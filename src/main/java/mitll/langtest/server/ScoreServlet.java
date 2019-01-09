@@ -553,8 +553,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (split1.length < 2) {
       toReturn.addProperty(ERROR, "expecting at least two query parameters");
     } else {
-      UserAndSelection userAndSelection = new UserAndSelection(split1).invoke();
-      Map<String, Collection<String>> selection = userAndSelection.getSelection();
+      Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke().getSelection();
 
       //logger.debug("chapterHistory " + user + " selection " + selection);
       try {

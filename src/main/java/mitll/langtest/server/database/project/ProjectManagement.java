@@ -379,6 +379,7 @@ public class ProjectManagement implements IProjectManagement {
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(),
         db.getResultDAO(),
         db.getPhoneDAO(),
+        db.getUserListManager(),
         project));
 
     if (slickProject != null) {

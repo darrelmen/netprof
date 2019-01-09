@@ -34,6 +34,7 @@ package mitll.langtest.server.database;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
@@ -62,9 +63,10 @@ import java.util.stream.Collectors;
  */
 public class JsonSupport {
   private static final Logger logger = LogManager.getLogger(JsonSupport.class);
-  public static final String SCORE_JSON = "scoreJson";
-  public static final String NAME = "name";
-  public static final String ID = "id";
+  private static final String SCORE_JSON = "scoreJson";
+//  public static final String NAME = "name";
+//  public static final String ID = "id";
+  private static final String LISTID = "listid";
 
   private final ISection<CommonExercise> sectionHelper;
   private final IResultDAO resultDAO;
@@ -73,24 +75,25 @@ public class JsonSupport {
 
   private final Language language;
   private final Project project;
+  private final IUserListManager userListManager;
 
   /**
    * @param sectionHelper
    * @param resultDAO
    * @param phoneDAO
-   * @see IProjectManagement#configureProject
+   * @param userListManager
+   * @see ProjectManagement#configureProject
    */
   public JsonSupport(ISection<CommonExercise> sectionHelper,
                      IResultDAO resultDAO,
                      IPhoneDAO phoneDAO,
-                     Project project) {
+                     IUserListManager userListManager, Project project) {
     this.sectionHelper = sectionHelper;
     this.resultDAO = resultDAO;
-
-    //  this.audioDAO = audioDAO;
     this.phoneDAO = phoneDAO;
     this.language = project.getLanguageEnum();
     this.project = project;
+    this.userListManager = userListManager;
   }
 
   /**
@@ -103,16 +106,24 @@ public class JsonSupport {
   JsonObject getJsonScoreHistory(int userid,
                                  Map<String, Collection<String>> typeToSection,
                                  ExerciseSorter sorter) {
-    Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
-    List<Integer> allIDs = new ArrayList<>();
+    Collection<String> listid = typeToSection.get(LISTID);
+    if (listid == null || listid.isEmpty()) {
+      return getJsonForExercises(userid, sorter, sectionHelper.getExercisesForSelectionState(typeToSection));
+    } else {
+      int id = 0;
+      try {
+        String next = listid.iterator().next();
+        id = Integer.parseInt(next);
+      } catch (NumberFormatException e) {
+        logger.warn("huh? couldn't parse ");
+      }
+      typeToSection.remove(LISTID);
+      return getJsonForExercises(userid, sorter, userListManager.getCommonExercisesOnList(project.getID(), id));
+    }
+  }
 
-/*    Map<String, CollationKey> idToKey = new HashMap<String, CollationKey>();
-    for (CommonExercise exercise : exercisesForState) {
-      String id = exercise.getOldID();
-      allIDs.add(id);
-      CollationKey collationKey = collator.getCollationKey(exercise.getForeignLanguage());
-      idToKey.put(id, collationKey);
-    }*/
+  private JsonObject getJsonForExercises(int userid, ExerciseSorter sorter, Collection<CommonExercise> exercisesForState) {
+    List<Integer> allIDs = new ArrayList<>();
 
     Map<Integer, CommonExercise> idToEx = new HashMap<>();
     for (CommonExercise exercise : exercisesForState) {
@@ -121,7 +132,6 @@ public class JsonSupport {
       idToEx.put(id, exercise);
     }
 
-    //List<ExerciseCorrectAndScore> exerciseCorrectAndScores = resultDAO.getExerciseCorrectAndScores(userid, allIDs, idToKey);
     Collection<ExerciseCorrectAndScore> exerciseCorrectAndScores =
         resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, sorter, language);
 
