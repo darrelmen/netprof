@@ -330,14 +330,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.flashcard.PolyglotFlashcardFactory#PolyglotFlashcardFactory
    * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#PolyglotPracticePanel
    */
-  public QuizSpec getQuizInfo(int userListID) {
-    UserList<?> list = db.getUserListManager().getUserListDAO().getList(userListID);
-    if (list == null) logger.warn("no quiz with list id " + userListID);
-    QuizSpec quizSpec = list != null ? new QuizSpec(list.getRoundTimeMinutes(), list.getMinScore(), list.shouldShowAudio()) : new QuizSpec(10, 35, false);
-    if (DEBUG) logger.info("Returning " + quizSpec + " for " + userListID);
-    return quizSpec;
-  }
-
+  public QuizSpec getQuizInfo(int userListID) {    return db.getUserListManager().getQuizInfo(userListID);  }
 
   /**
    * TODO: This is a bit of a mess.

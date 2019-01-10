@@ -321,7 +321,7 @@ public class AudioFileHelper implements AlignDecode {
     if (isStale(exercise)) {
       //  logger.info("isValidForeignPhrase STALE ex " + exercise.getProjectID()  + "  " + exercise.getID() + " " + new Date(exercise.getLastChecked()) + " vs " + new Date(dictModified));
       // int before = oov.size();
-      validForeignPhrase = getASRScoring().validLTS(exercise.getForeignLanguage(), exercise.getTransliteration());
+      validForeignPhrase = AudioFileHelper.this.isValidForeignPhrase(exercise);
 //      if (oov.size() > before) {
 //        logger.info("isValidForeignPhrase " + project.getName() + " oov now " + oov.size());
 //      }
@@ -332,6 +332,10 @@ public class AudioFileHelper implements AlignDecode {
       (validForeignPhrase ? safe : unsafe).add(exercise.getID());
     }
     return validForeignPhrase;
+  }
+
+  public boolean isValidForeignPhrase(ClientExercise exercise) {
+    return getASRScoring().validLTS(exercise.getForeignLanguage(), exercise.getTransliteration());
   }
 
   /**
@@ -636,7 +640,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see mitll.langtest.server.decoder.RefResultDecoder#doDecode
    */
   public void decodeOneAttribute(CommonExercise exercise, AudioAttribute attribute, int userID, File absoluteFile) {
-    if (getASRScoring().validLTS(exercise.getForeignLanguage(), exercise.getTransliteration())) {
+    if (isValidForeignPhrase(exercise)) {
       decodeAndRemember(exercise, attribute, true, userID, absoluteFile);
     } else {
       logger.warn("decodeOneAttribute skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");

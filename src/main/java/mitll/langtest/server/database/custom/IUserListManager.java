@@ -40,6 +40,7 @@ import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.services.ListServiceImpl;
 import mitll.langtest.shared.custom.IUserList;
 import mitll.langtest.shared.custom.IUserListWithIDs;
+import mitll.langtest.shared.custom.QuizSpec;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -139,4 +140,6 @@ public interface IUserListManager {
   boolean updateProject(int oldID, int newprojid);
 
   JsonObject getListsJson(int userID, int projid, boolean isQuiz);
+
+  QuizSpec getQuizInfo(int userListID);
 }

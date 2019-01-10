@@ -14,6 +14,7 @@ import static mitll.langtest.server.database.exercise.SectionHelper.ANY;
 
 public class FilterResponseHelper {
   private static final Logger logger = LogManager.getLogger(FilterResponseHelper.class);
+
   private static final String LISTS = "Lists";
   private static final String CONTENT = "Content";
   public static final String SENTENCES = "Sentences";
@@ -28,7 +29,6 @@ public class FilterResponseHelper {
 
   public FilterResponse getTypeToValues(FilterRequest request, int projid, int userID) {
     logger.info("getTypeToValues " + request);
-
 
     request.prune();
 

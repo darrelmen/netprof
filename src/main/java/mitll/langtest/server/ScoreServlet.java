@@ -32,7 +32,6 @@
 
 package mitll.langtest.server;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
@@ -45,7 +44,6 @@ import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.scoring.JsonScoring;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.common.DominoSessionException;
-import mitll.langtest.shared.custom.IUserListLight;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.user.User;
@@ -62,6 +60,7 @@ import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -113,7 +112,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final boolean CONVERT_DECODE_TO_ALIGN = true;
   private static final String MESSAGE = "message";
   private static final String UTF_8 = "UTF-8";
-  public static final String LIST = "list";
+  private static final String LIST = "list";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -192,8 +191,8 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
-  private final Map<Integer, JsonObject> projectToNestedChaptersEverything = new HashMap<>();
-  private final Map<Integer, Long> projectToWhenCachedEverything = new HashMap<>();
+  private final Map<Integer, JsonObject> projectToNestedChaptersEverything = new ConcurrentHashMap<>();
+  private final Map<Integer, Long> projectToWhenCachedEverything = new ConcurrentHashMap<>();
 
   private final Map<Integer, JsonObject> projectToNestedChapters = new HashMap<>();
   private final Map<Integer, Long> projectToWhenCached = new HashMap<>();
@@ -280,37 +279,26 @@ public class ScoreServlet extends DatabaseServlet {
       try {
         if (realRequest == GetRequest.NESTED_CHAPTERS) {
           String[] split1 = queryString.split("&");
-          if (split1.length == 2) {
-            String removeExercisesWithMissingAudio = getRemoveExercisesParam(queryString);
-            boolean shouldRemoveExercisesWithNoAudio = removeExercisesWithMissingAudio.equals("true");
-            boolean dontRemove = removeExercisesWithMissingAudio.equals("false");
-            if (shouldRemoveExercisesWithNoAudio || dontRemove) {
-              if (dontRemove) {
-                JsonObject nestedChaptersEverything = projectToNestedChaptersEverything.get(projid);
-                Long whenCachedEverything = projectToWhenCachedEverything.get(projid);
-                if (nestedChaptersEverything == null ||
-                    (System.currentTimeMillis() - whenCachedEverything > REFRESH_CONTENT_INTERVAL_THREE)) {
-                  nestedChaptersEverything = getJsonNestedChapters(shouldRemoveExercisesWithNoAudio, projid);
-                  projectToNestedChaptersEverything.put(projid, nestedChaptersEverything);
-                  projectToWhenCachedEverything.put(projid, System.currentTimeMillis());
+
+          if (queryString.toLowerCase().contains("&context=true") || queryString.toLowerCase().contains("&context")) {
+            toReturn = getJsonNestedChapters(projid, true, true);
+          } else {
+            if (split1.length == 2) {
+              String removeExercisesWithMissingAudio = getRemoveExercisesParam(queryString);
+              boolean shouldRemoveExercisesWithNoAudio = removeExercisesWithMissingAudio.equals("true");
+              boolean dontRemove = removeExercisesWithMissingAudio.equals("false");
+              if (shouldRemoveExercisesWithNoAudio || dontRemove) {
+                if (dontRemove) {
+                  toReturn = getCachedNestedChapters(projid, shouldRemoveExercisesWithNoAudio);
+                } else {
+                  toReturn = getJsonNestedChapters(projid, true, false);
                 }
-                toReturn = nestedChaptersEverything;
               } else {
-                toReturn = getJsonNestedChapters(true, projid);
+                toReturn.addProperty(ERROR, "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO);
               }
             } else {
-              toReturn.addProperty(ERROR, "expecting param " + REMOVE_EXERCISES_WITH_MISSING_AUDIO);
+              toReturn = getCachedNested(projid);
             }
-          } else {
-            JsonObject nestedChapters = projectToNestedChapters.get(projid);
-            Long whenCached = projectToWhenCached.get(projid);
-
-            if (nestedChapters == null || (System.currentTimeMillis() - whenCached > REFRESH_CONTENT_INTERVAL)) {
-              nestedChapters = getJsonNestedChapters(true, projid);
-              projectToNestedChapters.put(projid, nestedChapters);
-              projectToWhenCached.put(projid, System.currentTimeMillis());
-            }
-            toReturn = nestedChapters;
           }
         } else if (realRequest == GetRequest.CHAPTER_HISTORY) {
           queryString = removePrefix(queryString, CHAPTER_HISTORY);
@@ -329,8 +317,8 @@ public class ScoreServlet extends DatabaseServlet {
           toReturn = db.getUserListManager().getListsJson(userID, projid, true);
         } else if (realRequest == GetRequest.CONTENT) {
           int listid = getListParam(queryString);
-          logger.info("list id " +listid);
-          toReturn =  getJsonForListContent(true, projid, listid);
+          logger.info("list id " + listid);
+          toReturn = getJsonForListContent(true, projid, listid);
         } else {
           toReturn.addProperty(ERROR, "unknown req " + queryString);
         }
@@ -350,17 +338,41 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
+  private JsonObject getCachedNested(int projid) {
+    return getNested(projid, System.currentTimeMillis(), REFRESH_CONTENT_INTERVAL, projectToNestedChapters, projectToWhenCached, true);
+  }
+
+  private JsonObject getCachedNestedChapters(int projid, boolean shouldRemoveExercisesWithNoAudio) {
+    return getNested(projid, System.currentTimeMillis(), REFRESH_CONTENT_INTERVAL_THREE, projectToNestedChaptersEverything, projectToWhenCachedEverything, shouldRemoveExercisesWithNoAudio);
+  }
+
+  private JsonObject getNested(int projid,
+                               long now, long refreshContentInterval,
+                               Map<Integer, JsonObject> projectToNestedChapters,
+                               Map<Integer, Long> projectToWhenCached,
+                               boolean shouldRemoveExercisesWithNoAudio) {
+    JsonObject nestedChapters = projectToNestedChapters.get(projid);
+    Long whenCached = projectToWhenCached.get(projid);
+
+    if (nestedChapters == null || (now - whenCached > refreshContentInterval)) {
+      nestedChapters = getJsonNestedChapters(projid, shouldRemoveExercisesWithNoAudio, false);
+      projectToNestedChapters.put(projid, nestedChapters);
+      projectToWhenCached.put(projid, now);
+    }
+    return nestedChapters;
+  }
+
   private int getListParam(String queryString) {
     String[] split1 = queryString.split("&");
-    int listid=-1;
-    for (String arg:split1) {
+    int listid = -1;
+    for (String arg : split1) {
       String[] split = arg.split("=");
       if (split.length == 2) {
         String key = split[0];
         if (key.equals(LIST)) {
           String value = split[1];
           try {
-            listid =Integer.parseInt(value);
+            listid = Integer.parseInt(value);
           } catch (NumberFormatException e) {
             logger.warn("can't parse " + value);
           }
@@ -488,8 +500,9 @@ public class ScoreServlet extends DatabaseServlet {
     String[] split1 = queryString.split("&");
     if (split1.length == 2) {
       return getParamValue(split1[1], REMOVE_EXERCISES_WITH_MISSING_AUDIO);
+    } else {
+      return removeExercisesWithMissingAudioDefault ? "true" : "false";
     }
-    return removeExercisesWithMissingAudioDefault ? "true" : "false";
   }
 
   private String getParamValue(String s, String param) {
@@ -863,25 +876,25 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * join against audio dao ex->audio map again to get user exercise audio! {@link JsonExport#getJsonArray}
    *
-   * @param removeExercisesWithMissingAudio
    * @param projectid
+   * @param removeExercisesWithMissingAudio
+   * @param justContext
    * @return json for content
    * @see #doGet
    */
-  private JsonObject getJsonNestedChapters(boolean removeExercisesWithMissingAudio, int projectid) {
-    JsonExport jsonExport = getJsonExport(removeExercisesWithMissingAudio, projectid);
+  private JsonObject getJsonNestedChapters(int projectid, boolean removeExercisesWithMissingAudio, boolean justContext) {
+    return getJsonForExport(projectid, justContext, removeExercisesWithMissingAudio, getJsonExport(removeExercisesWithMissingAudio, projectid));
+  }
 
+  @NotNull
+  private JsonObject getJsonForExport(int projectid, boolean justContext, boolean removeExercisesWithMissingAudio,
+                                      JsonExport jsonExport) {
     long then2 = System.currentTimeMillis();
 
     JsonObject JsonObject = new JsonObject();
     {
-      JsonObject.add(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio));
-      long now2 = System.currentTimeMillis();
-      if (now2 - then2 > 1000) {
-        String language = getLanguage(projectid);
-        logger.warn("getJsonNestedChapters " + language + " getContentAsJson took " + (now2 - then2) + " millis");
-      }
-      addVersion(JsonObject, projectid);
+      JsonObject.add(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio, justContext));
+      addVersion(projectid, then2, JsonObject);
     }
     return JsonObject;
   }
@@ -894,14 +907,17 @@ public class ScoreServlet extends DatabaseServlet {
     {
       List<CommonExercise> exercisesForList = db.getUserListManager().getCommonExercisesOnList(projectid, listid);
       JsonObject.add(CONTENT, jsonExport.getContentAsJsonFor(removeExercisesWithMissingAudio, exercisesForList));
-      long now = System.currentTimeMillis();
-      if (now - then > 1000) {
-        String language = getLanguage(projectid);
-        logger.warn("getJsonNestedChapters " + language + " getContentAsJson took " + (now - then) + " millis");
-      }
-      addVersion(JsonObject, projectid);
+      addVersion(projectid, then, JsonObject);
     }
     return JsonObject;
+  }
+
+  private void addVersion(int projectid, long then, JsonObject jsonObject) {
+    long now = System.currentTimeMillis();
+    if (now - then > 1000) {
+      logger.warn("addVersion " + getLanguage(projectid) + " addVersion took " + (now - then) + " millis");
+    }
+    addVersion(jsonObject, projectid);
   }
 
   private JsonExport getJsonExport(boolean removeExercisesWithMissingAudio, int projectid) {

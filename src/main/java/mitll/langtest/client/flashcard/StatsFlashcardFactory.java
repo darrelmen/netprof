@@ -83,7 +83,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
   private INavigation navigation;
   final KeyStorage storage;
 
-  protected final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
+  final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
   //  private static final boolean DEBUG = false;
   final INavigation.VIEWS instance;
 

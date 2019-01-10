@@ -61,6 +61,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
+import javax.json.Json;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.*;
@@ -150,12 +151,32 @@ public class EasyReportTest extends BaseTest {
   }
 
   @Test
-  public void testSectionHelper() {
+  public void testListJSON() {
     DatabaseImpl english = getDatabase();
     int projectid = 15;
     Project project = english.getProject(projectid);
-    project.getSectionHelper().report();
+
+    JsonObject listsJson = english.getUserListManager().getListsJson(6, 15, true);
+
+    logger.info("quiz " + listsJson);
+    logger.info("list " + english.getUserListManager().getListsJson(6, 15, false));
   }
+
+  @Test
+  public void testContextJSON() {
+    DatabaseImpl english = getDatabase();
+    int projectid = 3;
+    Project project = english.getProject(projectid);
+
+    JsonExport jsonExport = english.getJSONExport(projectid);
+    JsonArray contentAsJson = jsonExport.getContentAsJson(true, true);
+
+    logger.info("got " +contentAsJson.size());
+  //  contentAsJson.forEach(jsonElement -> logger.info("got " +jsonElement));
+
+    //  project.getSectionHelper().report();
+  }
+
 
   @Test
   public void testLists() {
@@ -1173,7 +1194,7 @@ public class EasyReportTest extends BaseTest {
     JsonExport jsonExport = andPopulate.getJSONExport(3);
     // long now = System.currentTimeMillis();
 
-    JsonArray contentAsJson = jsonExport.getContentAsJson(false);
+    JsonArray contentAsJson = jsonExport.getContentAsJson(false, false);
     logger.info("Got\n\t" + contentAsJson);
   }
 

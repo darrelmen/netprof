@@ -38,16 +38,13 @@ import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
-import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.custom.IUserListLight;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.project.Language;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

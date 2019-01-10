@@ -68,6 +68,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private List<ClientExercise> directlyRelated = new ArrayList<>();
 
+  /**
+   * @see #setSafeToDecode
+   */
   private boolean safeToDecode;
   private transient long safeToDecodeLastChecked;
 

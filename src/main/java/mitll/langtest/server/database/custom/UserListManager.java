@@ -1111,20 +1111,37 @@ public class UserListManager implements IUserListManager {
   }
 
   public JsonObject getListsJson(int userID, int projid, boolean isQuiz) {
-    return getLists(getUserListDAO().getAllOrMineLight(projid, userID, isQuiz));
+    return getLists(getUserListDAO().getAllOrMineLight(projid, userID, isQuiz), isQuiz);
   }
 
-  private JsonObject getLists(Collection<IUserListLight> lights) {
+  private JsonObject getLists(Collection<IUserListLight> lights, boolean isQuiz) {
     JsonArray lists = new JsonArray();
     JsonObject container = new JsonObject();
     for (IUserListLight light : lights) {
       JsonObject idAndName = new JsonObject();
-      idAndName.addProperty("id", light.getID());
+
+      int id = light.getID();
+      idAndName.addProperty("id", id);
       idAndName.addProperty("name", light.getName());
+
+      if (isQuiz) {
+        QuizSpec quizInfo = getQuizInfo(id);
+        idAndName.addProperty("numQuizItems", quizInfo.getRoundMinutes());
+        idAndName.addProperty("minScoreToAdvance", quizInfo.getMinScore());
+        idAndName.addProperty("playAudio", quizInfo.isShowAudio());
+      }
       lists.add(idAndName);
     }
     container.add("lists", lists);
 
     return container;
+  }
+
+  public QuizSpec getQuizInfo(int userListID) {
+    UserList<?> list = getUserListDAO().getList(userListID);
+    if (list == null) logger.warn("no quiz with list id " + userListID);
+    QuizSpec quizSpec = list != null ? new QuizSpec(list.getRoundTimeMinutes(), list.getMinScore(), list.shouldShowAudio()) : new QuizSpec(10, 35, false);
+    if (DEBUG) logger.info("Returning " + quizSpec + " for " + userListID);
+    return quizSpec;
   }
 }

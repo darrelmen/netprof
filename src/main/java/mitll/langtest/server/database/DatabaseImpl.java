@@ -853,7 +853,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Project project = getProject(projectid);
     if (project == null) {
       logger.warn("asking for unknown project " + projectid);
-      return new JsonExport(null, null, Collections.emptyList(), false);
+      return new JsonExport(null, null, Collections.emptyList(), false, null);
     } else {
       getExercises(projectid, false);
 
@@ -863,7 +863,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
           audioFileHelper == null ? Collections.emptyMap() : audioFileHelper.getPhoneToCount(),
           getSectionHelper(projectid),
           serverProps.getPreferredVoices(),
-          getLanguage(projectid).equalsIgnoreCase("english")
+          getLanguageEnum(projectid) == Language.ENGLISH,
+          project.getAudioFileHelper()
       );
 
       attachAllAudio(projectid);
