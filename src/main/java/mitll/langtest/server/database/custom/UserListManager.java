@@ -1126,7 +1126,7 @@ public class UserListManager implements IUserListManager {
 
       if (isQuiz) {
         QuizSpec quizInfo = getQuizInfo(id);
-        idAndName.addProperty("numQuizItems", quizInfo.getRoundMinutes());
+        idAndName.addProperty("quizMinutes", quizInfo.getRoundMinutes());
         idAndName.addProperty("minScoreToAdvance", quizInfo.getMinScore());
         idAndName.addProperty("playAudio", quizInfo.isShowAudio());
       }
