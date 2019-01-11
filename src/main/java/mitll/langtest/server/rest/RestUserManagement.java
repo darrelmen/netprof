@@ -555,10 +555,12 @@ public class RestUserManagement {
 
   public int getUserFromParam(String user) {
     int i = -1;
-    try {
-      i = Integer.parseInt(user);
-    } catch (NumberFormatException e) {
-      logger.error("expecting a number for user id " + user);
+    if (user != null) {
+      try {
+        i = Integer.parseInt(user);
+      } catch (NumberFormatException e) {
+        logger.warn("getUserFromParam expecting a number for user id " + user);
+      }
     }
     return i;
   }

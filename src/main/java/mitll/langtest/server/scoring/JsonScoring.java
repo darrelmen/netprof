@@ -175,7 +175,6 @@ public class JsonScoring {
         String path = answer.getPath();
         if (path.isEmpty()) logger.warn("no path?");
         jsonForScore.addProperty("path", path);
-        jsonForScore.addProperty("resultID", answer.getResultID());
 
         if (jsonForScore.get("pretest") == null) {
           jsonForScore.add("pretest", new JsonObject());
@@ -186,6 +185,7 @@ public class JsonScoring {
       } else {
         logger.warn("not adding stream info");
       }
+      jsonForScore.addProperty("resultID", answer.getResultID());
     }
 
     addValidity(exerciseID, jsonForScore,

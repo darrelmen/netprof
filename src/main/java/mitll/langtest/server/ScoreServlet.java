@@ -120,7 +120,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   public enum GetRequest {
     HASUSER,
-    //ADDUSER,
+
     PROJECTS,
     NESTED_CHAPTERS,
     CHAPTER_HISTORY,
@@ -283,7 +283,7 @@ public class ScoreServlet extends DatabaseServlet {
         if (realRequest == GetRequest.NESTED_CHAPTERS) {
           String[] split1 = queryString.split("&");
 
-          if (queryString.toLowerCase().contains("&context=true") || queryString.toLowerCase().contains("&context")) {
+          if (hasContextArg(queryString)) {
             toReturn = getJsonNestedChapters(projid, true, true);
           } else {
             if (split1.length == 2) {
@@ -339,6 +339,10 @@ public class ScoreServlet extends DatabaseServlet {
       db.logAndNotify(e);
       throw new IOException("doGet couldn't process request.", e);
     }
+  }
+
+  private boolean hasContextArg(String queryString) {
+    return queryString.toLowerCase().contains("&context=true") || queryString.toLowerCase().contains("&context");
   }
 
   private JsonObject getCachedNested(int projid) {
@@ -573,7 +577,7 @@ public class ScoreServlet extends DatabaseServlet {
 
       //logger.debug("chapterHistory " + user + " selection " + selection);
       try {
-        toReturn = db.getJsonScoreHistory(userID, projectid, selection, getExerciseSorter(projectid));
+        toReturn = db.getJsonScoreHistory(projectid, userID, selection, hasContextArg(queryString), getExerciseSorter(projectid));
       } catch (NumberFormatException e) {
         toReturn.addProperty(ERROR, "User id should be a number");
       }
@@ -777,15 +781,35 @@ public class ScoreServlet extends DatabaseServlet {
     String resultID = getHeader(request, HeaderValue.RESULT_ID);
     String roundTripMillis = getHeader(request, HeaderValue.ROUND_TRIP1);
 
-    try {
-      long roundTripMillis1 = Long.parseLong(roundTripMillis);
-      if (roundTripMillis1 == 0) {
-        logger.warn("addRT : huh? got 0 for " + roundTripMillis);
+    if (resultID == null) {
+      String message = "addRT missing header " + HeaderValue.RESULT_ID;
+      logger.error(message);
+      JsonObject.addProperty(ERROR, "addRT " + message);
+    } else if (roundTripMillis == null) {
+      String message = "addRT missing header " + HeaderValue.ROUND_TRIP1;
+      logger.error(message);
+      JsonObject.addProperty(ERROR, "addRT " + message);
+    } else {
+      try {
+        int resultID1 = Integer.parseInt(resultID);
+        long roundTripMillis1 = Long.parseLong(roundTripMillis);
+        //logger.info("addRT : " + resultID1 + " = " + roundTripMillis1);
+
+        if (roundTripMillis1 == 0) {
+          logger.warn("addRT : huh? got 0 for " + roundTripMillis);
+        }
+
+        addRT(resultID1, roundTripMillis1, JsonObject);
+      } catch (NumberFormatException e) {
+        logger.warn("addRT: Got bad format " + e, e);
+        addRTError(JsonObject, e);
       }
-      addRT(Integer.parseInt(resultID), roundTripMillis1, JsonObject);
-    } catch (NumberFormatException e) {
-      JsonObject.addProperty(ERROR, "addRT bad param format " + e.getMessage());
     }
+  }
+
+  private void addRTError(JsonObject JsonObject, NumberFormatException e) {
+    String message = e.getMessage();
+    JsonObject.addProperty(ERROR, "addRT bad param format " + message);
   }
 
   private PostRequest getPostRequest(String requestType) {

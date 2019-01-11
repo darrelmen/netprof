@@ -47,6 +47,7 @@ import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.project.Language;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -61,7 +62,7 @@ import java.util.stream.Collectors;
 public class JsonSupport {
   private static final Logger logger = LogManager.getLogger(JsonSupport.class);
   private static final String SCORE_JSON = "scoreJson";
-//  public static final String NAME = "name";
+  //  public static final String NAME = "name";
 //  public static final String ID = "id";
   private static final String LISTID = "listid";
 
@@ -96,27 +97,46 @@ public class JsonSupport {
   /**
    * @param userid
    * @param typeToSection
+   * @param forContext
    * @return
-   * @paramx collator
    * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   JsonObject getJsonScoreHistory(int userid,
                                  Map<String, Collection<String>> typeToSection,
+                                 boolean forContext,
                                  ExerciseSorter sorter) {
     Collection<String> listid = typeToSection.get(LISTID);
     if (listid == null || listid.isEmpty()) {
-      return getJsonForExercises(userid, sorter, sectionHelper.getExercisesForSelectionState(typeToSection));
-    } else {
-      int id = 0;
-      try {
-        String next = listid.iterator().next();
-        id = Integer.parseInt(next);
-      } catch (NumberFormatException e) {
-        logger.warn("huh? couldn't parse ");
+      Collection<CommonExercise> exercisesForSelectionState = sectionHelper.getExercisesForSelectionState(typeToSection);
+      if (forContext) {
+        exercisesForSelectionState = getContextExercises(exercisesForSelectionState);
       }
+      return getJsonForExercises(userid, sorter, exercisesForSelectionState);
+    } else {
+      int id = getListID(listid);
       typeToSection.remove(LISTID);
       return getJsonForExercises(userid, sorter, userListManager.getCommonExercisesOnList(project.getID(), id));
     }
+  }
+
+  @NotNull
+  private List<CommonExercise> getContextExercises(Collection<CommonExercise> exercisesForSelectionState) {
+    List<CommonExercise> context = new ArrayList<>();
+    exercisesForSelectionState.forEach(ex -> {
+      ex.getDirectlyRelated().forEach(cex -> context.add(cex.asCommon()));
+    });
+    return context;
+  }
+
+  private int getListID(Collection<String> listid) {
+    int id = 0;
+    try {
+      String next = listid.iterator().next();
+      id = Integer.parseInt(next);
+    } catch (NumberFormatException e) {
+      logger.warn("huh? couldn't parse ");
+    }
+    return id;
   }
 
   private JsonObject getJsonForExercises(int userid, ExerciseSorter sorter, Collection<CommonExercise> exercisesForState) {

@@ -1173,16 +1173,18 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @param userid
    * @param projid
+   * @param userid
    * @param typeToSection
+   * @param forContext
    * @return
    * @paramx collator
    * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public JsonObject getJsonScoreHistory(int userid,
-                                        int projid,
+  public JsonObject getJsonScoreHistory(int projid,
+                                        int userid,
                                         Map<String, Collection<String>> typeToSection,
+                                        boolean forContext,
                                         ExerciseSorter sorter) {
 
     if (projid == -1) {
@@ -1193,7 +1195,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     } else {
       JsonSupport jsonSupportForProject = getJsonSupportForProject(projid);
       // TODO :  maybe if the project is retired...?  how to handle this on iOS???
-      return jsonSupportForProject == null ? new JsonObject() : jsonSupportForProject.getJsonScoreHistory(userid, typeToSection, sorter);
+      return jsonSupportForProject == null ? new JsonObject() : jsonSupportForProject.getJsonScoreHistory(userid, typeToSection, forContext, sorter);
     }
   }
 

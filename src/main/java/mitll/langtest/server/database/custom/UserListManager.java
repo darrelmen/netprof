@@ -398,7 +398,7 @@ public class UserListManager implements IUserListManager {
       int userid1 = l.userid();
       String name = getUserName(userid1, idToName);
       String fullName = getFullName(userid1, idToFullName);
-       logger.info("list #" + id + " - " + numItems + " "+fullName);
+//   logger.info("list #" + id + " - " + numItems + " "+fullName);
 
       names.add(
           new SimpleUserList(
