@@ -966,8 +966,10 @@ public class ScoreServlet extends DatabaseServlet {
                                      String device) throws IOException {
     // check session
     long then = System.currentTimeMillis();
+    int sessionUser;
+
     try {
-      checkSession(request);
+      sessionUser = checkSession(request);
     } catch (DominoSessionException dse) {
       logger.info("getJsonForAudio got " + dse);
       JsonObject JsonObject = new JsonObject();
@@ -989,15 +991,19 @@ public class ScoreServlet extends DatabaseServlet {
 
     String user = getUser(request);
     int userid = userManagement.getUserFromParam(user);
+    if (userid != sessionUser && userid != -1) {
+      logger.info("getJsonForAudio posted user was " +userid + " but session user was " +sessionUser);
+    }
+    userid = sessionUser;
+
     boolean fullJSON = isFullJSON(request);
 
     long now = System.currentTimeMillis();
     logger.info("getJsonForAudio got" +
         "\n\trequest  " + requestType +
-        "\n\tfor user " + user +
+        "\n\tfor user " + user + "/" +userid+
         "\n\tprojid   " + projid +
         "\n\texid     " + realExID +
-        //"\n\texercise text " + realExID +
         "\n\treq      " + reqid +
         "\n\tfull     " + fullJSON +
         "\n\tprep time " + (now - then) +
