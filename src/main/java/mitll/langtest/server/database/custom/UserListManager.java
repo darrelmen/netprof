@@ -202,11 +202,12 @@ public class UserListManager implements IUserListManager {
                                   long start,
                                   long end) {
     String userChosenID = userDAO.getUserChosenID(userid);
+    String firstInitialName = userDAO.getFirstInitialName(userid);
     if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);
       return null;
     } else {
-      UserList e = new UserList(i++, userid, userChosenID, name, description, dliClass, isPrivate,
+      UserList e = new UserList(i++, userid, userChosenID, firstInitialName, name, description, dliClass, isPrivate,
           System.currentTimeMillis(), "", "", projid, UserList.LIST_TYPE.NORMAL, start, end, 10, 30, false);
       rememberList(projid, e);
 //      new Thread(() -> logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total")).start();
@@ -239,13 +240,14 @@ public class UserListManager implements IUserListManager {
                                            TimeRange timeRange,
                                            int duration, int minScore, boolean showAudio, Map<String, String> unitChapter) {
     String userChosenID = userDAO.getUserChosenID(userid);
+    String firstInitialName = userDAO.getFirstInitialName(userid);
     if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);
       return null;
     } else {
       long now = System.currentTimeMillis();
 
-      UserList<CommonShell> quiz = new UserList<>(i++, userid, userChosenID, name, description, dliClass, isPrivate,
+      UserList<CommonShell> quiz = new UserList<>(i++, userid, userChosenID, firstInitialName, name, description, dliClass, isPrivate,
           now, "", "", projid, UserList.LIST_TYPE.QUIZ, timeRange.getStart(), timeRange.getEnd(), duration, minScore, showAudio);
       int userListID = rememberList(projid, quiz);
 
@@ -337,9 +339,7 @@ public class UserListManager implements IUserListManager {
   private List<CommonExercise> getFirstEasyLength(Collection<CommonExercise> firstCandidates) {
     List<CommonExercise> first = new ArrayList<>();
     int misses = 0;
-//          while (first.size() < 10 && misses < 100) {
     for (CommonExercise candidate : firstCandidates) {
-      //CommonExercise exercise = getExercise(projectid, exid);
       int length = candidate.getForeignLanguage().length();
       if (length > 4 && length < 10 || misses++ > 100) {
         first.add(candidate);
@@ -356,25 +356,28 @@ public class UserListManager implements IUserListManager {
   /**
    * @param projid
    * @return
-   * @see mitll.langtest.server.services.ListServiceImpl#getLightListsForUser(boolean, boolean)
+   * @see mitll.langtest.server.services.ListServiceImpl#getLightListsForUser
    */
-//  @Override
-//  public Collection<IUserListLight> getAllOrMineLight(int projid) {
-//    return getUserListDAO().getAllOrMineLight(projid);
-//  }
   @Override
-  public Collection<IUserList> getSimpleListsForUser(int userid,
-                                                     int projid,
+  public Collection<IUserList> getSimpleListsForUser(int projid,
+                                                     int userid,
                                                      boolean listsICreated,
                                                      boolean visitedLists) {
-    List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
+    //List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
     //logger.info("getSimpleListsForUser for " + userid + " in " + projid + " found " + lists.size());
-    return getSimpleLists(lists);
+    return getSimpleLists(getRawLists(userid, projid, listsICreated, visitedLists));
   }
 
+  /**
+   * @param projid
+   * @param userID
+   * @param isQuiz
+   * @return
+   * @see mitll.langtest.server.services.ListServiceImpl#getSimpleListsForUser
+   */
   @Override
-  public Collection<IUserList> getAllQuizUserList(int projid, int userID) {
-    return getSimpleLists(userListDAO.getSlickAllQuiz(projid, userID));
+  public Collection<IUserList> getAllPublicOrMine(int projid, int userID, boolean isQuiz) {
+    return getSimpleLists(userListDAO.getSlickAllPublicOrMine(projid, userID, isQuiz));
   }
 
   @NotNull
@@ -386,6 +389,7 @@ public class UserListManager implements IUserListManager {
 
     List<IUserList> names = new ArrayList<>(lists.size());
     Map<Integer, String> idToName = new HashMap<>();
+    Map<Integer, String> idToFullName = new HashMap<>();
     lists.forEach(l -> {
       int id = l.id();
 
@@ -393,7 +397,9 @@ public class UserListManager implements IUserListManager {
 
       int userid1 = l.userid();
       String name = getUserName(userid1, idToName);
-      //  logger.info("list #" + id + " - " + numItems);
+      String fullName = getFullName(userid1, idToFullName);
+       logger.info("list #" + id + " - " + numItems + " "+fullName);
+
       names.add(
           new SimpleUserList(
               id,
@@ -401,6 +407,7 @@ public class UserListManager implements IUserListManager {
               l.projid(),
               userid1,
               name,
+              fullName,
               numItems,
               l.duration(),
               l.minscore(),
@@ -415,6 +422,15 @@ public class UserListManager implements IUserListManager {
     String name = idToName.get(userid);
     if (name == null) {
       idToName.put(userid, userDAO.getUserChosenID(userid));
+    }
+    return name;
+  }
+
+  @Nullable
+  private String getFullName(int userid, Map<Integer, String> idToName) {
+    String name = idToName.get(userid);
+    if (name == null) {
+      idToName.put(userid, userDAO.getFirstInitialName(userid));
     }
     return name;
   }
@@ -437,6 +453,7 @@ public class UserListManager implements IUserListManager {
       logger.info("getListsWithIdsForUser found " + exidsForList.size() + " list->exids for " + userid + " and " + projid + " took " + (now - then));
     }
     Map<Integer, String> idToName = new HashMap<>();
+    Map<Integer, String> idToFullName = new HashMap<>();
 
     List<IUserListWithIDs> names = new ArrayList<>(lists.size());
     lists.forEach(l -> {
@@ -444,9 +461,10 @@ public class UserListManager implements IUserListManager {
 
       int userid1 = l.userid();
       String name = getUserName(userid1, idToName);
+      String fullName = getFullName(userid1, idToFullName);
 
       Collection<Integer> exids = exidsForList.getOrDefault(id, Collections.emptyList());
-      // logger.info("For " + id + " got " + exids);
+      logger.info("getListsWithIdsForUser For " + id + " got " + exids + " fullName " + fullName);
       names.add(
           new SimpleUserListWithIDs(
               id,
@@ -454,6 +472,7 @@ public class UserListManager implements IUserListManager {
               l.projid(),
               l.userid(),
               name,
+              fullName,
               new ArrayList<>(exids),
               l.duration(),
               l.isprivate())
@@ -1111,18 +1130,22 @@ public class UserListManager implements IUserListManager {
   }
 
   public JsonObject getListsJson(int userID, int projid, boolean isQuiz) {
-    return getLists(getUserListDAO().getAllOrMineLight(projid, userID, isQuiz), isQuiz);
+//    return getLists(getUserListDAO().getAllOrMineLight(projid, userID, isQuiz), isQuiz);
+    Collection<IUserList> allPublicOrMine = getAllPublicOrMine(projid, userID, isQuiz);
+    allPublicOrMine.removeIf(iUserList -> iUserList.getNumItems() == 0);
+    return getLists(allPublicOrMine, isQuiz);
   }
 
-  private JsonObject getLists(Collection<IUserListLight> lights, boolean isQuiz) {
+  private JsonObject getLists(Collection<IUserList> lights, boolean isQuiz) {
     JsonArray lists = new JsonArray();
     JsonObject container = new JsonObject();
-    for (IUserListLight light : lights) {
+    for (IUserList light : lights) {
       JsonObject idAndName = new JsonObject();
 
       int id = light.getID();
       idAndName.addProperty("id", id);
       idAndName.addProperty("name", light.getName());
+      idAndName.addProperty("numItems", light.getNumItems());
 
       if (isQuiz) {
         QuizSpec quizInfo = getQuizInfo(id);

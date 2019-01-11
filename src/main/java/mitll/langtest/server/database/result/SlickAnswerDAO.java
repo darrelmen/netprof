@@ -111,8 +111,14 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
   }
 
   @Override
-  public void addRoundTrip(int resultID, int roundTrip) {
-    dao.addRoundTrip(resultID, roundTrip);
+  public void addRoundTrip(int resultID, long roundTrip) {
+    int i = dao.addRoundTrip(resultID, roundTrip);
+
+    if (i == 0) {
+      logger.warn("addRoundTrip huh? tried to set round trip for " + resultID + " to " + roundTrip + " but failed?");
+    } else {
+      logger.info("addRoundTrip (" + i + "): " + resultID + " = " + roundTrip);
+    }
   }
 
   @Override
@@ -140,5 +146,7 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
   }
 
   @Override
-  public void deleteForProject(int projID) { dao.deleteForProject(projID); }
+  public void deleteForProject(int projID) {
+    dao.deleteForProject(projID);
+  }
 }

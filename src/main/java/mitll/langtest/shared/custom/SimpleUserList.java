@@ -6,6 +6,7 @@ public class SimpleUserList extends UserListLight implements IUserList {
   private int numItems;
   private int duration, minScore;
   private String userChosenID;
+  private String fullName;
   private boolean showAudio;
   private boolean isPrivate;
 
@@ -18,16 +19,19 @@ public class SimpleUserList extends UserListLight implements IUserList {
    * @param projid
    * @param userid
    * @param userChosenID
+   * @param fullName
    * @param duration
    * @param isPrivate
-   * @see mitll.langtest.server.database.custom.UserListManager#getSimpleListsForUser
+   * @see mitll.langtest.server.database.custom.UserListManager#getSimpleLists
    */
   public SimpleUserList(int id, String name, int projid, int userid, String userChosenID,
+                        String fullName,
                         int numItems, int duration, int minScore, boolean showAudio, boolean isPrivate) {
     super(id, name);
     this.projid = projid;
     this.userid = userid;
     this.userChosenID = userChosenID;
+    this.fullName=fullName;
     this.numItems = numItems;
     this.duration = duration;
     this.minScore = minScore;
@@ -48,6 +52,11 @@ public class SimpleUserList extends UserListLight implements IUserList {
   @Override
   public String getUserChosenID() {
     return userChosenID;
+  }
+
+  @Override
+  public String getFirstInitialName() {
+    return fullName;
   }
 
   @Override

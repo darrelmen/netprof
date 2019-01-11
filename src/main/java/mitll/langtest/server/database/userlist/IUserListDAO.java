@@ -85,7 +85,7 @@ public interface IUserListDAO extends IDAO {
   Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid);
   List<IUserListLight> getAllOrMineLight(int projid, int userid, boolean isQuiz);
   Collection<UserList<CommonShell>> getAllQuiz(int projid);
-  Collection<SlickUserExerciseList> getSlickAllQuiz(int projid, int userID);
+  Collection<SlickUserExerciseList> getSlickAllPublicOrMine(int projid, int userID, boolean isQuiz);
   Collection<SlickLightList> getSlickAllOrMineLight(int projid, int userID, boolean isQuiz);
 
   /**

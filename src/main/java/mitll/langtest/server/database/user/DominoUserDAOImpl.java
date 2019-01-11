@@ -122,6 +122,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private static final boolean DEBUG_STUDENTS = false;
   private static final boolean DEBUG_TEACHERS = false;
+  public static final String F_LAST = "F. Last";
 
   private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
@@ -244,6 +245,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           });
 
 
+  private final LoadingCache<Integer, FirstLastUser> idToFirstLastUser = CacheBuilder.newBuilder()
+      .maximumSize(10000)
+      .expireAfterWrite(CACHE_TIMEOUT, TimeUnit.MINUTES)
+      .build(
+          new CacheLoader<Integer, FirstLastUser>() {
+            @Override
+            public User load(Integer key) {
+              //    logger.info("idToUser Load " + key);
+              return getUser(lookupUser(key));
+            }
+          });
   /**
    * @param database
    * @see mitll.langtest.server.database.DatabaseImpl#connectToDatabases(PathHelper, ServletContext)
@@ -688,7 +700,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @NotNull
   public Group getGroup() {
     if (primaryGroup == null) {
-      logger.info("getGroup : Search groups for " +NETPROF1);
+      logger.info("getGroup : Search groups for " + NETPROF1);
 
       List<Group> groups = delegate.getGroupDAO().searchGroups(NETPROF1);
       if (groups.isEmpty()) {
@@ -753,7 +765,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private Group getGroupOrMake(String name) {
     Group group = nameToGroup.get(name);
     if (group == null) {
-      logger.info("getGroupOrMake : Search groups for " +name);
+      logger.info("getGroupOrMake : Search groups for " + name);
       List<Group> groups = delegate.getGroupDAO().searchGroups(name);
       group = groups.isEmpty() ? null : groups.iterator().next();
 
@@ -1327,7 +1339,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       if (DEBUG_TEACHERS) {
         logger.info("toUser : User #" + documentDBID + " " + userId + " is a " + userKind);
       }
-    } else if (DEBUG_STUDENTS){
+    } else if (DEBUG_STUDENTS) {
       logger.info("toUser : User #" + documentDBID + " " + userId + " is a " + userKind + " with roles " + dominoUser.getRoleAbbreviations());
     }
 
@@ -1766,6 +1778,28 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     Map<Integer, FirstLastUser> firstLastFor = getFirstLastFor(Collections.singleton(userid));
     FirstLastUser firstLastUser = firstLastFor.get(userid);
     return firstLastUser == null ? null : firstLastUser.getUserID();
+  }
+
+  public String getFirstInitialName(int userid) {
+    Map<Integer, FirstLastUser> firstLastFor = getFirstLastFor(Collections.singleton(userid));
+    return getFirstInitialName(firstLastFor.get(userid));
+  }
+
+  @Nullable
+  private String getFirstInitialName(SimpleUser firstLastUser) {
+    String s = firstLastUser == null ? null :
+        (firstLastUser.getFirst().length() > 0 ?
+            firstLastUser.getFirst().substring(0, 1) + ". " : "") +
+            firstLastUser.getLast();
+
+    // logger.info("getFirstInitialName Got " +userid + " " + firstLastUser + " : " + s);
+
+    if (s != null && s.equalsIgnoreCase(F_LAST)) {
+      s = firstLastUser.getUserID();
+    }
+    // logger.info("now Got " +userid + " " + firstLastUser + " : " + s);
+
+    return s;
   }
 
   /**

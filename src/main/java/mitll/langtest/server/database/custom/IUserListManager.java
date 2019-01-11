@@ -63,8 +63,7 @@ public interface IUserListManager {
 
 //  Collection<IUserListLight> getAllOrMineLight(int projid);
 
-  Collection<IUserList> getSimpleListsForUser(int userid,
-                                              int projid,
+  Collection<IUserList> getSimpleListsForUser(int projid, int userid,
                                               boolean listsICreated,
                                               boolean visitedLists);
 
@@ -75,7 +74,7 @@ public interface IUserListManager {
 
   Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, boolean listsICreated, boolean visitedLists, boolean includeQuiz);
 
-  Collection<IUserList> getAllQuizUserList(int projid, int userID);
+  Collection<IUserList> getAllPublicOrMine(int projid, int userID, boolean isQuiz);
 
   /**
    * @param userid

@@ -164,6 +164,9 @@ public class ScoreServlet extends DatabaseServlet {
     FULL,
     WIDGET_TYPE("widgetType"),
     RESULT_ID("resultID"),
+    /**
+     * From EAFEventPoster.postRT -
+     */
     ROUND_TRIP1("roundTrip"),
     DIALOGSESSION,
     RECORDINGSESSION,
@@ -775,9 +778,13 @@ public class ScoreServlet extends DatabaseServlet {
     String roundTripMillis = getHeader(request, HeaderValue.ROUND_TRIP1);
 
     try {
-      addRT(Integer.parseInt(resultID), Integer.parseInt(roundTripMillis), JsonObject);
+      long roundTripMillis1 = Long.parseLong(roundTripMillis);
+      if (roundTripMillis1 == 0) {
+        logger.warn("addRT : huh? got 0 for " + roundTripMillis);
+      }
+      addRT(Integer.parseInt(resultID), roundTripMillis1, JsonObject);
     } catch (NumberFormatException e) {
-      JsonObject.addProperty(ERROR, "bad param format " + e.getMessage());
+      JsonObject.addProperty(ERROR, "addRT bad param format " + e.getMessage());
     }
   }
 
@@ -845,7 +852,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param JsonObject
    * @see #doPost(HttpServletRequest, HttpServletResponse)
    */
-  private void addRT(int resultID, int roundTripMillis, JsonObject JsonObject) {
+  private void addRT(int resultID, long roundTripMillis, JsonObject JsonObject) {
     getDAOContainer().getAnswerDAO().addRoundTrip(resultID, roundTripMillis);
     JsonObject.addProperty("OK", "OK");
   }
@@ -859,19 +866,6 @@ public class ScoreServlet extends DatabaseServlet {
     response.setContentType("application/json; charset=UTF-8");
     response.setCharacterEncoding(UTF_8);
   }
-
-  /**
-   * @param response
-   * @param year
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
-   */
-/*  private void configureResponseHTML(HttpServletResponse response, int year) {
-    response.setContentType("text/html; charset=UTF-8");
-    response.setCharacterEncoding("UTF-8");
-//    String language = "";
-//    String fileName = year == -1 ? "reportFor" + language : ("reportFor" + language + "_forYear" + year);
-    // response.setHeader("Content-disposition", "attachment; filename=" + fileName + ".html");
-  }*/
 
   /**
    * join against audio dao ex->audio map again to get user exercise audio! {@link JsonExport#getJsonArray}
@@ -992,7 +986,7 @@ public class ScoreServlet extends DatabaseServlet {
     String user = getUser(request);
     int userid = userManagement.getUserFromParam(user);
     if (userid != sessionUser && userid != -1) {
-      logger.info("getJsonForAudio posted user was " +userid + " but session user was " +sessionUser);
+      logger.info("getJsonForAudio posted user was " + userid + " but session user was " + sessionUser);
     }
     userid = sessionUser;
 
@@ -1001,7 +995,7 @@ public class ScoreServlet extends DatabaseServlet {
     long now = System.currentTimeMillis();
     logger.info("getJsonForAudio got" +
         "\n\trequest  " + requestType +
-        "\n\tfor user " + user + "/" +userid+
+        "\n\tfor user " + user + "/" + userid +
         "\n\tprojid   " + projid +
         "\n\texid     " + realExID +
         "\n\treq      " + reqid +

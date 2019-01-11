@@ -397,7 +397,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
           uniqueid, //id
           userWhere.getID(), // age
           // exp
-          userWhere.getUserID(), rs.getString(NAME), // exp
+          userWhere.getUserID(), userWhere.getFullName(), rs.getString(NAME), // exp
           rs.getString("description"), // exp
           rs.getString("classmarker"),
           rs.getBoolean(ISPRIVATE),
@@ -450,7 +450,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public Collection<SlickUserExerciseList> getSlickAllQuiz(int projid, int userID) {
+  public Collection<SlickUserExerciseList> getSlickAllPublicOrMine(int projid, int userID, boolean isQuiz) {
     return null;
   }
 }

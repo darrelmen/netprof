@@ -168,6 +168,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   Map<Integer, FirstLastUser> getFirstLastFor(Collection<Integer> userDBIds);
 
   String getUserChosenID(int userid);
+  String getFirstInitialName(int userid);
 
   boolean isMale(int userid);
 

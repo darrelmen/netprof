@@ -94,6 +94,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
+  public String getFirstInitialName(int userid) {
+    return null;
+  }
+
+  @Override
   public <T> Map<Integer, T> getJustTeachers(Map<Integer, T> activeSince) {
     return null;
   }

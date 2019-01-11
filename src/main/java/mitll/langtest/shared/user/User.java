@@ -37,6 +37,7 @@ import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -46,8 +47,6 @@ import static mitll.langtest.shared.user.Kind.STUDENT;
 import static mitll.langtest.shared.user.User.Permission.*;
 
 public class User extends MiniUser implements ReportUser {
-  private static final String NOT_SET = "NOT_SET";
-
   @Deprecated
   private int experience;
   /**
@@ -139,36 +138,10 @@ public class User extends MiniUser implements ReportUser {
     Permission(String name) {
       this.name = name;
     }
-
-//    public String getName() {
-//      return name;
-//    }
   }
 
   public User() {
   } // for serialization
-
-  /**
-   * @param id
-   * @param age
-   * @param gender
-   * @param experience
-   * @param ipaddr
-   * @param password
-   * @param enabled
-   * @param permissions
-   * @see mitll.langtest.server.database.custom.UserListManager#getQCUser
-   */
-/*
-  public User(int id, int age, int gender, Gender realGender, int experience, String ipaddr, String password,
-              boolean enabled, Collection<Permission> permissions) {
-    this(id, NOT_SET, age, gender, realGender, experience, ipaddr, password, NOT_SET, NOT_SET, enabled, false, permissions,
-        STUDENT,
-        "",
-        "", "", //"",
-        System.currentTimeMillis(), "OTHER", true);
-  }
-*/
 
   /**
    * @param id
@@ -323,6 +296,23 @@ public class User extends MiniUser implements ReportUser {
     return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? getName() : getUserID();
   }
 
+  @Nullable
+  public String getFirstInitialName() {
+    String f = first == null ? "" :
+        (first.length() > 0 ?
+            first.substring(0, 1) + ". " : "");
+    String l = last == null ? "" : last;
+    String both = f + l;
+    // logger.info("getFirstInitialName Got " +userid + " " + firstLastUser + " : " + s);
+
+    if (both.isEmpty() || both.equalsIgnoreCase("F. Last")) {
+      both = getUserID();
+    }
+    // logger.info("now Got " +userid + " " + firstLastUser + " : " + s);
+
+    return both;
+  }
+
   public Collection<Permission> getPermissions() {
     return permissions;
   }
@@ -381,6 +371,7 @@ public class User extends MiniUser implements ReportUser {
   public String getResetKey() {
     return resetKey;
   }
+
   public void setResetKey(String resetKey) {
     this.resetKey = resetKey;
   }

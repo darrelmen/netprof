@@ -5,6 +5,7 @@ public interface IUserList extends IUserListLight {
 
   int getUserID();
   String getUserChosenID();
+  String getFirstInitialName();
 
   int getNumItems();
 

@@ -52,7 +52,7 @@ public interface IAnswerDAO {
    */
   int addAnswer(AnswerInfo answerInfo, long timestamp);
 
-  void addRoundTrip(int resultID, int roundTrip);
+  void addRoundTrip(int resultID, long roundTrip);
 
   void addUserScore(int id, float score);
 

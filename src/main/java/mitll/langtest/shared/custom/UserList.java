@@ -32,7 +32,6 @@
 
 package mitll.langtest.shared.custom;
 
-import com.github.gwtbootstrap.client.ui.Heading;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
@@ -60,6 +59,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
 
   private int userid;
   private String userChosenID;
+  private String firstInitialName;
 
   private String name;
   private String description;
@@ -67,8 +67,6 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   private LIST_TYPE listType;
 
   private boolean isPrivate;
-
-  //private boolean isReview;
 
   private long modified;
 
@@ -94,6 +92,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
    * @param uniqueID
    * @param userid
    * @param userChosenID
+   * @param firstInitialName
    * @param name
    * @param description
    * @param classMarker
@@ -111,9 +110,12 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   public UserList(int uniqueID,
                   int userid,
                   String userChosenID,
+                  String firstInitialName,
+
                   String name,
                   String description,
                   String classMarker,
+
                   boolean isPrivate,
                   long modified,
                   String contextURL,
@@ -126,6 +128,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     super(uniqueID);
     this.userid = userid;
     this.userChosenID = userChosenID;
+    this.firstInitialName = firstInitialName;
     this.name = name;
     this.description = description;
     this.classMarker = classMarker;
@@ -239,12 +242,6 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return getName().equals(MY_LIST);
   }
 
-/*
-  public void setReview(boolean isReview) {
-    this.isReview = isReview;
-  }
-*/
-
   public long getModified() {
     return modified;
   }
@@ -297,8 +294,8 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.QuizIntro#onQuizChoice
    * @return
+   * @see mitll.langtest.client.flashcard.QuizIntro#onQuizChoice
    */
   @Override
   public int getMinScore() {
@@ -328,6 +325,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
 
   /**
    * So we can show which lists are owned by a teacher.
+   *
    * @return
    */
   public boolean isTeacher() {
@@ -341,6 +339,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
 
   /**
    * Notional idea of when a list or quiz is visible - additional dimension on top of private/public
+   *
    * @return
    */
   public long getStart() {
@@ -352,10 +351,15 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   }
 
   @Override
+  public String getFirstInitialName() {
+    return firstInitialName;
+  }
+
+  @Override
   public String toString() {
-    return "UserList #" + getID() + " '" + name + "' by " + getUserID() +
-        "\n\tshow audio " +shouldShowAudio()+
-      //  "\n\t : " + (isReview ? " REVIEW " : "") +
+    return "UserList #" + getID() + " '" + name + "' by " + getUserID() + "/" + getFirstInitialName() +
+        "\n\tshow audio " + shouldShowAudio() +
+        //  "\n\t : " + (isReview ? " REVIEW " : "") +
         " : with " + getNumItems() + " exercises.";
   }
 }

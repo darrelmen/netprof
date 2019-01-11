@@ -33,7 +33,6 @@
 package mitll.langtest.client.custom.userlist;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -41,9 +40,7 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.MemoryItemContainer;
-import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.custom.UserList;
@@ -289,7 +286,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
       @Override
       public SafeHtml getValue(UserList<CommonShell> shell) {
-        String owner = addOwnerToDescrip && (shell.getUserID() != controller.getUser()) ? "(" + shell.getUserChosenID() + ") " : "";
+        String owner = addOwnerToDescrip && (shell.getUserID() != controller.getUser()) ? "(" + shell.getFirstInitialName() + ") " : "";
         String description = owner + shell.getDescription();
         //   logger.info("Desc " + description + " length " + description.length());
         String truncate = truncate(description, 30);
@@ -324,7 +321,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
       @Override
       public SafeHtml getValue(UserList<CommonShell> shell) {
-        return getSafeHtml(shell.getUserChosenID());
+        return getSafeHtml(shell.getFirstInitialName());
       }
     };
   }
@@ -391,7 +388,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   private ColumnSortEvent.ListHandler<UserList<CommonShell>> getOwnerSorted(Column<UserList<CommonShell>, SafeHtml> englishCol,
                                                                             List<UserList<CommonShell>> dataList) {
     ColumnSortEvent.ListHandler<UserList<CommonShell>> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol, Comparator.comparing(UserList::getUserChosenID));
+    columnSortHandler.setComparator(englishCol, Comparator.comparing(UserList::getFirstInitialName));
     return columnSortHandler;
   }
 

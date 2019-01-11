@@ -202,9 +202,10 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
     IUserListManager userListManager = getUserListManager();
 
-    Collection<IUserList> listsForUser = list_type == UserList.LIST_TYPE.NORMAL ?
-        userListManager.getSimpleListsForUser(userIDFromSessionOrDB, projectIDFromUser, onlyCreated, visited) :
-        userListManager.getAllQuizUserList(projectIDFromUser, userIDFromSessionOrDB);
+    boolean isNormalList = list_type == UserList.LIST_TYPE.NORMAL;
+    Collection<IUserList> listsForUser = isNormalList ?
+        userListManager.getSimpleListsForUser(projectIDFromUser, userIDFromSessionOrDB, onlyCreated, visited) :
+        userListManager.getAllPublicOrMine(projectIDFromUser, userIDFromSessionOrDB, false);
 
     long now = System.currentTimeMillis();
 
@@ -226,7 +227,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     long then = System.currentTimeMillis();
     Collection<IUserListLight> listsForUser =
-        getUserListManager().getUserListDAO().getAllOrMineLight(getProjectIDFromUser(userIDFromSessionOrDB), -1, true);
+        getUserListManager().getUserListDAO().getAllOrMineLight(getProjectIDFromUser(userIDFromSessionOrDB), userIDFromSessionOrDB, true);
 
     long now = System.currentTimeMillis();
 
