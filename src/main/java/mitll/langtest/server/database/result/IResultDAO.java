@@ -35,9 +35,7 @@ package mitll.langtest.server.database.result;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.ReportStats;
 import mitll.langtest.server.sorter.ExerciseSorter;
-import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
@@ -45,7 +43,6 @@ import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.npdata.dao.SlickPerfResult;
 
-import java.text.Collator;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -92,23 +89,20 @@ public interface IResultDAO extends IDAO {
 
   MonitorResult getMonitorResultByID(int id);
 
+/*
   Collection<UserAndTime> getUserAndTimes();
+*/
 
   UserToCount getUserToNumAnswers();
 
- /* SessionsAndScores getSessionsForUserIn2(Collection<Integer> ids,
-                                          int latestResultID,
-                                          int userid,
-                                          Collection<Integer> allIds,
-                                          Map<Integer, CollationKey> idToKey,
-                                          String language);*/
-
+/*
   <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises,
                                                                    int userid,
                                                                    Collator collator,
                                                                    Language language);
+*/
 
-  Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
+  List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
                                                                           List<Integer> allIds,
                                                                           Map<Integer, CommonExercise> idToEx,
                                                                           ExerciseSorter sorter,
@@ -130,7 +124,7 @@ public interface IResultDAO extends IDAO {
 
   int ensureDefault(int projid, int beforeLoginUser, int unknownExerciseID);
 
-  int getDefaultResult();
+ // int getDefaultResult();
 
 /*
   Map<String, Integer> getStudentAnswers(int projid);
@@ -138,7 +132,9 @@ public interface IResultDAO extends IDAO {
 
   int getStudentForPath(int projid, String path);
 
+/*
   Collection<Integer> getPracticedByUser(int userid, int projid);
+*/
 
   /**
    * @param userid

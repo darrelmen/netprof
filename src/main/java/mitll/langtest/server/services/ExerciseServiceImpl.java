@@ -309,13 +309,13 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     if (commonExercises.isEmpty()) {
       commonExercises = tripleExercises.getByID();
     }
-    if (request.isIncorrectFirstOrder()) {
+  /*  if (request.isIncorrectFirstOrder()) {
       if (DEBUG)
         logger.info("getSortedExercises adding isIncorrectFirstOrder " + tripleExercises.getByExercise().size() + " basicExercises");
       commonExercises =
           db.getResultDAO().getExercisesSortedIncorrectFirst(tripleExercises.getByExercise(), userID,
               getAudioFileHelper(projID).getCollator(), getLanguageEnum(projectForUser));
-    } else {
+    } else {*/
       if (predefExercises) {
         commonExercises = new ArrayList<>(tripleExercises.getByID());
         List<CommonExercise> basicExercises = new ArrayList<>(tripleExercises.getByExercise());
@@ -357,7 +357,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
               .forEach(commonExercises::add);
         }
       }
-    }
+   // }
     return commonExercises;
   }
 
@@ -524,7 +524,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     String prefix = request.getPrefix().trim(); // leading or trailing spaces shouldn't do anything
     int userID = request.getUserID();
-    boolean incorrectFirst = request.isIncorrectFirstOrder();
+    //boolean incorrectFirst = request.isIncorrectFirstOrder();
 
     boolean hasPrefix = !prefix.isEmpty();
     if (hasPrefix) {
@@ -556,14 +556,14 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     // why copy???
     List<CommonExercise> copy;
 
-    if (incorrectFirst) {
-      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getAudioFileHelper(projID).getCollator(), getLanguageEnum(projID));
-    } else {
+//    if (incorrectFirst) {
+//      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getAudioFileHelper(projID).getCollator(), getLanguageEnum(projID));
+//    } else {
       copy = new ArrayList<>(exercisesForState);
 //      if (!request.isQuiz()) {
       sortExercises(copy, false, request.getPrefix());
       //    }
-    }
+//    }
     logger.info("getExerciseListWrapperForPrefix returning " + copy.size());
 
     return makeExerciseListWrapper(request, copy, projID);

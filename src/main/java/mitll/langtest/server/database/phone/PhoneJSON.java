@@ -2,6 +2,7 @@ package mitll.langtest.server.database.phone;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
 import org.apache.logging.log4j.LogManager;
@@ -98,7 +99,12 @@ public class PhoneJSON {
           Long key = pair.getKey();
           result.addProperty(ANSWER, pair.getValue());
           result.addProperty(REF, resToRef.get(key));
-          result.addProperty(RESULT, resToResult.get(key));
+
+          {
+            String value = resToResult.get(key);
+            JsonParser parser = new JsonParser();
+            result.add(RESULT, parser.parse(value).getAsJsonObject());
+          }
 
           results.add(Long.toString(key), result);
         }

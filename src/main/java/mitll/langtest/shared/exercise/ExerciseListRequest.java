@@ -67,7 +67,7 @@ public class ExerciseListRequest implements IsSerializable {
   // TODO : which of these are mutually exclusive???
   private boolean onlyUnrecordedByMe = false;
   private boolean onlyExamples = false;
-  private boolean incorrectFirstOrder = false;
+ // private boolean incorrectFirstOrder = false;
   private boolean onlyWithAnno = false;
   private boolean onlyUninspected = false;
   private boolean onlyForUser = false;
@@ -94,7 +94,7 @@ public class ExerciseListRequest implements IsSerializable {
         !isFilterActivity(activityType) &&
         !onlyUnrecordedByMe &&
         !onlyExamples &&
-        !incorrectFirstOrder &&
+  //      !incorrectFirstOrder &&
         !onlyWithAnno &&
         !onlyUninspected &&
         !onlyForUser;
@@ -116,7 +116,7 @@ public class ExerciseListRequest implements IsSerializable {
         onlyUnrecordedByMe == other.onlyUnrecordedByMe &&
         //  onlyRecordedByMatchingGender == other.onlyRecordedByMatchingGender &&
         onlyExamples == other.onlyExamples &&
-        incorrectFirstOrder == other.incorrectFirstOrder &&
+        //incorrectFirstOrder == other.incorrectFirstOrder &&
         onlyWithAnno == other.onlyWithAnno &&
         //      onlyWithAudioAnno == other.onlyWithAudioAnno &&
         //   onlyDefaultAudio == other.onlyDefaultAudio &&
@@ -215,16 +215,15 @@ public class ExerciseListRequest implements IsSerializable {
     this.onlyExamples = onlyExamples;
     return this;
   }
-
+/*
   public boolean isIncorrectFirstOrder() {
     return incorrectFirstOrder;
-  }
+  }*/
 
-  public ExerciseListRequest setIncorrectFirstOrder(boolean incorrectFirstOrder) {
+/*  public ExerciseListRequest setIncorrectFirstOrder(boolean incorrectFirstOrder) {
     this.incorrectFirstOrder = incorrectFirstOrder;
     return this;
-  }
-
+  }*/
 
   public boolean isOnlyWithAnno() {
     return onlyWithAnno;
@@ -359,7 +358,7 @@ public class ExerciseListRequest implements IsSerializable {
             (onlyExamples ? "\n\tonly examples       " : "") +
             (onlyWithAnno ? "\n\tonly with anno " : "") +
             (onlyForUser ? "\n\tonlyForUser     " : "") +
-            (incorrectFirstOrder ? "\n\tincorrectFirstOrder     " : "") +
+         //   (incorrectFirstOrder ? "\n\tincorrectFirstOrder     " : "") +
             (onlyUninspected ? "\n\tonly uninspected    " : "") +
             (addContext ? "\n\tadd context    " : "") +
             (addFirst ? "\n\tadd first ex    " : "\n\tdon't add first") +

@@ -121,9 +121,9 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   /**
-   * @see RecordWordAndPhone#recordWordAndPhoneInfo(int, int, Map)
    * @param bulk
    * @param projID
+   * @see RecordWordAndPhone#recordWordAndPhoneInfo(int, int, Map)
    */
   @Override
   public void addBulkPhones(List<Phone> bulk, int projID) {
@@ -473,7 +473,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
     int num = 0;
     Map<Integer, String> exidToRef = new HashMap<>();
-Set<Integer> isContextEx=new HashSet<>();
+    Set<Integer> isContextEx = new HashSet<>();
     // first by phone,
     // then by bigram, then examples per bigram
     Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS = new HashMap<>();
@@ -703,7 +703,7 @@ Set<Integer> isContextEx=new HashSet<>();
 
   @Override
   public int deleteForProject(int projID) {
-   return dao.deleteForProject(projID);
+    return dao.deleteForProject(projID);
   }
 
   public boolean updateProjectForRID(int rid, int newprojid) {

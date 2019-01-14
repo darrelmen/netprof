@@ -91,7 +91,8 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String EXID = "exid";
   private static final String REQID = "reqid";
   private static final String VERSION = "version";
-  private static final String CONTEXT = "context";
+  public static final String CONTEXT1 = "context";
+  private static final String CONTEXT = CONTEXT1;
   private static final String WIDGET = "widget";
 
   private static final String REQUEST1 = HeaderValue.REQUEST.toString() + "=";
@@ -113,6 +114,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String MESSAGE = "message";
   private static final String UTF_8 = "UTF-8";
   private static final String LIST = "list";
+  public static final String SORT_BY_LATEST_SCORE = "sortByLatestScore";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -342,7 +344,15 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private boolean hasContextArg(String queryString) {
-    return queryString.toLowerCase().contains("&context=true") || queryString.toLowerCase().contains("&context");
+    return hasArg(queryString, CONTEXT1);
+  }
+
+  private boolean hasSortByLatestScore(String queryString) {
+    return hasArg(queryString, SORT_BY_LATEST_SCORE);
+  }
+
+  private boolean hasArg(String queryString, String context) {
+    return queryString.toLowerCase().contains("&" + context + "=true") || queryString.toLowerCase().contains("&" + context);
   }
 
   private JsonObject getCachedNested(int projid) {
@@ -400,11 +410,26 @@ public class ScoreServlet extends DatabaseServlet {
   private int getTripleProjID(HttpServletRequest request) {
     int projid = getProjID(request);
 
+    if (projid == -1) {
+      String[] split1 = request.getQueryString().split("&");
+      Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke().getSelection();
+      if (selection.get("projid") != null) {
+        String projid1 = selection.get("projid").iterator().next();
+        try {
+          projid = Integer.parseInt(projid1);
+        } catch (NumberFormatException e) {
+          logger.warn("couldn't parse '" + projid1 + "'");
+        }
+      }
+    }
+
     // language overrides user id mapping...
-    {
-      String language = getLanguage(request);
-      if (language != null) {
-        projid = getProjectID(language);
+    if (projid == -1) {
+      {
+        String language = getLanguage(request);
+        if (language != null) {
+          projid = getProjectID(language);
+        }
       }
     }
 
@@ -569,17 +594,24 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private JsonObject getChapterHistory(String queryString, JsonObject toReturn, int projectid, int userID) {
     logger.info("getChapterHistory for project " + projectid);
-    String[] split1 = queryString.split("&");
-    if (split1.length < 2) {
-      toReturn.addProperty(ERROR, "expecting at least two query parameters");
-    } else {
-      Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke().getSelection();
 
-      //logger.debug("chapterHistory " + user + " selection " + selection);
-      try {
-        toReturn = db.getJsonScoreHistory(projectid, userID, selection, hasContextArg(queryString), getExerciseSorter(projectid));
-      } catch (NumberFormatException e) {
-        toReturn.addProperty(ERROR, "User id should be a number");
+    if (projectid == -1) {
+      toReturn.addProperty(ERROR, "no project specified for user " + userID);
+    } else {
+      String[] split1 = queryString.split("&");
+      if (split1.length < 2) {
+        toReturn.addProperty(ERROR, "expecting at least two query parameters");
+      } else {
+        Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke().getSelection();
+
+        //logger.debug("chapterHistory " + user + " selection " + selection);
+        try {
+          boolean sortByLatestScore = hasSortByLatestScore(queryString);
+          logger.info("getChapterHistory Sort by latest " + sortByLatestScore);
+          toReturn = db.getJsonScoreHistory(projectid, userID, selection, hasContextArg(queryString), sortByLatestScore, getExerciseSorter(projectid));
+        } catch (NumberFormatException e) {
+          toReturn.addProperty(ERROR, "User id should be a number");
+        }
       }
     }
     return toReturn;

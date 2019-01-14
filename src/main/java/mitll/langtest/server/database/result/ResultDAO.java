@@ -458,20 +458,20 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     return 0;
   }
 
-  @Override
+ /* @Override
   public int getDefaultResult() {
     return 0;
   }
-
+*/
   @Override
   public int getStudentForPath(int projid, String path) {
     return 0;
   }
-
+/*
   @Override
   public Collection<Integer> getPracticedByUser(int userid, int projid) {
     return null;
-  }
+  }*/
 
   @Override
   public <T extends HasID> Map<Integer, Float> getScores(int userid, Collection<T> exercises) {
@@ -686,8 +686,8 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     List<CorrectAndScore> results = new ArrayList<>();
 
     while (rs.next()) {
-      int uniqueID = rs.getInt(ID);
-      int userid = rs.getInt(USERID);
+//      int uniqueID = rs.getInt(ID);
+//      int userid = rs.getInt(USERID);
       String id = rs.getString(EXID);
       Timestamp timestamp = rs.getTimestamp(Database.TIME);
       boolean correct = rs.getBoolean(CORRECT);

@@ -267,11 +267,11 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
       database.closeConnection(connection);
     }
   }
-
+/*
   @Override
   public void addUserScore(int id, float score) {
     changeScore(id, score, ResultDAO.USER_SCORE);
-  }
+  }*/
 
   private void changeScore(int id, float score, String scoreColumn) {
     Connection connection = getConnection();

@@ -48,7 +48,7 @@ import java.util.List;
  */
 public class ExerciseCorrectAndScore implements IsSerializable, Comparable<ExerciseCorrectAndScore> {
   private static final int MAX_TO_USE = 5;
-  private List<CorrectAndScore> correctAndScores = new ArrayList<CorrectAndScore>();
+  private List<CorrectAndScore> correctAndScores = new ArrayList<>();
   private int id;
 
   // required for rpc
@@ -133,6 +133,8 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
 
 
   /**
+   * TODO : why???
+   *
    * Difference in terms of # of correct over incorrect
    *
    * @return
@@ -147,6 +149,10 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     return c;
   }
 
+  /**
+   * @see mitll.langtest.server.database.result.BaseResultDAO#compScores(ExerciseCorrectAndScore, ExerciseCorrectAndScore)
+   * @return
+   */
   public float getAvgScore() {
     if (isEmpty()) return 0f;
 
@@ -162,35 +168,55 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     return n > 0f ? (c / n) : 0f;
   }
 
+  /**
+   * @see mitll.langtest.server.database.JsonSupport#addJsonHistory
+   * @return
+   */
   public List<CorrectAndScore> getCorrectAndScoresLimited() {
     List<CorrectAndScore> toUse = getCorrectAndScores();
     if (toUse.size() > MAX_TO_USE) toUse = toUse.subList(toUse.size() - MAX_TO_USE, toUse.size());
     return toUse;
   }
 
-  public float getScore() {
+  /**
+   * @see mitll.langtest.server.database.JsonSupport#getJsonForExercises
+   * @return
+   */
+  public float getLatestScore() {
     long latest = Long.MIN_VALUE;
     float score = -1f;
 
     for (CorrectAndScore correctAndScore : getCorrectAndScores()) {
-      if (correctAndScore.getTimestamp() > latest) score = correctAndScore.getScore();
+      long timestamp = correctAndScore.getTimestamp();
+      if (timestamp > latest) {
+        score = correctAndScore.getScore();
+        latest = timestamp;
+      }
     }
     return score;
   }
 
+  /**
+   * @see mitll.langtest.server.database.JsonSupport#addJsonHistory
+   * @return
+   */
   public int getAvgScorePercent() {
     return Math.round(getAvgScore() * 100f);
   }
 
+  public int getLatestScorePercent() {
+    return Math.round(getLatestScore() * 100f);
+  }
+
   /**
    * @param correctAndScore
-   * @see ResultDAO#getExerciseCorrectAndScores(List, Collection)
+   * @see BaseResultDAO#getExerciseCorrectAndScores(List, Collection)
    */
   public void add(CorrectAndScore correctAndScore) {
     getCorrectAndScores().add(correctAndScore);
   }
 
-  public void sort() {
+  public void sortByTime() {
     Collections.sort(getCorrectAndScores());
   }
 
@@ -198,7 +224,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
     return id;
   }
 
-  public List<CorrectAndScore> getCorrectAndScores() {
+  private List<CorrectAndScore> getCorrectAndScores() {
     return correctAndScores;
   }
 
@@ -209,6 +235,7 @@ public class ExerciseCorrectAndScore implements IsSerializable, Comparable<Exerc
       else builder.append("-");
     }
 
-    return "id " + id + " " + builder + " correct " + getNumCorrect() + "/" + getNumIncorrect() + " score " + (int) getAvgScore();
+    return "id " + id + " " + builder + " correct " + getNumCorrect() + "/" + getNumIncorrect() +
+        "\n\tscore " + (int) getAvgScore() + "\n\tlatest " + getLatestScore();
   }
 }

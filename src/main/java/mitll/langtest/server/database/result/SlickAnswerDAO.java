@@ -120,11 +120,13 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
       logger.info("addRoundTrip (" + i + "): " + resultID + " = " + roundTrip);
     }
   }
+/*
 
   @Override
   public void addUserScore(int id, float score) {
     dao.addUserScore(id, score);
   }
+*/
 
   /**
    * TODO : set the isCorrect field

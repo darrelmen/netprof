@@ -65,6 +65,7 @@ public class JsonSupport {
   //  public static final String NAME = "name";
 //  public static final String ID = "id";
   private static final String LISTID = "listid";
+  public static final String SCORES = "scores";
 
   private final ISection<CommonExercise> sectionHelper;
   private final IResultDAO resultDAO;
@@ -98,24 +99,26 @@ public class JsonSupport {
    * @param userid
    * @param typeToSection
    * @param forContext
+   * @param sortByLatestScore
    * @return
    * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
   JsonObject getJsonScoreHistory(int userid,
                                  Map<String, Collection<String>> typeToSection,
                                  boolean forContext,
-                                 ExerciseSorter sorter) {
+                                 ExerciseSorter sorter,
+                                 boolean sortByLatestScore) {
     Collection<String> listid = typeToSection.get(LISTID);
     if (listid == null || listid.isEmpty()) {
       Collection<CommonExercise> exercisesForSelectionState = sectionHelper.getExercisesForSelectionState(typeToSection);
       if (forContext) {
         exercisesForSelectionState = getContextExercises(exercisesForSelectionState);
       }
-      return getJsonForExercises(userid, sorter, exercisesForSelectionState);
+      return getJsonForExercises(userid, sorter, exercisesForSelectionState, sortByLatestScore);
     } else {
       int id = getListID(listid);
       typeToSection.remove(LISTID);
-      return getJsonForExercises(userid, sorter, userListManager.getCommonExercisesOnList(project.getID(), id));
+      return getJsonForExercises(userid, sorter, userListManager.getCommonExercisesOnList(project.getID(), id), sortByLatestScore);
     }
   }
 
@@ -139,7 +142,7 @@ public class JsonSupport {
     return id;
   }
 
-  private JsonObject getJsonForExercises(int userid, ExerciseSorter sorter, Collection<CommonExercise> exercisesForState) {
+  private JsonObject getJsonForExercises(int userid, ExerciseSorter sorter, Collection<CommonExercise> exercisesForState, boolean sortByLatestScore) {
     List<Integer> allIDs = new ArrayList<>();
 
     Map<Integer, CommonExercise> idToEx = new HashMap<>();
@@ -149,8 +152,13 @@ public class JsonSupport {
       idToEx.put(id, exercise);
     }
 
-    Collection<ExerciseCorrectAndScore> exerciseCorrectAndScores =
+    List<ExerciseCorrectAndScore> exerciseCorrectAndScores =
         resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, sorter, language);
+
+    if (true) {
+     // exerciseCorrectAndScores.sort(Comparator.comparingDouble(ExerciseCorrectAndScore::getLatestScore));
+      exerciseCorrectAndScores.forEach(exerciseCorrectAndScore -> logger.info("getJsonForExercises : " + exerciseCorrectAndScore.getId() + " = " + exerciseCorrectAndScore.getLatestScore()));
+    }
 
     return addJsonHistory(exerciseCorrectAndScores);
   }
@@ -198,15 +206,20 @@ public class JsonSupport {
 
       JsonObject exAndScores = new JsonObject();
       exAndScores.addProperty("ex", ex.getId());
-      exAndScores.addProperty("s", Integer.toString(ex.getAvgScorePercent()));
+
+      {
+        String value = Integer.toString(ex.getLatestScorePercent());
+        exAndScores.addProperty("s", value);
+      }
+
       exAndScores.add("h", history);
-      exAndScores.add("scores", getScoresAsJson(correctAndScoresLimited));
+      exAndScores.add(SCORES, getScoresAsJson(correctAndScoresLimited));
       exAndScores.addProperty(SCORE_JSON, empty ? "" : correctAndScoresLimited.get(correctAndScoresLimited.size() - 1).getScoreJson());
       scores.add(exAndScores);
     }
 
     JsonObject container = new JsonObject();
-    container.add("scores", scores);
+    container.add(SCORES, scores);
     container.addProperty("lastCorrect", Integer.toString(correct));
     container.addProperty("lastIncorrect", Integer.toString(incorrect));
     return container;
