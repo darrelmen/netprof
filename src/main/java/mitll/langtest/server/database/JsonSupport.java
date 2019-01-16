@@ -142,7 +142,8 @@ public class JsonSupport {
     return id;
   }
 
-  private JsonObject getJsonForExercises(int userid, ExerciseSorter sorter, Collection<CommonExercise> exercisesForState, boolean sortByLatestScore) {
+  private JsonObject getJsonForExercises(int userid, ExerciseSorter sorter, Collection<CommonExercise> exercisesForState,
+                                         boolean sortByLatestScore) {
     List<Integer> allIDs = new ArrayList<>();
 
     Map<Integer, CommonExercise> idToEx = new HashMap<>();
@@ -155,10 +156,10 @@ public class JsonSupport {
     List<ExerciseCorrectAndScore> exerciseCorrectAndScores =
         resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, sorter, language);
 
-    if (true) {
-     // exerciseCorrectAndScores.sort(Comparator.comparingDouble(ExerciseCorrectAndScore::getLatestScore));
-      exerciseCorrectAndScores.forEach(exerciseCorrectAndScore -> logger.info("getJsonForExercises : " + exerciseCorrectAndScore.getId() + " = " + exerciseCorrectAndScore.getLatestScore()));
-    }
+//    if (true) {
+//     // exerciseCorrectAndScores.sort(Comparator.comparingDouble(ExerciseCorrectAndScore::getLatestScore));
+//      exerciseCorrectAndScores.forEach(exerciseCorrectAndScore -> logger.info("getJsonForExercises : " + exerciseCorrectAndScore.getId() + " = " + exerciseCorrectAndScore.getLatestScore()));
+//    }
 
     return addJsonHistory(exerciseCorrectAndScores);
   }

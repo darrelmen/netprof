@@ -590,7 +590,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param toReturn
    * @param projectid
    * @return
-   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   * @see #doGet
    */
   private JsonObject getChapterHistory(String queryString, JsonObject toReturn, int projectid, int userID) {
     logger.info("getChapterHistory for project " + projectid);

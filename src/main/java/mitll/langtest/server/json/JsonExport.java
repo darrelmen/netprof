@@ -43,6 +43,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.function.Function;
 
 import static mitll.langtest.server.database.exercise.Facet.SUB_TOPIC;
 
@@ -119,16 +120,7 @@ public class JsonExport {
     List<String> minimalTypeOrder = getMinimalTypeOrder();
 
     for (SectionNode node : sectionHelper.getSectionNodesForTypes()) {
-      String type = node.getType();
-      String name = node.getName();
-
-      typeToValues.put(type, Collections.singletonList(name));
-      JsonObject jsonForNode = getJsonForNode(node, typeToValues, removeExercisesWithMissingAudio, justContext, minimalTypeOrder);
-      typeToValues.remove(type);
-
-      if (jsonForNode != null) {
-        jsonArray.add(jsonForNode);
-      } else logger.info("no content for " + type + " = " + name);
+      addToJsonArrayForChildren(typeToValues, removeExercisesWithMissingAudio, justContext, minimalTypeOrder, jsonArray, node);
     }
     return jsonArray;
   }
@@ -189,30 +181,17 @@ public class JsonExport {
 //          logger.info("getJsonForNode leaf content for " + type + " = " + name + " : " +jsonForSelection.size());
 //        }
       } else {
-        List<SectionNode> children = node.getChildren();
+        //List<SectionNode> children = node.getChildren();
         //     logger.info("getJsonForNode node " + node.getType() + " = " + node.getName() + " with " + children.size() + " children");
 
-        for (SectionNode child : children) {
-          String type1 = child.getType();
-          String name1 = child.getName();
-          typeToValues.put(type1, Collections.singletonList(name1));
-
-//          logger.info("\tgetJsonForNode node " + child.getType() + " = " + child.getName() + " typeToValues " + typeToValues);
-
-          JsonObject jsonForNode1 = getJsonForNode(child, typeToValues, removeExercisesWithMissingAudio, justContext, firstTypes);
-
-          if (jsonForNode1 != null) {
-            jsonArray.add(jsonForNode1);
-          } else {
-            logger.info("getJsonForNode no content for " + type1 + " = " + name1);
-          }
-          typeToValues.remove(type1);
+        for (SectionNode child : node.getChildren()) {
+          addToJsonArrayForChildren(typeToValues, removeExercisesWithMissingAudio, justContext, firstTypes, jsonArray, child);
         }
       }
 
       if (!leaf && jsonForNode != null) {
         jsonForNode.add(CHILDREN, jsonArray);
-        if (jsonArray.size() == 0 ) {
+        if (jsonArray.size() == 0) {
           logger.info("getJsonForNode no content for " + type + " = " + name);
 
           jsonForNode = null;
@@ -220,6 +199,24 @@ public class JsonExport {
       }
     }
     return jsonForNode;
+  }
+
+  private void addToJsonArrayForChildren(Map<String, Collection<String>> typeToValues,
+                                         boolean removeExercisesWithMissingAudio, boolean justContext,
+                                         Collection<String> firstTypes,
+                                         JsonArray jsonArray,
+                                         SectionNode child) {
+    String type1 = child.getType();
+    String name1 = child.getName();
+    typeToValues.put(type1, Collections.singletonList(name1));
+    JsonObject jsonForNode1 = getJsonForNode(child, typeToValues, removeExercisesWithMissingAudio, justContext, firstTypes);
+    typeToValues.remove(type1);
+
+    if (jsonForNode1 != null) {
+      jsonArray.add(jsonForNode1);
+    } else {
+      logger.info("no content for " + type1 + " = " + name1);
+    }
   }
 
   /**
@@ -263,13 +260,13 @@ public class JsonExport {
       exercisesForState.forEach(ex -> {
         ex.getDirectlyRelated().forEach(c -> context.add(c.asCommon()));
       });
-  //    logger.info("for " + typeToValues + " context " + context.size());
+      //    logger.info("for " + typeToValues + " context " + context.size());
 
       exercisesForState = context;
     }
     List<CommonExercise> filteredExercises = getFilteredExercises(removeExercisesWithMissingAudio, removeCantDecode, exercisesForState);
     if (!exercisesForState.isEmpty() && filteredExercises.isEmpty()) {
-      logger.warn("getFilteredExercises for " +typeToValues+ " removed all " + exercisesForState.size());
+      logger.warn("getFilteredExercises for " + typeToValues + " removed all " + exercisesForState.size());
     }
     return filteredExercises;
   }
@@ -282,7 +279,13 @@ public class JsonExport {
 
     removeMissingAudio(removeExercisesWithMissingAudio, copy);
     removeCantDecode(removeCantDecode, copy);
-    getExerciseSorter().sortedByPronLengthThenPhone(copy, phoneToCount);
+
+    copy.sort(Comparator
+        .comparing((Function<CommonExercise, String>) CommonShell::getForeignLanguage)
+        .thenComparing(CommonShell::getEnglish));
+
+   // getExerciseSorter().sortedByPronLengthThenPhone(copy, phoneToCount);
+
     return copy;
   }
 

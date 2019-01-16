@@ -37,6 +37,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
@@ -251,11 +252,20 @@ public abstract class BaseResultDAO extends DAO {
   ) {
     List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(results, allIds);
     sortedResults.sort((o1, o2) -> {
-      CommonExercise o1Ex = idToEx.get(o1.getId());
-      CommonExercise o2Ex = idToEx.get(o2.getId());
-      return compareUsingPhones(o1, o2, o1Ex, o2Ex, sorter);
+      CommonShell o1Ex = idToEx.get(o1.getId());
+      CommonShell o2Ex = idToEx.get(o2.getId());
+      return compareFLThenEnglish(o1Ex, o2Ex);
+      // return compareUsingPhones(o1, o2, o1Ex, o2Ex, sorter);
     });
+
+
+
     return sortedResults;
+  }
+
+  private int compareFLThenEnglish(CommonShell o1Ex, CommonShell o2Ex) {
+    int i = o1Ex.getForeignLanguage().compareTo(o2Ex.getForeignLanguage());
+    return i == 0 ? o1Ex.getEnglish().compareTo(o2Ex.getEnglish()) : i;
   }
 
   /**
@@ -267,6 +277,7 @@ public abstract class BaseResultDAO extends DAO {
    * @param sorter
    * @return
    */
+/*
   private int compareUsingPhones(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2,
                                  CommonExercise o1Ex, CommonExercise o2Ex, final ExerciseSorter sorter) {
     if (o1.isEmpty() && o2.isEmpty()) {
@@ -277,6 +288,7 @@ public abstract class BaseResultDAO extends DAO {
       return compScoresPhones(o1, o2, o1Ex, o2Ex, sorter);
     }
   }
+*/
 
   /**
    * Break tie scores with phone comparison -- why?
