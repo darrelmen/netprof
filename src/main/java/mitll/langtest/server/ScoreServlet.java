@@ -1062,7 +1062,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     then = System.currentTimeMillis();
     File saveFile = new FileSaver().writeAudioFile(
-        pathHelper, request.getInputStream(), realExID, userid, getProject(projid).getLanguage(), true);
+        pathHelper, request.getInputStream(), realExID, userid, getProject(projid).getLanguageEnum(), true);
 
     now = System.currentTimeMillis();
     if (now - then > 10) {

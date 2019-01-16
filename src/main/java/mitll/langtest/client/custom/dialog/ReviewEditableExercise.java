@@ -50,6 +50,7 @@ import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.qc.FixNPFHelper;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
@@ -115,7 +116,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    * @param originalList
    * @param exerciseList
    * @paramx predefinedContent   - this should be a reference to the Learn tab exercise list, but it's not getting set.
-   * @see mitll.langtest.client.custom.FixNPFHelper#getFactory
+   * @see FixNPFHelper#getFactory
    */
   public ReviewEditableExercise(ExerciseController controller,
                                 U changedUserExercise,
@@ -130,7 +131,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    * @param listInterface
    * @param toAddTo
    * @return
-   * @see mitll.langtest.client.custom.FixNPFHelper#getFactory
+   * @see FixNPFHelper#getFactory
    */
   public Panel addFields(final ListInterface<T, U> listInterface, final Panel toAddTo) {
     Panel widgets = super.addFields(listInterface, toAddTo);

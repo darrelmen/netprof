@@ -165,7 +165,6 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
      */
     RecordRefAudioPanel(ClientExercise e, ExerciseController controller1, ListInterface<T, ClientExercise> exerciseList1, String instance) {
       super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance, false);
-      //  logger.info("RecordRefAudioPanel : Do normal recording " + doNormalRecording);
     }
 
     @Override
@@ -177,7 +176,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
     protected void enableNext() {
       super.enableNext();
       if (isCompleted()) {
-        showRecordedState(exercise);
+        showRecordedState();
       }
     }
 
@@ -199,9 +198,6 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
         ((Panel) parent).add(c);
         added = true;
       }
-      //else {
-      //getProgressInfo();
-      //}
     }
 
     /**

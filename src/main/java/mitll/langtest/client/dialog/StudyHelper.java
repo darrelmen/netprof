@@ -1,9 +1,12 @@
-package mitll.langtest.client.banner;
+package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.banner.IBanner;
+import mitll.langtest.client.banner.LearnHelper;
+import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
@@ -22,14 +25,14 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Created by go22670 on 4/5/17.
  */
-class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T> {
+public class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T> {
   private int dialogSessionID = -1;
 
   /**
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  StudyHelper(ExerciseController controller) {
+  public StudyHelper(ExerciseController controller) {
     super(controller);
   }
 
@@ -53,14 +56,10 @@ class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T>
     if (dialog == null) {
       child.add(new HTML("hmm can't find dialog #" + dialogFromURL + " in database?"));
     } else {
-      DivWidget header = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog);
-      header.addStyleName("bottomFiveMargin");
-      child.add(header);
-      //  private final Logger logger = Logger.getLogger("LearnHelper");
-      int dialogID = dialog.getID();
+      child.add(getHeader(dialog));
 
       controller.getDialogService().addSession(new DialogSession(controller.getUser(),
-          getProjectid(), dialogID, INavigation.VIEWS.STUDY), new AsyncCallback<Integer>() {
+          getProjectid(), dialog.getID(), INavigation.VIEWS.STUDY), new AsyncCallback<Integer>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("creating new dialog study session", caught);
@@ -74,6 +73,13 @@ class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T>
     }
     super.showContent(child, INavigation.VIEWS.STUDY);
     hideList();
+  }
+
+  @NotNull
+  private DivWidget getHeader(IDialog dialog) {
+    DivWidget header = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog);
+    header.addStyleName("bottomFiveMargin");
+    return header;
   }
 
   private int getProjectid() {
@@ -93,7 +99,6 @@ class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T>
   private int getDialogFromURL() {
     return new SelectionState().getDialog();
   }
-
 
   @Override
   public int getDialogSessionID() {

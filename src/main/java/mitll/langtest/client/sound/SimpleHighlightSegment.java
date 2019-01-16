@@ -47,7 +47,7 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
    * Not needed here.
    */
   @Override
-  public void obscureText() {}
+  public boolean obscureText() { return true;}
 
   /**
    * Not needed here.

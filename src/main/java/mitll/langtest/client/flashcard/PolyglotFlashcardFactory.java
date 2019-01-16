@@ -8,6 +8,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.quiz.NewQuizHelper;
 import mitll.langtest.shared.custom.QuizSpec;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -319,7 +320,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
 
   /**
    * @param listOverride
-   * @see mitll.langtest.client.banner.NewQuizHelper#gotQuizChoice
+   * @see NewQuizHelper#gotQuizChoice
    */
   public void removeItemFromHistory(int listOverride) {
     String currrentToken = History.getToken();

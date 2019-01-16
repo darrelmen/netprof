@@ -55,7 +55,8 @@ public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends C
   @Override
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
     return super.getExerciseListRequest(prefix)
-        .setDialogID(getDialogFromURL());
+        .setDialogID(getDialogFromURL())
+        .setOnlyFL(true);
   }
 
   private int getDialogFromURL() {

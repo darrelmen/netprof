@@ -56,7 +56,7 @@ class JSONAnswerParser {
     converted.setDynamicRange(getFloatField(jsonObject, "dynamicRange"));
     //useInvalidResult(validity, getFloatField(jsonObject, "dynamicRange"));
     long timestamp = getLongField(jsonObject, "timestamp");
-    logger.info("getAudioAnswer json timestamp " + timestamp + " " + new Date(timestamp));
+  //  logger.info("getAudioAnswer json timestamp " + timestamp + " " + new Date(timestamp));
     converted.setTimestamp(timestamp);
 
     if (validity == Validity.OK /*|| validity == Validity.CUT_OFF*/) {
@@ -134,8 +134,7 @@ class JSONAnswerParser {
               getFloatField(object, END),
               event,
               getFloatField(object, SCORE),
-              event,
-              i
+              event
           )
       );
     }
@@ -168,7 +167,7 @@ class JSONAnswerParser {
       //   logger.info("getLongField obj "  +jsonValue + " is not a number?");
       String s = jsonValue.isString().stringValue();
       try {
-        logger.info("getLongField parse obj " + jsonValue + " : " + s);
+     //   logger.info("getLongField parse obj " + jsonValue + " : " + s);
         return Long.parseLong(s);
       } catch (NumberFormatException e) {
         logger.warning("can't parse " + s);

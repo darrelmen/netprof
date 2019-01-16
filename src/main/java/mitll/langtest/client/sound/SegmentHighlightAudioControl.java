@@ -158,6 +158,10 @@ public class SegmentHighlightAudioControl implements AudioControl {
       }
     }
 
+    private void showHighlight() {
+      transcriptToHighlight.get(currentSegment).showHighlight();
+    }
+
     @Override
     public void songFinished() {
       if (DEBUG_DETAIL) logger.info("songFinished..." + transcriptToHighlight.values().size() + " segments...");
@@ -183,10 +187,6 @@ public class SegmentHighlightAudioControl implements AudioControl {
       } else {
         logger.warning("removeHighlight no current word....");
       }
-    }
-
-    private void showHighlight() {
-      transcriptToHighlight.get(currentSegment).showHighlight();
     }
   }
 

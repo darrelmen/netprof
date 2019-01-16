@@ -1,4 +1,4 @@
-package mitll.langtest.client.banner;
+package mitll.langtest.client.dialog;
 
 import mitll.langtest.client.custom.INavigation;
 import org.jetbrains.annotations.NotNull;

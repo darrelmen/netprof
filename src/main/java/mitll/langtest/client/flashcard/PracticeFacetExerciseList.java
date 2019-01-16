@@ -1,7 +1,8 @@
-package mitll.langtest.client.banner;
+package mitll.langtest.client.flashcard;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.banner.PracticeHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.ControlState;
@@ -25,16 +26,16 @@ import java.util.logging.Logger;
 public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U extends ClientExercise>
     extends ListFacetExerciseList<T> {
   private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
-  private final PracticeHelper<T, U> practiceHelper;
+  private final PracticeHelper<T> practiceHelper;
   private ControlState controlState;
 
-  PracticeFacetExerciseList(Panel topRow,
-                            Panel currentExercisePanel,
-                            ExerciseController controller,
-                            ListOptions listOptions,
-                            DivWidget listHeader,
-                            INavigation.VIEWS views,
-                            PracticeHelper<T, U> practiceHelper) {
+  public PracticeFacetExerciseList(Panel topRow,
+                                   Panel currentExercisePanel,
+                                   ExerciseController controller,
+                                   ListOptions listOptions,
+                                   DivWidget listHeader,
+                                   INavigation.VIEWS views,
+                                   PracticeHelper<T> practiceHelper) {
     super(topRow,
         currentExercisePanel,
         controller,
@@ -72,8 +73,9 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
     super.goToFirst(searchIfAny, exerciseID);
 
     if (practiceHelper != null) {
-      if (practiceHelper.getPolyglotFlashcardFactory() != null) {
-        practiceHelper.getPolyglotFlashcardFactory().setMode(practiceHelper.getMode());
+      PolyglotFlashcardFactory<T, ClientExercise> polyglotFlashcardFactory = practiceHelper.getPolyglotFlashcardFactory();
+      if (polyglotFlashcardFactory != null) {
+        polyglotFlashcardFactory.setMode(practiceHelper.getMode());
       }
       if (getStatsFlashcardFactory() != null) {
         getStatsFlashcardFactory().setNavigation(practiceHelper.getNavigation());
@@ -111,13 +113,13 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
                                           boolean onlyDefaultUser, boolean onlyUninspected) {
     super.loadExercisesUsingPrefix(typeToSection, "", exerciseID, onlyWithAudioAnno, onlyDefaultUser, onlyUninspected);
 
-    StatsFlashcardFactory<T, U> statsFlashcardFactory = getStatsFlashcardFactory();
+    StatsFlashcardFactory<T, ClientExercise> statsFlashcardFactory = getStatsFlashcardFactory();
     if (statsFlashcardFactory != null) {
       statsFlashcardFactory.setSelection(typeToSection);
     }
   }
 
-  private StatsFlashcardFactory<T, U> getStatsFlashcardFactory() {
+  private StatsFlashcardFactory<T, ClientExercise> getStatsFlashcardFactory() {
     return practiceHelper == null ? null : practiceHelper.getStatsFlashcardFactory();
   }
 
@@ -148,17 +150,9 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
         if (!visibleIDs.contains(id)) {
           visibleIDs.add(id);
           logger.warning("reallyGetExercises added current ex to visible " + id);
-/*
-          int c = 0;
-          for (Integer id2 : visibleIDs) {
-            logger.info("#" + c++ + " : " + id2);
-          }
-*/
         }
       }
-
-      logger.info("\n\n\treallyGetExercises now " + visibleIDs.size() + " visible ids : " + visibleIDs + " currentReq " + currentReq);
-
+//      logger.info("\n\n\treallyGetExercises now " + visibleIDs.size() + " visible ids : " + visibleIDs + " currentReq " + currentReq);
     }
     super.reallyGetExercises(visibleIDs, currentReq);
   }

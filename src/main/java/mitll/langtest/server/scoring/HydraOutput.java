@@ -4,6 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class HydraOutput {
@@ -65,6 +66,7 @@ public class HydraOutput {
    *
    * @param reco
    * @return
+   * @see ASRWebserviceScoring#isMatch(HydraOutput, Map)
    */
   boolean isMatch(List<WordAndProns> reco) {
     if (reco.size() != wordAndProns.size()) {
@@ -78,7 +80,7 @@ public class HydraOutput {
     }
   }
 
-  private boolean doPhoneComparison(List<WordAndProns> reco, List<WordAndProns> expectedSeq) {
+/*  private boolean doPhoneComparison(List<WordAndProns> reco, List<WordAndProns> expectedSeq) {
     boolean res = true;
     for (int i = 0; i < reco.size(); i++) {
       WordAndProns recoWordAndProns = reco.get(i);
@@ -103,7 +105,7 @@ public class HydraOutput {
       }
     }
     return res;
-  }
+  }*/
 
   List<WordAndProns> getWordAndProns() {
     return wordAndProns;

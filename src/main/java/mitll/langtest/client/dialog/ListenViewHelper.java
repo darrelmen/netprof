@@ -1,8 +1,6 @@
-package mitll.langtest.client.banner;
+package mitll.langtest.client.dialog;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.Icon;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -15,6 +13,9 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
+import mitll.langtest.client.LangTest;
+import mitll.langtest.client.banner.IBanner;
+import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -24,22 +25,35 @@ import mitll.langtest.client.scoring.RefAudioGetter;
 import mitll.langtest.client.scoring.TurnPanel;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.shared.dialog.DialogMetadata;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
 /**
  * Created by go22670 on 4/5/17.
  */
-public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
+public class ListenViewHelper<T extends TurnPanel>
     extends DialogView implements ContentView, PlayListener, IListenView {
+  public static final String INTERPRETER = "Interpreter";
+  public static final String SPEAKER_B = "B";
+  public static final int INTERPRETER_WIDTH = 235;
+  public static final String ENGLISH_SPEAKER = "English Speaker";
+  public static final int SPEAKER_WIDTH = 313;
   private final Logger logger = Logger.getLogger("ListenViewHelper");
+
+  private static final String MIDDLE_COLOR = "#00800059";
+
+  public enum COLUMNS {LEFT, MIDDLE, RIGHT, UNK}
 
   private static final String VALUE = "value";
   private static final String SLIDER_MAX = "100";
@@ -58,12 +72,18 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   final ExerciseController controller;
   final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
-  final List<T> bothTurns = new ArrayList<>();
+  final List<T> allTurns = new ArrayList<>();
+  private final List<T> promptTurns = new ArrayList<>();
   final List<T> leftTurnPanels = new ArrayList<>();
+  private final List<T> middleTurnPanels = new ArrayList<>();
   private final List<T> rightTurnPanels = new ArrayList<>();
 
   private T currentTurn;
-  CheckBox leftSpeakerBox, rightSpeakerBox;
+
+  private CheckBox leftSpeakerBox = null;
+  private CheckBox rightSpeakerBox = null;
+
+  CheckBox speakerBoxes;
   private ComplexWidget slider;
   private Button playButton;
   private DivWidget dialogHeader;
@@ -74,12 +94,13 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    *
    */
   protected int dialogID;
+  boolean isInterpreter = false;
 
   /**
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  ListenViewHelper(ExerciseController controller) {
+  public ListenViewHelper(ExerciseController controller) {
     this.controller = controller;
   }
 
@@ -90,8 +111,10 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    */
   @Override
   public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
-    bothTurns.clear();
+    promptTurns.clear();
+    allTurns.clear();
     leftTurnPanels.clear();
+    middleTurnPanels.clear();
     rightTurnPanels.clear();
     currentTurn = null;
 
@@ -119,14 +142,15 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @param child
    */
   void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
-    if (dialog == null) {
-    } else {
+    if (dialog != null) {
       this.dialogID = dialog.getID();
+      isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
+
       showDialog(dialogID, dialog, child);
-      getRefAudio(new ArrayList<RefAudioGetter>(bothTurns).iterator());
+
+      getRefAudio(new ArrayList<RefAudioGetter>(allTurns).iterator());
     }
   }
-
 
   /**
    * Main method for showing the three sections
@@ -141,7 +165,31 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
       child.add(new HTML("hmmm can't find dialog #" + dialogID + " in database"));
     } else {
       child.add(dialogHeader = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog));
-      child.add(getSpeakerRow(dialog));
+
+      DivWidget controlAndSpeakers = new DivWidget();
+      styleControlRow(controlAndSpeakers);
+      child.add(controlAndSpeakers);
+
+      DivWidget outer = new DivWidget();
+      outer.addStyleName("inlineFlex");
+      outer.setWidth("100%");
+
+      Image w = new Image(LangTest.LANGTEST_IMAGES + "englishSpeaker.png");
+      w.addStyleName("floatLeft");
+      outer.add(w);
+
+      DivWidget controls = getControls();
+      controls.setWidth("100%");
+      controls.getElement().getStyle().setMarginTop(50, PX);
+      outer.add(controls);
+
+      Image w1 = new Image(LangTest.LANGTEST_IMAGES + "chineseSpeaker.png");
+      w1.addStyleName("floatRight");
+      outer.add(w1);
+
+      controlAndSpeakers.add(outer);
+      controlAndSpeakers.add(getSpeakerRow(dialog));
+
       child.add(getTurns(dialog));
     }
   }
@@ -149,15 +197,108 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   @NotNull
   private DivWidget getSpeakerRow(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
-    styleControlRow(rowOne);
+    rowOne.getElement().setId("speakerRow");
+    rowOne.getElement().getStyle().setMarginTop(5, PX);
 
-    leftSpeakerBox = addLeftSpeaker(rowOne, dialog.getSpeakers().get(0));
+    {
+      String firstSpeaker = dialog.getSpeakers().get(0);
+      if (!dialog.getExercises().isEmpty()) {
+        ClientExercise next = dialog.getExercises().iterator().next();
+        boolean hasEnglishAttr = next.hasEnglishAttr();
 
-    rowOne.add(getControls());
+        if (hasEnglishAttr && getExerciseSpeaker(next).equalsIgnoreCase(firstSpeaker)) {
+          firstSpeaker = ENGLISH_SPEAKER;
+        }
+      }
+      if (firstSpeaker == null) firstSpeaker = "A";
 
-    rightSpeakerBox = addRightSpeaker(rowOne, dialog.getSpeakers().get(1));
+      if (isInterpreter) {
+        Heading w = new Heading(4, firstSpeaker);
+
+        DivWidget left = new DivWidget();
+        left.add(w);
+        left.setWidth(SPEAKER_WIDTH +
+            "px");
+
+        styleLeftSpeaker(w);
+
+        left.addStyleName("floatLeft");
+        left.addStyleName("bubble");
+        left.addStyleName("leftbubble");
+        //left.addStyleName("leftFiveMargin");
+        left.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
+
+        rowOne.add(left);
+      } else {
+        leftSpeakerBox = addLeftSpeaker(rowOne, firstSpeaker);
+      }
+    }
+
+    {
+      if (isInterpreter) {
+        String secondSpeaker = dialog.getSpeakers().get(2);
+
+        if (!dialog.getExercises().isEmpty()) {
+          ClientExercise next = dialog.getExercises().iterator().next();
+          boolean hasEnglishAttr = next.hasEnglishAttr();
+
+          if (hasEnglishAttr && !getExerciseSpeaker(next).equalsIgnoreCase(secondSpeaker)) {
+            secondSpeaker = controller.getLanguageInfo().toDisplay()+ " Speaker";
+          }
+        }
+
+        if (secondSpeaker == null) secondSpeaker = SPEAKER_B;
+
+        Heading w = new Heading(4, secondSpeaker);
+
+        DivWidget right = new DivWidget();
+        right.setWidth(SPEAKER_WIDTH +
+            "px");
+        right.add(w);
+        right.addStyleName("bubble");
+        right.addStyleName("rightbubble");
+        right.addStyleName("floatRight");
+        //left.addStyleName("leftFiveMargin");
+        right.getElement().getStyle().setBackgroundColor(RIGHT_BKG_COLOR);
+        styleRightSpeaker(w);
+        rowOne.add(right);
+      }
+    }
+
+    {
+      String interpreterSpeaker = dialog.getSpeakers().get(1);
+      if (interpreterSpeaker == null) interpreterSpeaker = INTERPRETER;
+
+      if (isInterpreter) {
+        Heading w = new Heading(4, INTERPRETER);
+
+        DivWidget middle = new DivWidget();
+        middle.addStyleName("bubble");
+        middle.setWidth(INTERPRETER_WIDTH + "px");
+        middle.setHeight("44px");
+        middle.getElement().getStyle().setMarginTop(0, PX);
+        middle.getElement().getStyle().setMarginBottom(0, PX);
+        middle.getElement().getStyle().setProperty("marginLeft", "auto");
+        middle.getElement().getStyle().setProperty("marginRight", "auto");
+        middle.add(w);
+        styleLabel(w);
+        w.getElement().getStyle().setMarginLeft(43, PX);
+
+        middle.getElement().getStyle().setBackgroundColor(MIDDLE_COLOR);
+        rowOne.add(middle);
+      } else {
+        rightSpeakerBox = addRightSpeaker(rowOne, interpreterSpeaker);
+      }
+    }
+
 
     return rowOne;
+  }
+
+  private String getExerciseSpeaker(ClientExercise next) {
+    List<ExerciseAttribute> speaker = next.getAttributes().stream().filter(attr -> attr.getProperty().equalsIgnoreCase("Speaker")).collect(Collectors.toList());
+
+    return speaker.isEmpty() ? "" : speaker.get(0).getValue();
   }
 
   private void styleControlRow(DivWidget rowOne) {
@@ -166,7 +307,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     style.setProperty("position", "sticky");
     style.setTop(0, PX);
 
-    setControlRowHeight(rowOne);
+//    setControlRowHeight(rowOne);
 
 //    rowOne.setWidth(97 + "%");
     style.setMarginTop(10, PX);
@@ -174,26 +315,37 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     style.setZIndex(1000);
   }
 
+/*
   void setControlRowHeight(DivWidget rowOne) {
     rowOne.setHeight(getControlRowHeight() + "px");
   }
 
   private int getControlRowHeight() {
-    return 40;
+    return 105;
   }
+*/
 
   private CheckBox addLeftSpeaker(DivWidget rowOne, String label) {
     CheckBox checkBox = new CheckBox(label, true);
     setLeftTurnSpeakerInitial(checkBox);
-    checkBox.addStyleName("floatLeft");
-    checkBox.addStyleName("leftFiveMargin");
-    checkBox.addStyleName("leftSpeaker");
-    checkBox.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
+    styleLeftSpeaker(checkBox);
 
     checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
 
     rowOne.add(getLeftSpeakerDiv(checkBox));
     return checkBox;
+  }
+
+  private void styleLeftSpeaker(UIObject checkBox) {
+//    checkBox.addStyleName("floatLeft");
+//    checkBox.addStyleName("leftFiveMargin");
+//    checkBox.addStyleName("leftSpeaker");
+//
+//    checkBox.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
+//    checkBox.getElement().getStyle().setMarginLeft(43,PX);
+//    checkBox.getElement().getStyle().setFontSize(32,PX);
+
+    styleLabel(checkBox);
   }
 
   @NotNull
@@ -207,18 +359,28 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     CheckBox checkBox = new CheckBox(label, true);
 
     setRightTurnInitialValue(checkBox);
-    Style style = checkBox.getElement().getStyle();
-    style.setBackgroundColor(RIGHT_BKG_COLOR);
-
-    checkBox.addStyleName("rightSpeaker");
-    checkBox.addStyleName("rightAlign");
-    checkBox.addStyleName("floatRight");
-    checkBox.addStyleName("rightFiveMargin");
+    styleRightSpeaker(checkBox);
 
     checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
 
     rowOne.add(getRightSpeakerDiv(checkBox));
     return checkBox;
+  }
+
+  private void styleRightSpeaker(UIObject checkBox) {
+    // Style style = checkBox.getElement().getStyle();
+    //  style.setBackgroundColor(RIGHT_BKG_COLOR);
+
+//    checkBox.addStyleName("rightSpeaker");
+//    checkBox.addStyleName("rightAlign");
+//    checkBox.addStyleName("floatRight");
+//    checkBox.addStyleName("rightFiveMargin");
+    styleLabel(checkBox);
+  }
+
+  private void styleLabel(UIObject checkBox) {
+    checkBox.getElement().getStyle().setMarginLeft(43, PX);
+    checkBox.getElement().getStyle().setFontSize(32, PX);
   }
 
   @NotNull
@@ -237,17 +399,43 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   void speakerOneCheck(Boolean value) {
-    if (!value && !rightSpeakerBox.getValue()) {
-      rightSpeakerBox.setValue(true);
+    if (!value && !isRightSpeakerSelected()) {
+      setRightSpeaker();
+    }
+  }
+
+  private void setRightSpeaker() {
+    setRightSpeaker(true);
+  }
+
+  void setRightSpeaker(boolean value) {
+    if (rightSpeakerBox != null) {
+      rightSpeakerBox.setValue(value);
     }
   }
 
   void speakerTwoCheck(Boolean value) {
-    if (!value && !leftSpeakerBox.getValue()) {
-      leftSpeakerBox.setValue(true);
+    if (!value && !isLeftSpeakerSelected()) {
+      selectLeftSpeaker();
     }
   }
 
+  private void selectLeftSpeaker() {
+    setLeftSpeaker(true);
+  }
+
+  void setLeftSpeaker(boolean val) {
+    if (leftSpeakerBox != null)
+      leftSpeakerBox.setValue(val);
+  }
+
+  private Boolean isLeftSpeakerSelected() {
+    return leftSpeakerBox == null || leftSpeakerBox.getValue();
+  }
+
+  private Boolean isRightSpeakerSelected() {
+    return rightSpeakerBox == null || rightSpeakerBox.getValue();
+  }
 
   /**
    * @param dialog
@@ -257,28 +445,30 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   @NotNull
   DivWidget getTurns(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
-
-//    turnContainer = rowOne;
     rowOne.getElement().setId("turnContainer");
-
-    //rowOne.setWidth(97 + "%");
-
     rowOne.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
     rowOne.getElement().getStyle().setMarginTop(10, PX);
     rowOne.addStyleName("cardBorderShadow");
-//
-//    rowOne.getElement().getStyle().setPaddingBottom(50, PX);
     rowOne.getElement().getStyle().setMarginBottom(10, PX);
 
     List<String> speakers = dialog.getSpeakers();
+    //logger.info("speakers " + speakers);
 
-    Map<String, List<ClientExercise>> speakerToEx = dialog.groupBySpeaker();
-    String right = speakers.get(1);
-    List<ClientExercise> rightTurns = speakerToEx.get(right);
+//    Map<String, List<ClientExercise>> speakerToEx = dialog.groupBySpeaker();
+//    String middle = speakers.get(1);
+    // List<ClientExercise> middleTurns = speakerToEx.get(middle);
+
+    String left = speakers.get(0);
+    String right = speakers.get(2);
+/*    logger.info("for speaker " + left + " got " + speakerToEx.get(left).size());
+    logger.info("for speaker " + middle + " got " + middleTurns.size());
+    logger.info("for speaker " + right + " got " + speakerToEx.get(right).size());*/
 
     dialog.getExercises().forEach(clientExercise -> {
-      // logger.info("ex " + clientExercise.getID() + " audio " + clientExercise.getAudioAttributes());
-      addTurn(rowOne, rightTurns, clientExercise);
+      COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
+      //    logger.info("ex " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage() + " : " + columnForEx);
+
+      addTurn(rowOne, columnForEx, clientExercise);
     });
 
     markFirstTurn();
@@ -286,21 +476,67 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
     return rowOne;
   }
 
-  private void addTurn(DivWidget rowOne, List<ClientExercise> rightTurns, ClientExercise clientExercise) {
-    boolean isRight = rightTurns != null && rightTurns.contains(clientExercise);
+  private COLUMNS getColumnForEx(String left, String right, ClientExercise clientExercise) {
+    List<ExerciseAttribute> collect = getSpeakerAttributes(clientExercise);
+    if (collect.isEmpty()) {
+      logger.warning("no speaker " + clientExercise);
+      return COLUMNS.UNK;
+    } else {
+      return getColumnForSpeaker(left, right, collect);
+    }
+  }
 
-    T turn = getTurnPanel(clientExercise, isRight);
+  @NotNull
+  private COLUMNS getColumnForSpeaker(String left, String right, List<ExerciseAttribute> collect) {
+    String speaker = getSpeaker(collect);
+    COLUMNS columns;
+    if (speaker.equalsIgnoreCase(left)) {
+      columns = COLUMNS.LEFT;
+    } else if (speaker.equalsIgnoreCase(right)) {
+      columns = COLUMNS.RIGHT;
+    } else {
+      columns = COLUMNS.MIDDLE;
+    }
+    return columns;
+  }
 
-    if (isRight) rightTurnPanels.add(turn);
-    else leftTurnPanels.add(turn);
+  private String getSpeaker(List<ExerciseAttribute> collect) {
+    return collect.get(0).getValue();
+  }
 
-    bothTurns.add(turn);
+  @NotNull
+  private List<ExerciseAttribute> getSpeakerAttributes(ClientExercise clientExercise) {
+    return clientExercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(DialogMetadata.SPEAKER.name())).collect(Collectors.toList());
+  }
+
+
+  /**
+   * @param rowOne
+   * @param columns
+   * @param clientExercise
+   * @see
+   */
+  private void addTurn(DivWidget rowOne, COLUMNS columns, ClientExercise clientExercise) {
+    T turn = getTurnPanel(clientExercise, columns);
+
+    if (columns == COLUMNS.RIGHT) {
+      rightTurnPanels.add(turn);
+      promptTurns.add(turn);
+    } else if (columns == COLUMNS.LEFT) {
+      leftTurnPanels.add(turn);
+      promptTurns.add(turn);
+    } else if (columns == COLUMNS.MIDDLE) {
+      middleTurnPanels.add(turn);
+    }
+
+    allTurns.add(turn);
+
     rowOne.add(turn);
   }
 
   private void markFirstTurn() {
-    if (!bothTurns.isEmpty()) {
-      setCurrentTurn(bothTurns.get(0));
+    if (!allTurns.isEmpty()) {
+      setCurrentTurn(allTurns.get(0));
       //   logger.info("getTurns : markCurrent ");
       markCurrent();
       makeVisible(currentTurn);
@@ -325,34 +561,34 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
 
   private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
     if (iterator.hasNext()) {
-      RefAudioGetter next = iterator.next();
+      // RefAudioGetter next = iterator.next();
       //logger.info("getRefAudio asking next panel...");
 
-      if (false) {
-        logger.info("getRefAudio : skip stale req for panel...");
-      } else {
-        next.getRefAudio(() -> {
-          if (iterator.hasNext()) {
-            //     logger.info("\tgetRefAudio panel complete...");
-            //   final int reqid = next.getReq();
-            if (true) {
-
-              if (Scheduler.get() != null) {
-                Scheduler.get().scheduleDeferred(() -> {
-                  if (true) {
-                    getRefAudio(iterator);
-                  } else {
+//      if (false) {
+//        logger.info("getRefAudio : skip stale req for panel...");
+//      } else {
+      iterator.next().getRefAudio(() -> {
+        if (iterator.hasNext()) {
+          //     logger.info("\tgetRefAudio panel complete...");
+          //   final int reqid = next.getReq();
+          if (true) {
+            if (Scheduler.get() != null) {
+              Scheduler.get().scheduleDeferred(() -> {
+                // if (true) {
+                getRefAudio(iterator);
+                // }
+                //else {
 //              /
-                  }
-                });
-              }
+                // }
+              });
             }
-          } else {
-            //   logger.info("\tgetRefAudio all panels complete...");
           }
-        });
-      }
+        } else {
+          //   logger.info("\tgetRefAudio all panels complete...");
+        }
+      });
     }
+    // }
   }
 
   /**
@@ -361,8 +597,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @return
    */
   @NotNull
-  T getTurnPanel(ClientExercise clientExercise, boolean isRight) {
-    T turn = reallyGetTurnPanel(clientExercise, isRight);
+  T getTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
+    T turn = reallyGetTurnPanel(clientExercise, columns);
     turn.addWidgets(true, false, PhonesChoices.HIDE);
     turn.addPlayListener(this);
     turn.addDomHandler(event -> gotTurnClick(turn), ClickEvent.getType());
@@ -370,17 +606,23 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   @NotNull
-  T reallyGetTurnPanel(ClientExercise clientExercise, boolean isRight) {
-    return (T) new TurnPanel<>(
+  T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
+
+    TurnPanel widgets = new TurnPanel(
         clientExercise,
         controller,
         null,
         alignments,
         this,
-        isRight);
+        columns);
+    if (columns == COLUMNS.MIDDLE) {
+      widgets.addStyleName("inlineFlex");
+      widgets.setWidth("100%");
+    }
+    return (T) widgets;
   }
 
-  boolean gotTurnClick = false;
+  private boolean gotTurnClick = false;
 
   void gotTurnClick(T turn) {
     gotTurnClick = true;
@@ -398,6 +640,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    */
   @NotNull
   DivWidget getControls() {
+
+
     DivWidget rowOne = new DivWidget();
     rowOne.getElement().setId("controls");
     rowOne.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
@@ -478,7 +722,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   void gotBackward() {
     setPlayButtonToPlay();
 
-    List<T> seq = getPromptSeq();
+    List<T> seq = getAllTurns();
 
     int i = seq.indexOf(currentTurn);
     int i1 = i - 1;
@@ -509,7 +753,7 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   void gotForward() {
     setPlayButtonToPlay();
 
-    List<T> seq = getPromptSeq();
+    List<T> seq = getAllTurns();
 
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
@@ -550,26 +794,25 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    */
   void gotPlay() {
     //   logger.info("got click on play ");
-
     if (!setTurnToPromptSide()) {
-      T currentTurn = getCurrentTurn();
-      boolean last = isLast(currentTurn);
-      if (last) logger.info("OK, on last - let's consider going back to start");
-      if (currentTurn != null && !currentTurn.hasCurrentMark()) {
-        markFirstTurn();
-      }
+      ifOnLastJumpBackToFirst();
     }
 
     playCurrentTurn();
   }
 
-  private boolean isLast(T currentTurn) {
-    List<T> seq = getPromptSeq();
-    return seq.indexOf(currentTurn) == seq.size();
+  void ifOnLastJumpBackToFirst() {
+    T currentTurn = getCurrentTurn();
+    boolean last = isLast(currentTurn);
+    if (last) logger.info("OK, on last - let's consider going back to start");
+    if (currentTurn != null && !currentTurn.hasCurrentMark()) {
+      markFirstTurn();
+    }
   }
 
   /**
    * @return true if changed turn to next one
+   * @see #gotPlay
    */
   boolean setTurnToPromptSide() {
     Boolean leftSpeakerSet = isLeftSpeakerSet();
@@ -591,11 +834,12 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
   }
 
   /**
+   * TODO : not sure if this is right?
    * Wrap around if on last turn.
    */
   void setNextTurnForSide() {
     removeMarkCurrent();
-    int i = bothTurns.indexOf(currentTurn); // must be on right
+    int i = allTurns.indexOf(currentTurn);
 
     if (currentTurn == null) {
       logger.warning("setNextTurnForSide no current turn");
@@ -603,20 +847,25 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
       if (DEBUG) logger.info("setNextTurnForSide current turn for ex " + currentTurn.getExID());
     }
 
-    int nextIndex = (i + 1 == bothTurns.size()) ? 0 : i + 1;
+    int nextIndex = (i + 1 == allTurns.size()) ? 0 : i + 1;
 
     if (DEBUG) logger.info("setNextTurnForSide " + i + " next " + nextIndex);
 
-    setCurrentTurn(bothTurns.get(nextIndex));
+    setCurrentTurn(allTurns.get(nextIndex));
+  }
+
+
+  boolean onLastTurn() {
+    return isLast(currentTurn);
+  }
+
+  private boolean isLast(T currentTurn) {
+    List<T> seq = getAllTurns();
+    return seq.indexOf(currentTurn) == seq.size() - 1;
   }
 
   boolean onFirstPromptTurn() {
     return getPromptSeq().indexOf(currentTurn) == 0;
-  }
-
-  boolean onLastTurn() {
-    List<T> seq = bothTurns;
-    return seq.indexOf(currentTurn) == seq.size() - 1;
   }
 
   /**
@@ -625,9 +874,26 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @return
    */
   List<T> getPromptSeq() {
-    boolean leftSpeaker = isLeftSpeakerSet();
-    boolean rightSpeaker = isRightSpeakerSet();
-    return (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : bothTurns;
+    if (isInterpreter) {
+      return promptTurns;
+    } else {
+      boolean leftSpeaker = isLeftSpeakerSet();
+      boolean rightSpeaker = isRightSpeakerSet();
+      List<T> ts = (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : allTurns;
+      // logger.info("getPromptSeq " + ts.size());
+      report(ts);
+      return ts;
+    }
+  }
+
+  List<T> getAllTurns() {
+    return allTurns;
+  }
+
+  private void report(List<T> allTurns) {
+    StringBuilder builder = new StringBuilder();
+    allTurns.forEach(turn -> builder.append(turn.getExID()).append(", "));
+    logger.info("seq " + builder);
   }
 
   /**
@@ -636,18 +902,22 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @return
    */
   List<T> getRespSeq() {
-    boolean leftSpeaker = isLeftSpeakerSet();
-    boolean rightSpeaker = isRightSpeakerSet();
-    return leftSpeaker ? rightTurnPanels : rightSpeaker ? leftTurnPanels : null;
+    if (isInterpreter) return middleTurnPanels;
+    else {
+      boolean leftSpeaker = isLeftSpeakerSet();
+      boolean rightSpeaker = isRightSpeakerSet();
+      return leftSpeaker ? rightTurnPanels : rightSpeaker ? leftTurnPanels : null;
+    }
   }
 
   Boolean isLeftSpeakerSet() {
-    return leftSpeakerBox.getValue();
+    return isLeftSpeakerSelected();
   }
 
   Boolean isRightSpeakerSet() {
-    return rightSpeakerBox.getValue();
+    return isRightSpeakerSelected();
   }
+
 
   /**
    * @see #gotTurnClick
@@ -698,7 +968,8 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
       setPlayButtonToPlay();
       removeMarkCurrent();
       currentTurnPlayEnded(false);
-
+    } else {
+      logger.info("playStopped - no current turn.");
     }
   }
 
@@ -707,12 +978,17 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @see #playStopped
    */
   void currentTurnPlayEnded(boolean wasRecording) {
-    if (DEBUG || true)
+    if (DEBUG) {
       logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID() + " gotTurnClick " + gotTurnClick);
+    }
+
     if (gotTurnClick) {
       gotTurnClick = false;
     } else {
       T next = getNext();
+      if (DEBUG && next != null) {
+        logger.info("next turn " + next.getExID());
+      }
       makeNextVisible();
 
       if (next == null) {
@@ -775,19 +1051,22 @@ public class ListenViewHelper<T extends TurnPanel<ClientExercise>>
    * @return null if on last turn
    */
   private T getNext() {
-    List<T> seq = getPromptSeq();
+    List<T> seq = getAllTurns();
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
+    if (DEBUG) logger.info("getNext current " + i + " next " + i1);
 
     if (i1 > seq.size() - 1) {
       return null;
     } else {
-      return seq.get(i1);
+      T widgets = seq.get(i1);
+      if (DEBUG) logger.info("getNext current at " + i1 + " will be ex #" + widgets.getExID());
+      return widgets;
     }
   }
 
   private T getPrev() {
-    List<T> seq = getPromptSeq();
+    List<T> seq = getAllTurns();
     int i = seq.indexOf(currentTurn);
     int i1 = i - 1;
 

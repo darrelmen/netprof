@@ -42,6 +42,7 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
@@ -51,6 +52,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Does fancy flashing record bulb while recording.
@@ -212,7 +214,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     }
     // add slow speed recording widget
 
-    if (!exercise.isContext()) {
+    if (!exercise.isContext() && !hasLanguageAttr(exercise)) {
       AudioType slow = normalRecord ? AudioType.SLOW : AudioType.CONTEXT_SLOW;
 
 //      logger.info("getAnswerWidget audio type " + slow + " user " + controller.getUser() +
@@ -223,6 +225,15 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     }
 
     return vp;
+  }
+
+  private boolean hasLanguageAttr(T ex) {
+    return !ex.getAttributes()
+        .stream()
+        .filter(attr ->
+            attr.getProperty().equalsIgnoreCase(DialogMetadata.LANGUAGE.name())
+        )
+        .collect(Collectors.toSet()).isEmpty();
   }
 
   private boolean hasContext(T exercise) {
@@ -249,8 +260,16 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     audioPanels.add(fast);
     vp.add(fast);
 
-    if (fast.isAudioPathSet()) recordCompleted(fast);
     addAnswerWidget(index, fast);
+
+    if (fast.isAudioPathSet()) {
+//      logger.info("found audio path for " +exercise.getRefAudio());
+      recordCompleted(fast);
+    }
+    else {
+      logger.info("no audio path for " +exercise.getID() + " "+exercise.getEnglish() + " " + exercise.getForeignLanguage());
+    }
+
     return fast;
   }
 
@@ -276,11 +295,12 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
    */
   @Override
   public void postAnswers(ExerciseController controller, HasID completedExercise) {
-    showRecordedState(completedExercise);
+    // logger.info("postAnswers " + completedExercise.getID());
+    showRecordedState();
     exerciseList.loadNextExercise(completedExercise);
   }
 
-  protected void showRecordedState(HasID completedExercise) {
+  protected void showRecordedState() {
     LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
     exerciseList.redraw();
   }

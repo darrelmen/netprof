@@ -24,7 +24,7 @@ public interface IHighlightSegment {
   boolean isHighlighted();
 
   void setObscurable();
-  void obscureText();
+  boolean obscureText();
   void restoreText();
 
   int getLength();

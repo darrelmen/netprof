@@ -200,7 +200,7 @@ public class DominoExerciseDAO {
       return ex.addUnitToValue(chapterName, displayValue);
     } else {
       if (!displayValue.trim().isEmpty()) {
-//            logger.info("addAttribute : for " + ex.getID() + " adding " + name + " = " + displayValue);
+//            logger.info("findOrAddAttribute : for " + ex.getID() + " adding " + name + " = " + displayValue);
         ex.addAttribute(new ExerciseAttribute(getNormName(name), displayValue));
         return true;
       } else {

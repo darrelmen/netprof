@@ -16,6 +16,7 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -54,6 +55,7 @@ public class JsonScoring {
   private static final float MIN_HYDRA_ALIGN = 0.3F;
   private static final String BAD_EXERCISE_ID = "bad_exercise_id";
   private static final String DYNAMIC_RANGE = "dynamicRange";
+  public static final String PRETEST = "pretest";
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
 
@@ -176,16 +178,22 @@ public class JsonScoring {
         if (path.isEmpty()) logger.warn("no path?");
         jsonForScore.addProperty("path", path);
 
-        if (jsonForScore.get("pretest") == null) {
-          jsonForScore.add("pretest", new JsonObject());
+        if (jsonForScore.get(PRETEST) == null) {
+          jsonForScore.add(PRETEST, new JsonObject());
         }
+
         long timestamp = answer.getTimestamp();
-        logger.info("getJsonObject timestamp " + timestamp + " " + new Date(timestamp));
+        //    logger.info("getJsonObject timestamp " + timestamp + " " + new Date(timestamp));
         jsonForScore.addProperty("timestamp", timestamp);
       } else {
         logger.warn("not adding stream info");
       }
+
       jsonForScore.addProperty("resultID", answer.getResultID());
+    } else if (answer != null) {
+      logger.warn("getJsonObject - validity is " + answer.getValidity() +
+          "\n\tduration " + answer.getDurationInMillis() +
+          "\n\tfor      " + answer);
     }
 
     addValidity(exerciseID, jsonForScore,
@@ -367,19 +375,23 @@ public class JsonScoring {
       Exercise exercise1 = (Exercise) exercise;
       exercise1.setForeignLanguage(foreignLanguage);
       exercise1.setID(exerciseID);
-
     }
+
+    Language language = getLanguage(projectID);
+
     AudioContext audioContext =
-        new AudioContext(reqid, user, projectID, getLanguage(projectID), exerciseID,
+        new AudioContext(reqid, user, projectID, language, exerciseID,
             0, options.shouldDoDecoding() ? AudioType.PRACTICE : AudioType.LEARN);
+
     //   logger.info("getAnswer  for " + exerciseID + " for " + user + " and file " + wavPath);
+
     AudioAnswer answer = getAudioFileHelper(projectID)
         .getAnswer(exercise,
             audioContext,
             wavPath, file, deviceType, device, score,
             options, pretestScore);
 
-    ensureMP3Later(answer.getPath(), user, foreignLanguage, exercise.getEnglish(), getLanguage(projectID));
+    ensureMP3Later(answer.getPath(), user, foreignLanguage, exercise.getEnglish(), language.getLanguage());
 
     return answer;
   }
@@ -434,8 +446,8 @@ public class JsonScoring {
     jsonForScore.addProperty(REQID, reqID);
   }
 
-  private String getLanguage(int projectid) {
-    return getProject(projectid).getLanguage();
+  private Language getLanguage(int projectid) {
+    return getProject(projectid).getLanguageEnum();
   }
 
   private Project getProject(int projid) {

@@ -53,6 +53,11 @@ public class ExerciseAttribute extends Pair implements Comparable<ExerciseAttrib
   public ExerciseAttribute() {
   }
 
+  /**
+   * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#addAttribute
+   * @param status
+   * @param value
+   */
   public ExerciseAttribute(String status, String value) {
     super(status, value);
   }

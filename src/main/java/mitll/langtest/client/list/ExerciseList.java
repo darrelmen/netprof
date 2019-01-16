@@ -44,7 +44,6 @@ import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -59,8 +58,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.custom.content.NPFHelper.COMPLETE;
-import static mitll.langtest.client.custom.content.NPFHelper.LIST_COMPLETE;
 import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
 
 /**
@@ -76,6 +73,8 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
 public abstract class ExerciseList<T extends CommonShell, U extends HasID> extends DivWidget
     implements ListInterface<T, U>, ProvidesResize {
   private final Logger logger = Logger.getLogger("ExerciseList");
+  public static final String LIST_COMPLETE = "List complete!";
+  public static final String COMPLETE = "Complete";
 
   private static final boolean DEBUG_STALE = true;
   private static final boolean DEBUG = false;
@@ -345,16 +344,21 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       } else {
         lastSuccessfulRequest = request;
         if (DEBUG) logger.info("onSuccess last req now " + lastSuccessfulRequest);
-        checkForEmptyExerciseList(result.getExercises().isEmpty());
-        int idToUse = exerciseID == -1 ? result.getFirstExercise() == null ? -1 : result.getFirstExercise().getID() : exerciseID;
-
         setScores(result);
-
-        // TODO : check the current list of exercise ids - if it's not different than the result set, don't blink the UI.
-
-        rememberAndLoadFirst(result.getExercises(), selectionID, searchIfAny, idToUse);
+        gotExercisesResponse(exerciseID, selectionID, searchIfAny, result.getExercises(), result.getFirstExercise());
       }
     }
+  }
+
+  protected void gotExercisesResponse(int exerciseID, String selectionID, String searchIfAny,
+                                    List<T> exercises, ClientExercise firstExercise) {
+    checkForEmptyExerciseList(exercises.isEmpty());
+    int idToUse = exerciseID == -1 ? firstExercise == null ? -1 : firstExercise.getID() : exerciseID;
+
+
+    // TODO : check the current list of exercise ids - if it's not different than the result set, don't blink the UI.
+
+    rememberAndLoadFirst(exercises, selectionID, searchIfAny, idToUse);
   }
 
   /**
@@ -457,7 +461,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   /**
    * @see #reloadWith
    */
-  private void checkForEmptyExerciseList(boolean isEmpty) {
+  protected void checkForEmptyExerciseList(boolean isEmpty) {
     // if (DEBUG) logger.info("ExerciseList.gotExercises result = " + result);
     if (isEmpty) {
       gotEmptyExerciseList();

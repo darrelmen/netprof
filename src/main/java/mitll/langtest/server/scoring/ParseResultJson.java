@@ -157,7 +157,7 @@ public class ParseResultJson {
       // logger.warn("json is " + json);
       return Collections.emptyMap();
     } else {
-    //  Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = parseJsonString(json, false, null);
+      //  Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent = parseJsonString(json, false, null);
 
       Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap = readFromJSON(json);
       return toSlim(netPronImageTypeListMap);
@@ -165,9 +165,9 @@ public class ParseResultJson {
   }
 
   /**
+   * @return
    * @seex #slimReadFromJSON(String)
    * @paramx typeToEvent
-   * @return
    */
 /*  private Map<NetPronImageType, List<SlimSegment>> slimGetNetPronImageTypeToEndTimes(
       Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent) {
@@ -184,19 +184,18 @@ public class ParseResultJson {
 
     return typeToEndTimes;
   }*/
-
-  private  Map<NetPronImageType, List<SlimSegment>> toSlim(Map<NetPronImageType, List<TranscriptSegment>> fullTranscript) {
+  private Map<NetPronImageType, List<SlimSegment>> toSlim(Map<NetPronImageType, List<TranscriptSegment>> fullTranscript) {
     Map<NetPronImageType, List<SlimSegment>> typeToEndTimes = new HashMap<>();
 
-   for (Map.Entry<NetPronImageType, List<TranscriptSegment>> typeToEvents: fullTranscript.entrySet()) {
-     NetPronImageType key = typeToEvents.getKey();
+    for (Map.Entry<NetPronImageType, List<TranscriptSegment>> typeToEvents : fullTranscript.entrySet()) {
+      NetPronImageType key = typeToEvents.getKey();
 
-     List<TranscriptSegment> segments = typeToEvents.getValue();
-     List<SlimSegment> value = new ArrayList<>(segments.size());
-     typeToEndTimes.put(key, value);
-     segments.forEach(segment -> value.add(segment.toSlim()));
-   }
-   return typeToEndTimes;
+      List<TranscriptSegment> segments = typeToEvents.getValue();
+      List<SlimSegment> value = new ArrayList<>(segments.size());
+      typeToEndTimes.put(key, value);
+      segments.forEach(segment -> value.add(segment.toSlim()));
+    }
+    return typeToEndTimes;
   }
 
   /**
@@ -243,7 +242,7 @@ public class ParseResultJson {
         for (int i = 0; i < size; i++) {
           JsonObject word = words.get(i).getAsJsonObject();
           List<TranscriptEvent> wsubs = new ArrayList<>();
-          String wordToken = objectToEvent(wordEvents, w1, word, false, useKaldi, wsubs);
+          String wordToken = objectToEvent(wordEvents, w1, word, false, useKaldi, wsubs, null);
           allwsubs.addAll(wsubs);
 //          logger.info("\treadFromJSON wordToken " + wordToken);
 //          logger.info("\treadFromJSON wsubs     " + wsubs);
@@ -302,7 +301,6 @@ public class ParseResultJson {
   }
 
   /**
-   * @see #readFromJSON(JsonObject, String, String, boolean, Map, boolean)
    * @param phoneEvents
    * @param phones
    * @param phoneToken
@@ -310,6 +308,7 @@ public class ParseResultJson {
    * @param subs
    * @param useKaldi
    * @return
+   * @see #readFromJSON(JsonObject, String, String, boolean, Map, boolean)
    */
   private List<String> getPhones(SortedMap<Float, TranscriptEvent> phoneEvents,
                                  JsonArray phones,
@@ -321,7 +320,6 @@ public class ParseResultJson {
   }
 
   /**
-   * @see #getPhones
    * @param phoneEvents
    * @param phones
    * @param tokenKey
@@ -329,6 +327,7 @@ public class ParseResultJson {
    * @param subs
    * @param useKaldi
    * @return
+   * @see #getPhones
    */
   private List<String> getEventsFromJson(SortedMap<Float, TranscriptEvent> phoneEvents,
                                          JsonArray phones,
@@ -337,9 +336,13 @@ public class ParseResultJson {
                                          List<TranscriptEvent> subs,
                                          boolean useKaldi) {
     List<String> phonesForWord = new ArrayList<>();
-    for (int j = 0; j < phones.size(); j++) {
+    int size = phones.size();
+    for (int j = 0; j < size; j++) {
       JsonObject phone = phones.get(j).getAsJsonObject();
-      String phoneToken = objectToEvent(phoneEvents, tokenKey, phone, usePhone, useKaldi, subs);
+      boolean notOnLast = j < size - 1;
+      String nextEvent = notOnLast ? getToken(tokenKey, phones.get(j + 1).getAsJsonObject()) : null;
+
+      String phoneToken = objectToEvent(phoneEvents, tokenKey, phone, usePhone, useKaldi, subs, nextEvent);
       phonesForWord.add(phoneToken);
     }
     return phonesForWord;
@@ -350,9 +353,9 @@ public class ParseResultJson {
                                JsonObject phone,
                                boolean usePhone,
                                boolean useKaldi,
-                               List<TranscriptEvent> subs) {
-    JsonElement jsonElement = phone.get(tokenKey);
-    String token = (jsonElement.isJsonPrimitive()) ? jsonElement.getAsString() : "word";
+                               List<TranscriptEvent> subs,
+                               String nextEvent) {
+    String token = getToken(tokenKey, phone);
 
     if (token.equalsIgnoreCase("<eps>")) token = SIL;
 
@@ -368,12 +371,17 @@ public class ParseResultJson {
     }
 
     if (usePhone) {
-      token = props.getDisplayPhoneme(languageEnum, token);
+      token = props.getDisplayPhoneme(languageEnum, token, null, nextEvent);
     }
 
     TranscriptEvent value = new TranscriptEvent((float) pstart, (float) pend, token, (float) pscore);
     phoneEvents.put((float) pstart, value);
     subs.add(value);
     return token;
+  }
+
+  private String getToken(String tokenKey, JsonObject phone) {
+    JsonElement jsonElement = phone.get(tokenKey);
+    return (jsonElement.isJsonPrimitive()) ? jsonElement.getAsString() : "word";
   }
 }

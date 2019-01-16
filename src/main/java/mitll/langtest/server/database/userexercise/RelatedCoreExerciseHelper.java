@@ -66,6 +66,11 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
   }
 
   @Override
+  public int deleteRelatedForDialog(int dialog) {
+    return 0;
+  }
+
+  @Override
   public Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(int projid) {
     return daoWrapper.byProjectForDialog(projid);
   }

@@ -1,11 +1,12 @@
-package mitll.langtest.client.banner;
+package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.banner.IBanner;
+import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
-import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -17,11 +18,9 @@ import java.util.Arrays;
 /**
  * Created by go22670 on 4/5/17.
  */
-class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
+public class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
   //  private final Logger logger = Logger.getLogger("LearnHelper");
-
-  //private static final String DIALOG_PRACTICE_STEPS = "Dialog Practice Steps";
-  private static final String WELCOME_TO_DIALOG_PRACTICE = "Welcome to Dialog Practice!";
+  private static final String WELCOME_TO_DIALOG_PRACTICE = "Welcome to Interpreter Practice!";
   private static final String CHOOSE_A_DIALOG_AND_THEN = "Choose a dialog and then:";
   private static final String STUDY = "Study";
   private static final String LISTEN = "Listen";
@@ -32,14 +31,13 @@ class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  DialogViewHelper(ExerciseController controller) {
+  public DialogViewHelper(ExerciseController controller) {
     super(controller);
   }
 
   @Override
   public void showContent(Panel listContent, INavigation.VIEWS views) {
     super.showContent(listContent, views);
-
     doIntroMaybe();
   }
 
@@ -50,10 +48,10 @@ class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
 
       new ModalInfoDialog(WELCOME_TO_DIALOG_PRACTICE, Arrays.asList(
           getLarger(CHOOSE_A_DIALOG_AND_THEN),
-          getLarger("* " + getLarge(STUDY) + " the new vocabulary and turns by recording yourself speaking each item."),
-          getLarger("* " + getLarge(LISTEN) + " to the dialog."),
-          getLarger("* " + getLarge(REHEARSE) + " by speaking after hearing each prompt."),
-          getLarger("* " + getLarge(PERFORM) + " by speaking and filling in the the obscured vocabulary.")
+          getLarger("* " + getLarge(STUDY) + " the sentences in each dialog."),
+          getLarger("* " + getLarge(LISTEN) + " to the whole dialog."),
+          getLarger("* " + getLarge(REHEARSE) + " speaking in your role as interpreter."),
+          getLarger("* " + getLarge(PERFORM) + " as an interpreter by listening and responding with the scripted phrases.")
       ), 240, false);
     }
   }

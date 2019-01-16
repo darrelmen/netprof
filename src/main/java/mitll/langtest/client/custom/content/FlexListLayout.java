@@ -158,7 +158,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends HasID> imp
    * @param topRow
    * @see #doInternalLayout
    */
-  protected void styleTopRow(Panel twoRows, Panel topRow) {
+  private void styleTopRow(Panel twoRows, Panel topRow) {
     topRow.addStyleName("floatLeft");
     topRow.addStyleName("leftBlock");
     topRow.addStyleName("rightFiveMargin");

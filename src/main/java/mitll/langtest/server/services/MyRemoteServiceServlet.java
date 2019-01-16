@@ -454,7 +454,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return getSectionHelper(getProjectIDFromUser());
   }
 
-  protected ISection<CommonExercise> getSectionHelper(int projectID) {
+  private ISection<CommonExercise> getSectionHelper(int projectID) {
     return db.getSectionHelper(projectID);
   }
 
@@ -462,7 +462,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return getDialogSectionHelper(getProjectIDFromUser());
   }
 
-  ISection<IDialog> getDialogSectionHelper(int projectID) {
+  private ISection<IDialog> getDialogSectionHelper(int projectID) {
     return db.getDialogSectionHelper(projectID);
   }
 
@@ -572,7 +572,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   public IDialog getDialog(int id) throws DominoSessionException {
     IDialog iDialog = getOneDialog(id);
 
-    logger.info("getDialog get dialog " + id + "\n\treturns " + iDialog);
+  //  logger.info("getDialog get dialog " + id + "\n\treturns " + iDialog);
 
     if (iDialog != null) {
       int projid = iDialog.getProjid();
@@ -583,6 +583,10 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
         iDialog.getExercises().forEach(clientExercise ->
             db.getAudioDAO().attachAudioToExercise(clientExercise, language, new HashMap<>())
         );
+
+    /*    iDialog.getExercises().forEach(exercise ->
+            logger.info("lang for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " " + language)
+        );*/
       }
 
       new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(projid, project, iDialog.getExercises());
@@ -593,8 +597,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
 
   private IDialog getOneDialog(int id) throws DominoSessionException {
-    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    return getOneDialog(userIDFromSessionOrDB, id);
+    return getOneDialog(getUserIDFromSessionOrDB(), id);
   }
 
   /**
@@ -607,7 +610,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @return the first dialog if the id is -1 or bogus...
    */
   @Nullable
-  protected IDialog getOneDialog(int userIDFromSessionOrDB, int dialogID) {
+  private IDialog getOneDialog(int userIDFromSessionOrDB, int dialogID) {
     List<IDialog> iDialogs = getDialogs(userIDFromSessionOrDB);
     if (dialogID == -1) {
       return iDialogs.isEmpty() ? null : iDialogs.get(0);
@@ -621,7 +624,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return getDialogsForProject(getProjectIDFromUser(userIDFromSessionOrDB));
   }
 
-  protected List<IDialog> getDialogsForProject(int projectIDFromUser) {
+  List<IDialog> getDialogsForProject(int projectIDFromUser) {
     List<IDialog> dialogList = new ArrayList<>();
     {
       if (projectIDFromUser != -1) {

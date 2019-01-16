@@ -2,7 +2,7 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.IListenView;
+import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
@@ -12,7 +12,6 @@ import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.SimpleAudioAnswer;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -32,7 +31,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  */
 public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends NoFeedbackRecordAudioPanel<T>
     implements SessionManager {
-  private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+//  private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
 
   private static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
@@ -51,6 +50,9 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
   private ScoreFeedbackDiv scoreFeedbackDiv;
   private final boolean addPlayer;
   private Widget scoreHistory;
+  /**
+   * @see #getDialogSessionID
+   */
   private final IListenView listenView;
 
   /**
@@ -59,6 +61,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
    * @param listContainer
    * @param addPlayer
    * @param listenView
+   * @param sessionManager
    * @see TwoColumnExercisePanel#getItemContent
    * @see TwoColumnExercisePanel#addContextFields
    */
@@ -66,8 +69,9 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
                          T exercise,
                          ListInterface<?, ?> listContainer,
                          boolean addPlayer,
-                         IListenView listenView) {
-    super(exercise, controller, () -> null);
+                         IListenView listenView,
+                         SessionManager sessionManager) {
+    super(exercise, controller, sessionManager);
     this.listenView = listenView;
     this.listContainer = listContainer;
     this.addPlayer = addPlayer;

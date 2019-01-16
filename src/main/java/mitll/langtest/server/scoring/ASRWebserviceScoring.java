@@ -66,6 +66,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES;
@@ -97,7 +98,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final String SIL = "sil";
 
   static final int MAX_FROM_ANY_TOKEN = 10;
+
   private static final boolean DEBUG = false;
+
   private static final String WAV1 = ".wav";
   private static final String WAV = WAV1;
   private static final String SCORE = "score";
@@ -152,7 +155,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     this.project = project;
 
     int port = getWebservicePort();
-    phoneToDisplay = properties.getPhoneToDisplay(languageEnum);
+    phoneToDisplay = Collections.emptyMap();//properties.getPhoneToDisplay(languageEnum);
 //      logger.info("(" + language + ") phone->display " + phoneToDisplay);
 
     this.pronunciationLookup = new PronunciationLookup(htkDictionary, getLTS(), project);
@@ -374,7 +377,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       Path tempDir = null;
       String rawAudioPath = getUniqueRawAudioPath(filePath);
       try {
-        tempDir = Files.createTempDirectory("scoreRepeatExercise_" + language);
+        tempDir = Files.createTempDirectory("scoreRepeatExercise_" + languageEnum.getLanguage());
 
         File tempFile = tempDir.toFile();
 
@@ -640,7 +643,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String absolutePath = rawFile.getAbsolutePath();
     if (rawFile.exists()) {
       if (rawFile.delete()) {
-        logger.info("cleanUpRawFile : deleted " + absolutePath);
+       // logger.info("cleanUpRawFile : deleted " + absolutePath);
       } else {
         String mes = "cleanUpRawFile : huh? couldn't delete raw audio rawFile " + absolutePath;
         logger.error(mes);
@@ -751,8 +754,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent =
           eventAndFileInfo == null ? Collections.emptyMap() : eventAndFileInfo.getTypeToEvent();
 
-      Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes =
-          generator.getTypeToSegments(typeToEvent, languageEnum);
+      Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = generator.getTypeToSegments(typeToEvent, languageEnum);
 
 /*
       logger.info("getPretestScore sTypeToImage" +
@@ -898,7 +900,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                               int end) {
     // reference trans
     String cleaned = getTranscriptToPost(transcript, decode);
-    boolean removeAllPunct = !language.equalsIgnoreCase("french");
+    boolean removeAllPunct = languageEnum != Language.FRENCH;
 
     List<WordAndProns> possibleProns = new ArrayList<>();
 
@@ -961,7 +963,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       String[] split = results[0].split(SEMI);
       Scores scores = new Scores(split);
 
-      logger.info("runHydra " + language +
+      logger.info("runHydra " + languageEnum +
           "\n\ttook      " + timeToRunHydra + " millis to run " + (decode ? "decode" : "align") +
           "\n\ton        " + audioPath +
           "\n\tscore     " + split[0] /*+
@@ -989,12 +991,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String cleaned = getLCTranscript(transcript);
 
     if (isAsianLanguage) {
-      cleaned = (decode ? UNKNOWN_MODEL + " " : "") + getSegmented(transcript); // segmentation method will filter out the UNK model
+      cleaned = (decode ? UNKNOWN_MODEL + " " : "") + getSegmented(transcript).trim(); // segmentation method will filter out the UNK model
 
-      logger.info("runHydra now for asian language (" + language + "): " +
-          "\n\tdecode     " + decode +
-          "\n\ttranscript " + transcript +
-          "\n\tcleaned    " + cleaned
+      if (DEBUG) logger.info("getTranscriptToPost for asian language (" + languageEnum + "): " +
+          (decode ? "\n\tdecode     " + decode : "") +
+          "\n\ttranscript '" + transcript + "'" +
+          "\n\tcleaned    '" + cleaned +"'"
       );
     }
 /*    else {
@@ -1051,6 +1053,19 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   @Override
   public TransNormDict getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns) {
     return pronunciationLookup.createHydraDict(cleaned, transliteration, possibleProns);
+  }
+
+  public List<String> getTokens(String transcript, String transliteration) {
+   // logger.info("getTokens for " +transcript);
+    String cleaned = getTranscriptToPost(transcript, false);
+
+    List<WordAndProns> possibleProns = new ArrayList<>();
+
+    // generate dictionary
+    getHydraDict(cleaned, transliteration, possibleProns);
+    List<String> collect = possibleProns.stream().map(WordAndProns::getWord).collect(Collectors.toList());
+   // logger.info("getTokens for " +transcript + " = " +collect);
+    return collect;
   }
 
   /**
@@ -1170,7 +1185,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         if (!key.equalsIgnoreCase(SIL)) {
           Float value = phoneScorePair.getValue();
           String s = phoneToDisplay.get(key);
-          if (s != null) logger.info(key + " = " + s);
+
+          if (s != null) logger.info("getTokenToScore " + key + " = " + s);
+
           s = s == null ? key : s;
           //   logger.info("getTokenToScore adding '" + key + "' : " + value);
           phoneToScore.put(s, Math.min(1.0f, value));
@@ -1189,6 +1206,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return pronunciationLookup;
   }
 
+  /**
+   * @param netPronImageTypeListMap
+   * @return
+   * @see #isMatch
+   */
   private List<WordAndProns> getRecoPhones(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeListMap) {
     List<TranscriptSegment> words = netPronImageTypeListMap.get(NetPronImageType.WORD_TRANSCRIPT);
     List<TranscriptSegment> phones = netPronImageTypeListMap.get(NetPronImageType.PHONE_TRANSCRIPT);

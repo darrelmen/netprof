@@ -30,21 +30,23 @@
  *
  */
 
-package mitll.langtest.client.custom;
+package mitll.langtest.client.qc;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
+import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
+import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
-import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
 
-import static mitll.langtest.client.custom.INavigation.VIEWS.QC_ENTRIES;
-import static mitll.langtest.client.custom.INavigation.VIEWS.QC_SENTENCES;
+import static mitll.langtest.client.custom.INavigation.VIEWS.FIX_SENTENCES;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -52,9 +54,8 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.QC_SENTENCES;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/30/16.
  */
-public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise> {
-//  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
-  private final boolean forSentences;
+public class FixNPFHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise> {
+  private final INavigation.VIEWS views;
 
   /**
    * @param controller
@@ -62,9 +63,11 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise>
    * @see mitll.langtest.client.banner.NewContentChooser#showView(INavigation.VIEWS, boolean, boolean)
    * @see
    */
-  public MarkDefectsChapterNPFHelper(ExerciseController controller, boolean forSentences) {
+  public FixNPFHelper(ExerciseController controller, boolean forSentences, INavigation.VIEWS views) {
     super(controller);
-    this.forSentences = forSentences;
+    //  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
+  //  boolean forSentences1 = forSentences;
+    this.views = views;
   }
 
   /**
@@ -92,8 +95,8 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise>
                                                                        DivWidget listHeader,
                                                                        DivWidget footer) {
 
-        return new DefectsExerciseList<T>(controller,
-            topRow, currentExercisePanel, instanceName, listHeader, instanceName == INavigation.VIEWS.QC_SENTENCES);
+        return new FixExerciseList<>(controller,
+            topRow, currentExercisePanel, instanceName, listHeader, instanceName == FIX_SENTENCES);
       }
     };
   }
@@ -103,7 +106,15 @@ public class MarkDefectsChapterNPFHelper<T extends CommonShell & ScoredExercise>
     return new ExercisePanelFactory<T, ClientExercise>(controller, exerciseList) {
       @Override
       public Panel getExercisePanel(ClientExercise e) {
-        return new QCNPFExercise<>(e, controller, outerExerciseList, forSentences ? QC_SENTENCES : QC_ENTRIES);
+        ReviewEditableExercise<T, ClientExercise> reviewEditableExercise = new ReviewEditableExercise<>(
+            controller,
+            e,
+            -1,
+            outerExerciseList,
+            views);
+        Panel widgets = reviewEditableExercise.addFields(outerExerciseList, new SimplePanel());
+        reviewEditableExercise.setFields(e);
+        return widgets;
       }
     };
   }

@@ -56,7 +56,13 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   //private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
 
   private static final String RECORD_BUTTON = "RecordButton";
+  /**
+   *
+   */
   private static final String ANIMATED_PROGRESS_GIF = "animated_progress.gif";
+  /**
+   * @see #stopRecording(long, boolean)
+   */
   private static final String WAIT_URL = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS_GIF;
   private final RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;

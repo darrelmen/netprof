@@ -32,18 +32,24 @@
 
 package mitll.langtest.server.database.postgres;
 
+import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.project.DialogPopulate;
+import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.Language;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class DialogTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(DialogTest.class);
@@ -56,40 +62,137 @@ public class DialogTest extends BaseTest {
   private static final String ANY = "Any";
   private static final String CHAPTER = "Chapter";
   public static final String U5 = "" + 5;
-  public static final String UNIT = "Unit";
+  public static final String UNIT1 = "Unit";
+  public static final String UNIT = UNIT1;
   public static final String C17 = "" + 17;
   public static final String PAGE = "page";
   public static final String KOREAN = "Korean";
 
   @Test
   public void testDict() {
-    DatabaseImpl andPopulate = getDatabase().setInstallPath("");
+    String korean = KOREAN;
+    testDialogPopulate(korean);
+  }
 
-    Project project = andPopulate.getProjectByName(KOREAN);
+  @Test
+  public void testInterpreter() {
+    testDialogPopulate("Chinese");
+  }
 
+  @Test
+  public void testInterpreterStored() {
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = andPopulate.getProject(12);
+    report(andPopulate, project);
+  }
+
+  @Test
+  public void testInterpreterRecord() {
+    DatabaseImpl andPopulate = getDatabase();
+    int projectid = 12;
+    Project project = andPopulate.getProject(projectid);
+
+//    FilterRequest request = new FilterRequest();
+//    request.setRecordRequest(true);
+
+    FilterRequest request = new FilterRequest().setRecordRequest(true);
+    project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
+
+    FilterResponse typeToValues = andPopulate.getFilterResponseHelper().getTypeToValues(request, projectid, 6);
+
+    logger.info("typeToValues " + typeToValues);
+
+    ExerciseListRequest request1 = new ExerciseListRequest(1, 6);
+    request1.setOnlyUnrecordedByMe(true);
+    HashMap<String, Collection<String>> typeToSelection = new HashMap<>();
+    typeToSelection.put(UNIT1, Collections.singleton("1"));
+    typeToSelection.put(DialogMetadata.LANGUAGE.name(), Collections.singleton(Language.ENGLISH.name()));
+    request1.setTypeToSelection(typeToSelection);
+
+    {
+      List<CommonExercise> exercisesForSelectionState =
+          andPopulate.getFilterResponseHelper().getExercisesForSelectionState(request1, projectid);
+
+      exercisesForSelectionState.forEach(ex -> logger.info("ENGLISH got " + ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage()));
+    }
+
+    typeToSelection.put(DialogMetadata.LANGUAGE.name(), Collections.singleton(Language.MANDARIN.name()));
+
+    {
+      List<CommonExercise> exercisesForSelectionState =
+          andPopulate.getFilterResponseHelper().getExercisesForSelectionState(request1, projectid);
+
+      exercisesForSelectionState.forEach(ex -> logger.info("CHINESE got " + ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage() + " " + ex.getTokens()));
+    }
+    typeToSelection.remove(UNIT1);
+
+    {
+      List<CommonExercise> exercisesForSelectionState =
+          andPopulate.getFilterResponseHelper().getExercisesForSelectionState(request1, projectid);
+
+      exercisesForSelectionState.forEach(ex -> logger.info("CHINESE got " + ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage() + " " + ex.getTokens()));
+    }
+    //  report(andPopulate, project);
+  }
+
+  private void testDialogPopulate(String korean) {
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = andPopulate.getProject(12);
+//    Project project = andPopulate.getProjectByName(korean);
+
+    if (!new DialogPopulate(andPopulate, getPathHelper(andPopulate)).populateDatabase(project)) {
+      logger.info("testDialogPopulate project " + project + " already has dialog data.");
+    }
+
+    report(andPopulate, project);
+  }
+
+  private void report(DatabaseImpl andPopulate, Project project) {
     List<IDialog> dialogs = andPopulate.getDialogDAO().getDialogs(project.getID());
     dialogs.forEach(iDialog -> {
       logger.info("dialog " + iDialog);
 
       logger.info("sp    " + iDialog.getSpeakers());
       logger.info("attr  " + iDialog.getAttributes());
-     // logger.info("by sp " + iDialog.groupBySpeaker());
-      logger.info("core  " + iDialog.getCoreVocabulary().size());
+      // logger.info("by sp " + iDialog.groupBySpeaker());
+   //   logger.info("core  " + iDialog.getCoreVocabulary().size());
       iDialog.getCoreVocabulary().forEach(clientExercise -> {
-        String pronunciationsFromDictOrLTS = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
-
-        logger.info("core " + clientExercise.getForeignLanguage() + " -> " + pronunciationsFromDictOrLTS);
+        List<String> tokens = project.getAudioFileHelper().getASR().getTokens(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
+//        String pronunciationsFromDictOrLTS = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
+        logger.info("core " + clientExercise.getForeignLanguage() + " -> " + tokens);
       });
-      logger.info("\n\n\n");
+     // logger.info("\n\n\n");
 
 //      iDialog.getExercises().forEach(clientExercise -> clientExercise.getAttributes().forEach(exerciseAttribute -> logger.info("\t" + exerciseAttribute)));
       iDialog.getExercises().forEach(clientExercise -> {
-        String pronunciationsFromDictOrLTS = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
+        List<ExerciseAttribute> collect = clientExercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(DialogMetadata.LANGUAGE.name())).collect(Collectors.toList());
+        if (!collect.isEmpty()) {
+          boolean isEnglish = collect.get(0).getValue().equalsIgnoreCase(Language.ENGLISH.name());
+          if (!isEnglish) {
+//            String pronunciationsFromDictOrLTS = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
+//            logger.info(clientExercise.getForeignLanguage() + " -> " + pronunciationsFromDictOrLTS);
 
-        logger.info(clientExercise.getForeignLanguage() + " -> " + pronunciationsFromDictOrLTS);
+           // List<String> tokens = project.getAudioFileHelper().getASR().getTokens(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
+
+            List<String> tokens = clientExercise.getTokens();
+            if (tokens == null) {
+              logger.error("ex #"+ clientExercise.getID() + " " +clientExercise.getForeignLanguage() + " -> " + tokens);
+            }
+            logger.info("ex #"+ clientExercise.getID() + " " +clientExercise.getForeignLanguage() + " -> " + tokens);
+
+          }
+        }
+
       });
     });
   }
+
+
+  @NotNull
+  private static PathHelper getPathHelper(DatabaseImpl database) {
+    return new PathHelper("war", database.getServerProps());
+  }
+
 
   @Test
   public void testEx() {

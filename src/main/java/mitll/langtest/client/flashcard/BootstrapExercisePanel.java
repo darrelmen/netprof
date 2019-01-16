@@ -218,16 +218,16 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
   }
 
   private void addContextSentenceToShowWhileWaiting(ExerciseController controller, Panel toAddTo) {
-    ClientExercise next = exercise.getDirectlyRelated().iterator().next();
+    ClientExercise contextSentence = exercise.getDirectlyRelated().iterator().next();
     int fontSize = controller.getProjectStartupInfo().getLanguageInfo().getFontSize();
 
     ClickableWords commonExerciseClickableWords =
-        new ClickableWords(null, exercise.getID(), controller.getLanguage(), fontSize, BLUE);
+        new ClickableWords(null, exercise.getID(), controller.getLanguageInfo(), fontSize, BLUE, true);
 
-    String flToShow = next.getFLToShow();
-    String flToShow1 = exercise.getFLToShow();
-    DivWidget contentWidget = commonExerciseClickableWords.getClickableWordsHighlight(flToShow, flToShow1,
-        FieldType.FL, new ArrayList<>(), false);
+    String flToShow = contextSentence.getFLToShow();
+    String toHighlight = exercise.getFLToShow();
+    DivWidget contentWidget = commonExerciseClickableWords.getClickableWordsHighlight(flToShow, toHighlight,
+        FieldType.FL, new ArrayList<>(), false, contextSentence.getTokens(), exercise.getTokens());
 
     contextSentenceWhileWaiting = getCenteredRow(contentWidget);
 

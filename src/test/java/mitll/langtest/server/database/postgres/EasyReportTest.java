@@ -34,6 +34,7 @@ package mitll.langtest.server.database.postgres;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -61,9 +62,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
-import javax.json.Json;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -127,6 +132,41 @@ public class EasyReportTest extends BaseTest {
     getDNS("gmaiil.com");
   }
 
+  @Test
+  public void testPinyin() {
+    ServerProperties serverProperties = new ServerProperties();
+
+    List<String> words = new ArrayList<>(Arrays.asList("yī èr sān sì yǒu wǔ liù qī bā jiǔ".split(" ")));
+    Map<String, String> numberToPron = new HashMap<>();
+    for (int i = 1; i < words.size()+1; i++) {
+      numberToPron.put("" + i, words.get(i-1));
+    }
+
+    numberToPron.forEach((k, v) -> System.out.println(toFull(k) + "\t" + serverProperties.toDict(v)));
+    //  serverProperties.toDict();
+  }
+
+
+  private static final char FULL_WIDTH_ZERO = '\uFF10';
+  private static final char ZERO = '0';
+  private static final String P_Z = "\\p{Z}+";
+
+  private String toFull(String s) {
+    StringBuilder builder = new StringBuilder();
+
+    final CharacterIterator it = new StringCharacterIterator(s);
+    for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
+      if (c >= ZERO && c <= '9') {
+        int offset = c - ZERO;
+        int full = FULL_WIDTH_ZERO + offset;
+        builder.append(Character.valueOf((char) full).toString());
+      } else {
+        builder.append(c);
+      }
+    }
+    return builder.toString();
+  }
+
   private void getDNS(String host) {
 
     InetAddress byName = null;
@@ -151,7 +191,135 @@ public class EasyReportTest extends BaseTest {
   }
 
   @Test
-  public void testListJSON() {
+  public void testOverlap() {
+    String toFindFile = "msaFiles2.csv";
+    String goldFile = "msaAnswerAudioSorted.txt";
+
+    String language = "MSA";
+
+
+    compareAudio(toFindFile, goldFile, language, false);
+  }
+
+  @Test
+  public void testOverlap2() {
+//    String toFindFile = "msaFiles2.csv";
+//    String goldFile = "msaAnswerAudioSorted.txt";
+
+
+    //  List<String> langs = Arrays.asList("Egyptian");//, "Korean", "Levantine", "CM", "Pashto", "Russian", "Spanish");
+    List<String> langs = Arrays.asList("Egyptian", "Korean", "Levantine", "CM", "Pashto", "Russian", "Spanish");
+
+    langs.forEach(lang -> {
+
+      String s = lang.toLowerCase();
+
+      if (s.equalsIgnoreCase("cm")) s = "mandarin_simplified";
+
+      String toFind = "for_crowdflower_annotation-all_recs-" + s + ".tsv";
+      String goldFile = "Audio" + lang + ".txt";
+
+      compareAudio(toFind, goldFile, lang, true);
+
+
+    });
+  }
+
+  private void compareAudio(String toFindFile, String goldFile, String language, boolean split) {
+    File toFind = new File("/Users/go22670/Desktop/lists_for_gordon/" +
+        toFindFile
+        // "msaFiles.csv"
+    );
+    File goldList = new File("/Users/go22670/Desktop/lists_for_gordon/" +
+        goldFile
+        //    "msaAnswerFilesSorted.txt"
+    );
+
+    if (!toFind.exists()) {
+      logger.warn("no file " + toFind.getAbsolutePath());
+      return;
+    }
+
+    if (!goldList.exists()) {
+      logger.warn("no file " + goldList.getAbsolutePath());
+      return;
+    }
+
+    Set<String> expectedMP3s = getLines(toFind);
+    Set<String> knownMP3s = getLines(goldList);
+
+    Set<String> found = new TreeSet<>();
+    Set<String> missing = new TreeSet<>();
+
+    logger.info(language + " expectedMP3s " + expectedMP3s.size());
+    logger.info(language + " knownMP3s    " + knownMP3s.size());
+
+    expectedMP3s.forEach(expected ->
+    {
+
+      String search = expected;
+      if (split) {
+        String[] split1 = expected.split("\t");
+        String url = split1[6];
+
+        // https://np.ll.mit.edu/crowdflowerMandarin_simplified
+        //   logger.info(language + " url " + url);
+        String suffix = language;
+        if (language.equalsIgnoreCase("CM")) {
+          suffix = "Mandarin_simplified";
+        }
+        String prefix = "https://np.ll.mit.edu/crowdflower" +
+            suffix +
+            "/";
+        if (!url.startsWith(prefix)) {
+          logger.warn("expecting " + prefix + " on " + url);
+        } else {
+          search = "./" + url.substring(prefix.length());
+        }
+      }
+
+      if (knownMP3s.contains(search)) {
+        found.add(search);
+      } else {
+//        if (missing.size()<10) logger.warn(language + " missing " +search);
+        missing.add(search);
+      }
+    });
+
+    logger.info(language + " found   " + found.size());
+    logger.info(language + " missing " + missing.size());
+
+    if (missing.size() < 400) {
+      missing.forEach(miss -> {
+        if (!miss.startsWith(".//opt/netprof"))
+          logger.info(language + " missing " + miss);
+      });
+    }
+  }
+
+  private Set<String> getLines(File toFind) {
+    try {
+      FileReader fileReader = new FileReader(toFind);
+      BufferedReader reader = new BufferedReader(fileReader);
+
+      /*line =*/
+      reader.readLine(); // skip header
+
+      String line;
+      Set<String> expected = new HashSet<>();
+      while ((line = reader.readLine()) != null) {
+        expected.add(line.trim());
+      }
+      reader.close();
+      return expected;
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return new HashSet<>();
+  }
+
+  public void testSectionHelper() {
+
     DatabaseImpl english = getDatabase();
     int projectid = 15;
     Project project = english.getProject(projectid);

@@ -1,4 +1,4 @@
-package mitll.langtest.client.banner;
+package mitll.langtest.client.dialog;
 
 public interface IListenView {
   int getVolume();

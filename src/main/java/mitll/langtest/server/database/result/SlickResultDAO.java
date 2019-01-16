@@ -69,6 +69,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   private SlickResult defaultResult;
   private final ServerProperties serverProps;
 
+  private static final boolean DEBUG = false;
+
   /**
    * @param database
    * @param dbConnection
@@ -660,10 +662,13 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    */
   public Collection<SlickPerfResult> getPerfForDialogSession(int dialogsessionid) {
     Collection<SlickPerfResult> slickPerfResults = dao.perfByDialogSession(dialogsessionid);
-    logger.info("getPerfForDialogSession for " + dialogsessionid);
 
-    slickPerfResults.forEach(slickPerfResult -> logger.info("perf " + slickPerfResult.id() + " by " + slickPerfResult.userid() + " @ "
-        + slickPerfResult.modified() + " ex " + slickPerfResult.exid() + " answer " + slickPerfResult.answer()));
+    if (DEBUG) {
+      logger.info("getPerfForDialogSession for " + dialogsessionid);
+
+      slickPerfResults.forEach(slickPerfResult -> logger.info("perf " + slickPerfResult.id() + " by " + slickPerfResult.userid() + " @ "
+          + slickPerfResult.modified() + " ex " + slickPerfResult.exid() + " answer " + slickPerfResult.answer()));
+    }
 
     return slickPerfResults;
   }

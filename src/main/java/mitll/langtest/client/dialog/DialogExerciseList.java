@@ -1,4 +1,4 @@
-package mitll.langtest.client.banner;
+package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -9,17 +9,16 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.UIObject;
+import mitll.langtest.client.banner.Emoticon;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.project.ThumbnailChoices;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.FilterResponse;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,6 +38,9 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private static final int MAX_LENGTH_ID1 = 2 * MAX_LENGTH_ID + 12;
   private static final int NORMAL_MIN_HEIGHT = 101;// 67;
   private static final int LANGUAGE_SIZE = 6;
+
+  private static final boolean DEBUG = false;
+
   /**
    *
    */
@@ -58,7 +60,11 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     if (!isThereALoggedInUser()) return;
     final long then = System.currentTimeMillis();
 
-    controller.getDialogService().getTypeToValues(getFilterRequest(userListID, getPairs(typeToSelection)),
+    if (DEBUG) logger.info("req " +typeToSelection);
+
+    FilterRequest filterRequest = getFilterRequest(userListID, getPairs(typeToSelection));
+    if (DEBUG) logger.info("filterRequest " +filterRequest);
+    controller.getDialogService().getTypeToValues(filterRequest,
         new AsyncCallback<FilterResponse>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -97,7 +103,8 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private Map<Integer, CorrectAndScore> scoreHistoryPerExercise;
 
   @Override
-  protected void getFullExercises(Collection<Integer> visibleIDs, int currentReq, Collection<Integer> requested, List<IDialog> alreadyFetched) {
+  protected void getFullExercises(Collection<Integer> visibleIDs, int currentReq,
+                                  Collection<Integer> requested, List<IDialog> alreadyFetched) {
     //  logger.info("getFullExercises " + visibleIDs);
     controller.getDialogService().getDialogs(new ExerciseListRequest(),
         new AsyncCallback<ExerciseListWrapper<IDialog>>() {
@@ -111,7 +118,6 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
             List<IDialog> toShow = result.getExercises().stream().filter(iDialog -> visibleIDs.contains(iDialog.getID())).collect(Collectors.toList());
             scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
 
-        //    toShow.forEach(iDialog -> iDialog.ge);
             sortDialogs(toShow, visibleIDs);
             showExercisesForCurrentReq(toShow, incrReq());
           }
@@ -214,7 +220,7 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   }
 
   private boolean isTitle(ExerciseAttribute attr) {
-    return attr.getProperty().equals(IDialog.METADATA.FLTITLE.toString().toLowerCase());
+    return attr.getProperty().equals(DialogMetadata.FLTITLE.toString().toLowerCase());
   }
 
   @NotNull

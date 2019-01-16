@@ -64,14 +64,15 @@ public class ScoreToJSON {
   private static final Logger logger = LogManager.getLogger(ScoreToJSON.class);
 
   private static final String START = "start";
-  public static final String END1 = "end";
+  private static final String END1 = "end";
   private static final String END = END1;
   private static final String EVENT = "event";
-  public static final String CONTENT = "content";
+ // public static final String CONTENT = "content";
   private static final String SCORE = "score";
-  public static final String STR = "str";
-  public static final String ID = "id";
-  public static final String SEGMENT_SCORE = "s";
+  private static final String STR = "str";
+  private static final String ID = "id";
+  private static final String SEGMENT_SCORE = "s";
+//  public static final String OUR_FORTH_TONE = "uu4";
 
   /**
    * We skip sils, since we wouldn't want to show them to the user.
@@ -97,9 +98,9 @@ public class ScoreToJSON {
   private static final JsonObject jsonNULL = new JsonObject();
 
   /**
-   * @see DecodeAlignOutput#DecodeAlignOutput(PretestScore, boolean)
    * @param pretestScore
    * @return
+   * @see DecodeAlignOutput#DecodeAlignOutput(PretestScore, boolean)
    */
   public JsonObject getJsonObject(PretestScore pretestScore) {
     JsonObject jsonObject = new JsonObject();
@@ -227,20 +228,24 @@ public class ScoreToJSON {
     jsonObject.addProperty(SCORE, score.getHydecScore());
 
     for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : score.getTypeToSegments().entrySet()) {
-      List<TranscriptSegment> value = pair.getValue();
+      List<TranscriptSegment> segments = pair.getValue();
       JsonArray value1 = new JsonArray();
       NetPronImageType imageType = pair.getKey();
 
       boolean usePhone = imageType == NetPronImageType.PHONE_TRANSCRIPT &&
           (serverProps.usePhoneToDisplay(languageEnum) || usePhoneDisplay);
 
-      for (TranscriptSegment segment : value) {
+      int numSegments = segments.size();
+      for (int i = 0; i < numSegments; i++) {
+        TranscriptSegment segment = segments.get(i);
+
+//      for (TranscriptSegment segment : segments) {
         JsonObject object = new JsonObject();
         String event = segment.getEvent();
 
         if (isValidEvent(event)) {
           if (usePhone) {  // remap to display labels
-            event = serverProps.getDisplayPhoneme(languageEnum, event);
+            event = serverProps.getDisplayPhoneme(languageEnum, segments, numSegments, i, event);
           }
 
           object.addProperty(EVENT, event);
@@ -256,4 +261,19 @@ public class ScoreToJSON {
     }
     return jsonObject;
   }
+
+/*  private String getDisplayPhoneme(ServerProperties serverProps, Language languageEnum, List<TranscriptSegment> segments, int numSegments, int i, String event) {
+    if (languageEnum == Language.MANDARIN && event.equals(OUR_FORTH_TONE) && i < numSegments - 1) {
+      TranscriptSegment nextPhoneSegment = segments.get(i + 1);
+      String event1 = nextPhoneSegment.getEvent();
+      if (event1.endsWith("4")) {
+        event = "u";
+      } else {
+        event = ServerProperties.FORTH_U_TONE;
+      }
+    } else {
+      event = serverProps.getDisplayPhoneme(languageEnum, event);
+    }
+    return event;
+  }*/
 }

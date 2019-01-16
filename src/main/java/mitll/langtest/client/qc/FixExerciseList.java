@@ -1,8 +1,11 @@
-package mitll.langtest.client.custom;
+package mitll.langtest.client.qc;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.recording.NoListFacetExerciseList;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.shared.exercise.*;
@@ -11,19 +14,31 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
-class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
-  private final Logger logger = Logger.getLogger("DefectsExerciseList");
-
+/**
+ * A list for items to fix (review).
+ *
+ * @param <T>
+ */
+class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
+  // private final Logger logger = Logger.getLogger("FixExerciseList");
   private final boolean isContext;
 
-  DefectsExerciseList(ExerciseController controller,
-                      Panel topRow,
-                      Panel currentExercisePanel,
-                      INavigation.VIEWS instanceName,
-                      DivWidget listHeader,
-                      boolean isContext) {
+  /**
+   * @param controller
+   * @param topRow
+   * @param currentExercisePanel
+   * @param instanceName
+   * @param listHeader
+   * @param isContext
+   * @see FixNPFHelper#getMyListLayout(SimpleChapterNPFHelper)
+   */
+  FixExerciseList(ExerciseController controller,
+                  Panel topRow,
+                  Panel currentExercisePanel,
+                  INavigation.VIEWS instanceName,
+                  DivWidget listHeader,
+                  boolean isContext) {
     super(
         controller,
         topRow,
@@ -48,11 +63,10 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
 
     ExerciseListRequest exerciseListRequest = super
         .getExerciseListRequest(typeToSection, prefix, onlyUninspected)
-        .setOnlyUninspected(true)
+        .setOnlyWithAnno(true)
         .setQC(true)
         .setAddContext(isContext);
-
-  //  logger.info("getExerciseListRequest req " + exerciseListRequest);
+    // logger.info("getExerciseListRequest req " + exerciseListRequest);
 
     return exerciseListRequest;
   }
@@ -60,13 +74,13 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
     ExerciseListRequest exerciseListRequest =
         super.getExerciseListRequest(prefix)
-            .setOnlyUninspected(true)
+            .setOnlyWithAnno(true)
             .setQC(true)
             .setAddContext(isContext);
- //   logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
-
+    // logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest prefix "));
 //    logger.info("logException stack " + exceptionAsString);
+
     return exerciseListRequest;
   }
 
@@ -80,7 +94,18 @@ class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends NoList
   @Override
   protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
     return new FilterRequest(incrReqID(), pairs, userListID)
-        .setOnlyUninspected(true)
+        .setOnlyWithAnno(true)
         .setExampleRequest(isContext);
+  }
+
+  @Override
+  protected void onLastItem() {
+    new ModalInfoDialog(COMPLETE, LIST_COMPLETE, hiddenEvent -> showEmptySelection());
+  }
+
+  @Override
+  protected String getEmptySearchMessage() {
+    return "<b>You've completed fixing defects for this selection.</b>" +
+        "<p>Please clear one of your selections and select a different unit or chapter.</p>";
   }
 }

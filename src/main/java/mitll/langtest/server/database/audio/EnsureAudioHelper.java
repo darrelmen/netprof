@@ -312,10 +312,11 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
    * Only works with .mp3 and .ogg (why???)
    *
    * @param audioFile
+   * @param language
    * @return
    */
   @Override
-  public String getWavAudioFile(String audioFile, String language) {
+  public String getWavAudioFile(String audioFile, Language language) {
     String reqFile = audioFile;
     if (audioFile.endsWith("." + AudioTag.COMPRESSED_TYPE) ||
         audioFile.endsWith(MP3)
@@ -328,7 +329,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
         File test = pathHelper.getAbsoluteAudioFile(wavFile);
         if (!test.exists()) {
           logger.warn("not at " + test.getAbsolutePath());
-          test = pathHelper.getAbsoluteBestAudioFile(wavFile, language.toLowerCase());
+          test = pathHelper.getAbsoluteBestAudioFile(wavFile, language);
           if (!test.exists()) {
             logger.warn("getWavAudioFile NOPE at " + test.getAbsolutePath());
           }

@@ -1,6 +1,7 @@
 package mitll.langtest.client.scoring;
 
-import mitll.langtest.client.banner.RehearseViewHelper;
+import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.shared.answer.AudioAnswer;
 
 public interface IRecordDialogTurn {
@@ -22,4 +23,9 @@ public interface IRecordDialogTurn {
   void switchAudioToReference();
 
   void revealScore();
+
+  void usePartial(StreamResponse response);
+  Widget myGetPopupTargetWidget();
+
+  //void setCurrent(boolean val);
 }

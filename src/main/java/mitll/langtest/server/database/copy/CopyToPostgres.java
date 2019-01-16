@@ -106,6 +106,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String CONFIG = "config";
   private static final String NO_TRANSCRIPT_FOUND = "no transcript found";
   private static final boolean ALLOW_DELETE = false;
+  public static final String WAR = "war";
   //public static final int PASUYA_ID = 736;
 
   private static DatabaseImpl database;
@@ -418,19 +419,24 @@ public class CopyToPostgres<T extends CommonShell> {
     database.close();
   }
 
-  private void reportAfterDelete(int config, IProjectDAO projectDAO, long then, String drop) {
+/*  private void reportAfterDelete(int config, IProjectDAO projectDAO, long then, String drop) {
     long now = System.currentTimeMillis();
 
     Collection<SlickProject> all = projectDAO.getAll();
     logger.info("reportAfterDelete Took " + (now - then) + " millis to " + drop + " #" + config + ", now there are " + all.size() + " projects:");
 
     all.forEach(project -> logger.info("\t" + project));
-  }
+  }*/
 
   private static DatabaseImpl getDatabase(String propertiesFile) {
-    ServerProperties serverProps = getProps(propertiesFile);
-    String war = "war";
-    return new DatabaseImpl(getProps(propertiesFile), getPathHelper(war, serverProps), null, null);
+    ServerProperties props = getProps(propertiesFile);
+ /*   if (optDatabase != null) {
+      logger.info("\n\n\n\nusing " + optDatabase + " optional database\n\n\n");
+      serverProps.setDBConfig(optDatabase);
+    }*/
+
+    return new DatabaseImpl(props,
+        getPathHelper(WAR, props), null, null);
   }
 
   @NotNull
@@ -1726,6 +1732,12 @@ public class CopyToPostgres<T extends CommonShell> {
     }
   }
 
+  /**
+   * @see #main
+   * @see DIALOG command
+   * @param to
+   * @param propertiesFile
+   */
   private static void copyDialog(int to, String propertiesFile) {
     database = getDatabase(propertiesFile);
     if (to == -1) logger.error("remember to set the project id");
@@ -1743,7 +1755,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
   @NotNull
   private static PathHelper getPathHelper(DatabaseImpl database) {
-    return getPathHelper("war", database.getServerProps());
+    return getPathHelper(WAR, database.getServerProps());
   }
 
   private static void cleanDialog(int to, String propertiesFile) {

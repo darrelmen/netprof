@@ -65,15 +65,20 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
 
   private static final int CONTENT_SCROLL_HEIGHT = 220;
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
+  /**
+   * @see #addAnswerWidget(int, Widget)
+   */
   private final List<Widget> answers = new ArrayList<>();
   private final Set<Widget> completed = new HashSet<>();
-  protected T exercise = null;
+  protected T exercise;
   final ExerciseController controller;
   private final NavigationHelper navigationHelper;
   final ListInterface<L, T> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<>();
   final String instance;
   private final boolean doNormalRecording;
+
+  private static final boolean DEBUG = false;
 
   /**
    * Includes fix for
@@ -305,8 +310,7 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
    */
   void addAnswerWidget(int index, Widget answerWidget) {
     answers.add(answerWidget);
-    Set<Widget> objects = indexToWidgets.get(index);
-    if (objects == null) indexToWidgets.put(index, objects = new HashSet<>());
+    Set<Widget> objects = indexToWidgets.computeIfAbsent(index, k -> new HashSet<>());
     objects.add(answerWidget);
   }
 
@@ -371,15 +375,16 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
   }
 
   protected void enableNext() {
-//    logger.info("enableNext : answered " + completed.size() + " vs total " + answers.size());
+    if (DEBUG) logger.info("enableNext : answered " + completed.size() + " vs total " + answers.size());
     navigationHelper.enableNextButton(isCompleted());
   }
 
   protected boolean isCompleted() {
     boolean b = completed.size() == answers.size();
-//    if (b) {
-//      logger.info("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
-//    }
+
+    if (DEBUG)
+      logger.info("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : completed? = " + b);
+
     return b;
   }
 

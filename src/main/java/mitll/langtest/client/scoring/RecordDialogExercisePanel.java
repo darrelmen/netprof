@@ -4,9 +4,11 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.Emoticon;
-import mitll.langtest.client.banner.IRehearseView;
-import mitll.langtest.client.banner.RehearseViewHelper;
 import mitll.langtest.client.banner.SessionManager;
+import mitll.langtest.client.dialog.IRehearseView;
+import mitll.langtest.client.dialog.ListenViewHelper.COLUMNS;
+import mitll.langtest.client.dialog.PerformViewHelper;
+import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.ListInterface;
@@ -28,8 +30,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.client.LangTest.RED_X_URL;
+import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.*;
 
-public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPanel<T> implements IRecordDialogTurn {
+public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialogTurn {
   private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
   private static final boolean DEBUG_PARTIAL = false;
@@ -46,7 +49,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   private long start = 0L;
   private long firstVAD = -1L;
 
-  private NoFeedbackRecordAudioPanel<T> recordAudioPanel;
+  private NoFeedbackRecordAudioPanel<ClientExercise> recordAudioPanel;
   private static final float DELAY_SCALAR = 1.0F;
   /**
    *
@@ -62,6 +65,8 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
   private AudioAttribute studentAudioAttribute;
   private boolean gotStreamStop;
+  private TreeMap<TranscriptSegment, IHighlightSegment> transcriptToHighlight = null;
+  boolean doPushToTalk = false;
 
   /**
    * @param commonExercise
@@ -71,25 +76,22 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    * @param listenView
    * @param sessionManager
    * @param isRight
-   * @see RehearseViewHelper#reallyGetTurnPanel(ClientExercise, boolean)
+   * @see RehearseViewHelper#getRecordingTurnPanel
    */
-  public RecordDialogExercisePanel(final T commonExercise,
+  public RecordDialogExercisePanel(final ClientExercise commonExercise,
                                    final ExerciseController controller,
                                    final ListInterface<?, ?> listContainer,
                                    Map<Integer, AlignmentOutput> alignments,
                                    IRehearseView listenView,
                                    SessionManager sessionManager,
-                                   boolean isRight) {
-    super(commonExercise, controller, listContainer, alignments, listenView, isRight);
+                                   COLUMNS columns) {
+    super(commonExercise, controller, listContainer, alignments, listenView, columns);
     this.rehearseView = listenView;
-
     setMinExpectedDur(commonExercise);
-
     this.sessionManager = sessionManager;
-    addStyleName("inlineFlex");
   }
 
-  private void setMinExpectedDur(T commonExercise) {
+  private void setMinExpectedDur(ClientExercise commonExercise) {
     if (commonExercise.hasRefAudio()) {
       minDur = commonExercise.getFirst().getDurationInMillis();
       minDur = (long) (((float) minDur) * DELAY_SCALAR);
@@ -108,7 +110,8 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    */
   @Override
   protected TreeMap<TranscriptSegment, IHighlightSegment> showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
-    TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap = super.showAlignment(id, duration, alignmentOutput);
+    TreeMap<TranscriptSegment, IHighlightSegment> transcriptSegmentIHighlightSegmentTreeMap =
+        super.showAlignment(id, duration, alignmentOutput);
     this.refSpeechDur = getSpeechDur(id, alignmentOutput);
     return transcriptSegmentIHighlightSegmentTreeMap;
   }
@@ -142,8 +145,6 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     rememberAudio(getRegularSpeedIfAvailable(exercise));
   }
 
-  private TreeMap<TranscriptSegment, IHighlightSegment> transcriptToHighlight = null;
-
   /**
    * TODOx : do this better - should
    *
@@ -156,8 +157,14 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     emoticon.setVisible(true);
 
     if (transcriptToHighlight == null) {
-      transcriptToHighlight =
-          showAlignment(0, studentAudioAttribute.getDurationInMillis(), studentAudioAttribute.getAlignmentOutput());
+      if (studentAudioAttribute != null) {
+        AlignmentOutput alignmentOutput = studentAudioAttribute.getAlignmentOutput();
+        alignmentOutput.setShowPhoneScores(true);
+
+        transcriptToHighlight = showAlignment(0, studentAudioAttribute.getDurationInMillis(), alignmentOutput);
+      } else {
+        logger.warning("showScoreInfo no student audio for " + this);
+      }
     }
 
     revealScore();
@@ -173,7 +180,6 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
   private void showWordScore(SlimSegment withScore, IHighlightSegment v) {
     v.restoreText();
-
     v.setHighlightColor(SimpleColumnChart.getColor(withScore.getScore()));
     v.showHighlight();
   }
@@ -188,7 +194,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    * 3) if you have a choice, don't obscure first token? ?
    *
    * @param coreVocab
-   * @see mitll.langtest.client.banner.PerformViewHelper#getTurnPanel
+   * @see PerformViewHelper#getTurnPanel
    * Or should we use exact match?
    */
   public void maybeSetObscure(Collection<String> coreVocab) {
@@ -229,12 +235,24 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     return candidate;
   }
 
+  public void reallyObscure() {
+    //  logger.info("reallyObscure For " + exercise.getID() + " obscure " + flclickables.size() + " clickables");
+    flclickables.forEach(iHighlightSegment -> {
+      iHighlightSegment.setObscurable();
+      boolean b = iHighlightSegment.obscureText();
+      if (!b) logger.info("huh? didn't obscure");
+    });
+    flClickableRowPhones.setVisible(false);
+  }
+
   public void obscureText() {
+//    logger.info("obscureText For " + exercise.getID() + " obscure " + flclickables.size() + " clickables");
     flclickables.forEach(IHighlightSegment::obscureText);
   }
 
   public void restoreText() {
     flclickables.forEach(IHighlightSegment::restoreText);
+    flClickableRowPhones.setVisible(true);
   }
 
   /**
@@ -267,16 +285,6 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   }
 
   /**
-   * @see RehearseViewHelper#useResult
-   * @return
-   */
-/*  public float getSpeakingRate() {
-    float v = (refSpeechDur == 0F || studentSpeechDur == 0F) ? -1F : (studentSpeechDur / refSpeechDur);
-    logger.info("getSpeakingRate " + getExID() + " student " + studentSpeechDur + " ref " + refSpeechDur + " ratio " + v);
-    return v;
-  }*/
-
-  /**
    * @see RehearseViewHelper#useInvalidResult
    * Maybe color in the words red?
    */
@@ -293,101 +301,34 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
-    NoFeedbackRecordAudioPanel<T> recordPanel = new NoFeedbackRecordAudioPanel<T>(exercise, controller, sessionManager) {
-      /**
-       *
-       * SO in an async world, this result may not be for this exercise panel!
-       *
-       * @see PostAudioRecordButton#onPostSuccess(AudioAnswer, long)
-       * @see FeedbackPostAudioRecordButton#useResult
-       * @param result
-       */
-      @Override
-      public void useResult(AudioAnswer result) {
-        super.useResult(result);
-        rehearseView.useResult(result);
+    boolean isRehearse = rehearseView instanceof PerformViewHelper;
+    logger.info("is perform " + isRehearse);
 
-        if (false) {
-          logger.info("useResult got for ex " + result.getExid() + " vs local " + getExID() +
-              " = " + result.getValidity() + " " + result.getPretestScore());
-        }
-        // logger.info("useResult got words " + result.getPretestScore().getWordScores());
-      }
-
-      @Override
-      Widget getPopupTargetWidget() {
-        return myGetPopupTargetWidget();
-      }
-
-      /**
-       * @see PostAudioRecordButton#usePartial
-       * @param response
-       */
-      @Override
-      public void usePartial(StreamResponse response) {
-        RecordDialogExercisePanel.this.usePartial(response);
-      }
-
-      @Override
-      public void gotAbort() {
-        logger.info("OK got abort!");
-      }
-
-      /**
-       *
-       */
-      @Override
-      public void onPostFailure() {
-        logger.info("onPostFailure exid " + getExID());
-        stopRecording();
-      }
-
-      /**
-       * TODO : do something smarter here on invalid state????
-       *
-       * @param exid
-       * @param isValid
-       * @see PostAudioRecordButton#useInvalidResult
-       */
-      @Override
-      public void useInvalidResult(int exid, boolean isValid) {
-        super.useInvalidResult(exid, isValid);
-        rehearseView.useInvalidResult(exid);
-
-        logger.warning("useInvalidResult got valid = " + isValid);
-      }
-
-      /**
-       * @see RecordButton.RecordingListener#stopRecording(long, boolean)
-       */
-      @Override
-      public void stopRecording() {
-        super.stopRecording();
-        rehearseView.stopRecording();
-      }
-
-      @Override
-      public int getDialogSessionID() {
-        return rehearseView.getDialogSessionID();
-      }
-    };
+    NoFeedbackRecordAudioPanel<ClientExercise> recordPanel =
+//        isRehearse ?
+//            new PushToTalkDialogRecordAudioPanel(exercise, controller, sessionManager, rehearseView, this) :
+        new ContinuousDialogRecordAudioPanel(exercise, controller, sessionManager, rehearseView, this);
 
     this.recordAudioPanel = recordPanel;
 
     recordPanel.addWidgets();
 
     DivWidget flContainer = getHorizDiv();
-    if (isRight) {
+    if (columns == RIGHT) {
       addStyleName("floatRight");
-    } else {
+    } else if (columns == LEFT) {
       flContainer.addStyleName("floatLeft");
     }
 
     // add hidden button
     {
-      PostAudioRecordButton postAudioRecordButton = recordPanel.getPostAudioRecordButton();
+      PostAudioRecordButton postAudioRecordButton = getPostAudioRecordButton(recordPanel);
       postAudioRecordButton.setVisible(false);
-      flContainer.add(postAudioRecordButton);
+      DivWidget buttonContainer = new DivWidget();
+      buttonContainer.setId("recordButtonContainer_" + getExID());
+      buttonContainer.add(postAudioRecordButton);
+      //   postAudioRecordButton.setEnabled(false);
+      flContainer.add(buttonContainer);
     }
 
     flContainer.add(recordPanel.getScoreFeedback());
@@ -401,7 +342,11 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     super.addWidgets(showFL, showALTFL, phonesChoices);
   }
 
-  private void usePartial(StreamResponse response) {
+  private PostAudioRecordButton getPostAudioRecordButton(NoFeedbackRecordAudioPanel<ClientExercise> recordPanel) {
+    return recordPanel.getPostAudioRecordButton();
+  }
+
+  public void usePartial(StreamResponse response) {
     if (isRecording()) {
       Validity validity = response.getValidity();
       rehearseView.addPacketValidity(validity);
@@ -424,6 +369,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
       }
 
       if (response.isStreamStop()) {
+        // logger.info("usePartial stopStream");
         gotStreamStop = true;
       }
     } else {
@@ -435,8 +381,33 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     return this.toString();
   }
 
-  private Widget myGetPopupTargetWidget() {
+  public Widget myGetPopupTargetWidget() {
     return this;
+  }
+
+  /**
+   * TODO :subclass!
+   */
+   @Override
+  public void markCurrent() {
+    super.markCurrent();
+
+    if (doPushToTalk) {
+      if (columns == MIDDLE) {
+        getRecordButton().setVisible(true);
+      }
+    }
+  }
+
+  @Override
+  public void removeMarkCurrent() {
+    super.removeMarkCurrent();
+
+    if (doPushToTalk) {
+      if (getRecordButton().isRecording()) {
+        cancelRecording();
+      }
+    }
   }
 
   /**
@@ -456,10 +427,15 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     return w;
   }
 
+  /**
+   * @return
+   * @see #addWidgets(boolean, boolean, PhonesChoices)
+   */
   @NotNull
   private DivWidget getHorizDiv() {
     DivWidget flContainer = new DivWidget();
     flContainer.addStyleName("inlineFlex");
+    flContainer.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
     flContainer.getElement().setId("RecordDialogExercisePanel_horiz");
     return flContainer;
   }
@@ -469,13 +445,22 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
   }
 
   /**
-   * @see RehearseViewHelper#currentTurnPlayEnded
+   * @see RehearseViewHelper#startRecordingTurn
    */
   public void startRecording() {
     start = System.currentTimeMillis();
     logger.info("startRecording for " + getExID() + " at " + start + " or " + new Date(start));
     firstVAD = -1;
-    recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
+
+    if (columns == MIDDLE && doPushToTalk) {
+      getRecordButton().setVisible(true);
+    } else {
+      getRecordButton().startOrStopRecording();
+    }
+  }
+
+  private PostAudioRecordButton getRecordButton() {
+    return getPostAudioRecordButton(recordAudioPanel);
   }
 
   /**
@@ -483,7 +468,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    * Check against expected duration to see when to end.
    *
    * @see #startRecording
-   * @see RehearseViewHelper#mySilenceDetected()
+   * @see RehearseViewHelper#stopRecordingTurn()
    */
   public boolean stopRecording() {
     long now = System.currentTimeMillis();
@@ -496,7 +481,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
     boolean vadCheck = clientVAD && gotStreamStop;
 
 
-    if (vadCheck || diff > minDurPlusMoveOn) {
+    if (vadCheck || diff > minDurPlusMoveOn || doPushToTalk) {
       logger.info("stopRecording " + this +
           "\n\tvadCheck  " + vadCheck +
           "\n\tgotStreamStop " + gotStreamStop +
@@ -507,7 +492,7 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
           "\n\tminDur+move on " + minDurPlusMoveOn +
           "\n\tdiff      " + diff
       );
-      recordAudioPanel.getPostAudioRecordButton().startOrStopRecording();
+      getRecordButton().startOrStopRecording();
       return true;
     } else {
 /*
@@ -523,13 +508,107 @@ public class RecordDialogExercisePanel<T extends ClientExercise> extends TurnPan
    * @see RehearseViewHelper#mySilenceDetected()
    */
   public boolean isRecording() {
-    return recordAudioPanel.getPostAudioRecordButton().isRecording();
+    return getRecordButton().isRecording();
   }
 
   public float getRefSpeechDur() {
     return refSpeechDur;
   }
+
   public float getStudentSpeechDur() {
     return studentSpeechDur;
+  }
+
+  private static class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel<ClientExercise> {
+    IRehearseView rehearseView;
+    IRecordDialogTurn recordDialogTurn;
+    private final Logger logger = Logger.getLogger("ContinuousDialogRecordAudioPanel");
+
+    ContinuousDialogRecordAudioPanel(ClientExercise exercise, ExerciseController controller, SessionManager sessionManager,
+                                     IRehearseView rehearseView,
+                                     IRecordDialogTurn recordDialogTurn) {
+      super(exercise, controller, sessionManager);
+      this.rehearseView = rehearseView;
+      this.recordDialogTurn = recordDialogTurn;
+    }
+
+    /**
+     * SO in an async world, this result may not be for this exercise panel!
+     *
+     * @param result
+     * @see PostAudioRecordButton#onPostSuccess(AudioAnswer, long)
+     * @see FeedbackPostAudioRecordButton#useResult
+     */
+    @Override
+    public void useResult(AudioAnswer result) {
+      super.useResult(result);
+      getPostAudioRecordButton().setVisible(false);
+      rehearseView.useResult(result);
+
+      if (DEBUG) {
+        logger.info("useResult got for ex " + result.getExid() + " vs local " + exercise.getID() +
+            " = " + result.getValidity() + " " + result.getPretestScore());
+      }
+      // logger.info("useResult got words " + result.getPretestScore().getWordScores());
+    }
+
+    @Override
+    Widget getPopupTargetWidget() {
+      return recordDialogTurn.myGetPopupTargetWidget();
+    }
+
+    /**
+     * @param response
+     * @see PostAudioRecordButton#usePartial
+     */
+    @Override
+    public void usePartial(StreamResponse response) {
+      recordDialogTurn.usePartial(response);
+    }
+
+//    @Override
+//    public void gotAbort() {
+//      //logger.info("OK got abort!");
+//    }
+
+    /**
+     *
+     */
+    @Override
+    public void onPostFailure() {
+      logger.info("onPostFailure exid " + exercise.getID());
+      stopRecording();
+    }
+
+    /**
+     * TODO : do something smarter here on invalid state????
+     *
+     * @param exid
+     * @param isValid
+     * @see PostAudioRecordButton#useInvalidResult
+     */
+    @Override
+    public void useInvalidResult(int exid, boolean isValid) {
+      super.useInvalidResult(exid, isValid);
+      rehearseView.useInvalidResult(exid);
+      getPostAudioRecordButton().setVisible(false);
+
+      logger.warning("useInvalidResult got valid = " + isValid);
+    }
+
+    /**
+     * @see RecordButton.RecordingListener#stopRecording(long, boolean)
+     */
+    @Override
+    public void stopRecording() {
+      // logger.info("stopRecording for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+      super.stopRecording();
+      rehearseView.stopRecording();
+    }
+
+    @Override
+    public int getDialogSessionID() {
+      return rehearseView.getDialogSessionID();
+    }
   }
 }

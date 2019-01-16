@@ -80,8 +80,9 @@ public class SmallVocabDecoder {
    * @see #getTrimmedLeaveAccents
    */
   private static final String FRENCH_PUNCT = "[,.?!]";
-  private static final boolean DEBUG = false;
   private static final String TURKISH_CAP_I = "İ";
+  private static final boolean WARN_ABOUT_BAD_CHINESE = false;
+
   private static final String P_P = "\\p{P}";
   private static final String ONE_SPACE = " ";
 
@@ -90,12 +91,13 @@ public class SmallVocabDecoder {
 
   private static final int TOO_LONG = 8;
 
-  // private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PREFIX = false;
-  private static final boolean DEBUG_SEGMENT = false;
   private final Pattern pattern;
   private final Pattern spacepattern;
   private final Pattern oepattern;
+
+  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PREFIX = false;
+  private static final boolean DEBUG_SEGMENT = false;
 
   /**
    * Compiles some handy patterns.
@@ -198,15 +200,21 @@ public class SmallVocabDecoder {
 
   public String getSegmented(String longPhrase, boolean removeAllAccents) {
     Collection<String> tokens = getTokens(longPhrase, removeAllAccents);
-    boolean debug = longPhrase.startsWith("sel");
-    if (debug) {
-      tokens.forEach(token -> logger.info("getSegmented " + token));
-    }
+//    boolean debug = longPhrase.startsWith("sel");
+//    if (debug) {
+//      tokens.forEach(token -> logger.info("getSegmented " + token));
+//    }
     StringBuilder builder = new StringBuilder();
     tokens.forEach(token -> {
-      String segmentation = segmentation(token.trim());
-      if (debug) {
-        logger.info("getSegmented segmentation " + segmentation);
+
+      String trim = token.trim();
+      char c = trim.charAt(0);
+      String segmentation = trim;
+
+      if (c >= 'A' && c <= 'ž') { // so skip it. it's pinyin
+        if (WARN_ABOUT_BAD_CHINESE) logger.info("getSegmented token is not chinese '" + trim + "'");
+      } else {
+        segmentation = segmentation(trim);
       }
       builder.append(segmentation).append(ONE_SPACE);
     });

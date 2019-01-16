@@ -16,7 +16,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SingleSelectionModel;
-import mitll.langtest.client.banner.IListenView;
+import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.download.DownloadContainer;
 import mitll.langtest.client.exercise.ExerciseController;

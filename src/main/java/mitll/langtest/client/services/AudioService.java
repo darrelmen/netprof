@@ -42,6 +42,7 @@ import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.image.ImageResponse;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
@@ -79,13 +80,14 @@ public interface AudioService extends RemoteService {
    * @param imageType
    * @param imageOptions
    * @param exerciseID
+   * @param language
    * @return
    * @see LangTest#getImage
    */
   ImageResponse getImageForAudioFile(int reqid,
                                      String audioFile, String imageType, ImageOptions imageOptions,
                                      String exerciseID,
-                                     String language) throws DominoSessionException;
+                                     Language language) throws DominoSessionException;
 
   /**
    * @param projectid

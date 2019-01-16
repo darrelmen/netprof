@@ -197,7 +197,6 @@ public class AudioCheck {
                                                  boolean quietAudioOK) {
     try {
       ValidityAndDur validityAndDur = getValidityAndDur(name, fileInfo, allowMoreClipping, quietAudioOK, stream, true);
-      //maybeAddDNR(fileInfo, stream, validityAndDur);
       return validityAndDur;
     } catch (IOException e) {
       logger.error("got " + e, e);
@@ -210,8 +209,10 @@ public class AudioCheck {
       DynamicRange.RMSInfo dynamicRange = new DynamicRange().getRmsInfo(fileInfo, stream);
 
       if (dynamicRange.maxMin < MIN_DYNAMIC_RANGE) {
-        logger.info("maybeAddDNR file " + fileInfo + " doesn't meet dynamic range threshold (" + MIN_DYNAMIC_RANGE +
-            "): " + dynamicRange.maxMin);
+        if (DEBUG) {
+          logger.info("maybeAddDNR file " + fileInfo + " doesn't meet dynamic range threshold (" + MIN_DYNAMIC_RANGE +
+              "): " + dynamicRange.maxMin);
+        }
         validityAndDur.validity = Validity.SNR_TOO_LOW;
       }
       validityAndDur.setMaxMinRange(dynamicRange.maxMin);

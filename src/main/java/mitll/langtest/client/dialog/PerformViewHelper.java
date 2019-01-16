@@ -1,8 +1,9 @@
-package mitll.langtest.client.banner;
+package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
 import mitll.langtest.shared.dialog.IDialog;
@@ -13,16 +14,15 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercise>> extends RehearseViewHelper<T> {
+public class PerformViewHelper<T extends RecordDialogExercisePanel> extends RehearseViewHelper<T> {
   // private final Logger logger = Logger.getLogger("PerformViewHelper");
+  //private Set<String> uniqueCoreVocab;
 
-  private Set<String> uniqueCoreVocab;
-
-  PerformViewHelper(ExerciseController controller) {
+  public PerformViewHelper(ExerciseController controller) {
     super(controller);
   }
 
-  protected INavigation.VIEWS getView() {
+  public INavigation.VIEWS getView() {
     return INavigation.VIEWS.PERFORM;
   }
 
@@ -35,41 +35,37 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercis
   @NotNull
   @Override
   protected DivWidget getTurns(IDialog dialog) {
-    uniqueCoreVocab = dialog.getCoreVocabulary()
-        .stream()
-        .map(CommonShell::getForeignLanguage)
-        .collect(Collectors.toSet());
-
-//    logger.info("getTurns uniqueCoreVocabThisUnit " + uniqueCoreVocabThisUnit + " ");
-    //   logger.info("getTurns uniqueCoreVocab " + uniqueCoreVocab + " ");
-
+//    uniqueCoreVocab = dialog.getCoreVocabulary()
+//        .stream()
+//        .map(CommonShell::getForeignLanguage)
+//        .collect(Collectors.toSet());
     DivWidget turns = super.getTurns(dialog);
     Scheduler.get().scheduleDeferred(this::obscureRespTurns);
     return turns;
   }
 
+  @Override
+  protected boolean shouldShowScoreNow() {
+    return false;
+  }
+
   /**
+   * OK, let's go - hide everything!
+   *
    * @param clientExercise
    * @param isRight
    * @return
    */
   @NotNull
   @Override
-  protected T getTurnPanel(ClientExercise clientExercise, boolean isRight) {
-    T turnPanel = super.getTurnPanel(clientExercise, isRight);
-    turnPanel.maybeSetObscure(uniqueCoreVocab);
-    return turnPanel;
-  }
-
-  @NotNull
-  @Override
-  protected T reallyGetTurnPanel(ClientExercise clientExercise, boolean isRight) {
-    // logger.info("making record dialog ex panel for " + clientExercise.getID());
-    T turnPanel =
-        (T) new RecordDialogExercisePanel<ClientExercise>(clientExercise, controller,
-            null, alignments, this, this, isRight);
-
-    exToTurn.put(clientExercise.getID(), turnPanel);
+  protected T getTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
+    T turnPanel = super.getTurnPanel(clientExercise, columns);
+    // if (columns != COLUMNS.MIDDLE) {
+    turnPanel.reallyObscure();
+    //   }
+    //   else {
+//      turnPanel.maybeSetObscure(uniqueCoreVocab);
+    // }
     return turnPanel;
   }
 
@@ -101,7 +97,8 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel<ClientExercis
   }
 
   private void obscureRespTurns() {
-    getPromptSeq().forEach(RecordDialogExercisePanel::restoreText);
-    getRespSeq().forEach(RecordDialogExercisePanel::obscureText);
+//    getPromptSeq().forEach(RecordDialogExercisePanel::obscureText);
+//    getRespSeq().forEach(RecordDialogExercisePanel::restoreText);
+    allTurns.forEach(RecordDialogExercisePanel::obscureText);
   }
 }

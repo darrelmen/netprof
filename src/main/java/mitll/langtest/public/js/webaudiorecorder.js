@@ -144,6 +144,7 @@ function serviceStartStream(url, exid, reqid, isreference, audioType, dialogSess
         });
 }
 
+// WebAudioRecorder.doStopStream
 function serviceStopStream(abort) {
     recorder && recorder.stop();
     //recorder && recorder.clear();

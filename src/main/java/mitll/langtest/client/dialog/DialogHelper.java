@@ -52,7 +52,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class DialogHelper {
-  private final Logger logger = Logger.getLogger("DialogHelper");
+  //private final Logger logger = Logger.getLogger("DialogHelper");
 
   private static final String OK = "OK";
   private static final String CANCEL = "Cancel";

@@ -2,12 +2,9 @@ package mitll.langtest.client.custom.recording;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.banner.PracticeFacetExerciseList;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ClientExerciseFacetExerciseList;
-import mitll.langtest.client.list.FacetExerciseList;
-import mitll.langtest.client.list.ListFacetHelper;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -23,7 +20,6 @@ import java.util.*;
  * @param <T>
  */
 public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise>
-    // extends PracticeFacetExerciseList<T, ClientExercise> {
     extends ClientExerciseFacetExerciseList<T> {
 
   private static final String ALL_INSPECTED_OR_VISITED = "All inspected or visited";
@@ -75,7 +71,6 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise>
 
   @Override
   protected void hidePrevNext() {
-    // hidePrevNextWidgets();
     setProgressVisible(true);
   }
 
@@ -102,8 +97,7 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise>
     setProgressVisible(false);
   }
 
-  //@Override
-  protected void showOnlyOneExercise(Collection<ClientExercise> result) {
+  private void showOnlyOneExercise(Collection<ClientExercise> result) {
     ClientExercise next = result.iterator().next();
     markCurrentExercise(next.getID());
     addExerciseWidget(next);
