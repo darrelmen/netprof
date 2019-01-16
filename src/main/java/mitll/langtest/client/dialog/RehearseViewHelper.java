@@ -1133,7 +1133,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   protected boolean shouldShowScoreNow() {
-    return true;
+    return false;
   }
 
   @Override

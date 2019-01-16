@@ -78,9 +78,9 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
     boolean isInterpreterTurn = false;
 
     if (!speaker.isEmpty()) {
-      ExerciseAttribute exerciseAttribute = speaker.get(0);
-      isInterpreterTurn = exerciseAttribute.getValue().equals("I");
+      isInterpreterTurn = speaker.get(0).getValue().equals("I");
     }
+
     return isInterpreterTurn;
   }
 

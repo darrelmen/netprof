@@ -44,6 +44,11 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  */
 public class ListenViewHelper<T extends TurnPanel>
     extends DialogView implements ContentView, PlayListener, IListenView {
+  public static final String INTERPRETER = "Interpreter";
+  public static final String SPEAKER_B = "B";
+  public static final int INTERPRETER_WIDTH = 235;
+  public static final String ENGLISH_SPEAKER = "English Speaker";
+  public static final int SPEAKER_WIDTH = 313;
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   private static final String MIDDLE_COLOR = "#00800059";
@@ -196,15 +201,24 @@ public class ListenViewHelper<T extends TurnPanel>
     rowOne.getElement().getStyle().setMarginTop(5, PX);
 
     {
-      String label = dialog.getSpeakers().get(0);
-      if (label == null) label = "A";
+      String firstSpeaker = dialog.getSpeakers().get(0);
+      if (!dialog.getExercises().isEmpty()) {
+        ClientExercise next = dialog.getExercises().iterator().next();
+        boolean hasEnglishAttr = next.hasEnglishAttr();
+
+        if (hasEnglishAttr && getExerciseSpeaker(next).equalsIgnoreCase(firstSpeaker)) {
+          firstSpeaker = ENGLISH_SPEAKER;
+        }
+      }
+      if (firstSpeaker == null) firstSpeaker = "A";
 
       if (isInterpreter) {
-        Heading w = new Heading(4, label);
+        Heading w = new Heading(4, firstSpeaker);
 
         DivWidget left = new DivWidget();
         left.add(w);
-        left.setWidth("100px");
+        left.setWidth(SPEAKER_WIDTH +
+            "px");
 
         styleLeftSpeaker(w);
 
@@ -216,19 +230,30 @@ public class ListenViewHelper<T extends TurnPanel>
 
         rowOne.add(left);
       } else {
-        leftSpeakerBox = addLeftSpeaker(rowOne, label);
+        leftSpeakerBox = addLeftSpeaker(rowOne, firstSpeaker);
       }
     }
 
     {
       if (isInterpreter) {
-        String label2 = dialog.getSpeakers().get(2);
-        if (label2 == null) label2 = "B";
+        String secondSpeaker = dialog.getSpeakers().get(2);
 
-        Heading w = new Heading(4, label2);
+        if (!dialog.getExercises().isEmpty()) {
+          ClientExercise next = dialog.getExercises().iterator().next();
+          boolean hasEnglishAttr = next.hasEnglishAttr();
+
+          if (hasEnglishAttr && !getExerciseSpeaker(next).equalsIgnoreCase(secondSpeaker)) {
+            secondSpeaker = controller.getLanguageInfo().toDisplay()+ " Speaker";
+          }
+        }
+
+        if (secondSpeaker == null) secondSpeaker = SPEAKER_B;
+
+        Heading w = new Heading(4, secondSpeaker);
 
         DivWidget right = new DivWidget();
-        right.setWidth("100px");
+        right.setWidth(SPEAKER_WIDTH +
+            "px");
         right.add(w);
         right.addStyleName("bubble");
         right.addStyleName("rightbubble");
@@ -241,15 +266,15 @@ public class ListenViewHelper<T extends TurnPanel>
     }
 
     {
-      String label1 = dialog.getSpeakers().get(1);
-      if (label1 == null) label1 = "Interpreter";
+      String interpreterSpeaker = dialog.getSpeakers().get(1);
+      if (interpreterSpeaker == null) interpreterSpeaker = INTERPRETER;
 
       if (isInterpreter) {
-        Heading w = new Heading(4, "Interpreter");
+        Heading w = new Heading(4, INTERPRETER);
 
         DivWidget middle = new DivWidget();
         middle.addStyleName("bubble");
-        middle.setWidth(240 + "px");
+        middle.setWidth(INTERPRETER_WIDTH + "px");
         middle.setHeight("44px");
         middle.getElement().getStyle().setMarginTop(0, PX);
         middle.getElement().getStyle().setMarginBottom(0, PX);
@@ -262,12 +287,18 @@ public class ListenViewHelper<T extends TurnPanel>
         middle.getElement().getStyle().setBackgroundColor(MIDDLE_COLOR);
         rowOne.add(middle);
       } else {
-        rightSpeakerBox = addRightSpeaker(rowOne, label1);
+        rightSpeakerBox = addRightSpeaker(rowOne, interpreterSpeaker);
       }
     }
 
 
     return rowOne;
+  }
+
+  private String getExerciseSpeaker(ClientExercise next) {
+    List<ExerciseAttribute> speaker = next.getAttributes().stream().filter(attr -> attr.getProperty().equalsIgnoreCase("Speaker")).collect(Collectors.toList());
+
+    return speaker.isEmpty() ? "" : speaker.get(0).getValue();
   }
 
   private void styleControlRow(DivWidget rowOne) {
