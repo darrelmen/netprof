@@ -79,13 +79,21 @@ public class JsonExport {
 //  private static final String MN = "mn";
 
   private static final int MAX_DEPTH = 2;
-  public static final String SEMESTER = "Semester";
+  private static final String SEMESTER = "Semester";
 
   private final Map<String, Integer> phoneToCount;
   private final ISection<CommonExercise> sectionHelper;
   private final Collection<Integer> preferredVoices;
   private final boolean isEnglish;
-  AudioFileHelper audioFileHelper;
+  private AudioFileHelper audioFileHelper;
+
+  public JsonExport() {
+    this(Collections.emptyMap(),
+        null,
+        Collections.emptyList(),
+        false,
+        null);
+  }
 
   /**
    * @param phoneToCount
@@ -271,21 +279,31 @@ public class JsonExport {
     return filteredExercises;
   }
 
+  public List<CommonExercise> getFilteredForIOS(Collection<CommonExercise> exercises) {
+    return getFiltered(true, true, exercises);
+  }
+
   @NotNull
   private List<CommonExercise> getFilteredExercises(boolean removeExercisesWithMissingAudio,
                                                     boolean removeCantDecode,
                                                     Collection<CommonExercise> exercisesForState) {
-    List<CommonExercise> copy = new ArrayList<>(exercisesForState);
-
-    removeMissingAudio(removeExercisesWithMissingAudio, copy);
-    removeCantDecode(removeCantDecode, copy);
+    List<CommonExercise> copy = getFiltered(removeExercisesWithMissingAudio, removeCantDecode, exercisesForState);
 
     copy.sort(Comparator
         .comparing((Function<CommonExercise, String>) CommonShell::getForeignLanguage)
         .thenComparing(CommonShell::getEnglish));
 
-   // getExerciseSorter().sortedByPronLengthThenPhone(copy, phoneToCount);
+    // getExerciseSorter().sortedByPronLengthThenPhone(copy, phoneToCount);
 
+    return copy;
+  }
+
+  @NotNull
+  private List<CommonExercise> getFiltered(boolean removeExercisesWithMissingAudio, boolean removeCantDecode, Collection<CommonExercise> exercisesForState) {
+    List<CommonExercise> copy = new ArrayList<>(exercisesForState);
+
+    removeMissingAudio(removeExercisesWithMissingAudio, copy);
+    removeCantDecode(removeCantDecode, copy);
     return copy;
   }
 

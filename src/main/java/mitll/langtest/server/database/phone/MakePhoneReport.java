@@ -234,7 +234,7 @@ public class MakePhoneReport {
    * @param sortedPhones
    * @return
    */
-  private Map<String, List<WordAndScore>> sortPhonesByLatest(final Map<String, PhoneStats> phoneToAvg, List<String> sortedPhones) {
+/*  private Map<String, List<WordAndScore>> sortPhonesByLatest(final Map<String, PhoneStats> phoneToAvg, List<String> sortedPhones) {
     Map<String, List<WordAndScore>> phoneToMinimal = getPhoneToMinimal(phoneToAvg);
 
     final Map<String, Float> phoneToScore = new HashMap<>();
@@ -255,14 +255,14 @@ public class MakePhoneReport {
       }
     }
     return phoneToMinimal;
-  }
+  }*/
 
-  private float getAverage(Map.Entry<String, List<WordAndScore>> pair) {
+/*  private float getAverage(Map.Entry<String, List<WordAndScore>> pair) {
     float total = 0;
     for (WordAndScore example : pair.getValue()) total += example.getPronScore();
     total /= pair.getValue().size();
     return total;
-  }
+  }*/
 
   @NotNull
   private Map<String, List<WordAndScore>> getPhoneToMinimal(Map<String, PhoneStats> phoneToAvg) {

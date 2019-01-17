@@ -117,7 +117,7 @@ public class ListFacetHelper {
       @Override
       public void onSuccess(Collection<IUserList> result) {
         long l = System.currentTimeMillis();
-        if (l - then > 250) {
+        if (l - then > 350) {
           logger.info("addListsAsLinks : took " + (l - then) + " to get lists for user.");
         }
         addListsAsLinks(result, finalTypeToValues, liForDimensionForType);

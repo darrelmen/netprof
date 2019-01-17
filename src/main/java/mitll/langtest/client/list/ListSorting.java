@@ -63,8 +63,8 @@ class ListSorting<T extends CommonShell & Scored, U extends HasID> {
   //  logger.info("ListSorting: key " + keyForSorting);
     ProjectStartupInfo projectStartupInfo = exerciseList.controller.getProjectStartupInfo();
     if (projectStartupInfo != null) {
-      language = exerciseList.controller.getLanguage();
       languageInfo = exerciseList.controller.getLanguageInfo();
+      language = exerciseList.controller.getLanguageInfo().toDisplay();
     }
     locale = projectStartupInfo == null ? "" : projectStartupInfo.getLocale();
   }
@@ -264,8 +264,10 @@ class ListSorting<T extends CommonShell & Scored, U extends HasID> {
    */
   private void sortBy(List<T> toSort, Comparator<T> comp) {
     if (toSort == null) {
+    //  logger.info("1 using comp = " + comp);
       exerciseList.flushWith(comp);
     } else {
+   //   logger.info("2 using comp = " + comp);
       toSort.sort(comp);
     }
   }

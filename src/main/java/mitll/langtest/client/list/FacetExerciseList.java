@@ -1095,9 +1095,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return event -> {
       Map<String, String> candidate = new HashMap<>(typeToSelection);  // existing set is in type->selection
       candidate.put(type, getChoiceHandlerValue(type, key, newUserListID));
-
-      logger.info("getChoiceHandler click on " + type + "=" + key + ", list = " + newUserListID);
-      logger.info("getChoiceHandler candidate " + candidate);
+//
+//      logger.info("getChoiceHandler click on " + type + "=" + key + ", list = " + newUserListID);
+//      logger.info("getChoiceHandler candidate " + candidate);
 
       setHistory(candidate);
     };

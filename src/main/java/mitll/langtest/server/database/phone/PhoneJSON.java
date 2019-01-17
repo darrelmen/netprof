@@ -55,9 +55,8 @@ public class PhoneJSON {
       Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted =
           worstPhonesAndScore.getPhoneToWordAndScoreSorted();
 
-      Map<String, List<WordAndScore>> worstPhones = new HashMap<>();
+      Map<String, List<WordAndScore>> worstPhones = new LinkedHashMap<>();
       phoneToWordAndScoreSorted.forEach((k, v) -> {
-        //Collection<List<WordAndScore>> values = v.values();
         List<WordAndScore> wordAndScores = worstPhones.computeIfAbsent(k, k1 -> new ArrayList<>());
 
         for (List<WordAndScore> value : v.values()) {

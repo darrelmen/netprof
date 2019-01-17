@@ -61,8 +61,6 @@ public interface IUserListManager {
   UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid,
                    int size, int duration, int minScore, boolean showAudio, Map<String, String> unitChapter);
 
-//  Collection<IUserListLight> getAllOrMineLight(int projid);
-
   Collection<IUserList> getSimpleListsForUser(int projid, int userid,
                                               boolean listsICreated,
                                               boolean visitedLists);
@@ -74,7 +72,7 @@ public interface IUserListManager {
 
   Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, boolean listsICreated, boolean visitedLists, boolean includeQuiz);
 
-  Collection<IUserList> getAllPublicOrMine(int projid, int userID, boolean isQuiz);
+  Collection<IUserList> getAllPublicOrMine(int projid, int userID, boolean isQuiz, boolean onlyWithAudio);
 
   /**
    * @param userid

@@ -115,12 +115,12 @@ public class JsonSupport {
       if (forContext) {
         exercisesForSelectionState = getContextExercises(exercisesForSelectionState);
       }
-      return getJsonForExercises(userid, sorter, exercisesForSelectionState, sortByLatestScore);
+      return getJsonForExercises(userid, exercisesForSelectionState);
     } else {
 //      int id = getListID(listid);
       // typeToSection.remove(LISTID);
-      return getJsonForExercises(userid, sorter,
-          userListManager.getCommonExercisesOnList(project.getID(), getListID(listid)), sortByLatestScore);
+      return getJsonForExercises(userid,
+          userListManager.getCommonExercisesOnList(project.getID(), getListID(listid)));
     }
   }
 
@@ -144,8 +144,7 @@ public class JsonSupport {
     return id;
   }
 
-  private JsonObject getJsonForExercises(int userid, ExerciseSorter sorter, Collection<CommonExercise> exercisesForState,
-                                         boolean sortByLatestScore) {
+  private JsonObject getJsonForExercises(int userid, Collection<CommonExercise> exercisesForState) {
     List<Integer> allIDs = new ArrayList<>();
 
     Map<Integer, CommonExercise> idToEx = new HashMap<>();
@@ -165,25 +164,6 @@ public class JsonSupport {
 
     return addJsonHistory(exerciseCorrectAndScores);
   }
-
-  /**
-   * @param typeToSection
-   * @return
-   * @seex DatabaseImpl#getJsonRefResult(Map, int)
-   */
-/*
-  JSONObject getJsonRefResults(Map<String, Collection<String>> typeToSection) {
-    Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToSection);
-    List<Integer> allIDs = new ArrayList<>();
-    // Map<String, CommonExercise> idToEx = new HashMap<String, CommonExercise>();
-    for (CommonExercise exercise : exercisesForState) {
-      // String id = exercise.getOldID();
-      allIDs.add(exercise.getID());
-      // idToEx.put(id, exercise);
-    }
-    return refResultDAO.getJSONScores(allIDs);
-  }
-*/
 
   /**
    * scoreJson has the complete scoring json for the last item only.

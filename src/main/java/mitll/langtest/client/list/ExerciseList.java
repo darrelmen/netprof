@@ -73,8 +73,8 @@ import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAs
 public abstract class ExerciseList<T extends CommonShell, U extends HasID> extends DivWidget
     implements ListInterface<T, U>, ProvidesResize {
   private final Logger logger = Logger.getLogger("ExerciseList");
-  public static final String LIST_COMPLETE = "List complete!";
-  public static final String COMPLETE = "Complete";
+  protected static final String LIST_COMPLETE = "List complete!";
+  protected static final String COMPLETE = "Complete";
 
   private static final boolean DEBUG_STALE = true;
   private static final boolean DEBUG = false;
@@ -96,13 +96,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
 
   private static final int MAX_MSG_LEN = 200;
 
-  protected SimplePanel innerContainer;
+  SimplePanel innerContainer;
   final ExerciseServiceAsync service;
   private final UserFeedback feedback;
   ExercisePanelFactory<T, U> factory;
   protected final ExerciseController controller;
 
-  protected Panel createdPanel = null;
+  private Panel createdPanel = null;
   /**
    *
    */
@@ -517,11 +517,11 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
    * @see ExerciseList.SetExercisesCallback#onSuccess(ExerciseListWrapper)
    * @see #rememberAndLoadFirst
    */
-  public void rememberAndLoadFirst(List<T> exercises,
+  void rememberAndLoadFirst(List<T> exercises,
                                    String selectionID,
                                    String searchIfAny,
                                    int exerciseID) {
-    if (DEBUG) logger.info("ExerciseList : rememberAndLoadFirst instance '" + //getInstance() +
+    if (DEBUG | true) logger.info("ExerciseList : rememberAndLoadFirst instance '" + //getInstance() +
         "'" +
         "\n\tremembering " + exercises.size() + " exercises," +
         "\n\tselection   " + selectionID +

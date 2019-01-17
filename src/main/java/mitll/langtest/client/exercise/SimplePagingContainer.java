@@ -43,6 +43,7 @@ import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.view.client.ListDataProvider;
 import com.google.gwt.view.client.Range;
 import com.google.gwt.view.client.SingleSelectionModel;
+import mitll.langtest.client.list.ContainerList;
 import mitll.langtest.client.list.ListOptions;
 import org.jetbrains.annotations.NotNull;
 
@@ -76,11 +77,17 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   private SimplePager pager;
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_SORTING = false;
   private static final boolean DEBUG_SCROLL = false;
+  private ContainerList<T> containerList;
 
   protected SimplePagingContainer(ExerciseController controller) {
     this.controller = controller;
     this.dataProvider = new ListDataProvider<>();
+  }
+
+  public void setContainerList(ContainerList<T> containerList) {
+    this.containerList = containerList;
   }
 
   /**
@@ -131,7 +138,6 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   }
 
 
-
   public Map<Integer, T> getIdToExercise() {
     return Collections.emptyMap();
   }
@@ -166,7 +172,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    * @see #getTableWithPager
    */
   protected CellTable<T> makeCellTable(boolean sortEnglish) {
-  // logger.info("simplePaging : makeCellTable -------- " + sortEnglish);
+    // logger.info("simplePaging : makeCellTable -------- " + sortEnglish);
     CellTable.Resources o = chooseResources();
     this.table = makeCellTable(o);
 
@@ -236,19 +242,35 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   protected void addSelectionModel() {
   }
 
+  /**
+   * So if there's no comparator, use the initial ordering from the server...
+   */
   public void flush() {
+    long then = System.currentTimeMillis();
     if (comp != null) {
       List<T> newList = new ArrayList<>(getList());
-      if (DEBUG) logger.info("flush : start sorting " + newList.size());
+      //  if (DEBUG_SORTING) logger.info("flush : start sorting " + newList.size());
       newList.sort(comp);
-      if (DEBUG) logger.info("flush : end   sorting " + newList.size());
+      long now = System.currentTimeMillis();
+      if (DEBUG_SORTING) logger.info("flush : end   sorting " + newList.size() + " in " + (now - then));
       dataProvider.setList(newList);
 
     } else {
-      if (DEBUG) logger.info("flush :no comparator ");
+      if (DEBUG_SORTING) logger.info("flush :no comparator ");
+
+      if (containerList != null) {
+        dataProvider.setList(containerList.getInOrder());
+      }
+      long now = System.currentTimeMillis();
+      if (DEBUG_SORTING) logger.info("flush :no comparator took " + (now - then));
 
     }
+
+    then = System.currentTimeMillis();
     dataProvider.flush();
+    long now = System.currentTimeMillis();
+    if (DEBUG_SORTING) logger.info("flush : took " + (now - then));
+
     table.setRowCount(getList().size());
   }
 
@@ -261,7 +283,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   }
 
   protected void addColumn(Column<T, SafeHtml> id2, String title) {
-    addColumn(id2,new TextHeader(title));
+    addColumn(id2, new TextHeader(title));
   }
 
   /**
@@ -411,6 +433,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   private Comparator<T> comp;
 
+  /**
+   * @param comp
+   * @see mitll.langtest.client.list.PagingExerciseList#flushWith
+   */
   public void setComparator(Comparator<T> comp) {
     this.comp = comp;
   }
@@ -419,19 +445,19 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
    * @param comp
    * @see mitll.langtest.client.list.PagingExerciseList#sortBy
    */
-  @Override
+ /* @Override
   public void sortBy(Comparator<T> comp) {
     this.comp = comp;
     long then = System.currentTimeMillis();
-    if (DEBUG) logger.info("sortBy about to sort ------- ");
+    if (DEBUG || true) logger.info("sortBy about to sort ------- ");
     List<T> list = getList();
+
     List<T> newList = new ArrayList<>(list);
     newList.sort(comp);
 
     long now = System.currentTimeMillis();
-    if (DEBUG) logger.info("sortBy finished sort in " + (now - then) + " ----- ");
-  }
-
+    if (DEBUG|| true) logger.info("sortBy finished sort in " + (now - then) + " ----- ");
+  }*/
   public void hide() {
     table.setVisible(false);
   }

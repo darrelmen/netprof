@@ -115,6 +115,8 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String UTF_8 = "UTF-8";
   private static final String LIST = "list";
   public static final String SORT_BY_LATEST_SCORE = "sortByLatestScore";
+  public static final String TRUE = "true";
+  public static final String FALSE = "false";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -290,8 +292,8 @@ public class ScoreServlet extends DatabaseServlet {
           } else {
             if (split1.length == 2) {
               String removeExercisesWithMissingAudio = getRemoveExercisesParam(queryString);
-              boolean shouldRemoveExercisesWithNoAudio = removeExercisesWithMissingAudio.equals("true");
-              boolean dontRemove = removeExercisesWithMissingAudio.equals("false");
+              boolean shouldRemoveExercisesWithNoAudio = removeExercisesWithMissingAudio.equals(TRUE);
+              boolean dontRemove = removeExercisesWithMissingAudio.equals(FALSE);
               if (shouldRemoveExercisesWithNoAudio || dontRemove) {
                 if (dontRemove) {
                   toReturn = getCachedNestedChapters(projid, shouldRemoveExercisesWithNoAudio);
@@ -322,8 +324,13 @@ public class ScoreServlet extends DatabaseServlet {
           toReturn = db.getUserListManager().getListsJson(userID, projid, true);
         } else if (realRequest == GetRequest.CONTENT) {
           int listid = getListParam(queryString);
-          logger.info("list id " + listid);
-          toReturn = getJsonForListContent(true, projid, listid);
+          //logger.info("list id " + listid);
+          try {
+            new Thread().sleep(10000);
+          } catch (InterruptedException e) {
+            e.printStackTrace();
+          }
+          toReturn = getJsonForListContent(projid, listid);
         } else {
           toReturn.addProperty(ERROR, "unknown req " + queryString);
         }
@@ -533,7 +540,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (split1.length == 2) {
       return getParamValue(split1[1], REMOVE_EXERCISES_WITH_MISSING_AUDIO);
     } else {
-      return removeExercisesWithMissingAudioDefault ? "true" : "false";
+      return removeExercisesWithMissingAudioDefault ? TRUE : FALSE;
     }
   }
 
@@ -542,7 +549,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (!hasParam) {
       return "expecting param " + param;
     }
-    return s.equals(param + "=true") ? "true" : "false";
+    return s.equals(param + "=true") ? TRUE : FALSE;
   }
 
   /**
@@ -949,14 +956,14 @@ public class ScoreServlet extends DatabaseServlet {
     return JsonObject;
   }
 
-  private JsonObject getJsonForListContent(boolean removeExercisesWithMissingAudio, int projectid, int listid) {
-    JsonExport jsonExport = getJsonExport(removeExercisesWithMissingAudio, projectid);
+  private JsonObject getJsonForListContent(int projectid, int listid) {
+    JsonExport jsonExport = getJsonExport(true, projectid);
     long then = System.currentTimeMillis();
 
     JsonObject JsonObject = new JsonObject();
     {
       List<CommonExercise> exercisesForList = db.getUserListManager().getCommonExercisesOnList(projectid, listid);
-      JsonObject.add(CONTENT, jsonExport.getContentAsJsonFor(removeExercisesWithMissingAudio, exercisesForList));
+      JsonObject.add(CONTENT, jsonExport.getContentAsJsonFor(true, exercisesForList));
       addVersion(projectid, then, JsonObject);
     }
     return JsonObject;
@@ -1271,7 +1278,7 @@ public class ScoreServlet extends DatabaseServlet {
 
   private boolean getParam(HttpServletRequest request, String param) {
     String use_phone_to_display = request.getHeader(param);
-    return use_phone_to_display != null && !use_phone_to_display.equals("false");
+    return use_phone_to_display != null && !use_phone_to_display.equals(FALSE);
   }
 
   /**
