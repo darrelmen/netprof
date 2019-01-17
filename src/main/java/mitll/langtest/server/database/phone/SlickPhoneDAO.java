@@ -101,17 +101,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         shared.getDuration());
   }
 
-/*  public Phone fromSlick(SlickPhone slick) {
-    return new Phone(
-        slick.projid(),
-        slick.rid(),
-        slick.wid(),
-        slick.phone(),
-        slick.seq(),
-        slick.score(),
-        slick.duration());
-  }*/
-
   /**
    * @param bulk
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyPhone
@@ -176,6 +165,12 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     return getPhoneSummary(getSlickPhoneReports(userid, resultIDs));
   }
 
+  /**
+   * @see Analysis#getPhoneBigramsForPeriod
+   * @param userid
+   * @param resultIDs
+   * @return
+   */
   @Override
   public PhoneBigrams getPhoneBigrams(int userid, Collection<Integer> resultIDs) {
     return getPhoneBigrams(getSlickPhoneReports(userid, resultIDs));
@@ -341,8 +336,13 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     return new MakePhoneReport().getPhoneBigrams(phoneToBigramToScore);
   }*/
 
+  /**
+   * @see #getPhoneBigrams(int, Collection)
+   * @param phoneReportByResult
+   * @return
+   */
   private PhoneBigrams getPhoneBigrams(Collection<SlickPhoneReport> phoneReportByResult) {
-    Set<Integer> exids = new HashSet<>();
+    //Set<Integer> exids = new HashSet<>();
 
     // first by phone,
     // then by bigram, then examples per bigram

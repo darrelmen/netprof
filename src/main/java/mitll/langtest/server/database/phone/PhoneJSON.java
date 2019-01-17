@@ -57,10 +57,10 @@ public class PhoneJSON {
 
       Map<String, List<WordAndScore>> worstPhones = new HashMap<>();
       phoneToWordAndScoreSorted.forEach((k, v) -> {
-        Collection<List<WordAndScore>> values = v.values();
+        //Collection<List<WordAndScore>> values = v.values();
         List<WordAndScore> wordAndScores = worstPhones.computeIfAbsent(k, k1 -> new ArrayList<>());
 
-        for (List<WordAndScore> value : values) {
+        for (List<WordAndScore> value : v.values()) {
           wordAndScores.addAll(value);
         }
 //        wordAndScores.addAll(values);
@@ -96,17 +96,17 @@ public class PhoneJSON {
         for (Map.Entry<Long, String> pair : resToAnswer.entrySet()) {
           JsonObject result = new JsonObject();
 
-          Long key = pair.getKey();
+          Long resultID = pair.getKey();
           result.addProperty(ANSWER, pair.getValue());
-          result.addProperty(REF, resToRef.get(key));
+          result.addProperty(REF, resToRef.get(resultID));
 
           {
-            String value = resToResult.get(key);
+            String value = resToResult.get(resultID);
             JsonParser parser = new JsonParser();
             result.add(RESULT, parser.parse(value).getAsJsonObject());
           }
 
-          results.add(Long.toString(key), result);
+          results.add(Long.toString(resultID), result);
         }
         jsonObject.add(RESULTS, results);
       }

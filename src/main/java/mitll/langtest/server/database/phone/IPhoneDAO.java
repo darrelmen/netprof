@@ -28,15 +28,6 @@ public interface IPhoneDAO<T> extends IDAO {
   JsonObject getWorstPhonesJson(int userid, Collection<Integer> exids, String language, Project project);
 
   /**
-   * @param userid
-   * @param ids
-   * @param project
-   * @return
-   * @see mitll.langtest.server.database.analysis.Analysis#getPhoneReport
-   */
-  //PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> ids, Project project);
-
-  /**
    * @see mitll.langtest.server.database.analysis.Analysis#getPhoneSummary
    * @param userid
    * @param ids

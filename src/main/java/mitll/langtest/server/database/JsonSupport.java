@@ -34,6 +34,7 @@ package mitll.langtest.server.database;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
@@ -116,9 +117,10 @@ public class JsonSupport {
       }
       return getJsonForExercises(userid, sorter, exercisesForSelectionState, sortByLatestScore);
     } else {
-      int id = getListID(listid);
-      typeToSection.remove(LISTID);
-      return getJsonForExercises(userid, sorter, userListManager.getCommonExercisesOnList(project.getID(), id), sortByLatestScore);
+//      int id = getListID(listid);
+      // typeToSection.remove(LISTID);
+      return getJsonForExercises(userid, sorter,
+          userListManager.getCommonExercisesOnList(project.getID(), getListID(listid)), sortByLatestScore);
     }
   }
 
@@ -154,7 +156,7 @@ public class JsonSupport {
     }
 
     List<ExerciseCorrectAndScore> exerciseCorrectAndScores =
-        resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, sorter, language);
+        resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, language);
 
 //    if (true) {
 //     // exerciseCorrectAndScores.sort(Comparator.comparingDouble(ExerciseCorrectAndScore::getLatestScore));
@@ -210,12 +212,16 @@ public class JsonSupport {
 
       {
         String value = Integer.toString(ex.getLatestScorePercent());
-        exAndScores.addProperty("s", value);
+        exAndScores.addProperty("s", value);   // latest score!
       }
 
       exAndScores.add("h", history);
       exAndScores.add(SCORES, getScoresAsJson(correctAndScoresLimited));
-      exAndScores.addProperty(SCORE_JSON, empty ? "" : correctAndScoresLimited.get(correctAndScoresLimited.size() - 1).getScoreJson());
+      {
+        String value = empty ? "" : correctAndScoresLimited.get(correctAndScoresLimited.size() - 1).getScoreJson();
+        JsonParser parser = new JsonParser();
+        exAndScores.add(SCORE_JSON, parser.parse(value));
+      }
       scores.add(exAndScores);
     }
 
@@ -283,11 +289,18 @@ public class JsonSupport {
    * @see DatabaseImpl#getJsonPhoneReport
    */
   JsonObject getJsonPhoneReport(int userid, Map<String, Collection<String>> typeToValues, String language) {
-    Collection<CommonExercise> exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
-    logger.info("getJsonPhoneReport : for user " + userid + " and" +
-        "\n\tsel " +
-        typeToValues +
-        "\n\tgot " + exercisesForState.size() + " exercises");
+    Collection<String> listid = typeToValues.get(LISTID);
+
+    Collection<CommonExercise> exercisesForState;
+    if (listid == null || listid.isEmpty()) {
+      exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
+      logger.info("getJsonPhoneReport : for user " + userid + " and" +
+          "\n\tsel " +
+          typeToValues +
+          "\n\tgot " + exercisesForState.size() + " exercises");
+    } else {
+      exercisesForState = userListManager.getCommonExercisesOnList(project.getID(), getListID(listid));
+    }
     List<Integer> ids = exercisesForState.stream().map(HasID::getID).collect(Collectors.toList());
     return phoneDAO.getWorstPhonesJson(userid, ids, language, project);
   }

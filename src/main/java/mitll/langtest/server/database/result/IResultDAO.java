@@ -105,7 +105,7 @@ public interface IResultDAO extends IDAO {
   List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
                                                                           List<Integer> allIds,
                                                                           Map<Integer, CommonExercise> idToEx,
-                                                                          ExerciseSorter sorter,
+
                                                                           Language language);
 
   void attachScoreHistory(int userID, CommonExercise firstExercise, Language language);
