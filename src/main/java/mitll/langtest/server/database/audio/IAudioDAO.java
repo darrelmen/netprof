@@ -81,6 +81,8 @@ public interface IAudioDAO extends IDAO {
    */
   List<SlickAudio> getAllNoExistsCheck(int projid);
 
+  Set<Integer> getExercisesThatHaveAudio(int projID, Collection<Integer> exids);
+
   /**
    * @param firstExercise
    * @param language

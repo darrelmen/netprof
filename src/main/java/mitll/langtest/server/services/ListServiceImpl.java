@@ -205,7 +205,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     boolean isNormalList = list_type == UserList.LIST_TYPE.NORMAL;
     Collection<IUserList> listsForUser = isNormalList ?
         userListManager.getSimpleListsForUser(projectIDFromUser, userIDFromSessionOrDB, onlyCreated, visited) :
-        userListManager.getAllPublicOrMine(projectIDFromUser, userIDFromSessionOrDB, false, false);
+        userListManager.getAllPublicOrMine(projectIDFromUser, userIDFromSessionOrDB, list_type == UserList.LIST_TYPE.QUIZ, false);
 
     long now = System.currentTimeMillis();
 

@@ -164,6 +164,7 @@ public abstract class BaseAudioDAO extends DAO {
 
   /**
    * TODO : consider why doing this all the time
+   * TODO : this could be a lot smarter...
    *
    * @param exercises
    * @param language
@@ -225,13 +226,23 @@ public abstract class BaseAudioDAO extends DAO {
 
   @NotNull
   private <T extends ClientExercise> Set<Integer> getExerciseIDsForAttachment(Collection<T> exercises, Language language) {
+    long then = System.currentTimeMillis();
     Set<Integer> exerciseIDs = exercises.stream().map(HasID::getID).collect(Collectors.toSet());
-    logger.info("attachAudioToExercises to " + exercises.size() + " exercises for " +
+    long now = System.currentTimeMillis();
+    logger.info("attachAudioToExercises (" + (now - then) +
+        ") to " + exercises.size() + " exercises for " +
         language + " : " + exerciseIDs.size());
 
+    then = now;
     exercises
         .forEach(exercise -> exercise.getDirectlyRelated()
             .forEach(exercise1 -> exerciseIDs.add(exercise1.getID())));
+    now = System.currentTimeMillis();
+    logger.info("attachAudioToExercises 2 (" + (now - then) +
+        ") to " + exercises.size() + " exercises for " +
+        language + " : " + exerciseIDs.size());
+
+
     return exerciseIDs;
   }
 

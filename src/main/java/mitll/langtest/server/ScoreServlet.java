@@ -325,11 +325,11 @@ public class ScoreServlet extends DatabaseServlet {
         } else if (realRequest == GetRequest.CONTENT) {
           int listid = getListParam(queryString);
           //logger.info("list id " + listid);
-          try {
+      /*    try {
             new Thread().sleep(10000);
           } catch (InterruptedException e) {
             e.printStackTrace();
-          }
+          }*/
           toReturn = getJsonForListContent(projid, listid);
         } else {
           toReturn.addProperty(ERROR, "unknown req " + queryString);
@@ -940,7 +940,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet
    */
   private JsonObject getJsonNestedChapters(int projectid, boolean removeExercisesWithMissingAudio, boolean justContext) {
-    return getJsonForExport(projectid, justContext, removeExercisesWithMissingAudio, getJsonExport(removeExercisesWithMissingAudio, projectid));
+    return getJsonForExport(projectid, justContext, removeExercisesWithMissingAudio, getJsonExport(projectid));
   }
 
   @NotNull
@@ -957,7 +957,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private JsonObject getJsonForListContent(int projectid, int listid) {
-    JsonExport jsonExport = getJsonExport(true, projectid);
+    JsonExport jsonExport = getJsonExport(projectid);
     long then = System.currentTimeMillis();
 
     JsonObject JsonObject = new JsonObject();
@@ -977,11 +977,11 @@ public class ScoreServlet extends DatabaseServlet {
     addVersion(jsonObject, projectid);
   }
 
-  private JsonExport getJsonExport(boolean removeExercisesWithMissingAudio, int projectid) {
+  private JsonExport getJsonExport(int projectid) {
     if (projectid == -1) {
       logger.error("getJsonNestedChapters project id is not defined : " + projectid);
     } else {
-      logger.debug("getJsonNestedChapters get content for project id " + projectid + " remove exercises " + removeExercisesWithMissingAudio);
+      logger.debug("getJsonNestedChapters get content for project id " + projectid  );
     }
 
     long then = System.currentTimeMillis();

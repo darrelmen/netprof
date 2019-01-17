@@ -45,6 +45,7 @@ import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.services.AmasServices;
 import mitll.langtest.server.database.user.IPendingUserDAO;
 import mitll.langtest.server.database.userlist.UserListServices;
+import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -131,4 +132,6 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
   boolean isHasValidDB();
 
   String getDbConfig();
+
+  JsonExport getJSONExport(int projectid);
 }

@@ -367,6 +367,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return copy;
   }
 
+  public Set<Integer> getExercisesThatHaveAudio(int projID, Collection<Integer> exids) {
+    return dao.getExercisesThatHaveAudio(projID, exids);
+  }
+
   /**
    * Do this differently
    * <p>

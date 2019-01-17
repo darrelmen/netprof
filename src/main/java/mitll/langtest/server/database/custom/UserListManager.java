@@ -384,44 +384,62 @@ public class UserListManager implements IUserListManager {
     }
   }
 
+  /**
+   * TODO consider checking for not scoreable?
+   *
+   * @param lists
+   * @return
+   */
   @NotNull
   private Collection<IUserList> getSimpleListsOnlyWithAudio(Collection<SlickUserExerciseList> lists) {
-  //  Map<Integer, Collection<Integer>> exidsForList = userListExerciseJoinDAO.getExidsForList(getListIDs(lists));
+    //  Map<Integer, Collection<Integer>> exidsForList = userListExerciseJoinDAO.getExidsForList(getListIDs(lists));
     //  logger.info("asking for number of exercises for " + listIDs + "\n\tgot " + numForList);
 
     List<IUserList> userLists = new ArrayList<>(lists.size());
     Map<Integer, String> idToName = new HashMap<>();
     Map<Integer, String> idToFullName = new HashMap<>();
+    Set<Integer> listIDs = getListIDs(lists);
+    logger.info("getSimpleListsOnlyWithAudio asking for " + listIDs.size() + " lists");
+
+    Map<Integer, Collection<Integer>> exidsForList = userListExerciseJoinDAO.getExidsForList(listIDs);
+    if (listIDs.size() != exidsForList.size()) {
+      logger.info("getSimpleListsOnlyWithAudio got back " + exidsForList.size() + " ids->items");
+    }
+    long then = System.currentTimeMillis();
     lists.forEach(l -> {
       int listid = l.id();
+      int projid = l.projid();
+      Collection<Integer> exidsOnList = exidsForList.get(listid);
 
-      //    List<CommonExercise> commonExercisesOnList = getCommonExercisesOnList(l.projid(), id);
-      List<CommonExercise> filteredForIOS = new JsonExport().getFilteredForIOS(getCommonExercisesOnList(l.projid(), listid));
+      int numItems = 0;
+      if (exidsOnList == null) {
+        logger.warn("huh? no exercise ids for " + listid + " : " + l.name());
+      } else if (exidsOnList.isEmpty()) {
+        logger.info("empty exercise ids for " + listid + " : " + l.name());
+
+      } else {
+        Set<Integer> exercisesThatHaveAudio = databaseServices.getAudioDAO().getExercisesThatHaveAudio(projid, exidsOnList);
+//        logger.info("getSimpleListsOnlyWithAudio found " + commonExercisesOnList.size() + " exercises for list #" + listid);
+
+//        JsonExport jsonExport = databaseServices.getJSONExport(projid);
+//        List<CommonExercise> filteredForIOS = jsonExport.getFilteredForIOS(commonExercisesOnList);
+        if (exercisesThatHaveAudio.size() < exidsOnList.size()) {
+          logger.info("getSimpleListsOnlyWithAudio after filter " + exercisesThatHaveAudio.size() + " exercises for list #" + listid);
+        }
+        numItems = exercisesThatHaveAudio.size();
+      }
 
       int userid1 = l.userid();
       String name = getUserName(userid1, idToName);
       String fullName = getFullName(userid1, idToFullName);
-//   logger.info("list #" + id + " - " + numItems + " "+fullName);
-
-      userLists.add(getSimpleUserList(l, filteredForIOS.size(), userid1, name, fullName));
+      userLists.add(getSimpleUserList(l, numItems, userid1, name, fullName));
     });
+    long now = System.currentTimeMillis();
+
+    logger.info("getSimpleListsOnlyWithAudio took " + (now - then) + " millis");
+
     return userLists;
   }
-
-/*  private List<Integer> justWithAudio(Map<Integer, Collection<Integer>> exidsForList, SlickUserExerciseList l, int id) {
-    Collection<Integer> exids = exidsForList.getOrDefault(id, Collections.emptyList());
-
-    List<Integer> withAudio = new ArrayList<>();
-    exids.forEach(exid -> {
-      CommonExercise customOrPredefExercise = databaseServices.getDatabase().getCustomOrPredefExercise(l.projid(), exid);
-      if (customOrPredefExercise != null) {
-        if (customOrPredefExercise.hasRefAudio()) {
-          withAudio.add(customOrPredefExercise.getID());
-        }
-      }
-    });
-    return withAudio;
-  }*/
 
   @NotNull
   private Collection<IUserList> getSimpleLists(Collection<SlickUserExerciseList> lists) {
@@ -894,13 +912,27 @@ public class UserListManager implements IUserListManager {
     return where;
   }
 
+  /**
+   * A little weird the join can result in missing exercises...
+   * @param projid
+   * @param id
+   * @return
+   */
   @NotNull
   public List<CommonExercise> getCommonExercisesOnList(int projid, int id) {
     Collection<Integer> exidsForList = userListExerciseJoinDAO.getExidsForList(id);
     logger.info("getCommonExercisesOnList found " + exidsForList.size() + " exids for list #" + id);
 
     List<CommonExercise> exercises = new ArrayList<>(exidsForList.size());
-    exidsForList.forEach(exid -> exercises.add(databaseServices.getExercise(projid, exid)));
+    exidsForList.forEach(exid -> {
+      CommonExercise exercise = databaseServices.getExercise(projid, exid);
+      if (exercise != null) {
+        exercises.add(exercise);
+      } else {
+        logger.warn("getCommonExercisesOnList can't find exercise " + exid + " in " + projid);
+      }
+    });
+    logger.info("getCommonExercisesOnList found " + exercises.size() + " exercises for list #" + id);
     return exercises;
   }
 
@@ -1097,14 +1129,6 @@ public class UserListManager implements IUserListManager {
     return userListExerciseJoinDAO.remove(listid, exid);
   }
 
-  /**
-   * @return
-   * @seex mitll.langtest.server.services.ExerciseServiceImpl#filterByOnlyAudioAnno
-   */
-/*  @Override
-  public Collection<Integer> getAudioAnnos() {
-    return annotationDAO.getAudioAnnos();
-  }*/
   @Override
   public IAnnotationDAO getAnnotationDAO() {
     return annotationDAO;

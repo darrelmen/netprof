@@ -81,19 +81,18 @@ public class JsonExport {
   private static final int MAX_DEPTH = 2;
   private static final String SEMESTER = "Semester";
 
-  private final Map<String, Integer> phoneToCount;
   private final ISection<CommonExercise> sectionHelper;
   private final Collection<Integer> preferredVoices;
   private final boolean isEnglish;
   private AudioFileHelper audioFileHelper;
 
-  public JsonExport() {
+/*  public JsonExport() {
     this(Collections.emptyMap(),
         null,
         Collections.emptyList(),
         false,
         null);
-  }
+  }*/
 
   /**
    * @param phoneToCount
@@ -108,7 +107,7 @@ public class JsonExport {
                     Collection<Integer> preferredVoices,
                     boolean isEnglish,
                     AudioFileHelper audioFileHelper) {
-    this.phoneToCount = phoneToCount;
+   // Map<String, Integer> phoneToCount1 = phoneToCount;
     this.sectionHelper = sectionHelper;
     this.preferredVoices = preferredVoices;
     this.isEnglish = isEnglish;
@@ -337,10 +336,6 @@ public class JsonExport {
       }
       //    logger.info("getJsonForSelection after  had " + exercisesForState.size());
     }
-  }
-
-  private ExerciseSorter getExerciseSorter() {
-    return new ExerciseSorter(phoneToCount);
   }
 
   /**

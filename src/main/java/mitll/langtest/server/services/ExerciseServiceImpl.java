@@ -1291,6 +1291,13 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     return pair;
   }
 
+  /**
+   * @see #getLatestScoreAudioPath
+   * @param userID
+   * @param projectIDFromUser
+   * @param exid
+   * @return
+   */
   @Nullable
   private String getRefAudio(int userID, int projectIDFromUser, int exid) {
     CommonExercise byID = db.getCustomOrPredefExercise(projectIDFromUser, exid);

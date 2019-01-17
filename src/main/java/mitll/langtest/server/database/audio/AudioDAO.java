@@ -78,6 +78,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
+  public Set<Integer> getExercisesThatHaveAudio(int projID, Collection<Integer> exids) {
+    return null;
+  }
+
+  @Override
   public AudioAttribute getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript, AudioCopy audioCopy) {
     return null;
   }

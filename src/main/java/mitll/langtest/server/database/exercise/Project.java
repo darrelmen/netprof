@@ -34,16 +34,24 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
+import mitll.langtest.server.database.project.DialogPopulate;
 import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.project.ProjectDAO;
 import mitll.langtest.server.database.project.ProjectManagement;
+import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.decoder.RefResultDecoder;
+import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.scoring.ASRWebserviceScoring;
+import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.server.services.AudioServiceImpl;
+import mitll.langtest.server.services.ScoringServiceImpl;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -80,7 +88,7 @@ public class Project implements IPronunciationLookup {
 
   /**
    * @see #getWebserviceHost
-   * @see mitll.langtest.server.database.project.ProjectDAO#update
+   * @see ProjectDAO#update
    * @see ProjectManagement#getProjectInfo
    */
   /**
@@ -94,7 +102,7 @@ public class Project implements IPronunciationLookup {
 
   /**
    * @see #getWebservicePort
-   * @see mitll.langtest.server.database.project.ProjectDAO#update(int, ProjectInfo)
+   * @see ProjectDAO#update(int, ProjectInfo)
    */
 
   private SlickProject project;
@@ -122,13 +130,14 @@ public class Project implements IPronunciationLookup {
    */
   private List<IDialog> dialogs = new ArrayList<>();
   private final ISection<IDialog> dialogSectionHelper = new SectionHelper<>();
+  private JsonExport jsonExport;
 
   //private ExerciseTrie<CommonExercise> phoneTrie;
   //private Map<Integer, ExercisePhoneInfo> exToPhone;
 
   /**
    * @param exerciseDAO
-   * @see mitll.langtest.server.database.project.ProjectManagement#addSingleProject
+   * @see ProjectManagement#addSingleProject
    */
   public Project(ExerciseDAO<CommonExercise> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
@@ -253,7 +262,7 @@ public class Project implements IPronunciationLookup {
 
   /**
    * @param exerciseDAO
-   * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO
+   * @see ProjectManagement#setExerciseDAO
    */
   public void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
@@ -339,7 +348,7 @@ public class Project implements IPronunciationLookup {
   }
 
   /**
-   * @see mitll.langtest.server.services.AudioServiceImpl#recalcRefAudio
+   * @see AudioServiceImpl#recalcRefAudio
    */
   public RecalcRefResponse recalcRefAudio() {
     Collection<CommonExercise> exercisesForUser = getRawExercises();
@@ -514,7 +523,7 @@ public class Project implements IPronunciationLookup {
    * @param prefix
    * @return
    * @seex mitll.langtest.server.services.ListServiceImpl#getExerciseByVocab
-   * @see mitll.langtest.server.ScoreServlet#getExerciseIDFromText
+   * @see ScoreServlet#getExerciseIDFromText
    */
   public CommonExercise getExerciseByExactMatch(String prefix) {
     return getMatchEitherFLOrEnglish(prefix, fullTrie.getExercises(prefix));
@@ -656,7 +665,7 @@ public class Project implements IPronunciationLookup {
    * @param transcript
    * @param transliteration
    * @return
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict
+   * @see SlickUserExerciseDAO#getExercisePhoneInfoFromDict
    */
   @Override
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {
@@ -705,7 +714,7 @@ public class Project implements IPronunciationLookup {
 
   /**
    * @return
-   * @see mitll.langtest.server.scoring.AlignmentHelper#addAlignmentOutput(int, Project, Collection)
+   * @see AlignmentHelper#addAlignmentOutput(int, Project, Collection)
    */
   public Map<Integer, AlignmentOutput> getAudioToAlignment() {
     return audioToAlignment;
@@ -777,7 +786,7 @@ public class Project implements IPronunciationLookup {
   /**
    * @param testAudioFile
    * @param userIDFromSessionOrDB
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
+   * @see ScoringServiceImpl#getPretestScore
    */
   public void addAnswerToUser(String testAudioFile, int userIDFromSessionOrDB) {
     fileToRecorder.put(testAudioFile, userIDFromSessionOrDB);
@@ -820,7 +829,7 @@ public class Project implements IPronunciationLookup {
 
   /**
    * @param dialogs
-   * @see mitll.langtest.server.database.project.DialogPopulate#addDialogInfo
+   * @see DialogPopulate#addDialogInfo
    */
   public void setDialogs(List<IDialog> dialogs) {
     this.dialogs = dialogs;
@@ -858,6 +867,14 @@ public class Project implements IPronunciationLookup {
       logger.info("report on dialog types");
       dialogSectionHelper.report();
     }
+  }
+
+  public JsonExport getJsonExport() {
+    return jsonExport;
+  }
+
+  public void setJsonExport(JsonExport jsonExport) {
+    this.jsonExport = jsonExport;
   }
 
   public String toString() {

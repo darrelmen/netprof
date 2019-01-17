@@ -844,6 +844,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
+   * DUDE: super expensive...
+   *
+   * SUPER EXPENSIVE the first time
+   *
    * @param projectid
    * @return
    * @seex ScoreServlet#getJSONForExercises
@@ -855,20 +859,24 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.warn("asking for unknown project " + projectid);
       return new JsonExport(null, null, Collections.emptyList(), false, null);
     } else {
-      getExercises(projectid, false);
+      if (project.getJsonExport()== null) {
+        getExercises(projectid, false);
 
-      AudioFileHelper audioFileHelper = project.getAudioFileHelper();
+        AudioFileHelper audioFileHelper = project.getAudioFileHelper();
 
-      JsonExport jsonExport = new JsonExport(
-          audioFileHelper == null ? Collections.emptyMap() : audioFileHelper.getPhoneToCount(),
-          getSectionHelper(projectid),
-          serverProps.getPreferredVoices(),
-          getLanguageEnum(projectid) == Language.ENGLISH,
-          project.getAudioFileHelper()
-      );
+        JsonExport jsonExport = new JsonExport(
+            audioFileHelper == null ? Collections.emptyMap() : audioFileHelper.getPhoneToCount(),
+            getSectionHelper(projectid),
+            serverProps.getPreferredVoices(),
+            getLanguageEnum(projectid) == Language.ENGLISH,
+            project.getAudioFileHelper()
+        );
 
-      attachAllAudio(projectid);
-      return jsonExport;
+        attachAllAudio(projectid);
+        project.setJsonExport(jsonExport);
+      }
+
+      return project.getJsonExport();
     }
   }
 
