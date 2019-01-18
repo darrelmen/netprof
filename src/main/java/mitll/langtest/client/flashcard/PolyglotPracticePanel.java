@@ -89,7 +89,10 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
 
     if (this.polyglotFlashcardContainer.getQuizSpec() == null) {
 
-      controller.getListService().getQuizInfo(getChosenList(), new AsyncCallback<QuizSpec>() {
+      int chosenList = getChosenList();
+      logger.info("PolyglotPracticePanel chosen list " +chosenList);
+
+      controller.getListService().getQuizInfo(chosenList, new AsyncCallback<QuizSpec>() {
         @Override
         public void onFailure(Throwable caught) {
         }
@@ -325,6 +328,13 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
 
   private void stopTimerShowBanner() {
     controller.setBannerVisible(true);
+    logger.info("stopTimerShowBanner");
+    polyglotFlashcardContainer.cancelRoundTimer();
+  }
+
+  @Override
+  protected void onUnload() {
+    super.onUnload();
     polyglotFlashcardContainer.cancelRoundTimer();
   }
 
@@ -342,6 +352,10 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   void flipCard() {
   }
 
+  /**
+   * @see PolyglotFlashcardFactory#sessionComplete
+   * @param l
+   */
   void showTimeRemaining(long l) {
     String value;
     if (l > 0) {
@@ -362,7 +376,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
       value = "";
     }
     timeLeft.setText(value);
-    // logger.info("showTimeRemaining : time left " + l);
+ //   logger.info("showTimeRemaining : time left " + l);
   }
 
   public void onSetComplete() {

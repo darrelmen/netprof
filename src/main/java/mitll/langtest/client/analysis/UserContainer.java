@@ -77,9 +77,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    */
   private static final String POLY_NUMBER = "Session Compl.";//"Session Completed";
   private static final int LIFETIME_WIDTH = 60;
-  private static final String LIFETIME = "Life. #";
+  private static final String LIFETIME = "Life #";
   private static final int LIFETIME_AVG_WIDTH = 65;
-  private static final String LIFETIME_AVG = "Life. Avg";
+  private static final String LIFETIME_AVG = "Life Avg";
   private static final String OVERALL_SCORE = "Session Avg";//"Adjust.";
 
   /**

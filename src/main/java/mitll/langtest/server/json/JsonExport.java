@@ -107,7 +107,7 @@ public class JsonExport {
                     Collection<Integer> preferredVoices,
                     boolean isEnglish,
                     AudioFileHelper audioFileHelper) {
-   // Map<String, Integer> phoneToCount1 = phoneToCount;
+    // Map<String, Integer> phoneToCount1 = phoneToCount;
     this.sectionHelper = sectionHelper;
     this.preferredVoices = preferredVoices;
     this.isEnglish = isEnglish;
@@ -222,7 +222,7 @@ public class JsonExport {
     if (jsonForNode1 != null) {
       jsonArray.add(jsonForNode1);
     } else {
-      logger.info("no content for " + type1 + " = " + name1);
+      logger.info("addToJsonArrayForChildren : no content (remove = " + removeExercisesWithMissingAudio + ") for " + type1 + " = " + name1);
     }
   }
 
@@ -240,7 +240,11 @@ public class JsonExport {
       boolean removeCantDecode,
       boolean justContext,
       Collection<String> firstTypes) {
-    return getJsonExerciseArray(getFilteredExercises(typeToValues, removeExercisesWithMissingAudio, removeCantDecode, justContext), firstTypes);
+    List<CommonExercise> filteredExercises = getFilteredExercises(typeToValues, removeExercisesWithMissingAudio, removeCantDecode, justContext);
+    if (filteredExercises.isEmpty()) {
+      logger.warn("getJsonForSelection no content for " + typeToValues);
+    }
+    return getJsonExerciseArray(filteredExercises, firstTypes);
   }
 
   /**
@@ -263,18 +267,25 @@ public class JsonExport {
 
     if (justContext) {
       List<CommonExercise> context = new ArrayList<>();
-//      logger.info("for " + typeToValues + " found " + exercisesForState.size());
+      logger.info("getFilteredExercises for " + typeToValues + " found " + exercisesForState.size());
       exercisesForState.forEach(ex -> {
         ex.getDirectlyRelated().forEach(c -> context.add(c.asCommon()));
       });
-      //    logger.info("for " + typeToValues + " context " + context.size());
+      logger.info("getFilteredExercises for " + typeToValues + " context " + context.size());
 
       exercisesForState = context;
+    } else {
+      logger.info("getFilteredExercises for " + typeToValues + " found " + exercisesForState.size());
     }
+
     List<CommonExercise> filteredExercises = getFilteredExercises(removeExercisesWithMissingAudio, removeCantDecode, exercisesForState);
+
     if (!exercisesForState.isEmpty() && filteredExercises.isEmpty()) {
       logger.warn("getFilteredExercises for " + typeToValues + " removed all " + exercisesForState.size());
+    } else {
+      logger.info("getFilteredExercises for " + typeToValues + " found " + exercisesForState.size());
     }
+
     return filteredExercises;
   }
 
@@ -291,8 +302,6 @@ public class JsonExport {
     copy.sort(Comparator
         .comparing((Function<CommonExercise, String>) CommonShell::getForeignLanguage)
         .thenComparing(CommonShell::getEnglish));
-
-    // getExerciseSorter().sortedByPronLengthThenPhone(copy, phoneToCount);
 
     return copy;
   }

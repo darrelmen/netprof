@@ -91,6 +91,8 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise> extends Pract
 
   @Override
   protected ExercisePanelFactory<T, ClientExercise> getFactory(PagingExerciseList<T, ClientExercise> exerciseList) {
+    //logger.info("getFactory --  " + History.getToken());
+
     polyglotFlashcardFactory = new PolyglotFlashcardFactory<T, ClientExercise>(controller, exerciseList, INavigation.VIEWS.QUIZ) {
 
       @Override
@@ -194,10 +196,13 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise> extends Pract
 
   /**
    * @param listid
-   * @see QuizChoiceHelper
+   * @see QuizChoiceHelper#gotQuizChoice(int, boolean)
    */
   void gotQuizChoice(int listid, boolean shouldRemoveOldList) {
-    if (DEBUG) logger.info("gotQuizChoice : got choice " + listid);
+    if (DEBUG) {
+      logger.info("gotQuizChoice : got choice " + listid);
+    }
+
     PolyglotFlashcardFactory<T, ClientExercise> polyglotFlashcardFactory = getPolyglotFlashcardFactory();
     polyglotFlashcardFactory.cancelRoundTimer();
     if (shouldRemoveOldList) {

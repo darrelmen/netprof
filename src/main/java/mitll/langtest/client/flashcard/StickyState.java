@@ -38,6 +38,7 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.HasID;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Remember the state of the flashcards in the localStorage browser cache.
@@ -47,7 +48,7 @@ import java.util.*;
  * @since 7/8/14.
  */
 class StickyState extends SessionStorage {
-  //private final Logger logger = Logger.getLogger("StickyState");
+  private final Logger logger = Logger.getLogger("StickyState");
 
   private static final String INCORRECT = "Incorrect";
   private static final String SCORE = "Score";
@@ -162,9 +163,15 @@ class StickyState extends SessionStorage {
   void clearTimeRemaining() {
     storage.removeValue(TIME_REMAINING);
     clearSession();
+ //   if (getTimeRemainingMillis() > 0) logger.warning("huh? value after clear");
   }
 
+  /**
+   * @see PolyglotFlashcardFactory#timerFired
+   * @param millis
+   */
   void storeTimeRemaining(long millis) {
+  //  logger.info("storeTimeRemaining " + millis);
     storage.storeValue(TIME_REMAINING, "" + millis);
   }
 
@@ -172,11 +179,14 @@ class StickyState extends SessionStorage {
     return getLongValue(TIME_REMAINING);
   }
 
+  /**
+   * @see PolyglotFlashcardFactory#startQuiz
+   */
   void startQuiz() {
     storage.storeValue(IN_QUIZ, "" + true);
   }
 
-  public boolean inQuiz() {
+   boolean inQuiz() {
     return storage.getValue(IN_QUIZ) != null;
   }
 

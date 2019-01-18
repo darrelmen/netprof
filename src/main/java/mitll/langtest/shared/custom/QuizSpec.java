@@ -10,6 +10,12 @@ public class QuizSpec implements IsSerializable {
   public QuizSpec() {
   }
 
+  /**
+   * @see mitll.langtest.server.database.custom.UserListManager#getQuizInfo
+   * @param roundMinutes
+   * @param minScore
+   * @param showAudio
+   */
   public QuizSpec(int roundMinutes, int minScore, boolean showAudio) {
     this.roundMinutes = roundMinutes;
     this.minScore = minScore;

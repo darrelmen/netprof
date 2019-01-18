@@ -32,6 +32,7 @@
 
 package mitll.langtest.server;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
@@ -281,8 +282,6 @@ public class ScoreServlet extends DatabaseServlet {
 
       configureResponse(response);
 
-      //toReturn.put(ERROR, "expecting request");
-
       try {
         if (realRequest == GetRequest.NESTED_CHAPTERS) {
           String[] split1 = queryString.split("&");
@@ -363,10 +362,13 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private JsonObject getCachedNested(int projid) {
+    logger.info("getCachedNested returning cached chapters for " + projid);
     return getNested(projid, System.currentTimeMillis(), REFRESH_CONTENT_INTERVAL, projectToNestedChapters, projectToWhenCached, true);
   }
 
   private JsonObject getCachedNestedChapters(int projid, boolean shouldRemoveExercisesWithNoAudio) {
+    logger.info("getCachedNestedChapters returning cached chapters for " + projid + " remove audio " +shouldRemoveExercisesWithNoAudio);
+
     return getNested(projid, System.currentTimeMillis(), REFRESH_CONTENT_INTERVAL_THREE, projectToNestedChaptersEverything, projectToWhenCachedEverything, shouldRemoveExercisesWithNoAudio);
   }
 
@@ -380,8 +382,14 @@ public class ScoreServlet extends DatabaseServlet {
 
     if (nestedChapters == null || (now - whenCached > refreshContentInterval)) {
       nestedChapters = getJsonNestedChapters(projid, shouldRemoveExercisesWithNoAudio, false);
-      projectToNestedChapters.put(projid, nestedChapters);
-      projectToWhenCached.put(projid, now);
+      JsonArray asJsonArray = nestedChapters.getAsJsonArray(CONTENT);
+      if (asJsonArray == null || asJsonArray.size() == 0) {
+        logger.error("no content for " +projid);
+      }
+      else {
+        projectToNestedChapters.put(projid, nestedChapters);
+        projectToWhenCached.put(projid, now);
+      }
     }
     return nestedChapters;
   }
@@ -950,7 +958,8 @@ public class ScoreServlet extends DatabaseServlet {
 
     JsonObject JsonObject = new JsonObject();
     {
-      JsonObject.add(CONTENT, jsonExport.getContentAsJson(removeExercisesWithMissingAudio, justContext));
+      JsonArray contentAsJson = jsonExport.getContentAsJson(removeExercisesWithMissingAudio, justContext);
+      JsonObject.add(CONTENT, contentAsJson);
       addVersion(projectid, then2, JsonObject);
     }
     return JsonObject;
@@ -963,7 +972,8 @@ public class ScoreServlet extends DatabaseServlet {
     JsonObject JsonObject = new JsonObject();
     {
       List<CommonExercise> exercisesForList = db.getUserListManager().getCommonExercisesOnList(projectid, listid);
-      JsonObject.add(CONTENT, jsonExport.getContentAsJsonFor(true, exercisesForList));
+      JsonArray contentAsJsonFor = jsonExport.getContentAsJsonFor(true, exercisesForList);
+      JsonObject.add(CONTENT, contentAsJsonFor);
       addVersion(projectid, then, JsonObject);
     }
     return JsonObject;

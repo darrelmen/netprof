@@ -815,10 +815,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     }
   }
 
+  /**
+   * What if we log out or something in the middle here?
+   */
   private void setSession() {
+    int projectid = controller.getProjectStartupInfo() == null ? -1 : controller.getProjectStartupInfo().getProjectid();
     dialogSession = new DialogSession(
         controller.getUser(),
-        controller.getProjectStartupInfo().getProjectid(),
+        projectid,
         dialogID,
         getView());
 

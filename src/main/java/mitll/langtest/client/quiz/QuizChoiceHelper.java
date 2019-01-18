@@ -27,7 +27,7 @@ public class QuizChoiceHelper implements ContentView {
   private static final String GETTING_LISTS_FOR_USER = "getting simple lists for user";
 
   private static final boolean DEBUG = false;
-  ExerciseController controller;
+  private ExerciseController controller;
 
   private NewQuizHelper newQuizHelper;
   private Panel listContent;
@@ -76,6 +76,7 @@ public class QuizChoiceHelper implements ContentView {
 
   /**
    * Only show public lists or ones that are mine!
+   *
    * @param result
    * @return
    */
@@ -96,10 +97,15 @@ public class QuizChoiceHelper implements ContentView {
    * @see NewContentChooser#showQuizForReal
    */
   public void showChosenQuiz(DivWidget listContent) {
-    if (DEBUG) logger.info("showChosenQuiz");
+    int list = new SelectionState().getList();
+
+    if (DEBUG) {
+      logger.info("showChosenQuiz - #" + list);
+    }
+
     this.listContent = listContent;
     listContent.clear();
-    gotQuizChoice(new SelectionState().getList(), false);
+    gotQuizChoice(list, false);
   }
 
   private void gotQuizChoice(int listid) {
@@ -107,7 +113,9 @@ public class QuizChoiceHelper implements ContentView {
   }
 
   private void gotQuizChoice(int listid, boolean removeCurrent) {
-    if (DEBUG) logger.info("gotQuizChoice : got choice " + listid);
+    if (DEBUG) {
+      logger.info("gotQuizChoice : got choice " + listid + " remove current " + removeCurrent);
+    }
     listContent.clear();
     newQuizHelper.showContent(listContent, INavigation.VIEWS.QUIZ);
     newQuizHelper.gotQuizChoice(listid, removeCurrent);

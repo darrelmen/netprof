@@ -95,8 +95,7 @@ public class SelectionState {
    * @see HistoryExerciseList#getSelectionState(String)
    */
   public SelectionState(String token, boolean removePlus) {
-    String token1 = removePlus ? unencodeToken(token) : unencodeToken2(token);
-    parseToken(token1);
+    parseToken(removePlus ? unencodeToken(token) : unencodeToken2(token));
   }
 
   private String unencodeToken(String token) {

@@ -94,20 +94,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
   public StatsFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, INavigation.VIEWS instance) {
     super(controller, exerciseList);
     controlState = new ControlState();
-    this.instance =instance;
+    this.instance = instance;
 
     if (exerciseList != null) { // TODO ? can this ever happen?
-      exerciseList.addListChangedListener(new ListChangeListener<L>() {
-        /**
-         * @param items
-         * @param selectionID
-         * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst
-         */
-        @Override
-        public void listChanged(List<L> items, String selectionID) {
-          StatsFlashcardFactory.this.listChanged(items, selectionID);
-        }
-      });
+      addListChangedListener(exerciseList);
+
       if (exerciseList instanceof PracticeFacetExerciseList) {
         PracticeFacetExerciseList exerciseList1 = (PracticeFacetExerciseList) exerciseList;
         exerciseList1.setControlState(controlState);
@@ -127,6 +118,20 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
     if (exerciseList != null) {
       exerciseList.simpleSetShuffle(controlState.isShuffle());
     }
+  }
+
+  private void addListChangedListener(ListInterface<L, T> exerciseList) {
+    exerciseList.addListChangedListener(new ListChangeListener<L>() {
+      /**
+       * @param items
+       * @param selectionID
+       * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst
+       */
+      @Override
+      public void listChanged(List<L> items, String selectionID) {
+        StatsFlashcardFactory.this.listChanged(items, selectionID);
+      }
+    });
   }
 
   @NotNull
@@ -187,7 +192,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
     sticky.populateCorrectMap();
   }
 
-  public void resetStorage() {
+  void resetStorage() {
     sticky.resetStorage();
   }
 
@@ -215,7 +220,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
   public void startOver() {
     int lastID = allExercises.isEmpty() ? -1 : allExercises.get(allExercises.size() - 1).getID();
     int currentExerciseID = getCurrentExerciseID();
- logger.info("startOver : current " + currentExerciseID + ", last ID " + lastID);
+
+  //  logger.info("startOver : current " + currentExerciseID + ", last ID " + lastID);
+
     if (currentExerciseID != -1 && currentExerciseID != lastID) {
       exerciseList.loadExercise(currentExerciseID);
     } else {
@@ -251,7 +258,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
   public void showDrill() {
     navigation.showView(instance);
   }
-
   public void showQuiz() {
     navigation.showView(INavigation.VIEWS.QUIZ);
   }
