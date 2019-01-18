@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.postgres;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
@@ -113,8 +114,8 @@ public class EasyReportTest extends BaseTest {
   private void doMatch(String requestURI) {
     //Pattern pattern = Pattern.compile("^.*answers\\/(.+)\\/answers\\/.+");
 //    Pattern pattern = Pattern.compile("^.*answers\\/(.+)\\/.+");
-   // String s = ".*answers\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
-    String s2="answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
+    // String s = ".*answers\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
+    String s2 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
     Pattern pattern = Pattern.compile(s2);
     Matcher matcher = pattern.matcher(requestURI);
     if (matcher.find()) {
@@ -138,8 +139,8 @@ public class EasyReportTest extends BaseTest {
 
     List<String> words = new ArrayList<>(Arrays.asList("yī èr sān sì yǒu wǔ liù qī bā jiǔ".split(" ")));
     Map<String, String> numberToPron = new HashMap<>();
-    for (int i = 1; i < words.size()+1; i++) {
-      numberToPron.put("" + i, words.get(i-1));
+    for (int i = 1; i < words.size() + 1; i++) {
+      numberToPron.put("" + i, words.get(i - 1));
     }
 
     numberToPron.forEach((k, v) -> System.out.println(toFull(k) + "\t" + serverProperties.toDict(v)));
@@ -339,8 +340,8 @@ public class EasyReportTest extends BaseTest {
     JsonExport jsonExport = english.getJSONExport(projectid);
     JsonArray contentAsJson = jsonExport.getContentAsJson(true, true);
 
-    logger.info("got " +contentAsJson.size());
-  //  contentAsJson.forEach(jsonElement -> logger.info("got " +jsonElement));
+    logger.info("got " + contentAsJson.size());
+    //  contentAsJson.forEach(jsonElement -> logger.info("got " +jsonElement));
 
     //  project.getSectionHelper().report();
   }
@@ -1358,12 +1359,70 @@ public class EasyReportTest extends BaseTest {
   @Test
   public void testJson() {
     DatabaseImpl andPopulate = getAndPopulate();
-    //   Project project = andPopulate.getProject(3);
-    JsonExport jsonExport = andPopulate.getJSONExport(3);
-    // long now = System.currentTimeMillis();
 
-    JsonArray contentAsJson = jsonExport.getContentAsJson(false, false);
-    logger.info("Got\n\t" + contentAsJson);
+    andPopulate.getProjects().forEach(project -> {
+      JsonExport jsonExport = andPopulate.getJSONExport(project.getID());
+      // long now = System.currentTimeMillis();
+
+      JsonArray contentAsJson = jsonExport.getContentAsJson(false, false);
+      logger.info("jsonForProject (" +project.getName()+
+          ") : got " + project.getTypeOrder() + " vs " + jsonExport.getMinimalTypeOrder() + "  = " + contentAsJson.size());
+
+      if (!project.getSectionHelper().getTypeOrder().isEmpty() && contentAsJson.size() == 0) {
+        assert false;
+      }
+
+      dumpJSON(contentAsJson);
+    });
+  }
+
+  @Test
+  public void testJsonPrune() {
+    DatabaseImpl andPopulate = getAndPopulate();
+
+    andPopulate.getProjects().forEach(project -> {
+      JsonExport jsonExport = andPopulate.getJSONExport(project.getID());
+      // long now = System.currentTimeMillis();
+
+      JsonArray contentAsJson = jsonExport.getContentAsJson(true, false);
+      logger.info("jsonForProject (" +project.getName()+
+          ") (prune) : got " + project.getTypeOrder() + " vs " + jsonExport.getMinimalTypeOrder() + "  = " + contentAsJson.size());
+
+      if (!project.getSectionHelper().getTypeOrder().isEmpty() && contentAsJson.size() == 0) {
+        logger.warn("\n\n\n" +project.getName()+" no content\n\n\n\n\n");
+      }
+
+      dumpJSON(contentAsJson);
+    });
+  }
+
+  @Test
+  public void testJsonPruneContext() {
+    DatabaseImpl andPopulate = getAndPopulate();
+
+    andPopulate.getProjects().forEach(project -> {
+      JsonExport jsonExport = andPopulate.getJSONExport(project.getID());
+      // long now = System.currentTimeMillis();
+
+      JsonArray contentAsJson = jsonExport.getContentAsJson(true, true);
+      logger.info("jsonForProject (" +project.getName()+
+          ") (context) : got " + project.getTypeOrder() + " vs " + jsonExport.getMinimalTypeOrder() + "  = " + contentAsJson.size());
+
+      if (!project.getSectionHelper().getTypeOrder().isEmpty() && contentAsJson.size() == 0) {
+        logger.warn("\n\n\n" +project.getName()+" no content\n\n\n\n\n");
+      }
+
+      dumpJSON(contentAsJson);
+    });
+  }
+
+  private void dumpJSON(JsonArray contentAsJson) {
+    for (int i = 0; i < Math.min(contentAsJson.size(), 2); i++) {
+      JsonElement jsonElement = contentAsJson.get(i);
+      JsonObject asJsonObject = jsonElement.getAsJsonObject();
+      logger.info("item " + i + " " + asJsonObject.keySet());
+      logger.info("item " + i + " " + asJsonObject.getAsJsonPrimitive("type"));
+    }
   }
 
   @Test
