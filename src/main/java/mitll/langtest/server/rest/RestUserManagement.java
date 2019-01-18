@@ -75,7 +75,7 @@ public class RestUserManagement {
    * @see #doGet
    */
   private static final String RESET_PASS = "resetPassword";
-  private static final String SET_PASSWORD = "setPassword";
+  private static final String SET_PASSWORD = "request=setPassword";
 
   /**
    * Where is this used ???
@@ -122,6 +122,7 @@ public class RestUserManagement {
   public static final String AFFILIATION = "affiliation";
   public static final String FIRST1 = "first";
   public static final String LAST1 = "last";
+  public static final String RESET_PASS_KEY = "resetPassKey";
 
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
@@ -192,12 +193,23 @@ public class RestUserManagement {
     } */
     else if (queryString.startsWith(SET_PASSWORD)) {
       String[] split1 = getParams(queryString);
-      if (split1.length != 2) {
-        toReturn.addProperty(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
+      if (split1.length < 3) {
+        toReturn.addProperty(ERROR, "expecting 3");
       } else {
-        String token = getFirst(split1[0]);
-        String passwordH = getArg(split1[1]);
-        toReturn.addProperty(VALID, changePFor(token, passwordH, getBaseURL(request)));
+        // request=setPassword&token=oaNLq6fnjnrfoVhstj6XtWdWY4iwsU&pass=domino22&userid=14480
+        int i = 1;
+        String token = getFirst(split1[i++]);
+        String passwordH = getArg(split1[i++]);
+        String userID = getArg(split1[i++]);
+        int user = -1;
+
+        try {
+          user = Integer.parseInt(userID);
+        } catch (NumberFormatException e) {
+          logger.warn("couldn't parse " + userID);
+        }
+        logger.info("setPassword : userid " + userID + " token " + token);// + " pass " +passwordH);
+        toReturn.addProperty(VALID, changePFor(user, passwordH, getBaseURL(request), token));
       }
       return true;
     }
@@ -338,10 +350,9 @@ public class RestUserManagement {
     if (user.length() == 4) user = user + "_";
     else if (user.length() == 3) user = user + "__";
 
-    logger.warn("resetPassword for '" + user + "'");// and " + email);
+    logger.info("resetPassword for '" + user + "' opt email " + optionalEmail);
 
-    boolean knownUser = db.getUserDAO().isKnownUser(user);
-    if (knownUser) {
+    if (db.getUserDAO().isKnownUser(user)) {
       db.getUserDAO().forgotPassword(user, getBaseURL(request), optionalEmail);
       return PASSWORD_EMAIL_SENT;
     } else {
@@ -360,15 +371,20 @@ public class RestUserManagement {
    * @seex UserServiceImpl#changePFor
    * @see #doGet
    */
-  private boolean changePFor(String userid, String freeTextPassword, String baseURL) {
-    User userByID = db.getUserDAO().getUserByID(userid);
-    boolean b = db.getUserDAO().changePassword(userByID.getID(), freeTextPassword, baseURL);
+  private boolean changePFor(int userid, String freeTextPassword, String baseURL, String userKey) {
+    User userByID = db.getUserDAO().getByID(userid);
+    //  boolean b = db.getUserDAO().changePassword(userByID.getID(), freeTextPassword, baseURL);
 
-    if (!b) {
+    String email = userByID != null ? userByID.getEmail() : "";
+
+    String userID = userByID != null ? userByID.getUserID() : "unknown";
+    boolean result = db.getUserDAO().changePasswordForToken(userID, userKey, freeTextPassword, baseURL, email);
+
+    if (!result) {
       logger.error("changePFor : couldn't update user password for user " + userByID);
     }
 
-    return b;
+    return result;
   }
 
   private String getBaseURL(HttpServletRequest r) {
@@ -446,11 +462,11 @@ public class RestUserManagement {
         jsonObject.addProperty(EXISTING_USER_NAME, "");
       } else {
         jsonObject.addProperty(USERID, user1.getID());
+        jsonObject.addProperty(RESET_PASS_KEY, user1.getResetKey());
       }
 
     } else {
       logger.info("addUser - found existing user for " + user + " -> " + existingUser);
-
       jsonObject.addProperty(EXISTING_USER_NAME, "");
     }
   }

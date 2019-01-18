@@ -62,7 +62,7 @@ public class PropertyHandler {
   /**
    *
    */
-  public static final boolean IS_BETA=false;
+  public static final boolean IS_BETA = false;
 
 
   private static final String AFTER_STOP_DELAY_MILLIS = "afterStopDelayMillis";
@@ -74,8 +74,6 @@ public class PropertyHandler {
   private static final String CPW_TOKEN = "CPWtoken";
   public static final String CPW_TOKEN_2 = "CPW-token";
 
- // private static final String FONT_FAMILY = "fontFamily";
-// private static final String IS_AMAS = "isAMAS";
   private static final String IS_BETA_PROP = "isBeta";
 
   /**
@@ -87,19 +85,17 @@ public class PropertyHandler {
 
   private static final String APP_TITLE = "appTitle";
   private static final String SPLASH_TITLE = "splashTitle";
-  //private static final String RELEASE_DATE = "releaseDate";
   @Deprecated
   private static final String DEMO_MODE = "demo";
   private static final String RECORD_TIMEOUT = "recordTimeout";
 
-//  private static final String NAME_FOR_ITEM = "nameForItem";
+  //  private static final String NAME_FOR_ITEM = "nameForItem";
   private static final String NAME_FOR_ANSWER = "nameForAnswer";
-//  private static final String NAME_FOR_RECORDER = "nameForRecorder";
+  //  private static final String NAME_FOR_RECORDER = "nameForRecorder";
   private static final String LOG_CLIENT_MESSAGES = "logClient";
-  private static final String DIALOG1 = "dialog";
-//  private static final String DIALOG = DIALOG1;
 
   // URL parameters that can override above parameters
+
   private static final String BKG_COLOR_FOR_REF = "bkgColorForRef";
 
   private static final int DEFAULT_TIMEOUT = 45000;
@@ -120,7 +116,7 @@ public class PropertyHandler {
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
   //private static final String INITIAL_PROMPT = "Practice dialogs to improve pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
 
-  private boolean isAMAS;
+  //private boolean isAMAS;
 
   private boolean usePhoneToDisplay;
 
@@ -159,7 +155,7 @@ public class PropertyHandler {
   }
 
   public boolean isAMAS() {
-    return isAMAS;
+    return false;
   }
 
   /**
@@ -197,11 +193,11 @@ public class PropertyHandler {
   private String appTitle = null;
   private boolean allowPlusInURL;
 
-  private static final String RESPONSE_TYPE = "responseType";
+ // private static final String RESPONSE_TYPE = "responseType";
   private static final String SPEECH = "Speech";
   private static final String TEXT = "Text";
   private static final String AUDIO = "Audio";
- // private String responseType = AUDIO;
+  // private String responseType = AUDIO;
   private String helpEmail = NETPROF_HELP_DLIFLC_EDU;
   private String helpMessage = "";
 
@@ -286,9 +282,9 @@ public class PropertyHandler {
       appTitle = getAppTitleSuffix();
     }
 
-    if (isAMAS()) {
-      appTitle = getAppTitleSuffix();
-    }
+//    if (isAMAS()) {
+//      appTitle = getAppTitleSuffix();
+//    }
     if (splashTitle == null) {
       splashTitle = "";//language + getSpashTitleSuffix();
     }
@@ -449,7 +445,7 @@ public class PropertyHandler {
 
   /**
    * @return
-   * @see LangTest#showLogin()
+   * @see InitialUI#showLogin
    */
   String getResetPassToken() {
     return resetPassToken;
@@ -466,23 +462,6 @@ public class PropertyHandler {
   private static boolean knownChoice(String choice) {
     return TEXT.equals(choice) || AUDIO.equals(choice) || SPEECH.equals(choice);
   }
-
-  /**
-   * Parse URL to extract the responseType values
-   */
-//  private void setResponseType() {
-//    String href = Window.Location.getHref();
-//    if (href.contains("responseType=")) {
-//      //     logger.info("found response type " + href);
-//      String s = href.split("responseType=")[1];
-//      String candidate = s.split("\\*\\*\\*")[0];
-//      if (knownChoice(candidate)) {
-//        //responseType = candidate;
-//      } else {
-//        logger.warning("responseType unknown " + candidate);
-//      }
-//    }
-//  }
 
   @Deprecated
   public boolean isOdaMode() {

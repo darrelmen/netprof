@@ -242,7 +242,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                   String prefix,
 
                                   PrecalcScores precalcScores,
-                                  boolean usePhoneToDisplay, boolean kaldi) {
+                                  boolean usePhoneToDisplay,
+                                  boolean kaldi) {
     return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
         sentence, lmSentences, transliteration,
         imageOutDir,

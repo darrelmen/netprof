@@ -44,12 +44,9 @@ import java.util.Collection;
  */
 
 public class LoginResult implements IsSerializable {
-
   public enum ResultType implements IsSerializable {
     Success,
     Failed,
-    //AcctExpired,
-    // PassExpired,
     BadPassword,
     //SessionNotRestored,
     //SessionExpired,
@@ -64,12 +61,12 @@ public class LoginResult implements IsSerializable {
     ExistsValid,
     Multiple,
     Email,
+
     /**
      * ERROR
      */
     Unknown
   }
-
 
   private int id;
   private String userID;
@@ -121,22 +118,13 @@ public class LoginResult implements IsSerializable {
     return id;
   }
 
-/*
-  public void setId(int id) {
-    this.id = id;
-  }
-*/
-
+  /**
+   * @see mitll.langtest.server.database.user.BaseUserDAO#addUser
+   * @return
+   */
   public String getToken() {
     return token;
   }
-
-/*
-  public void setToken(String token) {
-    this.token = token;
-  }
-*/
-
 
   public User getLoggedInUser() {
     return loggedInUser;

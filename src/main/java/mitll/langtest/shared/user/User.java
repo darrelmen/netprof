@@ -368,10 +368,18 @@ public class User extends MiniUser implements ReportUser {
     return resetKey != null && !resetKey.isEmpty();
   }
 
+  /**
+   * @see mitll.langtest.client.user.SignUpForm#handleAddUserResponse
+   * @return
+   */
   public String getResetKey() {
     return resetKey;
   }
 
+  /**
+   * @see mitll.langtest.server.database.user.BaseUserDAO#addUser
+   * @param resetKey
+   */
   public void setResetKey(String resetKey) {
     this.resetKey = resetKey;
   }

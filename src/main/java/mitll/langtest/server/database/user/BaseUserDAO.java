@@ -156,8 +156,7 @@ public abstract class BaseUserDAO extends DAO {
    * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    */
   public User addUser(SignUpUser user) {
-    String userID = user.getUserID();
-    User currentUser = getUserByID(userID);
+    User currentUser = getUserByID(user.getUserID());
     if (currentUser == null) {
       LoginResult loginResult = addUserAndGetID(user);
       int userid = loginResult.getId();
@@ -166,27 +165,11 @@ public abstract class BaseUserDAO extends DAO {
       if (userWhere != null) {
         userWhere.setResetKey(loginResult.getToken());
       }
-      logger.info(" : addUser : added new user " + userWhere);
-
+      logger.info("addUser : added new user " + userWhere);
       return userWhere;
     } else {
-      logger.warn(" : addUser : user exists ");
-      // user exists!
+      logger.warn("addUser : user exists ");
       return null;
-      /*String emailHash = currentUser.getEmailHash();
-
-      if (emailHash != null &&
-          !emailHash.isEmpty()
-          ) {
-        logger.debug(" : addUser : user " + userID + " is an existing user.");
-        return null; // existing user!
-      } else {
-        int id = currentUser.getID();
-        updateUser(id, user.getKind(), user.getEmailH(), user.getEmail());
-        User userWhere = getUserWhere(id);
-        logger.debug(" : addUser : returning updated user " + userWhere);
-        return userWhere;
-      }*/
     }
   }
 

@@ -127,15 +127,16 @@ public class ResetPassword extends UserDialog {
 
     final FormField firstPassword = getPasswordField(fieldset, PASSWORD);
 
-    Button changePasswordButton =
-        getChangePasswordButton(
-            token,
-            useridField,
-            firstPassword,
-            getPasswordField(fieldset, HINT));
+    {
+      Button changePasswordButton =
+          getChangePasswordButton(
+              token,
+              useridField,
+              firstPassword,
+              getPasswordField(fieldset, HINT));
 
-    fieldset.add(changePasswordButton);
-
+      fieldset.add(changePasswordButton);
+    }
 
     setFocusOn((pendingUserID == null || pendingUserID.isEmpty()) ? useridField.getWidget() : firstPassword.getWidget());
     return container;

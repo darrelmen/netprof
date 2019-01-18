@@ -32,7 +32,9 @@
 
 package mitll.langtest.client.services;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.user.*;
 
 public interface OpenUserServiceAsync {
@@ -44,6 +46,13 @@ public interface OpenUserServiceAsync {
    */
   void loginUser(String userId, String attemptedFreeTextPassword, AsyncCallback<LoginResult> async);
 
+  /**
+   * @see mitll.langtest.client.user.ResetPassword#onChangePassword
+   * @param userId
+   * @param userKey
+   * @param newPassword
+   * @param async
+   */
   void changePasswordWithToken(String userId, String userKey, String newPassword, AsyncCallback<ChoosePasswordResult> async);
 
   void resetPassword(String userid, AsyncCallback<Boolean> asyncCallback);

@@ -952,7 +952,7 @@ public class SignUpForm extends UserDialog implements SignUp {
           boolean hasResetKey = theUser.hasResetKey();
           eventRegistration.logEvent(signUp, "signing up (reset key = " + hasResetKey + ")", "N/A", getSignUpEvent(theUser));
 
-          logger.info("handleAddUserResponse reset  key " + theUser.getResetKey());
+//          logger.info("handleAddUserResponse reset  key " + theUser.getResetKey());
           if (hasResetKey) {
             reloadPage(theUser);
           } else {
@@ -970,8 +970,7 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   private void reloadPage(User user) {
-    String changePwPnm = PropertyHandler.CPW_TOKEN_2;
-    String newURL = trimURL(Window.Location.getHref()) + "?" + changePwPnm + "=" + user.getResetKey() + RESET_PW_HASH;
+    String newURL = trimURL(Window.Location.getHref()) + "?" + PropertyHandler.CPW_TOKEN_2 + "=" + user.getResetKey() + RESET_PW_HASH;
     userManager.rememberUser(user);
     Window.Location.replace(newURL);
   }

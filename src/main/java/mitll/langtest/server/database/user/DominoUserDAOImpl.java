@@ -663,7 +663,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     boolean useUsualLogin = shouldUseUsualDominoEmail(email);
 
-    logger.info("usual login " + useUsualLogin + " for " + email);
+//    logger.info("usual login " + useUsualLogin + " for " + email);
 
     MyUserService.LoginResult loginResult =
         useUsualLogin ?
@@ -1125,8 +1125,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @Override
   public User getUserByID(String userID) {
     mitll.hlt.domino.shared.model.user.DBUser dominoUser = getDBUser(userID);
+
     if (dominoUser == null) {
-      logger.warn("getUserByID no user by '" + userID + "'");
+      logger.info("getUserByID no user by '" + userID + "'");
     } else {
       logger.info("getUserByID found " + userID + " user #" + dominoUser.getDocumentDBID());
     }
@@ -1878,7 +1879,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private boolean shouldUseUsualDominoEmail(String email) {
     boolean b = hasBlessedEmail(email);
-    logger.info("shouldUseUsualDominoEmail '" + email + "' - " + b);
+    //logger.info("shouldUseUsualDominoEmail '" + email + "' - " + b);
     return addUserViaEmail && !b;
   }
 
