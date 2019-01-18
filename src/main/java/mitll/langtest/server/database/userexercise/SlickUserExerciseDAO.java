@@ -781,8 +781,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
           if (!exercise.hasEnglishAttr()) {
             List<String> tokens = lookup.getAudioFileHelper().getASR().getTokens(exercise.getForeignLanguage(), exercise.getTransliteration());
             exercise.setTokens(tokens);
-            if (exercise.getID() > 130442)
-              logger.info("getExercises ex " + exercise.getID() + " has " + tokens.size() + " tokens");
+
+//            if (exercise.getID() > 130442)
+//              logger.info("getExercises ex " + exercise.getID() + " has " + tokens.size() + " tokens");
           }
         }
 

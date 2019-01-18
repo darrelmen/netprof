@@ -100,6 +100,8 @@ public class Project implements IPronunciationLookup {
   public static final String TRUE = Boolean.TRUE.toString();
   public static final String MANDARIN = "Mandarin";
 
+  private static final boolean REPORT_ON_DIALOG_TYPES = false;
+
   /**
    * @see #getWebservicePort
    * @see ProjectDAO#update(int, ProjectInfo)
@@ -863,7 +865,7 @@ public class Project implements IPronunciationLookup {
 
     dialogSectionHelper.rememberTypesInOrder(typeOrder, seen);
 
-    if (true) {
+    if (REPORT_ON_DIALOG_TYPES) {
       logger.info("report on dialog types");
       dialogSectionHelper.report();
     }

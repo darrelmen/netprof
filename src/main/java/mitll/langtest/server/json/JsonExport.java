@@ -76,7 +76,6 @@ public class JsonExport {
   private static final String CTID = "ctid";
   private static final String CT = "ct";
   private static final String CTR = "ctr";
-//  private static final String MN = "mn";
 
   private static final int MAX_DEPTH = 2;
   private static final String SEMESTER = "Semester";
@@ -85,14 +84,7 @@ public class JsonExport {
   private final Collection<Integer> preferredVoices;
   private final boolean isEnglish;
   private AudioFileHelper audioFileHelper;
-
-/*  public JsonExport() {
-    this(Collections.emptyMap(),
-        null,
-        Collections.emptyList(),
-        false,
-        null);
-  }*/
+  private static final boolean DEBUG = false;
 
   /**
    * @param phoneToCount
@@ -139,14 +131,21 @@ public class JsonExport {
   }
 
   @NotNull
-  private List<String> getMinimalTypeOrder() {
+  public List<String> getMinimalTypeOrder() {
     List<String> typeOrder = sectionHelper.getTypeOrder();
-    boolean semester = typeOrder.iterator().next().startsWith(SEMESTER);
-    if (semester) {
-      logger.info("getContentAsJson first is semester - pashto???");
+
+    boolean firstIsSemester = false;
+    if (typeOrder.isEmpty()) {
+      logger.warn("getMinimalTypeOrder huh? type order is empty?");
+    } else {
+      String next = typeOrder.iterator().next();
+      firstIsSemester = next.startsWith(SEMESTER);
+      if (firstIsSemester) {
+        logger.info("getMinimalTypeOrder first is " + next + " - pashto ?");
+      }
     }
 
-    int maxDepthToUse = semester ? MAX_DEPTH + 1 : MAX_DEPTH;
+    int maxDepthToUse = firstIsSemester ? MAX_DEPTH + 1 : MAX_DEPTH;
     return typeOrder.size() > maxDepthToUse ? typeOrder.subList(0, maxDepthToUse) : typeOrder;
   }
 
@@ -176,30 +175,52 @@ public class JsonExport {
       // logger.info("getJsonForNode node " + type + " = " + node.getName() + " vs " + firstTypes);
 
       boolean leaf = node.isLeaf();
-      if (leaf || !firstTypes.iterator().next().equalsIgnoreCase(type)) { // stop when get below first types, e.g. unit,chapter
+      String firstType = firstTypes.iterator().next();
+      boolean matchesFirstType = firstType.equalsIgnoreCase(type);
+      boolean addExerciseItems = leaf || !matchesFirstType;
+
+/*
+      if (!matchesFirstType) {
+        logger.info("getJsonForNode node " + type + "/" + firstType +
+            " = " + node.getName());
+      }
+*/
+      if (addExerciseItems) { // stop when get below first types, e.g. unit,chapter
         // logger.info("getJsonForNode leaf " + typeToValues.keySet() + " types");
         JsonArray jsonForSelection = getJsonForSelection(typeToValues, removeExercisesWithMissingAudio, true, justContext, firstTypes);
         jsonForNode.add(ITEMS, jsonForSelection);
+
         if (jsonForSelection.size() == 0) {
-          logger.info("getJsonForNode no leaf content for " + type + " = " + name);
+          if (DEBUG) {
+            logger.info("getJsonForNode no leaf content for " + type + " = " + name);
+          }
+
           jsonForNode = null;
+        } else {
+//          logger.info("getJsonForNode leaf content for " + type + " = " + name + " : " + jsonForSelection.size());
         }
-//        else {
-//          logger.info("getJsonForNode leaf content for " + type + " = " + name + " : " +jsonForSelection.size());
-//        }
       } else {
-        //List<SectionNode> children = node.getChildren();
-        //     logger.info("getJsonForNode node " + node.getType() + " = " + node.getName() + " with " + children.size() + " children");
+        List<SectionNode> children = node.getChildren();
+//        logger.info("getJsonForNode node " + node.getType() + " = " + node.getName() + " with " + children.size() + " children, before " + jsonArray.size());
 
         for (SectionNode child : node.getChildren()) {
           addToJsonArrayForChildren(typeToValues, removeExercisesWithMissingAudio, justContext, firstTypes, jsonArray, child);
         }
+
+        if (DEBUG) {
+          if (jsonArray.size() == 0) {
+            logger.info("getJsonForNode AFTER  node " + node.getType() + " = " + node.getName() +
+                " with " + children.size() + " children, after " + jsonArray.size());
+          }
+        }
       }
 
-      if (!leaf && jsonForNode != null) {
+      if (!addExerciseItems) {// && jsonForNode != null) {
         jsonForNode.add(CHILDREN, jsonArray);
         if (jsonArray.size() == 0) {
-          logger.info("getJsonForNode no content for " + type + " = " + name);
+          if (DEBUG) {
+            logger.info("getJsonForNode no content for " + type + " = " + name);
+          }
 
           jsonForNode = null;
         }
@@ -222,7 +243,9 @@ public class JsonExport {
     if (jsonForNode1 != null) {
       jsonArray.add(jsonForNode1);
     } else {
-      logger.info("addToJsonArrayForChildren : no content (remove = " + removeExercisesWithMissingAudio + ") for " + type1 + " = " + name1);
+      if (DEBUG) {
+        logger.info("addToJsonArrayForChildren : no content (remove = " + removeExercisesWithMissingAudio + ") for " + type1 + " = " + name1);
+      }
     }
   }
 
@@ -241,9 +264,13 @@ public class JsonExport {
       boolean justContext,
       Collection<String> firstTypes) {
     List<CommonExercise> filteredExercises = getFilteredExercises(typeToValues, removeExercisesWithMissingAudio, removeCantDecode, justContext);
-    if (filteredExercises.isEmpty()) {
-      logger.warn("getJsonForSelection no content for " + typeToValues);
+
+    if (DEBUG) {
+      if (filteredExercises.isEmpty()) {
+        logger.warn("getJsonForSelection no content for " + typeToValues);
+      }
     }
+
     return getJsonExerciseArray(filteredExercises, firstTypes);
   }
 
@@ -267,23 +294,25 @@ public class JsonExport {
 
     if (justContext) {
       List<CommonExercise> context = new ArrayList<>();
-      logger.info("getFilteredExercises for " + typeToValues + " found " + exercisesForState.size());
+      if (DEBUG) logger.info("getFilteredExercises for " + typeToValues + " found " + exercisesForState.size());
       exercisesForState.forEach(ex -> {
         ex.getDirectlyRelated().forEach(c -> context.add(c.asCommon()));
       });
-      logger.info("getFilteredExercises for " + typeToValues + " context " + context.size());
+      if (DEBUG) logger.info("getFilteredExercises for " + typeToValues + " context " + context.size());
 
       exercisesForState = context;
     } else {
-      logger.info("getFilteredExercises for " + typeToValues + " found " + exercisesForState.size());
+//      logger.info("getFilteredExercises for " + typeToValues + " found " + exercisesForState.size());
     }
 
     List<CommonExercise> filteredExercises = getFilteredExercises(removeExercisesWithMissingAudio, removeCantDecode, exercisesForState);
 
-    if (!exercisesForState.isEmpty() && filteredExercises.isEmpty()) {
-      logger.warn("getFilteredExercises for " + typeToValues + " removed all " + exercisesForState.size());
-    } else {
-      logger.info("getFilteredExercises for " + typeToValues + " found " + exercisesForState.size());
+    if (DEBUG) {
+      if (!exercisesForState.isEmpty() && filteredExercises.isEmpty()) {
+        logger.warn("getFilteredExercises for " + typeToValues + " removed all " + exercisesForState.size());
+      } else {
+        //    logger.info("getFilteredExercises for " + typeToValues + " found " + exercisesForState.size());
+      }
     }
 
     return filteredExercises;
@@ -363,6 +392,9 @@ public class JsonExport {
   private JsonArray getJsonExerciseArray(Collection<CommonExercise> copy, Collection<String> firstTypes) {
     JsonArray exercises = new JsonArray();
     copy.forEach(commonExercise -> exercises.add(getJsonForExercise(commonExercise, firstTypes)));
+
+    if (exercises.size() < copy.size())
+      logger.info("getJsonExerciseArray from " + copy.size() + " made " + exercises.size() + " size array");
     return exercises;
   }
 
