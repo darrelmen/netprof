@@ -118,6 +118,7 @@ public interface ASR {
   TransNormDict getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns);
 
   List<String> getTokens(String transcript, String transliteration);
+  String getNormTranscript(String transcript, String transliteration);
 
   String getSegmented(String input);
 

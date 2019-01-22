@@ -727,7 +727,7 @@ public class ServerProperties {
     return preferredVoices;
   }
 
-  public Map<String, String> getPhoneToDisplay(Language languageEnum) {
+  private Map<String, String> getPhoneToDisplay(Language languageEnum) {
     Map<String, String> stringStringMap = langToPhoneToDisplay.get(languageEnum);
     return stringStringMap == null ? Collections.emptyMap() : stringStringMap;
   }
@@ -742,8 +742,8 @@ public class ServerProperties {
    * @param event
    * @return
    */
-  public <T extends SlimSegment> String getDisplayPhoneme(Language languageEnum, List<T> segments, int numSegments, int i, String event) {
-
+  public <T extends SlimSegment> String getDisplayPhoneme(Language languageEnum, List<T> segments,
+                                                          int numSegments, int i, String event) {
     String prevEvent = i == 0 ? null : segments.get(i - 1).getEvent();
     String nextEvent = i < numSegments - 1 ? segments.get(i + 1).getEvent() : null;
     return getDisplayPhoneme(languageEnum, event, prevEvent, nextEvent);
@@ -766,39 +766,41 @@ public class ServerProperties {
    */
   public String getDisplayPhoneme(Language languageEnum, String event, String prevEvent, String nextEvent) {
     if (languageEnum == Language.MANDARIN) {
-      String displayPhoneme = getDisplayPhoneme(languageEnum, event);
-      boolean prevHasTone = hasTone(prevEvent);
-      boolean thisEventHasTone = hasTone(event);
-      boolean nextHasTone = hasTone(nextEvent);
+      event = convertToPinyin(languageEnum, event, prevEvent, nextEvent);
+    }
+    return event;
+  }
 
-      if (prevHasTone && thisEventHasTone) {   // vowel-VOWEL-?
-        if (isAOrE(prevEvent)) {  // they get it, on i of a-i
-          event = getPrefix(event);
-        } else if (prevEvent.startsWith("o") && event.startsWith("u")) {
-          event = getPrefix(event); // o gets the mark, u doesn't
-        } else {
-          event = displayPhoneme; // final vowel gets the mark
-        }
-      } else if (thisEventHasTone) {  // consonant-vowel-?
-        if (isAOrE(event)) {  // they get it, on a of a-i
+  private String convertToPinyin(Language languageEnum, String event, String prevEvent, String nextEvent) {
+    String displayPhoneme = getDisplayPhoneme(languageEnum, event);
+    boolean prevHasTone = hasTone(prevEvent);
+    boolean thisEventHasTone = hasTone(event);
+    boolean nextHasTone = hasTone(nextEvent);
+
+    if (prevHasTone && thisEventHasTone) {   // vowel-VOWEL-?
+      if (isAOrE(prevEvent)) {  // they get it, on i of a-i
+        event = getPrefix(event);
+      } else if (prevEvent.startsWith("o") && event.startsWith("u")) {
+        event = getPrefix(event); // o gets the mark, u doesn't
+      } else {
+        event = displayPhoneme; // final vowel gets the mark
+      }
+    } else if (thisEventHasTone) {  // consonant-vowel-?
+      if (isAOrE(event)) {  // they get it, on a of a-i
 //          logger.info("from " + event + " -> " + displayPhoneme);
-          event = displayPhoneme;
-        } else if (nextHasTone) { // ?-VOWEL-vowel
-          if (event.startsWith("o") && nextEvent.startsWith("u")) {
-            event = displayPhoneme; // o gets the mark!
-          } else {
-            event = getPrefix(event); // final vowel gets the mark , not this one
-          }
+        event = displayPhoneme;
+      } else if (nextHasTone) { // ?-VOWEL-vowel
+        if (event.startsWith("o") && nextEvent.startsWith("u")) {
+          event = displayPhoneme; // o gets the mark!
         } else {
-          event = displayPhoneme;
+          event = getPrefix(event); // final vowel gets the mark , not this one
         }
       } else {
         event = displayPhoneme;
       }
+    } else {
+      event = displayPhoneme;
     }
-//    else {
-//      event = displayPhoneme;
-//    }
     return event;
   }
 

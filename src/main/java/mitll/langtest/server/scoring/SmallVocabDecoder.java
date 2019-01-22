@@ -139,7 +139,7 @@ public class SmallVocabDecoder {
    * @return
    * @see #getTokens(String, boolean)
    */
-  String toFull(String s) {
+  public String toFull(String s) {
     StringBuilder builder = new StringBuilder();
 
     final CharacterIterator it = new StringCharacterIterator(s);

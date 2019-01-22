@@ -1,5 +1,9 @@
 package mitll.langtest.shared.analysis;
 
+import mitll.langtest.client.analysis.ReqCounter;
+import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.exercise.ExerciseController;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -19,10 +23,6 @@ public class AnalysisRequest implements Serializable {
   private int reqid = -1;
 
   public AnalysisRequest() {}
-
-  public int getUserid() {
-    return userid;
-  }
 
   public int getListid() {
     return listid;
@@ -52,6 +52,15 @@ public class AnalysisRequest implements Serializable {
     return minRecordings;
   }
 
+  public int getUserid() {
+    return userid;
+  }
+
+  /**
+   * @see mitll.langtest.client.analysis.AnalysisTab#AnalysisTab
+   * @param userid
+   * @return
+   */
   public AnalysisRequest setUserid(int userid) {
     this.userid = userid;
     return this;

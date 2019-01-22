@@ -75,6 +75,12 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   private static final boolean DEBUG_AUDIO_REPORT = false;
 
+  /**
+   *
+   * @param database
+   * @param dbConnection
+   * @param userDAO
+   */
   public SlickAudioDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
     super(database, userDAO);
     dao = new AudioDAOWrapper(dbConnection);
@@ -890,7 +896,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
                                CommonExercise exercise,
                                Language language,
                                Map<Integer, MiniUser> idToMini) {
-    //String nativeAudio = null;
     if (exercise != null) {
       MiniUser.Gender genderOfUser = getGender(userToGender, userid);
       if (genderOfUser == null) {
@@ -899,14 +904,14 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       }
 
       if (!exercise.hasRefAudio()) {
-        //      logger.info("Attach audio to " + exercise.getID());
+        logger.info("getNativeAudio trying to attach audio to " + exercise.getID());
         attachAudioToExercise(exercise, language, idToMini);
       }
 
       AudioAttribute audioAttributePrefGender = exercise.getAudioAttributePrefGender(genderOfUser == Male, true);
 
       if (audioAttributePrefGender == null) {
-//        logger.warn("no audio for " + exercise.getID());
+        logger.warn("getNativeAudio no audio for " + exercise.getID());
         return null;
       } else {
         return audioAttributePrefGender.getAudioRef();

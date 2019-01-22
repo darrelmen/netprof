@@ -43,6 +43,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
@@ -92,7 +93,7 @@ public abstract class BaseAudioDAO extends DAO {
   private static final boolean DEBUG_ATTACH = false;
   private static final boolean DEBUG_ATTACH_PATH = false;
 
-  protected final String mediaDir;
+  final String mediaDir;
 
   /**
    * @param database
@@ -213,10 +214,11 @@ public abstract class BaseAudioDAO extends DAO {
           logger.info("attachAudioToExercises for" +
               "\n\tex        # " + id +
               "\n\tattachedAll " + attachedAll +
-              "\n\tattr        " + audioAttributes.size());
-          for (AudioAttribute audioAttribute : audioAttributes) {
+              "\n\t# attr        " + audioAttributes.size());
+
+  /*        for (AudioAttribute audioAttribute : audioAttributes) {
             logger.info("\tattachAudioToExercises for ex " + id + " attach " + audioAttribute);
-          }
+          }*/
         }
       }
 
@@ -261,7 +263,7 @@ public abstract class BaseAudioDAO extends DAO {
     Collection<AudioAttribute> onlyContextFromParent = exercise.getContextAudio();
 
     if (doDEBUG) {
-      logger.info("addContextAudio for " + id + " found " + onlyContextFromParent.size() + " to attach ");
+      logger.info("addContextAudio for ex " + id + " found " + onlyContextFromParent.size() + " to attach ");
     }
 
     for (ClientExercise contextSentence : exercise.getDirectlyRelated()) {
@@ -289,7 +291,7 @@ public abstract class BaseAudioDAO extends DAO {
       if (doDEBUG) {
         StringBuilder builder = new StringBuilder();
         contextSentence.getAudioAttributes().forEach(audioAttribute -> builder.append(audioAttribute.getAudioRef()).append(", "));
-        logger.info("ex " + contextID + " has these audio attached " + builder);
+        logger.info("addContextAudio ex " + contextID + " has these audio attached " + builder);
       }
     }
   }
@@ -315,8 +317,9 @@ public abstract class BaseAudioDAO extends DAO {
     int id = firstExercise.getID();
     Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(id, idToMini);
     long now = System.currentTimeMillis();
+    boolean debugAttach = DEBUG_ATTACH;// || firstExercise.getID() == 10711;
 
-    if (now - then > WARN_DURATION)
+    if (now - then > WARN_DURATION || debugAttach)
       logger.warn("attachAudioToExercise took " + (now - then) +
           " to get " + audioAttributes.size() + " attributes for ex #" + id);
 /*    if (DEBUG) {
@@ -331,14 +334,14 @@ public abstract class BaseAudioDAO extends DAO {
     }*/
 
     then = now;
-    boolean attachedAll = attachAudio(firstExercise, audioAttributes, language, false);
+    boolean attachedAll = attachAudio(firstExercise, audioAttributes, language, debugAttach);
     now = System.currentTimeMillis();
 
     if (now - then > WARN_DURATION)
       logger.warn("attachAudioToExercise took " + (now - then) + " to attach audio to " + id);
 
     if (!attachedAll) {
-      if (DEBUG_ATTACH) {
+      if (debugAttach) {
         logger.info("attachAudioToExercise didn't attach all audio to " + id + " " + firstExercise.getForeignLanguage());
       }
 
@@ -384,8 +387,8 @@ public abstract class BaseAudioDAO extends DAO {
     boolean doDebug = debug || DEBUG_ATTACH;
 
     if (doDebug) {
-      logger.info("attachAudio for " + firstExercise.getID() + " " + firstExercise.getEnglish() + " " + firstExercise.getForeignLanguage() +
-          " found " + currentPaths.size() + " vs " + audioAttributes.size());
+      logger.info("attachAudio for ex " + firstExercise.getID() + " '" + firstExercise.getEnglish() + "' '" + firstExercise.getForeignLanguage() +
+          "' found " + currentPaths.size() + " vs " + audioAttributes.size());
     }
 
     int n = 0;
@@ -994,6 +997,8 @@ public abstract class BaseAudioDAO extends DAO {
         removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
   }
 
+  SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder();
+
   /**
    * TODO : don't duplicate code
    * remove punct before we get here.
@@ -1009,13 +1014,20 @@ public abstract class BaseAudioDAO extends DAO {
       transcript = transcript.trim();
     }
 
-    return transcript == null ||
+    boolean isMatch = transcript == null ||
         foreignLanguage.isEmpty() ||
         transcript.isEmpty() ||
         transcript.toLowerCase()
             .equals(
                 foreignLanguage
                     .toLowerCase());
+
+    if (!isMatch) {
+      String s = smallVocabDecoder.toFull(foreignLanguage);
+      String s1 = smallVocabDecoder.toFull(transcript);
+      isMatch = s.equals(s1);
+    }
+    return isMatch;
   }
 
   /**

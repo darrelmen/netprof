@@ -105,7 +105,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -163,6 +162,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private IPhoneDAO<Phone> phoneDAO;
 
   private IAudioDAO audioDAO;
+  private ITrainingAudioDAO trainingAudioDAO;
   private IAnswerDAO answerDAO;
   private IUserListManager userListManager;
   private IStateManager stateManager;
@@ -354,6 +354,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     this.userSessionDAO = new SlickUserSessionDAOImpl(this, userProjectDAO, dbConnection);
     SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     audioDAO = slickAudioDAO;
+    trainingAudioDAO = new SlickTrainingAudioDAO(this, dbConnection, this.userDAO);
     resultDAO = new SlickResultDAO(this, dbConnection);
     answerDAO = new SlickAnswerDAO(this, dbConnection);
 
@@ -444,6 +445,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     reportHelper = new ReportHelper(this, getProjectDAO(),
         getUserDAO(), pathHelper, getMailSupport());
+
+    // trainingAudioDAO.checkAndAddForEachProject();
   }
 
   private int getDefaultProject() {
@@ -735,6 +738,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return userDAO;
   }
 
+  /**
+   * ONLY FOR TESTING
+   *
+   * @param lessonPlanFileOnlyForImport
+   * @return
+   */
   public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport) {
     return setInstallPath(lessonPlanFileOnlyForImport, null);
   }
@@ -859,7 +868,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.warn("asking for unknown project " + projectid);
       return new JsonExport(null, null, Collections.emptyList(), false, null);
     } else {
-      if (project.getJsonExport()== null) {
+      if (project.getJsonExport() == null) {
         getExercises(projectid, false);
 
         AudioFileHelper audioFileHelper = project.getAudioFileHelper();
@@ -1005,42 +1014,35 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #setInstallPath(String, ServletContext)
    */
   private void makeDAO(String lessonPlanFileOnlyForImport) {
-    // logger.info("makeDAO - " + lessonPlanFileOnlyForImport);
+    logger.info("makeDAO - " + lessonPlanFileOnlyForImport);
+
     if (userManagement == null) {
       synchronized (this) {
-        // boolean isURL = serverProps.getLessonPlan().startsWith("http");
-        boolean amas = isAmas();
-        // int numExercises;
+        //  logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFileOnlyForImport);
+        makeExerciseDAO(lessonPlanFileOnlyForImport);
 
-        if (amas) {
-//          logger.info("Got " + lessonPlanFileOnlyForImport);
-          // TODO : get media directory from properties
-          // TODO : get install path directory from properties
-          // readAMASExercises(lessonPlanFileOnlyForImport, "", "", isURL);
-        } else {
-          //  logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFileOnlyForImport);
-          makeExerciseDAO(lessonPlanFileOnlyForImport);
-
-          if (!serverProps.useH2()) {
-            //        userExerciseDAO.useExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
-            populateProjects(-1);
-            //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
-            if (projectManagement.getProjects().isEmpty()) {
-              logger.warn("\nmakeDAO no projects loaded yet...?");
-            }
+        if (!serverProps.useH2()) {
+          //        userExerciseDAO.useExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
+          populateProjects(-1);
+          //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
+          if (projectManagement.getProjects().isEmpty()) {
+            logger.warn("\nmakeDAO no projects loaded yet...?");
+          }
       /*      else {
               ExerciseDAO<CommonExercise> exerciseDAO = projectManagement.getFirstProject().getExerciseDAO();
               logger.info("using exercise dao from first project " + exerciseDAO);
               userExerciseDAO.setExerciseDAO(exerciseDAO);
             }*/
-          }
-
-          if (serverProps.useH2()) {
-            userExerciseDAO.setExerciseDAO(projectManagement.setDependencies());
-          }
         }
-        userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO);
+
+        if (serverProps.useH2()) {
+          userExerciseDAO.setExerciseDAO(projectManagement.setDependencies());
+        }
+
+        trainingAudioDAO.checkAndAddAudio(projectManagement.getProjects(), audioDAO);
       }
+      userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO);
+
     }
   }
 
@@ -1348,7 +1350,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
           dialogSessionDAO,
           relatedResultDAO,
           imageDAO,
-          pendingUserDAO
+          pendingUserDAO,
+          trainingAudioDAO
       ).forEach(idao -> {
         if (createIfNotThere(idao, known)) {
           created.add(idao.getName());
@@ -1718,7 +1721,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Language language = getLanguageEnum(projectid);
     if (listid == -1) return language + "_Unknown";
 
-   // logger.info("writeUserList " + listid + " in " + projectid);
+    // logger.info("writeUserList " + listid + " in " + projectid);
 
     UserList<CommonShell> userListByID = getUserListManager().getSimpleUserListByID(listid);
 
@@ -1734,8 +1737,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         CommonExercise customOrPredefExercise = getCustomOrPredefExercise(projectid, ex.getID());
         if (customOrPredefExercise != null) {
           copyAsExercises.add(customOrPredefExercise);
-        }
-        else logger.warn("writeUserListAudio no exercise found = " + ex.getID());
+        } else logger.warn("writeUserListAudio no exercise found = " + ex.getID());
       }
       Map<Integer, MiniUser> idToMini = new HashMap<>();
       for (CommonExercise ex : copyAsExercises) {

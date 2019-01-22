@@ -222,14 +222,14 @@ public class ScoreToJSON {
    * @return
    * @see mitll.langtest.server.scoring.JsonScoring#getJsonForAudioForUser
    */
-  public JsonObject getJsonForScore(PretestScore score, boolean usePhoneDisplay, ServerProperties serverProps, Language languageEnum) {
+  public JsonObject getJsonForScore(PretestScore score, boolean usePhoneDisplay, ServerProperties serverProps,
+                                    Language languageEnum) {
     JsonObject jsonObject = new JsonObject();
-
     jsonObject.addProperty(SCORE, score.getHydecScore());
 
     for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : score.getTypeToSegments().entrySet()) {
       List<TranscriptSegment> segments = pair.getValue();
-      JsonArray value1 = new JsonArray();
+      JsonArray eventArray = new JsonArray();
       NetPronImageType imageType = pair.getKey();
 
       boolean usePhone = imageType == NetPronImageType.PHONE_TRANSCRIPT &&
@@ -239,7 +239,6 @@ public class ScoreToJSON {
       for (int i = 0; i < numSegments; i++) {
         TranscriptSegment segment = segments.get(i);
 
-//      for (TranscriptSegment segment : segments) {
         JsonObject object = new JsonObject();
         String event = segment.getEvent();
 
@@ -253,27 +252,12 @@ public class ScoreToJSON {
           object.addProperty(END, segment.getEnd());
           object.addProperty(SCORE, segment.getScore());
 
-          value1.add(object);
+          eventArray.add(object);
         }
       }
 
-      jsonObject.add(imageType.toString(), value1);
+      jsonObject.add(imageType.toString(), eventArray);
     }
     return jsonObject;
   }
-
-/*  private String getDisplayPhoneme(ServerProperties serverProps, Language languageEnum, List<TranscriptSegment> segments, int numSegments, int i, String event) {
-    if (languageEnum == Language.MANDARIN && event.equals(OUR_FORTH_TONE) && i < numSegments - 1) {
-      TranscriptSegment nextPhoneSegment = segments.get(i + 1);
-      String event1 = nextPhoneSegment.getEvent();
-      if (event1.endsWith("4")) {
-        event = "u";
-      } else {
-        event = ServerProperties.FORTH_U_TONE;
-      }
-    } else {
-      event = serverProps.getDisplayPhoneme(languageEnum, event);
-    }
-    return event;
-  }*/
 }

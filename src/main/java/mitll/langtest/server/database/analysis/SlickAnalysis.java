@@ -124,58 +124,32 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    */
   @Override
   public AnalysisReport getPerformanceReportForUser(AnalysisRequest analysisRequest) {
-    Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
-
-    Collection<UserInfo> userInfos = bestForUser.values();
-    UserInfo firstUser = bestForUser.isEmpty() ? null : getFirstUser(userInfos);
-
-    long then = System.currentTimeMillis();
-
     int userid = analysisRequest.getUserid();
-    AnalysisReport analysisReport = new AnalysisReport(
-        getUserPerformance(userid, bestForUser),
-        getPhoneSummary(userid, firstUser),
-        getCount(userInfos),
-        analysisRequest.getReqid());
 
-    {
-      long now = System.currentTimeMillis();
-      logger.info("getPerformanceReportForUser (took " + (now - then) + ") analysis report for " + userid +
-          " and list " + analysisRequest.getListid());// + analysisReport);
+    if (userid == -1) {
+      throw new IllegalArgumentException("must specify a user to make a request for");
+    } else {
+      Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
+
+      Collection<UserInfo> userInfos = bestForUser.values();
+      UserInfo firstUser = bestForUser.isEmpty() ? null : getFirstUser(userInfos);
+
+      long then = System.currentTimeMillis();
+
+      AnalysisReport analysisReport = new AnalysisReport(
+          getUserPerformance(userid, bestForUser),
+          getPhoneSummary(userid, firstUser),
+          getCount(userInfos),
+          analysisRequest.getReqid());
+
+      {
+        long now = System.currentTimeMillis();
+        logger.info("getPerformanceReportForUser (took " + (now - then) + ") analysis report for " + userid +
+            " and list " + analysisRequest.getListid());// + analysisReport);
+      }
+      return analysisReport;
     }
-    return analysisReport;
   }
-
-  /**
-   * @see AnalysisServiceImpl#getPhoneSummary(int, int, int, int)
-   * @param userid
-   * @param minRecordings
-   * @param listid
-   * @return
-   */
-/*  public PhoneSummary getPhoneSummary(int userid, int minRecordings, int listid) {
-    long then = System.currentTimeMillis();
-
-    PhoneSummary phoneSummary = getPhoneSummary(userid, getUserInfo(userid, listid, minRecordings), project);
-
-    long now = System.currentTimeMillis();
-
-    logger.info("getPhoneSummary (took " + (now - then) + ") for " + userid + " and list " + listid);
-
-    return phoneSummary;
-  }*/
-
-  /**
-   * @param userid
-   * @param listid
-   * @param from
-   * @param to
-   * @return
-   * @seex AnalysisServiceImpl#getPhoneReport
-   */
-/*  public PhoneReport getPhoneReportForPeriod(int userid, int listid, long from, long to) {
-    return getPhoneReportForPeriod(userid, getUserInfo(userid, listid, 0), project, from, to);
-  }*/
 
   /**
    * @param analysisRequest
@@ -191,9 +165,14 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @see AnalysisServiceImpl#getPhoneBigrams
    */
   public PhoneBigrams getPhoneBigramsForPeriod(AnalysisRequest analysisRequest) {
-    return getPhoneBigramsForPeriod(analysisRequest, getUserInfo(analysisRequest));
+    UserInfo userInfo = getUserInfo(analysisRequest);
+    if (userInfo == null) {
+      logger.warn("getPhoneBigramsForPeriod no user info for " + analysisRequest);
+      return new PhoneBigrams();
+    } else {
+      return getPhoneBigramsForPeriod(analysisRequest, userInfo);
+    }
   }
-
 
   /**
    * @param analysisRequest

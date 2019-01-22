@@ -38,6 +38,7 @@ import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.audio.NativeAudioResult;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.user.MiniUser;
@@ -49,10 +50,12 @@ import mitll.npdata.dao.phone.PhoneDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   private static final Logger logger = LogManager.getLogger(SlickPhoneDAO.class);
@@ -156,20 +159,17 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
    * @seex mitll.langtest.server.database.analysis.Analysis#getPhoneReport
    * @seex mitll.langtest.server.database.analysis.Analysis#getPhoneReportForPeriod(int, UserInfo, Project, long, long)
    */
- /*  @Override
-  public PhoneReport getWorstPhonesForResults(int userid, Collection<Integer> resultIDs, Project project) {
-    return getPhoneReport(getSlickPhoneReports(userid, resultIDs), true, userid, project);
-  }*/
   @Override
   public PhoneSummary getPhoneSummary(int userid, Collection<Integer> resultIDs) {
     return getPhoneSummary(getSlickPhoneReports(userid, resultIDs));
   }
 
   /**
-   * @see Analysis#getPhoneBigramsForPeriod
    * @param userid
    * @param resultIDs
    * @return
+   * @see AnalysisServiceImpl#getPhoneBigrams
+   * @see Analysis#getPhoneBigramsForPeriod
    */
   @Override
   public PhoneBigrams getPhoneBigrams(int userid, Collection<Integer> resultIDs) {
@@ -265,85 +265,13 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     return new MakePhoneReport().getPhoneSummary(phoneToScores);
   }
 
-/*  private PhoneBigrams getPhoneBigramsOLD(Collection<SlickPhoneReport> phoneReportByResult) {
-    Map<String, Map<String, Bigram>> phoneToBigramToScore = new HashMap<>();
-
-    String prevPhone = UNDERSCORE;
-    float prevScore = 0F;
-    int prevResult = -1;
-    int prevWord = -1;
-
-
-    for (SlickPhoneReport report : phoneReportByResult) {  // for every phone the user has uttered
-      String phone = report.phone();
-      String bigram = prevPhone + "-" + phone;
-
-      int resultID = report.rid();
-      int wseq = report.wseq();
-
-
-//      logger.info("getPhoneReport prevResult " + prevResult +
-//          " resultID " + resultID + " prevWord " + prevWord + " wseq " + wseq + " pseq " + report.pseq() + " phone " + report.phone() + " bigram " + bigram+ " in word " + report.word());
-
-
-      boolean firstPhoneInWord = prevResult != resultID || prevWord != wseq;
-      {
-
-        if (firstPhoneInWord) {
-          if (DEBUG_PHONE)
-            logger.info("getPhoneReport prevResult " + prevResult +
-                " resultID " + resultID + " prevWord " + prevWord + " wseq " + wseq + " phone " + report.phone());
-
-          prevPhone = UNDERSCORE;
-          prevResult = resultID;
-          prevWord = wseq;
-          prevScore = 0F;
-        }
-      }
-
-      float phoneScore = report.pscore();
-
-      {
-        // _ a b c
-        //   ^
-        // _-a    - a -> _-a ->score of a
-        //   a-b  - a -> a-b ->score of a
-
-        // _ a b c
-        //     ^
-        //   a-b    - b -> a-b -> score of b
-        //     b-c  - b -> b-c -> score of b
-
-        {
-          Bigram bigramScore2 = getBigramCounter(phoneToBigramToScore, prevPhone, bigram);
-          bigramScore2.increment(prevScore);
-        }
-
-        {
-          Bigram bigramScore = getBigramCounter(phoneToBigramToScore, phone, bigram);
-          bigramScore.increment(phoneScore);
-        }
-      }
-
-      prevPhone = phone;
-      prevScore = phoneScore;
-    }
-
-    phoneToBigramToScore.values().forEach(pair -> pair.values().forEach(Bigram::setScore));
-
-    logger.info("for " + phoneReportByResult.size() + " got " + phoneToBigramToScore.size() + " phones");
-
-    return new MakePhoneReport().getPhoneBigrams(phoneToBigramToScore);
-  }*/
 
   /**
-   * @see #getPhoneBigrams(int, Collection)
    * @param phoneReportByResult
    * @return
+   * @see #getPhoneBigrams(int, Collection)
    */
   private PhoneBigrams getPhoneBigrams(Collection<SlickPhoneReport> phoneReportByResult) {
-    //Set<Integer> exids = new HashSet<>();
-
     // first by phone,
     // then by bigram, then examples per bigram
     String prevPhone = UNDERSCORE;
@@ -360,7 +288,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
       boolean firstPhoneInWord = prevResult != resultID || prevWord != wseq;
       {
-
         if (firstPhoneInWord) {
           if (DEBUG_PHONE)
             logger.info("getPhoneBigrams prevResult " + prevResult +
@@ -373,47 +300,15 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         }
       }
 
-      String phone = report.phone();
-      String bigram = prevPhone + "-" + phone;
-      String rememPrev = prevPhone;
-      prevPhone = phone;
-
 /*
       logger.info("getPhoneBigrams prevResult " + prevResult +
           " resultID " + resultID + " prevWord " + prevWord + " wseq " + wseq + " pseq " + report.pseq() + " phone " + report.phone() + " bigram " + bigram + " in word " + report.word());
 */
 
-      float phoneScore = report.pscore();
+      incrementBigramCounts(phoneToBigramToScore, prevScore, prevPhone, report);
 
-      {
-        // _ a b c
-        //   ^
-        // _-a    - a -> _-a ->score of a
-        //   a-b  - a -> a-b ->score of a
-
-        // _ a b c
-        //     ^
-        //   a-b    - b -> a-b -> score of b
-        //     b-c  - b -> b-c -> score of b
-
-        {
-          Bigram bigramScore2 = getBigramCounter(phoneToBigramToScore, rememPrev, bigram);
-          bigramScore2.increment(prevScore);
-
-//          if (phone.equalsIgnoreCase("nj") || rememPrev.equalsIgnoreCase("nj")) {
-//            logger.info("1 bigram " + rememPrev + " bigram " + bigram + " " + bigramScore2);
-//          }
-        }
-
-        {
-          Bigram bigramScore = getBigramCounter(phoneToBigramToScore, phone, bigram);
-          bigramScore.increment(phoneScore);
-//          if (phone.equalsIgnoreCase("nj") || rememPrev.equalsIgnoreCase("nj")) {
-//            logger.info("2 bigram " + phone + " " + bigram + " " + bigramScore);
-//          }
-        }
-      }
-      prevScore = phoneScore;
+      prevPhone = report.phone();
+      prevScore = report.pscore();
     }
 
     phoneToBigramToScore.values().forEach(pair -> pair.values().forEach(Bigram::setScore));
@@ -423,6 +318,50 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     }
 
     return new MakePhoneReport().getPhoneBigrams(phoneToBigramToScore);
+  }
+
+  /**
+   * // _ a b c
+   * //   ^
+   * // _-a    - a -> _-a ->score of a
+   * //   a-b  - a -> a-b ->score of a
+   *
+   * // _ a b c
+   * //     ^
+   * //   a-b    - b -> a-b -> score of b
+   * //     b-c  - b -> b-c -> score of b
+   *
+   * @param phoneToBigramToScore
+   * @param prevScore
+   * @param prevPhone
+   * @param report
+   */
+  private void incrementBigramCounts(Map<String, Map<String, Bigram>> phoneToBigramToScore,
+                                     float prevScore,
+                                     String prevPhone,
+                                     SlickPhoneReport report) {
+    String phone = report.phone();
+    float phoneScore = report.pscore();
+
+    final String bigram = prevPhone + "-" + phone;
+
+
+    {
+      Bigram bigramScore2 = getBigramCounter(phoneToBigramToScore, prevPhone, bigram);
+      bigramScore2.increment(prevScore);
+
+//          if (phone.equalsIgnoreCase("nj") || rememPrev.equalsIgnoreCase("nj")) {
+//            logger.info("1 bigram " + rememPrev + " bigram " + bigram + " " + bigramScore2);
+//          }
+    }
+
+    {
+      Bigram bigramScore = getBigramCounter(phoneToBigramToScore, phone, bigram);
+      bigramScore.increment(phoneScore);
+//          if (phone.equalsIgnoreCase("nj") || rememPrev.equalsIgnoreCase("nj")) {
+//            logger.info("2 bigram " + phone + " " + bigram + " " + bigramScore);
+//          }
+    }
   }
 
   /**
@@ -485,6 +424,12 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
     int prevResult = -1;
     int prevWord = -1;
+
+    Set<Integer> exercisesWithoutAudio = new HashSet<>();
+
+//    Map<Integer, List<SlickPhoneReport>> ridToPhones =
+//        phoneReportByResult.stream().collect(Collectors.groupingBy(SlickPhoneReport::rid));
+
     for (SlickPhoneReport report : phoneReportByResult) {  // for every phone the user has uttered
       // int i = 1;
       c++;
@@ -493,29 +438,23 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
       // info from result table
       int exid = report.exid();
-      float pronScore = report.pronScore();
+      //  float overallScore = report.pronScore();
 
       boolean add = exids.add(exid);
-      if (add) { // only first score counts ???
-        totalScore += pronScore;
+      if (add) { // only first score counts
+        totalScore += report.pronScore();
       }
  /*     if (exid != currentExercise) {
         currentExercise = exid;
-        //  logger.debug("#" +c+  " adding " + exid + " score " + pronScore);
-        totalScore += pronScore;
+        //  logger.debug("#" +c+  " adding " + exid + " score " + overallScore);
+        totalScore += overallScore;
         totalItems++;
       }*/
 
       String refAudioForExercise = exidToRef.get(exid);
 
-      if (refAudioForExercise == null) {
-        NativeAudioResult nativeAudio = database.getNativeAudio(userToGender, userid, exid, project, idToMini);
-        refAudioForExercise = nativeAudio.getNativeAudioRef();
-        if (nativeAudio.isContext()) {
-          isContextEx.add(exid);
-          logger.info("getPhoneReport add context for " + exid);
-        }
-        exidToRef.put(exid, refAudioForExercise);
+      if (refAudioForExercise == null && !exercisesWithoutAudio.contains(exid)) {
+        refAudioForExercise = getNativeAudioRef(userid, project, userToGender, idToMini, exidToRef, isContextEx, exercisesWithoutAudio, exid);
       }
 
       String scoreJson = report.scorejson();
@@ -526,12 +465,14 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       int wseq = report.wseq();
 
       boolean firstPhoneInWord = prevResult != resultID || prevWord != wseq;
-      {
 
+      String phone = report.phone();
+
+      {
         if (firstPhoneInWord) {
           if (DEBUG_PHONE)
             logger.info("getPhoneReport prevResult " + prevResult +
-                " resultID " + resultID + " prevWord " + prevWord + " wseq " + wseq + " phone " + report.phone());
+                " resultID " + resultID + " prevWord " + prevWord + " wseq " + wseq + " phone " + phone);
 
           prevPhone = UNDERSCORE;
           prevResult = resultID;
@@ -540,11 +481,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         }
       }
 
-      String phone = report.phone();
       String bigram = prevPhone + "-" + phone;
       String rememPrev = prevPhone;
-      prevPhone = phone;
-
 
 /*
       logger.info("getPhoneReport prevResult " + prevResult +
@@ -553,35 +491,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
       float phoneScore = report.pscore();
 
-      {
-        // _ a b c
-        //   ^
-        // _-a    - a -> _-a ->score of a
-        //   a-b  - a -> a-b ->score of a
-
-        // _ a b c
-        //     ^
-        //   a-b    - b -> a-b -> score of b
-        //     b-c  - b -> b-c -> score of b
-
-        {
-          Bigram bigramScore2 = getBigramCounter(phoneToBigramToScore, rememPrev, bigram);
-          bigramScore2.increment(prevScore);
-
-//          if (phone.equalsIgnoreCase("nj") || rememPrev.equalsIgnoreCase("nj")) {
-//            logger.info("1 bigram " + rememPrev + " bigram " + bigram + " " + bigramScore2);
-//          }
-        }
-
-        {
-          Bigram bigramScore = getBigramCounter(phoneToBigramToScore, phone, bigram);
-          bigramScore.increment(phoneScore);
-//          if (phone.equalsIgnoreCase("nj") || rememPrev.equalsIgnoreCase("nj")) {
-//            logger.info("2 bigram " + phone + " " + bigram + " " + bigramScore);
-//          }
-        }
-      }
-
+      incrementBigramCounts(phoneToBigramToScore, prevScore, prevPhone, report);
 
       WordAndScore wordAndScore = getAndRememberWordAndScore(refAudioForExercise,
           phoneToScores,
@@ -605,6 +515,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 //      if (wordAndScore.getIsContext()) {
 //        logger.info("getPhoneReport exid " + exid + " is context");
 //      }
+      prevPhone = phone;
       prevScore = phoneScore;
 
       // right thing to do?
@@ -612,10 +523,6 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         Map<String, List<WordAndScore>> bigramToWords = phoneToBigramToWS.computeIfAbsent(rememPrev, k -> new HashMap<>());
         List<WordAndScore> wordAndScores1 = bigramToWords.computeIfAbsent(bigram, k -> new ArrayList<>());
         wordAndScores1.add(wordAndScore);
-
-//        if (bigram.equalsIgnoreCase(NJ_E)) {
-//          logger.info("getPhoneSummary bigram " + " " + NJ_E + " - " + wordAndScore.getWord());
-//        }
       }
 
       if (DEBUG) {
@@ -670,6 +577,37 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
             phoneToBigramToScore,
             totalScore,
             exids.size());
+  }
+
+  @Nullable
+  private String getNativeAudioRef(int userid, Project project, Map<Integer, MiniUser.Gender> userToGender,
+                                   Map<Integer, MiniUser> idToMini,
+                                   Map<Integer, String> exidToRef,
+                                   Set<Integer> isContextEx,
+                                   Set<Integer> exercisesWithoutAudio,
+                                   int exid) {
+    String refAudioForExercise;
+    NativeAudioResult nativeAudio = database.getNativeAudio(userToGender, userid, exid, project, idToMini);
+    refAudioForExercise = nativeAudio.getNativeAudioRef();
+    if (nativeAudio.isContext()) {
+      isContextEx.add(exid);
+      logger.info("getPhoneReport add context for user " + userid +
+          " for " + exid + " now has " + exidToRef.size());
+      if (refAudioForExercise == null) {
+        logger.warn("getPhoneReport no audio for exid = " + exid + " # without " + exercisesWithoutAudio.size());
+
+        CommonExercise customOrPredefExercise = database.getCustomOrPredefExercise(project.getID(), exid);
+        if (customOrPredefExercise != null && !customOrPredefExercise.getAudioAttributes().isEmpty()) {
+          logger.warn("getPhoneReport but ex " + exid + " has " + customOrPredefExercise.getAudioAttributes().size() + " audio attributes?");
+        } else if (customOrPredefExercise != null) {
+          logger.warn("getPhoneReport but ex " + exid + " has no audio attributes isContext = " + customOrPredefExercise.isContext());
+        }
+
+        exercisesWithoutAudio.add(exid);
+      }
+    }
+    exidToRef.put(exid, refAudioForExercise);
+    return refAudioForExercise;
   }
 
   @NotNull

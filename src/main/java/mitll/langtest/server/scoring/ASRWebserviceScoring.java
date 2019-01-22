@@ -351,7 +351,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     JsonObject jsonObject = null;
 
     List<WordAndProns> possibleProns = new ArrayList<>();
-    TransNormDict transNormDict = getHydraDict(sentence, "", possibleProns);
+    TransNormDict transNormDict = getHydraDict(sentence, transliteration, possibleProns);
 
 /*    logger.info("scoreRepeatExercise " +
         "\n\tdict          " + transNormDict.getDict() +
@@ -644,7 +644,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String absolutePath = rawFile.getAbsolutePath();
     if (rawFile.exists()) {
       if (rawFile.delete()) {
-       // logger.info("cleanUpRawFile : deleted " + absolutePath);
+        // logger.info("cleanUpRawFile : deleted " + absolutePath);
       } else {
         String mes = "cleanUpRawFile : huh? couldn't delete raw audio rawFile " + absolutePath;
         logger.error(mes);
@@ -997,7 +997,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       if (DEBUG) logger.info("getTranscriptToPost for asian language (" + languageEnum + "): " +
           (decode ? "\n\tdecode     " + decode : "") +
           "\n\ttranscript '" + transcript + "'" +
-          "\n\tcleaned    '" + cleaned +"'"
+          "\n\tcleaned    '" + cleaned + "'"
       );
     }
 /*    else {
@@ -1057,16 +1057,25 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   public List<String> getTokens(String transcript, String transliteration) {
-   // logger.info("getTokens for " +transcript);
-    String cleaned = getTranscriptToPost(transcript, false);
-
+    // logger.info("getTokens for " +transcript);
     List<WordAndProns> possibleProns = new ArrayList<>();
+
+    String cleaned = getTranscriptToPost(transcript, false);
 
     // generate dictionary
     getHydraDict(cleaned, transliteration, possibleProns);
     List<String> collect = possibleProns.stream().map(WordAndProns::getWord).collect(Collectors.toList());
-   // logger.info("getTokens for " +transcript + " = " +collect);
+    // logger.info("getTokens for " +transcript + " = " +collect);
     return collect;
+  }
+
+  public String getNormTranscript(String transcript, String transliteration) {
+    List<WordAndProns> possibleProns = new ArrayList<>();
+
+    String cleaned = getTranscriptToPost(transcript, false);
+
+    // generate dictionary
+    return getHydraDict(cleaned, transliteration, possibleProns).getNormTranscript();
   }
 
   /**

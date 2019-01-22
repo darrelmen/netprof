@@ -1092,9 +1092,17 @@ public class EasyReportTest extends BaseTest {
   }
 
   @Test
+  public void testTrainingnAudio() {
+    DatabaseImpl db = getAndPopulate();
+
+    Project project = db.getProject(SPANISH);
+    db.setInstallPath("dude");
+  }
+
+  @Test
   public void testPhoneReport() {
     DatabaseImpl db = getAndPopulate();
-    int projectid = KOREAN;
+    int projectid = SPANISH;//KOREAN;
     Project project = db.getProject(projectid);
     SlickAnalysis slickAnalysis = new SlickAnalysis(
         db.getDatabase(),
@@ -1104,22 +1112,27 @@ public class EasyReportTest extends BaseTest {
         project.getLanguageEnum(),
         projectid,
         project.getKind() == ProjectType.POLYGLOT);
+    int demoUser = 6;
 
-    AnalysisRequest analysisRequest = new AnalysisRequest(/*DEMO_USER, -1, -1, 0*/);
+    AnalysisRequest analysisRequest = new AnalysisRequest(/*DEMO_USER, -1, -1, 0*/).setUserid(demoUser);
+
     AnalysisReport performanceReportForUser = slickAnalysis.getPerformanceReportForUser(analysisRequest);
 
     logger.info("Got " + performanceReportForUser);
     logger.info("phone summary " + performanceReportForUser.getPhoneSummary().getPhoneToAvgSorted());
 
-    long maxValue = Long.MAX_VALUE;
+    // long maxValue = Long.MAX_VALUE;
 
     PhoneBigrams phoneBigramsForPeriod = slickAnalysis.getPhoneBigramsForPeriod(analysisRequest);
 
     logger.info("bigrams " + phoneBigramsForPeriod);
 
     Map<String, List<Bigram>> phoneToBigrams = phoneBigramsForPeriod.getPhoneToBigrams();
-    phoneToBigrams.forEach((s, bigrams) -> logger.info(s + " -> " + bigrams.size() + " : " + bigrams));
-
+    if (phoneToBigrams.isEmpty()) {
+      logger.warn("no results for " + analysisRequest);
+    } else {
+      phoneToBigrams.forEach((s, bigrams) -> logger.info(s + " -> " + bigrams.size() + " : " + bigrams));
+    }
     //  WordsAndTotal wordScoresForUser = slickAnalysis.getWordScoresForUser(DEMO_USER, -1, -1, 0, maxValue, 0, 100, "");
 
 
@@ -1142,15 +1155,19 @@ public class EasyReportTest extends BaseTest {
 */
 
     phoneToBigrams.forEach((phone, bigrams) -> {
-      logger.info(phone + " -> " + bigrams.size() + " : " + bigrams);
+      logger.info("dump " + phone + " -> " + bigrams.size() + " : " + bigrams);
       bigrams.forEach(bigram -> {
-        logger.info("\t" + phone + " -> " + bigram);
+        logger.info("dump \t" + phone + " -> " + bigram);
         List<WordAndScore> wordAndScoreForPhoneAndBigram = slickAnalysis.getWordAndScoreForPhoneAndBigram(
             new AnalysisRequest()
-                .setUserid(DEMO_USER)
+                .setUserid(demoUser)
                 .setPhone(phone)
                 .setBigram(bigram.getBigram()));
-        logger.info("\t" + phone + " -> " + bigram + " : " + wordAndScoreForPhoneAndBigram.size());
+        if (wordAndScoreForPhoneAndBigram == null) {
+          logger.warn("dump no info for " + phone + " " + bigram);
+        } else {
+          logger.info("dump \t" + phone + " -> " + bigram + " : " + wordAndScoreForPhoneAndBigram.size());
+        }
 
       });
     });
@@ -1365,7 +1382,7 @@ public class EasyReportTest extends BaseTest {
       // long now = System.currentTimeMillis();
 
       JsonArray contentAsJson = jsonExport.getContentAsJson(false, false);
-      logger.info("jsonForProject (" +project.getName()+
+      logger.info("jsonForProject (" + project.getName() +
           ") : got " + project.getTypeOrder() + " vs " + jsonExport.getMinimalTypeOrder() + "  = " + contentAsJson.size());
 
       if (!project.getSectionHelper().getTypeOrder().isEmpty() && contentAsJson.size() == 0) {
@@ -1385,11 +1402,11 @@ public class EasyReportTest extends BaseTest {
       // long now = System.currentTimeMillis();
 
       JsonArray contentAsJson = jsonExport.getContentAsJson(true, false);
-      logger.info("jsonForProject (" +project.getName()+
+      logger.info("jsonForProject (" + project.getName() +
           ") (prune) : got " + project.getTypeOrder() + " vs " + jsonExport.getMinimalTypeOrder() + "  = " + contentAsJson.size());
 
       if (!project.getSectionHelper().getTypeOrder().isEmpty() && contentAsJson.size() == 0) {
-        logger.warn("\n\n\n" +project.getName()+" no content\n\n\n\n\n");
+        logger.warn("\n\n\n" + project.getName() + " no content\n\n\n\n\n");
       }
 
       dumpJSON(contentAsJson);
@@ -1405,11 +1422,11 @@ public class EasyReportTest extends BaseTest {
       // long now = System.currentTimeMillis();
 
       JsonArray contentAsJson = jsonExport.getContentAsJson(true, true);
-      logger.info("jsonForProject (" +project.getName()+
+      logger.info("jsonForProject (" + project.getName() +
           ") (context) : got " + project.getTypeOrder() + " vs " + jsonExport.getMinimalTypeOrder() + "  = " + contentAsJson.size());
 
       if (!project.getSectionHelper().getTypeOrder().isEmpty() && contentAsJson.size() == 0) {
-        logger.warn("\n\n\n" +project.getName()+" no content\n\n\n\n\n");
+        logger.warn("\n\n\n" + project.getName() + " no content\n\n\n\n\n");
       }
 
       dumpJSON(contentAsJson);
