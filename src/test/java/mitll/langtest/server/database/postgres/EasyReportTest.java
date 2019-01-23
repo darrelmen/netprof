@@ -75,6 +75,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Thread.sleep;
+import static mitll.langtest.server.database.exercise.SectionHelper.ANY;
 
 public class EasyReportTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(EasyReportTest.class);
@@ -87,6 +88,7 @@ public class EasyReportTest extends BaseTest {
 
   public static final String SENTENCES_ONLY = "Sentences Only";
   public static final int PROJECTID = 3;
+  public static final String ANY = "Any";
 
   private final String longer = "대폭강화하기로";
 
@@ -1097,6 +1099,38 @@ public class EasyReportTest extends BaseTest {
 
     Project project = db.getProject(SPANISH);
     db.setInstallPath("dude");
+  }
+
+  @Test
+  public void testPhoneJSON() {
+    DatabaseImpl db = getAndPopulate();
+
+    int projectid =  SPANISH;//KOREAN;
+    Project project = db.getProject(projectid);
+//    SlickAnalysis slickAnalysis = new SlickAnalysis(
+//        db.getDatabase(),
+//        db.getPhoneDAO(),
+//        db.getAudioDAO(),
+//        (SlickResultDAO) db.getResultDAO(),
+//        project.getLanguageEnum(),
+//        projectid,
+//        project.getKind() == ProjectType.POLYGLOT);
+//    int demoUser = 6;
+
+
+    HashMap<String, Collection<String>> typeToValues = new HashMap<>();
+
+//    project.getTypeOrder().forEach(type -> {
+//      typeToValues.put(type, Collections.singleton(SectionHelper.ANY));
+//    });
+
+    typeToValues.put("Unit",Collections.singleton("1"));
+   // typeToValues.put("Lesson",Collections.singleton("1"));
+
+
+    //AnalysisRequest analysisRequest = new AnalysisRequest(/*DEMO_USER, -1, -1, 0*/).setUserid(demoUser);
+    JsonObject jsonPhoneReport = db.getJsonPhoneReport(6, projectid, typeToValues);
+    logger.info("got \n" + jsonPhoneReport);
   }
 
   @Test
