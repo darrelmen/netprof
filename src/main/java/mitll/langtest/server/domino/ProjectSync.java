@@ -32,18 +32,15 @@ import static mitll.langtest.shared.exercise.DominoUpdateResponse.UPLOAD_STATUS.
 
 public class ProjectSync implements IProjectSync {
   private static final Logger logger = LogManager.getLogger(ProjectSync.class);
-  public static final String ANY = "Any";
 
-  public static final String ID = "_id";
-  public static final String NAME = "name";
-  public static final String CREATE_TIME = "createTime";
   private static final boolean DEBUG = false;
 
-  public static final String UNKNOWN = "unknown";
   private final SimpleDateFormat format = new SimpleDateFormat("MMM d, yy h:mm a");
 
+  /**
+   * @see DominoImport
+   */
   static final String MONGO_TIME = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
-  public static final ZoneId UTC = ZoneId.of("UTC");
 
   private final ProjectServices projectServices;
   private final IProjectManagement projectManagement;
@@ -52,6 +49,9 @@ public class ProjectSync implements IProjectSync {
   private final ExerciseServices exerciseServices;
   private final IUserExerciseDAO slickUEDAO;
 
+  /**
+   * @see #getDominoUpdateResponse
+   */
   private final AudioCopy audioCopy;
 
   /**
@@ -90,8 +90,6 @@ public class ProjectSync implements IProjectSync {
    *
    * @param projectid
    * @param doChange
-   *
-   *
    * @see DominoImport#getImportFromDomino
    * @see mitll.langtest.client.project.ProjectChoices#showImportDialog
    * @see mitll.langtest.server.services.ProjectServiceImpl#addPending
@@ -151,15 +149,13 @@ public class ProjectSync implements IProjectSync {
           logger.info("addPending adding " + newEx.size() + " new non-context exercises");
 
           if (doChange) {
-            new ExerciseCopy().addExercises(
-                importUser,
-                projectid,
-                new HashMap<>(),
-                slickUEDAO,
-                newEx,
-                typeOrder,
-                new HashMap<>(),
-                dominoToExID, -1);
+            // return a map of domino id-> netprof id
+            dominoToExID = new ExerciseCopy().addExercisesSimple(
+                importUser,   // labeled with this user
+                projectid,    // for this project
+                slickUEDAO,   // so we can add context exercises
+                newEx,        // exercises to add
+                typeOrder);   // with this type order
           }
           newEx.forEach(commonExercise -> updates.add(new DominoUpdateItem(commonExercise, ADD)));
         }
@@ -482,8 +478,7 @@ public class ProjectSync implements IProjectSync {
               logger.info("\tgetNewAndChangedContextExercises changed import is " + importSentence);
               updateItems.add(getChanged(currentSentence, importSentence));
               rememberExID(importUpdateEx, importSentence, currentSentence.getID());
-            }
-            else {
+            } else {
               logger.info("\tgetNewAndChangedContextExercises NO CHANGE for changed import " + importSentence);
             }
           }
@@ -936,12 +931,12 @@ public class ProjectSync implements IProjectSync {
   /**
    * Try to ignore case on unit and chapter
    *
-   * @see #doUpdate
    * @param currentExercise
    * @param toUpdate
    * @param first
    * @param second
    * @return
+   * @see #doUpdate
    */
   private boolean changed(SlickExercise currentExercise, CommonExercise toUpdate, String first, String second) {
     Map<String, String> unitToValue = toUpdate.getUnitToValue();
@@ -970,7 +965,7 @@ public class ProjectSync implements IProjectSync {
   private String getUnitValueIgnoreCase(String first, Map<String, String> unitToValue) {
     String currentUnit = null;
     String anotherString = first.toLowerCase();
-    for (Map.Entry<String, String> pair: unitToValue.entrySet()) {
+    for (Map.Entry<String, String> pair : unitToValue.entrySet()) {
       if (pair.getKey().toLowerCase().equalsIgnoreCase(anotherString)) {
         currentUnit = pair.getValue();
         break;
