@@ -38,6 +38,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.audio.NativeAudioResult;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.word.Word;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
@@ -56,13 +57,14 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   private static final Logger logger = LogManager.getLogger(SlickPhoneDAO.class);
 
   static final String UNDERSCORE = "_";
 
- // public static final String NJ_E = "nj-e";
+  // public static final String NJ_E = "nj-e";
 
   private final PhoneDAOWrapper dao;
 
@@ -387,11 +389,12 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<>();
     String language = project.getLanguage();
 
+    int projectID = project.getID();
     if (DEBUG || true) {
       logger.info("getPhoneReport" +
           "\n\tuser    " + userid +
           "\n\tlang    " + language +
-          "\n\tproject " + project.getID() +
+          "\n\tproject " + projectID +
           "\n\tadd transcript      " + addTranscript +
           "\n\tphoneReportByResult " + phoneReportByResult.size());
 /*      List<SlickPhoneReport> sample = new ArrayList<>(phoneReportByResult);
@@ -427,30 +430,21 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
     Set<Integer> exercisesWithoutAudio = new HashSet<>();
 
-//    Map<Integer, List<SlickPhoneReport>> ridToPhones =
-//        phoneReportByResult.stream().collect(Collectors.groupingBy(SlickPhoneReport::rid));
+    Map<Integer, List<Word>> ridToWords = getRidToWords(phoneReportByResult, projectID);
+
     ServerProperties serverProps = database.getServerProps();
 
     for (SlickPhoneReport report : phoneReportByResult) {  // for every phone the user has uttered
-      // int i = 1;
       c++;
 
       if (DEBUG_PHONE) logger.info("getPhoneReport #" + c + " : " + report);
 
       // info from result table
       int exid = report.exid();
-      //  float overallScore = report.pronScore();
-
       boolean add = exids.add(exid);
       if (add) { // only first score counts
         totalScore += report.pronScore();
       }
- /*     if (exid != currentExercise) {
-        currentExercise = exid;
-        //  logger.debug("#" +c+  " adding " + exid + " score " + overallScore);
-        totalScore += overallScore;
-        totalItems++;
-      }*/
 
       String refAudioForExercise = exidToRef.get(exid);
 
@@ -581,7 +575,40 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
             phoneToBigramToScore,
             totalScore,
             exids.size(),
-            project.getLanguageEnum());
+            project.getLanguageEnum(),
+            ridToWords);
+  }
+
+  @NotNull
+  private Map<Integer, List<Word>> getRidToWords(Collection<SlickPhoneReport> phoneReportByResult, int projectID) {
+    Map<Integer, List<SlickPhoneReport>> ridToPhones =
+        phoneReportByResult.stream().collect(Collectors.groupingBy(SlickPhoneReport::rid));
+
+    Map<Integer, List<Word>> ridToWords = new HashMap<>();
+
+    ridToPhones.forEach((rid, v) -> {
+      ArrayList<Word> value = new ArrayList<>();
+      ridToWords.put(rid, value);
+
+      Map<Integer, List<SlickPhoneReport>> wseqToPhones = v.stream().collect(Collectors.groupingBy(SlickPhoneReport::wseq));
+
+      wseqToPhones.forEach((wid, p) -> {
+        SlickPhoneReport slickPhoneReport = p.get(0);
+        Word e = new Word(projectID, projectID, rid, slickPhoneReport.word(), wid, slickPhoneReport.wscore());
+        value.add(e);
+
+        List<Phone> phones = new ArrayList<>();
+        p.forEach(phone -> phones.add(new Phone(projectID, rid, wid, phone.phone(), phone.pseq(), phone.pscore(), 0)));
+        e.setPhones(phones);
+      });
+    });
+
+    // ridToWords.keySet().forEach(rid->logger.info("rid " + rid));
+    ridToWords.forEach((k,v)->{
+      logger.info(k + " = " + v);
+      v.forEach(word -> logger.info(word.getWord() + " " + word.getPhones()));
+    });
+    return ridToWords;
   }
 
   @Nullable

@@ -33,6 +33,7 @@
 package mitll.langtest.shared.analysis;
 
 import mitll.langtest.server.database.analysis.IAnalysis;
+import mitll.langtest.server.database.word.Word;
 import mitll.langtest.shared.project.Language;
 
 import java.util.HashMap;
@@ -55,6 +56,7 @@ public class PhoneReport extends PhoneSummary {
   private long serverTime;
   private transient Language language;
   private List<String> sortedPhones;
+  private transient Map<Integer, List<Word>> ridToWords;
 
   public PhoneReport() {
     valid = false;
@@ -72,7 +74,8 @@ public class PhoneReport extends PhoneSummary {
                      Map<String, PhoneStats> phoneToAvgSorted,
                      Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted,
                      List<String> sortedPhones,
-                     Language language) {
+                     Language language,
+                     Map<Integer, List<Word>> ridToWords) {
     super(phoneToAvgSorted);
 
     this.overallPercent = overallPercent;
@@ -80,6 +83,7 @@ public class PhoneReport extends PhoneSummary {
     this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
     this.sortedPhones = sortedPhones;
     this.language = language;
+    this.ridToWords = ridToWords;
     valid = true;
   }
 
@@ -128,5 +132,9 @@ public class PhoneReport extends PhoneSummary {
 
   public String toString() {
     return "valid " + valid + " : " + super.toString();
+  }
+
+  public Map<Integer, List<Word>> getRidToWords() {
+    return ridToWords;
   }
 }

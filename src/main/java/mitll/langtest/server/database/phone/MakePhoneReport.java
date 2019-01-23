@@ -1,6 +1,7 @@
 package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.analysis.PhoneAnalysis;
+import mitll.langtest.server.database.word.Word;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.project.Language;
 import org.apache.logging.log4j.LogManager;
@@ -27,6 +28,7 @@ public class MakePhoneReport {
    * @param totalScore
    * @param totalItems
    * @param language
+   * @param ridToWords
    * @return
    * @see SlickPhoneDAO#getPhoneReport
    */
@@ -34,7 +36,8 @@ public class MakePhoneReport {
                                     Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS,
                                     Map<String, Map<String, Bigram>> phoneToBigramToScore,
                                     float totalScore,
-                                    float totalItems, Language language) {
+                                    float totalItems,
+                                    Language language, Map<Integer, List<Word>> ridToWords) {
     float overallScore = totalItems > 0 ? totalScore / totalItems : 0;
     int percentOverall = (int) (100f * PhoneJSON.round(overallScore, 2));
 
@@ -59,14 +62,15 @@ public class MakePhoneReport {
 
     phoneToAvgSorted.keySet().forEach(p -> logger.info("getPhoneReport sorted " + p));
     List<String> sortedPhones = new ArrayList<>(phoneToAvgSorted.keySet().size());
-    phoneToAvgSorted.keySet().forEach(p -> sortedPhones.add(p));
+    sortedPhones.addAll(phoneToAvgSorted.keySet());
 
     return new PhoneReport(percentOverall,
         phoneToBigram,
         phoneToAvgSorted,
         phoneToBigramToWS,
         sortedPhones,
-        language);
+        language,
+        ridToWords);
   }
 
   @NotNull

@@ -1,6 +1,9 @@
 package mitll.langtest.server.database.word;
 
 import mitll.langtest.server.database.DatabaseServices;
+import mitll.langtest.server.database.phone.Phone;
+
+import java.util.List;
 
 /**
  * Created by go22670 on 3/29/16.
@@ -13,18 +16,20 @@ public class Word {
   private String word;
   private int seq;
   private float score;
+  private List<Phone> phones;
 
-  public Word() {}
+  public Word() {
+  }
 
   /**
-   * @see WordDAO#getWords
-   * @see SlickWordDAO#fromSlick
    * @param id
    * @param projid
    * @param rid
    * @param word
    * @param seq
    * @param score
+   * @see WordDAO#getWords
+   * @see SlickWordDAO#fromSlick
    */
   public Word(int id, int projid, int rid, String word, int seq, float score) {
     this(projid, rid, word, seq, score);
@@ -32,12 +37,12 @@ public class Word {
   }
 
   /**
-   * @see DatabaseServices#recordWordAndPhoneInfo
    * @param projid
    * @param rid
    * @param word
    * @param seq
    * @param score
+   * @see DatabaseServices#recordWordAndPhoneInfo
    */
   public Word(int projid, int rid, String word, int seq, float score) {
     this.projid = projid;
@@ -47,7 +52,9 @@ public class Word {
     this.score = score;
   }
 
-  public int getId() { return id; }
+  public int getId() {
+    return id;
+  }
 
   public int getRid() {
     return rid;
@@ -73,8 +80,17 @@ public class Word {
     return projid;
   }
 
+
+  public List<Phone> getPhones() {
+    return phones;
+  }
+
+  public void setPhones(List<Phone> phones) {
+    this.phones = phones;
+  }
+
   public String toString() {
-    return "# " + id + " proj " + projid+
-        "  rid " + rid + " " + word + " at " + seq + " score " + score;
+    return "# " + id + " proj " + projid +
+        " rid " + rid + " '" + word + "' at " + seq + " score " + score;
   }
 }

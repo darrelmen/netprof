@@ -44,12 +44,6 @@ import org.jetbrains.annotations.NotNull;
 public class TranscriptSegment extends SlimSegment implements IsSerializable, Comparable<TranscriptSegment> {
   private int start;                  // Start time in seconds
   private int end;                    // End time in seconds
-
-  /**
-   * @deprecated
-   */
- // private transient int index;                  // character index from start of string
-
   private String displayEvent = "";
 
   public TranscriptSegment() {
@@ -70,14 +64,13 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
     this.start = toInt(s);
     this.end = toInt(e);
     this.displayEvent = displayName;
-   // this.index = index;
   }
 
   /**
    * @param segment
    */
   public TranscriptSegment(TranscriptSegment segment) {
-    this(segment.getStart(), segment.getEnd(), segment.getEvent(), segment.getScore(), segment.getDisplayEvent());//, segment.index);
+    this(segment.getStart(), segment.getEnd(), segment.getEvent(), segment.getScore(), segment.getDisplayEvent());
   }
 
   public SlimSegment toSlim() { return new SlimSegment(getEvent(),getScore()); }

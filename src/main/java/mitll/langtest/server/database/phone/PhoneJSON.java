@@ -4,6 +4,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.word.Word;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.project.Language;
@@ -93,14 +94,16 @@ public class PhoneJSON {
         if (DEBUG) logger.info("order phones are " + order);
       }
 
-      jsonObject.add(RESULTS, addResults(resToAnswer, resToRef, resToResult));
+      jsonObject.add(RESULTS, addResults(resToAnswer, resToRef, resToResult, worstPhonesAndScore.getRidToWords(), language));
       jsonObject.addProperty(PHONE_SCORE, Integer.toString(worstPhonesAndScore.getOverallPercent())); // TODO : not sure where this is used
     }
 
     return jsonObject;
   }
 
-  private JsonObject addResults(Map<Long, String> resToAnswer, Map<Long, String> resToRef, Map<Long, String> resToResult) {
+  private JsonObject addResults(Map<Long, String> resToAnswer, Map<Long, String> resToRef, Map<Long, String> resToResult,
+                                Map<Integer, List<Word>> ridToWords,
+                                Language language) {
     JsonObject results = new JsonObject();
     for (Map.Entry<Long, String> pair : resToAnswer.entrySet()) {
       JsonObject result = new JsonObject();
@@ -110,9 +113,32 @@ public class PhoneJSON {
       result.addProperty(REF, resToRef.get(resultID));
 
       {
-        String value = resToResult.get(resultID);
-        JsonParser parser = new JsonParser();
-        result.add(RESULT, parser.parse(value).getAsJsonObject());
+//        String value = resToResult.get(resultID);
+//        JsonParser parser = new JsonParser();
+//        result.add(RESULT, parser.parse(value).getAsJsonObject());
+
+        JsonObject wordsObject = new JsonObject();
+        JsonArray words = new JsonArray();
+        result.add(RESULT, wordsObject);
+        wordsObject.add("words", words);
+        List<Word> words1 = ridToWords.get(resultID.intValue());
+        words1.forEach(word -> {
+          JsonObject wordJSON = new JsonObject();
+          words.add(wordJSON);
+          wordJSON.addProperty("id", word.getSeq());
+          wordJSON.addProperty("w", word.getWord());
+          wordJSON.addProperty("s", word.getScore());
+          JsonArray phones = new JsonArray();
+          wordJSON.add("phones", phones);
+          word.getPhones().forEach(phone -> {
+            JsonObject phoneJSON = new JsonObject();
+            phones.add(phoneJSON);
+            phoneJSON.addProperty("id", phone.getSeq());
+
+            phoneJSON.addProperty("p", serverProperties.getDisplayPhoneme(language, phone.getPhone()));
+            phoneJSON.addProperty("s", phone.getScore());
+          });
+        });
       }
 
       results.add(Long.toString(resultID), result);

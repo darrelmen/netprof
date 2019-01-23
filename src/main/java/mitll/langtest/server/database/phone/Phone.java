@@ -75,7 +75,7 @@ public class Phone {
   }
 
   public String toString() {
-    return " proj " + projid +
-        " rid " + rid + " wid " + wid + " : " + phone + " at " + seq + " score " + score;
+    return "proj " + projid +
+        " rid " + rid + " wid " + wid + " '" + phone + "' at " + seq + " score " + score;
   }
 }
