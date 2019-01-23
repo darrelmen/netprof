@@ -34,6 +34,7 @@ package mitll.langtest.shared.analysis;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -47,6 +48,7 @@ public class PhoneStats implements Serializable {
   private int count;
   private transient List<TimeAndScore> timeSeries;
   private List<PhoneSession> sessions;
+  private float avg = 0F;
 
   public PhoneStats() {
   }
@@ -58,11 +60,22 @@ public class PhoneStats implements Serializable {
   public PhoneStats(int count, List<TimeAndScore> timeSeries) {
     this.count = count;
     this.timeSeries = timeSeries;
+
+    float num = new Integer(timeSeries.size()).floatValue();
+
+    float total = 0F;
+    for (TimeAndScore timeAndScore : timeSeries) total += timeAndScore.getScore();
+    if (num > 0) {
+      avg = total / num;
+    }
   }
 
   public float getAvg() {
-    if (sessions == null) return 0f;
-    else {
+    return avg;
+
+  /*  if (sessions == null) {
+      return 0f;
+    } else {
       float total = 0;
       float avg = 0;
 
@@ -72,7 +85,7 @@ public class PhoneStats implements Serializable {
         avg += Double.valueOf(session.getMean()).floatValue() * inSession;
       }
       return total > 0 ? avg / total : 0;
-    }
+    }*/
   }
 
   public int getCount() {
@@ -93,13 +106,17 @@ public class PhoneStats implements Serializable {
   }
 
   /**
-   * @see mitll.langtest.server.database.analysis.PhoneAnalysis#setSessionsWithPrune
    * @param sessions
+   * @see mitll.langtest.server.database.analysis.PhoneAnalysis#setSessionsWithPrune
    */
   public void setSessions(List<PhoneSession> sessions) {
     this.sessions = sessions;
   }
 
+  /**
+   * @return
+   * @see mitll.langtest.client.analysis.PhoneContainer#getPhoneStatuses(List, Map, long, long)
+   */
   public List<PhoneSession> getSessions() {
     return sessions;
   }

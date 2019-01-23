@@ -834,7 +834,7 @@ public class ServerProperties {
    * @return
    * @see mitll.langtest.server.audio.ScoreToJSON#getJsonForScore
    */
-  private String getDisplayPhoneme(Language language, String phone) {
+  public String getDisplayPhoneme(Language language, String phone) {
     Map<String, String> phoneToDisplay = getPhoneToDisplay(language);
     if (phoneToDisplay == null) {
       //  if (language == Language.MANDARIN) logger.warn("no display map for " + language);

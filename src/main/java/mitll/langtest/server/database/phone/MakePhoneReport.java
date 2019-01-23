@@ -2,6 +2,7 @@ package mitll.langtest.server.database.phone;
 
 import mitll.langtest.server.database.analysis.PhoneAnalysis;
 import mitll.langtest.shared.analysis.*;
+import mitll.langtest.shared.project.Language;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -17,7 +18,7 @@ import static mitll.langtest.server.database.phone.SlickPhoneDAO.UNDERSCORE;
 public class MakePhoneReport {
   private static final Logger logger = LogManager.getLogger(MakePhoneReport.class);
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    * @param phoneToScores
@@ -25,6 +26,7 @@ public class MakePhoneReport {
    * @param phoneToBigramToScore
    * @param totalScore
    * @param totalItems
+   * @param language
    * @return
    * @see SlickPhoneDAO#getPhoneReport
    */
@@ -32,7 +34,7 @@ public class MakePhoneReport {
                                     Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS,
                                     Map<String, Map<String, Bigram>> phoneToBigramToScore,
                                     float totalScore,
-                                    float totalItems) {
+                                    float totalItems, Language language) {
     float overallScore = totalItems > 0 ? totalScore / totalItems : 0;
     int percentOverall = (int) (100f * PhoneJSON.round(overallScore, 2));
 
@@ -55,11 +57,16 @@ public class MakePhoneReport {
 
     Map<String, List<Bigram>> phoneToBigram = getPhoneToBigramReally(phoneToBigramToScore);
 
+    phoneToAvgSorted.keySet().forEach(p -> logger.info("getPhoneReport sorted " + p));
+    List<String> sortedPhones = new ArrayList<>(phoneToAvgSorted.keySet().size());
+    phoneToAvgSorted.keySet().forEach(p -> sortedPhones.add(p));
+
     return new PhoneReport(percentOverall,
         phoneToBigram,
         phoneToAvgSorted,
-        phoneToBigramToWS
-    );
+        phoneToBigramToWS,
+        sortedPhones,
+        language);
   }
 
   @NotNull
@@ -92,26 +99,30 @@ public class MakePhoneReport {
     Map<String, PhoneStats> phoneToAvgSorted = new LinkedHashMap<>();
 
     final Map<String, PhoneStats> phoneToAvg = getPhoneToPhoneStats(phoneToScores);
-    if (DEBUG) logger.info("getPhoneSummary phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+    if (DEBUG && false) logger.info("getPhoneStats phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
 
     // set sessions on each phone stats
     new PhoneAnalysis().setSessionsWithPrune(phoneToAvg);
 
-    if (DEBUG && false) logger.info("getPhoneSummary phoneToAvg " + phoneToAvg.size() + " " + phoneToAvg);
+    if (DEBUG) logger.info("getPhoneStats phoneToAvg " + phoneToAvg.size());// + " " + phoneToAvg);
 
     {
       List<String> sorted = new ArrayList<>(phoneToAvg.keySet());
 
-      if (DEBUG) logger.info("getPhoneSummary before sorted " + sorted);
+      if (DEBUG) logger.info("getPhoneStats before sorted " + sorted);
 
       sortPhonesByAvg(phoneToAvg, sorted);
 
-      if (DEBUG) logger.info("getPhoneSummary sorted " + sorted.size() + " " + sorted);
+      if (DEBUG) logger.info("getPhoneStats sorted " + sorted.size() + " " + sorted);
 
       sorted.forEach(phone -> phoneToAvgSorted.put(phone, phoneToAvg.get(phone)));
 
+      phoneToAvgSorted.forEach((k, v) -> {
+        logger.info("getPhoneStats phone " + k + " = " + v.getAvg());
+      });
+
       if (DEBUG) {
-        logger.info("getPhoneSummary phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
+        logger.info("getPhoneStats phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
       }
     }
     return phoneToAvgSorted;
@@ -209,12 +220,18 @@ public class MakePhoneReport {
       PhoneStats second = phoneToAvg.get(o2);
       float current = first.getAvg();
       float current1 = second.getAvg();
-      //if (current == current1) {
-      //  logger.info("got same " + current + " for " + o1 + " and " + o2);
-      //} else {
-      // logger.info("\tgot " + current + " for " + o1 + " and " + current1 + " for "+ o2);
-      //}
+
+
       int i = Float.compare(current, current1);
+
+      if (i == 0) {
+        logger.info("sortPhonesByAvg got same " + current + " for " + o1 + " and " + o2);
+      } else {
+//        logger.info("sortPhonesByAvg got " + i + " for " + o1 + " = " +
+//            current +
+//            " vs " + o2 + " = " + current1);
+
+      }
       return i == 0 ? o1.compareTo(o2) : i;
     });
 /*
@@ -263,7 +280,6 @@ public class MakePhoneReport {
     total /= pair.getValue().size();
     return total;
   }*/
-
   @NotNull
   private Map<String, List<WordAndScore>> getPhoneToMinimal(Map<String, PhoneStats> phoneToAvg) {
     Map<String, List<WordAndScore>> phoneToMinimal = new HashMap<>();
@@ -291,7 +307,9 @@ public class MakePhoneReport {
     phoneToScores.forEach((phone, scores) -> {
       scores.sort(Comparator.comparingLong(PhoneAndScore::getTimestamp));
       List<TimeAndScore> phoneTimeSeries = getPhoneTimeSeries(scores);
-      phoneToAvg.put(phone, new PhoneStats(phoneTimeSeries.size(), phoneTimeSeries));
+      PhoneStats value = new PhoneStats(phoneTimeSeries.size(), phoneTimeSeries);
+      phoneToAvg.put(phone, value);
+      //  logger.info("phone " + phone + " = " + value.getAvg());
     });
 
     return phoneToAvg;

@@ -211,7 +211,7 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   public JsonObject getWorstPhonesJson(int userid, Collection<Integer> exids, String language, Project project) {
     PhoneReport phoneReport = getPhoneReport(userid, exids, null);
     logger.info("getWorstPhonesJson phone report " + phoneReport);
-    return new PhoneJSON().getWorstPhonesJson(phoneReport);
+    return new PhoneJSON(database.getServerProps()).getWorstPhonesJson(phoneReport);
   }
 
   /**

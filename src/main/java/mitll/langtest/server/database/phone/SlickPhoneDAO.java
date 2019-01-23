@@ -33,6 +33,7 @@
 package mitll.langtest.server.database.phone;
 
 import com.google.gson.JsonObject;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.audio.NativeAudioResult;
@@ -55,14 +56,13 @@ import org.jetbrains.annotations.Nullable;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   private static final Logger logger = LogManager.getLogger(SlickPhoneDAO.class);
 
   static final String UNDERSCORE = "_";
 
-  public static final String NJ_E = "nj-e";
+ // public static final String NJ_E = "nj-e";
 
   private final PhoneDAOWrapper dao;
 
@@ -147,7 +147,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
         "\n\treport        " + report +
         "\n\tphone reports " + phoneReportByExercises.size()
     );
-    return new PhoneJSON().getWorstPhonesJson(report);
+    return new PhoneJSON(database.getServerProps()).getWorstPhonesJson(report);
   }
 
   /**
@@ -429,6 +429,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
 //    Map<Integer, List<SlickPhoneReport>> ridToPhones =
 //        phoneReportByResult.stream().collect(Collectors.groupingBy(SlickPhoneReport::rid));
+    ServerProperties serverProps = database.getServerProps();
 
     for (SlickPhoneReport report : phoneReportByResult) {  // for every phone the user has uttered
       // int i = 1;
@@ -467,6 +468,9 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       boolean firstPhoneInWord = prevResult != resultID || prevWord != wseq;
 
       String phone = report.phone();
+
+      phone = serverProps.getDisplayPhoneme(project.getLanguageEnum(), phone);
+
 
       {
         if (firstPhoneInWord) {
@@ -576,7 +580,8 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
             phoneToBigramToWS,
             phoneToBigramToScore,
             totalScore,
-            exids.size());
+            exids.size(),
+            project.getLanguageEnum());
   }
 
   @Nullable

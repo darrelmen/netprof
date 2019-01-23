@@ -904,7 +904,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       }
 
       if (!exercise.hasRefAudio()) {
-        logger.info("getNativeAudio trying to attach audio to " + exercise.getID());
+//        logger.info("getNativeAudio trying to attach audio to " + exercise.getID());
         attachAudioToExercise(exercise, language, idToMini);
       }
 
