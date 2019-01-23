@@ -118,7 +118,7 @@ public class AudioCopy {
     Map<String, List<SlickAudio>> transcriptToAudio = new HashMap<>();
 
     Collection<SlickAudio> audioAttributesByProjectThatHaveBeenChecked
-        = maxID == -1 ? Collections.EMPTY_LIST : daoContainer.getAudioDAO().getAllNoExistsCheck(maxID);
+        = maxID == -1 ? Collections.emptyList() : daoContainer.getAudioDAO().getAllNoExistsCheck(maxID);
 
     logger.info("getTranscriptToAudio found " + audioAttributesByProjectThatHaveBeenChecked.size() + " audio entries for " + maxID);
     for (SlickAudio audioAttribute : audioAttributesByProjectThatHaveBeenChecked) {
@@ -227,8 +227,6 @@ public class AudioCopy {
 
     String oldID = ex.getOldID();
     if (exid == null && !oldID.equalsIgnoreCase(UNKNOWN)) {
-      //  String oldID = oldID1;
-      //   exid = oldIDToExID.get(oldID);
       logger.info("getSlickAudios exercise old " + oldID + " -> " + exid +
           "\n\teng " + ex.getEnglish() +
           "\n\tfl  " + ex.getForeignLanguage());
@@ -385,6 +383,13 @@ public class AudioCopy {
     return audioMatches;
   }
 
+  /**
+   * @see mitll.langtest.server.database.audio.SlickAudioDAO#copyOne
+   * @param exid
+   * @param isContext
+   * @param audio
+   * @return
+   */
   public SlickAudio getCopiedAudio(int exid, boolean isContext, SlickAudio audio) {
     return getCopiedAudio(audio.projid(), exid, isContext, new Timestamp(System.currentTimeMillis()), audio);
   }
@@ -488,22 +493,6 @@ public class AudioCopy {
       }
       return audioType;
     }
-
- /*   public SlickAudio getMr() {
-      return mr;
-    }
-
-    public SlickAudio getFr() {
-      return fr;
-    }
-
-    public SlickAudio getMs() {
-      return ms;
-    }
-
-    public SlickAudio getFs() {
-      return fs;
-    }*/
 
     int getCount() {
       int count = 0;
