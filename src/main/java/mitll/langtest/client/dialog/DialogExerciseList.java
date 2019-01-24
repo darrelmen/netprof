@@ -60,29 +60,11 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     if (!isThereALoggedInUser()) return;
     final long then = System.currentTimeMillis();
 
-    if (DEBUG) logger.info("req " +typeToSelection);
+    if (DEBUG) logger.info("getTypeToValues req " + typeToSelection);
 
     FilterRequest filterRequest = getFilterRequest(userListID, getPairs(typeToSelection));
-    if (DEBUG) logger.info("filterRequest " +filterRequest);
-    controller.getDialogService().getTypeToValues(filterRequest,
-        new AsyncCallback<FilterResponse>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            if (caught instanceof DominoSessionException) {
-              logger.info("getTypeToValues : got " + caught);
-            }
-            controller.handleNonFatalError(GETTING_TYPE_VALUES, caught);
-          }
-
-          /**
-           * fixes downstream selections that no longer make sense.
-           * @param response
-           */
-          @Override
-          public void onSuccess(FilterResponse response) {
-            gotFilterResponse(response, then, typeToSelection);
-          }
-        });
+    if (DEBUG) logger.info("getTypeToValues filterRequest " + filterRequest);
+    controller.getDialogService().getTypeToValues(filterRequest, getTypeToValuesCallback(typeToSelection, then));
   }
 
   protected void getExerciseIDs(Map<String, Collection<String>> typeToSection,
@@ -269,12 +251,11 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     {
       int percentScore = scoreHistoryPerExercise.getOrDefault(dialog.getID(), new CorrectAndScore(0F, null)).getPercentScore();
       if (percentScore > 0) {
-       // logger.info("For " + dialog.getID() + " score " +percentScore);
+        // logger.info("For " + dialog.getID() + " score " +percentScore);
         double score = Integer.valueOf(percentScore).doubleValue() / 100D;
-       // logger.info("overallSmiley For " + dialog.getID() + " score " +score);
+        // logger.info("overallSmiley For " + dialog.getID() + " score " +score);
         overallSmiley.setEmoticon(score, controller.getLanguageInfo());
-      }
-      else overallSmiley.setVisible(false);
+      } else overallSmiley.setVisible(false);
       //  else overallSmiley.setEmoticon(0.5,controller.getLanguageInfo());
 
       styleAnimatedSmiley(overallSmiley);

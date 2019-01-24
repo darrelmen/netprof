@@ -343,9 +343,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   @NotNull
   private Map<String, String> getUnitToValue(SlickExercise slick, Collection<String> typeOrder) {
-    boolean isDefault = slick.projid() == DEFAULT_PROJECT;
     Map<String, String> unitToValue = new HashMap<>();
+
     if (typeOrder == null || typeOrder.isEmpty()) {
+      boolean isDefault = slick.projid() == DEFAULT_PROJECT;
       logger.warn("getUnitToValue no types for exercise " + (isDefault ? " DEFAULT PROJECT " : "") + slick);
     }
 
@@ -472,7 +473,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    */
   @NotNull
   private Exercise makeExercise(SlickExercise slick, boolean shouldSwap, List<String> typeOrder) {
-    int id = slick.id();
+   // int id = slick.id();
     String foreignlanguage = getTruncated(slick.foreignlanguage());
     String noAccentFL = StringUtils.stripAccents(foreignlanguage);
     String english = getTruncated(slick.english());
@@ -480,8 +481,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     Map<String, String> unitToValue = getUnitToValue(slick, typeOrder);
 
+    if (slick.projid() == 16 && slick.id() == 153010) logger.info("makeExercise ex (" +slick.id()+
+        ") " + typeOrder + " - " + unitToValue);
+
     Exercise exercise = new Exercise(
-        id,
+        slick.id(),
         slick.exid(),
         BaseUserDAO.UNDEFINED_USER,
         english,
@@ -735,6 +739,8 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     List<String> baseTypeOrder = lookup.getBaseTypeOrder();
 
+ //   logger.info("getExercises baseTypeOrder " + baseTypeOrder + " type " +typeOrder);
+
     List<CommonExercise> copy = new ArrayList<>();
 
     List<SlickExercisePhone> pairs = new ArrayList<>();
@@ -758,15 +764,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       //  logger.info("examining  " + all.size() + " exercises...");
 
       int n;
-      //  boolean shouldSwap = getShouldSwap(lookup.getID());
       boolean shouldSwap = lookup.shouldSwapPrimaryAndAlt();
 
       for (SlickExercise slickExercise : all) {
         Exercise exercise = makeExercise(slickExercise, shouldSwap, typeOrder);
 
-
         // remember to set swap flag so fl becomes alt-fl and vice-versa for chinese
-
 
         if (WARN_ABOUT_MISSING_PHONES) {
           if (exercise.getNumPhones() == 0 && n++ < 10) {

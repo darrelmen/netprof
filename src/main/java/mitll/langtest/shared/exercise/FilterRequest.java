@@ -33,6 +33,7 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.project.ProjectType;
 
 import java.util.*;
 
@@ -52,6 +53,7 @@ public class FilterRequest implements IsSerializable {
   private boolean exampleRequest = false;
   private boolean onlyUninspected = false;
   private boolean onlyWithAnno = false;
+  private ProjectType projectType = ProjectType.DEFAULT;
 
   public FilterRequest() {
   }
@@ -203,6 +205,15 @@ public class FilterRequest implements IsSerializable {
     pv.forEach((k, v) -> typeToSelection.add(new Pair(k, v)));
   }
 
+  public ProjectType getProjectType() {
+    return projectType;
+  }
+
+  public FilterRequest setProjectType(ProjectType projectType) {
+    this.projectType = projectType;
+    return this;
+  }
+
   /**
    * @return
    */
@@ -214,6 +225,7 @@ public class FilterRequest implements IsSerializable {
             (recordRequest ? "recordRequest " : "") +
             (onlyUninspected ? "onlyUninspected " : "") +
             (onlyWithAnno ? "onlyWithAnno " : "") +
+            (projectType != ProjectType.DEFAULT ? projectType : "") +
             (getTypeToSelection().isEmpty() ? "" : "\n\tselection " + getTypeToSelection());
   }
 }

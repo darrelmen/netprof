@@ -69,14 +69,16 @@ public class DialogHeader {
         vert.add(titleDiv);
       }
 
+      String english = dialog.getEnglish();
+
       {
         DivWidget titleDiv = new DivWidget();
         titleDiv.getElement().getStyle().setBackgroundColor("#dff4fc");
-        titleDiv.add(getHeading(5, dialog.getEnglish()));
+        titleDiv.add(getHeading(5, english));
         vert.add(titleDiv);
       }
 
-      {
+      if (!english.equalsIgnoreCase(dialog.getOrientation())) {
         DivWidget oreintDiv = new DivWidget();
         Heading w1 = new Heading(5, dialog.getOrientation());
         w1.addStyleName("wrapword");
@@ -115,7 +117,7 @@ public class DialogHeader {
   @NotNull
   private Widget getLeftArrow() {
     DivWidget buttonDiv = new DivWidget();
-    Button widgets = new Button("", IconType.ARROW_LEFT, event -> gotGoBack());
+    Button widgets = new Button(getCapitalized(getPrevView().toString().toLowerCase()), IconType.ARROW_LEFT, event -> gotGoBack());
     new TooltipHelper().addTooltip(widgets, getPrevTooltip());
 
     widgets.addStyleName("leftFiveMargin");
@@ -125,9 +127,15 @@ public class DialogHeader {
   }
 
   @NotNull
+  private String getCapitalized(String nameForAnswer) {
+    return nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1);
+  }
+
+  @NotNull
   private Widget getRightArrow() {
     DivWidget buttonDiv = new DivWidget();
-    Button widgets = new Button("", IconType.ARROW_RIGHT, event -> gotGoForward());
+    String nameForAnswer = getNextView() == null ? "" : getNextView().toString().toLowerCase();
+    Button widgets = new Button(getCapitalized(nameForAnswer), IconType.ARROW_RIGHT, event -> gotGoForward());
     new TooltipHelper().addTooltip(widgets, getNextTooltip());
     widgets.addStyleName("leftFiveMargin");
     widgets.addStyleName("rightTenMargin");
@@ -158,7 +166,6 @@ public class DialogHeader {
   }
 
   /**
-   *
    * @return null if nothing comes next
    */
   private INavigation.VIEWS getNextView() {

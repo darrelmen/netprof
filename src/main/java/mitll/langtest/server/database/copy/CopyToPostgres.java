@@ -127,6 +127,9 @@ public class CopyToPostgres<T extends CommonShell> {
     NORM("y"),
     RECORDINGS("r"),
     SEND("s"),
+    /**
+     * @see #copyDialog(int, String)
+     */
     DIALOG("g"),
     CLEANDIALOG("n"),
     LIST("p"),
@@ -276,9 +279,9 @@ public class CopyToPostgres<T extends CommonShell> {
   private Language getLanguageFor(String name) {
     try {
       if (name.equalsIgnoreCase(MANDARIN)) name = Language.MANDARIN.name();
-      return Language.valueOf(name);
+      return Language.valueOf(name.toUpperCase());
     } catch (IllegalArgumentException e) {
-      logger.error("no known language  " + name);
+      logger.error("getLanguageFor no known language  " + name);
       return Language.UNKNOWN;
     }
   }
@@ -1766,8 +1769,11 @@ public class CopyToPostgres<T extends CommonShell> {
     if (to == -1) logger.error("remember to set the project id");
     else {
       Project project = database.getProject(to);
-      if (project == null) logger.error("no project with id " + to);
-      else {
+      if (project == null) {
+        logger.error("no project with id " + to);
+      } else if (project.getStatus() == ProjectStatus.DELETED) {
+        logger.error("\n\n\ncleanDialog project " + project + " is " + project.getStatus());
+      } else {
         boolean b = new DialogPopulate(database, getPathHelper(database)).cleanDialog(project);
         if (!b) logger.info("project " + project + " already has dialog data.");
       }

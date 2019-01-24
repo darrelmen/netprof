@@ -44,6 +44,7 @@ import static mitll.langtest.shared.answer.AudioType.REGULAR;
  */
 public class DialogPopulate {
   private static final Logger logger = LogManager.getLogger(DialogPopulate.class);
+  private static final boolean DO_AUDIO_COPY = false;
 
   private final DatabaseImpl db;
   /**
@@ -200,24 +201,26 @@ public class DialogPopulate {
       addAudio(project, projid, exToAudio, defaultUser, now, audioCheck, allImportExToID);
     }
 
-    Set<ClientExercise> newEx = allImportExToID.keySet();
-    logger.info("found " + newEx.size() + " dialog exercises, " + allNewInDatabase.size() + " core");
-    allNewInDatabase.addAll(toCommon(newEx));
+    if (DO_AUDIO_COPY) {
+      Set<ClientExercise> newEx = allImportExToID.keySet();
+      logger.info("found " + newEx.size() + " dialog exercises, " + allNewInDatabase.size() + " core");
+      allNewInDatabase.addAll(toCommon(newEx));
 
-    Map<Boolean, List<CommonExercise>> englishAndNon = allNewInDatabase.stream().collect(Collectors.partitioningBy(ClientExercise::hasEnglishAttr));
-    {
-      List<CommonExercise> english = englishAndNon.get(true);
-      logger.info("copy audio for " + english.size() + " english exercises");
-      new AudioCopy(db, db.getProjectManagement(), db)
-          .copyAudio(englishProject.getID(), english,
-              new HashMap<>());
-    }
-    {
-      List<CommonExercise> fl = englishAndNon.get(false);
-      logger.info("copy audio for " + fl.size() + " fl exercises");
-      new AudioCopy(db, db.getProjectManagement(), db)
-          .copyAudio(projid, fl,
-              new HashMap<>());
+      Map<Boolean, List<CommonExercise>> englishAndNon = allNewInDatabase.stream().collect(Collectors.partitioningBy(ClientExercise::hasEnglishAttr));
+      {
+        List<CommonExercise> english = englishAndNon.get(true);
+        logger.info("copy audio for " + english.size() + " english exercises");
+        new AudioCopy(db, db.getProjectManagement(), db)
+            .copyAudio(englishProject.getID(), english,
+                new HashMap<>());
+      }
+      {
+        List<CommonExercise> fl = englishAndNon.get(false);
+        logger.info("copy audio for " + fl.size() + " fl exercises");
+        new AudioCopy(db, db.getProjectManagement(), db)
+            .copyAudio(projid, fl,
+                new HashMap<>());
+      }
     }
   }
 
@@ -391,11 +394,6 @@ public class DialogPopulate {
     }
     return relatedExercises;
   }
-
-/*
-  private List<ExerciseAttribute> findMatchingAttr(CommonExercise commonExercise, String type) {
-    return commonExercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(type)).collect(Collectors.toList());
-  }*/
 
   private void addAudio(Project project,
                         int projid,

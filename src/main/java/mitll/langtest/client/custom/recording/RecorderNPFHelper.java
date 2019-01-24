@@ -270,7 +270,8 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
 
     /**
      * @param exid
-     * @param field         @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
+     * @param field
+     * @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
      * @param commentToPost
      */
     @Override
@@ -316,6 +317,4 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
   private void getProgressInfoLater() {
     Scheduler.get().scheduleDeferred(RecorderNPFHelper.this::getProgressInfo);
   }
-
-
 }

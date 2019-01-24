@@ -108,7 +108,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   private static final String PAGE_SIZE_SELECTED = "pageSizeSelected";
 
-  protected static final String GETTING_TYPE_VALUES = "getting type->values";
+  private static final String GETTING_TYPE_VALUES = "getting type->values";
 
   /**
    *
@@ -778,9 +778,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   protected void addExerciseChoices(String dynamicFacet, ListItem liForDimensionForType, Set<MatchInfo> value) {
-//    Set<MatchInfo> value = new HashSet<>();
-//    value.add(e);
-
     Map<String, Set<MatchInfo>> typeToValues = new HashMap<>();
     typeToValues.put(dynamicFacet, value);
 
@@ -1152,31 +1149,30 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       }
 
       final long then = System.currentTimeMillis();
-
-      FilterRequest filterRequest = getFilterRequest(userListID, getPairs(typeToSelection));
-
-      // logger.info("getTypeToValues Send req " + filterRequest);
-
-      service.getTypeToValues(filterRequest,
-          new AsyncCallback<FilterResponse>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              if (caught instanceof DominoSessionException) {
-                logger.info("getTypeToValues : got " + caught);
-              }
-              controller.handleNonFatalError(GETTING_TYPE_VALUES, caught);
-            }
-
-            /**
-             * fixes downstream selections that no longer make sense.
-             * @param response
-             */
-            @Override
-            public void onSuccess(FilterResponse response) {
-              gotFilterResponse(response, then, typeToSelection);
-            }
-          });
+      service.getTypeToValues(getFilterRequest(userListID, getPairs(typeToSelection)), getTypeToValuesCallback(typeToSelection, then));
     }
+  }
+
+  @NotNull
+  protected AsyncCallback<FilterResponse> getTypeToValuesCallback(Map<String, String> typeToSelection, long then) {
+    return new AsyncCallback<FilterResponse>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        if (caught instanceof DominoSessionException) {
+          logger.info("getTypeToValues : got " + caught);
+        }
+        controller.handleNonFatalError(GETTING_TYPE_VALUES, caught);
+      }
+
+      /**
+       * fixes downstream selections that no longer make sense.
+       * @param response
+       */
+      @Override
+      public void onSuccess(FilterResponse response) {
+        gotFilterResponse(response, then, typeToSelection);
+      }
+    };
   }
 
 

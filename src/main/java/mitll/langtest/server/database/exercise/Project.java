@@ -247,17 +247,28 @@ public class Project implements IPronunciationLookup {
     return types;
   }
 
+  /**
+   * Cheesy code to avoid adding a duplicate type -- needed?
+   * @return
+   */
   @NotNull
   public List<String> getBaseTypeOrder() {
     List<String> typeOrder = new ArrayList<>();
     SlickProject project1 = getProject();
-    if (!project1.first().isEmpty()) {
-      typeOrder.add(project1.first());
-    } else {
-      logger.error("huh? project " + project + " first type is empty?");
+    {
+      String first = project1.first();
+      if (!first.isEmpty()) {
+        typeOrder.add(first);
+      } else {
+        logger.error("getBaseTypeOrder huh? project " + project + " first type is empty?");
+      }
     }
-    if (!project1.second().isEmpty()) {
-      typeOrder.add(project1.second());
+
+    {
+      String second = project1.second();
+      if (!second.isEmpty() && !typeOrder.contains(second)) {
+        typeOrder.add(second);
+      }
     }
     return typeOrder;
   }
@@ -764,16 +775,16 @@ public class Project implements IPronunciationLookup {
 
     if (user == null) {
       if (unknownFiles.containsKey(requestURI)) {
-      //  logger.warn("getUserForFile (" + getID() + ") OK, already know we can't find the user for " + requestURI);
+        //  logger.warn("getUserForFile (" + getID() + ") OK, already know we can't find the user for " + requestURI);
       } else {
         int studentForPath = db.getResultDAO().getStudentForPath(getID(), requestURI);
         if (studentForPath > 0) {
           fileToRecorder.put(requestURI, studentForPath);
-    //      logger.info("getUserForFile (" + getID() + ") remember '" + requestURI + "' = " + studentForPath + " now " + fileToRecorder.size());
+          //      logger.info("getUserForFile (" + getID() + ") remember '" + requestURI + "' = " + studentForPath + " now " + fileToRecorder.size());
           user = studentForPath;
         } else {
           unknownFiles.put(requestURI, false);
-  //        logger.info("getUserForFile (" + getID() + ") can't find user for " + requestURI + " = " + studentForPath + " now " + unknownFiles.size() + " " + unknownFiles.containsKey(requestURI));
+          //        logger.info("getUserForFile (" + getID() + ") can't find user for " + requestURI + " = " + studentForPath + " now " + unknownFiles.size() + " " + unknownFiles.containsKey(requestURI));
         }
       }
     } else {

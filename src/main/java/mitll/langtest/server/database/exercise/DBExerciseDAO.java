@@ -246,7 +246,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         List<CommonExercise> userCreatedExercises = getUserCreatedExercises(typeOrder, allRelated);
         userCreatedExercises.forEach(c -> idToUserExercise.put(c.getID(), c));
         userCreatedExercises.forEach(c -> c.getDirectlyRelated().forEach(d -> idToUserExercise.put(d.getID(), d.asCommon())));
-      //  logger.info("added " + userCreatedExercises.size() + " vs " + idToUserExercise.size());
+        //  logger.info("added " + userCreatedExercises.size() + " vs " + idToUserExercise.size());
       }
       return allNonContextExercises;
     } catch (Exception e) {
@@ -399,9 +399,17 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       attributeTypes.remove(SEMESTER.toString());
     }
 
-    typeOrder.addAll(attributeTypes);
-    getSectionHelper().reorderTypes(typeOrder);
-    return typeOrder;
+    final List<String> ftypeOrder = new ArrayList<>(typeOrder);
+    List<String> withAttr = new ArrayList<>(typeOrder);
+    attributeTypes.forEach(type -> {
+      if (!ftypeOrder.contains(type)) {
+        withAttr.add(type);
+      }
+    });
+
+    withAttr.addAll(attributeTypes);
+    getSectionHelper().reorderTypes(withAttr);
+    return withAttr;
   }
 
   @NotNull
@@ -452,10 +460,18 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     sectionHelper.setParentToChildTypes(parentToChild);
     if (DEBUG) {
       logger.info("setRootTypes roots " + rootTypes);
-
     }
-    sectionHelper.setPredefinedTypeOrder(typeOrder);
-    if (DEBUG) logger.info("parentToChild " + parentToChild);
+
+    Set<String> seen = new HashSet<>();
+    List<String> uniq = new ArrayList<>();
+    typeOrder.forEach(type -> {
+      if (!seen.contains(type)) {
+        seen.add(type);
+        uniq.add(type);
+      }
+    });
+    sectionHelper.setPredefinedTypeOrder(uniq);
+    if (DEBUG) logger.info("setRootTypes parentToChild " + parentToChild);
   }
 
   private void setParentChild(Collection<String> rootTypes, Map<String, String> parentToChild, String lowerTopic) {

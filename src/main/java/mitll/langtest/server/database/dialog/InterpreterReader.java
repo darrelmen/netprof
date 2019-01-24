@@ -6,7 +6,6 @@ import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.project.Language;
@@ -39,6 +38,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
   private static final boolean DEBUG = true;
   private static final String DIALOGS = "Dialogs";
   private static final String INTERPRETER = "I";
+  private static final String INTERPRETER1 = "Interpreter";
   //  private final boolean DEBUG = true;
   private final ExcelUtil excelUtil = new ExcelUtil();
 
@@ -287,9 +287,9 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
   }
 
   private void addCoreExercises(Project project, List<String> typeOrder, Set<CoreEntry> coreFL, Set<ClientExercise> coreExercises) {
-    List<CoreEntry> toAdd = addCoreWords(project, coreExercises, coreFL);
+//    List<CoreEntry> toAdd = addCoreWords(project, coreExercises, coreFL);
     Language languageEnum = project.getLanguageEnum();
-    toAdd.forEach(phrase -> coreExercises.add(getExercise(typeOrder, phrase.getText(), phrase.getSpeakerID(), languageEnum, phrase.getTurnID())));
+    coreFL.forEach(phrase -> coreExercises.add(getExercise(typeOrder, phrase.getText(), phrase.getSpeakerID(), languageEnum, phrase.getTurnID())));
   }
 
   static class CoreEntry {
@@ -340,18 +340,18 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
    * @param coreExercises set - only unique exercises...
    * @param tokens
    */
-  private List<CoreEntry> addCoreWords(Project project, Collection<ClientExercise> coreExercises, Collection<CoreEntry> tokens) {
-    List<CoreEntry> toAdd = new ArrayList<>();
-    tokens.forEach(token -> {
-      CommonExercise exerciseBySearch = project.getExerciseByExactMatch(token.getText());
-      if (exerciseBySearch == null) {
-        toAdd.add(token);
-      } else {
-        coreExercises.add(exerciseBySearch);
-      }
-    });
-    return toAdd;
-  }
+//  private List<CoreEntry> addCoreWords(Project project, Collection<ClientExercise> coreExercises, Collection<CoreEntry> tokens) {
+//    List<CoreEntry> toAdd = new ArrayList<>();
+//    tokens.forEach(token -> {
+//      CommonExercise exerciseBySearch = project.getExerciseByExactMatch(token.getText());
+//      if (exerciseBySearch == null) {
+//        toAdd.add(token);
+//      } else {
+//        coreExercises.add(exerciseBySearch);
+//      }
+//    });
+//    return toAdd;
+//  }
 
   /**
    * Split them.
@@ -456,12 +456,8 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
       exercise.getMutable().setOldID(turnID);
     }
 
-    {
-      Map<String, String> unitToValue = new HashMap<>();
-      unitToValue.put(typeOrder.get(0), DEFAULT_UNIT);
-      unitToValue.put(typeOrder.get(1), DEFAULT_CHAPTER);
-      exercise.setUnitToValue(unitToValue);
-    }
+    exercise.setUnitToValue(getDefaultUnitAndChapter(typeOrder));
+
     if (!speakerID.isEmpty()) {
       speakers.add(speakerID);
       exercise.addAttribute(new ExerciseAttribute(DialogMetadata.SPEAKER.getCap(), speakerID, false));
@@ -472,5 +468,11 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
     return exercise;
   }
 
-
+  @NotNull
+  private Map<String, String> getDefaultUnitAndChapter(List<String> typeOrder) {
+    Map<String, String> unitToValue = new HashMap<>();
+    unitToValue.put(typeOrder.get(0), DEFAULT_UNIT);
+    unitToValue.put(typeOrder.get(1), INTERPRETER1);
+    return unitToValue;
+  }
 }

@@ -10,6 +10,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.ProjectType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -21,11 +22,15 @@ import java.util.logging.Logger;
  * @see RecorderNPFHelper#getMyListLayout
  */
 class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
- // private final Logger logger = Logger.getLogger("RecordingFacetExerciseList");
+  private final Logger logger = Logger.getLogger("RecordingFacetExerciseList");
 
   private static final String NONE_RECORDED_YET = "None Recorded Yet";
   private static final String ALL_RECORDED = "All Recorded.";
-  private static final String LANGUAGE_META_DATA = DialogMetadata.LANGUAGE.name();
+  private static final String ANY = "Any";
+  /**
+   * @see #getPairs(Map)
+   */
+  private static final List<String> DYNAMIC_FACETS = Arrays.asList(DialogMetadata.LANGUAGE.name(), DialogMetadata.SPEAKER.name());
 
   private final boolean isContext;
 
@@ -86,8 +91,15 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   @NotNull
   protected List<Pair> getPairs(Map<String, String> typeToSelection) {
     List<Pair> pairs = super.getPairs(typeToSelection);
-    addDynamicFacetToPairs(typeToSelection, LANGUAGE_META_DATA, pairs);
-  //  logger.info("pairs now " + pairs);
+    if (controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG) {
+      DYNAMIC_FACETS.forEach(facet -> {
+        boolean added = addDynamicFacetToPairs(typeToSelection, facet, pairs);
+        if (!added) {
+          pairs.add(new Pair(facet, ANY));
+        }
+      });
+    }
+  //  logger.info("getPairs pairs now " + pairs + " for " + typeToSelection);
     return pairs;
   }
 
@@ -111,6 +123,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
     return new FilterRequest(incrReqID(), pairs, userListID)
         .setRecordRequest(true)
+        .setProjectType(controller.getProjectStartupInfo().getProjectType())
         .setExampleRequest(isContext);
   }
 
@@ -122,7 +135,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   @Override
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
     ExerciseListRequest request = super.getExerciseListRequest(prefix);
- //   logger.info("getExerciseListRequest " + isContext);
+    //   logger.info("getExerciseListRequest " + isContext);
     request.setOnlyExamples(isContext);
     return request;
   }
@@ -137,35 +150,41 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
    */
   @NotNull
   @Override
-  protected Map<String, String> getNewTypeToSelection(SelectionState selectionState, Collection<String> typeOrder) {
-    typeOrder = new ArrayList<>(typeOrder);
-    typeOrder.add(LANGUAGE_META_DATA);
-
-    return getTypeToSelection(selectionState, typeOrder);
+  protected Map<String, String> getNewTypeToSelection(SelectionState selectionState, final Collection<String> typeOrder) {
+    List<String> copy = new ArrayList<>(typeOrder);
+    copy.addAll(DYNAMIC_FACETS);
+    return getTypeToSelection(selectionState, copy);
   }
 
   @Override
   protected void addDynamicFacets(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer) {
-    Set<MatchInfo> matchInfos = typeToValues.get(LANGUAGE_META_DATA);
+    DYNAMIC_FACETS.forEach(facet -> addExerciseChoices(typeToValues, allTypesContainer, facet));
+  }
+
+  private void addExerciseChoices(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer, String languageMetaData) {
+    Set<MatchInfo> matchInfos = typeToValues.get(languageMetaData);
 //    logger.info("addDynamicFacets match infos  " + matchInfos);
 //    logger.info("addDynamicFacets typeToValues " + typeToValues);
     if (matchInfos != null && !matchInfos.isEmpty()) {
-      addExerciseChoices(LANGUAGE_META_DATA, addContentFacet(allTypesContainer), matchInfos);
+      addExerciseChoices(languageMetaData, addContentFacet(allTypesContainer, languageMetaData), matchInfos);
     }
   }
 
   /**
-   *
-   *
    * @param allTypesContainer
    */
-  private ListItem addContentFacet(UnorderedList allTypesContainer) {
-    ListItem widgets = addContentFacet();
+  private ListItem addContentFacet(UnorderedList allTypesContainer, String facet) {
+    ListItem widgets = addContentFacet(facet);
     allTypesContainer.add(widgets);
     return widgets;
   }
 
-  private ListItem addContentFacet() {
-    return getTypeContainer(LANGUAGE_META_DATA, getTypeToSelection().containsKey(LANGUAGE_META_DATA));
+  private ListItem addContentFacet(String facet) {
+    return getTypeContainer(facet);
+  }
+
+  @NotNull
+  private ListItem getTypeContainer(String languageMetaData) {
+    return getTypeContainer(languageMetaData, getTypeToSelection().containsKey(languageMetaData));
   }
 }
