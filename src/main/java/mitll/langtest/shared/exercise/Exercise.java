@@ -377,6 +377,11 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return attributes;
   }
 
+  /**
+   * Is it marked with the english attribute? so we can check if we have an interpreter exercise sequence
+   * with alternating english and fl phrases.
+   * @return
+   */
   public boolean hasEnglishAttr() {
     return !getAttributes()
         .stream()

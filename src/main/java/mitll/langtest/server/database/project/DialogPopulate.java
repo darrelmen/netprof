@@ -34,6 +34,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.project.ProjectManagement.FIVE_YEARS;
 import static mitll.langtest.shared.answer.AudioType.REGULAR;
@@ -93,7 +94,7 @@ public class DialogPopulate {
    * @param project
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyDialog
    */
-  public boolean populateDatabase(Project project) {
+  public boolean populateDatabase(Project project, Project englishProject) {
     int projid = project.getID();
     IDialogDAO dialogDAO = db.getDialogDAO();
     if (!dialogDAO.getDialogs(projid).isEmpty()) {
@@ -102,42 +103,59 @@ public class DialogPopulate {
     } else {
       waitUntilTrieReady(project);
 
-      maybeDoDialogImport(project, dialogDAO);
-
-      maybeDoInterpreterImport(project, dialogDAO);
+      maybeDoDialogImport(project, englishProject, dialogDAO);
+      maybeDoInterpreterImport(project, englishProject, dialogDAO);
 
       return true;
     }
   }
 
-  private void maybeDoInterpreterImport(Project project, IDialogDAO dialogDAO) {
+  /**
+   * Only some languages
+   *
+   * @param project
+   * @param dialogDAO
+   */
+  private void maybeDoInterpreterImport(Project project, Project englishProject, IDialogDAO dialogDAO) {
     int defaultUser = db.getUserDAO().getDefaultUser();
     Language languageEnum = project.getLanguageEnum();
 
-    if (languageEnum == Language.MANDARIN) {
+    if (languageEnum == Language.MANDARIN || languageEnum == Language.FRENCH || languageEnum == Language.RUSSIAN) {
       logger.info("maybeDoInterpreterImport found interpreter candidate " + project);
 
       Map<ClientExercise, String> exToAudio = new HashMap<>();
 
-      Map<Dialog, SlickDialog> dialogToSlick = new InterpreterReader().getDialogs(defaultUser, exToAudio, project);
+      Project productionByLanguage = db.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
+      Map<Dialog, SlickDialog> dialogToSlick = new InterpreterReader().getDialogs(defaultUser, exToAudio, project, productionByLanguage);
 
       logger.info("maybeDoInterpreterImport read " + dialogToSlick.size());
-      addDialogs(project, dialogDAO, exToAudio, defaultUser, DialogType.INTERPRETER, dialogToSlick);
+      addDialogs(project, englishProject, dialogDAO, exToAudio, defaultUser, DialogType.INTERPRETER, dialogToSlick);
     }
   }
 
-  private void maybeDoDialogImport(Project project, IDialogDAO dialogDAO) {
+  private void maybeDoDialogImport(Project project, Project englishProject, IDialogDAO dialogDAO) {
     Map<ClientExercise, String> exToAudio = new HashMap<>();
     int defaultUser = db.getUserDAO().getDefaultUser();
     Language languageEnum = project.getLanguageEnum();
 
     if (shouldTryToReadDialogInfo(languageEnum)) {
-      addDialogs(project, dialogDAO, exToAudio, defaultUser, DialogType.DIALOG,
-          getDialogReader(languageEnum).getDialogs(defaultUser, exToAudio, project));
+      Project productionByLanguage = db.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
+      addDialogs(project, englishProject, dialogDAO, exToAudio, defaultUser, DialogType.DIALOG,
+          getDialogReader(languageEnum).getDialogs(defaultUser, exToAudio, project, productionByLanguage));
     }
   }
 
+  /**
+   * @param project
+   * @param englishProject
+   * @param dialogDAO
+   * @param exToAudio
+   * @param defaultUser
+   * @param dialogType
+   * @param dialogToSlick
+   */
   private void addDialogs(Project project,
+                          Project englishProject,
                           IDialogDAO dialogDAO,
                           Map<ClientExercise, String> exToAudio,
                           int defaultUser,
@@ -148,20 +166,18 @@ public class DialogPopulate {
 
     long now = System.currentTimeMillis();
     Timestamp modified = new Timestamp(now);
-    AudioCheck audioCheck = new AudioCheck(db.getServerProps().shouldTrimAudio(), db.getServerProps().getMinDynamicRange());
 
     int projid = project.getID();
     Map<ExerciseAttribute, Integer> attrToInt = getExerciseAttributeToID(projid, defaultUser, dialogs, now);
 
     Map<ClientExercise, Integer> allImportExToID = new HashMap<>();
     List<String> typeOrder = project.getTypeOrder();
-
+    Set<CommonExercise> allNewInDatabase = new HashSet<>();
     dialogs.forEach(dialog -> {
       // add the image
       int imageID = db.getImageDAO().insert(getSlickImage(projid, now, dialog, modified));
 
-      SlickDialog slickDialog = dialogToSlick.get(dialog);
-      slickDialog.imageid_$eq(imageID);
+      dialogToSlick.get(dialog).imageid_$eq(imageID);
 
       // add the dialog to the database
       int dialogID = dialogDAO.add(defaultUser, projid, 1, imageID, now, now,
@@ -173,46 +189,58 @@ public class DialogPopulate {
       addDialogAttributes(dialogDAO, defaultUser, modified, attrToInt, dialog, dialogID);
 
       // add the exercises
-      addExercises(projid, defaultUser, modified, allImportExToID, typeOrder, dialog, dialogID);
+      addExercises(projid, defaultUser, typeOrder, modified, allImportExToID, dialog, dialogID);
 
       // add core vocab
-      addCoreVocab(projid, modified, dialog, dialogID);
+      allNewInDatabase.addAll(addCoreVocab(projid, defaultUser, typeOrder, modified, dialog, dialogID));
     });
 
-    addAudio(project, projid, exToAudio, defaultUser, now, audioCheck, allImportExToID);
+    {
+      AudioCheck audioCheck = new AudioCheck(db.getServerProps().shouldTrimAudio(), db.getServerProps().getMinDynamicRange());
+      addAudio(project, projid, exToAudio, defaultUser, now, audioCheck, allImportExToID);
+    }
 
-    new AudioCopy(db, db.getProjectManagement(), db)
-        .copyAudio(projid, allImportExToID.keySet(), new HashMap<>());
+    Set<ClientExercise> newEx = allImportExToID.keySet();
+    logger.info("found " + newEx.size() + " dialog exercises, " + allNewInDatabase.size() + " core");
+    allNewInDatabase.addAll(toCommon(newEx));
+
+    Map<Boolean, List<CommonExercise>> englishAndNon = allNewInDatabase.stream().collect(Collectors.partitioningBy(ClientExercise::hasEnglishAttr));
+    {
+      List<CommonExercise> english = englishAndNon.get(true);
+      logger.info("copy audio for " + english.size() + " english exercises");
+      new AudioCopy(db, db.getProjectManagement(), db)
+          .copyAudio(englishProject.getID(), english,
+              new HashMap<>());
+    }
+    {
+      List<CommonExercise> fl = englishAndNon.get(false);
+      logger.info("copy audio for " + fl.size() + " fl exercises");
+      new AudioCopy(db, db.getProjectManagement(), db)
+          .copyAudio(projid, fl,
+              new HashMap<>());
+    }
   }
 
   /**
    * @param projid
    * @param defaultUser
+   * @param typeOrder
    * @param modified
    * @param allImportExToID
-   * @param typeOrder
    * @param dialog
    * @param dialogID
    * @see #addDialogs
    */
   private void addExercises(int projid,
                             int defaultUser,
+                            List<String> typeOrder,
                             Timestamp modified,
                             Map<ClientExercise, Integer> allImportExToID,
-                            List<String> typeOrder,
                             Dialog dialog,
                             int dialogID) {
-    ExerciseCopy exerciseCopy = new ExerciseCopy();
+    List<CommonExercise> commonExercisesFromDialog = getCommonExercisesFromDialog(dialog);
 
-    Map<CommonExercise, Integer> importExToID = exerciseCopy.addExercisesAndAttributes(
-        defaultUser,
-        projid,
-        db.getUserExerciseDAO(),
-        getCommonExercisesFromDialog(dialog),
-        typeOrder,
-        new HashMap<>(),
-        new HashMap<>(),
-        true);
+    Map<CommonExercise, Integer> importExToID = addExercises(projid, defaultUser, typeOrder, commonExercisesFromDialog);
 
     allImportExToID.putAll(importExToID);
 
@@ -220,14 +248,30 @@ public class DialogPopulate {
 
     db.getUserExerciseDAO().getRelatedExercise().addBulkRelated(
         getSlickRelatedExercises(projid, modified, dialog, dialogID, importExToID));
+  }
 
+  private Map<CommonExercise, Integer> addExercises(int projid, int defaultUser, List<String> typeOrder,
+                                                    List<CommonExercise> commonExercisesFromDialog) {
+    return new ExerciseCopy().addExercisesAndAttributes(
+        defaultUser,
+        projid,
+        db.getUserExerciseDAO(),
+        commonExercisesFromDialog,
+        typeOrder,
+        new HashMap<>(),
+        new HashMap<>(),
+        true);
   }
 
   @NotNull
   private List<CommonExercise> getCommonExercisesFromDialog(Dialog dialog) {
-    List<CommonExercise> commonExercises = new ArrayList<>();
+    return toCommon(dialog.getExercises());
+  }
 
-    dialog.getExercises().forEach(clientExercise -> commonExercises.add(clientExercise.asCommon()));
+  @NotNull
+  private List<CommonExercise> toCommon(Collection<ClientExercise> exercises) {
+    List<CommonExercise> commonExercises = new ArrayList<>(exercises.size());
+    exercises.forEach(clientExercise -> commonExercises.add(clientExercise.asCommon()));
     return commonExercises;
   }
 
@@ -263,18 +307,69 @@ public class DialogPopulate {
     return languageEnum == Language.KOREAN ? new KPDialogs() : new EnglishDialog();
   }
 
-  private void addCoreVocab(int projid, Timestamp modified, Dialog dialog, int dialogID) {
+  /**
+   * Deals with any new exercises for core vocab.
+   *
+   * @param projid
+   * @param modified
+   * @param dialog
+   * @param dialogID
+   * @see #addDialogs(Project, Project, IDialogDAO, Map, int, DialogType, Map)
+   */
+  private Set<CommonExercise> addCoreVocab(int projid, int userID, List<String> typeOrder, Timestamp modified, Dialog dialog, int dialogID) {
+    List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
+
     List<SlickRelatedExercise> relatedExercises = new ArrayList<>();
 
-    dialog.getCoreVocabulary().forEach(clientExercise ->
-        relatedExercises.add(new SlickRelatedExercise(-1, clientExercise.getID(),
-            clientExercise.getID(), projid, dialogID, modified))
-    );
+    Map<Boolean, List<ClientExercise>> newAndOldExercises =
+        coreVocabulary.stream().collect(Collectors.partitioningBy(clientExercise -> clientExercise.getID() > -1));
+
+    List<ClientExercise> newExercises = newAndOldExercises.get(false);
+    List<ClientExercise> oldExercises = newAndOldExercises.get(true);
+
+    Map<CommonExercise, Integer> importExToID = addExercises(projid, userID, typeOrder, toCommon(newExercises));
+
+    List<Collection<CommonExercise>> both = new ArrayList<>();
+    Set<CommonExercise> newInDatabase = importExToID.keySet();
+    both.add(newInDatabase);
+    both.add(toCommon(oldExercises));
+
+    both.forEach(commonExercises ->
+        commonExercises.forEach(clientExercise ->
+            {
+              int id = getExID(importExToID, clientExercise);
+              if (id == -1) {
+                logger.error("addCoreVocab huh? exercise has no id");
+              }
+              relatedExercises.add(new SlickRelatedExercise(-1,
+                  id,
+                  id,
+                  projid,
+                  dialogID,
+                  modified));
+            }
+        ));
 
     db
         .getUserExerciseDAO()
         .getRelatedCoreExercise()
         .addBulkRelated(relatedExercises);
+
+    return newInDatabase;
+  }
+
+  @NotNull
+  private Integer getExID(Map<CommonExercise, Integer> importExToID, CommonExercise clientExercise) {
+    Integer id = clientExercise.getID();
+    if (id == -1) {
+      logger.info("addCoreVocab lookup ex '" + clientExercise.getEnglish() + "' " + clientExercise.getForeignLanguage());
+      id = importExToID.get(clientExercise);
+      if (id == null) {
+        logger.error("can't find " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage());
+        id = -1;
+      }
+    }
+    return id;
   }
 
   @NotNull
@@ -311,21 +406,16 @@ public class DialogPopulate {
     exToAudio.forEach((k, v) -> {
       File file = new File(db.getServerProps().getAudioBaseDir(), v);
       if (!file.exists()) {
-        logger.error("can't find audio file " + file.getAbsolutePath());
+        logger.error("addAudio can't find audio file " + file.getAbsolutePath());
       } else {
         logger.info("addAudio : found audio at " + file.getAbsolutePath());
       }
       AudioCheck.ValidityAndDur valid = audioCheck.isValid(file, true, false);
 
       Integer exid = allImportExToID.get(k);
-      //  Integer exid = exToID.get(k);
-      if (exid == null) logger.error("can't find ex by '" + k + "' in " + allImportExToID.size());
-      else {
-   /*     Result result = new Result(-1, defaultUser,
-            exid,
-            0, v, true, now, AudioType.REGULAR, valid.durationInMillis,
-            true, 0.99F, "", "", 0, 0, false,
-            (float) valid.getDynamicRange(), valid.getValidity().toString(), "");*/
+      if (exid == null) {
+        logger.error("addAudio can't find ex by '" + k + "' in " + allImportExToID.size());
+      } else {
         addResultAndAudio(project, projid, defaultUser, now, k, v, valid, exid);
       }
     });
@@ -386,7 +476,6 @@ public class DialogPopulate {
   }
 
   /**
-   * @see #addAudio
    * @param project
    * @param projid
    * @param defaultUser
@@ -395,6 +484,7 @@ public class DialogPopulate {
    * @param pathOnDisk
    * @param valid
    * @param exid
+   * @see #addAudio
    */
   private void addResultAndAudio(Project project, int projid, int defaultUser, long now,
                                  ClientExercise k, String pathOnDisk, AudioCheck.ValidityAndDur valid,
@@ -406,9 +496,9 @@ public class DialogPopulate {
         .addAnswer(new AnswerInfo(
             new AudioContext(0, defaultUser, projid, languageEnum, exid, 0, REGULAR),
             new AnswerInfo.RecordingInfo(pathOnDisk, pathOnDisk, "", "", foreignLanguage, ""), valid, ""), now);
-    logger.info("Remember path        " + pathOnDisk);
+    logger.info("addResultAndAudio Remember path        " + pathOnDisk);
     File absoluteFile = pathHelper.getAbsoluteAudioFile(pathOnDisk);
-    logger.info("Remember absoluteFile " + absoluteFile.getAbsolutePath());
+    logger.info("addResultAndAudio Remember absoluteFile " + absoluteFile.getAbsolutePath());
 
     String permanentAudioPath = pathWriter.
         getPermanentAudioPath(

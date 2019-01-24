@@ -503,6 +503,7 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * Don't add nulls to list!
+   *
    * @param group
    * @return
    */
@@ -807,6 +808,11 @@ public class ProjectManagement implements IProjectManagement {
     return first.orElse(null);
   }
 
+  public Project getProductionByLanguage(Language language) {
+    List<Project> matchingProjects = getMatchingProjects(language, false);
+    return (matchingProjects.isEmpty()) ? null : matchingProjects.get(0);
+  }
+
   @Override
   public List<Project> getMatchingProjects(Language languageMatchingGroup, boolean isPoly) {
     List<Project> projectByLangauge = getProjectByLangauge(languageMatchingGroup);
@@ -1107,7 +1113,7 @@ public class ProjectManagement implements IProjectManagement {
           if (kind == DialogType.INTERPRETER) {
             name = INTERPRETER;
             cc = INTERPRETER1;
-           // logger.info("addModeChoices : found first interpreter dialog : " + iDialog);
+            // logger.info("addModeChoices : found first interpreter dialog : " + iDialog);
           } else {
             logger.info("dialog kind is " + kind);
           }

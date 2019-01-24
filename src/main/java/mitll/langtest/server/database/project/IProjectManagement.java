@@ -90,6 +90,7 @@ public interface IProjectManagement {
   Project getProject(int projectid, boolean onlyOne);
   Project getProjectByName(String name);
   List<Project> getProjectByLangauge(Language name);
+  Project getProductionByLanguage(Language language);
   List<Project> getMatchingProjects(Language languageMatchingGroup, boolean isPoly);
   boolean exists(int projectid);
 

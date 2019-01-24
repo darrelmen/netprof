@@ -87,32 +87,35 @@ public class SlickTrainingAudioDAO extends DAO implements ITrainingAudioDAO {
   @Override
   public void checkAndAddAudio(Collection<Project> projects, IAudioDAO audioDAO) {
     for (Project project : projects) {
-      if (project.getStatus() != ProjectStatus.DELETED && project.getStatus() != ProjectStatus.RETIRED) {
-        int id = project.getID();
-        int numFor = dao.getNumFor(id);
-        if (numFor == 0) {
-          logger.info("checkAndAddAudio no training audio for " + project);
+      if (project.getProject() != null) {
+        ProjectStatus status = project.getStatus();
+        if (status != ProjectStatus.DELETED && status != ProjectStatus.RETIRED) {
+          int id = project.getID();
+          int numFor = dao.getNumFor(id);
+          if (numFor == 0) {
+            logger.info("checkAndAddAudio no training audio for " + project);
 
-          List<SlickAudio> all = audioDAO.getAll(id);
-          List<SlickTrainingAudio> trainingAudios = new ArrayList<>();
-          ASR asr = project.getAudioFileHelper().getASR();
+            List<SlickAudio> all = audioDAO.getAll(id);
+            List<SlickTrainingAudio> trainingAudios = new ArrayList<>();
+            ASR asr = project.getAudioFileHelper().getASR();
 
-          all.forEach(slickAudio -> {
-            String normTranscript = asr.getNormTranscript(slickAudio.transcript(), "");
-            trainingAudios.add(new SlickTrainingAudio(-1,
-                slickAudio.userid(),
-                slickAudio.exid(),
-                slickAudio.modified(),
-                slickAudio.audioref(),
-                slickAudio.audiotype(),
-                slickAudio.transcript(),
-                normTranscript,
-                id,
-                slickAudio.gender()
-            ));
-          });
+            all.forEach(slickAudio -> {
+              String normTranscript = asr.getNormTranscript(slickAudio.transcript(), "");
+              trainingAudios.add(new SlickTrainingAudio(-1,
+                  slickAudio.userid(),
+                  slickAudio.exid(),
+                  slickAudio.modified(),
+                  slickAudio.audioref(),
+                  slickAudio.audiotype(),
+                  slickAudio.transcript(),
+                  normTranscript,
+                  id,
+                  slickAudio.gender()
+              ));
+            });
 
-          dao.addBulk(trainingAudios);
+            dao.addBulk(trainingAudios);
+          }
         }
       }
     }

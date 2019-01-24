@@ -1733,19 +1733,22 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   /**
-   * @see #main
-   * @see DIALOG command
+   * There had better be an english project if we're doing interpreter dialogs.
+   *
    * @param to
    * @param propertiesFile
+   * @see #main
+   * @see DIALOG
    */
   private static void copyDialog(int to, String propertiesFile) {
     database = getDatabase(propertiesFile);
     if (to == -1) logger.error("remember to set the project id");
     else {
       Project project = database.getProject(to);
-      if (project == null) logger.error("no project with id " + to);
+      if (project == null) logger.error("copyDialog no project with id " + to);
       else {
-        if (!new DialogPopulate(database, getPathHelper(database)).populateDatabase(project)) {
+        Project english = database.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
+        if (!new DialogPopulate(database, getPathHelper(database)).populateDatabase(project, english)) {
           logger.info("project " + project + " already has dialog data.");
         }
       }

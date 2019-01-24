@@ -6,6 +6,7 @@ import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.project.Language;
@@ -35,26 +36,28 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
   private static final String M_2_M = "M2M";
   private static final String DEFAULT_UNIT = "1";
   private static final String DEFAULT_CHAPTER = "1";
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
+  private static final String DIALOGS = "Dialogs";
+  private static final String INTERPRETER = "I";
   //  private final boolean DEBUG = true;
-  private ExcelUtil excelUtil = new ExcelUtil();
+  private final ExcelUtil excelUtil = new ExcelUtil();
 
   /**
    * @param defaultUser
    * @param exToAudio
    * @param project
+   * @param englishProject
    * @return
    */
   @Override
   public Map<Dialog, SlickDialog> getDialogs(int defaultUser,
                                              Map<ClientExercise, String> exToAudio,
-                                             Project project) {
+                                             Project project, Project englishProject) {
     Map<Dialog, SlickDialog> dialogToSlick = new HashMap<>();
     String dialogDataDir = getDialogDataDir(project);
     String projectLanguage = project.getLanguage().toLowerCase();
 
-    String dirPath = dialogDataDir;
-    File loc = new File(dirPath);
+    File loc = new File(dialogDataDir);
     boolean directory = loc.isDirectory();
     if (!directory) logger.warn("huh? not a dir");
 
@@ -74,7 +77,9 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
           logger.info("getDialogs sheet " + sheet.getSheetName() + " had " + physicalNumberOfRows + " rows.");
 
         if (physicalNumberOfRows > 0) {
-          dialogToSlick = readFromSheet(defaultUser, sheet, project);
+          if (sheet.getSheetName().equalsIgnoreCase(DIALOGS)) {
+            dialogToSlick = readFromSheet(defaultUser, sheet, project, englishProject);
+          }
         }
       }
 
@@ -86,22 +91,31 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
     return dialogToSlick;
   }
 
-  private Set<Character> splitChar = new HashSet<>(Arrays.asList('。', '.', '?', '？'));
+  private final Set<Character> splitChar = new HashSet<>(Arrays.asList('。', '.', '?', '？'));
 
+  /**
+   * @param defaultUser
+   * @param sheet
+   * @param project
+   * @param engProject  so we can add english core words and phrases
+   * @return
+   */
   private Map<Dialog, SlickDialog> readFromSheet(int defaultUser,
                                                  Sheet sheet,
-                                                 Project project) {
+                                                 Project project,
+                                                 Project engProject) {
     Map<Dialog, SlickDialog> dialogToSlick = new LinkedHashMap<>();
 
     try {
       Iterator<Row> iter = sheet.rowIterator();
-      // Map<Integer, CellRangeAddress> rowToRange = excelUtil.getRowToRange(sheet);
       Timestamp modified = new Timestamp(System.currentTimeMillis());
 
       List<String> columns;
 
       List<String> typeOrder = project.getTypeOrder();
       List<ClientExercise> exercises = new ArrayList<>();
+      Set<CoreEntry> coreEng = new HashSet<>();
+      Set<CoreEntry> coreFL = new HashSet<>();
 
       Set<String> speakers = new LinkedHashSet<>();
 
@@ -109,20 +123,20 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
       int audioFileIndex = -1;
       int textIndex = -1;
+      int coreWordsIndex = -1;
       boolean gotHeader = false;
 
       int lastDialogID = -1;
       int realID = -1;
+      String prevtriple = "";
 
       String imageBaseDir = getImageBaseDir(project);
       for (; iter.hasNext(); ) {
-        Row next = iter.next();
+        Row theRow = iter.next();
         rows++;
 
-        //  boolean inMergedRow = rowToRange.keySet().contains(next.getRowNum());
-
         if (!gotHeader) {
-          columns = excelUtil.getHeader(next); // could be several junk rows at the top of the spreadsheet
+          columns = excelUtil.getHeader(theRow); // could be several junk rows at the top of the spreadsheet
 
           for (String col : columns) {
             String colNormalized = col.toLowerCase();
@@ -132,24 +146,40 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
               audioFileIndex = i;
             } else if (colNormalized.equalsIgnoreCase(TEXT)) {
               textIndex = i;
+            } else if (colNormalized.equalsIgnoreCase("Key Words to Omit")) {
+              coreWordsIndex = i;
+            } else if (colNormalized.equalsIgnoreCase("Core words / phrases")) {
+              coreWordsIndex = i;
             }
           }
           gotHeader = true;
         } else {
-          boolean isDelete = excelUtil.isDeletedRow(sheet, next, 1);
+          boolean isDelete = excelUtil.isDeletedRow(sheet, theRow, 1);
           if (isDelete) {
-            logger.warn("skipping deleted row " + rows);
+            logger.warn("readFromSheet skipping deleted row " + rows);
           } else {
-            String audioFilenames = excelUtil.getCell(next, audioFileIndex);
-            String text = excelUtil.getCell(next, textIndex);
-
-            if (DEBUG) logger.info("row #" + rows + " : " + audioFilenames + " = " + text);
+            String audioFilenames = excelUtil.getCell(theRow, audioFileIndex);
+            String text = excelUtil.getCell(theRow, textIndex);
+            String coreWords = excelUtil.getCell(theRow, coreWordsIndex);
+            if (DEBUG) {
+              if (!text.isEmpty())
+                logger.info("row #" + rows + " : " + audioFilenames + " = " + text);
+            }
 
             List<String> parts = new ArrayList<>(Arrays.asList(audioFilenames.split("-")));
             int i = 0;
+
+            if (parts.size() < 4) {
+              logger.warn("readFromSheet Skip first col with " + audioFilenames);
+              continue;
+            }
+
             String dialogID = parts.get(i++);
             String turnID = parts.get(i++);
             String speakerID = parts.get(i++);
+
+            String triple = dialogID + turnID + speakerID;
+
             String language = parts.get(i++);
             String gender = parts.get(i++);
 
@@ -159,41 +189,53 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
               if (lastDialogID != realID && lastDialogID != -1) {
                 String title = getTitle(lastDialogID);
-                logger.info("adding dialog " + title);
-                addDialogPair(defaultUser, project, dialogToSlick, modified, exercises, speakers, getOrientation(lastDialogID), title, getImageRef(imageBaseDir, ""+lastDialogID));
+                logger.info("readFromSheet adding dialog " + title);
+                final Set<ClientExercise> coreExercises = getCoreExercises(project, engProject, typeOrder, coreEng, coreFL);
+
+                addDialogPair(defaultUser, project, dialogToSlick,
+                    modified, exercises, coreExercises, speakers, getOrientation(lastDialogID), title, getImageRef(imageBaseDir, "" + lastDialogID));
 
                 // start new set of speakers...
                 speakers = new LinkedHashSet<>();
                 exercises = new ArrayList<>();
+                coreEng = new HashSet<>();
+                coreFL = new HashSet<>();
               }
 
               lastDialogID = realID;
 
               try {
-                //int realTurnID = Integer.parseInt(turnID.substring(1));
-                Language lang = Language.UNKNOWN;
-                if (language.equalsIgnoreCase(ENG)) lang = Language.ENGLISH;
-                else if (language.equalsIgnoreCase(CHN)) lang = Language.MANDARIN;
-                else logger.warn("unknown language " + language);
+                Language lang = getLanguage(language);
+                //  addCoreWords(coreEng, coreFL, coreWords, lang);
 
-                if (gender.equalsIgnoreCase(M_2_M)) {
-                  List<String> sentences = Collections.singletonList(text);
-                  if (speakerID.equals("I")) {
-                    sentences = getSentences(text);
+                boolean genderMatch = gender.equalsIgnoreCase(M_2_M) || gender.isEmpty();
+                boolean newTurn = !triple.equalsIgnoreCase(prevtriple);
+                if (!text.isEmpty()) {
+                  if (genderMatch || newTurn) {
+                    for (String s : getSentences(text, speakerID)) {
+                      logger.info("add " + realID + " : " + speakerID + " @ " + turnID + " " + language + " " + text);
+                      exercises.add(getExercise(typeOrder, s, speakerID, lang, turnID, speakers));
+                    }
+
+                    if (!coreWords.isEmpty()) {
+                      if (lang == Language.ENGLISH) {
+                        coreEng.add(new CoreEntry(coreWords, speakerID, turnID));
+                      } else {
+                        coreFL.add(new CoreEntry(coreWords, speakerID, turnID));
+                      }
+                    }
+                    prevtriple = triple;
+                    logger.info("readFromSheet # exercises (" + triple + ") for " + id + " is " + exercises.size());
+                  } else {
+                    logger.warn("readFromSheet skipping " + gender);
                   }
-
-                  for (String s : sentences) {
-                    exercises.add(getExercise(typeOrder, s, speakerID, lang, turnID, speakers));
-                  }
-
-                  logger.info("# exercises for " + id + " is " + exercises.size());
                 }
 
               } catch (NumberFormatException e) {
-                logger.warn("can't parse turn " + turnID);
+                logger.warn("readFromSheet can't parse turn " + turnID);
               }
             } catch (NumberFormatException e) {
-              logger.warn("can't parse dialog " + dialogID);
+              logger.warn("readFromSheet can't parse dialog " + dialogID);
             }
           }
         }
@@ -202,7 +244,9 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
       String title = getTitle(realID);
       logger.info("finally, adding dialog " + title);
-      addDialogPair(defaultUser, project, dialogToSlick, modified, exercises, speakers, getOrientation(realID), title, getImageRef(imageBaseDir, "" + realID));
+      final Set<ClientExercise> coreExercises = getCoreExercises(project, engProject, typeOrder, coreEng, coreFL);
+      addDialogPair(defaultUser, project, dialogToSlick, modified, exercises, coreExercises, speakers,
+          getOrientation(realID), title, getImageRef(imageBaseDir, "" + realID));
 
     } catch (Exception e) {
       logger.error("got " + e, e);
@@ -210,6 +254,111 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
     return dialogToSlick;
   }
 
+//  private void addCoreWords(Set<String> coreEng, Set<String> coreFL, String coreWords, Language lang) {
+//    if (!coreWords.trim().isEmpty()) {
+//      if (lang == Language.ENGLISH) {
+//        coreEng.add(coreWords);
+//      } else {
+//        coreFL.add(coreWords);
+//      }
+//    }
+//  }
+
+  /**
+   * TODO : what to do about english?
+   *
+   * TODO : what to do about fl?
+   *
+   * @param project
+   * @param typeOrder
+   * @param coreEng
+   * @param coreFL
+   * @return
+   */
+  @NotNull
+  private Set<ClientExercise> getCoreExercises(Project project, Project engProject, List<String> typeOrder,
+                                               Set<CoreEntry> coreEng, Set<CoreEntry> coreFL) {
+    final Set<ClientExercise> coreExercises = new HashSet<>();
+
+    addCoreExercises(project, typeOrder, coreFL, coreExercises);
+    addCoreExercises(engProject, typeOrder, coreEng, coreExercises);
+
+    return coreExercises;
+  }
+
+  private void addCoreExercises(Project project, List<String> typeOrder, Set<CoreEntry> coreFL, Set<ClientExercise> coreExercises) {
+    List<CoreEntry> toAdd = addCoreWords(project, coreExercises, coreFL);
+    Language languageEnum = project.getLanguageEnum();
+    toAdd.forEach(phrase -> coreExercises.add(getExercise(typeOrder, phrase.getText(), phrase.getSpeakerID(), languageEnum, phrase.getTurnID())));
+  }
+
+  static class CoreEntry {
+    private final String text;
+    private final String speakerID;
+    private final String turnID;
+
+    CoreEntry(String text, String speakerID, String turnID) {
+      this.text = text;
+      this.speakerID = speakerID;
+      this.turnID = turnID;
+    }
+
+    String getText() {
+      return text;
+    }
+
+    String getSpeakerID() {
+      return speakerID;
+    }
+
+    String getTurnID() {
+      return turnID;
+    }
+  }
+
+  private List<String> getSentences(String text, String speakerID) {
+    List<String> sentences = Collections.singletonList(text);
+    if (speakerID.equals(INTERPRETER)) {
+      sentences = getSentences(text);
+    }
+    return sentences;
+  }
+
+  @NotNull
+  private Language getLanguage(String language) {
+    Language lang = Language.UNKNOWN;
+    if (language.equalsIgnoreCase(ENG)) lang = Language.ENGLISH;
+    else if (language.equalsIgnoreCase(CHN)) lang = Language.MANDARIN;
+    else if (language.equalsIgnoreCase("FRE")) lang = Language.FRENCH;
+    else if (language.equalsIgnoreCase("RUS")) lang = Language.RUSSIAN;
+    else logger.warn("unknown language " + language);
+    return lang;
+  }
+
+  /**
+   * @param project
+   * @param coreExercises set - only unique exercises...
+   * @param tokens
+   */
+  private List<CoreEntry> addCoreWords(Project project, Collection<ClientExercise> coreExercises, Collection<CoreEntry> tokens) {
+    List<CoreEntry> toAdd = new ArrayList<>();
+    tokens.forEach(token -> {
+      CommonExercise exerciseBySearch = project.getExerciseByExactMatch(token.getText());
+      if (exerciseBySearch == null) {
+        toAdd.add(token);
+      } else {
+        coreExercises.add(exerciseBySearch);
+      }
+    });
+    return toAdd;
+  }
+
+  /**
+   * Split them.
+   *
+   * @param text
+   * @return
+   */
   private List<String> getSentences(String text) {
     List<String> sentences = new ArrayList<>();
     String s = "";
@@ -261,7 +410,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
   private void addDialogPair(int defaultUser, Project project, Map<Dialog, SlickDialog> dialogToSlick,
                              Timestamp modified,
                              List<ClientExercise> exercises,
-
+                             Set<ClientExercise> coreExercises,
                              Set<String> speakers,
                              String orientation, String title,
                              String imageRef) {
@@ -277,12 +426,16 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
         DEFAULT_UNIT, DEFAULT_CHAPTER,
         attributes,
         exercises,
-        Collections.emptySet(),
+        coreExercises,
         orientation,
         orientation,
         title,
         dialogToSlick,
         DialogType.INTERPRETER);
+  }
+
+  private Exercise getExercise(List<String> typeOrder, String text, String speakerID, Language lang, String turnID) {
+    return getExercise(typeOrder, text, speakerID, lang, turnID, new HashSet<>());
   }
 
   /**
@@ -298,7 +451,10 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
                                Set<String> speakers) {
     Exercise exercise = new Exercise();
-    exercise.getMutable().setOldID(turnID);
+
+    if (!turnID.isEmpty()) {
+      exercise.getMutable().setOldID(turnID);
+    }
 
     {
       Map<String, String> unitToValue = new HashMap<>();
@@ -306,8 +462,10 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
       unitToValue.put(typeOrder.get(1), DEFAULT_CHAPTER);
       exercise.setUnitToValue(unitToValue);
     }
-    speakers.add(speakerID);
-    exercise.addAttribute(new ExerciseAttribute(DialogMetadata.SPEAKER.getCap(), speakerID, false));
+    if (!speakerID.isEmpty()) {
+      speakers.add(speakerID);
+      exercise.addAttribute(new ExerciseAttribute(DialogMetadata.SPEAKER.getCap(), speakerID, false));
+    }
     exercise.addAttribute(new ExerciseAttribute(DialogMetadata.LANGUAGE.getCap(), lang.name(), false));
     exercise.getMutable().setForeignLanguage(text);
 

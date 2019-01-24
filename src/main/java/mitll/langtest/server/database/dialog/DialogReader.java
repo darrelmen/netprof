@@ -39,7 +39,6 @@ class DialogReader extends BaseDialogReader {
    * @param coreVocabs
    * @return
    * @see EnglishDialog#getDialogs
-   * @see KPDialogs#getDialogs
    */
   @NotNull
   Map<Dialog, SlickDialog> getDialogsByProp(int defaultUser,
@@ -221,10 +220,15 @@ class DialogReader extends BaseDialogReader {
     }
   }
 
+  /**
+   * @see #getDialogsByProp
+   * @param coreVocabs
+   * @param project
+   * @return
+   */
   private List<CVMatch> getCVs(List<String> coreVocabs, Project project) {
     List<CVMatch> cvs = new ArrayList<>(coreVocabs.size());
 
-//    Set<CommonExercise> coreExercises=new HashSet<>();
     coreVocabs.forEach(raw -> {
       Set<CommonExercise> coreExercises = new HashSet<>();
       CVMatch cvMatch = new CVMatch(coreExercises);
@@ -283,21 +287,15 @@ class DialogReader extends BaseDialogReader {
     coreExercises.add(exerciseBySearch);
   }
 
-  class CVMatch {
+  static class CVMatch {
     private final Set<CommonExercise> netprofEntries;
-    private Map<String, CommonExercise> tokenToEx;
 
-    CVMatch(Set<CommonExercise> netprofEntries) {//}, Map<String, CommonExercise> tokenToEx) {
+    CVMatch(Set<CommonExercise> netprofEntries) {
       this.netprofEntries = netprofEntries;
-      //this.tokenToEx = tokenToEx;
     }
 
     Set<CommonExercise> getNetprofEntries() {
       return netprofEntries;
-    }
-
-    public Map<String, CommonExercise> getTokenToEx() {
-      return tokenToEx;
     }
   }
 

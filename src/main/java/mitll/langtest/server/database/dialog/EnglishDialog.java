@@ -75,13 +75,14 @@ public class EnglishDialog extends DialogReader implements IDialogReader {
   /**
    * @param defaultUser
    * @param exToAudio
+   * @param englishProject
    * @return
    * @see mitll.langtest.server.database.project.DialogPopulate#populateDatabase
    */
   @Override
   public Map<Dialog, SlickDialog> getDialogs(int defaultUser,
                                              Map<ClientExercise, String> exToAudio,
-                                             Project project) {
+                                             Project project, Project englishProject) {
     return getDialogsByProp(defaultUser, exToAudio, project, dialogProps, new ArrayList<>());
   }
 }

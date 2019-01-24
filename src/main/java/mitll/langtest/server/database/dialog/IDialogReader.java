@@ -13,8 +13,9 @@ public interface IDialogReader {
    * @param defaultUser
    * @param exToAudio
    * @param project
+   * @param englishProject
    * @return
    */
   Map<Dialog, SlickDialog> getDialogs(int defaultUser,
-                                      Map<ClientExercise, String> exToAudio, Project project);
+                                      Map<ClientExercise, String> exToAudio, Project project, Project englishProject);
 }

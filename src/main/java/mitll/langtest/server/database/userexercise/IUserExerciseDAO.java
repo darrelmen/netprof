@@ -132,7 +132,6 @@ public interface IUserExerciseDAO extends IDAO {
    */
   int add(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder);
 
-
   int insert(SlickExercise UserExercise);
 
   List<CommonShell> getOnList(int listID, boolean shouldSwap);

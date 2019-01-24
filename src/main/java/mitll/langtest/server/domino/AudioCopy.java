@@ -323,7 +323,8 @@ public class AudioCopy {
     List<SlickAudio> audioAttributes = transcriptToAudio.get(fl);
 
     String english = ex.getEnglish();
-    logger.info("addAudioForVocab looking for match to ex " + exid + "/" + ex.getID() + " '" + english + "' = '" + fl + "'");
+    logger.info("addAudioForVocab (" + projectid +
+        ") looking for match to ex " + exid + "/" + ex.getID() + " '" + english + "' = '" + fl + "'");
     if (audioAttributes != null) {
       transcriptMatches.add(copyMatchingAudio(projectid, exid, audioAttributes, false));
       match++;
@@ -384,11 +385,11 @@ public class AudioCopy {
   }
 
   /**
-   * @see mitll.langtest.server.database.audio.SlickAudioDAO#copyOne
    * @param exid
    * @param isContext
    * @param audio
    * @return
+   * @see mitll.langtest.server.database.audio.SlickAudioDAO#copyOne
    */
   public SlickAudio getCopiedAudio(int exid, boolean isContext, SlickAudio audio) {
     return getCopiedAudio(audio.projid(), exid, isContext, new Timestamp(System.currentTimeMillis()), audio);

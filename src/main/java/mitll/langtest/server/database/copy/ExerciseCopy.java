@@ -3,6 +3,7 @@ package mitll.langtest.server.database.copy;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
+import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
@@ -171,6 +172,7 @@ public class ExerciseCopy {
    * @param exercises  to add
    * @param typeOrder  with this project type order (e.g. unit, chapter)
    * @return map of domino id->netprof id
+   * @see mitll.langtest.server.domino.ProjectSync#getDominoUpdateResponse
    */
   public Map<Integer, Integer> addExercisesSimple(int importUser,
                                                   int projectid,
