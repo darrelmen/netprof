@@ -57,6 +57,7 @@ public class PhoneReport extends PhoneSummary {
   private transient Language language;
   private List<String> sortedPhones;
   private transient Map<Integer, List<Word>> ridToWords;
+  private transient Map<String, List<WordAndScore>> phoneToExamples;
 
   public PhoneReport() {
     valid = false;
@@ -73,6 +74,7 @@ public class PhoneReport extends PhoneSummary {
                      Map<String, List<Bigram>> phoneToBigrams,
                      Map<String, PhoneStats> phoneToAvgSorted,
                      Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted,
+                     Map<String, List<WordAndScore>> phoneToExamples,
                      List<String> sortedPhones,
                      Language language,
                      Map<Integer, List<Word>> ridToWords) {
@@ -84,6 +86,7 @@ public class PhoneReport extends PhoneSummary {
     this.sortedPhones = sortedPhones;
     this.language = language;
     this.ridToWords = ridToWords;
+    this.phoneToExamples = phoneToExamples;
     valid = true;
   }
 
@@ -136,5 +139,9 @@ public class PhoneReport extends PhoneSummary {
 
   public Map<Integer, List<Word>> getRidToWords() {
     return ridToWords;
+  }
+
+  public Map<String, List<WordAndScore>> getPhoneToExamples() {
+    return phoneToExamples;
   }
 }

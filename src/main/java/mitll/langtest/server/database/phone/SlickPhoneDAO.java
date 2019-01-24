@@ -434,6 +434,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
     ServerProperties serverProps = database.getServerProps();
 
+    Map<String,List<WordAndScore>> phoneToExamples =new HashMap<>();
     for (SlickPhoneReport report : phoneReportByResult) {  // for every phone the user has uttered
       c++;
 
@@ -510,6 +511,9 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
           language);
       wordAndScore.setIsContext(isContextEx.contains(exid));
 
+      List<WordAndScore> wordAndScores = phoneToExamples.computeIfAbsent(phone, k -> new ArrayList<>());
+      wordAndScores.add(wordAndScore);
+
 //      if (wordAndScore.getIsContext()) {
 //        logger.info("getPhoneReport exid " + exid + " is context");
 //      }
@@ -573,6 +577,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
             phoneToScores,
             phoneToBigramToWS,
             phoneToBigramToScore,
+            phoneToExamples,
             totalScore,
             exids.size(),
             project.getLanguageEnum(),

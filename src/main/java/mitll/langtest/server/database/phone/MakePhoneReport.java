@@ -35,6 +35,7 @@ public class MakePhoneReport {
   public PhoneReport getPhoneReport(Map<String, List<PhoneAndScore>> phoneToScores,
                                     Map<String, Map<String, List<WordAndScore>>> phoneToBigramToWS,
                                     Map<String, Map<String, Bigram>> phoneToBigramToScore,
+                                    Map<String, List<WordAndScore>> phoneToExamples,
                                     float totalScore,
                                     float totalItems,
                                     Language language, Map<Integer, List<Word>> ridToWords) {
@@ -54,6 +55,8 @@ public class MakePhoneReport {
 
     sortExamples(phoneToBigramToWS);
 
+    phoneToExamples = sortExamplesSimple(phoneToExamples);
+
     if (DEBUG) {
       logger.info("getPhoneReport phone->words " + phoneToBigramToWS.size() + " : " + phoneToBigramToWS.keySet());
     }
@@ -61,6 +64,8 @@ public class MakePhoneReport {
     Map<String, List<Bigram>> phoneToBigram = getPhoneToBigramReally(phoneToBigramToScore);
 
     phoneToAvgSorted.keySet().forEach(p -> logger.info("getPhoneReport sorted " + p));
+
+
     List<String> sortedPhones = new ArrayList<>(phoneToAvgSorted.keySet().size());
     sortedPhones.addAll(phoneToAvgSorted.keySet());
 
@@ -68,6 +73,7 @@ public class MakePhoneReport {
         phoneToBigram,
         phoneToAvgSorted,
         phoneToBigramToWS,
+        phoneToExamples,
         sortedPhones,
         language,
         ridToWords);
@@ -191,12 +197,7 @@ public class MakePhoneReport {
       bgToExamples.forEach((bg, examples) -> {
 
         if (bg.startsWith(phone)) {
-          examples.sort((o1, o2) -> {
-            int compare = Float.compare(o1.getPrevScore(), o2.getPrevScore());
-            if (compare == 0) {
-              return o1.getTieBreaker(o2, compare);
-            } else return compare;
-          });
+          examples.sort(getWordAndScoreComparator());
         } else {
           examples.sort(WordAndScore::compareTo);
         }
@@ -209,6 +210,32 @@ public class MakePhoneReport {
             .values()
             .forEach(scores -> scores
                 .sort(WordAndScore::compareTo)));*/
+  }
+
+  @NotNull
+  private Comparator<WordAndScore> getWordAndScoreComparator() {
+    return (o1, o2) -> {
+      int compare = Float.compare(o1.getPrevScore(), o2.getPrevScore());
+      if (compare == 0) {
+        return o1.getTieBreaker(o2, compare);
+      } else return compare;
+    };
+  }
+
+  /**
+   * don't show multiple examples of same word...?
+   * calc avg over returned words
+   * @param phoneToExamples
+   * @return
+   */
+  private Map<String, List<WordAndScore>>  sortExamplesSimple(Map<String, List<WordAndScore>> phoneToExamples) {
+    phoneToExamples.forEach((k, v) -> v.sort(getWordAndScoreComparator()));
+
+    Map<String, List<WordAndScore>> phoneToExamplesLimited=new HashMap<>();
+
+    phoneToExamples.forEach((k,v)->phoneToExamplesLimited.put(k,v.subList(0,Math.min(v.size(),5))));
+
+    return phoneToExamplesLimited;
   }
 
   /**
