@@ -31,6 +31,13 @@ public interface ExerciseServices {
 
   FilterResponseHelper getFilterResponseHelper();
 
+  /**
+   * JUST FOR TESTING
+   * @param request
+   * @param projid
+   * @param userid
+   * @return
+   */
   FilterResponse getTypeToValues(FilterRequest request, int projid, int userid);
 
   List<CommonExercise> filterExercises(ExerciseListRequest request,

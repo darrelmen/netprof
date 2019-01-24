@@ -91,7 +91,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
     return dialogToSlick;
   }
 
-  private final Set<Character> splitChar = new HashSet<>(Arrays.asList('。', '.', '?', '？'));
+  private final Set<Character> SPLIT_CHARS = new HashSet<>(Arrays.asList('。', '.', '?', '？'));
 
   /**
    * @param defaultUser
@@ -169,7 +169,8 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
             List<String> parts = new ArrayList<>(Arrays.asList(audioFilenames.split("-")));
             int i = 0;
 
-            if (parts.size() < 4) {
+            int size = parts.size();
+            if (size < 4) {
               logger.warn("readFromSheet Skip first col with " + audioFilenames);
               continue;
             }
@@ -181,7 +182,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
             String triple = dialogID + turnID + speakerID;
 
             String language = parts.get(i++);
-            String gender = parts.get(i++);
+            String gender = size == 4 ? "" : parts.get(i++);
 
             String id = dialogID.substring(1);
             try {
@@ -365,12 +366,18 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
     for (int j = 0; j < text.length(); j++) {
       Character character = text.charAt(j);
       s += character;
-      if (splitChar.contains(character)) {
-        sentences.add(s.trim());
+      if (SPLIT_CHARS.contains(character)) {
+        String trim = s.trim();
+        trim = trim.replaceAll(" ", "");
+        if (!trim.isEmpty()) {
+          sentences.add(trim);
+        }
         s = "";
       }
     }
-    if (!s.isEmpty()) sentences.add(s.trim());
+    String trim = s.trim();
+    trim = trim.replaceAll(" ", "");
+    if (!trim.isEmpty()) sentences.add(trim);
 
     if (DEBUG) {
       if (sentences.size() > 1) {

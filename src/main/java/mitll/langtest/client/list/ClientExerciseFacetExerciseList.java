@@ -63,8 +63,8 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
           "\n\talready   " + getIDs(alreadyFetched));
     }
 
-  //  ExerciseListRequest exerciseListRequest = getExerciseListRequest("");
-   // logger.info("getFullExercises " + exerciseListRequest);
+    //  ExerciseListRequest exerciseListRequest = getExerciseListRequest("");
+    // logger.info("getFullExercises " + exerciseListRequest);
 
     service.getFullExercises(getExerciseListRequest("").setReqID(currentReq),
         requested,
@@ -112,7 +112,7 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
     if (DEBUG) logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs.size());
 
     if (isCurrentReq(reqID)) {
-     // Map<Integer, ClientExercise> idToEx = rememberFetched(result, alreadyFetched);
+      // Map<Integer, ClientExercise> idToEx = rememberFetched(result, alreadyFetched);
       gotFullExercises(reqID, getVisibleExercises(visibleIDs, rememberFetched(result, alreadyFetched)));
     } else {
       if (DEBUG_STALE)
@@ -183,13 +183,16 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
   }
 
   @NotNull
-  protected void addDynamicFacetToPairs(Map<String, String> typeToSelection, String languageMetaData, List<Pair> pairs) {
-    addPairForTypeSelection(typeToSelection, pairs, languageMetaData);
+  protected boolean addDynamicFacetToPairs(Map<String, String> typeToSelection, String languageMetaData, List<Pair> pairs) {
+    return addPairForTypeSelection(typeToSelection, pairs, languageMetaData);
   }
 
-  void addPairForTypeSelection(Map<String, String> typeToSelection, List<Pair> pairs, String dynamicFacet) {
+ protected boolean addPairForTypeSelection(Map<String, String> typeToSelection, List<Pair> pairs, String dynamicFacet) {
     if (typeToSelection.containsKey(dynamicFacet)) {
       pairs.add(new Pair(dynamicFacet, typeToSelection.get(dynamicFacet)));
+      return true;
+    } else {
+      return false;
     }
   }
 }

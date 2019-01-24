@@ -112,7 +112,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
   private static final String CHAPTER = "chapter";
   private static final String LESSON = "lesson";
-  private static final String MODULE = "Module";
+  private static final String MODULE = "Module".toLowerCase();
 
   private static final String OTHER = "Other";
   private static final String EN_TRANSLATION = "EN Translation";
@@ -154,7 +154,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
     super(serverProps, userListManager, addDefects, serverProps.getLanguage());
     this.file = file;
 
-    logger.info("Reading from " + file);
+    logger.info("ExcelImport Reading from " + file);
     maxExercises = serverProps.getMaxNumExercises();
     // turn off missing fast/slow for classroom
     shouldHaveRefAudio = false;
@@ -377,8 +377,9 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
               audioIndex = i;
 //              hasAudioIndex = true;
             } else if (gotUCW) {
-              if (DEBUG || true)
-                logger.debug("readFromSheet using predef unit/chapter/week " + unitIndex + "," + chapterIndex + "," + weekIndex);
+              if (DEBUG || true) {
+                logger.info("readFromSheet using predef unit/chapter/week " + unitIndex + "," + chapterIndex + "," + weekIndex);
+              }
               if (i == unitIndex) {
                 predefinedTypeOrder.add(col);
                 unitName = col;

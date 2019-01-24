@@ -1689,6 +1689,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return serverProps.getLanguage();
   }
 
+  /**
+   * JUST FOR TESTING?
+   * @param request
+   * @param projid
+   * @param userid
+   * @return
+   */
   public FilterResponse getTypeToValues(FilterRequest request, int projid, int userid) {
     return getFilterResponseHelper().getTypeToValues(request, projid, userid);
   }
