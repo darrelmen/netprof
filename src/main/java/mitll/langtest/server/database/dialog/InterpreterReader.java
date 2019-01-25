@@ -140,6 +140,8 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
       int lastDialogID = -1;
       String lastRawDialogID = "";
+      String lastTitle = "";
+      String lastOrientation = "";
       int realID = -1;
       String prevtriple = "";
 
@@ -188,6 +190,8 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
             String pinyin = getCellValue(pinyinIndex, theRow);
             String corePinyin = getCellValue(corePinyinIndex, theRow);
 
+            if (!title.isEmpty())lastTitle=title;
+            if (!orientation.isEmpty())lastOrientation=orientation;
             if (DEBUG) {
               if (!text.isEmpty())
                 logger.info("row #" + rows + " : " + audioFilenames + " = " + text);
@@ -272,16 +276,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
         }
       }
 
-
-//      String title = getTitle(realID);
-//      logger.info("finally, adding dialog " + title);
-//      final Set<ClientExercise> coreExercises = getCoreExercises(project, engProject, typeOrder, coreEng, coreFL);
-//      addDialogPair(defaultUser, project, dialogToSlick, modified, exercises, coreExercises, speakers,
-//          getOrientation(realID), title, getImageRef(imageBaseDir, "" + realID));
-
-      addDialog(defaultUser, project, engProject, dialogToSlick, modified, typeOrder, exercises, coreEng, coreFL, speakers, lastRawDialogID, imageBaseDir, title, orientation);
-
-
+      addDialog(defaultUser, project, engProject, dialogToSlick, modified, typeOrder, exercises, coreEng, coreFL, speakers, lastRawDialogID, imageBaseDir, lastTitle, lastOrientation);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
