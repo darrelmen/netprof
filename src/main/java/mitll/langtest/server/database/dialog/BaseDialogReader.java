@@ -109,6 +109,11 @@ public class BaseDialogReader {
     return imageBaseDir + dir + File.separator + dir + JPG;
   }
 
+  /**
+   * images/russian/
+   * @param project
+   * @return
+   */
   @NotNull
    String getImageBaseDir(Project project) {
     return IMAGES + project.getLanguage().toLowerCase() + File.separator;

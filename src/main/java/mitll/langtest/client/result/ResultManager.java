@@ -109,7 +109,7 @@ public class ResultManager extends PagerTable {
   private static final String CLOSE = "Close";
   private static final int MAX_TO_SHOW = PAGE_SIZE;
 
- // private static final boolean DEBUG = false;
+  // private static final boolean DEBUG = false;
 
   private final EventRegistration eventRegistration;
   private final ResultServiceAsync resultServiceAsync = GWT.create(ResultService.class);
@@ -303,7 +303,7 @@ public class ResultManager extends PagerTable {
         final int start = display.getVisibleRange().getStart();
         int end = start + display.getVisibleRange().getLength();
         end = end >= numResults ? numResults : end;
-     //   logger.info("createProvider asking for " + start + "->" + end);
+        //   logger.info("createProvider asking for " + start + "->" + end);
 
         StringBuilder builder = tableSortHelper.getColumnSortedState(table);
         final Map<String, String> unitToValue = resultTypeAhead.getUnitToValue();
@@ -469,8 +469,12 @@ public class ResultManager extends PagerTable {
       TextColumn<MonitorResult> unit = new TextColumn<MonitorResult>() {
         @Override
         public String getValue(MonitorResult answer) {
-          Map<String, String> unitToValue = answer.getUnitToValue();
-          return unitToValue == null ? "?" : unitToValue.get(type);
+          if (answer == null) {
+            return "";
+          } else {
+            Map<String, String> unitToValue = answer.getUnitToValue();
+            return unitToValue == null ? "?" : unitToValue.get(type);
+          }
         }
       };
       unit.setSortable(true);
