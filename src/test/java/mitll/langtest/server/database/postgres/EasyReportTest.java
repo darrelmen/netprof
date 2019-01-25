@@ -1105,31 +1105,13 @@ public class EasyReportTest extends BaseTest {
   public void testPhoneJSON() {
     DatabaseImpl db = getAndPopulate();
 
-    int projectid =  SPANISH;//KOREAN;
-    Project project = db.getProject(projectid);
-//    SlickAnalysis slickAnalysis = new SlickAnalysis(
-//        db.getDatabase(),
-//        db.getPhoneDAO(),
-//        db.getAudioDAO(),
-//        (SlickResultDAO) db.getResultDAO(),
-//        project.getLanguageEnum(),
-//        projectid,
-//        project.getKind() == ProjectType.POLYGLOT);
-//    int demoUser = 6;
-
-
+    int projectid = SPANISH;//KOREAN;
+    db.getProject(projectid);
     HashMap<String, Collection<String>> typeToValues = new HashMap<>();
 
-//    project.getTypeOrder().forEach(type -> {
-//      typeToValues.put(type, Collections.singleton(SectionHelper.ANY));
-//    });
-
-    typeToValues.put("Unit",Collections.singleton("1"));
-   // typeToValues.put("Lesson",Collections.singleton("1"));
-
-
-    //AnalysisRequest analysisRequest = new AnalysisRequest(/*DEMO_USER, -1, -1, 0*/).setUserid(demoUser);
-    JsonObject jsonPhoneReport = db.getJsonPhoneReport(6, projectid, typeToValues);
+    typeToValues.put("Unit", Collections.singleton("2"));
+    typeToValues.put("Chapter", Collections.singleton("2"));
+    JsonObject jsonPhoneReport = db.getJsonPhoneReport(659, projectid, typeToValues);
     logger.info("got \n" + jsonPhoneReport);
   }
 

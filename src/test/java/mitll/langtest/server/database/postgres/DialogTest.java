@@ -43,6 +43,7 @@ import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.ProjectType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -70,8 +71,7 @@ public class DialogTest extends BaseTest {
 
   @Test
   public void testDict() {
-    String korean = KOREAN;
-    testDialogPopulate(korean);
+    testDialogPopulate(KOREAN);
   }
 
   @Test
@@ -87,22 +87,41 @@ public class DialogTest extends BaseTest {
   }
 
   @Test
+  public void testInterpreterFrench() {
+    DatabaseImpl andPopulate = getDatabase();
+    andPopulate.getProject(12);
+    Project project = andPopulate.getProjectManagement().getProductionByLanguage(Language.FRENCH);
+    int projectid = project.getID();
+
+    FilterRequest request = new FilterRequest()
+        .setRecordRequest(true)
+        .setProjectType(ProjectType.DIALOG);
+
+   // project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
+
+    request.addPair(new Pair("Book","1"));
+    request.addPair(new Pair("SPEAKER","A"));
+
+    logger.info("types " + request + " for " + project.getTypeOrder());
+
+    FilterResponse typeToValues = andPopulate.getFilterResponseHelper().getTypeToValues(request, projectid, 6);
+    logger.info("typeToValues " + typeToValues);
+  }
+
+  @Test
   public void testInterpreterRecord() {
     DatabaseImpl andPopulate = getDatabase();
     int projectid = 12;
     Project project = andPopulate.getProject(projectid);
 
-//    FilterRequest request = new FilterRequest();
-//    request.setRecordRequest(true);
-
-    FilterRequest request = new FilterRequest().setRecordRequest(true);
+    FilterRequest request = new FilterRequest().setRecordRequest(true).setProjectType(ProjectType.DIALOG);
     project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
 
     FilterResponse typeToValues = andPopulate.getFilterResponseHelper().getTypeToValues(request, projectid, 6);
 
     logger.info("typeToValues " + typeToValues);
 
-    ExerciseListRequest request1 = new ExerciseListRequest(1, 6);
+    ExerciseListRequest request1 = new ExerciseListRequest(1, 6).setProjectType(ProjectType.DIALOG);
     request1.setOnlyUnrecordedByMe(true);
     HashMap<String, Collection<String>> typeToSelection = new HashMap<>();
     typeToSelection.put(UNIT1, Collections.singleton("1"));
@@ -122,8 +141,22 @@ public class DialogTest extends BaseTest {
       List<CommonExercise> exercisesForSelectionState =
           andPopulate.getFilterResponseHelper().getExercisesForSelectionState(request1, projectid);
 
-      exercisesForSelectionState.forEach(ex -> logger.info("CHINESE got " + ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage() + " " + ex.getTokens()));
+      exercisesForSelectionState.forEach(ex -> logger.info("CHINESE " +
+          "\n\ttype->sel " + typeToSelection +
+          " got " + ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage() + " " + ex.getTokens()));
     }
+
+    typeToSelection.put(DialogMetadata.SPEAKER.name(), Collections.singleton("B"));
+
+    {
+      List<CommonExercise> exercisesForSelectionState =
+          andPopulate.getFilterResponseHelper().getExercisesForSelectionState(request1, projectid);
+
+      exercisesForSelectionState.forEach(ex -> logger.info("CHINESE" +
+          "\n\ttype->sel " + typeToSelection +
+          " (A) got " + ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage() + " " + ex.getTokens()));
+    }
+
     typeToSelection.remove(UNIT1);
 
     {
@@ -132,6 +165,8 @@ public class DialogTest extends BaseTest {
 
       exercisesForSelectionState.forEach(ex -> logger.info("CHINESE got " + ex.getID() + " " + ex.getEnglish() + " " + ex.getForeignLanguage() + " " + ex.getTokens()));
     }
+
+
     //  report(andPopulate, project);
   }
 
@@ -140,7 +175,7 @@ public class DialogTest extends BaseTest {
     Project project = andPopulate.getProject(12);
 //    Project project = andPopulate.getProjectByName(korean);
 
-    if (!new DialogPopulate(andPopulate, getPathHelper(andPopulate)).populateDatabase(project)) {
+    if (!new DialogPopulate(andPopulate, getPathHelper(andPopulate)).populateDatabase(project, andPopulate.getProjectManagement().getProductionByLanguage(Language.ENGLISH))) {
       logger.info("testDialogPopulate project " + project + " already has dialog data.");
     }
 
@@ -155,13 +190,13 @@ public class DialogTest extends BaseTest {
       logger.info("sp    " + iDialog.getSpeakers());
       logger.info("attr  " + iDialog.getAttributes());
       // logger.info("by sp " + iDialog.groupBySpeaker());
-   //   logger.info("core  " + iDialog.getCoreVocabulary().size());
+      //   logger.info("core  " + iDialog.getCoreVocabulary().size());
       iDialog.getCoreVocabulary().forEach(clientExercise -> {
         List<String> tokens = project.getAudioFileHelper().getASR().getTokens(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
 //        String pronunciationsFromDictOrLTS = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
         logger.info("core " + clientExercise.getForeignLanguage() + " -> " + tokens);
       });
-     // logger.info("\n\n\n");
+      // logger.info("\n\n\n");
 
 //      iDialog.getExercises().forEach(clientExercise -> clientExercise.getAttributes().forEach(exerciseAttribute -> logger.info("\t" + exerciseAttribute)));
       iDialog.getExercises().forEach(clientExercise -> {
@@ -172,13 +207,13 @@ public class DialogTest extends BaseTest {
 //            String pronunciationsFromDictOrLTS = project.getAudioFileHelper().getPronunciationsFromDictOrLTS(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
 //            logger.info(clientExercise.getForeignLanguage() + " -> " + pronunciationsFromDictOrLTS);
 
-           // List<String> tokens = project.getAudioFileHelper().getASR().getTokens(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
+            // List<String> tokens = project.getAudioFileHelper().getASR().getTokens(clientExercise.getForeignLanguage(), clientExercise.getTransliteration());
 
             List<String> tokens = clientExercise.getTokens();
             if (tokens == null) {
-              logger.error("ex #"+ clientExercise.getID() + " " +clientExercise.getForeignLanguage() + " -> " + tokens);
+              logger.error("ex #" + clientExercise.getID() + " " + clientExercise.getForeignLanguage() + " -> " + tokens);
             }
-            logger.info("ex #"+ clientExercise.getID() + " " +clientExercise.getForeignLanguage() + " -> " + tokens);
+            logger.info("ex #" + clientExercise.getID() + " " + clientExercise.getForeignLanguage() + " -> " + tokens);
 
           }
         }
