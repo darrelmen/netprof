@@ -35,6 +35,7 @@ package mitll.langtest.client.custom;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Window;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.initial.PropertyHandler;
 
 import java.util.logging.Logger;
 
@@ -157,12 +158,12 @@ public class KeyStorage {
   /**
    * So try to make separate name space for different apps "netprof" vs "dialog"
    * and in the space of a user.
+   *
    * @param name
    * @return
    */
   protected String getKey(String name) {
-    return controller.getProps().getAppTitle() + "_" +
-        user + "_" + name;
+    return PropertyHandler.getAppName() + "_" + user + "_" + name;
   }
 
   public String toString() {

@@ -602,15 +602,16 @@ public abstract class BaseAudioDAO extends DAO {
    * @param userid         only used to determine the gender we should show
    * @param projid
    * @param exToTranscript
+   * @param filterOnBothSpeeds
    * @return ids with both regular and slow speed recordings
    * @see mitll.langtest.server.database.exercise.FilterResponseHelper#getRecordedByMatchingGender(int, int, boolean, Map)
    */
-  public Collection<Integer> getRecordedBySameGender(int userid, int projid, Map<Integer, String> exToTranscript) {
-    return getAudioExercisesForGenderBothSpeeds(
+  public Collection<Integer> getRecordedBySameGender(int userid, int projid, Map<Integer, String> exToTranscript, boolean filterOnBothSpeeds) {
+    return getAudioExercisesThatHaveBeenRecorded(
         projid,
         userDAO.isMale(userid),
-        exToTranscript
-    );
+        exToTranscript,
+        filterOnBothSpeeds);
   }
 
   /**
@@ -959,9 +960,9 @@ public abstract class BaseAudioDAO extends DAO {
                                                    int projid);
 
 
-  abstract Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid,
-                                                             boolean isMale,
-                                                             Map<Integer, String> exToTranscript);
+  abstract Set<Integer> getAudioExercisesThatHaveBeenRecorded(int projid,
+                                                              boolean isMale,
+                                                              Map<Integer, String> exToTranscript, boolean filterOnBothSpeeds);
 
   abstract Set<Integer> getContextAudioExercises(int projid,
                                                  boolean isMale,

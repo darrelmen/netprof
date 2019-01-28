@@ -108,7 +108,7 @@ public interface IAudioDAO extends IDAO {
    * @return
    * @see mitll.langtest.server.database.exercise.FilterResponseHelper#getRecordedByMatchingGender
    */
-  Collection<Integer> getRecordedBySameGender(int userid, int projid, Map<Integer, String> exToTranscript);
+  Collection<Integer> getRecordedBySameGender(int userid, int projid, Map<Integer, String> exToTranscript, boolean filterOnBothSpeeds);
 
   Set<Integer> getRecordedBySameGenderContext(int userid, int projid, Map<Integer, String> exToTranscript);
 

@@ -6,20 +6,22 @@ public class QuizSpec implements IsSerializable {
   private int roundMinutes;
   private int minScore;
   private boolean showAudio;
+  private boolean isDefault = true;
 
   public QuizSpec() {
   }
 
   /**
-   * @see mitll.langtest.server.database.custom.UserListManager#getQuizInfo
    * @param roundMinutes
    * @param minScore
    * @param showAudio
+   * @see mitll.langtest.server.database.custom.UserListManager#getQuizInfo
    */
-  public QuizSpec(int roundMinutes, int minScore, boolean showAudio) {
+  public QuizSpec(int roundMinutes, int minScore, boolean showAudio, boolean isDefault) {
     this.roundMinutes = roundMinutes;
     this.minScore = minScore;
     this.showAudio = showAudio;
+    this.isDefault = isDefault;
   }
 
   public int getRoundMinutes() {
@@ -34,10 +36,19 @@ public class QuizSpec implements IsSerializable {
     return showAudio;
   }
 
+  public boolean isDefault() {
+    return isDefault;
+  }
+
+  public void setDefault(boolean aDefault) {
+    isDefault = aDefault;
+  }
+
   public String toString() {
     return "quiz " +
         "\n\tminutes   " + roundMinutes +
         "\n\tminScore  " + minScore +
+        "\n\tdefault   " + isDefault +
         "\n\tshowAudio " + showAudio;
   }
 }

@@ -51,6 +51,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 
@@ -136,6 +137,8 @@ public interface ExerciseController extends Services, ExceptionSupport {
   boolean isMicAvailable();
 
   KeyStorage getStorage();
+
+  ProjectMode getMode();
 
   void showListIn(int listID, INavigation.VIEWS views);
 

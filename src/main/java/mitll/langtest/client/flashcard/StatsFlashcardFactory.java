@@ -63,7 +63,7 @@ import java.util.logging.Logger;
 public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExercise>
     extends ExercisePanelFactory<L, T>
     implements FlashcardContainer {
-  private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
+  //private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   final ControlState controlState;
   private List<L> allExercises;

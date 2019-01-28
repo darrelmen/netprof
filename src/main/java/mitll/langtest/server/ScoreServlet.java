@@ -45,7 +45,10 @@ import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.scoring.JsonScoring;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.custom.QuizSpec;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
@@ -92,7 +95,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String EXID = "exid";
   private static final String REQID = "reqid";
   private static final String VERSION = "version";
-  public static final String CONTEXT1 = "context";
+  private static final String CONTEXT1 = "context";
   private static final String CONTEXT = CONTEXT1;
   private static final String WIDGET = "widget";
 
@@ -972,7 +975,8 @@ public class ScoreServlet extends DatabaseServlet {
     JsonObject JsonObject = new JsonObject();
     {
       List<CommonExercise> exercisesForList = db.getUserListManager().getCommonExercisesOnList(projectid, listid);
-      JsonArray contentAsJsonFor = jsonExport.getContentAsJsonFor(true, exercisesForList);
+      QuizSpec quizInfo = db.getUserListManager().getQuizInfo(listid);
+      JsonArray contentAsJsonFor = jsonExport.getContentAsJsonFor(quizInfo.isDefault(), exercisesForList);
       JsonObject.add(CONTENT, contentAsJsonFor);
       addVersion(projectid, then, JsonObject);
     }

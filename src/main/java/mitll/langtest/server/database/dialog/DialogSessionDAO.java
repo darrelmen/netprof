@@ -228,33 +228,41 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
 
   /**
    * @param ds
+   * @return  session id;
    * @see mitll.langtest.server.services.DialogServiceImpl#addSession
    */
   @Override
   public int add(DialogSession ds) {
 //    logger.info("Add session " + ds);
 
-    long modified = ds.getModified();
-    if (modified == 0) modified = System.currentTimeMillis();
-    long end = ds.getEnd();
-    if (end == 0) end = modified;
+    int dialogid = ds.getDialogid();
+    if (dialogid < 1) {
+      logger.warn("\n\n\ninvalid dialog id " + dialogid + " for " +ds);
+      return -1;
+    } else {
+      long modified = ds.getModified();
+      if (modified == 0) modified = System.currentTimeMillis();
 
-    int insert = dao.insert(new SlickDialogSession(
-        -1,
-        ds.getUserid(),
-        ds.getProjid(),
-        ds.getDialogid(),
-        new Timestamp(modified),
-        new Timestamp(end),
-        ds.getView().toString(),
-        ds.getStatus().toString(),
-        ds.getNumRecordings(),
-        ds.getScore(),
-        ds.getSpeakingRate()
-    ));
+      long end = ds.getEnd();
+      if (end == 0) end = modified;
 
-  //  logger.info("add " + ds + " id " + insert);
-    return insert;
+      int insert = dao.insert(new SlickDialogSession(
+          -1,
+          ds.getUserid(),
+          ds.getProjid(),
+          dialogid,
+          new Timestamp(modified),
+          new Timestamp(end),
+          ds.getView().toString(),
+          ds.getStatus().toString(),
+          ds.getNumRecordings(),
+          ds.getScore(),
+          ds.getSpeakingRate()
+      ));
+
+      //  logger.info("add " + ds + " id " + insert);
+      return insert;
+    }
   }
 
   @Override

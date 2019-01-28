@@ -42,6 +42,7 @@ import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.services.ExerciseServiceImpl;
 import mitll.langtest.shared.answer.ActivityType;
+import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectType;
 
 import java.util.Collection;
@@ -77,7 +78,8 @@ public class ExerciseListRequest implements IsSerializable {
   private boolean plainVocab = false;
   private boolean isOnlyFL = false;
   private int dialogID = -1;
-  private ProjectType projectType = ProjectType.DEFAULT;
+ // private ProjectType projectType = ProjectType.DEFAULT;
+  private ProjectMode mode = ProjectMode.VOCABULARY;
 
   public ExerciseListRequest() {
   }
@@ -95,7 +97,6 @@ public class ExerciseListRequest implements IsSerializable {
         !isFilterActivity(activityType) &&
         !onlyUnrecordedByMe &&
         !onlyExamples &&
-  //      !incorrectFirstOrder &&
         !onlyWithAnno &&
         !onlyUninspected &&
         !onlyForUser;
@@ -115,12 +116,8 @@ public class ExerciseListRequest implements IsSerializable {
     return prefix.equals(other.getPrefix()) &&
         typeToSelection.equals(other.getTypeToSelection()) &&
         onlyUnrecordedByMe == other.onlyUnrecordedByMe &&
-        //  onlyRecordedByMatchingGender == other.onlyRecordedByMatchingGender &&
         onlyExamples == other.onlyExamples &&
-        //incorrectFirstOrder == other.incorrectFirstOrder &&
         onlyWithAnno == other.onlyWithAnno &&
-        //      onlyWithAudioAnno == other.onlyWithAudioAnno &&
-        //   onlyDefaultAudio == other.onlyDefaultAudio &&
         onlyUninspected == other.onlyUninspected &&
         userListID == other.userListID;
   }
@@ -350,12 +347,25 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
-  public ProjectType getProjectType() {
-    return projectType;
+  /**
+   * @see mitll.langtest.server.database.exercise.FilterResponseHelper#getSectionHelperFromFiltered
+   * @return
+   */
+//  public ProjectType getProjectType() {
+//    return projectType;
+//  }
+
+//  public ExerciseListRequest setProjectType(ProjectType projectType) {
+//    this.projectType = projectType;
+//    return this;
+//  }
+
+  public ProjectMode getMode() {
+    return mode;
   }
 
-  public ExerciseListRequest setProjectType(ProjectType projectType) {
-    this.projectType = projectType;
+  public ExerciseListRequest setMode(ProjectMode mode) {
+    this.mode = mode;
     return this;
   }
 
@@ -380,6 +390,7 @@ public class ExerciseListRequest implements IsSerializable {
             //   (incorrectFirstOrder ? "\n\tincorrectFirstOrder     " : "") +
             (onlyUninspected ? "\n\tonly uninspected    " : "") +
             (addContext ? "\n\tadd context    " : "") +
+            "\n\tmode    "  + mode +
             (addFirst ? "\n\tadd first ex    " : "\n\tdon't add first") +
             (QC ? "\n\tqc request    " : "")
         ;

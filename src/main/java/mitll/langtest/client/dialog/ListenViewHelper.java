@@ -150,6 +150,9 @@ public class ListenViewHelper<T extends TurnPanel>
 
       getRefAudio(new ArrayList<RefAudioGetter>(allTurns).iterator());
     }
+    else {
+      logger.info("showDialogGetRef no dialog for " + dialogID);
+    }
   }
 
   /**
@@ -886,7 +889,7 @@ public class ListenViewHelper<T extends TurnPanel>
     }
   }
 
-  List<T> getAllTurns() {
+  private List<T> getAllTurns() {
     return allTurns;
   }
 
@@ -917,7 +920,6 @@ public class ListenViewHelper<T extends TurnPanel>
   Boolean isRightSpeakerSet() {
     return isRightSpeakerSelected();
   }
-
 
   /**
    * @see #gotTurnClick

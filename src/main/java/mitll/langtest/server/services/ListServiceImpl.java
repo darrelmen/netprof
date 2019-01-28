@@ -59,6 +59,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   private static final Logger logger = LogManager.getLogger(ListServiceImpl.class);
 
   private static final boolean DEBUG = false;
+  private static final String REGEX = " ";  // no break space!
   //private static final boolean DEBUG_IMPORT = false;
   //public static final String WORD_EXPRESSION = "Word/Expression";
 
@@ -187,7 +188,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * TODO : consider not doing it separately from other facets.
    *
    * @param onlyCreated only relevant for NORMAL lists
-   * @param visited only relevant for NORMAL lists
+   * @param visited     only relevant for NORMAL lists
    * @param list_type
    * @return
    * @see mitll.langtest.client.list.ListFacetHelper#populateListChoices
@@ -331,7 +332,9 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.flashcard.PolyglotFlashcardFactory#PolyglotFlashcardFactory
    * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#PolyglotPracticePanel
    */
-  public QuizSpec getQuizInfo(int userListID) {    return db.getUserListManager().getQuizInfo(userListID);  }
+  public QuizSpec getQuizInfo(int userListID) {
+    return db.getUserListManager().getQuizInfo(userListID);
+  }
 
   /**
    * TODO: This is a bit of a mess.
@@ -354,8 +357,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
 
     // production onlhy
-    List<Project> englishProjects = db.getProjectManagement().getMatchingProjects(Language.ENGLISH, false);
-    Project englishProject = englishProjects.isEmpty() ? null : englishProjects.get(0);
+    Project englishProject = db.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
     Set<String> currentKnownFL = getCurrentOnList(userListByID);
 
     if (DEBUG) {
@@ -365,7 +367,8 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     Set<Integer> ids = userListByID.getExercises().stream().map(HasID::getID).collect(Collectors.toSet());
 
     Set<CommonExercise> knownAlready = new HashSet<>();
-    List<CommonExercise> newItems = convertTextToExercises(lines, knownAlready, ids, currentKnownFL, project, englishProject, userIDFromSession);
+    List<CommonExercise> newItems = convertTextToExercises(lines, knownAlready, ids, currentKnownFL,
+        project, englishProject, userIDFromSession);
 
     List<CommonExercise> reallyNewItems = new ArrayList<>();
     List<CommonExercise> actualItems = addItemsToList(userListID, project, knownAlready, newItems, reallyNewItems);
@@ -491,8 +494,8 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
           String[] parts = line.split("\\t");
 //      logger.info("\tgot " + parts.length + " parts");
           if (parts.length > 1) {
-            String first = parts[0].trim();
-            String second = parts[1].trim();
+            String first  = getTrim(parts[0]);
+            String second = getTrim(parts[1]);
             Pair e = new Pair(firstIsEnglish ? second : first, firstIsEnglish ? first : second);
             pairs.add(e);
           }
@@ -542,6 +545,15 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     }
 
     return newItems;
+  }
+
+  /**
+   * deal with no break space
+   * @param part
+   * @return
+   */
+  private String getTrim(String part) {
+    return part.replaceAll(REGEX, " ").trim();
   }
 
   private boolean guessLanguageInCol(String[] lines, Project englishProject, List<Pair> pairs) {

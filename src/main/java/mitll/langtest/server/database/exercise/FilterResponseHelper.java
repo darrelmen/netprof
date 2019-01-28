@@ -5,7 +5,7 @@ import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.project.ProjectType;
+import mitll.langtest.shared.project.ProjectMode;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +27,6 @@ public class FilterResponseHelper {
   private static final String RECORDED1 = "Recorded";
 
   private final DatabaseServices databaseServices;
-  private List<CommonExercise> unrecordedExercises;
 
   public FilterResponseHelper(DatabaseServices databaseServices) {
     this.databaseServices = databaseServices;
@@ -49,13 +48,15 @@ public class FilterResponseHelper {
 
     ISection<CommonExercise> sectionHelper = getSectionHelper(projid);
     if (sectionHelper == null) {
-      logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
+      logger.info("getTypeToValues no response...");// + "\n\ttype->selection" + typeToSelection);
       return new FilterResponse();
     } else {
       if (request.isRecordRequest()) { //how no user???
         return getFilterResponseForRecording(request, projid, userID);
       } else if (request.isOnlyUninspected()) {
-        return getFilterResponse(request, projid, getRequestForUninspected(request, userID));
+        FilterResponse filterResponse = getFilterResponse(request, projid, getRequestForUninspected(request, userID));
+        addInterpreterMetaData(request, hasDialogs(projid) && request.getMode() == ProjectMode.DIALOG, filterResponse);
+        return filterResponse;
       } else if (request.isOnlyWithAnno()) {
         return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyWithAnno(true));
       } else if (request.isExampleRequest()) {
@@ -84,20 +85,31 @@ public class FilterResponseHelper {
    * @paramx response
    */
   private FilterResponse getFilterResponseForRecording(FilterRequest request, int projectID, int userFromSessionID) {
-    boolean includeLanguage = hasDialogs(projectID);
+    //  boolean includeLanguage = hasDialogs(projectID);
 
     //logger.info("getFilterResponseForRecording has dialogs = " + includeLanguage + " for " + projectID);
 
     FilterResponse filterResponse = getFilterResponse(request, projectID,
-        getExerciseListRequest(request, userFromSessionID)
-            .setOnlyUnrecordedByMe(true));
+        getExerciseListRequest(request, userFromSessionID).setOnlyUnrecordedByMe(true));
 
-    if (includeLanguage) {
+    addInterpreterMetaData(request, hasDialogs(projectID), filterResponse);
+
+    return filterResponse;
+  }
+
+  private void addInterpreterMetaData(FilterRequest request, boolean includeLanguage, FilterResponse filterResponse) {
+    if (includeLanguage && isDialogReq(request)) {
       filterResponse.addTypeToInclude(LANGUAGE_META_DATA);
       filterResponse.addTypeToInclude(SPEAKER_META_DATA);
     }
+  }
 
-    return filterResponse;
+  private boolean isDialogReq(FilterRequest request) {
+    return /*request.getProjectType() == ProjectType.DIALOG && */request.getMode() == ProjectMode.DIALOG;
+  }
+
+  private boolean isDialog(ExerciseListRequest request) {
+    return request.getMode() == ProjectMode.DIALOG;
   }
 
   private boolean hasDialogs(int projectID) {
@@ -115,7 +127,8 @@ public class FilterResponseHelper {
 
     return new ExerciseListRequest()
         .setOnlyExamples(exampleRequest)
-        .setProjectType(request.getProjectType())
+        //.setProjectType(request.getProjectType())
+        .setMode(request.getMode())
         .setUserID(userID);
   }
 
@@ -170,17 +183,19 @@ public class FilterResponseHelper {
    * @param all
    * @param sectionHelper
    * @param typeOrder
+   * @param doQC
+   * @param doDialogFilter
    * @see #getSectionHelperFromFiltered(int, ExerciseListRequest)
    */
   private void populate(int projid,
                         Collection<CommonExercise> all,
                         ISection<CommonExercise> sectionHelper,
                         List<String> typeOrder,
-                        boolean onlyUnrecordedByMe) {
+                        boolean includeLanguageFacets) {
     populate(all, typeOrder, sectionHelper,
-        databaseServices.getProject(projid),
+        databaseServices.getProject(projid).getBaseTypeOrder(),
         databaseServices.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid),
-        onlyUnrecordedByMe);
+        includeLanguageFacets);
   }
 
   /**
@@ -188,48 +203,50 @@ public class FilterResponseHelper {
    * @param typeOrder
    * @param sectionHelper
    * @param lookup
+   * @param doQC
+   * @param doDialogFilter
    * @return
    * @paramx addTypesToSection
    * @seex #getByProject
    * @seex #getContextByProject
-   * @see #populate(int, Collection, ISection, List, boolean)
+   * @see #populate(int, Collection, ISection, List, boolean, boolean, boolean)
    */
   private void populate(Collection<CommonExercise> all,
                         List<String> typeOrder,
                         ISection<CommonExercise> sectionHelper,
-                        Project lookup,
+                        List<String> baseTypeOrder,
                         Map<Integer, ExerciseAttribute> allByProject,
-                        boolean onlyUnrecordedByMe) {
+                        boolean includeLanguageFacets) {
     List<List<Pair>> allAttributes = new ArrayList<>();
-    List<String> baseTypeOrder = lookup.getBaseTypeOrder();
 
     long then = System.currentTimeMillis();
-    {
-      Collection<String> allFacetTypes = allByProject
-          .values()
-          .stream()
-          .filter(ExerciseAttribute::isFacet)
-          .map(Pair::getProperty)
-          .collect(Collectors.toCollection(HashSet::new));
 
-      boolean includeLanguage = onlyUnrecordedByMe && !lookup.getDialogs().isEmpty();
+    Collection<String> allFacetTypes = allByProject
+        .values()
+        .stream()
+        .filter(ExerciseAttribute::isFacet)
+        .map(Pair::getProperty)
+        .collect(Collectors.toCollection(HashSet::new));
 
-      if (includeLanguage) {
-        //    logger.info("populate : including facets for language - base types " + baseTypeOrder);
-        allFacetTypes.add(LANGUAGE_META_DATA);
-        allFacetTypes.add(SPEAKER_META_DATA);
-      }
 
-      all.forEach(commonExercise -> allAttributes.add(getPairs(commonExercise, baseTypeOrder, sectionHelper,
-          allFacetTypes, !includeLanguage)));
+    if (includeLanguageFacets) {
+      logger.info("populate : including facets for language - base types " + baseTypeOrder);
+      allFacetTypes.add(LANGUAGE_META_DATA);
+      allFacetTypes.add(SPEAKER_META_DATA);
     }
+
+    //logger.info("populate : including facets " + allFacetTypes);
+
+    all.forEach(commonExercise -> allAttributes.add(getPairs(commonExercise, baseTypeOrder, sectionHelper,
+        allFacetTypes, !includeLanguageFacets)));
 
     long now = System.currentTimeMillis();
 
     if (now - then > 0) {
       logger.info("populate took " + (now - then) +
-          "\n\tto attach " + allAttributes.size() + " : " + allAttributes +
-          "\n\tattributes to " + all.size() + " exercises.");
+          "\n\tto attach " + allAttributes.size() + //" : " + allAttributes +
+          "\n\tattributes to " + all.size() + " exercises for " +
+          "\n\tfacets  " + allFacetTypes);
     }
 
     sectionHelper.rememberTypesInOrder(typeOrder, allAttributes);
@@ -276,9 +293,15 @@ public class FilterResponseHelper {
    * @see #getFilterResponseForRecording(FilterRequest, int, int)
    */
   private FilterResponse getFilterResponse(FilterRequest request, int projectID, ExerciseListRequest exerciseListRequest) {
+    logger.info("getFilterResponse FilterRequest " + request);
+    logger.info("getFilterResponse ExerciseListRequest " + exerciseListRequest);
     SectionHelper<CommonExercise> unrecordedSectionHelper = getSectionHelperFromFiltered(projectID, exerciseListRequest);
-    FilterResponse typeToValues = unrecordedSectionHelper.getTypeToValues(request, true);
-    //  logger.info("getFilterResponse resp " + typeToValues);
+
+  //  unrecordedSectionHelper.report();
+
+    FilterResponse typeToValues = unrecordedSectionHelper.getTypeToValues(request, false);
+
+    logger.info("getFilterResponse resp " + typeToValues);
     return typeToValues;
   }
 
@@ -287,25 +310,30 @@ public class FilterResponseHelper {
     List<CommonExercise> filtered;
     List<String> typeOrder = new ArrayList<>(getSectionHelper(projectID).getTypeOrder());
 
-    if (request.getProjectType() == ProjectType.DIALOG) {
+    boolean dialog = isDialog(request);
+    if (dialog) {
       filtered = getDialogExercises(projectID);
       if (request.isOnlyExamples()) {
-        int before = filtered.size();
+        // int before = filtered.size();
         filtered = filtered.stream().filter(CommonShell::isContext).collect(Collectors.toList());
         //    logger.info("getSectionHelperFromFiltered context from " + before + " to " + filtered.size());
       }
       typeOrder.add(LANGUAGE_META_DATA);
       typeOrder.add(SPEAKER_META_DATA);
+      filtered = filterExercises(request, filtered, projectID);
     } else {
       filtered = filterExercises(request, getExercises(projectID), projectID);
     }
 
-    // logger.info("getSectionHelperFromFiltered build section helper from " + filtered.size() + " and types " + typeOrder);
+    logger.info("getSectionHelperFromFiltered build section helper from " + filtered.size() + " and types " + typeOrder + " dialog " + dialog);
 
     SectionHelper<CommonExercise> unrecordedSectionHelper = new SectionHelper<>();
-    populate(projectID, filtered, unrecordedSectionHelper, typeOrder, request.isOnlyUnrecordedByMe());
+    boolean includeLanguage = (request.isOnlyUnrecordedByMe() || request.isOnlyUninspected()) && dialog;
+
+    populate(projectID, filtered, unrecordedSectionHelper, typeOrder, includeLanguage);
     return unrecordedSectionHelper;
   }
+
 
   @NotNull
   private List<CommonExercise> getDialogExercises(int projectID) {
@@ -377,19 +405,14 @@ public class FilterResponseHelper {
 //        logger.info("filterExercises OK doing examples");
         exercises = getContextExercises(exercises);
       }
-      Collection<String> languageFilter = request.getTypeToSelection().get(LANGUAGE_META_DATA);
-      Collection<String> speakerFilter = request.getTypeToSelection().get(SPEAKER_META_DATA);
 
-      logger.info("filterByUnrecordedOrGetContext : Filter for matching gender " +
-          "\n\tto user         " + request.getUserID() + " only recorded" +
-          "\n\ttype->selection " + request.getTypeToSelection().keySet() +
-          "\n\tlangauge        " + languageFilter +
-          "\n\tspeaker         " + speakerFilter
-      );
-
-
-      exercises = getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, onlyExamples,
-          languageFilter, speakerFilter);
+      boolean filterOnBothSpeeds = request.getMode() != ProjectMode.DIALOG;
+      if (!filterOnBothSpeeds) logger.info("only filter on reg speed");
+      if (request.getMode() == ProjectMode.DIALOG) {
+        databaseServices.getProject(projid).getD
+      }
+      exercises = getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, onlyExamples, filterOnBothSpeeds);
+      exercises = maybeDoInterpreterFilter(request, exercises);
     } else if (request.isOnlyWithAnno()) {
       boolean isContext = onlyExamples || request.shouldAddContext();
       if (isContext) {
@@ -402,9 +425,9 @@ public class FilterResponseHelper {
       if (isContext) {
         exercises = getParentChildPairs(exercises, projid);
       }
-
     } else if (request.isOnlyUninspected()) {
       exercises = filterByUninspected(exercises);
+      exercises = maybeDoInterpreterFilter(request, exercises);
     } else if (onlyExamples) {
       logger.info("filterExercises OK doing examples 3");
       exercises = getContextExercises(exercises);
@@ -423,6 +446,21 @@ public class FilterResponseHelper {
         "\n\tfilter req " + request +
         "\n\treturn     " + exercises.size());
 
+    return exercises;
+  }
+
+  private List<CommonExercise> maybeDoInterpreterFilter(ExerciseListRequest request, List<CommonExercise> exercises) {
+    Collection<String> languageFilter = request.getTypeToSelection().get(LANGUAGE_META_DATA);
+    Collection<String> speakerFilter = request.getTypeToSelection().get(SPEAKER_META_DATA);
+
+    logger.info("filterByUnrecordedOrGetContext : Filter for matching gender " +
+        "\n\tto user         " + request.getUserID() + " only recorded" +
+        "\n\ttype->selection " + request.getTypeToSelection().keySet() +
+        "\n\tlangauge        " + languageFilter +
+        "\n\tspeaker         " + speakerFilter
+    );
+
+    exercises = maybeDoInterpreterFilter(languageFilter, speakerFilter, exercises);
     return exercises;
   }
 
@@ -499,11 +537,12 @@ public class FilterResponseHelper {
    * TODO : way too much work here... why go through all exercises?
    * TODO : why return all exercises?
    *
+   * @param languageFilter
    * @param userID
    * @param exercises
    * @param projid
    * @param onlyExamples
-   * @param languageFilter
+   * @param filterOnBothSpeeds
    * @return
    * @paramx onlyRecorded
    * @see #filterExercises
@@ -513,8 +552,7 @@ public class FilterResponseHelper {
                                                                       Collection<CommonExercise> exercises,
                                                                       int projid,
                                                                       boolean onlyExamples,
-                                                                      Collection<String> languageFilter,
-                                                                      Collection<String> speakerFilter) {
+                                                                      boolean filterOnBothSpeeds) {
     Set<Integer> unrecordedIDs = new HashSet<>(exercises.size());
 
     Map<Integer, String> exToTranscript = new HashMap<>();
@@ -526,7 +564,8 @@ public class FilterResponseHelper {
     }
 
     logger.info("getRecordFilterExercisesMatchingGender # exToTranscript " + exToTranscript.size());
-    Collection<Integer> recordedBySameGender = getRecordedByMatchingGender(userID, projid, onlyExamples, exToTranscript);
+    Collection<Integer> recordedBySameGender =
+        getRecordedByMatchingGender(userID, projid, onlyExamples, exToTranscript, filterOnBothSpeeds);
 
     logger.info("getRecordFilterExercisesMatchingGender" +
             "\n\tall exercises " + unrecordedIDs.size() +
@@ -547,9 +586,17 @@ public class FilterResponseHelper {
 
     List<CommonExercise> unrecordedExercises = getUnrecordedForIDs(exercises, unrecordedIDs);
 
-    boolean useLangFilter = languageFilter != null && !languageFilter.isEmpty();
+    // boolean useLangFilter = languageFilter != null && !languageFilter.isEmpty();
 
-    if (useLangFilter) {
+
+    logger.info("getRecordFilterExercisesMatchingGender to be recorded " + unrecordedExercises.size() + " from " + exercises.size());
+
+    return unrecordedExercises;
+  }
+
+  private List<CommonExercise> maybeDoInterpreterFilter(Collection<String> languageFilter,
+                                                        Collection<String> speakerFilter, List<CommonExercise> unrecordedExercises) {
+    if (languageFilter != null && !languageFilter.isEmpty()) {
       logger.info("getRecordFilterExercisesMatchingGender before " + unrecordedExercises.size() + " = " + languageFilter);
       unrecordedExercises = filterByMatchingLanguage(languageFilter, unrecordedExercises, LANGUAGE_META_DATA);
       logger.info("getRecordFilterExercisesMatchingGender after  " + unrecordedExercises.size());
@@ -562,9 +609,6 @@ public class FilterResponseHelper {
       unrecordedExercises = filterByMatchingLanguage(speakerFilter, unrecordedExercises, SPEAKER_META_DATA);
       logger.info("getRecordFilterExercisesMatchingGender after  " + unrecordedExercises.size() + " = " + speakerFilter);
     }
-
-    logger.info("getRecordFilterExercisesMatchingGender to be recorded " + unrecordedExercises.size() + " from " + exercises.size());
-
     return unrecordedExercises;
   }
 
@@ -603,20 +647,21 @@ public class FilterResponseHelper {
    * @param userID
    * @param projid
    * @param onlyExamples
+   * @param filterOnBothSpeeds
    * @return
    * @see #getRecordFilterExercisesMatchingGender
    */
   private Collection<Integer> getRecordedByMatchingGender(int userID,
                                                           int projid,
                                                           boolean onlyExamples,
-                                                          Map<Integer, String> exToTranscript) {
+                                                          Map<Integer, String> exToTranscript, boolean filterOnBothSpeeds) {
     logger.info("getRecordedByMatchingGender : for " +
         "\n\tuser #" + userID +
         "\n\tonly by same gender examples only " + onlyExamples);// + " from " + exercises.size());
 
     return onlyExamples ?
         databaseServices.getAudioDAO().getRecordedBySameGenderContext(userID, projid, exToTranscript) :
-        databaseServices.getAudioDAO().getRecordedBySameGender(userID, projid, exToTranscript);
+        databaseServices.getAudioDAO().getRecordedBySameGender(userID, projid, exToTranscript, filterOnBothSpeeds);
   }
 
   /**

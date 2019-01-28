@@ -190,8 +190,8 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
             String pinyin = getCellValue(pinyinIndex, theRow);
             String corePinyin = getCellValue(corePinyinIndex, theRow);
 
-            if (!title.isEmpty())lastTitle=title;
-            if (!orientation.isEmpty())lastOrientation=orientation;
+            if (!title.isEmpty()) lastTitle = title;
+            if (!orientation.isEmpty()) lastOrientation = orientation;
             if (DEBUG) {
               if (!text.isEmpty())
                 logger.info("row #" + rows + " : " + audioFilenames + " = " + text);
@@ -215,8 +215,11 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
             String triple = dialogID + turnID + speakerID;
 
             String language = parts.get(i++);
-            String gender = size == 4 ? "" : parts.get(i++);
+            Language lang = getLanguage(language);
 
+            speakerID = getConvertedSpeakerID(project, speakerID, lang);
+
+            String gender = size == 4 ? "" : parts.get(i++);
 
             String id = dialogID.substring(1);
             try {
@@ -241,9 +244,6 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
               lastRawDialogID = dialogID;
 
               try {
-                Language lang = getLanguage(language);
-                //  addCoreWords(coreEng, coreFL, coreWords, lang);
-
                 boolean genderMatch = /*gender.equalsIgnoreCase(M_2_M) ||*/ gender.isEmpty();
                 boolean newTurn = !triple.equalsIgnoreCase(prevtriple);
                 if (!text.isEmpty()) {
@@ -281,6 +281,30 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
       logger.error("got " + e, e);
     }
     return dialogToSlick;
+  }
+
+  @NotNull
+  private String getConvertedSpeakerID(Project project, String speakerID, Language lang) {
+    if (speakerID.equalsIgnoreCase("A")) {
+      if (lang == Language.ENGLISH) {
+        speakerID = "English Speaker";
+      }
+      else {
+        speakerID = project.getLanguageEnum().toDisplay() + " Speaker";
+      }
+    }
+    else if (speakerID.equalsIgnoreCase("B")) {
+      if (lang == Language.ENGLISH) {
+        speakerID = "English Speaker";
+      }
+      else {
+        speakerID = project.getLanguageEnum().toDisplay() + " Speaker";
+      }
+    }
+    else if (speakerID.equalsIgnoreCase("I")) {
+      speakerID = "Interpreter";
+    }
+    return speakerID;
   }
 
   private void addDialog(int defaultUser, Project project, Project engProject,

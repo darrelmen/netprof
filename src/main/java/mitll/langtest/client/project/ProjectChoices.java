@@ -318,6 +318,7 @@ public class ProjectChoices extends ThumbnailChoices {
 
   /**
    * Sort by display name not enum name.
+   *
    * @param nest
    * @param languages
    */
@@ -1081,7 +1082,7 @@ public class ProjectChoices extends ThumbnailChoices {
    * @see #gotClickOnFlag
    */
   private void setProjectForUser(int projectid, ProjectMode mode) {
-    // logger.info("setProjectForUser set project for " + projectid);
+    logger.info("setProjectForUser set project for " + projectid + " mode " + mode);
     uiLifecycle.clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override

@@ -393,13 +393,13 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
 /*
   @Override
-  Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid, boolean isMale, String regSpeed, String slowSpeed) {
+  Set<Integer> getAudioExercisesThatHaveBeenRecorded(int projid, boolean isMale, String regSpeed, String slowSpeed) {
     return null;
   }
 */
 
   @Override
-  Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid, boolean isMale, Map<Integer, String> exToTranscript) {
+  Set<Integer> getAudioExercisesThatHaveBeenRecorded(int projid, boolean isMale, Map<Integer, String> exToTranscript, boolean filterOnBothSpeeds) {
     return null;
   }
 

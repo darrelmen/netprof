@@ -304,7 +304,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       this.exerciseID = exerciseID;
       this.request = request;
 
-      if (DEBUG) logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
+      if (DEBUG || true) logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
 
 /*      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " +getInstance()));
       logger.info("logException stack " + exceptionAsString);*/
@@ -350,7 +350,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
     }
   }
 
-  protected void gotExercisesResponse(int exerciseID, String selectionID, String searchIfAny,
+  private void gotExercisesResponse(int exerciseID, String selectionID, String searchIfAny,
                                     List<T> exercises, ClientExercise firstExercise) {
     checkForEmptyExerciseList(exercises.isEmpty());
     int idToUse = exerciseID == -1 ? firstExercise == null ? -1 : firstExercise.getID() : exerciseID;
@@ -521,7 +521,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
                                    String selectionID,
                                    String searchIfAny,
                                    int exerciseID) {
-    if (DEBUG | true) logger.info("ExerciseList : rememberAndLoadFirst instance '" + //getInstance() +
+    if (DEBUG || true) logger.info("ExerciseList : rememberAndLoadFirst instance '" + //getInstance() +
         "'" +
         "\n\tremembering " + exercises.size() + " exercises," +
         "\n\tselection   " + selectionID +

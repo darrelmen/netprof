@@ -81,15 +81,14 @@ import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.image.ImageResponse;
-import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.project.SlimProject;
-import mitll.langtest.shared.project.StartupInfo;
+import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.user.User;
 
 import java.util.*;
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.banner.NewContentChooser.MODE;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -1273,6 +1272,21 @@ public class LangTest implements
       storage = new KeyStorage(this);
     }
     return storage;
+  }
+
+  public ProjectMode getMode() {
+    String mode = getStorage().getValue(MODE);
+
+    if (mode == null || mode.isEmpty()) {
+      return ProjectMode.VOCABULARY;
+    } else {
+      try {
+        return ProjectMode.valueOf(mode);
+      } catch (IllegalArgumentException e) {
+        logger.warning("got unknown mode '" + mode + "'");
+        return ProjectMode.VOCABULARY;
+      }
+    }
   }
 
   @Override

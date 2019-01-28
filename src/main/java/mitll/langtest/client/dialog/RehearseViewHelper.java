@@ -834,8 +834,15 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
       @Override
       public void onSuccess(Integer result) {
-        //  logger.info("startSession : made new session = " + result);
-        dialogSession.setID(result);
+        if (result > 0) {
+          //  logger.info("startSession : made new session = " + result);
+          dialogSession.setID(result);
+        }
+        else {
+          logger.warning("setSession invalid req " + dialogSession);
+          controller.getNavigation();
+
+        }
       }
     });
   }

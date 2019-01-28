@@ -52,6 +52,8 @@ import org.junit.Test;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.shared.project.ProjectMode.DIALOG;
+
 public class DialogTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(DialogTest.class);
   public static final int MAX = 200;
@@ -60,7 +62,8 @@ public class DialogTest extends BaseTest {
   private static final String TOPIC_PRESENTATION_A = "Topic Presentation A";
   public static final String PRESENTATION1 = "presentation";
   private static final String PRESENTATION = PRESENTATION1;
-  private static final String ANY = "Any";
+  public static final String ANY1 = "Any";
+  private static final String ANY = ANY1;
   private static final String CHAPTER = "Chapter";
   public static final String U5 = "" + 5;
   public static final String UNIT1 = "Unit";
@@ -95,17 +98,98 @@ public class DialogTest extends BaseTest {
 
     FilterRequest request = new FilterRequest()
         .setRecordRequest(true)
-        .setProjectType(ProjectType.DIALOG);
+        .setMode(DIALOG);
 
-   // project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
+    // project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
 
-    request.addPair(new Pair("Book","1"));
-    request.addPair(new Pair("SPEAKER","A"));
+    request.addPair(new Pair("Book", ANY1));
+    request.addPair(new Pair("Module",  ANY1));
+    request.addPair(new Pair("LANGUAGE",  ANY1));
+    request.addPair(new Pair("SPEAKER",  ANY1));
+    //request.addPair(new Pair("SPEAKER","A"));
 
     logger.info("types " + request + " for " + project.getTypeOrder());
 
-    FilterResponse typeToValues = andPopulate.getFilterResponseHelper().getTypeToValues(request, projectid, 6);
-    logger.info("typeToValues " + typeToValues);
+    FilterResponse typeToValues = getTypeToValues(andPopulate, projectid, request);
+
+    logger.info("typeToValues for " +
+        "\n\treq          " + request +
+        "\n\ttype->values " + typeToValues);
+
+//    request.addPair(new Pair("Book","1"));
+//    request.addPair(new Pair("SPEAKER", "English Speaker"));
+//
+//    logger.info("types " + request + " for " + project.getTypeOrder());
+//
+//    typeToValues = getTypeToValues(andPopulate, projectid, request);
+//
+//    logger.info("typeToValues for " +
+//        "\n\treq          " + request +
+//        "\n\ttype->values " + typeToValues);
+//
+
+    request = new FilterRequest()
+        .setOnlyUninspected(true)
+        .setMode(DIALOG);
+
+    logger.info("types " + request + " for " + project.getTypeOrder());
+
+    typeToValues = getTypeToValues(andPopulate, projectid, request);
+
+    logger.info("typeToValues for " +
+        "\n\treq          " + request +
+        "\n\ttype->values " + typeToValues);
+  }
+
+
+  @Test
+  public void testNormalFrench() {
+    DatabaseImpl andPopulate = getDatabase();
+    andPopulate.getProject(12);
+    Project project = andPopulate.getProjectManagement().getProductionByLanguage(Language.FRENCH);
+    int projectid = project.getID();
+
+    FilterRequest request = new FilterRequest()
+        .setRecordRequest(true);
+
+    // project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
+
+    request.addPair(new Pair("Book", "1"));
+    //request.addPair(new Pair("SPEAKER","A"));
+
+    logger.info("types " + request + " for " + project.getTypeOrder());
+
+    FilterResponse typeToValues = getTypeToValues(andPopulate, projectid, request);
+
+    logger.info("typeToValues for " +
+        "\n\treq          " + request +
+        "\n\ttype->values " + typeToValues);
+
+//    request.addPair(new Pair("Book","1"));
+//    request.addPair(new Pair("SPEAKER","English Speaker"));
+//
+//    logger.info("types " + request + " for " + project.getTypeOrder());
+//
+//    typeToValues = getTypeToValues(andPopulate, projectid, request);
+//
+//    logger.info("typeToValues for " +
+//        "\n\treq          " + request+
+//        "\n\ttype->values " + typeToValues);
+
+
+    request.setOnlyUninspected(true);
+
+    logger.info("types " + request + " for " + project.getTypeOrder());
+
+    typeToValues = getTypeToValues(andPopulate, projectid, request);
+
+    logger.info("typeToValues for " +
+        "\n\treq          " + request +
+        "\n\ttype->values " + typeToValues);
+  }
+
+  private FilterResponse getTypeToValues(DatabaseImpl andPopulate, int projectid, FilterRequest request) {
+    return andPopulate.getFilterResponseHelper().getTypeToValues(request, projectid, 6);
   }
 
   @Test
@@ -114,14 +198,14 @@ public class DialogTest extends BaseTest {
     int projectid = 12;
     Project project = andPopulate.getProject(projectid);
 
-    FilterRequest request = new FilterRequest().setRecordRequest(true).setProjectType(ProjectType.DIALOG);
+    FilterRequest request = new FilterRequest().setRecordRequest(true).setMode(DIALOG);
     project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
 
-    FilterResponse typeToValues = andPopulate.getFilterResponseHelper().getTypeToValues(request, projectid, 6);
+    FilterResponse typeToValues = getTypeToValues(andPopulate, projectid, request);
 
     logger.info("typeToValues " + typeToValues);
 
-    ExerciseListRequest request1 = new ExerciseListRequest(1, 6).setProjectType(ProjectType.DIALOG);
+    ExerciseListRequest request1 = new ExerciseListRequest(1, 6).setMode(DIALOG);
     request1.setOnlyUnrecordedByMe(true);
     HashMap<String, Collection<String>> typeToSelection = new HashMap<>();
     typeToSelection.put(UNIT1, Collections.singleton("1"));

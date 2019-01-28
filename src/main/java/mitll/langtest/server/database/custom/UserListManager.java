@@ -914,6 +914,7 @@ public class UserListManager implements IUserListManager {
 
   /**
    * A little weird the join can result in missing exercises...
+   *
    * @param projid
    * @param id
    * @return
@@ -1233,9 +1234,13 @@ public class UserListManager implements IUserListManager {
 
   public QuizSpec getQuizInfo(int userListID) {
     UserList<?> list = getUserListDAO().getList(userListID);
-    if (list == null) logger.warn("no quiz with list id " + userListID);
-    QuizSpec quizSpec = list != null ? new QuizSpec(list.getRoundTimeMinutes(), list.getMinScore(), list.shouldShowAudio()) : new QuizSpec(10, 35, false);
-    if (DEBUG) logger.info("Returning " + quizSpec + " for " + userListID);
+    if (list == null) logger.warn("getQuizInfo no quiz with list id " + userListID);
+
+    QuizSpec quizSpec = list != null ?
+        new QuizSpec(list.getRoundTimeMinutes(), list.getMinScore(), list.shouldShowAudio(), list.getListType() != UserList.LIST_TYPE.QUIZ) :
+        new QuizSpec(10, 35, false, true);
+
+    if (DEBUG) logger.info("getQuizInfo returning " + quizSpec + " for " + userListID);
     return quizSpec;
   }
 }

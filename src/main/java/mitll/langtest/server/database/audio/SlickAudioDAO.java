@@ -76,7 +76,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   private static final boolean DEBUG_AUDIO_REPORT = false;
 
   /**
-   *
    * @param database
    * @param dbConnection
    * @param userDAO
@@ -478,46 +477,41 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param projid
    * @param isMale
    * @param exToTranscript
+   * @param filterOnBothSpeeds
    * @return
    */
   @Override
-  Set<Integer> getAudioExercisesForGenderBothSpeeds(int projid,
-                                                    boolean isMale,
-                                                    Map<Integer, String> exToTranscript) {
+  Set<Integer> getAudioExercisesThatHaveBeenRecorded(int projid,
+                                                     boolean isMale,
+                                                     Map<Integer, String> exToTranscript,
+                                                     boolean filterOnBothSpeeds) {
     Set<Integer> maleReg = new HashSet<>();
     Set<Integer> femaleReg = new HashSet<>();
     Set<Integer> uniqueIDs = exToTranscript.keySet();
     if (DEBUG_AUDIO_REPORT)
-      logger.info("getAudioExercisesForGenderBothSpeeds : check " + uniqueIDs.size() + " exercises");
+      logger.info("getAudioExercisesThatHaveBeenRecorded : check " + uniqueIDs.size() + " exercises");
     getCountForGender(projid, AudioType.REGULAR, uniqueIDs, exToTranscript, maleReg, femaleReg);
 
     float maleFast = (float) maleReg.size();
     if (DEBUG_AUDIO_REPORT) logger.info("getRecordedReport male fast " + maleFast);
     float femaleFast = (float) femaleReg.size();
 
-    Set<Integer> maleSlowSpeed = new HashSet<>();
-    Set<Integer> femaleSlowSpeed = new HashSet<>();
-    getCountForGender(projid, AudioType.SLOW, uniqueIDs, exToTranscript, maleSlowSpeed, femaleSlowSpeed);
-    float maleSlow = (float) maleSlowSpeed.size();
-    float femaleSlow = (float) femaleSlowSpeed.size();
+    if (filterOnBothSpeeds) {
+      Set<Integer> maleSlowSpeed = new HashSet<>();
+      Set<Integer> femaleSlowSpeed = new HashSet<>();
+      getCountForGender(projid, AudioType.SLOW, uniqueIDs, exToTranscript, maleSlowSpeed, femaleSlowSpeed);
+      float maleSlow = (float) maleSlowSpeed.size();
+      float femaleSlow = (float) femaleSlowSpeed.size();
 
-    if (DEBUG_AUDIO_REPORT) logger.info("getRecordedReport male slow " + maleSlow);
+      if (DEBUG_AUDIO_REPORT) logger.info("getRecordedReport male slow " + maleSlow);
 
-    maleReg.retainAll(maleSlowSpeed);
-    //  float male = maleReg.size();
-    //  if (DEBUG_AUDIO_REPORT) logger.info("male total " + male);
+      maleReg.retainAll(maleSlowSpeed);
+      if (DEBUG_AUDIO_REPORT) logger.info("female fast " + femaleFast + " slow " + femaleSlow);
 
-//    Set<Integer> femaleIDs = userMapFemales.keySet();
-    //   femaleIDs = new HashSet<>(femaleIDs);
-    //  femaleIDs.add(BaseUserDAO.DEFAULT_FEMALE_ID);
-//    float femaleFast = getCountForGender(projid, AudioType.REGULAR, uniqueIDs, exToTranscript, femaleReg, , false);
-//    float femaleSlow = getCountForGender(projid, AudioType.SLOW, uniqueIDs, exToTranscript, femaleSlowSpeed, , false);
+      // overlap
+      femaleReg.retainAll(femaleSlowSpeed);
+    }
 
-    if (DEBUG_AUDIO_REPORT) logger.info("female fast " + femaleFast + " slow " + femaleSlow);
-
-    // overlap
-    femaleReg.retainAll(femaleSlowSpeed);
-//    float female = femaleReg.size();
     return isMale ? maleReg : femaleReg;
   }
 

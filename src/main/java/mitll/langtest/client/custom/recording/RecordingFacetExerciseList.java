@@ -10,6 +10,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectType;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +22,7 @@ import java.util.logging.Logger;
  *
  * @see RecorderNPFHelper#getMyListLayout
  */
-class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
+public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
   private final Logger logger = Logger.getLogger("RecordingFacetExerciseList");
 
   private static final String NONE_RECORDED_YET = "None Recorded Yet";
@@ -30,9 +31,12 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   /**
    * @see #getPairs(Map)
    */
-  private static final List<String> DYNAMIC_FACETS = Arrays.asList(DialogMetadata.LANGUAGE.name(), DialogMetadata.SPEAKER.name());
+  private static final List<String> DYNAMIC_FACETS =
+      Arrays.asList(DialogMetadata.LANGUAGE.name(), DialogMetadata.SPEAKER.name());
 
-  private final boolean isContext;
+  protected final boolean isContext;
+  private boolean isDialog;
+  //private ProjectMode mode;
 
   /**
    * @param controller
@@ -42,12 +46,12 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
    * @param listHeader
    * @param isContext
    */
-  RecordingFacetExerciseList(ExerciseController controller,
-                             Panel topRow,
-                             Panel currentExercisePanel,
-                             INavigation.VIEWS instanceName,
-                             DivWidget listHeader,
-                             boolean isContext) {
+  public RecordingFacetExerciseList(ExerciseController controller,
+                                    Panel topRow,
+                                    Panel currentExercisePanel,
+                                    INavigation.VIEWS instanceName,
+                                    DivWidget listHeader,
+                                    boolean isContext) {
     super(
         controller,
         topRow,
@@ -56,6 +60,11 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
         listHeader,
         instanceName);
     this.isContext = isContext;
+    ProjectMode mode = controller.getMode();
+    logger.info("mode = " + mode);
+    isDialog = isDialog() && mode == ProjectMode.DIALOG;
+    logger.info("isDialog = " + isDialog);
+
   }
 
   @NotNull
@@ -91,7 +100,7 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   @NotNull
   protected List<Pair> getPairs(Map<String, String> typeToSelection) {
     List<Pair> pairs = super.getPairs(typeToSelection);
-    if (controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG) {
+    if (isDialog) {
       DYNAMIC_FACETS.forEach(facet -> {
         boolean added = addDynamicFacetToPairs(typeToSelection, facet, pairs);
         if (!added) {
@@ -99,16 +108,25 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
         }
       });
     }
-  //  logger.info("getPairs pairs now " + pairs + " for " + typeToSelection);
+    logger.info("getPairs pairs now " + pairs + " for " + typeToSelection);
     return pairs;
+  }
+
+  private boolean isDialog() {
+    ProjectType projectType = controller.getProjectStartupInfo().getProjectType();
+    logger.info("isDialog project type " + controller.getProjectStartupInfo());
+    return projectType == ProjectType.DIALOG;
   }
 
   @Override
   protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                        String prefix,
                                                        boolean onlyUninspected) {
+    logger.info("getExerciseListRequest type->sel " +typeToSection);
     ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyUninspected);
-    exerciseListRequest.setOnlyUnrecordedByMe(true);
+    exerciseListRequest.setOnlyUnrecordedByMe(true).setMode(controller.getMode());
+    logger.info("getExerciseListRequest exerciseListRequest " +exerciseListRequest);
+    logger.info("getExerciseListRequest type->sel " +exerciseListRequest.getTypeToSelection());
     return exerciseListRequest;
   }
 
@@ -123,7 +141,8 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
     return new FilterRequest(incrReqID(), pairs, userListID)
         .setRecordRequest(true)
-        .setProjectType(controller.getProjectStartupInfo().getProjectType())
+        // .setProjectType(controller.getProjectStartupInfo().getProjectType())
+        .setMode(controller.getMode())
         .setExampleRequest(isContext);
   }
 
@@ -135,8 +154,10 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   @Override
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
     ExerciseListRequest request = super.getExerciseListRequest(prefix);
-    //   logger.info("getExerciseListRequest " + isContext);
-    request.setOnlyExamples(isContext);
+    ProjectMode mode = controller.getMode();
+    request.setOnlyExamples(isContext).setMode(mode);
+   // logger.info("getExerciseListRequest isContext = " + isContext);
+    logger.info("getExerciseListRequest req " + request);
     return request;
   }
 
@@ -151,14 +172,20 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
   @NotNull
   @Override
   protected Map<String, String> getNewTypeToSelection(SelectionState selectionState, final Collection<String> typeOrder) {
-    List<String> copy = new ArrayList<>(typeOrder);
-    copy.addAll(DYNAMIC_FACETS);
-    return getTypeToSelection(selectionState, copy);
+    if (isDialog) {
+      List<String> copy = new ArrayList<>(typeOrder);
+      copy.addAll(DYNAMIC_FACETS);
+      return getTypeToSelection(selectionState, copy);
+    } else {
+      return super.getNewTypeToSelection(selectionState, typeOrder);
+    }
   }
 
   @Override
   protected void addDynamicFacets(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer) {
-    DYNAMIC_FACETS.forEach(facet -> addExerciseChoices(typeToValues, allTypesContainer, facet));
+    if (isDialog) {
+      DYNAMIC_FACETS.forEach(facet -> addExerciseChoices(typeToValues, allTypesContainer, facet));
+    }
   }
 
   private void addExerciseChoices(Map<String, Set<MatchInfo>> typeToValues, UnorderedList allTypesContainer, String languageMetaData) {
@@ -174,13 +201,9 @@ class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> extends
    * @param allTypesContainer
    */
   private ListItem addContentFacet(UnorderedList allTypesContainer, String facet) {
-    ListItem widgets = addContentFacet(facet);
+    ListItem widgets = getTypeContainer(facet);
     allTypesContainer.add(widgets);
     return widgets;
-  }
-
-  private ListItem addContentFacet(String facet) {
-    return getTypeContainer(facet);
   }
 
   @NotNull

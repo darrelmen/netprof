@@ -530,8 +530,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 //     String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest for " + prefix));
 //   logger.info("logException stack " + exceptionAsString);
     boolean context = views.isContext();
-
-    if (context) logger.warning("\n\n\ngetExerciseListRequest view " + views);
+   // if (context) logger.warning("\n\n\ngetExerciseListRequest view " + views);
     return super.getExerciseListRequest(prefix)
         .setAddFirst(false)
         .setOnlyExamples(context);
@@ -1149,7 +1148,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       }
 
       final long then = System.currentTimeMillis();
-      service.getTypeToValues(getFilterRequest(userListID, getPairs(typeToSelection)), getTypeToValuesCallback(typeToSelection, then));
+      FilterRequest filterRequest = getFilterRequest(userListID, getPairs(typeToSelection));
+      logger.info("req " + filterRequest);
+      service.getTypeToValues(filterRequest, getTypeToValuesCallback(typeToSelection, then));
     }
   }
 
@@ -1205,7 +1206,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get" +
           "\n\ttype to selection " + typeToSelection +
           "\n\ttype to include   " + response.getTypesToInclude() +

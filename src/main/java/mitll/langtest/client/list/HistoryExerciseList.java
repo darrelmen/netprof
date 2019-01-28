@@ -518,7 +518,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
                                           boolean onlyUninspected) {
     ExerciseListRequest request = getExerciseListRequest(typeToSection, prefix, onlyUninspected);
 
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("loadExercisesUsingPrefix got" +
           "\n\ttype->section " + typeToSection +
           "\n\tprefix        " + prefix +
@@ -575,7 +575,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
                                 int exerciseID,
                                 ExerciseListRequest request) {
     waitCursorHelper.scheduleWaitTimer();
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID +
           "\n\tfor " + request);
 

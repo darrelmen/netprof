@@ -616,12 +616,20 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
       return iDialogs.isEmpty() ? null : iDialogs.get(0);
     } else {
       List<IDialog> collect = iDialogs.stream().filter(iDialog -> iDialog.getID() == dialogID).collect(Collectors.toList());
-      return collect.isEmpty() ? iDialogs.isEmpty() ? null : iDialogs.iterator().next() : collect.iterator().next();
+      IDialog iDialog = collect.isEmpty() ? iDialogs.isEmpty() ? null : iDialogs.iterator().next() : collect.iterator().next();
+      if (iDialog == null) {
+        logger.warn("\n\n\nno dialog for " + dialogID + " From " +iDialogs.size());
+      }
+      return iDialog;
     }
   }
 
   protected List<IDialog> getDialogs(int userIDFromSessionOrDB) {
-    return getDialogsForProject(getProjectIDFromUser(userIDFromSessionOrDB));
+    int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+    if (projectIDFromUser == -1) {
+      logger.warn("no project id?");
+    }
+    return getDialogsForProject(projectIDFromUser);
   }
 
   List<IDialog> getDialogsForProject(int projectIDFromUser) {
@@ -629,6 +637,9 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     {
       if (projectIDFromUser != -1) {
         dialogList = getProject(projectIDFromUser).getDialogs();
+      }
+      else {
+        logger.warn("no project id?");
       }
     }
     return dialogList;

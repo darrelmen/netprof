@@ -169,7 +169,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     // add dialog attributes
     Map<Integer, ExerciseAttribute> idToPair = databaseImpl.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
 
-    logger.info("getDialogs got " + idToPair.size() + " attributes for " + projid);
+    logger.info("getDialogs got " + idToPair.size() + " attributes for project #" + projid);
 
     Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated =
         databaseImpl.getUserExerciseDAO().getRelatedExercise().getDialogIDToRelated(projid);

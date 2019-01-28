@@ -414,7 +414,7 @@ public class PropertyHandler {
     return appTitle;
   }
 
-  private static native String getAppName() /*-{
+  public static native String getAppName() /*-{
       return $wnd.navigator.appName;
   }-*/;
 

@@ -41,6 +41,7 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * Created by go22670 on 4/10/17.
  */
 public class NewContentChooser implements INavigation, ValueChangeHandler<String> {
+  public static final String MODE = "Mode";
   private final Logger logger = Logger.getLogger("NewContentChooser");
 
   private static final String CURRENT_VIEW = "CurrentView";
@@ -86,7 +87,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
 
     this.controller = controller;
-   // this.listView = new ListView(controller);
+    // this.listView = new ListView(controller);
     this.banner = banner;
     //  divWidget.setId("NewContentChooser");
 
@@ -334,7 +335,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private void clearAndPush(boolean isFirstTime, String currentStoredView, VIEWS listen, boolean doPushItem, boolean keepList) {
     clear();
 
-    if (DEBUG) logger.info("clearAndPush isFirst " + isFirstTime + " current " + currentStoredView + " now " + listen + " push " + doPushItem);
+    if (DEBUG)
+      logger.info("clearAndPush isFirst " + isFirstTime + " current " + currentStoredView + " now " + listen + " push " + doPushItem);
 
     if (doPushItem) {
       if (isFirstTime && currentStoredView.isEmpty()) pushFirstUnit();
@@ -508,11 +510,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       quizHelper.showContent(divWidget, QUIZ);
     } else {
       if (list == -1) {
-       // logger.info("showQuizForReal no list but not from click");
+        // logger.info("showQuizForReal no list but not from click");
 
         quizHelper.showContent(divWidget, QUIZ);
       } else {
-      //  logger.info("showQuizForReal NOT from a click, maybe from jump or reload for " + list);
+        //  logger.info("showQuizForReal NOT from a click, maybe from jump or reload for " + list);
         quizHelper.showChosenQuiz(divWidget);
       }
     }
@@ -615,20 +617,42 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     // logger.info("storeViewForMode " + mode);
     //pushItem(""); // clear instance in url
     storeValue(mode == ProjectMode.DIALOG ? DIALOG : LEARN);
+    getStorage().storeValue(MODE, mode.name());
+
+    logger.info("storeViewForMode OK mode now = " + controller.getMode());
   }
+
+//  public ProjectMode getMode() {
+//    String mode = getStorage().getValue(MODE);
+//
+//    if (mode == null) {
+//      return ProjectMode.VOCABULARY;
+//    } else {
+//      try {
+//        return ProjectMode.valueOf(mode);
+//      } catch (IllegalArgumentException e) {
+//        logger.warning("got unknown mode " + mode);
+//        return ProjectMode.VOCABULARY;
+//      }
+//    }
+//  }
 
   @NotNull
   private String getStoredView() {
-    String value = controller.getStorage().getValue(CURRENT_VIEW);
+    String value = getStorage().getValue(CURRENT_VIEW);
     if (value == null || value.isEmpty()) return "";
     else return value.toUpperCase();
+  }
+
+  private KeyStorage getStorage() {
+    return controller.getStorage();
   }
 
   /**
    * @param view
    */
   private void storeValue(VIEWS view) {
-    controller.getStorage().storeValue(CURRENT_VIEW, view.name());
+    getStorage().storeValue(CURRENT_VIEW, view.name());
   }
 
   private void showProgress() {
@@ -685,7 +709,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
   @Override
   public void showListIn(int listid, VIEWS view) {
-  //  logger.info("showListIn - " + listid + " " + view);
+    //  logger.info("showListIn - " + listid + " " + view);
     setHistoryWithList(listid, view);
     banner.show(view, false);
   }
@@ -718,7 +742,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    * @param url
    */
   private void pushItem(String url) {
-   if (DEBUG) logger.info("pushItem - " + url);
+    if (DEBUG) logger.info("pushItem - " + url);
     //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
 //     logger.info("logException stack " + exceptionAsString);
     History.newItem(url);
