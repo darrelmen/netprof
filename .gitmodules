@@ -1,5 +1,5 @@
 [submodule "gradle-common"]
 	path = gradle-common
 	url = https://gh.ll.mit.edu/Domino/gradle-common.git
-
+        branch = topic-role-select-all
 
