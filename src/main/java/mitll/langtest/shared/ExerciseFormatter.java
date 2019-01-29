@@ -32,6 +32,8 @@
 
 package mitll.langtest.shared;
 
+import mitll.langtest.shared.project.Language;
+
 /**
  * Created with IntelliJ IDEA.
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -53,25 +55,25 @@ public class ExerciseFormatter {
   public static final String CONTEXT_TRANSLATION = "Context Translation: ";
 
   /**
-   * @see mitll.langtest.client.exercise.WaveformExercisePanel#getExerciseContent
    * @param arabic
    * @param language
    * @return
+   * @see mitll.langtest.client.exercise.WaveformExercisePanel#getExerciseContent
    */
-  public static String getArabic(String arabic, String language) {
-    return getArabic(arabic, language.equalsIgnoreCase("urdu"), language.equalsIgnoreCase("pashto"), false);
+  public static String getArabic(String arabic, Language language) {
+    return getArabic(arabic, language == Language.URDU, language == Language.PASHTO, false);
   }
 
   private static String getArabic(String arabic, boolean isUrdu, boolean isPashto, boolean includePrompt) {
     String prompt = includePrompt ? "<span class=\"Instruction-title\">" +
-      FOREIGN_LANGUAGE_PROMPT +
-      "</span>\n" : "";
+        FOREIGN_LANGUAGE_PROMPT +
+        "</span>\n" : "";
     return "<div class=\"Instruction\">\n" +
-      prompt +
-      "<span class=\"" +
-      (isUrdu ? "urdubigflfont" : isPashto ? "pashtofont" : "Instruction-data") +
-      "\"> " + arabic +
-      "</span>\n" +
-      "</div>\n";
+        prompt +
+        "<span class=\"" +
+        (isUrdu ? "urdubigflfont" : isPashto ? "pashtofont" : "Instruction-data") +
+        "\"> " + arabic +
+        "</span>\n" +
+        "</div>\n";
   }
 }

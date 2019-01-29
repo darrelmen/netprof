@@ -415,10 +415,14 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
     table.setColumnWidth(itemCol, itemColWidth + "px");
 
-    String headerForFL = controller.getLanguageInfo() == Language.ENGLISH ? "Meaning" : controller.getLanguage();
+    String headerForFL = isEnglish() ? "Meaning" : controller.getLanguageInfo().toDisplay();
     addColumn(itemCol, new TextHeader(headerForFL));
 
     tableSortHelper.rememberColumn(itemCol, WORD);
+  }
+
+  private boolean isEnglish() {
+    return controller.getLanguageInfo() == Language.ENGLISH;
   }
 
   private int getItemColWidth() {

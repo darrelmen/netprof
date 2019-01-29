@@ -39,7 +39,6 @@ import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
@@ -164,7 +163,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
      * @see RecorderNPFHelper#getFactory
      */
     RecordRefAudioPanel(ClientExercise e, ExerciseController controller1, ListInterface<T, ClientExercise> exerciseList1, String instance) {
-      super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance, false);
+      super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording);
     }
 
     @Override

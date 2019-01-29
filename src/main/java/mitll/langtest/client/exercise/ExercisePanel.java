@@ -41,6 +41,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -75,8 +76,6 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
   private final NavigationHelper navigationHelper;
   final ListInterface<L, T> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<>();
-  final String instance;
-  private final boolean doNormalRecording;
 
   private static final boolean DEBUG = false;
 
@@ -87,21 +86,15 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
    * @param e
    * @param controller
    * @param exerciseList
-   * @param instance
-   * @param enableNextOnlyWhenBothCompleted
    * @see ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.list.ListInterface#loadExercise
    */
-  ExercisePanel(final T e,
-                final ExerciseController controller,
-                ListInterface<L, T> exerciseList,
-                String instance,
-                boolean doNormalRecording, boolean enableNextOnlyWhenBothCompleted) {
+  ExercisePanel(final T e, final ExerciseController controller, ListInterface<L, T> exerciseList) {
     this.exercise = e;
     this.controller = controller;
     this.exerciseList = exerciseList;
-    this.instance = instance;
-    this.doNormalRecording = doNormalRecording;
+    //  this.instance = instance;
+    //   this.doNormalRecording = doNormalRecording;
 
 /*
     logger.info("for " + e.getID() +
@@ -206,13 +199,6 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
     return (content.length() > 200) ? getContentScroller(maybeRTLContent) : maybeRTLContent;
   }
 
-  /**
-   * @return
-   * @see #getAnswerWidget
-   */
-  boolean isNormalRecord() {
-    return doNormalRecording;
-  }
 
   protected abstract String getExerciseContent(T e);
 
@@ -264,7 +250,7 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
   }
 
   private boolean isPashto() {
-    return controller.getLanguage().equalsIgnoreCase("Pashto");
+    return controller.getLanguageInfo() == Language.PASHTO;
   }
 
   public void onResize() {

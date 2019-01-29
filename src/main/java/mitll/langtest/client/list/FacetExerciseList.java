@@ -147,7 +147,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   private static final String SHOW_LESS = "<i>View fewer</i>";
 
-  protected static final String ANY = "Any";
+  static final String ANY = "Any";
   private static final String MENU_ITEM = "menuItem";
 
   /**
@@ -530,7 +530,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 //     String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest for " + prefix));
 //   logger.info("logException stack " + exceptionAsString);
     boolean context = views.isContext();
-   // if (context) logger.warning("\n\n\ngetExerciseListRequest view " + views);
+    // if (context) logger.warning("\n\n\ngetExerciseListRequest view " + views);
     return super.getExerciseListRequest(prefix)
         .setAddFirst(false)
         .setOnlyExamples(context);
@@ -1143,13 +1143,14 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       doOpacityFeedback();
 
       if (DEBUG) {
-        List<Pair> pairs = getPairs(typeToSelection);
-        logger.info("getTypeToValues request " + pairs + " list " + userListID);
+        logger.info("getTypeToValues request " + getPairs(typeToSelection) + " list " + userListID);
       }
 
       final long then = System.currentTimeMillis();
       FilterRequest filterRequest = getFilterRequest(userListID, getPairs(typeToSelection));
-      logger.info("req " + filterRequest);
+      if (DEBUG) {
+        logger.info("req " + filterRequest);
+      }
       service.getTypeToValues(filterRequest, getTypeToValuesCallback(typeToSelection, then));
     }
   }
@@ -1206,8 +1207,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
-    if (DEBUG || true) {
-      logger.info("getTypeToValues took " + (System.currentTimeMillis() - then) + " to get" +
+    long diff = System.currentTimeMillis() - then;
+    if (DEBUG || diff > 30) {
+      logger.info("getTypeToValues took " + diff + " to get" +
           "\n\ttype to selection " + typeToSelection +
           "\n\ttype to include   " + response.getTypesToInclude() +
           "\n\t#type to values   " + response.getTypeToValues().size() +

@@ -57,6 +57,7 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -424,7 +425,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     foreignAnno.getElement().setId("foreignLanguageAnnotation");
 //    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
     foreignLang = makeBoxAndAnno(row, "", foreignAnno);
-    if (getLanguage().equalsIgnoreCase("urdu")) {
+    if (getLanguage() == Language.URDU) {
       foreignLang.getWidget().getElement().getStyle().setProperty("fontFamily", "'MyUrduWebFont'");
     }
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
@@ -436,8 +437,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     foreignLang.box.getElement().getStyle().setFontSize(18, Style.Unit.PX);
   }
 
-  private String getLanguage() {
-    return controller.getLanguage();
+  private Language getLanguage() {
+    return controller.getLanguageInfo();
   }
 
   protected void setMarginBottom(FormField foreignLang) {
@@ -785,7 +786,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   protected boolean isEnglish() {
-    return controller.getLanguage().equalsIgnoreCase("english");
+    return controller.getLanguageInfo() == Language.ENGLISH;
   }
 
   void formInvalid() {
@@ -847,7 +848,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
     return "The" +
         words + oovs + are +
-        "not in our " + getLanguage() + " dictionary. Please edit.";
+        "not in our " + getLanguage().toDisplay() + " dictionary. Please edit.";
   }
 
   private void checkContext(Panel toAddTo, boolean onClick) {

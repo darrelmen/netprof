@@ -28,6 +28,7 @@ import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.sound.SoundFeedback;
 import mitll.langtest.shared.analysis.WordScore;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.jetbrains.annotations.NotNull;
@@ -98,7 +99,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     CellTable.Resources o;
     if (isRTL) {   // so when we truncate long entries, the ... appears on the correct end
       // logger.info("simplePaging : chooseResources RTL - content");
-      if (controller.getLanguage().equalsIgnoreCase("urdu")) {
+      if (controller.getLanguageInfo() == Language.URDU) {
         o = GWT.create(UrduTableResources.class);
       } else {
         o = GWT.create(RTLTableResources.class);

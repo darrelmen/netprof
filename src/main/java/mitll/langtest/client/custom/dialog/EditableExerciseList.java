@@ -322,7 +322,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
           public void onSuccess(CommonExercise newExercise) {
             if (newExercise == null) {
               // logger.info("onSuccess not in dict!");
-              message.setText("This is not in our " + controller.getLanguage() + " dictionary. Please edit.");
+              message.setText("This is not in our " + controller.getLanguageInfo().toDisplay()+ " dictionary. Please edit.");
             } else {
              // logger.info("checkIsValidPhrase got " + newExercise.getID() + " dir " + newExercise.getDirectlyRelated());
               showNewItem(newExercise);

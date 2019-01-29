@@ -110,6 +110,10 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
   void getImage(int reqid, String path, String type, int toUse, int height, int exerciseID, AsyncCallback<ImageResponse> client);
 
+  /**
+   * @deprecated
+   * @return
+   */
   String getLanguage();
   Language getLanguageInfo();
 

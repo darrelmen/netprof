@@ -86,7 +86,6 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
     Widget itemHeader = getItemHeader(exercise);
     if (exercise.getUnitToValue().isEmpty()) {
       vp.add(itemHeader);
-
       return itemHeader;
     } else {
       Panel unitLessonForExercise = getUnitLessonForExercise(exercise);
@@ -106,7 +105,6 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
     widget.addStyleName("inlineFlex");
     addProminentLabel(widget,ITEM,"" + e.getID(),false);
     return widget;
-
 //        new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + e.getID());
   }
 
@@ -170,10 +168,13 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
 
 
   private void addProminentLabel(Panel flow, String npId, String oldID, boolean markProminent) {
-    //   Heading child = new Heading(HEADING_FOR_UNIT_LESSON, npId);
-    HTML child = new HTML(npId);
+       Heading child = new Heading(HEADING_FOR_UNIT_LESSON, npId);
+    //HTML child = new HTML(npId);
+    child.getElement().getStyle().setColor("gray");
+    child.getElement().getStyle().setFontWeight(Style.FontWeight.NORMAL);
+
     child.addStyleName("rightFiveMargin");
-    child.getElement().getStyle().setMarginTop(11, Style.Unit.PX);
+    //child.getElement().getStyle().setMarginTop(11, Style.Unit.PX);
 
     flow.add(child);
 

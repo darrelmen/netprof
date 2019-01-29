@@ -36,7 +36,8 @@ public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> 
 
   protected final boolean isContext;
   private boolean isDialog;
-  //private ProjectMode mode;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param controller
@@ -61,10 +62,9 @@ public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> 
         instanceName);
     this.isContext = isContext;
     ProjectMode mode = controller.getMode();
-    logger.info("mode = " + mode);
+   // logger.info("mode = " + mode);
     isDialog = isDialog() && mode == ProjectMode.DIALOG;
-    logger.info("isDialog = " + isDialog);
-
+  //  logger.info("isDialog = " + isDialog);
   }
 
   @NotNull
@@ -108,13 +108,13 @@ public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> 
         }
       });
     }
-    logger.info("getPairs pairs now " + pairs + " for " + typeToSelection);
+    //logger.info("getPairs pairs now " + pairs + " for " + typeToSelection);
     return pairs;
   }
 
   private boolean isDialog() {
     ProjectType projectType = controller.getProjectStartupInfo().getProjectType();
-    logger.info("isDialog project type " + controller.getProjectStartupInfo());
+   // logger.info("isDialog project type " + controller.getProjectStartupInfo());
     return projectType == ProjectType.DIALOG;
   }
 
@@ -122,11 +122,11 @@ public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> 
   protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                        String prefix,
                                                        boolean onlyUninspected) {
-    logger.info("getExerciseListRequest type->sel " +typeToSection);
+  //  logger.info("getExerciseListRequest type->sel " +typeToSection);
     ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyUninspected);
     exerciseListRequest.setOnlyUnrecordedByMe(true).setMode(controller.getMode());
-    logger.info("getExerciseListRequest exerciseListRequest " +exerciseListRequest);
-    logger.info("getExerciseListRequest type->sel " +exerciseListRequest.getTypeToSelection());
+  //  logger.info("getExerciseListRequest exerciseListRequest " +exerciseListRequest);
+   // logger.info("getExerciseListRequest type->sel " +exerciseListRequest.getTypeToSelection());
     return exerciseListRequest;
   }
 
@@ -141,7 +141,6 @@ public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> 
   protected FilterRequest getFilterRequest(int userListID, List<Pair> pairs) {
     return new FilterRequest(incrReqID(), pairs, userListID)
         .setRecordRequest(true)
-        // .setProjectType(controller.getProjectStartupInfo().getProjectType())
         .setMode(controller.getMode())
         .setExampleRequest(isContext);
   }
@@ -157,7 +156,7 @@ public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> 
     ProjectMode mode = controller.getMode();
     request.setOnlyExamples(isContext).setMode(mode);
    // logger.info("getExerciseListRequest isContext = " + isContext);
-    logger.info("getExerciseListRequest req " + request);
+    if (DEBUG) logger.info("getExerciseListRequest req " + request);
     return request;
   }
 

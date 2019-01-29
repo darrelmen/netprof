@@ -304,7 +304,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       this.exerciseID = exerciseID;
       this.request = request;
 
-      if (DEBUG || true) logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
+      if (DEBUG) logger.info("SetExercisesCallback req " + exerciseID + " search " + searchIfAny);
 
 /*      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("instance " +getInstance()));
       logger.info("logException stack " + exceptionAsString);*/
@@ -336,7 +336,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       if (isStaleResponse(result)) {
         if (DEBUG_STALE) {
           logger.info("SetExercisesCallback.onSuccess ignoring" +
-              "\n\tinstance " + getInstance()+
+              "\n\tinstance " + getInstance() +
               "\n\tresult   " + result.getReqID() + " b/c before" +
               "\n\tlatest   " + lastReqID);
         }
@@ -518,16 +518,18 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
    * @see #rememberAndLoadFirst
    */
   void rememberAndLoadFirst(List<T> exercises,
-                                   String selectionID,
-                                   String searchIfAny,
-                                   int exerciseID) {
-    if (DEBUG || true) logger.info("ExerciseList : rememberAndLoadFirst instance '" + //getInstance() +
-        "'" +
-        "\n\tremembering " + exercises.size() + " exercises," +
-        "\n\tselection   " + selectionID +
-        "\n\tsearchIfAny " + searchIfAny +
-        "\n\tfirst       " + exerciseID
-    );
+                            String selectionID,
+                            String searchIfAny,
+                            int exerciseID) {
+    if (DEBUG) {
+      logger.info("ExerciseList : rememberAndLoadFirst instance '" + //getInstance() +
+          "'" +
+          "\n\tremembering " + exercises.size() + " exercises," +
+          "\n\tselection   " + selectionID +
+          "\n\tsearchIfAny " + searchIfAny +
+          "\n\tfirst       " + exerciseID
+      );
+    }
 
     exercises = rememberExercises(exercises);
     for (ListChangeListener<T> listener : listeners) {  // can't do a lambda, since we change exercises...?
