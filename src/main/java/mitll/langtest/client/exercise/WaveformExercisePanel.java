@@ -66,6 +66,9 @@ import java.util.stream.Collectors;
 public class WaveformExercisePanel<L extends CommonShell, T extends ClientExercise> extends ExercisePanel<L, T> {
   private Logger logger = Logger.getLogger("WaveformExercisePanel");
 
+  /**
+   *
+   */
   private static final String NO_AUDIO_TO_RECORD = "No in-context sentence for this exercise.";
   public static final String CONTEXT = "context=";
 
@@ -76,8 +79,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
   private static final String PROMPT_BOTH_SPEEDS = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private boolean isBusy = false;
   private Collection<RecordAudioPanel> audioPanels;
-
-  private final boolean doNormalRecording;
 
   private static final String LANGUAGE_META_DATA = DialogMetadata.LANGUAGE.name();
   private static final String SPEAKER_META_DATA = DialogMetadata.SPEAKER.name();
@@ -92,9 +93,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
   public WaveformExercisePanel(T e,
                                ExerciseController controller, ListInterface<L, T> exerciseList,
                                boolean doNormalRecording) {
-    super(e, controller, exerciseList);
-    // this.instance=instance;
-    this.doNormalRecording = doNormalRecording;
+    super(e, controller, exerciseList, doNormalRecording);
   }
 
   @Override
@@ -136,7 +135,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     }
     boolean normalRecord = isNormalRecord();
     List<ExerciseAttribute> dialogAttributes = getDialogAttributes(exercise);
-    // logger.info("attr " +dialogAttributes);
+  //  logger.info("normal " + normalRecord + " attr " + dialogAttributes);
     if (!dialogAttributes.isEmpty()) {
       normalRecord = false;
     }

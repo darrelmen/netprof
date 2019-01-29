@@ -62,6 +62,7 @@ import java.util.logging.Logger;
  */
 abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends VerticalPanel implements
     BusyPanel, PostAnswerProvider, ProvidesResize, RequiresResize {
+  protected final boolean doNormalRecording;
   private final Logger logger = Logger.getLogger("ExercisePanel");
 
   private static final int CONTENT_SCROLL_HEIGHT = 220;
@@ -89,12 +90,11 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
    * @see ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.list.ListInterface#loadExercise
    */
-  ExercisePanel(final T e, final ExerciseController controller, ListInterface<L, T> exerciseList) {
+  ExercisePanel(final T e, final ExerciseController controller, ListInterface<L, T> exerciseList, boolean doNormalRecording) {
     this.exercise = e;
     this.controller = controller;
     this.exerciseList = exerciseList;
-    //  this.instance = instance;
-    //   this.doNormalRecording = doNormalRecording;
+    this.doNormalRecording = doNormalRecording;
 
 /*
     logger.info("for " + e.getID() +
@@ -180,9 +180,7 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
     return false;
   }
 
-  void addInstructions() {
-    add(new Heading(4, PROMPT));
-  }
+  abstract void addInstructions();
 
   /**
    * @param e
