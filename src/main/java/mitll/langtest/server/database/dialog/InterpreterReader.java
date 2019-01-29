@@ -257,7 +257,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
                     if (!coreWords.isEmpty()) {
                       Set<CoreEntry> core = lang == Language.ENGLISH ? coreEng : coreFL;
-                      core.add(new CoreEntry(coreWords, corePinyin, speakerID, turnID));
+                      core.add(new CoreEntry(coreWords, corePinyin, speakerID, turnID, lang));
                     }
                     prevtriple = triple;
                     logger.info("readFromSheet # exercises (" + triple + ") for " + id + " is " + exercises.size());
@@ -288,20 +288,16 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
     if (speakerID.equalsIgnoreCase("A")) {
       if (lang == Language.ENGLISH) {
         speakerID = "English Speaker";
-      }
-      else {
+      } else {
         speakerID = project.getLanguageEnum().toDisplay() + " Speaker";
       }
-    }
-    else if (speakerID.equalsIgnoreCase("B")) {
+    } else if (speakerID.equalsIgnoreCase("B")) {
       if (lang == Language.ENGLISH) {
         speakerID = "English Speaker";
-      }
-      else {
+      } else {
         speakerID = project.getLanguageEnum().toDisplay() + " Speaker";
       }
-    }
-    else if (speakerID.equalsIgnoreCase("I")) {
+    } else if (speakerID.equalsIgnoreCase("I")) {
       speakerID = "Interpreter";
     }
     return speakerID;
@@ -388,7 +384,6 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
   }
 
   private void addCoreExercises(Project project, List<String> typeOrder, Set<CoreEntry> coreFL, Set<ClientExercise> coreExercises) {
-//    List<CoreEntry> toAdd = addCoreWords(project, coreExercises, coreFL);
     Language languageEnum = project.getLanguageEnum();
     coreFL.forEach(phrase -> coreExercises.add(getExercise(typeOrder, phrase.getText(), phrase.getTransliteration(), phrase.getSpeakerID(), languageEnum, phrase.getTurnID())));
   }
@@ -398,12 +393,14 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
     private final String transliteration;
     private final String speakerID;
     private final String turnID;
+    private final Language language;
 
-    CoreEntry(String text, String transliteration, String speakerID, String turnID) {
+    CoreEntry(String text, String transliteration, String speakerID, String turnID, Language language) {
       this.text = text;
       this.transliteration = transliteration;
       this.speakerID = speakerID;
       this.turnID = turnID;
+      this.language = language;
     }
 
     String getText() {
@@ -578,16 +575,20 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
     exercise.setUnitToValue(getDefaultUnitAndChapter(typeOrder));
 
-    if (!speakerID.isEmpty()) {
-      speakers.add(speakerID);
-      exercise.addAttribute(new ExerciseAttribute(DialogMetadata.SPEAKER.getCap(), speakerID, false));
-    }
-    exercise.addAttribute(new ExerciseAttribute(DialogMetadata.LANGUAGE.getCap(), lang.name(), false));
+    addAttributes(speakerID, lang, speakers, exercise);
 
     mutable.setForeignLanguage(text);
     mutable.setTransliteration(transliteration);
 
     return exercise;
+  }
+
+  private void addAttributes(String speakerID, Language lang, Set<String> speakers, Exercise exercise) {
+    if (!speakerID.isEmpty()) {
+      speakers.add(speakerID);
+      exercise.addAttribute(new ExerciseAttribute(DialogMetadata.SPEAKER.getCap(), speakerID, false));
+    }
+    exercise.addAttribute(new ExerciseAttribute(DialogMetadata.LANGUAGE.getCap(), lang.name(), false));
   }
 
   @NotNull

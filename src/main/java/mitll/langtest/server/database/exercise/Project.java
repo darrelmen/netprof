@@ -78,7 +78,7 @@ import static mitll.langtest.shared.project.ProjectProperty.*;
  * <p>
  * TODO : give this an interface
  */
-public class Project implements IPronunciationLookup {
+public class Project implements IPronunciationLookup, IProject {
   private static final Logger logger = LogManager.getLogger(Project.class);
 
   private static final String HYDRA_2 = "hydra2";
@@ -177,6 +177,7 @@ public class Project implements IPronunciationLookup {
     return project == null ? "No project yet" : project.language();
   }
 
+  @Override
   public Language getLanguageEnum() {
     return project == null ? Language.UNKNOWN : getLanguageFor();
   }
@@ -507,13 +508,14 @@ public class Project implements IPronunciationLookup {
     propCache.putAll(db.getProjectDAO().getProps(getID()));
   }
 
-  int spew = 0;
+  private  int spew = 0;
 
   /**
    * @param id
    * @return
    * @see
    */
+  @Override
   public CommonExercise getExerciseByID(int id) {
     if (id == 2) {
       logger.warn("getExerciseByID project # " + getID() + " : skip request for unknown exercise (2)");

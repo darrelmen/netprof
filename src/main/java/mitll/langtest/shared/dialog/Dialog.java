@@ -362,6 +362,14 @@ public class Dialog implements IDialog, MutableShell {
     return coreVocabulary;
   }
 
+  @Override
+  public List<ClientExercise> getBothExercisesAndCore() {
+    List<ClientExercise> both = new ArrayList<>(coreVocabulary.size() + exercises.size());
+    both.addAll(exercises);
+    both.addAll(coreVocabulary);
+    return both;
+  }
+
   public String toString() {
     return "Dialog #" + id +
         "\n\tunit        " + unit +

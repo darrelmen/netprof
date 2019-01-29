@@ -44,7 +44,7 @@ import java.util.*;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/30/16.
  */
-public class FilterRequest implements IsSerializable {
+public class FilterRequest implements IsSerializable, IRequest {
   private int reqID = 1;
   private List<Pair> typeToSelection = new ArrayList<>();
   private String prefix = "";
@@ -101,6 +101,7 @@ public class FilterRequest implements IsSerializable {
         typeToSelection.equals(other.getTypeToSelection());
   }
 
+  @Override
   public int getReqID() {
     return reqID;
   }
@@ -216,6 +217,7 @@ public class FilterRequest implements IsSerializable {
 //    return this;
 //  }
 
+  @Override
   public ProjectMode getMode() {
     return mode;
   }
@@ -236,8 +238,9 @@ public class FilterRequest implements IsSerializable {
             (recordRequest ? "recordRequest " : "") +
             (onlyUninspected ? "onlyUninspected " : "") +
             (onlyWithAnno ? "onlyWithAnno " : "") +
-            //(projectType != ProjectType.DEFAULT ? projectType : "") +
-            (mode != ProjectMode.VOCABULARY ? mode : "") +
-            (getTypeToSelection().isEmpty() ? "" : "\n\tselection " + getTypeToSelection());
+            (mode != ProjectMode.VOCABULARY ?
+                  "\n\tmode      " + mode : "") +
+            (getTypeToSelection().isEmpty() ? "" :
+                  "\n\tselection " + getTypeToSelection());
   }
 }

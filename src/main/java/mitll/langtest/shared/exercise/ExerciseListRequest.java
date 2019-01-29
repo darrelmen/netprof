@@ -55,7 +55,7 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/30/16.
  */
-public class ExerciseListRequest implements IsSerializable {
+public class ExerciseListRequest implements IsSerializable,IRequest {
   private int reqID = 1;
   private Map<String, Collection<String>> typeToSelection = new HashMap<>();
   private String prefix = "";
@@ -140,6 +140,7 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
+  @Override
   public String getPrefix() {
     return prefix;
   }
@@ -241,6 +242,7 @@ public class ExerciseListRequest implements IsSerializable {
    * @return
    * @see ExerciseServiceImpl#getFirstFew
    */
+  @Override
   public int getLimit() {
     return limit;
   }
@@ -360,6 +362,7 @@ public class ExerciseListRequest implements IsSerializable {
 //    return this;
 //  }
 
+  @Override
   public ProjectMode getMode() {
     return mode;
   }

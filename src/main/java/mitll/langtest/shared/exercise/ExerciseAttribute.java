@@ -101,8 +101,8 @@ public class ExerciseAttribute extends Pair implements Comparable<ExerciseAttrib
     return isFacet;
   }
 
-  @Override
+/*  @Override
   public String toString() {
     return super.toString() + (isFacet? "": ("(not facet)"));
-  }
+  }*/
 }

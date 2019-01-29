@@ -89,7 +89,37 @@ public class DialogTest extends BaseTest {
     report(andPopulate, project);
   }
 
+
   @Test
+  public void testInterpreterFrenchToRecord() {
+    DatabaseImpl andPopulate = getDatabase();
+    andPopulate.getProject(12);
+    Project project = andPopulate.getProjectManagement().getProductionByLanguage(Language.FRENCH);
+    int projectid = project.getID();
+
+    FilterRequest request = new FilterRequest()
+        .setRecordRequest(true)
+        .setMode(DIALOG);
+
+    // project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
+
+    request.addPair(new Pair("Book", ANY1));
+    request.addPair(new Pair("Module", ANY1));
+    request.addPair(new Pair("LANGUAGE", ANY1));
+    request.addPair(new Pair("SPEAKER", ANY1));
+    //request.addPair(new Pair("SPEAKER","A"));
+
+    logger.info("types " + request + " for " + project.getTypeOrder());
+
+    FilterResponse typeToValues = getTypeToValues(andPopulate, projectid, request);
+
+    logger.info("typeToValues for " +
+        "\n\treq          " + request +
+        "\n\ttype->values " + typeToValues);
+
+  }
+
+    @Test
   public void testInterpreterFrench() {
     DatabaseImpl andPopulate = getDatabase();
     andPopulate.getProject(12);

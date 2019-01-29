@@ -29,7 +29,7 @@ public interface ExerciseServices {
 
   Language getLanguageEnum(CommonExercise ex);
 
-  FilterResponseHelper getFilterResponseHelper();
+  IResponseFilter getFilterResponseHelper();
 
   /**
    * JUST FOR TESTING

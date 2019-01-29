@@ -33,6 +33,7 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
@@ -101,7 +102,12 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
    * @see GoodwaveExercisePanel#getQuestionContent
    */
   private Widget getItemHeader(HasID e) {
-    return new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + e.getID());
+    DivWidget widget = new DivWidget();
+    widget.addStyleName("inlineFlex");
+    addProminentLabel(widget,ITEM,"" + e.getID(),false);
+    return widget;
+
+//        new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + e.getID());
   }
 
   protected SafeHtml getSafeHtml(String columnText) {
@@ -127,7 +133,9 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
    * @see #addUnitChapterItem
    */
   private Panel getUnitLessonForExercise(T exercise) {
-    Panel flow = new HorizontalPanel();
+   // Panel flow = new HorizontalPanel();
+    Panel flow = new DivWidget();
+    flow.addStyleName("inlineFlex");
     //flow.getElement().setId("getUnitLessonForExercise_unitLesson");
     flow.addStyleName("leftFiveMargin");
     // logger.info("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
@@ -135,9 +143,12 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
     for (String type : typeOrder) {
       String subtext = exercise.getUnitToValue().get(type);
       if (subtext != null && !subtext.isEmpty()) {
-        Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, subtext);
-        child.addStyleName("rightFiveMargin");
-        flow.add(child);
+//        Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, subtext);
+//        child.addStyleName("rightFiveMargin");
+
+        //  flow.add(child);
+
+        addProminentLabel(flow, type, subtext, false);
       }
     }
 
@@ -147,30 +158,34 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
 
     boolean showDomino = dominoID > 0;
     if (showDomino) {
-      addProminentLabel(flow, DOMINO_ID, "" + dominoID);
+      addProminentLabel(flow, DOMINO_ID, "" + dominoID, true);
     }
 
     if (!showDomino && !oldID.isEmpty()) {
-      addProminentLabel(flow, NP_ID, oldID);
+      addProminentLabel(flow, NP_ID, oldID, true);
     }
 
     return flow;
   }
 
 
-  private void addProminentLabel(Panel flow, String npId, String oldID) {
-    Heading child = new Heading(HEADING_FOR_UNIT_LESSON, npId);
+  private void addProminentLabel(Panel flow, String npId, String oldID, boolean markProminent) {
+    //   Heading child = new Heading(HEADING_FOR_UNIT_LESSON, npId);
+    HTML child = new HTML(npId);
     child.addStyleName("rightFiveMargin");
+    child.getElement().getStyle().setMarginTop(11, Style.Unit.PX);
 
     flow.add(child);
 
     Heading npid = new Heading(HEADING_FOR_UNIT_LESSON, oldID);
     npid.addStyleName("rightFiveMargin");
-    npid.getElement().getStyle().setColor("blue");
+    if (markProminent) {
+      npid.getElement().getStyle().setColor("blue");
+    }
     flow.add(npid);
   }
 
-  public InlineLabel showPopup(T exercise) {
+  InlineLabel showPopup(T exercise) {
     InlineLabel itemHeader = getLabel(exercise);
     showPopup(itemHeader, getUnitLessonForExercise2(exercise));
     return itemHeader;

@@ -248,7 +248,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         userCreatedExercises.forEach(c -> c.getDirectlyRelated().forEach(d -> idToUserExercise.put(d.getID(), d.asCommon())));
         //  logger.info("added " + userCreatedExercises.size() + " vs " + idToUserExercise.size());
       }
-      return allNonContextExercises;
+      return Collections.unmodifiableList(allNonContextExercises);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }

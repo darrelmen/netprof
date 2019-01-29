@@ -36,6 +36,7 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
+import mitll.langtest.server.database.exercise.IProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogStatus;
@@ -177,7 +178,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     Map<Integer, List<SlickRelatedExercise>> dialogIDToCoreRelated =
         databaseImpl.getUserExerciseDAO().getRelatedCoreExercise().getDialogIDToRelated(projid);
 
-    Project project = databaseImpl.getProject(projid);
+    IProject project = databaseImpl.getIProject(projid);
 
     allJoinByProject.forEach((dialogID, slickDialogAttributeJoins) -> {
       Dialog dialog = idToDialog.get(dialogID);
@@ -197,6 +198,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
       addExercises(projid, dialogIDToRelated, dialogID, dialog);
 
       addCoreVocab(dialogIDToCoreRelated.get(dialogID), project, dialog);
+
       // add images
       addImage(projid, dialog);
     });
@@ -208,7 +210,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return dao.byProjID(projid);
   }
 
-  private void addCoreVocab(List<SlickRelatedExercise> relatedExercises, Project project, Dialog dialog) {
+  private void addCoreVocab(List<SlickRelatedExercise> relatedExercises, IProject project, Dialog dialog) {
     if (relatedExercises != null) {
       Set<CommonExercise> uniq = new HashSet<>();
 

@@ -66,7 +66,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   private AudioAttribute studentAudioAttribute;
   private boolean gotStreamStop;
   private TreeMap<TranscriptSegment, IHighlightSegment> transcriptToHighlight = null;
-  boolean doPushToTalk = false;
+  private boolean doPushToTalk = false;
 
   /**
    * @param commonExercise

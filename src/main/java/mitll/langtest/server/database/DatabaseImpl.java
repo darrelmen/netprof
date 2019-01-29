@@ -1077,6 +1077,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
+  public IProject getIProject(int projID) { return getProject(projID);}
+
   /**
    * @param projectid if it's -1 only do something if it's on import
    * @return
@@ -1703,12 +1705,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public List<CommonExercise> filterExercises(ExerciseListRequest request,
                                               List<CommonExercise> exercises,
                                               int projid) {
-    return getFilterResponseHelper().filterExercises(request, exercises, projid);
+    return getFilterResponseHelper().filter(request, exercises, projid);
   }
 
-  public FilterResponseHelper getFilterResponseHelper() {
+  public IResponseFilter getFilterResponseHelper() {
     return new FilterResponseHelper(this);
   }
+
 
   /**
    * For downloading a user list.

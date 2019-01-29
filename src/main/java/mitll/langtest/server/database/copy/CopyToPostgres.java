@@ -131,6 +131,9 @@ public class CopyToPostgres<T extends CommonShell> {
      * @see #copyDialog(int, String)
      */
     DIALOG("g"),
+    /**
+     * @see #cleanDialog
+     */
     CLEANDIALOG("n"),
     LIST("p"),
     REMAP("e"),
@@ -1770,12 +1773,12 @@ public class CopyToPostgres<T extends CommonShell> {
     else {
       Project project = database.getProject(to);
       if (project == null) {
-        logger.error("no project with id " + to);
+        logger.error("cleanDialog no project with id " + to);
       } else if (project.getStatus() == ProjectStatus.DELETED) {
         logger.error("\n\n\ncleanDialog project " + project + " is " + project.getStatus());
       } else {
         boolean b = new DialogPopulate(database, getPathHelper(database)).cleanDialog(project);
-        if (!b) logger.info("project " + project + " already has dialog data.");
+        if (!b) logger.info("\n\tcleanDialog project " + project + " already has dialog data.");
       }
     }
     if (database != null) database.close();

@@ -324,18 +324,18 @@ public class DialogPopulate {
 
     List<SlickRelatedExercise> relatedExercises = new ArrayList<>();
 
-    Map<Boolean, List<ClientExercise>> newAndOldExercises =
-        coreVocabulary.stream().collect(Collectors.partitioningBy(clientExercise -> clientExercise.getID() > -1));
+//    Map<Boolean, List<ClientExercise>> newAndOldExercises =
+//        coreVocabulary.stream().collect(Collectors.partitioningBy(clientExercise -> clientExercise.getID() > -1));
 
-    List<ClientExercise> newExercises = newAndOldExercises.get(false);
-    List<ClientExercise> oldExercises = newAndOldExercises.get(true);
+    List<ClientExercise> newExercises = coreVocabulary;//newAndOldExercises.get(false);
+//    List<ClientExercise> oldExercises = newAndOldExercises.get(true);
 
     Map<CommonExercise, Integer> importExToID = addExercises(projid, userID, typeOrder, toCommon(newExercises));
 
     List<Collection<CommonExercise>> both = new ArrayList<>();
     Set<CommonExercise> newInDatabase = importExToID.keySet();
     both.add(newInDatabase);
-    both.add(toCommon(oldExercises));
+    //  both.add(toCommon(oldExercises));
 
     both.forEach(commonExercises ->
         commonExercises.forEach(clientExercise ->
@@ -563,28 +563,27 @@ public class DialogPopulate {
    * @return
    */
   public boolean cleanDialog(Project project) {
+    int id = project.getID();
     {
       Collection<Integer> toDelete = new HashSet<>();
       Collection<Integer> toRemove = new HashSet<>();
-      db.getDialogDAO().getDialogs(project.getID())
+      db.getDialogDAO().getDialogs(id)
           .forEach(iDialog -> {
 
             toRemove.add(iDialog.getID());
 
-            iDialog.getExercises()
-                .forEach(clientExercise -> {
-                  toDelete.add(clientExercise.getID());
-                });
+            iDialog.getExercises().forEach(clientExercise -> toDelete.add(clientExercise.getID()));
+            iDialog.getCoreVocabulary().forEach(clientExercise -> toDelete.add(clientExercise.getID()));
           });
 
-      logger.info("deleting " + toDelete.size() + " exercises");
+      logger.info("cleanDialog deleting " + toDelete.size() + " exercises");
       db.getUserExerciseDAO().deleteByExID(toDelete);
 
-      logger.info("removing " + toRemove.size() + " context exercise relations for these dialogs");
+      logger.info("cleanDialog removing " + toRemove.size() + " context exercise relations for these dialogs");
       toRemove.forEach(dir -> db.getUserExerciseDAO().getRelatedExercise().deleteRelatedForDialog(dir));
     }
 
-    db.getDialogDAO().removeForProject(project.getID());
+    db.getDialogDAO().removeForProject(id);
     return true;
   }
 }

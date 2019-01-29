@@ -45,6 +45,7 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
@@ -76,6 +77,8 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
   private static final String RECORD_PROMPT2 = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private boolean isBusy = false;
   private Collection<RecordAudioPanel> audioPanels;
+  private static final String LANGUAGE_META_DATA = DialogMetadata.LANGUAGE.name();
+  private static final String SPEAKER_META_DATA = DialogMetadata.SPEAKER.name();
 
   /**
    * @param e
@@ -135,6 +138,9 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
       flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     }
     boolean normalRecord = isNormalRecord();
+    if (!getDialogAttributes(exercise).isEmpty()) {
+      normalRecord = true;
+    }
     //  logger.info("addInstructions normal  "+normalRecord);
     add(new Heading(4, normalRecord ? RECORD_PROMPT2 : RECORD_PROMPT));//isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
   }
@@ -154,6 +160,19 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     }
     return typeOrder;
   }
+
+
+  @NotNull
+  private List<ExerciseAttribute> getDialogAttributes(ClientExercise ex) {
+    return ex.getAttributes()
+        .stream()
+        .filter(exerciseAttribute -> {
+          String property = exerciseAttribute.getProperty();
+          return (
+              property.equalsIgnoreCase(SPEAKER_META_DATA) || property.equalsIgnoreCase(LANGUAGE_META_DATA));
+        }).collect(Collectors.toList());
+  }
+
 
   /**
    * TODO : support recording audio for multiple context sentences...?
@@ -265,9 +284,8 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     if (fast.isAudioPathSet()) {
 //      logger.info("found audio path for " +exercise.getRefAudio());
       recordCompleted(fast);
-    }
-    else {
-      logger.info("no audio path for " +exercise.getID() + " "+exercise.getEnglish() + " " + exercise.getForeignLanguage());
+    } else {
+      logger.info("no audio path for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
     }
 
     return fast;

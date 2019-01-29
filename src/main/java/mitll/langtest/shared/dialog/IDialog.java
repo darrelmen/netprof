@@ -51,6 +51,7 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored {
 
   List<ClientExercise> getCoreVocabulary();
 
+  List<ClientExercise> getBothExercisesAndCore();
 
   /**
    * The names of the speakers in a dialog - could be more than 2!
