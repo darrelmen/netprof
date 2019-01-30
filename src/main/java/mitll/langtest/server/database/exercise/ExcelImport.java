@@ -928,7 +928,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   @Override
-  public List<CommonExercise> getExactMatch(String fl, int userIDFromSession) {
+  public List<CommonExercise> getUserDefinedByProjectExactMatch(String fl, int userIDFromSession) {
     return null;
   }
 }

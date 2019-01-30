@@ -465,7 +465,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       } else {
         Project project = matchingProjects.get(0);
         audioFileHelper = project.getAudioFileHelper();
-       // logger.info("using english project audio file helper " +project.getID() + " " +project.getName());
+        // logger.info("using english project audio file helper " +project.getID() + " " +project.getName());
       }
     }
     return audioFileHelper;
@@ -779,8 +779,9 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
   @Override
-  public Collection<String> isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException {
-    return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, transliteration);
+  public Collection<String> isValidForeignPhrase(int projectID, String foreign, String transliteration) {
+    AudioFileHelper audioFileHelper = getAudioFileHelper(projectID);
+    return audioFileHelper == null ? Collections.emptyList() : audioFileHelper.checkLTSOnForeignPhrase(foreign, transliteration);
   }
 
   /**

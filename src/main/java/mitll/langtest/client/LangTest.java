@@ -589,7 +589,7 @@ public class LangTest implements
     //  ImageResponse ifPresent = imageCache.getIfPresent(key);
     ImageResponse ifPresent = imageCache.get(key);
     if (ifPresent != null) {
-    //  logger.info("getImage for key " + key + " found  " + ifPresent);
+      //  logger.info("getImage for key " + key + " found  " + ifPresent);
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {
@@ -608,9 +608,9 @@ public class LangTest implements
 
             public void onSuccess(ImageResponse result) {
               imageCache.put(key, result);
-            //   logger.info("getImage storing key " + key + " now  " + imageCache.size() + " cached.");
+              //   logger.info("getImage storing key " + key + " now  " + imageCache.size() + " cached.");
               if (client != null) {
-              //  logger.info("getImage client "+ client.getClass());
+                //  logger.info("getImage client "+ client.getClass());
 
                 Scheduler.get().scheduleDeferred(() -> {
                   client.onSuccess(result);
@@ -813,6 +813,10 @@ public class LangTest implements
   public ProjectStartupInfo getProjectStartupInfo() {
     //logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
     return projectStartupInfo;
+  }
+
+  public int getProjectID() {
+    return projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
   }
 
   /**
@@ -1185,10 +1189,10 @@ public class LangTest implements
    * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    */
   public void stopRecording(boolean useDelay, boolean abort) {
-   logger.info("stopRecording : " +
-       "\n\ttime recording in UI " + (System.currentTimeMillis() - then) + " millis, " +
-       "\n\tabort                " + abort +
-       "\n\tuse delay            " + useDelay);
+    logger.info("stopRecording : " +
+        "\n\ttime recording in UI " + (System.currentTimeMillis() - then) + " millis, " +
+        "\n\tabort                " + abort +
+        "\n\tuse delay            " + useDelay);
 
     if (useDelay) {
       BrowserRecording.stopRecording(abort);

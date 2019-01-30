@@ -122,6 +122,15 @@ public class ScoreServlet extends DatabaseServlet {
   public static final String TRUE = "true";
   public static final String FALSE = "false";
 
+  private static final Set<String> notInteresting = new HashSet<>(Arrays.asList(
+      "Accept-Encoding",
+      "Accept-Language",
+      "accept",
+      "connection",
+      "password",
+      "pass"));
+
+
   private boolean removeExercisesWithMissingAudioDefault = true;
 
   private RestUserManagement userManagement;
@@ -370,7 +379,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private JsonObject getCachedNestedChapters(int projid, boolean shouldRemoveExercisesWithNoAudio) {
-    logger.info("getCachedNestedChapters returning cached chapters for " + projid + " remove audio " +shouldRemoveExercisesWithNoAudio);
+    logger.info("getCachedNestedChapters returning cached chapters for " + projid + " remove audio " + shouldRemoveExercisesWithNoAudio);
 
     return getNested(projid, System.currentTimeMillis(), REFRESH_CONTENT_INTERVAL_THREE, projectToNestedChaptersEverything, projectToWhenCachedEverything, shouldRemoveExercisesWithNoAudio);
   }
@@ -387,9 +396,8 @@ public class ScoreServlet extends DatabaseServlet {
       nestedChapters = getJsonNestedChapters(projid, shouldRemoveExercisesWithNoAudio, false);
       JsonArray asJsonArray = nestedChapters.getAsJsonArray(CONTENT);
       if (asJsonArray == null || asJsonArray.size() == 0) {
-        logger.error("no content for " +projid);
-      }
-      else {
+        logger.error("no content for " + projid);
+      } else {
         projectToNestedChapters.put(projid, nestedChapters);
         projectToWhenCached.put(projid, now);
       }
@@ -484,20 +492,21 @@ public class ScoreServlet extends DatabaseServlet {
     reply(response, respString);
   }
 
-  private final Set<String> notInteresting = new HashSet<>(Arrays.asList(
-      "Accept-Encoding",
-      "Accept-Language",
-      "accept",
-      "connection",
-      "password",
-      "pass"));
 
   private void reportOnHeaders(HttpServletRequest request) {
+    toSet(request)
+        .stream()
+        .filter(name -> !notInteresting.contains(name))
+        .collect(Collectors.toList())
+        .forEach(header -> logger.info("\trequest header " + header + " = " + request.getHeader(header)));
+  }
+
+  @NotNull
+  private Set<String> toSet(HttpServletRequest request) {
     Enumeration<String> headerNames = request.getHeaderNames();
     Set<String> headers = new TreeSet<>();
     while (headerNames.hasMoreElements()) headers.add(headerNames.nextElement());
-    List<String> collect = headers.stream().filter(name -> !notInteresting.contains(name)).collect(Collectors.toList());
-    collect.forEach(header -> logger.info("\trequest header " + header + " = " + request.getHeader(header)));
+    return headers;
   }
 
   private String getQuery(HttpServletRequest request) throws UnsupportedEncodingException {
@@ -995,7 +1004,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (projectid == -1) {
       logger.error("getJsonNestedChapters project id is not defined : " + projectid);
     } else {
-      logger.debug("getJsonNestedChapters get content for project id " + projectid  );
+      logger.debug("getJsonNestedChapters get content for project id " + projectid);
     }
 
     long then = System.currentTimeMillis();

@@ -46,7 +46,6 @@ import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.database.userlist.SlickUserListDAO;
-import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.custom.*;
 import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.DBConnection;
@@ -378,7 +377,7 @@ public class UserListManager implements IUserListManager {
   public Collection<IUserList> getAllPublicOrMine(int projid, int userID, boolean isQuiz, boolean onlyWithAudio) {
     Collection<SlickUserExerciseList> slickAllPublicOrMine = userListDAO.getSlickAllPublicOrMine(projid, userID, isQuiz);
     if (onlyWithAudio) {
-      return getSimpleListsOnlyWithAudio(slickAllPublicOrMine);
+      return getSimpleListsOnlyWithAudio(slickAllPublicOrMine, !isQuiz);
     } else {
       return getSimpleLists(slickAllPublicOrMine);
     }
@@ -388,10 +387,11 @@ public class UserListManager implements IUserListManager {
    * TODO consider checking for not scoreable?
    *
    * @param lists
+   * @param filterOutNoAudio
    * @return
    */
   @NotNull
-  private Collection<IUserList> getSimpleListsOnlyWithAudio(Collection<SlickUserExerciseList> lists) {
+  private Collection<IUserList> getSimpleListsOnlyWithAudio(Collection<SlickUserExerciseList> lists, boolean filterOutNoAudio) {
     //  Map<Integer, Collection<Integer>> exidsForList = userListExerciseJoinDAO.getExidsForList(getListIDs(lists));
     //  logger.info("asking for number of exercises for " + listIDs + "\n\tgot " + numForList);
 
@@ -408,31 +408,30 @@ public class UserListManager implements IUserListManager {
     long then = System.currentTimeMillis();
     lists.forEach(l -> {
       int listid = l.id();
-      int projid = l.projid();
       Collection<Integer> exidsOnList = exidsForList.get(listid);
 
       int numItems = 0;
       if (exidsOnList == null) {
-        logger.warn("huh? no exercise ids for " + listid + " : " + l.name());
+        logger.warn("getSimpleListsOnlyWithAudio huh? no exercise ids for " + listid + " : " + l.name());
       } else if (exidsOnList.isEmpty()) {
-        logger.info("empty exercise ids for " + listid + " : " + l.name());
+        logger.info("getSimpleListsOnlyWithAudio empty exercise ids for " + listid + " : " + l.name());
 
       } else {
-        Set<Integer> exercisesThatHaveAudio = databaseServices.getAudioDAO().getExercisesThatHaveAudio(projid, exidsOnList);
+        Collection<Integer> exercisesThatHaveAudio =
+            filterOutNoAudio ? databaseServices.getAudioDAO().getExercisesThatHaveAudio(l.projid(), exidsOnList) : exidsOnList;
 //        logger.info("getSimpleListsOnlyWithAudio found " + commonExercisesOnList.size() + " exercises for list #" + listid);
-
-//        JsonExport jsonExport = databaseServices.getJSONExport(projid);
-//        List<CommonExercise> filteredForIOS = jsonExport.getFilteredForIOS(commonExercisesOnList);
         if (exercisesThatHaveAudio.size() < exidsOnList.size()) {
           logger.info("getSimpleListsOnlyWithAudio after filter " + exercisesThatHaveAudio.size() + " exercises for list #" + listid);
         }
         numItems = exercisesThatHaveAudio.size();
       }
 
-      int userid1 = l.userid();
-      String name = getUserName(userid1, idToName);
-      String fullName = getFullName(userid1, idToFullName);
-      userLists.add(getSimpleUserList(l, numItems, userid1, name, fullName));
+      {
+        int userid1 = l.userid();
+        String name = getUserName(userid1, idToName);
+        String fullName = getFullName(userid1, idToFullName);
+        userLists.add(getSimpleUserList(l, numItems, userid1, name, fullName));
+      }
     });
     long now = System.currentTimeMillis();
 

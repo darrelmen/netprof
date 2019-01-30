@@ -1877,9 +1877,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public void doReport() {
     if (serverProps.isFirstHydra()) {
       if (reportHelper.isTodayAGoodDay()) {
-        reportHelper.sendReports(getReport());
+        sendReports();
       } else {
-        logger.info("doReport : not sending email report since this is not Sunday...");
+        logger.info("doReport : not sending email report since this is not the day to send them...");
       }
     } else {
       // logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
@@ -1936,16 +1936,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @return
    * @deprecated
    */
-  public List<JsonObject> doReportAllYears() {
-    return doReportForYear(-1);
-  }
+//  public List<JsonObject> doReportAllYears() {
+//    return doReportForYear(-1);
+//  }
 
   /**
    * JUST FOR TESTING
    *
    * @deprecated JUST FOR TESTING
    */
-  public List<JsonObject> doReportForYear(int year) {
+  /*public List<JsonObject> doReportForYear(int year) {
     List<JsonObject> jsons = new ArrayList<>();
     IReport report = getReport();
 
@@ -1967,7 +1967,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     report.getSummaryReport(allReports, pathHelper);
     return jsons;
-  }
+  }*/
 
   /**
    * @param projID

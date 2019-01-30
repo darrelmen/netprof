@@ -190,7 +190,7 @@ public interface IUserExerciseDAO extends IDAO {
       Map<Integer, ExerciseAttribute> allByProject,
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs, boolean isPredef);
 
-  List<Integer> getByProjectExactMatch(int projid, int creator, String fl);
+  List<Integer> getUserDefinedByProjectExactMatch(int projid, int creator, String fl);
 
   /**
    *

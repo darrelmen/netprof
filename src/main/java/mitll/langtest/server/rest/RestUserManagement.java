@@ -119,10 +119,10 @@ public class RestUserManagement {
   private static final String LOGIN_RESULT = "loginResult";
   private static final String TRUE = "TRUE";
   private static final String SUCCESS = "success";
-  public static final String AFFILIATION = "affiliation";
-  public static final String FIRST1 = "first";
-  public static final String LAST1 = "last";
-  public static final String RESET_PASS_KEY = "resetPassKey";
+  private static final String AFFILIATION = "affiliation";
+  private static final String FIRST1 = "first";
+  private static final String LAST1 = "last";
+  private static final String RESET_PASS_KEY = "resetPassKey";
 
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
@@ -159,61 +159,71 @@ public class RestUserManagement {
       }
       return true;
     } else if (queryString.startsWith(RESET_PASS)) {
-      logger.info(" - calling reset " + queryString);
+      logger.info("doGet - calling reset " + queryString);
       String[] split1 = getParams(queryString);
       if (split1.length != 2) {
         toReturn.addProperty(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
       } else {
-        String user = getFirst(split1[0]);
-        String second = split1[1];
-        String optionalEmail = getArg(second);//second.split("=")[1];
-
-        String token = resetPassword(user, request, optionalEmail);//emailFromDevice, request.getRequestURL().toString());
-        toReturn.addProperty(TOKEN, token);
+        resetPassword(getBaseURL(request), toReturn, split1);
       }
       return true;
-    }
-/*    else if (queryString.startsWith(RESET_PASSWORD_FROM_EMAIL)) {
-      logger.warn("\n\n\n calling reset password? ");
-      String[] split1 = getParams(queryString);
-      if (split1.length != 1) {
-        toReturn.put(ERROR, EXPECTING_ONE_QUERY_PARAMETER);
-      } else {
-        String token = getFirst(split1[0]);
-
-        // OK the real person clicked on their email link
-        response.setContentType("text/html");
-
-        String rep = (getUserIDForToken(token) == -1) ?
-            getHTML("Note : your password has already been reset. Please go back to NetProF.", "Password has already been reset") :
-            getHTML("OK, your password has been reset. Please go back to NetProF and login.", "Password has been reset");
-        reply(response, rep);
-      }
-      return true;
-    } */
-    else if (queryString.startsWith(SET_PASSWORD)) {
+    } else if (queryString.startsWith(SET_PASSWORD)) {
       String[] split1 = getParams(queryString);
       if (split1.length < 3) {
         toReturn.addProperty(ERROR, "expecting 3");
       } else {
         // request=setPassword&token=oaNLq6fnjnrfoVhstj6XtWdWY4iwsU&pass=domino22&userid=14480
-        int i = 1;
-        String token = getFirst(split1[i++]);
-        String passwordH = getArg(split1[i++]);
-        String userID = getArg(split1[i++]);
-        int user = -1;
-
-        try {
-          user = Integer.parseInt(userID);
-        } catch (NumberFormatException e) {
-          logger.warn("couldn't parse " + userID);
-        }
-        logger.info("setPassword : userid " + userID + " token " + token);// + " pass " +passwordH);
-        toReturn.addProperty(VALID, changePFor(user, passwordH, getBaseURL(request), token));
+        doSetPassword(getBaseURL(request), queryString, toReturn, split1);
       }
       return true;
     }
     return false;
+  }
+
+  private void resetPassword( String baseURL, JsonObject toReturn, String[] split1) {
+    String user = getFirst(split1[0]);
+    String optionalEmail = getArg(split1[1]);
+    String token = resetPassword(user, baseURL, optionalEmail);//emailFromDevice, request.getRequestURL().toString());
+    toReturn.addProperty(TOKEN, token);
+  }
+
+  /**
+   * e.g. request=setPassword&token=oaNLq6fnjnrfoVhstj6XtWdWY4iwsU&pass=domino22&userid=14480
+   *
+   * @param baseURL
+   * @param queryString
+   * @param toReturn
+   * @param split1
+   */
+  private void doSetPassword(String baseURL, String queryString, JsonObject toReturn, String[] split1) {
+    logger.info("setPassword : req " + queryString);// + " pass " +passwordH);
+
+    int i = 1;
+    String token = getFirst(split1[i++]);
+    String passwordH = getArg(split1[i++]);
+    String userID = getArg(split1[i++]);
+    if (token.isEmpty()) {
+      toReturn.addProperty(ERROR, "no token in request - expecting it first");
+    } else if (passwordH.isEmpty()) {
+      toReturn.addProperty(ERROR, "no password in request - expecting it second");
+    }
+    if (userID.isEmpty()) {
+      toReturn.addProperty(ERROR, "no user id in request - expecting it first");
+    }
+    int user = getUserID(userID);
+    logger.info("setPassword : userid " + userID + " token " + token);// + " pass " +passwordH);
+    toReturn.addProperty(VALID, changePFor(user, passwordH, baseURL, token));
+  }
+
+  private int getUserID(String userID) {
+    int user = -1;
+
+    try {
+      user = Integer.parseInt(userID);
+    } catch (NumberFormatException e) {
+      logger.warn("couldn't parse " + userID);
+    }
+    return user;
   }
 
   private String getFirst(String first1) {
@@ -226,7 +236,13 @@ public class RestUserManagement {
   }
 
   private String getArg(String first) {
-    return first.split("=")[1];
+    String[] split = first.split("=");
+    if (split.length == 2) {
+      return split[1];
+    } else {
+      logger.warn("getArg couldn't get arg value from " + first + " expecting A=B");
+      return "";
+    }
   }
 
   /**
@@ -346,14 +362,14 @@ public class RestUserManagement {
    * @return
    * @see #doGet(HttpServletRequest, String, JsonObject)
    */
-  private String resetPassword(String user, HttpServletRequest request, String optionalEmail) {
+  private String resetPassword(String user, String baseURL, String optionalEmail) {
     if (user.length() == 4) user = user + "_";
     else if (user.length() == 3) user = user + "__";
 
     logger.info("resetPassword for '" + user + "' opt email " + optionalEmail);
 
     if (db.getUserDAO().isKnownUser(user)) {
-      db.getUserDAO().forgotPassword(user, getBaseURL(request), optionalEmail);
+      db.getUserDAO().forgotPassword(user, baseURL, optionalEmail);
       return PASSWORD_EMAIL_SENT;
     } else {
       return NOT_VALID;

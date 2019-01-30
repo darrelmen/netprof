@@ -126,11 +126,10 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   }
 
   @Override
-  public List<CommonExercise> getExactMatch(String fl, int userIDFromSession) {
-    List<Integer> byProjectExactMatch = userExerciseDAO.getByProjectExactMatch(project.id(), userIDFromSession, fl);
+  public List<CommonExercise> getUserDefinedByProjectExactMatch(String fl, int userIDFromSession) {
+    List<Integer> byProjectExactMatch = userExerciseDAO.getUserDefinedByProjectExactMatch(project.id(), userIDFromSession, fl);
     List<CommonExercise> matches = new ArrayList<>(byProjectExactMatch.size());
-    byProjectExactMatch
-        .forEach(id -> matches.add(getExercise(id)));
+    byProjectExactMatch.forEach(id -> matches.add(getExercise(id)));
     return matches;
   }
 

@@ -1212,8 +1212,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       logger.info("getTypeToValues took " + diff + " to get" +
           "\n\ttype to selection " + typeToSelection +
           "\n\ttype to include   " + response.getTypesToInclude() +
-          "\n\t#type to values   " + response.getTypeToValues().size() +
-          "\n\ttype to values    " + response.getTypeToValues()
+          "\n\t#type to values   " + response.getTypeToValues().size()
+         // +          "\n\ttype to values    " + response.getTypeToValues()
       );
     }
 

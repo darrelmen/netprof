@@ -200,7 +200,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     if (request.isOnlyFL()) {
 //      logger.info("before " + commonExercises.size());
       commonExercises = db.getFilterResponseHelper().getCommonExercisesWithoutEnglish(commonExercises);
-  //    logger.info("after  " + commonExercises.size());
+      //    logger.info("after  " + commonExercises.size());
     }
 
     //logger.info("getDialogResponse returning exercises for " + request.getDialogID() + " " + collect.size());
@@ -329,48 +329,48 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
           db.getResultDAO().getExercisesSortedIncorrectFirst(tripleExercises.getByExercise(), userID,
               getAudioFileHelper(projID).getCollator(), getLanguageEnum(projectForUser));
     } else {*/
-      if (predefExercises) {
-        commonExercises = new ArrayList<>(tripleExercises.getByID());
-        List<CommonExercise> basicExercises = new ArrayList<>(tripleExercises.getByExercise());
-        boolean sortByFL = projectForUser.isEnglish();
-        String searchTerm = request.getPrefix();
+    if (predefExercises) {
+      commonExercises = new ArrayList<>(tripleExercises.getByID());
+      List<CommonExercise> basicExercises = new ArrayList<>(tripleExercises.getByExercise());
+      boolean sortByFL = projectForUser.isEnglish();
+      String searchTerm = request.getPrefix();
 
-        {
-          // only do this if we control the sort in the facet exercise list drop down
-          sortExercises(basicExercises, sortByFL, searchTerm);
-        }
+      {
+        // only do this if we control the sort in the facet exercise list drop down
+        sortExercises(basicExercises, sortByFL, searchTerm);
+      }
 
-        Set<Integer> unique = new HashSet<>();
+      Set<Integer> unique = new HashSet<>();
+      if (DEBUG)
+        logger.info("getSortedExercises adding " + tripleExercises.getByID().size() + " by id tripleExercises");
+
+      // 1) first add any exact by id matches - should only be one
+      if (tripleExercises.getByID().size() > 1)
+        logger.error("expecting only 0 or 1 matches for by id " + tripleExercises.getByID().size());
+
+      tripleExercises.getByID().forEach(e -> unique.add(e.getID()));
+      if (DEBUG) logger.info("getSortedExercises adding " + basicExercises.size() + " basicExercises");
+
+      basicExercises
+          .stream()
+          .filter(e -> !unique.contains(e.getID()))
+          .forEach(commonExercises::add);
+
+      commonExercises.forEach(e -> unique.add(e.getID()));
+
+      // last come context matches
+      {
+        List<CommonExercise> contextExercises = getSortedContext(tripleExercises, sortByFL, searchTerm);
         if (DEBUG)
-          logger.info("getSortedExercises adding " + tripleExercises.getByID().size() + " by id tripleExercises");
+          logger.info("getSortedExercises adding " + contextExercises.size() + " contextExercises, " + unique.size() + " unique");
 
-        // 1) first add any exact by id matches - should only be one
-        if (tripleExercises.getByID().size() > 1)
-          logger.error("expecting only 0 or 1 matches for by id " + tripleExercises.getByID().size());
-
-        tripleExercises.getByID().forEach(e -> unique.add(e.getID()));
-        if (DEBUG) logger.info("getSortedExercises adding " + basicExercises.size() + " basicExercises");
-
-        basicExercises
+        contextExercises
             .stream()
             .filter(e -> !unique.contains(e.getID()))
             .forEach(commonExercises::add);
-
-        commonExercises.forEach(e -> unique.add(e.getID()));
-
-        // last come context matches
-        {
-          List<CommonExercise> contextExercises = getSortedContext(tripleExercises, sortByFL, searchTerm);
-          if (DEBUG)
-            logger.info("getSortedExercises adding " + contextExercises.size() + " contextExercises, " + unique.size() + " unique");
-
-          contextExercises
-              .stream()
-              .filter(e -> !unique.contains(e.getID()))
-              .forEach(commonExercises::add);
-        }
       }
-   // }
+    }
+    // }
     return commonExercises;
   }
 
@@ -575,10 +575,10 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 //    if (incorrectFirst) {
 //      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getAudioFileHelper(projID).getCollator(), getLanguageEnum(projID));
 //    } else {
-      copy = new ArrayList<>(exercisesForState);
+    copy = new ArrayList<>(exercisesForState);
 //      if (!request.isQuiz()) {
-      sortExercises(copy, false, request.getPrefix());
-      //    }
+    sortExercises(copy, false, request.getPrefix());
+    //    }
 //    }
     logger.info("getExerciseListWrapperForPrefix returning " + copy.size());
 
@@ -790,8 +790,11 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private void addAnnotationsAndAudio(int userID, CommonExercise firstExercise, boolean isQC, int projID) {
     long then = System.currentTimeMillis();
 
-    logger.info("addAnnotationsAndAudio adding anno to " + firstExercise.getID() +
-        "\n\twith " + firstExercise.getDirectlyRelated().size() + " context exercises");
+    if (DEBUG) {
+      logger.info("addAnnotationsAndAudio adding anno to " + firstExercise.getID() +
+          "\n\twith " + firstExercise.getDirectlyRelated().size() + " context exercises");
+    }
+
     addAnnotations(firstExercise); // todo do this in a better way
 
     long now = System.currentTimeMillis();
@@ -802,7 +805,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       logger.debug("addAnnotationsAndAudio : (" + language + ") took " + (now - then) + " millis to add annotations to exercise " + oldID);
     }
     then = now;
-    // int i = attachAudio(firstExercise);
+
     db.getAudioDAO().attachAudioToExercises(Collections.singleton(firstExercise), db.getLanguageEnum(projID), projID);
 
     if (DEBUG) {
@@ -1206,7 +1209,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     db.getAudioDAO().attachAudioToExercises(toAddAudioTo, language, projectID);
     now = System.currentTimeMillis();
 
-    if (now - then > 10  || DEBUG_FULL)
+    if (now - then > 10 || DEBUG_FULL)
       logger.info("getFullExercises took " + (now - then) + " to attach audio to " + toAddAudioTo.size() + " exercises");
 
     then = System.currentTimeMillis();
@@ -1292,11 +1295,11 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   }
 
   /**
-   * @see #getLatestScoreAudioPath
    * @param userID
    * @param projectIDFromUser
    * @param exid
    * @return
+   * @see #getLatestScoreAudioPath
    */
   @Nullable
   private String getRefAudio(int userID, int projectIDFromUser, int exid) {

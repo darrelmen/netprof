@@ -56,7 +56,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
   private static final int FIRST_WIDTH = 90;
   private static final int LAST_WIDTH = 100;
   private static final String FIRST = "First";
-  public static final int MIN_HEIGHT = 250;
+  private static final int MIN_HEIGHT = 250;
 
   public BasicUserContainer(ExerciseController controller, String selectedUserKey, String header) {
     super(controller, selectedUserKey, header, 10, 7);

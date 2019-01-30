@@ -170,7 +170,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return Window.getClientHeight() < 822;
   }
 
-  protected void setMinHeight(Panel tableWithPager, int minHeight) {
+  void setMinHeight(Panel tableWithPager, int minHeight) {
     tableWithPager.getElement().getStyle().setProperty("minHeight", minHeight + "px");
   }
 

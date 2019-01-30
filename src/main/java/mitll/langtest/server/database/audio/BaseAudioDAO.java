@@ -92,6 +92,7 @@ public abstract class BaseAudioDAO extends DAO {
   private static final boolean DEBUG_AUDIO_REPORT = false;
   private static final boolean DEBUG_ATTACH = false;
   private static final boolean DEBUG_ATTACH_PATH = false;
+  private static final boolean DEBUG = false;
 
   final String mediaDir;
 
@@ -231,18 +232,23 @@ public abstract class BaseAudioDAO extends DAO {
     long then = System.currentTimeMillis();
     Set<Integer> exerciseIDs = exercises.stream().map(HasID::getID).collect(Collectors.toSet());
     long now = System.currentTimeMillis();
-    logger.info("attachAudioToExercises (" + (now - then) +
-        ") to " + exercises.size() + " exercises for " +
-        language + " : " + exerciseIDs.size());
+
+    if (DEBUG || (now - then) > 50) {
+      logger.info("attachAudioToExercises (" + (now - then) +
+          ") to " + exercises.size() + " exercises for " +
+          language + " : " + exerciseIDs.size());
+    }
 
     then = now;
     exercises
         .forEach(exercise -> exercise.getDirectlyRelated()
             .forEach(exercise1 -> exerciseIDs.add(exercise1.getID())));
     now = System.currentTimeMillis();
-    logger.info("attachAudioToExercises 2 (" + (now - then) +
-        ") to " + exercises.size() + " exercises for " +
-        language + " : " + exerciseIDs.size());
+    if (DEBUG || (now - then) > 50) {
+      logger.info("attachAudioToExercises 2 (" + (now - then) +
+          ") to " + exercises.size() + " exercises for " +
+          language + " : " + exerciseIDs.size());
+    }
 
 
     return exerciseIDs;
@@ -599,7 +605,7 @@ public abstract class BaseAudioDAO extends DAO {
    * TODO : don't do this - won't scale with users
    * TODO : use the transcript map
    *
-   * @param userid         only used to determine the gender we should show
+   * @param userid             only used to determine the gender we should show
    * @param projid
    * @param exToTranscript
    * @param filterOnBothSpeeds

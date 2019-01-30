@@ -60,8 +60,8 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
   private static final boolean DEBUG = false;
   private static final String REGEX = " ";  // no break space!
+  private static final String TIC_REGEX = "&#39;";
   //private static final boolean DEBUG_IMPORT = false;
-  //public static final String WORD_EXPRESSION = "Word/Expression";
 
   /**
    * @return
@@ -481,43 +481,20 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
 
     List<Pair> pairs = new ArrayList<>(lines.length);
 
-
     HeaderInfo headerInfo = readHeader(lines);
 
     if (headerInfo.isFoundHeader()) {
-      boolean skipFirst = true;
-
-      boolean firstIsEnglish = headerInfo.isFirstIsEnglish();
-      // assume first col is foreign
-      for (String line : lines) {
-        if (!skipFirst) {
-          String[] parts = line.split("\\t");
-//      logger.info("\tgot " + parts.length + " parts");
-          if (parts.length > 1) {
-            String first  = getTrim(parts[0]);
-            String second = getTrim(parts[1]);
-            Pair e = new Pair(firstIsEnglish ? second : first, firstIsEnglish ? first : second);
-            pairs.add(e);
-          }
-        }
-        skipFirst = false;
-      }
+      readGivenHeader(lines, pairs, headerInfo);
     } else if (englishProject != null) {  // in local dev could be false
       // gotta guess somehow
-      firstColIsEnglish = guessLanguageInCol(lines, englishProject, pairs);
-//
-//      if (guessLanguageInCol(lines, englishProject, pairs)) {
-//        pairs.forEach(Pair::swap);
-//      }
+      firstColIsEnglish = guessLanguageInCol(lines, englishProject.getAudioFileHelper().getASR().getPronunciationLookup(), pairs);
     } else {
-      logger.info("convertTextToExercises : no english project??");
+      logger.warn("convertTextToExercises : no english project??");
 
       for (String line : lines) {
         String[] parts = line.split("\\t");
         if (parts.length > 1) {
-          String fl = parts[0].trim();
-          String english = parts[1].trim();
-          pairs.add(new Pair(fl, english));
+          pairs.add(getPair(parts));
         }
       }
     }
@@ -533,10 +510,17 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
           CommonExercise known = makeOrFindExercise(newItems, firstColIsEnglish, userIDFromSession, fl, english, project,
               onListAlready);
 
-          if (known != null && known.getID() > 0) {
-            logger.info("convertTextToExercises made or found " + known.getID() +
-                "  '" + fl + "' = '" + english + "'");
-            knownAlready.add(known);
+          if (known == null) {
+            logger.warn("convertTextToExercises couldn't make exercise from " + pair);
+          } else {
+            if (known.getID() > 0) {
+              logger.info("convertTextToExercises made or found " + known.getID() +
+                  " fl '" + fl + "' = eng '" + english + "'");
+              knownAlready.add(known);
+            } else {
+              logger.info("convertTextToExercises new ex " + known.getID() +
+                  "  '" + fl + "' = '" + english + "'");
+            }
           }
         } else {
           logger.info("convertTextToExercises skipping " + fl + " that's already on the list.");
@@ -547,67 +531,95 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     return newItems;
   }
 
+  private void readGivenHeader(String[] lines, List<Pair> pairs, HeaderInfo headerInfo) {
+    boolean skipFirst = true;
+
+    boolean firstIsEnglish = headerInfo.isFirstIsEnglish();
+    // assume first col is foreign
+    for (String line : lines) {
+      if (!skipFirst) {
+        String[] parts = line.split("\\t");
+        if (parts.length > 1) {
+          Pair e = getPair(parts);
+          if (firstIsEnglish) e.swap();
+          pairs.add(e);
+        }
+      }
+      skipFirst = false;
+    }
+  }
+
   /**
    * deal with no break space
+   *
+   * deal with tic marks...?
+   *
    * @param part
    * @return
    */
   private String getTrim(String part) {
-    return part.replaceAll(REGEX, " ").trim();
+    return part.replaceAll(REGEX, " ").replaceAll(TIC_REGEX, "'").trim();
   }
 
-  private boolean guessLanguageInCol(String[] lines, Project englishProject, List<Pair> pairs) {
-    IPronunciationLookup engLookup = englishProject.getAudioFileHelper().getASR().getPronunciationLookup();
-
+  private boolean guessLanguageInCol(String[] lines, IPronunciationLookup engLookup, List<Pair> pairs) {
     // make a decision as to which side is english in word pairs
     int engCountFirst = 0, engCountSecond = 0;
     int totalFirst = 0, totalSecond = 0;
 
-    boolean firstColIsEnglish = false;
     // assume first col is foreign
     for (String line : lines) {
       String[] parts = line.split("\\t");
-//      logger.info("\tgot " + parts.length + " parts");
       if (parts.length > 1) {
-        String fl = parts[0].trim();
-        String english = parts[1].trim();
-
-        pairs.add(new Pair(fl, english));
+        Pair e = getPair(parts);
+        pairs.add(e);
 
         {
-          IPronunciationLookup.InDictStat tokenStats = engLookup.getTokenStats(fl);
+          IPronunciationLookup.InDictStat tokenStats = engLookup.getTokenStats(e.getProperty());
           engCountFirst += tokenStats.getNumInDict();
           totalFirst += tokenStats.getNumTokens();
         }
 
         {
-          IPronunciationLookup.InDictStat tokenStats = engLookup.getTokenStats(english);
+          IPronunciationLookup.InDictStat tokenStats = engLookup.getTokenStats(e.getValue());
           engCountSecond += tokenStats.getNumInDict();
           totalSecond += tokenStats.getNumTokens();
         }
       }
     }
 
-    logger.info("eng first  " + engCountFirst + "/" + totalFirst);
-    logger.info("eng second " + engCountSecond + "/" + totalSecond);
+    return isFirstColumnEnglish(engCountFirst, engCountSecond, totalFirst, totalSecond);
+  }
+
+  private boolean isFirstColumnEnglish(int engCountFirst, int engCountSecond, int totalFirst, int totalSecond) {
+    logger.info("guessLanguageInCol eng first  " + engCountFirst + "/" + totalFirst);
+    logger.info("guessLanguageInCol eng second " + engCountSecond + "/" + totalSecond);
+    boolean firstColIsEnglish;
     if (totalFirst == 0 && totalSecond > 0) {
-      //firstColIsEnglish = false;
+      firstColIsEnglish = false;
     } else if (totalSecond == 0 && totalFirst > 0) {
       firstColIsEnglish = true;
     } else {
       float firstRatio = (float) engCountFirst / (float) totalFirst;
       float secondRatio = (float) engCountSecond / (float) totalSecond;
-      logger.info("eng ratios " + firstRatio + " vs " + secondRatio);
 
       firstColIsEnglish = firstRatio > secondRatio;
+
+      logger.info("guessLanguageInCol eng ratios " + firstRatio + " vs " + secondRatio +
+          "\n\tfirst col is english " + firstColIsEnglish);
     }
     return firstColIsEnglish;
   }
 
+  @NotNull
+  private Pair getPair(String[] parts) {
+    String fl = getTrim(parts[0]);
+    String english = getTrim(parts[1]);
+
+    return new Pair(fl, english);
+  }
+
   private HeaderInfo readHeader(String[] lines) {
     boolean foundHeader = false;
-
-//    String language = project.getLanguage();
     String englishLang = Language.ENGLISH.toString();
 
     String headerFirst, headerSecond;
@@ -628,19 +640,19 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   }
 
   private static class HeaderInfo {
-    private boolean foundHeader;
-    private boolean firstIsEnglish;
+    private final boolean foundHeader;
+    private final boolean firstIsEnglish;
 
-    public HeaderInfo(boolean foundHeader, boolean firstIsEnglish) {
+    HeaderInfo(boolean foundHeader, boolean firstIsEnglish) {
       this.foundHeader = foundHeader;
       this.firstIsEnglish = firstIsEnglish;
     }
 
-    public boolean isFoundHeader() {
+    boolean isFoundHeader() {
       return foundHeader;
     }
 
-    public boolean isFirstIsEnglish() {
+    boolean isFirstIsEnglish() {
       return firstIsEnglish;
     }
   }
@@ -672,7 +684,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
                                             String english,
                                             Project project,
                                             Set<Integer> onListAlready) {
-    english = english.replaceAll("&#39;", "").trim();
+    english = english.replaceAll(TIC_REGEX, "'").trim();
 
     int projectID = project.getID();
     if (firstColIsEnglish || (isValid(project, english) && !isValid(project, fl))) {
@@ -705,7 +717,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     } else {
       if (DEBUG) logger.info("makeOrFindExercise : exercise " + exercise);
       // gotta be mine
-      List<CommonExercise> exactMatch = db.getExerciseDAO(projectID).getExactMatch(fl, userIDFromSession);
+      List<CommonExercise> exactMatch = db.getExerciseDAO(projectID).getUserDefinedByProjectExactMatch(fl, userIDFromSession);
 
       if (!exactMatch.isEmpty()) {
         if (exactMatch.size() > 1)
@@ -725,13 +737,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     }
 
     if (exercise == null && !found) { // OK gotta make a new one
-      Exercise newItem =
-          new Exercise(-1,
-              userIDFromSession,
-              english,
-              projectID,
-              false);
-      newItem.setForeignLanguage(fl);
+      Exercise newItem = getNewExercise(userIDFromSession, fl, english, projectID);
       newItems.add(newItem);
       exercise = newItem;
       if (DEBUG) logger.info("reallyCreateNewItems new " + newItem);
@@ -740,17 +746,19 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     return exercise;
   }
 
+  @NotNull
+  private Exercise getNewExercise(int userIDFromSession, String fl, String english, int projectID) {
+    Exercise newItem =
+        new Exercise(-1,
+            userIDFromSession,
+            english,
+            projectID,
+            false);
+    newItem.setForeignLanguage(fl);
+    return newItem;
+  }
+
   private CommonExercise getExerciseByVocab(int projectID, String foreignLanguage) {
     return db.getProject(projectID).getExerciseByExactMatch(foreignLanguage.trim());
   }
-
-  /**
-   * @param exercise
-   * @return
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#duplicateExercise
-   */
- /* @Override
-  public CommonExercise duplicateExercise(CommonExercise exercise) {
-    return db.duplicateExercise(exercise);
-  }*/
 }

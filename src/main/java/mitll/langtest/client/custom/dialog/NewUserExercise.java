@@ -813,7 +813,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     if (safeText.isEmpty()) {
       checkContext(toAddTo, onClick);
     } else {
-      controller.getScoringService().isValidForeignPhrase(safeText, "", new AsyncCallback<Collection<String>>() {
+      controller.getScoringService().isValidForeignPhrase(controller.getProjectID(), safeText, "", new AsyncCallback<Collection<String>>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("is valid exercise", caught);
@@ -856,10 +856,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     if (safeText1.isEmpty()) {
       afterValidForeignPhrase(toAddTo, onClick);
     } else {
-      controller.getScoringService().isValidForeignPhrase(safeText1, "", new AsyncCallback<Collection<String>>() {
+      controller.getScoringService().isValidForeignPhrase(controller.getProjectID(), safeText1, "", new AsyncCallback<Collection<String>>() {
         @Override
         public void onFailure(Throwable caught) {
-          controller.handleNonFatalError("is valid exercise", caught);
+          controller.handleNonFatalError("is valid context exercise", caught);
         }
 
         @Override

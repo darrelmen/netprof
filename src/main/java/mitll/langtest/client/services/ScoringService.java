@@ -94,8 +94,7 @@ public interface ScoringService extends RemoteService {
    * @return
    * @seex mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
-  Collection<String> isValidForeignPhrase(String foreign, String transliteration) throws DominoSessionException;
-
+  Collection<String> isValidForeignPhrase(int projID, String foreign, String transliteration);
 
   /**
    * @param projid

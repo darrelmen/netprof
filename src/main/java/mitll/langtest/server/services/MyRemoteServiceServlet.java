@@ -220,6 +220,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     int userIDFromSession = getUserIDFromSessionOrDB();
     if (userIDFromSession == -1) {
       // it's not in the current session - can we recover it from the remember me cookie?
+      logger.warn("getProject no user session?");
       return null;
     } else {
       return getProjectForUser(userIDFromSession);
@@ -470,20 +471,11 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @return
    */
   protected AudioFileHelper getAudioFileHelper() throws DominoSessionException {
-    Project project = getProject();
-    if (serverProps.isAMAS()) {
-      return audioFileHelper;
-    } else {
-      return getAudioFileHelper(project);
-    }
+    return getAudioFileHelper(getProject());
   }
 
   protected AudioFileHelper getAudioFileHelper(int projectID) {
-    if (serverProps.isAMAS()) {
-      return audioFileHelper;
-    } else {
-      return getAudioFileHelper(db.getProject(projectID));
-    }
+    return getAudioFileHelper(db.getProject(projectID));
   }
 
   @Nullable
@@ -572,7 +564,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   public IDialog getDialog(int id) throws DominoSessionException {
     IDialog iDialog = getOneDialog(id);
 
-  //  logger.info("getDialog get dialog " + id + "\n\treturns " + iDialog);
+    //  logger.info("getDialog get dialog " + id + "\n\treturns " + iDialog);
 
     if (iDialog != null) {
       int projid = iDialog.getProjid();
@@ -618,7 +610,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
       List<IDialog> collect = iDialogs.stream().filter(iDialog -> iDialog.getID() == dialogID).collect(Collectors.toList());
       IDialog iDialog = collect.isEmpty() ? iDialogs.isEmpty() ? null : iDialogs.iterator().next() : collect.iterator().next();
       if (iDialog == null) {
-        logger.warn("\n\n\nno dialog for " + dialogID + " From " +iDialogs.size());
+        logger.warn("\n\n\nno dialog for " + dialogID + " From " + iDialogs.size());
       }
       return iDialog;
     }
@@ -637,8 +629,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     {
       if (projectIDFromUser != -1) {
         dialogList = getProject(projectIDFromUser).getDialogs();
-      }
-      else {
+      } else {
         logger.warn("no project id?");
       }
     }

@@ -125,6 +125,7 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
 
   ProjectStartupInfo getProjectStartupInfo();
+  int getProjectID();
 
   boolean hasModel();
 
