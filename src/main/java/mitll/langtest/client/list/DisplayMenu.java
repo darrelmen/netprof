@@ -34,6 +34,7 @@ public class DisplayMenu {
    * @see #getShowSounds
    */
   private static final String SHOW_SOUNDS = "Show Sounds";
+  private static final String SHOW_PINYIN = "Show Pinyin";
 
   /**
    * @see DisplayMenu#storePhoneChoices
@@ -59,6 +60,7 @@ public class DisplayMenu {
 
   /**
    * Only show primary vs alt choices for Mandarin, which is only one we have for now.?
+   *
    * @return
    * @see FacetExerciseList#getPagerAndSort
    */
@@ -93,7 +95,7 @@ public class DisplayMenu {
   }
 
   private NavLink getShowSounds() {
-    NavLink phoneChoice = new NavLink(SHOW_SOUNDS);
+    NavLink phoneChoice = new NavLink(isMandarin ? SHOW_PINYIN : SHOW_SOUNDS);
     if (getPhonesDisplay() == PhonesChoices.SHOW) {
       phoneChoice.setIcon(CHECK);
     }

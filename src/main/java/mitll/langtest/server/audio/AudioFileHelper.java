@@ -43,10 +43,8 @@ import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.dialog.IDialogSessionDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectManagement;
-import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
@@ -62,8 +60,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import scala.Tuple2;
-import scala.collection.Iterator;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -97,6 +93,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final String OGG = "ogg";
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PRON = false;
 
   private static final double MIN_SCORE_FOR_CORRECT_ALIGN = 0.35;
   /**
@@ -220,7 +217,7 @@ public class AudioFileHelper implements AlignDecode {
           logger.info("checkLTSAndCountPhones : " + language + " checking " + exercises.size() + " exercises...");
 
           for (CommonExercise exercise : exercises) {
-            boolean validForeignPhrase = isValidForeignPhrase(safe, unsafe, exercise, oov);
+            boolean validForeignPhrase = isValidForeignPhrase(safe, unsafe, exercise);
             //  logger.info("checkLTSAndCountPhones : " + language + " oov " + oov.size());
 
             if (!validForeignPhrase) {
@@ -241,14 +238,14 @@ public class AudioFileHelper implements AlignDecode {
             // check context sentences
             for (ClientExercise context : exercise.getDirectlyRelated()) {
               CommonExercise commonExercise = context.asCommon();
-              boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, commonExercise, oov);
+              boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, commonExercise);
               if (commonExercise.isSafeToDecode() != validForeignPhrase2) {
                 commonExercise.getMutable().setSafeToDecode(validForeignPhrase2);
               }
             }
           }
 
-          writeOOV(oov);
+          writeOOV(oov, "oov");
 
           long then = System.currentTimeMillis();
           logger.warn("checkLTSAndCountPhones took " + (then - now) + " millis to examine " + exercises.size() + " exercises.");
@@ -271,10 +268,10 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
-  private void writeOOV(Set<String> oov) {
+  private void writeOOV(Set<String> oov, String suffix) {
     if (!oov.isEmpty()) {
       try {
-        String fileName = "Project_" + project.getLanguage() + "_" + project.getName() + ".txt";
+        String fileName = "Project_" + suffix+project.getLanguage() + "_" + project.getName() + ".txt";
         File file = new File("/tmp/" + fileName);
         logger.info("writeOOV writing " + oov.size() + " oov items to " + file.getAbsolutePath());
         FileWriter oovTokens = new FileWriter(file);
@@ -296,7 +293,7 @@ public class AudioFileHelper implements AlignDecode {
 
       Set<String> oov1 = getPronunciationLookup().getOOV();
       if (!oov1.isEmpty()) {
-        writeOOV(oov1);
+        writeOOV(oov1,suffix);
       }
     }
   }
@@ -305,16 +302,15 @@ public class AudioFileHelper implements AlignDecode {
    * @param safe
    * @param unsafe
    * @param exercise
-   * @param oov
    * @return
    * @see #checkLTSAndCountPhones
    */
-  private boolean isValidForeignPhrase(Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise, Set<String> oov) {
+  private boolean isValidForeignPhrase(Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise) {
     boolean validForeignPhrase = exercise.isSafeToDecode();
     if (isStale(exercise)) {
       //  logger.info("isValidForeignPhrase STALE ex " + exercise.getProjectID()  + "  " + exercise.getID() + " " + new Date(exercise.getLastChecked()) + " vs " + new Date(dictModified));
       // int before = oov.size();
-      validForeignPhrase = AudioFileHelper.this.isValidForeignPhrase(exercise);
+      validForeignPhrase = isValidForeignPhrase(exercise);
 //      if (oov.size() > before) {
 //        logger.info("isValidForeignPhrase " + project.getName() + " oov now " + oov.size());
 //      }
@@ -1243,14 +1239,15 @@ public class AudioFileHelper implements AlignDecode {
           "\n\tfl       '" + foreignLanguage + "'" +
           (language == Language.JAPANESE ? "\n\tsegmented '" + getSegmented(foreignLanguage) + "'" : "")
       );
-   /*   {
+
+      if (DEBUG_PRON) {
         List<WordAndProns> possibleProns = new ArrayList<>();
 
         logger.info("getProxyScore " +
             "\n\tfile " + theFile +
             "\n\tdict " + getHydraDict(foreignLanguage, possibleProns));
-        //possibleProns.forEach(p -> logger.info(foreignLanguage + " : " + p));
-      }*/
+        possibleProns.forEach(p -> logger.info(foreignLanguage + " : " + p));
+      }
 
       long then = System.currentTimeMillis();
       String json = httpClient.sendAndReceiveAndClose(theFile);
@@ -1293,8 +1290,8 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private TransNormDict getHydraDict(String foreignLanguage, java.util.List<WordAndProns> possibleProns) {
-    String s = getSmallVocabDecoder().lcToken(foreignLanguage, removeAccents);
-    String cleaned = getSegmented(s); // segmentation method will filter out the UNK model
+   // String s = getSmallVocabDecoder().lcToken(foreignLanguage, removeAccents);
+    String cleaned = getSegmented(getSmallVocabDecoder().lcToken(foreignLanguage, removeAccents)); // segmentation method will filter out the UNK model
     return getASRScoring().getHydraDict(cleaned.trim(), "", possibleProns);
   }
 
@@ -1340,7 +1337,6 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * @return
-   * @see mitll.langtest.server.services.ScoringServiceImpl#isHydraRunning
    * @see mitll.langtest.server.services.ScoringServiceImpl#isHydraRunning
    */
   public boolean isHydraAvailable() {

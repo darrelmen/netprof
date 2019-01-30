@@ -150,8 +150,8 @@ class CheckLTS {
 
 //    if (removeAllAccents) logger.info("checkLTS " +foreignLanguagePhrase);
 
-    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, removeAllAccents);
-    Collection<String> translitTokens = transliteration.isEmpty() ? Collections.emptyList() : smallVocabDecoder.getTokens(transliteration, removeAllAccents);
+    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, removeAllAccents, false);
+    Collection<String> translitTokens = transliteration.isEmpty() ? Collections.emptyList() : smallVocabDecoder.getTokens(transliteration, removeAllAccents, false);
 
     boolean translitOk = isTranslitOk(lts, transliteration, tokens, translitTokens);
 
@@ -361,7 +361,7 @@ class CheckLTS {
   private PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
     //   logger.info("lang  " + language + " is asian " + isAsianLanguage);
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary, isAsianLanguage);
-    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, false);
+    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, false, false);
 
     List<String> firstPron = new ArrayList<>();
     Set<String> uphones = new TreeSet<>();

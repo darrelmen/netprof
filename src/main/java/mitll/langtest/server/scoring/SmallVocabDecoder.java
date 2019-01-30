@@ -41,6 +41,7 @@ import java.text.CharacterIterator;
 import java.text.Normalizer;
 import java.text.StringCharacterIterator;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -83,7 +84,9 @@ public class SmallVocabDecoder {
   private static final String TURKISH_CAP_I = "İ";
   private static final boolean WARN_ABOUT_BAD_CHINESE = false;
 
-  private static final String P_P = "\\p{P}";
+//  private static final String P_P = "\\p{P}";
+  private static final String INTERNAL_PUNCT_REGEX = "(?:(?<!\\S)\\p{Punct}+)|(?:\\p{Punct}+(?!\\S))";
+
   private static final String ONE_SPACE = " ";
 
   private HTKDictionary htkDictionary;
@@ -91,9 +94,12 @@ public class SmallVocabDecoder {
 
   private static final int TOO_LONG = 8;
 
-  private final Pattern pattern;
+  private final Pattern pattern, tickPattern;
+  private final Pattern internalPunctPattern;
+  private final Pattern frenchPunct;
   private final Pattern spacepattern;
   private final Pattern oepattern;
+  private final Pattern replaceMeOE;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PREFIX = false;
@@ -103,7 +109,12 @@ public class SmallVocabDecoder {
    * Compiles some handy patterns.
    */
   public SmallVocabDecoder() {
-    pattern = Pattern.compile(REMOVE_ME + "|" + P_P);
+    tickPattern = Pattern.compile("['’]");  // "don't" or "mustn't"
+    pattern = Pattern.compile(REMOVE_ME + "|" + INTERNAL_PUNCT_REGEX);
+    internalPunctPattern = Pattern.compile(INTERNAL_PUNCT_REGEX);
+    frenchPunct = Pattern.compile(FRENCH_PUNCT);
+
+    replaceMeOE = Pattern.compile(REPLACE_ME_OE);
     spacepattern = Pattern.compile(P_Z);
     oepattern = Pattern.compile(REPLACE_ME_OE);
   }
@@ -137,7 +148,7 @@ public class SmallVocabDecoder {
   /**
    * @param s
    * @return
-   * @see #getTokens(String, boolean)
+   * @see #getTokens(String, boolean, boolean)
    */
   public String toFull(String s) {
     StringBuilder builder = new StringBuilder();
@@ -164,7 +175,7 @@ public class SmallVocabDecoder {
   List<String> getSimpleVocab(Collection<String> sentences, int vocabSizeLimit) {
     // childCount the tokens
     final Map<String, Integer> sc = new HashMap<>();
-    sentences.forEach(sent -> getTokens(sent, false).forEach(token -> {
+    sentences.forEach(sent -> getTokens(sent, false, false).forEach(token -> {
       Integer c = sc.get(token);
       sc.put(token, (c == null) ? 1 : c + 1);
     }));
@@ -199,14 +210,9 @@ public class SmallVocabDecoder {
   }
 
   public String getSegmented(String longPhrase, boolean removeAllAccents) {
-    Collection<String> tokens = getTokens(longPhrase, removeAllAccents);
-//    boolean debug = longPhrase.startsWith("sel");
-//    if (debug) {
-//      tokens.forEach(token -> logger.info("getSegmented " + token));
-//    }
+    Collection<String> tokens = getTokens(longPhrase, removeAllAccents, false);
     StringBuilder builder = new StringBuilder();
     tokens.forEach(token -> {
-
       String trim = token.trim();
       char c = trim.charAt(0);
       String segmentation = trim;
@@ -229,35 +235,37 @@ public class SmallVocabDecoder {
    * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#isCorrect(Collection, String, boolean, boolean)
    */
   public List<String> getTokensAllLanguages(boolean isMandarin, String fl, boolean removeAllAccents) {
-    return isMandarin ? getMandarinTokens(fl) : getTokens(fl, removeAllAccents);
+    return isMandarin ? getMandarinTokens(fl) : getTokens(fl, removeAllAccents, false);
   }
 
   /**
    * @param sentence
    * @param removeAllAccents
+   * @param debug
    * @return
    * @see IPronunciationLookup#getPronunciationsFromDictOrLTS
    * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile
    */
-  public List<String> getTokens(String sentence, boolean removeAllAccents) {
+  public List<String> getTokens(String sentence, boolean removeAllAccents, boolean debug) {
     List<String> all = new ArrayList<>();
     if (sentence.isEmpty()) {
       logger.warn("huh? empty sentence?");
     }
     //  logger.info("getTokens initial    '" + sentence + "'");
     String trimmedSent = getTrimmedSent(sentence, removeAllAccents);
-    //if (removeAllAccents) {
 
-
-    if (DEBUG && !sentence.equalsIgnoreCase(trimmedSent)) {
+    boolean b = DEBUG || debug;
+    if (b && !sentence.equalsIgnoreCase(trimmedSent)) {
       logger.info("getTokens " +
-          "\n\tbefore     '" + sentence + "'" +
-          "\n\tafter trim '" + trimmedSent + "'");
+          "\n\tremoveAllAccents " + removeAllAccents + "'" +
+          "\n\tbefore           '" + sentence + "'" +
+          "\n\tafter trim       '" + trimmedSent + "'");
     }
-    // }
 
-    for (String untrimedToken : trimmedSent.split(P_Z)) { // split on spaces
-      //String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
+    // Matcher matcher = spacepattern.matcher(trimmedSent);
+
+
+    for (String untrimedToken : spacepattern.split(trimmedSent)) { // split on spaces
       String token = untrimedToken.trim();  // necessary?
       if (token.length() > 0) {
         String trim = token.trim();
@@ -271,7 +279,7 @@ public class SmallVocabDecoder {
       }
     }
 
-    if (DEBUG) logger.info("getTokens " +
+    if (b) logger.info("getTokens " +
         "\n\tbefore     '" + sentence + "'" +
         "\n\tafter trim '" + trimmedSent + "'" +
         "\n\tall        (" + all.size() + ")" + all
@@ -295,7 +303,7 @@ public class SmallVocabDecoder {
   private List<String> getMandarinTokens(String foreignLanguage) {
     String segmentation = segmentation(foreignLanguage);
     if (DEBUG) logger.info("getMandarinTokens '" + foreignLanguage + "' = '" + segmentation + "'");
-    return getTokens(segmentation, false);
+    return getTokens(segmentation, false, false);
   }
 
   /**
@@ -324,11 +332,15 @@ public class SmallVocabDecoder {
    * @see PronunciationLookup#getPronStringForWord(String, Collection, boolean)
    */
   private String getTrimmedLeaveAccents(String sentence) {
-    String trim = sentence
-        .replaceAll(FRENCH_PUNCT, "")
-        .replaceAll(REPLACE_ME_OE, OE)
+    String alt = frenchPunct.matcher(sentence).replaceAll(" ");
+    alt = internalPunctPattern.matcher(alt).replaceAll("");
+    alt = replaceMeOE.matcher(alt).replaceAll(OE);
+
+    String trim = alt
+        //  .replaceAll(FRENCH_PUNCT, "")
+        // .replaceAll(REPLACE_ME_OE, OE)
         .replaceAll(TURKISH_CAP_I, "I")
-        .replaceAll(P_P, ONE_SPACE)
+        //  .replaceAll(INTERNAL_PUNCT_REGEX, ONE_SPACE)
         //.replaceAll("\\s+", " ")
         .trim();
     //logger.warn("getTrimmedLeaveAccents before " + sentence + " after "+ trim);
@@ -357,20 +369,10 @@ public class SmallVocabDecoder {
         getTrimmedLeaveLastSpace(token).toLowerCase() :
         getTrimmedLeaveAccents(token).toLowerCase();
   }
-/*
-  private String lcToken(String token) {
-*//*    String s = token
-        .replaceAll(REMOVE_ME, " ")
-        .replaceAll("\\p{Z}+", " ")
-        .replaceAll("\\p{P}", "");
-
-    // return StringUtils.stripAccents(s).toLowerCase();*//*
-
-    String s = getTrimmedLeaveLastSpace(token);
-    return s.toLowerCase();
-  }*/
 
   /**
+   * Gosh - we should put these in a table once and never recalc again.
+   *
    * We want to keep accents - french accents especially...
    * They are in the dictionary.
    *
@@ -394,11 +396,22 @@ public class SmallVocabDecoder {
         .replaceAll(P_P, ONE_SPACE)
         .replaceAll(REPLACE_ME_OE, OE);*/
 
-    String alt = pattern.matcher(sentence).replaceAll(ONE_SPACE);
+    String alt = tickPattern.matcher(sentence).replaceAll("");
+    alt = pattern.matcher(alt).replaceAll(ONE_SPACE);
+
+//    if (sentence.length() != alt.length()) {
+//      logger.info("'" + sentence + "' = '" + alt + "'");
+//    }
+
     alt = oepattern.matcher(alt).replaceAll(OE);
+    // logger.info("'" + alt + "' = '" + alt + "'");
     alt = spacepattern.matcher(alt).replaceAll(ONE_SPACE);
+    // logger.info("'" + alt + "' = '" + alt + "'");
     //  s = s.trim();
     alt = alt.trim();
+
+    // logger.info("'" + alt + "' = '" + alt + "'");
+
 //    if (!s.equals(alt)) {
 //      logger.warn("bug '" + sentence + "' old '" + s + "' vs new '" + alt + "'");
 //    }
@@ -509,7 +522,7 @@ public class SmallVocabDecoder {
       }
       //else {
 //        logger.info("found " + substring + " = " + memo);
-     // }
+      // }
       String rest = memo;
 
       if (!rest.isEmpty()) {

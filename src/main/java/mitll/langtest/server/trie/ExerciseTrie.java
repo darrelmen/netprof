@@ -141,7 +141,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
       String meaning = exercise.getMeaning().trim();
       if (!meaning.isEmpty()) {
         smallVocabDecoder
-            .getTokens(getTrimmed(meaning), false)
+            .getTokens(getTrimmed(meaning), false, debug)
             .forEach(token -> addEntry(exercise, token));
       }
     }
@@ -191,7 +191,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   }
 
   private void addTransliteration(String transliteration, T exercise) {
-    for (String token : smallVocabDecoder.getTokens(transliteration, false)) {
+    for (String token : smallVocabDecoder.getTokens(transliteration, false, debug)) {
       addEntry(exercise, token);
       String noAccents = StringUtils.stripAccents(token);
 
@@ -251,7 +251,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   }
 
   private void addSuffixes(T exercise, String trimmed) {
-    Collection<String> tokens = smallVocabDecoder.getTokens(trimmed, false);
+    Collection<String> tokens = smallVocabDecoder.getTokens(trimmed, false, debug);
 
     trimmed = trimmed.toLowerCase();
 

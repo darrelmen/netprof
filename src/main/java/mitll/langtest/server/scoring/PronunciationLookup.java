@@ -27,7 +27,10 @@ public class PronunciationLookup implements IPronunciationLookup {
   public static final String SIL = "sil";
   private static final int MAX_FROM_ANY_TOKEN = 10;
   private static final String POUND = "#";
+
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PARTS = false;
+  public static final int TOO_MANY_PRONS = 50;
 
 
   private SmallVocabDecoder svDecoderHelper = null;
@@ -40,6 +43,7 @@ public class PronunciationLookup implements IPronunciationLookup {
   private final boolean isAsianLanguage;
   private final boolean hasLTS;
   private final boolean emptyLTS;
+  private final Language language;
 
   /**
    * @param dictionary
@@ -59,7 +63,7 @@ public class PronunciationLookup implements IPronunciationLookup {
     french = language == Language.FRENCH;
     removeAllPunct = language != Language.FRENCH;
     this.isAsianLanguage = isAsianLanguage(language);
-
+    this.language = language;
     makeDecoder();
   }
 
@@ -169,7 +173,7 @@ public class PronunciationLookup implements IPronunciationLookup {
 
   @Override
   public InDictStat getTokenStats(String transcript) {
-    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct);
+    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct, false);
     int total = transcriptTokens.size();
     int inDict = 0;
     for (String word : transcriptTokens) {
@@ -205,14 +209,22 @@ public class PronunciationLookup implements IPronunciationLookup {
                                                       List<WordAndProns> possible) {
     StringBuilder dict = new StringBuilder();
 
-//    logger.info("getPronunciationsFromDictOrLTS ask for pron for '" + transcript + "'");
-    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct);
-    //   logger.info("getPronunciationsFromDictOrLTS got              '" + transcriptTokens + "'");
-//    {
-//      StringBuilder builder = new StringBuilder();
-//      transcriptTokens.forEach(token -> builder.append(token).append(" "));
-//      logger.info("getPronunciationsFromDictOrLTS : transcript '" + transcript + "' = " + builder.toString());
-//    }
+    boolean debug = false;// language == Language.ENGLISH;
+
+    if (debug) {
+      logger.info("getPronunciationsFromDictOrLTS ask for pron for '" + transcript + "'");
+    }
+
+    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct, debug);
+
+    if (debug) {
+      logger.info("getPronunciationsFromDictOrLTS got              '" + transcriptTokens + "'");
+      {
+        StringBuilder builder = new StringBuilder();
+        transcriptTokens.forEach(token -> builder.append(token).append(" "));
+        logger.info("getPronunciationsFromDictOrLTS : transcript '" + transcript + "' = " + builder.toString());
+      }
+    }
 
     String norm = String.join(" ", transcriptTokens);
     int numTokens = transcriptTokens.size();
@@ -238,7 +250,9 @@ public class PronunciationLookup implements IPronunciationLookup {
         ) {
           candidates.add(addDictMatch(justPhones, dict, word, easyMatch, lowerMatch, stripMatch));
         } else if (!removeAllPunct && !(wordProns = hasParts(word)).isEmpty()) {
-          if (DEBUG || true) logger.info("getPronunciationsFromDictOrLTS add parts for '" + word + "'");
+          if (DEBUG || DEBUG_PARTS) {
+            logger.info("getPronunciationsFromDictOrLTS add parts for '" + word + "'");
+          }
           candidates.add(addDictParts(justPhones, dict, wordProns, word));
         } else {  // not in the dictionary, let's ask LTS
           {
@@ -317,7 +331,7 @@ public class PronunciationLookup implements IPronunciationLookup {
             for (String[] pron : translitprocess) {
               prons.add(getPhoneSeq(pron));
             }
-            candidates.add(new WordAndProns(word, prons));
+            candidates.add(new WordAndProns(word, prons).setFromLTS(true));
           }
         }
       } else {
@@ -332,7 +346,7 @@ public class PronunciationLookup implements IPronunciationLookup {
         addUnkPron(transcript, dict, candidates, word);
       }
     } else { // it's ok -use it
-      if (process.length > 50) {
+      if (process.length > TOO_MANY_PRONS) {
         logger.info("getPronunciationsFromDictOrLTS prons length " + process.length +
             "\n\tfor " + word +
             "\n\tin '" + transcript + "'");
@@ -355,7 +369,7 @@ public class PronunciationLookup implements IPronunciationLookup {
           logger.warn("getPronunciationsFromDictOrLTS : skipping invalid pron " + Arrays.asList(pron) + " for " + word);
         }
       }
-      candidates.add(new WordAndProns(word, prons));
+      candidates.add(new WordAndProns(word, prons).setFromLTS(true));
     }
   }
 
@@ -393,7 +407,9 @@ public class PronunciationLookup implements IPronunciationLookup {
       dict.append(pronStringForWord);
     }
     WordAndProns wordAndProns = new WordAndProns(word, possibleProns);
-    logger.warn("\taddDictParts for " + word + " made " + wordAndProns);
+
+    if (DEBUG_PARTS) logger.info("addDictParts for " + word + " made " + wordAndProns);
+
     return wordAndProns;
   }
 
@@ -409,6 +425,8 @@ public class PronunciationLookup implements IPronunciationLookup {
   }
 
   /**
+   * TODO : only try to do this for FRENCH!
+   *
    * for instance in french we want to try
    * <p>
    * provient-elle as
@@ -444,7 +462,11 @@ public class PronunciationLookup implements IPronunciationLookup {
 
           int size = prons.size();
           List<List<String>> possibleProns = new ArrayList<>(size);
-          logger.info("hasParts for '" + lookupToken + "' found " + size + " possible prons.");
+
+          if (DEBUG_PARTS) {
+            logger.info("hasParts for '" + lookupToken + "' found " + size + " possible prons.");
+          }
+
           for (int i = 0; i < size; i++) {
             String[] phoneSequence = prons.apply(i);
             List<String> e = Arrays.asList(phoneSequence);

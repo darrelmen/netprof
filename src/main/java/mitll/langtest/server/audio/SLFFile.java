@@ -176,7 +176,7 @@ public class SLFFile {
     int ctr = 0;
     for (String sentence : sentencesToUse) {
 //      logger.info("createSimpleSLFFile sentence " + sentence);
-      Collection<String> tokens = svd.getTokens(sentence, removeAllAccents);
+      Collection<String> tokens = svd.getTokens(sentence, removeAllAccents, false);
 
       int prevNode = 0;  // points to initial node
       int currentSil = 0;
