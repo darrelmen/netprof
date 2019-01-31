@@ -135,7 +135,9 @@ public abstract class BaseUserDAO extends DAO {
     return importUser;
   }
 
-  public int getDefaultUser() {    return defaultUser;  }
+  public int getDefaultUser() {
+    return defaultUser;
+  }
 
   public int getDefaultMale() {
     return defaultMale;
@@ -160,12 +162,21 @@ public abstract class BaseUserDAO extends DAO {
     if (currentUser == null) {
       LoginResult loginResult = addUserAndGetID(user);
       int userid = loginResult.getId();
+      if (loginResult.getResultType() == LoginResult.ResultType.Unknown) {
+        logger.warn("got result " + loginResult.getResultType());
+      } else {
+        logger.info("result " + loginResult.getResultType() + " for user " + userid);
+      }
 
       User userWhere = userid == -1 ? null : getUserWhere(userid);
       if (userWhere != null) {
-        userWhere.setResetKey(loginResult.getToken());
+        String token = loginResult.getToken();
+        userWhere.setResetKey(token);
+        if (token.isEmpty()) logger.warn("addUser huh? empty token?");
+      } else {
+        logger.warn("addUser : can't find user with id " + userid);
       }
-      logger.info("addUser : added new user " + userWhere);
+      logger.info("addUser : added new " + userWhere);
       return userWhere;
     } else {
       logger.warn("addUser : user exists ");

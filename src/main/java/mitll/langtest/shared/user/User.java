@@ -459,8 +459,6 @@ public class User extends MiniUser implements ReportUser {
             "\n\tadmin   " + isAdmin() : "") +
         (!isEnabled() ?
             "\n\tenabled " + isEnabled() : "") +
-//        "\n\tdialect " + getDialect() +
-//        "\n\temailH " + getEmailHash() +
         (email.isEmpty() ? "" :
             "\n\temail   " + email) +
         (getPasswordHash().isEmpty() ? "" :

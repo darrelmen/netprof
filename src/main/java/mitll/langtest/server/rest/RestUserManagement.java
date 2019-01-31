@@ -122,6 +122,11 @@ public class RestUserManagement {
   private static final String AFFILIATION = "affiliation";
   private static final String FIRST1 = "first";
   private static final String LAST1 = "last";
+  /**
+   * on iOS:
+   * @see EAFSignUpViewController.useJsonChapterData
+   * @see #addUser(HttpServletRequest, String, String, String, JsonObject)
+   */
   private static final String RESET_PASS_KEY = "resetPassKey";
 
   private final DatabaseImpl db;
@@ -478,7 +483,11 @@ public class RestUserManagement {
         jsonObject.addProperty(EXISTING_USER_NAME, "");
       } else {
         jsonObject.addProperty(USERID, user1.getID());
-        jsonObject.addProperty(RESET_PASS_KEY, user1.getResetKey());
+        String resetKey = user1.getResetKey();
+        if (resetKey.isEmpty()) {
+          logger.warn("empty reset key?");
+        }
+        jsonObject.addProperty(RESET_PASS_KEY, resetKey);
       }
 
     } else {

@@ -675,8 +675,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       return new LoginResult(-1, ""); // password error?
     } else {
       ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
+      String emailToken = loginResult.emailToken;
+      if (emailToken.isEmpty()) logger.error("addUser huh? no email token for " + clientUserDetail);
       return new LoginResult(clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID(),
-          useUsualLogin ? "" : loginResult.emailToken);
+          useUsualLogin ? "" : emailToken);
     }
   }
 

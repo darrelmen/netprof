@@ -41,7 +41,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   private static final List<String> messages = Arrays.asList(
       "You've recorded all the items. ",
       "Click on a dot in the chart to jump back and re-record.",
-      //"Or use the arrow keys to review.",
       "Or to see your overall score click See Your Scores."
   );
   private static final boolean DO_AUTOLOAD = true;
@@ -65,6 +64,8 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   boolean showAudio;
   QuizSpec quizSpec;
   private final INavigation.VIEWS instance;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param statsFlashcardFactory
@@ -90,7 +91,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
     if (this.polyglotFlashcardContainer.getQuizSpec() == null) {
 
       int chosenList = getChosenList();
-      logger.info("PolyglotPracticePanel chosen list " +chosenList);
+      logger.info("PolyglotPracticePanel chosen list " + chosenList);
 
       controller.getListService().getQuizInfo(chosenList, new AsyncCallback<QuizSpec>() {
         @Override
@@ -328,13 +329,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
 
   private void stopTimerShowBanner() {
     controller.setBannerVisible(true);
-    logger.info("stopTimerShowBanner");
-    polyglotFlashcardContainer.cancelRoundTimer();
-  }
-
-  @Override
-  protected void onUnload() {
-    super.onUnload();
+    if (DEBUG) logger.info("PolyglotPracticePanel : stopTimerShowBanner");
     polyglotFlashcardContainer.cancelRoundTimer();
   }
 
@@ -353,8 +348,8 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   }
 
   /**
-   * @see PolyglotFlashcardFactory#sessionComplete
    * @param l
+   * @see PolyglotFlashcardFactory#sessionComplete
    */
   void showTimeRemaining(long l) {
     String value;
@@ -376,7 +371,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
       value = "";
     }
     timeLeft.setText(value);
- //   logger.info("showTimeRemaining : time left " + l);
+    //   logger.info("showTimeRemaining : time left " + l);
   }
 
   public void onSetComplete() {

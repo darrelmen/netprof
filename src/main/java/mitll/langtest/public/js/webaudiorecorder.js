@@ -261,6 +261,7 @@ function initWebAudio() {
             ' navigator.getUserMedia ' + (navigator.getMedia ? 'available.' : 'not present!'));
     } catch (e) {
         __log('initWebAudio No web audio support in this browser!');
+        __log(e);
         //console.error(e);
         webAudioMicNotAvailable();
     }

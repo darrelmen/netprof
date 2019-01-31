@@ -644,7 +644,7 @@ public class AudioFileHelper implements AlignDecode {
     String transcript = attribute.getTranscript();
 
     if (!transcript.equalsIgnoreCase(exercise.getForeignLanguage())) {
-      logger.warn("hmm, the audio transcript " + transcript + " doesn't match the exercise " + exercise.getForeignLanguage());
+      logger.warn("decodeAndRemember hmm, the audio transcript " + transcript + " doesn't match the exercise " + exercise.getForeignLanguage());
     }
 
     try {
@@ -658,9 +658,9 @@ public class AudioFileHelper implements AlignDecode {
           absoluteFile,
           language);
     } catch (Exception e) {
-      logger.error("Got " + e, e);
+      logger.error("decodeAndRemember Got " + e, e);
       logger.warn(
-          "exercise " + exercise +
+          "decodeAndRemember exercise " + exercise +
               "\n\tattribute    " + attribute +
               "\n\tuserID       " + userID +
               "\n\tabsoluteFile " + absoluteFile);

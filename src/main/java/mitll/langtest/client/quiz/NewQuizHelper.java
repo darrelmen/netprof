@@ -200,14 +200,16 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise> extends Pract
    */
   void gotQuizChoice(int listid, boolean shouldRemoveOldList) {
     if (DEBUG) {
-      logger.info("gotQuizChoice : got choice " + listid);
+      logger.info("gotQuizChoice : got choice " + listid + " should remove " + shouldRemoveOldList);
     }
 
     PolyglotFlashcardFactory<T, ClientExercise> polyglotFlashcardFactory = getPolyglotFlashcardFactory();
-    polyglotFlashcardFactory.cancelRoundTimer();
+
     if (shouldRemoveOldList) {
+      polyglotFlashcardFactory.cancelRoundTimer();
       polyglotFlashcardFactory.removeItemFromHistory(listid);
     }
+
     hideList();
 
     polyglotFlashcardFactory.startQuiz();

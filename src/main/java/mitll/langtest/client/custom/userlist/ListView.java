@@ -74,6 +74,7 @@ import java.util.logging.Logger;
 public class ListView implements ContentView, CreateListComplete {
   private final Logger logger = Logger.getLogger("ListView");
 
+  private static final String QUIZ = "Quiz";
   private static final String DO_QUIZ = "Do quiz";
   private static final String DELETE_LIST = "Delete list.";
 
@@ -555,7 +556,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   @NotNull
   private Button getQuizButton(ListContainer container) {
-    Button drill = getSuccessButton("Quiz");
+    Button drill = getSuccessButton(QUIZ);
     drill.setType(ButtonType.INFO);
 
     drill.addClickHandler(event -> showQuiz(getCurrentSelection(container)));
@@ -599,7 +600,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   @NotNull
   private Button getAddQuizButton() {
-    final Button add = new Button("Quiz", IconType.PLUS);
+    final Button add = new Button(QUIZ, IconType.PLUS);
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> dialogHelper = doAddQuiz());
     add.setType(ButtonType.SUCCESS);

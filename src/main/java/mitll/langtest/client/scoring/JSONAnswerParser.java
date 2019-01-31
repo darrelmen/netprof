@@ -37,11 +37,12 @@ class JSONAnswerParser {
    */
   @NotNull
   AudioAnswer getAudioAnswer(JSONObject jsonObject) {
-//    String message = getField(jsonObject, "MESSAGE");
     Validity validity = getValidity(jsonObject);
 
     JSONValue jsonValue2 = jsonObject.get(PATH);
-    if (jsonValue2 == null) logger.info("no path on json? validity = " + validity);
+    if (jsonValue2 == null && validity == Validity.OK) {
+      logger.warning("getAudioAnswer no path on json? validity = " + validity);
+    }
 
     AudioAnswer converted = new AudioAnswer(
         getField(jsonObject, PATH),
@@ -54,7 +55,6 @@ class JSONAnswerParser {
     converted.setResultID(getIntField(jsonObject, "resultID"));
 
     converted.setDynamicRange(getFloatField(jsonObject, "dynamicRange"));
-    //useInvalidResult(validity, getFloatField(jsonObject, "dynamicRange"));
     long timestamp = getLongField(jsonObject, "timestamp");
   //  logger.info("getAudioAnswer json timestamp " + timestamp + " " + new Date(timestamp));
     converted.setTimestamp(timestamp);
