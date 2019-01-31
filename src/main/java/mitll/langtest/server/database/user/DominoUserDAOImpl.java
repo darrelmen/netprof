@@ -108,7 +108,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final mitll.hlt.domino.shared.model.user.User.Gender DFEMALE = mitll.hlt.domino.shared.model.user.User.Gender.Female;
   private static final mitll.hlt.domino.shared.model.user.User.Gender UNSPECIFIED = mitll.hlt.domino.shared.model.user.User.Gender.Unspecified;
   private static final String NETPROF1 = "Netprof";
-  //  private static final String PRIMARY = NETPROF1;
   private static final String DEFAULT_AFFILIATION = "";
 
   private static final String UID_F = "userId";
@@ -122,7 +121,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private static final boolean DEBUG_STUDENTS = false;
   private static final boolean DEBUG_TEACHERS = false;
-  public static final String F_LAST = "F. Last";
+  private static final String F_LAST = "F. Last";
 
   private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
@@ -131,7 +130,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           "dliflc.edu",
           "mail.mil", //146
           "us.af.mil",
-          "gmail.com,",
+          "gmail.com",
           "yahoo.com",
           "mail.mil",
           "ll.mit.edu",
@@ -163,10 +162,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   private static final String VALID_EMAIL = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
 
+/*
   private static final String EMAIL_REGEX =
       "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*" +
           "@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+" +
           "(?:[A-Z]{2}|com|org|net|edu|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)\\b";
+*/
 
   private static final long STALE_DUR = 24L * 60L * 60L * 1000L;
   private static final boolean SWITCH_USER_PROJECT = false;
@@ -256,6 +257,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
               return getUser(lookupUser(key));
             }
           });
+
   /**
    * @param database
    * @see mitll.langtest.server.database.DatabaseImpl#connectToDatabases(PathHelper, ServletContext)
@@ -663,7 +665,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     boolean useUsualLogin = shouldUseUsualDominoEmail(email);
 
-//    logger.info("usual login " + useUsualLogin + " for " + email);
+    if (useUsualLogin) {
+      logger.info("addUser : usual login " + useUsualLogin + " for " + email);
+    }
 
     MyUserService.LoginResult loginResult =
         useUsualLogin ?
@@ -676,7 +680,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     } else {
       ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
       String emailToken = loginResult.emailToken;
-      if (emailToken.isEmpty()) logger.error("addUser huh? no email token for " + clientUserDetail);
+      if (emailToken.isEmpty()) {
+        logger.error("addUser (useUsualLogin = " + useUsualLogin +
+            ") : no email token for " + clientUserDetail);
+      }
       return new LoginResult(clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID(),
           useUsualLogin ? "" : emailToken);
     }
@@ -1879,9 +1886,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         myUserService.changePassword(userId, userKey, newPassword, url);
   }
 
-  private boolean shouldUseUsualDominoEmail(String email) {
+  @Override
+  public boolean shouldUseUsualDominoEmail(String email) {
     boolean b = hasBlessedEmail(email);
-    //logger.info("shouldUseUsualDominoEmail '" + email + "' - " + b);
+
+   // logger.info("shouldUseUsualDominoEmail (addUserViaEmail = " + addUserViaEmail + ") '" + email + "' - " + b);
+
     return addUserViaEmail && !b;
   }
 

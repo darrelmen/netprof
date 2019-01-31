@@ -150,37 +150,33 @@ public class ServerProperties {
   private static final String LOG_MAILFROM = "log.mailfrom";
   private static final String MAIL_FROM = "mail.from";
 
-  //  private static final String IMAGE = "image";
   private static final String NETPROF = "netprof";
 
   private static final String POSTGRES_HYDRA = "postgresHydra";
 //  private static final String POSTGRES_DATA2_DIALOG = "postgresData2Dialog";
 
 
-  public static final String ADD_USER_VIA_EMAIL = "addUserViaEmail";
-  public static final String SEND_HEARTBEAT = "sendHeartbeat";
-  public static final String HEARTBEAT_PERIOD = "heartbeatPeriod";
-  public static final String HEARTBEAT_REC1 = "heartbeatRec";
-
-  // private String dbConfig = POSTGRES_DATA2_DIALOG;
+  private static final String ADD_USER_VIA_EMAIL = "addUserViaEmail";
+  private static final String SEND_HEARTBEAT = "sendHeartbeat";
+  private static final String HEARTBEAT_PERIOD = "heartbeatPeriod";
+  private static final String HEARTBEAT_REC1 = "heartbeatRec";
 
   private static final String SCORING_MODEL = "scoringModel";
   private static final String TALKS_TO_DOMINO = "talksToDomino";
 
-  public static final String OUR_FORTH_TONE = "uu4";
+//  public static final String OUR_FORTH_TONE = "uu4";
 
-  public static final String FORTH_U_TONE = "ù";
-  public static final String THIRD_U_TONE = "ǔ";
-  public static final String SECOND_U_TONE = "ú";
-  public static final String FIRST_U_TONE = "ū";
-  public static final String UU = "uu";
-  public static final String NORMAL_U = "u";
-
+  private static final String FORTH_U_TONE = "ù";
+  private static final String THIRD_U_TONE = "ǔ";
+  private static final String SECOND_U_TONE = "ú";
+  private static final String FIRST_U_TONE = "ū";
+//  public static final String UU = "uu";
+ // public static final String NORMAL_U = "u";
 
   //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
 
   @Deprecated
-  private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
+  private String miraClassifierURL = MIRA_DEVEL;
 
   private static final String LESSON_PLAN_FILE = "lessonPlanFile";
   private static final String USE_H_2 = "useH2";
@@ -989,7 +985,7 @@ public class ServerProperties {
    * @see mitll.langtest.server.database.copy.CopyToPostgres#getDatabaseLight
    */
   public void setDBConfig(String optDatabase) {
-    //this.dbConfig = optDatabase;
+
   }
 
   /**

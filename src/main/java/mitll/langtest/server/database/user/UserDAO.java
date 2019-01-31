@@ -76,6 +76,11 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   }
 
   @Override
+  public boolean shouldUseUsualDominoEmail(String email) {
+    return false;
+  }
+
+  @Override
   public boolean isValidServer(String server) {
     return false;
   }

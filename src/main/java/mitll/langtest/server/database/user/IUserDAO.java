@@ -189,6 +189,8 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    */
   boolean changePassword(int user, String newHashPassword, String baseURL);
 
+  boolean shouldUseUsualDominoEmail(String email);
+
   /**
    * @param user
    * @param currentHashPassword
