@@ -573,7 +573,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
       {
         Language language = project.getLanguageEnum();
         iDialog.getExercises().forEach(clientExercise ->
-            db.getAudioDAO().attachAudioToExercise(clientExercise, language, new HashMap<>())
+            db.getAudioDAO().attachAudioToExercise(clientExercise, language, new HashMap<>(), project.getAudioFileHelper().getSmallVocabDecoder())
         );
 
     /*    iDialog.getExercises().forEach(exercise ->

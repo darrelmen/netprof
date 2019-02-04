@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.scoring;
 
+import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.lts.HTKDictionary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -41,7 +42,6 @@ import java.text.CharacterIterator;
 import java.text.Normalizer;
 import java.text.StringCharacterIterator;
 import java.util.*;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -62,8 +62,12 @@ public class SmallVocabDecoder {
    * @see #lcToken
    * <p>
    * remove latin capital letter i with dot above - 0130
+   * 0x2026 = three dot elipsis
+   * FF01 = full width exclamation
+   * FF1B - full semi
+   * 002D - hyphen
    */
-  private static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193;~/']";
+  private static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193\\u2026\\uFF01\\uFF1B\\u002D;~/']";
   private static final String REPLACE_ME_OE = "[\\u0152\\u0153]";
 
   /**
@@ -84,7 +88,7 @@ public class SmallVocabDecoder {
   private static final String TURKISH_CAP_I = "İ";
   private static final boolean WARN_ABOUT_BAD_CHINESE = false;
 
-//  private static final String P_P = "\\p{P}";
+  private static final String P_P = "\\p{P}";
   private static final String INTERNAL_PUNCT_REGEX = "(?:(?<!\\S)\\p{Punct}+)|(?:\\p{Punct}+(?!\\S))";
 
   private static final String ONE_SPACE = " ";
@@ -94,7 +98,9 @@ public class SmallVocabDecoder {
 
   private static final int TOO_LONG = 8;
 
-  private final Pattern pattern, tickPattern;
+  private final Pattern punctCleaner;
+  private final Pattern tickPattern;
+  // private final Pattern englishFrenchPattern;
   private final Pattern internalPunctPattern;
   private final Pattern frenchPunct;
   private final Pattern spacepattern;
@@ -104,28 +110,35 @@ public class SmallVocabDecoder {
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PREFIX = false;
   private static final boolean DEBUG_SEGMENT = false;
+  private final Language language;
 
   /**
    * Compiles some handy patterns.
+   *
+   * @param language
    */
-  public SmallVocabDecoder() {
-    tickPattern = Pattern.compile("['’]");  // "don't" or "mustn't"
-    pattern = Pattern.compile(REMOVE_ME + "|" + INTERNAL_PUNCT_REGEX);
+  public SmallVocabDecoder(Language language) {
+    // and leading upside down question marks...
+    tickPattern = Pattern.compile("['’\\u00bf]");  // "don't" or "mustn't"
+    punctCleaner = Pattern.compile(REMOVE_ME + "|" + P_P);
+    //englishFrenchPattern = Pattern.compile(REMOVE_ME + "|" + INTERNAL_PUNCT_REGEX);
     internalPunctPattern = Pattern.compile(INTERNAL_PUNCT_REGEX);
     frenchPunct = Pattern.compile(FRENCH_PUNCT);
 
     replaceMeOE = Pattern.compile(REPLACE_ME_OE);
     spacepattern = Pattern.compile(P_Z);
     oepattern = Pattern.compile(REPLACE_ME_OE);
+    this.language = language;
   }
 
   /**
    * @param htkDictionary
    * @param isAsianLanguage
+   * @param language
    * @see PronunciationLookup#makeDecoder
    */
-  public SmallVocabDecoder(HTKDictionary htkDictionary, boolean isAsianLanguage) {
-    this();
+  public SmallVocabDecoder(HTKDictionary htkDictionary, boolean isAsianLanguage, Language language) {
+    this(language);
     this.htkDictionary = htkDictionary;
     this.isAsianLanguage = isAsianLanguage;
 //    logger.info("SmallVocabDecoder dict now " + ((htkDictionary != null) ? htkDictionary.size() : " null dict") + " asian " + isAsianLanguage);
@@ -262,9 +275,6 @@ public class SmallVocabDecoder {
           "\n\tafter trim       '" + trimmedSent + "'");
     }
 
-    // Matcher matcher = spacepattern.matcher(trimmedSent);
-
-
     for (String untrimedToken : spacepattern.split(trimmedSent)) { // split on spaces
       String token = untrimedToken.trim();  // necessary?
       if (token.length() > 0) {
@@ -336,15 +346,19 @@ public class SmallVocabDecoder {
     alt = internalPunctPattern.matcher(alt).replaceAll("");
     alt = replaceMeOE.matcher(alt).replaceAll(OE);
 
-    String trim = alt
-        //  .replaceAll(FRENCH_PUNCT, "")
-        // .replaceAll(REPLACE_ME_OE, OE)
-        .replaceAll(TURKISH_CAP_I, "I")
-        //  .replaceAll(INTERNAL_PUNCT_REGEX, ONE_SPACE)
-        //.replaceAll("\\s+", " ")
-        .trim();
+    if (language == Language.TURKISH) {
+      alt = alt
+          //  .replaceAll(FRENCH_PUNCT, "")
+          // .replaceAll(REPLACE_ME_OE, OE)
+          .replaceAll(TURKISH_CAP_I, "I")
+          //  .replaceAll(INTERNAL_PUNCT_REGEX, ONE_SPACE)
+          //.replaceAll("\\s+", " ")
+          .trim();
+    } else {
+      alt = alt.trim();
+    }
     //logger.warn("getTrimmedLeaveAccents before " + sentence + " after "+ trim);
-    return trim;
+    return alt;
   }
 
   /**
@@ -384,7 +398,6 @@ public class SmallVocabDecoder {
   public String getTrimmedLeaveLastSpace(String sentence) {
 /*    String s = sentence
         .replaceAll(REMOVE_ME, ONE_SPACE)
-        //   .replaceAll("", " ")
         .replaceAll(P_Z, ONE_SPACE)  // normalize all whitespace
 
         // .replaceAll(";", " ")
@@ -397,24 +410,16 @@ public class SmallVocabDecoder {
         .replaceAll(REPLACE_ME_OE, OE);*/
 
     String alt = tickPattern.matcher(sentence).replaceAll("");
-    alt = pattern.matcher(alt).replaceAll(ONE_SPACE);
+    alt = punctCleaner.matcher(alt).replaceAll(ONE_SPACE);
 
 //    if (sentence.length() != alt.length()) {
 //      logger.info("'" + sentence + "' = '" + alt + "'");
 //    }
 
     alt = oepattern.matcher(alt).replaceAll(OE);
-    // logger.info("'" + alt + "' = '" + alt + "'");
     alt = spacepattern.matcher(alt).replaceAll(ONE_SPACE);
-    // logger.info("'" + alt + "' = '" + alt + "'");
-    //  s = s.trim();
     alt = alt.trim();
 
-    // logger.info("'" + alt + "' = '" + alt + "'");
-
-//    if (!s.equals(alt)) {
-//      logger.warn("bug '" + sentence + "' old '" + s + "' vs new '" + alt + "'");
-//    }
     return alt;
   }
 

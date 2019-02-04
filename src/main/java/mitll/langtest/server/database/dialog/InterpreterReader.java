@@ -42,6 +42,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
   private static final String INTERPRETER1 = "Interpreter";
   public static final String KEY_WORDS_TO_OMIT = "Key Words to Omit";
   public static final String CORE_WORDS_PHRASES = "Core words / phrases";
+  public static final String TITLE = "title";
   //  private final boolean DEBUG = true;
   private final ExcelUtil excelUtil = new ExcelUtil();
 
@@ -165,8 +166,9 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
               coreWordsIndex = i;
             } else if (colNormalized.equalsIgnoreCase(CORE_WORDS_PHRASES)) {
               coreWordsIndex = i;
-            } else if (colNormalized.equalsIgnoreCase("title")) {
+            } else if (colNormalized.equalsIgnoreCase(TITLE)) {
               titleIndex = i;
+              logger.info("found title index " +titleIndex);
             } else if (colNormalized.equalsIgnoreCase("orientation")) {
               orientationIndex = i;
             } else if (colNormalized.equalsIgnoreCase("pinyin")) {
@@ -190,8 +192,14 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
             String pinyin = getCellValue(pinyinIndex, theRow);
             String corePinyin = getCellValue(corePinyinIndex, theRow);
 
-            if (!title.isEmpty()) lastTitle = title;
-            if (!orientation.isEmpty()) lastOrientation = orientation;
+            if (!title.isEmpty()) {
+              lastTitle = title;
+              logger.info("current title " + title);
+            }
+            if (!orientation.isEmpty()) {
+              lastOrientation = orientation;
+              logger.info("current orientation " + orientation);
+            }
             if (DEBUG) {
               if (!text.isEmpty())
                 logger.info("row #" + rows + " : " + audioFilenames + " = " + text);
@@ -226,12 +234,11 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
               realID = Integer.parseInt(id);
 
               if (lastDialogID != realID && lastDialogID != -1) {
-                //title = getTitleOrDefault(lastDialogID, title);
-                logger.info("readFromSheet adding dialog " + title);
+                logger.info("readFromSheet adding dialog title " + lastTitle);
                 addDialog(defaultUser, project, engProject, dialogToSlick, modified, typeOrder, exercises,
                     coreEng, coreFL, speakers,
                     lastRawDialogID,
-                    imageBaseDir, title, orientation);
+                    imageBaseDir, lastTitle, orientation);
 
                 // start new set of speakers...
                 speakers = new LinkedHashSet<>();

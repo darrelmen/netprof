@@ -138,8 +138,12 @@ public class ServerProperties {
   private static final String MAIL_SERVER = "mail.server";
   private static final String SERVER_NAME = "SERVER_NAME";
   private static final String DEBUG_ONE_PROJECT = "debugOneProject";
-  private static final String IOS_VERSION = "1.0.1";
+
+
+  private static final String IOS_VERSION = "2.0.0";
+
   private static final String I_OS_VERSION = "iOSVersion";
+
   private static final String IMPL_VERSION = Attributes.Name.IMPLEMENTATION_VERSION.toString();
   public static final String DEFAULT_MAIL_FROM = "netprof-admin@ll.mit.edu";
   private static final String MAIL_REPLYTO = "mail.replyto";

@@ -99,7 +99,6 @@ public class JsonExport {
                     Collection<Integer> preferredVoices,
                     boolean isEnglish,
                     AudioFileHelper audioFileHelper) {
-    // Map<String, Integer> phoneToCount1 = phoneToCount;
     this.sectionHelper = sectionHelper;
     this.preferredVoices = preferredVoices;
     this.isEnglish = isEnglish;

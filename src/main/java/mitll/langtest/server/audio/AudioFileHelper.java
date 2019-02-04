@@ -35,7 +35,6 @@ package mitll.langtest.server.audio;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.server.*;
-import mitll.langtest.server.autocrt.AutoCRT;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseServices;
@@ -110,8 +109,6 @@ public class AudioFileHelper implements AlignDecode {
   private final Project project;
   private ASR asrScoring;
   private DecodeCorrectnessChecker decodeCorrectnessChecker;
-
-  private AutoCRT autoCRT;
 
   private final DatabaseServices db;
   private final LogAndNotify logAndNotify;
@@ -1762,34 +1759,6 @@ public class AudioFileHelper implements AlignDecode {
         .getDictFile();
   }
 
-  /**
-   * @param relativeConfigDir
-   * @paramx studentAnswersDB
-   * @paramx crtScoring
-   * @see LangTestDatabaseImpl#init()
-   */
-  public AutoCRT makeAutoCRT(String relativeConfigDir) {
-    if (autoCRT == null) {
-//      logger.debug("lang " + langTestDatabase);
-//      logger.debug("serverProps " + serverProps);
-//      if (langTestDatabase == null) {
-//        logger.warn("skipping set install path...");
-//      } else {
-//        langTestDatabase.setInstallPath(serverProps.getUseFile(), studentAnswersDB);
-//      }
-      return makeClassifier(relativeConfigDir);
-    } else return autoCRT;
-  }
-
-  private AutoCRT makeClassifier(String relativeConfigDir) {
-    //  Export export = studentAnswersDB.getExport();
-    autoCRT = new AutoCRT(null, this, new InDictFilter(this),
-        pathHelper.getInstallPath(), relativeConfigDir,
-        serverProps.getMinPronScore(), serverProps.getMiraFlavor(), serverProps.getMiraClassifierURL(),
-        serverProps.useMiraClassifier(), serverProps);
-//    autoCRT.makeClassifier();
-    return autoCRT;
-  }
 
   private DecodeCorrectnessChecker getChecker() {
     if (decodeCorrectnessChecker == null) {

@@ -99,6 +99,7 @@ public abstract class BaseAudioDAO extends DAO {
   /**
    * @param database
    * @param userDAO
+   * @param language
    * @see SlickAudioDAO#SlickAudioDAO(Database, DBConnection, IUserDAO)
    */
   BaseAudioDAO(Database database, IUserDAO userDAO) {
@@ -106,6 +107,7 @@ public abstract class BaseAudioDAO extends DAO {
     this.userDAO = userDAO;
     netProfDurLength = database.getServerProps().getAudioBaseDir().length();
     mediaDir = database.getServerProps().getMediaDir();
+
   }
 
   /**
@@ -198,7 +200,10 @@ public abstract class BaseAudioDAO extends DAO {
   private <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises,
                                                                  Language language,
                                                                  Map<Integer, List<AudioAttribute>> audioAttributesForExercises) {
-    boolean doDEBUG = DEBUG_ATTACH;// || exercises.size() < 6;// || (id == 125524) || (id == 126304);
+    boolean doDEBUG = DEBUG_ATTACH;
+
+    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(language);
+
     for (ClientExercise exercise : exercises) {
       List<AudioAttribute> audioAttributes = audioAttributesForExercises.get(exercise.getID());
 
@@ -208,7 +213,7 @@ public abstract class BaseAudioDAO extends DAO {
           logger.info("attachAudioToExercises no audio for " + id);
         }
       } else {
-        boolean attachedAll = attachAudio(exercise, audioAttributes, language, doDEBUG);
+        boolean attachedAll = attachAudio(exercise, audioAttributes, language, doDEBUG, smallVocabDecoder);
 
         if (doDEBUG) {
           int id = exercise.getID();
@@ -223,7 +228,7 @@ public abstract class BaseAudioDAO extends DAO {
         }
       }
 
-      addContextAudio(language, audioAttributesForExercises, exercise);
+      addContextAudio(language, audioAttributesForExercises, exercise, smallVocabDecoder);
     }
   }
 
@@ -258,11 +263,12 @@ public abstract class BaseAudioDAO extends DAO {
    * @param language
    * @param audioAttributesForExercises
    * @param exercise
+   * @param smallVocabDecoder
    * @see #attachAudioToExercises(Collection, Language, int)
    */
   private void addContextAudio(Language language,
                                Map<Integer, List<AudioAttribute>> audioAttributesForExercises,
-                               ClientExercise exercise) {
+                               ClientExercise exercise, SmallVocabDecoder smallVocabDecoder) {
     int id = exercise.getID();
     boolean doDEBUG = DEBUG_ATTACH;
 
@@ -282,13 +288,13 @@ public abstract class BaseAudioDAO extends DAO {
       } else {
         if (doDEBUG)
           logger.info("addContextAudio for " + id + " and " + contextID + " found " + onlyContextFromParent.size() + " to attach e.g. " + onlyContextFromParent.iterator().next().getTranscript());
-        attachAudio(contextSentence, onlyContextFromParent, language, false);
+        attachAudio(contextSentence, onlyContextFromParent, language, false, smallVocabDecoder);
       }
 
       if (audioAttributes != null) { // not sure when this would be true...
 //        logger.info("addContextAudio found context audio for context exercise " + contextID + " " + audioAttributes.size());
         /*boolean attachedAll =*/
-        attachAudio(contextSentence, audioAttributes, language, false);
+        attachAudio(contextSentence, audioAttributes, language, false, smallVocabDecoder);
       } else {
         if (doDEBUG)
           logger.info("addContextAudio no audio found for context parent exercise " + id + " and context " + contextID);
@@ -315,10 +321,11 @@ public abstract class BaseAudioDAO extends DAO {
   /**
    * @param firstExercise
    * @param language
+   * @param smallVocabDecoder
    * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
    * @see DatabaseImpl#writeUserListAudio(OutputStream, int, int, AudioExportOptions)
    */
-  public int attachAudioToExercise(ClientExercise firstExercise, Language language, Map<Integer, MiniUser> idToMini) {
+  public int attachAudioToExercise(ClientExercise firstExercise, Language language, Map<Integer, MiniUser> idToMini, SmallVocabDecoder smallVocabDecoder) {
     long then = System.currentTimeMillis();
     int id = firstExercise.getID();
     Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(id, idToMini);
@@ -340,7 +347,7 @@ public abstract class BaseAudioDAO extends DAO {
     }*/
 
     then = now;
-    boolean attachedAll = attachAudio(firstExercise, audioAttributes, language, debugAttach);
+    boolean attachedAll = attachAudio(firstExercise, audioAttributes, language, debugAttach, smallVocabDecoder);
     now = System.currentTimeMillis();
 
     if (now - then > WARN_DURATION)
@@ -375,6 +382,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param audioAttributes
    * @param language
    * @param debug
+   * @param smallVocabDecoder
    * @see AudioExport#writeFolderContents
    * @see #attachAudioToExercise
    * @see mitll.langtest.server.json.JsonExport#getJsonArray
@@ -383,7 +391,8 @@ public abstract class BaseAudioDAO extends DAO {
   private boolean attachAudio(ClientExercise firstExercise,
                               Collection<AudioAttribute> audioAttributes,
                               Language language,
-                              boolean debug) {
+                              boolean debug,
+                              SmallVocabDecoder smallVocabDecoder) {
     boolean allSucceeded = true;
 
     // unfortunately we update existing records, so the id will not change, but the path will
@@ -401,7 +410,7 @@ public abstract class BaseAudioDAO extends DAO {
     for (AudioAttribute candidate : audioAttributes) {
       if (!currentPaths.contains(candidate.getAudioRef())) {
         n++;
-        boolean didIt = attachAudioAndFixPath(firstExercise, mediaDir, candidate, language, debug);
+        boolean didIt = attachAudioAndFixPath(firstExercise, mediaDir, candidate, language, debug, smallVocabDecoder);
         if (didIt) {
 //          logger.debug("\tadding path '" + candidate.getAudioRef() + "' " + candidate + " to " + firstExercise.getOldID());
           if (doDebug)
@@ -454,6 +463,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @param attr
    * @param language
    * @param debug
+   * @param smallVocabDecoder
    * @return false if the text of the exercise and the transcript on the audio don't match
    * @see #attachAudio
    */
@@ -461,7 +471,8 @@ public abstract class BaseAudioDAO extends DAO {
                                         String mediaDir,
                                         AudioAttribute attr,
                                         Language language,
-                                        boolean debug) {
+                                        boolean debug,
+                                        SmallVocabDecoder smallVocabDecoder) {
     Collection<ClientExercise> directlyRelated = firstExercise.getDirectlyRelated();
     boolean isContext = attr.isContextAudio();
     String exerciseText = isContext && !directlyRelated.isEmpty() ?
@@ -469,7 +480,7 @@ public abstract class BaseAudioDAO extends DAO {
         firstExercise.getForeignLanguage();
     boolean forgiving = language != Language.LEVANTINE;
 
-    boolean isMatch = forgiving ? isMatchExToAudioArabic(attr, exerciseText) : matchTranscriptAttr(exerciseText, attr.getTranscript());
+    boolean isMatch = forgiving ? isMatchExToAudioArabic(attr, exerciseText, smallVocabDecoder) : matchTranscriptAttr(exerciseText, attr.getTranscript(), smallVocabDecoder);
     if (isMatch) {
       // add to both if context???
       if (DEBUG_ATTACH) {
@@ -496,7 +507,7 @@ public abstract class BaseAudioDAO extends DAO {
 
       if (isContext) {
         for (ClientExercise dir : directlyRelated) {
-          if (isMatchExToAudio(attr, dir, true)) {
+          if (isMatchExToAudio(attr, dir, true, smallVocabDecoder)) {
             boolean b = firstExercise.getMutableAudio().addAudio(attr);
             if (!b) logger.info("2 didn't attach to " + dir.getID() + " " + dir.getEnglish());
             break;
@@ -566,23 +577,24 @@ public abstract class BaseAudioDAO extends DAO {
     }
   }
 
-  private boolean isMatchExToAudio(AudioAttribute attr, CommonShell dir, boolean forgivingMatch) {
+  private boolean isMatchExToAudio(AudioAttribute attr, CommonShell dir, boolean forgivingMatch, SmallVocabDecoder smallVocabDecoder) {
     String foreignLanguage = dir.getForeignLanguage();
     String transcript = attr.getTranscript();
-    return forgivingMatch ? isMatchExToAudioArabic(attr, foreignLanguage) : isNoAccentMatch(foreignLanguage, transcript);
+    return forgivingMatch ? isMatchExToAudioArabic(attr, foreignLanguage, smallVocabDecoder) : isNoAccentMatch(foreignLanguage, transcript);
   }
 
   /**
    * Todo : check if language is arabic before doing normArabic.
    *
    * @param foreignLanguage
+   * @param smallVocabDecoder
    * @return
    * @paramx attr
    */
-  private boolean isMatchExToAudioArabic(AudioAttribute attr, String foreignLanguage) {
+  private boolean isMatchExToAudioArabic(AudioAttribute attr, String foreignLanguage, SmallVocabDecoder smallVocabDecoder) {
     String normFL = getNorm(removePunct(foreignLanguage));
     String normT = getNorm(removePunct(attr.getTranscript()));
-    return matchTranscriptAttr(normFL, normT);
+    return matchTranscriptAttr(normFL, normT, smallVocabDecoder);
   }
 
   private String getNorm(String foreignLanguage) {
@@ -1004,7 +1016,6 @@ public abstract class BaseAudioDAO extends DAO {
         removePunct(transcript).toLowerCase().equals(removePunct(foreignLanguage).toLowerCase());
   }
 
-  SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder();
 
   /**
    * TODO : don't duplicate code
@@ -1015,7 +1026,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @paramx transcript
    * @see mitll.langtest.server.database.audio.BaseAudioDAO#isMatchExToAudio
    */
-  private boolean matchTranscriptAttr(String foreignLanguage, String transcript) {
+  private boolean matchTranscriptAttr(String foreignLanguage, String transcript, SmallVocabDecoder smallVocabDecoder) {
     foreignLanguage = foreignLanguage.trim();
     if (transcript != null) {
       transcript = transcript.trim();

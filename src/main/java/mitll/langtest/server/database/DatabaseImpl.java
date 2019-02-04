@@ -89,6 +89,7 @@ import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
@@ -114,7 +115,6 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.util.*;
@@ -1077,7 +1077,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
-  public IProject getIProject(int projID) { return getProject(projID);}
+  public IProject getIProject(int projID) {
+    return getProject(projID);
+  }
 
   /**
    * @param projectid if it's -1 only do something if it's on import
@@ -1582,7 +1584,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       exercise = getUserExerciseByExID(exid, swap);
     }
 
-    String nativeAudio = audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguageEnum(), idToMini);
+    String nativeAudio = audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguageEnum(), idToMini, project.getAudioFileHelper().getSmallVocabDecoder());
     return new NativeAudioResult(nativeAudio, exercise != null && exercise.isContext());
     // return nativeAudio;
   }
@@ -1693,6 +1695,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * JUST FOR TESTING?
+   *
    * @param request
    * @param projid
    * @param userid
@@ -1734,7 +1737,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     // logger.info("writeUserList " + listid + " in " + projectid);
 
     UserList<CommonShell> userListByID = getUserListManager().getSimpleUserListByID(listid);
-
+    Project project = getProject(projectid);
+    SmallVocabDecoder smallVocabDecoder = project == null ? null : project.getAudioFileHelper().getSmallVocabDecoder();
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
       return language + "_Unknown";
@@ -1752,7 +1756,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
       Map<Integer, MiniUser> idToMini = new HashMap<>();
       for (CommonExercise ex : copyAsExercises) {
         userListManager.addAnnotations(ex);
-        getAudioDAO().attachAudioToExercise(ex, language, idToMini);
+        if (smallVocabDecoder != null) {
+          getAudioDAO().attachAudioToExercise(ex, language, idToMini, smallVocabDecoder);
+        }
       }
       long now = System.currentTimeMillis();
       logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");

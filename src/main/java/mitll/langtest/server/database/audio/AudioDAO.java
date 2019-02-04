@@ -39,6 +39,7 @@ import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.domino.AudioCopy;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -643,6 +644,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     return results;
   }
 
+/*
   private Set<Integer> getExidResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
     Set<Integer> results = new HashSet<>();
@@ -654,6 +656,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
     return results;
   }
+*/
 
   /**
    * @seex mitll.langtest.server.database.ImportCourseExamples#copyAudio
@@ -927,7 +930,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   @Override
-  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, Language language, Map<Integer, MiniUser> idToMini) {
+  public String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise, Language language, Map<Integer, MiniUser> idToMini, SmallVocabDecoder smallVocabDecoder) {
     return null;
   }
 

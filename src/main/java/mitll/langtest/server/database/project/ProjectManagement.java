@@ -464,6 +464,8 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
+   * We should be able to look at the file and figure out the project and owner id
+   *
    * answers/spanish/answers/plan/1711/0/subject-896/answer_1511623283958.wav
    * /opt/netprof/answers/spanish/answers/plan/1711/0/subject-896/answer_1511623283958.wav
    *
@@ -475,30 +477,47 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public int getUserForFile(String requestURI) {
-    Pattern pattern = Pattern.compile(ANSWERS1);
-    Matcher matcher = pattern.matcher(requestURI);
+    int userID = -1;
 
-    if (matcher.find()) {
-      String group = matcher.group(1);
-      // logger.info("getUserForFile lang " + group);
-      List<Project> matches = getProjectsForLanguage(group);
+    String[] split = requestURI.split("subject-");
+    if (split.length == 2) {
+      String s1 = split[1];
+      String[] split1 = s1.split("/");
+      String s = split1[0];
+      try {
+        // logger.info("getUserForFile parse " + s);
+        userID = Integer.parseInt(s);
+      } catch (NumberFormatException e) {
+        logger.warn("getUserForFile couldn't parse " + s + " in " + s1 + " of " + requestURI);
+      }
+    } else {  // fallback???
+      Pattern pattern = Pattern.compile(ANSWERS1);
+      Matcher matcher = pattern.matcher(requestURI);
 
-      if (matches.isEmpty()) {
-        //  logger.info("getUserForFile lang " + group + " matches " + matches.size());
-        int userID = getUserIDFromAll(requestURI);
-        if (userID != -1) {
+      if (matcher.find()) {
+        String group = matcher.group(1);
+        // logger.info("getUserForFile lang " + group);
+        List<Project> matches = getProjectsForLanguage(group);
+
+        if (matches.isEmpty()) {
+          logger.warn("getUserForFile lang " + group + " match no projects?");
+          userID = getUserIDFromAll(requestURI);
+        } else {
+          // logger.info("getUserForFile lang " + group + " matches " + matches.size());
+          userID = getUserIDFrom(requestURI, matches);
+          if (userID == -1) {
+            logger.info("getUserForFile lang " + group + " project matches " + matches.size());
+          }
           return userID;
         }
       } else {
-        // logger.info("getUserForFile lang " + group + " matches " + matches.size());
-        return getUserIDFrom(requestURI, matches);
+        return getUserIDFromAll(requestURI);
       }
-    } else {
-      return getUserIDFromAll(requestURI);
     }
-    //}
-//    logger.info("getUserForFile couldn't find recorder of " + requestURI);
-    return -1;
+    if (userID == -1) {
+      logger.info("getUserForFile couldn't find recorder of " + requestURI);
+    }
+    return userID;
   }
 
   /**

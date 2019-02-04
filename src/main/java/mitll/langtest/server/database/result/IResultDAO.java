@@ -89,18 +89,7 @@ public interface IResultDAO extends IDAO {
 
   MonitorResult getMonitorResultByID(int id);
 
-/*
-  Collection<UserAndTime> getUserAndTimes();
-*/
-
   UserToCount getUserToNumAnswers();
-
-/*
-  <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises,
-                                                                   int userid,
-                                                                   Collator collator,
-                                                                   Language language);
-*/
 
   List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
                                                                           List<Integer> allIds,
@@ -124,17 +113,7 @@ public interface IResultDAO extends IDAO {
 
   int ensureDefault(int projid, int beforeLoginUser, int unknownExerciseID);
 
- // int getDefaultResult();
-
-/*
-  Map<String, Integer> getStudentAnswers(int projid);
-*/
-
   int getStudentForPath(int projid, String path);
-
-/*
-  Collection<Integer> getPracticedByUser(int userid, int projid);
-*/
 
   /**
    * @param userid

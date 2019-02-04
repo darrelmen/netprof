@@ -592,7 +592,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     Map<Integer, List<Word>> ridToWords = new HashMap<>();
 
     ridToPhones.forEach((rid, v) -> {
-      ArrayList<Word> value = new ArrayList<>();
+      List<Word> value = new ArrayList<>();
       ridToWords.put(rid, value);
 
       Map<Integer, List<SlickPhoneReport>> wseqToPhones = v.stream().collect(Collectors.groupingBy(SlickPhoneReport::wseq));
@@ -609,10 +609,11 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
     });
 
     // ridToWords.keySet().forEach(rid->logger.info("rid " + rid));
-    ridToWords.forEach((k,v)->{
-      logger.info(k + " = " + v);
-      v.forEach(word -> logger.info(word.getWord() + " " + word.getPhones()));
-    });
+//    ridToWords.forEach((k,v)->{
+//      logger.info(k + " = " + v);
+//      v.forEach(word -> logger.info(word.getWord() + " " + word.getPhones()));
+//    });
+
     return ridToWords;
   }
 

@@ -45,6 +45,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * AttachSecurityFilter: A security filter that ensures a user is allowed
@@ -70,6 +72,7 @@ public class AttachSecurityFilter implements Filter {
 
   private IUserSecurityManager securityManager;
   private ServletContext servletContext;
+  private String webappName = NETPROF;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_RESPONSE = false;
@@ -77,6 +80,23 @@ public class AttachSecurityFilter implements Filter {
 
   public void init(FilterConfig filterConfig) {
     this.servletContext = filterConfig.getServletContext();
+
+    String contextPath = servletContext.getContextPath();
+
+    log.info("context        '" + contextPath + "'");
+    String realContextPath = servletContext == null ? "" : servletContext.getRealPath(servletContext.getContextPath());
+    log.info("realContextPath " + realContextPath);
+
+    List<String> pathElements = Arrays.asList(realContextPath.split(realContextPath.contains("\\") ? "\\\\" : "/"));
+    log.info("pathElements    " + pathElements);
+
+    webappName = pathElements.get(pathElements.size() - 1);
+    log.info("webappName " + webappName);
+
+    if (!webappName.equalsIgnoreCase("dialog") || !webappName.equalsIgnoreCase(NETPROF)) {
+      log.warn("huh? unexpected : app name is " + webappName);
+    }
+
 //    if (DEBUG) log.info("found servlet context " + servletContext);
   }
 
@@ -282,7 +302,7 @@ public class AttachSecurityFilter implements Filter {
 
   @NotNull
   private String removeNetprof(String fileToFind) {
-    return fileToFind.startsWith(NETPROF) ? fileToFind.substring(NETPROF.length()) : fileToFind;
+    return fileToFind.startsWith(webappName) ? fileToFind.substring(webappName.length()) : fileToFind;
   }
 
   private int getUserForWavFile(String fileToFind) {

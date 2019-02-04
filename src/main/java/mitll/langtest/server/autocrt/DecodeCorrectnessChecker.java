@@ -67,10 +67,10 @@ public class DecodeCorrectnessChecker {
   private static final Logger logger = LogManager.getLogger(DecodeCorrectnessChecker.class);
 
   private static final String UNKNOWN_MODEL = ASR.UNKNOWN_MODEL;
-  public static final String MANDARIN = "mandarin";
-  public static final String FRENCH = "french";
-  public static final String KOREAN = "korean";
-  public static final String SPANISH = "spanish";
+//  public static final String MANDARIN = "mandarin";
+//  public static final String FRENCH = "french";
+//  public static final String KOREAN = "korean";
+//  public static final String SPANISH = "spanish";
   private static final String UD = "Ud.";
   private static final String USTED = "usted";
   private static final String UDS = "Uds.";

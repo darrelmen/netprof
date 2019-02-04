@@ -37,6 +37,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.domino.AudioCopy;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -881,6 +882,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param exercise
    * @param language
    * @param idToMini
+   * @param smallVocabDecoder
    * @return
    * @see Database#getNativeAudio
    */
@@ -889,7 +891,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
                                int userid,
                                CommonExercise exercise,
                                Language language,
-                               Map<Integer, MiniUser> idToMini) {
+                               Map<Integer, MiniUser> idToMini,
+                               SmallVocabDecoder smallVocabDecoder) {
     if (exercise != null) {
       MiniUser.Gender genderOfUser = getGender(userToGender, userid);
       if (genderOfUser == null) {
@@ -899,7 +902,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
       if (!exercise.hasRefAudio()) {
 //        logger.info("getNativeAudio trying to attach audio to " + exercise.getID());
-        attachAudioToExercise(exercise, language, idToMini);
+        attachAudioToExercise(exercise, language, idToMini, smallVocabDecoder);
       }
 
       AudioAttribute audioAttributePrefGender = exercise.getAudioAttributePrefGender(genderOfUser == Male, true);

@@ -107,7 +107,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final String STATUS = "status";
   private static final String LOG = "log";
 
-  private final SLFFile slfFile = new SLFFile();
+  private final SLFFile slfFile;
 
   // TODO make Scores + phoneLab + wordLab an object so have something more descriptive than Object[]
   private final Cache<String, HydraOutput> decodeAudioToScore; // key => (Scores, wordLab, phoneLab)
@@ -153,7 +153,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     fileToDuration = CacheBuilder.newBuilder().maximumSize(100000).build();
     generator = new TranscriptSegmentGenerator(properties);
     this.project = project;
-
+    this.slfFile = new SLFFile(project.getLanguageEnum());
     int port = getWebservicePort();
     phoneToDisplay = Collections.emptyMap();//properties.getPhoneToDisplay(languageEnum);
 //      logger.info("(" + language + ") phone->display " + phoneToDisplay);

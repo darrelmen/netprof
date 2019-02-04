@@ -30,7 +30,7 @@ public class PronunciationLookup implements IPronunciationLookup {
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PARTS = false;
-  public static final int TOO_MANY_PRONS = 50;
+  private static final int TOO_MANY_PRONS = 50;
 
 
   private SmallVocabDecoder svDecoderHelper = null;
@@ -69,7 +69,7 @@ public class PronunciationLookup implements IPronunciationLookup {
 
   private void makeDecoder() {
     if (svDecoderHelper == null && htkDictionary != null) {
-      svDecoderHelper = new SmallVocabDecoder(htkDictionary, isAsianLanguage);
+      svDecoderHelper = new SmallVocabDecoder(htkDictionary, isAsianLanguage, language);
     }
   }
 
@@ -394,7 +394,7 @@ public class PronunciationLookup implements IPronunciationLookup {
           ") using unk phone for '" + word + "' in '" + transcript + "'" + s);
     }
     dict.append(getUnkPron(word));
-    candidates.add(new WordAndProns(word, UNK));
+    candidates.add(new WordAndProns(word, UNK).setUNK(true));
   }
 
   private WordAndProns addDictParts(boolean justPhones, StringBuilder dict, List<List<String>> wordProns, String word) {

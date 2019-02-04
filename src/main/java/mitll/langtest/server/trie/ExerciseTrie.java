@@ -263,7 +263,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
         } else {
           String substring = trimmed.substring(token.length());
 
-          String trimmed1 = smallVocabDecoder.getTrimmed(substring );
+          String trimmed1 = smallVocabDecoder.getTrimmed(substring);
           if (trimmed1.isEmpty()) {
             //logger.error("is empty ");
           } else {
