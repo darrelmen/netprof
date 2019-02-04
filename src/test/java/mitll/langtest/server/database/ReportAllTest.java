@@ -131,7 +131,7 @@ public class ReportAllTest extends BaseTest {
       H2Connection connection = getH2Connection("war/config/english/" + db);
 
       DatabaseImpl database = getDatabase(config);
-      database.doReportForYear(2015);
+  //    database.doReportForYear(2015);
 
       try {
         Thread.sleep(1000);
@@ -179,7 +179,7 @@ public class ReportAllTest extends BaseTest {
       H2Connection connection = getH2(db);
 
       DatabaseImpl database = getDatabase(config);
-      database.doReportForYear(2016);
+     // database.doReportForYear(2016);
 
       try {
         Thread.sleep(1000);

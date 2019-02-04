@@ -37,6 +37,8 @@ import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.project.Language;
+import mitll.npdata.dao.lts.KoreanLTS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
@@ -55,7 +57,7 @@ public class TrieTest extends BaseTest {
     Exercise e = new Exercise(1, 1, test, 1, false);
     e.setForeignLanguage("soemthing korean");
     exercises.add(e);
-    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder();
+    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(Language.KOREAN);
     ExerciseTrie<CommonExercise> korean = new ExerciseTrie<>(exercises, "korean", smallVocabDecoder, true, false);
 
     testAll(test,korean);

@@ -46,6 +46,7 @@ import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.server.scoring.WordAndProns;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.custom.UserList;
@@ -59,11 +60,12 @@ import org.junit.Test;
 
 import java.text.Normalizer;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ProjectTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(ProjectTest.class);
-  public static final int MAX = 200;
-  public static final int PROJECTID = 9;
+  private static final int MAX = 200;
+  private static final int PROJECTID = 9;
 
 /*  @Test
   public void testProjectInfo() {
@@ -89,7 +91,7 @@ public class ProjectTest extends BaseTest {
 
   @Test
   public void testFrench2() {
-    SmallVocabDecoder svd = new SmallVocabDecoder();
+    SmallVocabDecoder svd = new SmallVocabDecoder(Language.FRENCH);
     {
       String ff = "\uFB00";
       String normalized = Normalizer.normalize(ff, Normalizer.Form.NFKC);
@@ -138,9 +140,9 @@ public class ProjectTest extends BaseTest {
             audioFileHelper.getPronunciationsFromDictOrLTSFull(foreignLanguage, "");
 
         logger.warn("For " +
-            "\n\ten " + exercise.getEnglish() +
-            "\n\tfl " + exercise.getForeignLanguage() +
-            "\n\t   " + pronunciationsFromDictOrLTS
+                "\n\ten " + exercise.getEnglish() +
+                "\n\tfl " + exercise.getForeignLanguage() +
+                "\n\t   " + pronunciationsFromDictOrLTS
 //            +
 //            "\n\tLM " + audioFileHelper.getLM(foreignLanguage,false)+
 //            "\n\tTR " + audioFileHelper.getHydraTranscript(foreignLanguage)
@@ -150,6 +152,106 @@ public class ProjectTest extends BaseTest {
 //    project.getAudioFileHelper().getPronunciationsFromDictOrLTS()
   }
 
+  @Test
+  public void testFrenchSegmentation() {
+    DatabaseImpl spanish = getDatabase();
+    spanish.getProject(2);
+    Project project = spanish.getProjectManagement().getProductionByLanguage(Language.FRENCH);
+    reportLTS(project);
+  }
+
+  @Test
+  public void testEngSegmentation() {
+    DatabaseImpl spanish = getDatabase();
+    spanish.getProject(2);
+    reportLTS(spanish.getProjectManagement().getProductionByLanguage(Language.ENGLISH));
+  }
+
+  @Test
+  public void testChineseSegmentation() {
+    DatabaseImpl spanish = getDatabase();
+    spanish.getProject(2);
+    reportLTS(spanish.getProjectManagement().getProductionByLanguage(Language.MANDARIN));
+  }
+
+  @Test
+  public void testGMAIL() {
+    DatabaseImpl spanish = getDatabase();
+    spanish.getProject(2);
+
+    boolean b = spanish.getUserDAO().shouldUseUsualDominoEmail("gvidaver@gmail.com");
+    logger.info("got " + b);
+  }
+
+  @Test
+  public void testEngSegmentation2() {
+    DatabaseImpl spanish = getDatabase();
+    spanish.getProject(2);
+    Project project = spanish.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
+    CommonExercise exerciseByID = project.getExerciseByID(127646);
+    Set<String> ltsWords = new HashSet<>();
+    Set<Integer> lts = new HashSet<>();
+    Set<Integer> unks = new HashSet<>();
+    Set<String> unkWords = new HashSet<>();
+
+    checkEx(project, ltsWords, unkWords, lts, unks, exerciseByID);
+    //reportLTS(productionByLanguage);
+  }
+
+  @Test
+  public void testEngSegmentation3() {
+    DatabaseImpl spanish = getDatabase();
+    spanish.getProject(2);
+    Project project = spanish.getProjectManagement().getProductionByLanguage(Language.SPANISH);
+    CommonExercise exerciseByID = project.getExerciseByID(4039);
+    Set<String> ltsWords = new HashSet<>();
+    Set<String> unkWords = new HashSet<>();
+    Set<Integer> lts = new HashSet<>();
+    Set<Integer> unks = new HashSet<>();
+
+    checkEx(project, ltsWords, unkWords, lts, unks, exerciseByID);
+    //reportLTS(productionByLanguage);
+  }
+
+  private void reportLTS(Project project) {
+    Set<String> ltsWords = new HashSet<>();
+    Set<String> unkWords = new HashSet<>();
+    Set<Integer> lts = new HashSet<>();
+    Set<Integer> unks = new HashSet<>();
+    project.getRawExercises().forEach(exerciseByID -> {
+      // CommonExercise exerciseByID = project.getExerciseByID(exid);
+      if (!exerciseByID.hasEnglishAttr()) {
+        checkEx(project, ltsWords, unkWords, lts, unks, exerciseByID);
+      }
+    });
+    logger.info("found " + lts.size() + " exercises with lts " + ltsWords.size() + " : " + ltsWords);
+    logger.info("found " + unks.size() + " exercises with unks " + unks.size() + " : " + unkWords);
+  }
+
+  private void checkEx(Project project, Set<String> ltsWords, Set<String> unkWords, Set<Integer> lts, Set<Integer> unks, CommonExercise exerciseByID) {
+    List<WordAndProns> possibleProns = new ArrayList<>();
+    String foreignLanguage = exerciseByID.getForeignLanguage();
+    project.getAudioFileHelper().getASR().getHydraDict(foreignLanguage, "", possibleProns);
+    List<WordAndProns> fromLTS = possibleProns.stream().filter(WordAndProns::isFromLTS).collect(Collectors.toList());
+    if (!fromLTS.isEmpty()) {
+      // possibleProns.forEach(wordAndProns -> logger.info("got " + wordAndProns));
+      logger.warn(exerciseByID.getID() + " : '" + foreignLanguage + "' = " + fromLTS);
+      fromLTS.forEach(wordAndProns -> ltsWords.add(wordAndProns.getWord()));
+      lts.add(exerciseByID.getID());
+    } else {
+      List<WordAndProns> unk = possibleProns.stream().filter(WordAndProns::isUNK).collect(Collectors.toList());
+      if (!unk.isEmpty()) {
+        possibleProns.forEach(wordAndProns -> logger.info("got " + wordAndProns));
+        logger.warn(exerciseByID.getID() + " : '" + foreignLanguage + "' = " + unk);
+        unk.forEach(wordAndProns -> unkWords.add(wordAndProns.getWord()));
+        unks.add(exerciseByID.getID());
+      }
+    }
+  /*  else {
+      logger.info(exerciseByID.getID() + " : '" + foreignLanguage + "' = " + fromLTS);
+      possibleProns.forEach(wordAndProns -> logger.info("got " + wordAndProns));
+    }*/
+  }
 
   @Test
   public void testSegmentation() {
