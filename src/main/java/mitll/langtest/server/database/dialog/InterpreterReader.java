@@ -192,14 +192,6 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
             String pinyin = getCellValue(pinyinIndex, theRow);
             String corePinyin = getCellValue(corePinyinIndex, theRow);
 
-            if (!title.isEmpty()) {
-              lastTitle = title;
-              logger.info("current title " + title);
-            }
-            if (!orientation.isEmpty()) {
-              lastOrientation = orientation;
-              logger.info("current orientation " + orientation);
-            }
             if (DEBUG) {
               if (!text.isEmpty())
                 logger.info("row #" + rows + " : " + audioFilenames + " = " + text);
@@ -235,10 +227,11 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
               if (lastDialogID != realID && lastDialogID != -1) {
                 logger.info("readFromSheet adding dialog title " + lastTitle);
+
                 addDialog(defaultUser, project, engProject, dialogToSlick, modified, typeOrder, exercises,
                     coreEng, coreFL, speakers,
                     lastRawDialogID,
-                    imageBaseDir, lastTitle, orientation);
+                    imageBaseDir, lastTitle, lastOrientation);
 
                 // start new set of speakers...
                 speakers = new LinkedHashSet<>();
@@ -249,6 +242,15 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
               lastDialogID = realID;
               lastRawDialogID = dialogID;
+
+              if (!title.isEmpty()) {
+                lastTitle = title;
+                logger.info("current title " + title);
+              }
+              if (!orientation.isEmpty()) {
+                lastOrientation = orientation;
+                logger.info("current orientation " + orientation);
+              }
 
               try {
                 boolean genderMatch = /*gender.equalsIgnoreCase(M_2_M) ||*/ gender.isEmpty();
@@ -267,7 +269,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
                       core.add(new CoreEntry(coreWords, corePinyin, speakerID, turnID, lang));
                     }
                     prevtriple = triple;
-                    logger.info("readFromSheet # exercises (" + triple + ") for " + id + " is " + exercises.size());
+//                    logger.info("readFromSheet # exercises (" + triple + ") for " + id + " is " + exercises.size());
                   } else {
                     logger.warn("readFromSheet skipping " + gender);
                   }
@@ -283,7 +285,10 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
         }
       }
 
-      addDialog(defaultUser, project, engProject, dialogToSlick, modified, typeOrder, exercises, coreEng, coreFL, speakers, lastRawDialogID, imageBaseDir, lastTitle, lastOrientation);
+      addDialog(defaultUser, project, engProject, dialogToSlick, modified, typeOrder,
+          exercises, coreEng, coreFL, speakers, lastRawDialogID, imageBaseDir,
+          lastTitle, lastOrientation);
+
     } catch (Exception e) {
       logger.error("got " + e, e);
     }

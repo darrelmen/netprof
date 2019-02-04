@@ -1739,6 +1739,8 @@ public class CopyToPostgres<T extends CommonShell> {
   }
 
   /**
+   * Cleans the dialogs first...
+   *
    * There had better be an english project if we're doing interpreter dialogs.
    *
    * @param to
@@ -1753,9 +1755,16 @@ public class CopyToPostgres<T extends CommonShell> {
       Project project = database.getProject(to);
       if (project == null) logger.error("copyDialog no project with id " + to);
       else {
-        Project english = database.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
-        if (!new DialogPopulate(database, getPathHelper(database)).populateDatabase(project, english)) {
-          logger.info("project " + project + " already has dialog data.");
+
+        DialogPopulate dialogPopulate = new DialogPopulate(database, getPathHelper(database));
+        boolean b = dialogPopulate.cleanDialog(project);
+        if (b) {
+          Project english = database.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
+          if (!dialogPopulate.populateDatabase(project, english)) {
+            logger.info("project " + project + " already has dialog data.");
+          }
+        } else {
+          logger.warn("didn't clean the dialogs from " + project);
         }
       }
     }
