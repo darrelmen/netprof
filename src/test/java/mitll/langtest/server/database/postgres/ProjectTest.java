@@ -46,6 +46,7 @@ import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.server.scoring.TextNormalizer;
 import mitll.langtest.server.scoring.WordAndProns;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.analysis.UserInfo;
@@ -251,6 +252,45 @@ public class ProjectTest extends BaseTest {
       logger.info(exerciseByID.getID() + " : '" + foreignLanguage + "' = " + fromLTS);
       possibleProns.forEach(wordAndProns -> logger.info("got " + wordAndProns));
     }*/
+  }
+
+  @Test
+  public void testNormalization() {
+    {
+      TextNormalizer textNormalizer = new TextNormalizer(Language.SPANISH);
+      List<String> strings = Arrays.asList(
+          "そして, 何を飲みましたか",
+          "Don't go to the store.",
+          "¿Cuándo" +
+              "visita" +
+              "a" +
+              "sus" +
+              "padres?",
+          "l'assurance");
+      strings.forEach(fl -> logger.info("from " + fl + " -> " + textNormalizer.getNorm(fl)));
+    }
+
+    {
+      TextNormalizer textNormalizer = new TextNormalizer(Language.FRENCH);
+      List<String> strings = Arrays.asList(
+          "そして, 何を飲みましたか",
+          "Don't go to the store.",
+          "l'assurance");
+      strings.forEach(fl -> logger.info("from " + fl + " -> " + textNormalizer.getNorm(fl)));
+    }
+
+    {
+      String turkish =    "İki " +
+          "Bin " +
+          "Bir " +
+          "Uzay " +
+          "Macerası ";
+
+      TextNormalizer textNormalizer = new TextNormalizer(Language.TURKISH);
+      List<String> strings = Arrays.asList(
+          turkish);
+      strings.forEach(fl -> logger.info("from " + fl + " -> '" + textNormalizer.getNorm(fl) + "'"));
+    }
   }
 
   @Test

@@ -282,7 +282,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
 
   private String getTrimmed(String english) {
     String sentence = english.toLowerCase();
-    String trimmed = smallVocabDecoder.getTrimmedLeaveLastSpace(sentence);
+    String trimmed = smallVocabDecoder.getTrimmed(sentence);
 //    if (!sentence.equals(trimmed)) {
 //      logger.info("before " + sentence);
 //      logger.info("after  " + trimmed);
