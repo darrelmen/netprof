@@ -75,7 +75,7 @@ public class SmallVocabDecoder {
    *
    * @see #segmentation
    */
-  private static final String JAPANESE_PUNCT = "[\\u3001\\u3002\\uFF0C\\uFF1F\\u2019\\u2026\\u003A\\u0022\\u00B7]";
+  private static final String JAPANESE_PUNCT = "[\\u3001\\u3002\\uFF0C\\uFF1F\\u2019\\u2026\\u003A\\u0022\\u00B7\\uFF01\\uFF1B\\u300A]";
   private static final String OE = "oe";
 
   private static final char FULL_WIDTH_ZERO = '\uFF10';
@@ -110,6 +110,7 @@ public class SmallVocabDecoder {
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PREFIX = false;
   private static final boolean DEBUG_SEGMENT = false;
+  private static final boolean DEBUG_MANDARIN = true;
   private final Language language;
 
   /**
@@ -312,7 +313,7 @@ public class SmallVocabDecoder {
    */
   private List<String> getMandarinTokens(String foreignLanguage) {
     String segmentation = segmentation(foreignLanguage);
-    if (DEBUG) logger.info("getMandarinTokens '" + foreignLanguage + "' = '" + segmentation + "'");
+//    if (DEBUG_MANDARIN) logger.info("getMandarinTokens '" + foreignLanguage + "' = '" + segmentation + "'");
     return getTokens(segmentation, false, false);
   }
 

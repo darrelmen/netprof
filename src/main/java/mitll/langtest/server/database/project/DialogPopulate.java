@@ -99,7 +99,7 @@ public class DialogPopulate {
     int projid = project.getID();
     IDialogDAO dialogDAO = db.getDialogDAO();
     if (!dialogDAO.getDialogs(projid).isEmpty()) {
-      logger.info("Project #" + projid + " already has dialog data so not adding any.");
+      logger.info("\n\nProject #" + projid + " already has dialog data so not adding any.");
       return false;
     } else {
       waitUntilTrieReady(project);
@@ -131,6 +131,9 @@ public class DialogPopulate {
 
       logger.info("maybeDoInterpreterImport read " + dialogToSlick.size());
       addDialogs(project, englishProject, dialogDAO, exToAudio, defaultUser, DialogType.INTERPRETER, dialogToSlick);
+    }
+    else {
+      logger.warn("skipping lang " +languageEnum);
     }
   }
 

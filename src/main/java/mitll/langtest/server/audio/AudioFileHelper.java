@@ -1570,6 +1570,10 @@ public class AudioFileHelper implements AlignDecode {
                                      String url,
                                      DecoderOptions decoderOptions,
                                      int userID) {
+    if (exercise == null) {
+      return new AudioAnswer();
+    }
+
     AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.getDurationInMillis(), exercise.getID());
     boolean b = exercise.asCommon().hasEnglishAttr();
 

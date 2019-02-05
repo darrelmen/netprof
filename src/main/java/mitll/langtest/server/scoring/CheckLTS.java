@@ -361,7 +361,7 @@ class CheckLTS {
   private PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
     //   logger.info("lang  " + language + " is asian " + isAsianLanguage);
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary, isAsianLanguage, languageInfo);
-    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, false, false);
+    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, languageInfo != Language.FRENCH, false);
 
     List<String> firstPron = new ArrayList<>();
     Set<String> uphones = new TreeSet<>();

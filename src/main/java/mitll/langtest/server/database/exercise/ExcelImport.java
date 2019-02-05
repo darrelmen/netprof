@@ -48,14 +48,9 @@ import mitll.npdata.dao.SlickUpdateDominoPair;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.poi.POIXMLProperties;
-import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
-import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.openxml4j.opc.internal.PackagePropertiesPart;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.xmlbeans.XmlException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -104,8 +99,8 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
   }
 
   @Override
-  public void refresh(int exid) {
-
+  public boolean refresh(int exid) {
+    return false;
   }
 
   private static final String BOOK = "book";
@@ -824,7 +819,6 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                                 CommonExercise imported) {
     exercises.add(imported);
   }
-
 
 
   /**

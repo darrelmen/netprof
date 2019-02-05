@@ -164,6 +164,8 @@ public class PronunciationLookup implements IPronunciationLookup {
               max = Math.max(max, pc.length);
             }
             total += max;
+          } else {
+            logger.warn("no lts output for " + word1);
           }
         }
       }
@@ -297,7 +299,9 @@ public class PronunciationLookup implements IPronunciationLookup {
                       List<WordAndProns> candidates,
                       String word) {
     String word1 = word.toLowerCase();
-    //  logger.info("no dict entry for " + word1);
+
+   // logger.info("useLTS no dict entry for " + word1);
+
     LTS lts = getLTS();
     String[][] process = lts.process(word1);
 

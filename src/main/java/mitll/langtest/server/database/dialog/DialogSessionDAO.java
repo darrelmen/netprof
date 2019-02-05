@@ -233,7 +233,7 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
    */
   @Override
   public int add(DialogSession ds) {
-//    logger.info("Add session " + ds);
+    logger.info("Add session " + ds);
 
     int dialogid = ds.getDialogid();
     if (dialogid < 1) {
@@ -246,10 +246,14 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
       long end = ds.getEnd();
       if (end == 0) end = modified;
 
+      int userid = ds.getUserid();
+      int projid = ds.getProjid();
+      logger.info("add for user " +userid + " in " + projid + " for dialog "+dialogid);
+
       int insert = dao.insert(new SlickDialogSession(
           -1,
-          ds.getUserid(),
-          ds.getProjid(),
+          userid,
+          projid,
           dialogid,
           new Timestamp(modified),
           new Timestamp(end),
@@ -260,7 +264,8 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
           ds.getSpeakingRate()
       ));
 
-      //  logger.info("add " + ds + " id " + insert);
+      logger.info("add " + ds +
+          "\n\tid " + insert);
       return insert;
     }
   }

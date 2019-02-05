@@ -454,12 +454,14 @@ public class ProjectManagement implements IProjectManagement {
         try {
           sleep(1000);
           logger.info("rememberUsers ---> no default user yet.....");
-        } catch (InterruptedException e) {
-          e.printStackTrace();
+        } catch ( Exception e) {
+          logger.warn("got " + e,e);
         }
       }
 
+      logger.info("about to remember users for  " +projectID);
       db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUsersForProject(projectID));
+      logger.info("finished remembering users for  " +projectID);
     }, "ProjectManagement.rememberUsers_" + projectID).start();
   }
 

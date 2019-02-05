@@ -1750,21 +1750,23 @@ public class CopyToPostgres<T extends CommonShell> {
    */
   private static void copyDialog(int to, String propertiesFile) {
     database = getDatabase(propertiesFile);
-    if (to == -1) logger.error("remember to set the project id");
+    if (to == -1) logger.error("copyDialog remember to set the project id");
     else {
       Project project = database.getProject(to);
-      if (project == null) logger.error("copyDialog no project with id " + to);
-      else {
-
+      if (project == null) {
+        logger.error("\n\n\n\ncopyDialog no project with id " + to);
+      } else {
+        logger.info("\n\n\npopulate for " + to + " in " + propertiesFile);
+        logger.info("\n\n\npopulate for " + project);
         DialogPopulate dialogPopulate = new DialogPopulate(database, getPathHelper(database));
-        boolean b = dialogPopulate.cleanDialog(project);
-        if (b) {
-          Project english = database.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
-          if (!dialogPopulate.populateDatabase(project, english)) {
-            logger.info("project " + project + " already has dialog data.");
-          }
+        //       boolean b = dialogPopulate.cleanDialog(project);
+        //     if (b) {
+        Project english = database.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
+        logger.info("populate found " + english);
+        if (!dialogPopulate.populateDatabase(project, english)) {
+          logger.warn("project " + project + " already has dialog data.");
         } else {
-          logger.warn("didn't clean the dialogs from " + project);
+          logger.info("add the dialogs to " + project);
         }
       }
     }

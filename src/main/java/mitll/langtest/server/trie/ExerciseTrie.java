@@ -212,25 +212,27 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private void addFL(boolean isMandarin, boolean hasClickableCharacters, T exToReturnOnMatch, String fl) {
     fl = getTrimmed(fl);
 
-    if (debug) logger.info("addFL " + fl + " for " + exToReturnOnMatch.getID());
-    addEntryToTrie(new ExerciseWrapper<>(fl, exToReturnOnMatch));
-    //addSubstrings(exToReturnOnMatch, fl);
+    if (!fl.isEmpty()) {
+      if (debug) logger.info("addFL " + fl + " for " + exToReturnOnMatch.getID());
+      addEntryToTrie(new ExerciseWrapper<>(fl, exToReturnOnMatch));
+      //addSubstrings(exToReturnOnMatch, fl);
 
-    addSuffixes(exToReturnOnMatch, fl);
+      addSuffixes(exToReturnOnMatch, fl);
 
-    Collection<String> tokens = smallVocabDecoder.getTokensAllLanguages(isMandarin, fl, removeAllPunct);
-    for (String token : tokens) {
-      addEntry(exToReturnOnMatch, token);
-      // String noAccents = removeDiacritics(token);
-      String noAccents = StringUtils.stripAccents(token);
+      Collection<String> tokens = smallVocabDecoder.getTokensAllLanguages(isMandarin, fl, removeAllPunct);
+      for (String token : tokens) {
+        addEntry(exToReturnOnMatch, token);
+        // String noAccents = removeDiacritics(token);
+        String noAccents = StringUtils.stripAccents(token);
 
-      if (!token.equals(noAccents) && !noAccents.isEmpty()) {
-        addEntry(exToReturnOnMatch, noAccents);
+        if (!token.equals(noAccents) && !noAccents.isEmpty()) {
+          addEntry(exToReturnOnMatch, noAccents);
+        }
       }
-    }
 
-    if (hasClickableCharacters) {
-      addClickableCharacters(exToReturnOnMatch, fl);
+      if (hasClickableCharacters) {
+        addClickableCharacters(exToReturnOnMatch, fl);
+      }
     }
   }
 
@@ -244,9 +246,11 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private void addEnglish(T exercise, String english) {
     if (english != null && !english.isEmpty()) {
       String trimmed = getTrimmed(english);
-      if (debug) logger.info("addEnglish 2 " + trimmed);
-      addEntryToTrie(new ExerciseWrapper<>(trimmed, exercise));
-      addSuffixes(exercise, trimmed);
+      if (!trimmed.isEmpty()) {
+        if (debug) logger.info("addEnglish 2 " + trimmed);
+        addEntryToTrie(new ExerciseWrapper<>(trimmed, exercise));
+        addSuffixes(exercise, trimmed);
+      }
     }
   }
 
