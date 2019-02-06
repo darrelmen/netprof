@@ -47,14 +47,13 @@ public class NormalizerTest extends BaseTest {
   @Test
   public void testNormalization() {
     {
-      TextNormalizer textNormalizer = new TextNormalizer(Language.SPANISH);
+      TextNormalizer textNormalizer = new TextNormalizer(Language.SPANISH.name());
       List<String> strings = Arrays.asList(
           "そして, 何を飲みましたか",
 
           "Don't go to the store.",
 
-          "¿Cuándo " +
-              "visita " +
+          "¿Cuándo  visita " +
               "a " +
               "sus " +
               "padres?",
@@ -65,7 +64,7 @@ public class NormalizerTest extends BaseTest {
     }
 
     {
-      TextNormalizer textNormalizer = new TextNormalizer(Language.FRENCH);
+      TextNormalizer textNormalizer = new TextNormalizer(Language.FRENCH.name());
       List<String> strings = Arrays.asList(
           "そして, 何を飲みましたか",
           "Don't go to the store.",
@@ -77,13 +76,9 @@ public class NormalizerTest extends BaseTest {
     }
 
     {
-      String turkish = "İki " +
-          "Bin " +
-          "Bir " +
-          "Uzay " +
-          "Macerası ";
+      String turkish = "İki  Bin  Bir  Uzay  Macerası ";
 
-      TextNormalizer textNormalizer = new TextNormalizer(Language.TURKISH);
+      TextNormalizer textNormalizer = new TextNormalizer(Language.TURKISH.name());
       List<String> strings = Arrays.asList(
           turkish);
       strings.forEach(fl -> logger.info("from " + fl + " -> '" + textNormalizer.getNorm(fl) + "'"));
