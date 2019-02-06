@@ -278,45 +278,6 @@ public class ProjectTest extends BaseTest {
   }
 
   @Test
-  public void testNormalization() {
-    {
-      TextNormalizer textNormalizer = new TextNormalizer(Language.SPANISH);
-      List<String> strings = Arrays.asList(
-          "そして, 何を飲みましたか",
-          "Don't go to the store.",
-          "¿Cuándo" +
-              "visita" +
-              "a" +
-              "sus" +
-              "padres?",
-          "l'assurance");
-      strings.forEach(fl -> logger.info("from " + fl + " -> " + textNormalizer.getNorm(fl)));
-    }
-
-    {
-      TextNormalizer textNormalizer = new TextNormalizer(Language.FRENCH);
-      List<String> strings = Arrays.asList(
-          "そして, 何を飲みましたか",
-          "Don't go to the store.",
-          "l'assurance");
-      strings.forEach(fl -> logger.info("from " + fl + " -> " + textNormalizer.getNorm(fl)));
-    }
-
-    {
-      String turkish =    "İki " +
-          "Bin " +
-          "Bir " +
-          "Uzay " +
-          "Macerası ";
-
-      TextNormalizer textNormalizer = new TextNormalizer(Language.TURKISH);
-      List<String> strings = Arrays.asList(
-          turkish);
-      strings.forEach(fl -> logger.info("from " + fl + " -> '" + textNormalizer.getNorm(fl) + "'"));
-    }
-  }
-
-  @Test
   public void testSegmentation() {
     DatabaseImpl spanish = getDatabase();
     Project project = spanish.getProject(3);

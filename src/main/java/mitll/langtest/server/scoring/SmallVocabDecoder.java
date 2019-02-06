@@ -101,7 +101,7 @@ public class SmallVocabDecoder extends  TextNormalizer {
    * @param language
    */
   public SmallVocabDecoder(Language language) {
-    super(language);
+    super(language.name());
   }
 
   /**

@@ -1,18 +1,12 @@
 package mitll.langtest.server.scoring;
 
-import mitll.langtest.shared.project.Language;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Pattern;
 
 public class TextNormalizer {
-  private static final Logger logger = LogManager.getLogger(TextNormalizer.class);
+  //private static final Logger logger = LogManager.getLogger(TextNormalizer.class);
 
   static final String ONE_SPACE = " ";
   private static final String OE = "oe";
@@ -52,10 +46,14 @@ public class TextNormalizer {
   private final Pattern frenchPunct;
   private final Pattern spacepattern;
   private final Pattern oepattern;
-  private final Language language;
+  private final boolean isAccented;
+  private final boolean isTurkish;
+  private static final String TURKISH = "TURKISH";
+  private static final Set<String> ACCENTED = new HashSet<>(Arrays.asList("FRENCH", TURKISH, "SERBIAN", "CROATIAN"));
 
-  public TextNormalizer(Language language) {
-    this.language = language;
+  public TextNormalizer(String language) {
+    this.isAccented = !ACCENTED.contains(language);
+    this.isTurkish = TURKISH.equalsIgnoreCase(language);;
     // and leading upside down question marks...
     tickPattern = Pattern.compile("['’\\u00bf]");  // "don't" or "mustn't"
     punctCleaner = Pattern.compile(REMOVE_ME + "|" + P_P);
@@ -67,11 +65,7 @@ public class TextNormalizer {
   }
 
   public String getNorm(String raw) {
-    return String.join(" ", getTokens(raw,
-        language != Language.FRENCH &&
-            language != Language.TURKISH &&
-            language != Language.CROATIAN &&
-            language != Language.SERBIAN, false));
+    return String.join(" ", getTokens(raw, isAccented, false));
   }
 
   /**
@@ -84,18 +78,18 @@ public class TextNormalizer {
    */
   public List<String> getTokens(String sentence, boolean removeAllAccents, boolean debug) {
     List<String> all = new ArrayList<>();
-    if (sentence.isEmpty()) {
+ /*   if (sentence.isEmpty()) {
       logger.warn("huh? empty sentence?");
-    }
+    }*/
     String trimmedSent = getTrimmedSent(sentence, removeAllAccents);
 
-    boolean b = DEBUG || debug;
+  /*  boolean b = DEBUG || debug;
     if (b && !sentence.equalsIgnoreCase(trimmedSent)) {
       logger.info("getTokens " +
           "\n\tremoveAllAccents " + removeAllAccents + "'" +
           "\n\tbefore           '" + sentence + "'" +
           "\n\tafter trim       '" + trimmedSent + "'");
-    }
+    }*/
 
     for (String untrimedToken : spacepattern.split(trimmedSent)) { // split on spaces
       String token = untrimedToken.trim();  // necessary?
@@ -108,11 +102,13 @@ public class TextNormalizer {
       }
     }
 
+/*
     if (b) logger.info("getTokens " +
         "\n\tbefore     '" + sentence + "'" +
         "\n\tafter trim '" + trimmedSent + "'" +
         "\n\tall        (" + all.size() + ")" + all
     );
+*/
 
     return all;
   }
@@ -178,7 +174,7 @@ public class TextNormalizer {
     alt = internalPunctPattern.matcher(alt).replaceAll("");
     alt = oepattern.matcher(alt).replaceAll(OE);
 
-    if (language == Language.TURKISH) {
+    if (isTurkish) {
       alt = alt
           .replaceAll(TURKISH_CAP_I, NORMAL_I)
           .trim();
@@ -186,5 +182,23 @@ public class TextNormalizer {
       alt = alt.trim();
     }
     return alt;
+  }
+
+  public static void main(String[] args) {
+    if (args.length < 2) {
+      System.out.println("usage (" + args.length + ") language token1 ... tokenN");
+
+    } else {
+      String lang = args[0];
+      try {
+      //  Language language = Language.valueOf(lang.toUpperCase());
+        StringBuilder builder = new StringBuilder();
+        for (int i = 1; i < args.length; i++) builder.append(args[i]).append(" ");
+        // logger.info("norm : " + lang + " " + builder);
+        System.out.println(new TextNormalizer(lang.toUpperCase()).getNorm(builder.toString()));
+      } catch (IllegalArgumentException e) {
+        System.err.println("couldn't parse \"" + lang + "\" as a language");
+      }
+    }
   }
 }
