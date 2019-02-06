@@ -39,6 +39,7 @@ import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
@@ -55,6 +56,7 @@ import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Deals with downloads from site -- for excel spreadsheets and zips of audio.
@@ -74,6 +76,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String AUDIO = "audio";
   private static final String LIST = "list";
   private static final String DIALOG = "d";
+  public static final String S = DIALOG + "=";
   private static final String FILE = "file";
 
   private static final String COMPRESSED_SUFFIX = "mp3";
@@ -166,7 +169,17 @@ public class DownloadServlet extends DatabaseServlet {
 
           queryString = decode;
 
-          if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
+          if (queryString.contains(S)) {
+            String[] split = queryString.split(S);
+
+            if (split.length == 2) {
+              String[] splitArgs = split[1].split(REGEXAMPERSAND);
+              String listid = splitArgs[0];
+              if (!listid.isEmpty()) {
+                writeDialogList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
+              }
+            }
+          } else if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
             donwloadAList(response, db, projid, hasProjectSpecificAudio, queryString);
           } else if (queryString.startsWith(FILE)) {
             returnAudioFile(response, db, queryString, language, projid);
@@ -532,6 +545,38 @@ public class DownloadServlet extends DatabaseServlet {
 
       options.setUserList(true);
       db.writeUserListAudio(response.getOutputStream(),
+          id == null ? -1 : id,
+          projectid,
+          options);
+    } catch (Exception e) {
+      logger.error("couldn't write zip?", e);
+    }
+  }
+
+  private void writeDialogList(HttpServletResponse response,
+                               DatabaseImpl db,
+                               String dialogID,
+                               int projectid,
+                               AudioExportOptions options) {
+    Integer id = null;
+    try {
+      id = Integer.parseInt(dialogID);
+    } catch (NumberFormatException e) {
+      logger.error("couldn't parse " + dialogID);
+    }
+
+    try {
+      final int fid = id == null ? -1 : id;
+
+      List<IDialog> collect = db.getProject(projectid).getDialogs().stream().filter(d -> d.getID() == fid).collect(Collectors.toList());
+
+      String name = id == null | collect.isEmpty() ? "unknown" : collect.get(0).getEnglish();
+      name = name.replaceAll(",", "_").replaceAll(" ", "_");
+      name += ".zip";
+      setHeader(response, name);
+
+      options.setUserList(true);
+      db.writeDialogItems(response.getOutputStream(),
           id == null ? -1 : id,
           projectid,
           options);

@@ -118,6 +118,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.Thread.sleep;
 import static mitll.langtest.server.PathHelper.ANSWERS;
@@ -1737,41 +1738,71 @@ public class DatabaseImpl implements Database, DatabaseServices {
     // logger.info("writeUserList " + listid + " in " + projectid);
 
     UserList<CommonShell> userListByID = getUserListManager().getSimpleUserListByID(listid);
-    Project project = getProject(projectid);
-    SmallVocabDecoder smallVocabDecoder = project == null ? null : project.getAudioFileHelper().getSmallVocabDecoder();
+    String name = "";
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
       return language + "_Unknown";
     } else {
       //logger.debug("writing contents of " + userListByID);
-      long then = System.currentTimeMillis();
-      List<CommonExercise> copyAsExercises = new ArrayList<>();
 
-      for (CommonShell ex : userListByID.getExercises()) {
-        CommonExercise customOrPredefExercise = getCustomOrPredefExercise(projectid, ex.getID());
-        if (customOrPredefExercise != null) {
-          copyAsExercises.add(customOrPredefExercise);
-        } else logger.warn("writeUserListAudio no exercise found = " + ex.getID());
-      }
-      Map<Integer, MiniUser> idToMini = new HashMap<>();
-      for (CommonExercise ex : copyAsExercises) {
-        userListManager.addAnnotations(ex);
-        if (smallVocabDecoder != null) {
-          getAudioDAO().attachAudioToExercise(ex, language, idToMini, smallVocabDecoder);
-        }
-      }
-      long now = System.currentTimeMillis();
-      logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
-      new AudioExport(getServerProps()).writeUserListAudio(
-          out,
-          userListByID.getName(),
-          getSectionHelper(projectid),
-          copyAsExercises,
-          language.getLanguage(),
-          listid == COMMENT_MAGIC_ID,
-          options);
+      name = userListByID.getName();
+      boolean isCommentList = listid == COMMENT_MAGIC_ID;
+      doAudioExport(out, isCommentList, projectid, options, language, name, userListByID.getExercises());
     }
-    return language + "_" + userListByID.getName();
+    return language + "_" + name;
+  }
+
+  public String writeDialogItems(OutputStream out,
+                                 int dialogID,
+                                 int projectid,
+                                 AudioExportOptions options) throws Exception {
+    Language language = getLanguageEnum(projectid);
+    if (dialogID == -1) return language + "_Unknown";
+    String name = "";
+    List<IDialog> collect = getProject(projectid).getDialogs().stream().filter(d -> d.getID() == dialogID).collect(Collectors.toList());
+    if (collect.isEmpty()) {
+      logger.error("huh? can't find user list " + dialogID);
+      return language + "_Unknown";
+    } else {
+      IDialog iDialog = collect.get(0);
+      name = iDialog.getEnglish() + "_" + iDialog.getForeignLanguage();
+      doAudioExport(out, false, projectid, options, language, name, iDialog.getExercises());
+    }
+
+    return language + "_" + name;
+
+  }
+
+  private <T extends CommonShell> void doAudioExport(OutputStream out, boolean isCommentList, int projectid, AudioExportOptions options,
+                                                     Language language, String name, List<T> exercises) throws Exception {
+
+    long then = System.currentTimeMillis();
+    List<CommonExercise> copyAsExercises = new ArrayList<>();
+    for (CommonShell ex : exercises) {
+      CommonExercise customOrPredefExercise = getCustomOrPredefExercise(projectid, ex.getID());
+      if (customOrPredefExercise != null) {
+        copyAsExercises.add(customOrPredefExercise);
+      } else logger.warn("writeUserListAudio no exercise found = " + ex.getID());
+    }
+    Map<Integer, MiniUser> idToMini = new HashMap<>();
+    Project project = getProject(projectid);
+    SmallVocabDecoder smallVocabDecoder = project == null ? null : project.getAudioFileHelper().getSmallVocabDecoder();
+    for (CommonExercise ex : copyAsExercises) {
+      userListManager.addAnnotations(ex);
+      if (smallVocabDecoder != null) {
+        getAudioDAO().attachAudioToExercise(ex, language, idToMini, smallVocabDecoder);
+      }
+    }
+    long now = System.currentTimeMillis();
+    logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
+    new AudioExport(getServerProps()).writeUserListAudio(
+        out,
+        name,
+        getSectionHelper(projectid),
+        copyAsExercises,
+        language.getLanguage(),
+        isCommentList,
+        options);
   }
 
   /**
