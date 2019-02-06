@@ -245,20 +245,20 @@ public class PronunciationLookup implements IPronunciationLookup {
       if (!word.equals(" ") && !word.isEmpty()) {
         boolean easyMatch, lowerMatch = false, stripMatch = false;
 
-        if (DEBUG) logger.info("getPronunciationsFromDictOrLTS look in dict for '" + word + "'");
+        if (DEBUG || debug) logger.info("getPronunciationsFromDictOrLTS look in dict for '" + word + "'");
         if ((easyMatch = htkDictionary.contains(word)) ||
             (lowerMatch = htkDictionary.contains(word.toLowerCase())) ||
             (russian && (stripMatch = htkDictionary.contains(getSmallVocabDecoder().removeAccents(word))))
         ) {
           candidates.add(addDictMatch(justPhones, dict, word, easyMatch, lowerMatch, stripMatch));
         } else if (!removeAllPunct && !(wordProns = hasParts(word)).isEmpty()) {
-          if (DEBUG || DEBUG_PARTS) {
+          if (DEBUG || DEBUG_PARTS || debug) {
             logger.info("getPronunciationsFromDictOrLTS add parts for '" + word + "'");
           }
           candidates.add(addDictParts(justPhones, dict, wordProns, word));
         } else {  // not in the dictionary, let's ask LTS
           {
-            if (DEBUG) {
+            if (DEBUG || debug) {
               String optional = russian ? " or " + getSmallVocabDecoder().removeAccents(word) : "";
               logger.info("getPronunciationsFromDictOrLTS NOT found in dict : '" + word + "'" + optional);
             }
@@ -300,7 +300,7 @@ public class PronunciationLookup implements IPronunciationLookup {
                       String word) {
     String word1 = word.toLowerCase();
 
-   // logger.info("useLTS no dict entry for " + word1);
+    // logger.info("useLTS no dict entry for " + word1);
 
     LTS lts = getLTS();
     String[][] process = lts.process(word1);

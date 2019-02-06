@@ -1803,8 +1803,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.error("getUserListName : can't find user list " + listid);
       return "_Unknown";
     } else {
-      String language1 = getLanguage(userListByID.getProjid());
-      return language1 + "_" + userListByID.getName();
+      return getLanguage(userListByID.getProjid()) + "_" + userListByID.getName();
     }
   }
 

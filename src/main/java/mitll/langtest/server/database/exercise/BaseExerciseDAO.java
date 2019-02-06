@@ -624,4 +624,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
   public void updatePhones(int id, int count) {
   }
+
+  public void bulkImport() {
+
+  }
 }

@@ -1725,7 +1725,7 @@ public class AudioFileHelper implements AlignDecode {
   private HTKDictionary makeDict(String modelsDir) {
     // logger.info("makeDict :" +        "\n\tmodelsDir    " + modelsDir);
     String dictFile = getDictFile(modelsDir);
-//    logger.info("makeDict :" + "\n\tdictFile    " + dictFile);
+  //  logger.info("makeDict :" + "\n\tdictFile    " + dictFile);
 
     if (dictFile != null && new File(dictFile).exists()) {
       long then = System.currentTimeMillis();

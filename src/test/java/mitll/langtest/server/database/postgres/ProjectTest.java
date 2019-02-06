@@ -212,6 +212,19 @@ public class ProjectTest extends BaseTest {
 
     checkEx(project, ltsWords, unkWords, lts, unks, exerciseByID);
     //reportLTS(productionByLanguage);
+  }  @Test
+  public void testEngSegmentation4() {
+    DatabaseImpl spanish = getDatabase();
+    spanish.getProject(2);
+    Project project = spanish.getProjectManagement().getProductionByLanguage(Language.SPANISH);
+
+    Set<String> ltsWords = new HashSet<>();
+    Set<String> unkWords = new HashSet<>();
+    Set<Integer> lts = new HashSet<>();
+    Set<Integer> unks = new HashSet<>();
+
+    check(project, ltsWords, unkWords, lts, unks, "¿Cuándo visita a sus padres?",-1);
+    //reportLTS(productionByLanguage);
   }
 
   private void reportLTS(Project project) {
@@ -230,28 +243,38 @@ public class ProjectTest extends BaseTest {
   }
 
   private void checkEx(Project project, Set<String> ltsWords, Set<String> unkWords, Set<Integer> lts, Set<Integer> unks, CommonExercise exerciseByID) {
-    List<WordAndProns> possibleProns = new ArrayList<>();
     String foreignLanguage = exerciseByID.getForeignLanguage();
-    project.getAudioFileHelper().getASR().getHydraDict(foreignLanguage, "", possibleProns);
-    List<WordAndProns> fromLTS = possibleProns.stream().filter(WordAndProns::isFromLTS).collect(Collectors.toList());
-    if (!fromLTS.isEmpty()) {
-      // possibleProns.forEach(wordAndProns -> logger.info("got " + wordAndProns));
-      logger.warn(exerciseByID.getID() + " : '" + foreignLanguage + "' = " + fromLTS);
-      fromLTS.forEach(wordAndProns -> ltsWords.add(wordAndProns.getWord()));
-      lts.add(exerciseByID.getID());
-    } else {
-      List<WordAndProns> unk = possibleProns.stream().filter(WordAndProns::isUNK).collect(Collectors.toList());
-      if (!unk.isEmpty()) {
-        possibleProns.forEach(wordAndProns -> logger.info("got " + wordAndProns));
-        logger.warn(exerciseByID.getID() + " : '" + foreignLanguage + "' = " + unk);
-        unk.forEach(wordAndProns -> unkWords.add(wordAndProns.getWord()));
-        unks.add(exerciseByID.getID());
-      }
-    }
+    int id = exerciseByID.getID();
+
+    check(project, ltsWords, unkWords, lts, unks, foreignLanguage, id);
   /*  else {
       logger.info(exerciseByID.getID() + " : '" + foreignLanguage + "' = " + fromLTS);
       possibleProns.forEach(wordAndProns -> logger.info("got " + wordAndProns));
     }*/
+  }
+
+  private void check(Project project, Set<String> ltsWords, Set<String> unkWords, Set<Integer> lts, Set<Integer> unks, String foreignLanguage, int id) {
+    List<WordAndProns> possibleProns = new ArrayList<>();
+    project.getAudioFileHelper().getASR().getHydraDict(foreignLanguage, "", possibleProns);
+    List<WordAndProns> fromLTS = possibleProns.stream().filter(WordAndProns::isFromLTS).collect(Collectors.toList());
+    if (!fromLTS.isEmpty()) {
+      // possibleProns.forEach(wordAndProns -> logger.info("got " + wordAndProns));
+      logger.warn(id + " : '" + foreignLanguage + "' = " + fromLTS);
+      fromLTS.forEach(wordAndProns -> ltsWords.add(wordAndProns.getWord()));
+      lts.add(id);
+    } else {
+      List<WordAndProns> unk = possibleProns.stream().filter(WordAndProns::isUNK).collect(Collectors.toList());
+      if (!unk.isEmpty()) {
+        possibleProns.forEach(wordAndProns -> logger.info("got " + wordAndProns));
+        logger.warn(id + " : '" + foreignLanguage + "' = " + unk);
+        unk.forEach(wordAndProns -> unkWords.add(wordAndProns.getWord()));
+        unks.add(id);
+      }
+      else {
+        possibleProns.forEach(wordAndProns -> logger.info("got " + wordAndProns));
+
+      }
+    }
   }
 
   @Test
