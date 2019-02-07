@@ -102,7 +102,7 @@ public class DownloadHelper implements IShowStatus {
   private final Heading status2 = new Heading(4, "");
   private final Heading status3 = new Heading(4, "");
   private DivWidget outer;
-  FacetExerciseList<?, ?> facetExerciseList;
+  private FacetExerciseList<?, ?> facetExerciseList;
 
   /**
    * @param host
@@ -146,10 +146,7 @@ public class DownloadHelper implements IShowStatus {
         new DialogHelper.CloseListener() {
           @Override
           public boolean gotYes() {
-            String urlForDownload = toDominoUrl(getDownloadAudio(host)) +
-                getURL(selectionState.getTypeToSection(), search);
-
-            new DownloadIFrame(urlForDownload);
+            new DownloadIFrame(toDominoUrl(getDownloadAudio(host)) + getURL());
             return true;
           }
 
@@ -415,7 +412,10 @@ public class DownloadHelper implements IShowStatus {
    * @return
    * @see mitll.langtest.server.DownloadServlet#getTypeToSelectionFromRequest
    */
-  private String getURL(Map<String, Collection<String>> typeToSection, String search) {
+  private String getURL() {
+    final String search = selectionState.getSearch();
+
+    Map<String, Collection<String>> typeToSection = selectionState.getTypeToSection();
     String encode = URL.encodeQueryString(getSelectionMap(typeToSection).toString());
 
 /*    logger.info("getURL " +
@@ -427,6 +427,7 @@ public class DownloadHelper implements IShowStatus {
     return "?" +
         "request=" + DownloadContainer.DOWNLOAD_AUDIO +
         "&unit=" + encode +
+        "&d=" + selectionState.getDialog() +
         "&male=" + isMale +
         "&regular=" + speedChoices.isRegular() +
         "&context=" + isContext +

@@ -15,10 +15,12 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.project.ThumbnailChoices;
-import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
+import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.jetbrains.annotations.NotNull;
 
@@ -151,7 +153,6 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
     dialogs
         .forEach(dialog -> {
-
 //          logger.info("Got " + dialog.getID() + " " + dialog.getEnglish() + " " + dialog.getAttributes());
           Panel langIcon = getImageAnchor(dialog);
           if (langIcon != null) {
@@ -217,6 +218,8 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private DivWidget getContainerWithButtons(IDialog dialog) {
     DivWidget container = new DivWidget();
 
+  //  logger.info("dialog "+ dialog.getForeignLanguage() + " " + dialog.getEnglish());
+
     {
       String truncate = thumbnailChoices.truncate(dialog.getForeignLanguage(), MAX_LENGTH_ID);
       Heading label = getLabel(truncate);
@@ -226,7 +229,7 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     }
 
     {
-      String english = thumbnailChoices.truncate(dialog.getEnglish(), MAX_LENGTH_ID1);
+      String english = thumbnailChoices.truncate(dialog.getOrientation(), MAX_LENGTH_ID1);
       Heading label1 = getLabel(english);
       label1.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
       label1.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
@@ -235,8 +238,6 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
       container.add(label1);
     }
     Emoticon overallSmiley = getEmoticon(dialog);
-
-    //  ProgressBar w = new ProgressBar(ProgressBarBase.Style.DEFAULT);
     container.add(overallSmiley);
     container.setWidth("100%");
     container.addStyleName("floatLeft");

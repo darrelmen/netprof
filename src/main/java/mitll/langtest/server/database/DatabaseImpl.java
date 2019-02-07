@@ -855,7 +855,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * DUDE: super expensive...
-   *
+   * <p>
    * SUPER EXPENSIVE the first time
    *
    * @param projectid
@@ -1752,7 +1752,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
       return language + "_Unknown";
     } else {
       //logger.debug("writing contents of " + userListByID);
-
       name = userListByID.getName();
       boolean isCommentList = listid == COMMENT_MAGIC_ID;
       doAudioExport(out, isCommentList, projectid, options, language, name, userListByID.getExercises());
@@ -1773,12 +1772,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
       return language + "_Unknown";
     } else {
       IDialog iDialog = collect.get(0);
-      name = iDialog.getEnglish() + "_" + iDialog.getForeignLanguage();
-      doAudioExport(out, false, projectid, options, language, name, iDialog.getExercises());
+      name = language + "_" +(iDialog.getEnglish().isEmpty() ? iDialog.getForeignLanguage() : iDialog.getEnglish());
+      doAudioExport(out, false, projectid, options, language, name, iDialog.getBothExercisesAndCore());
     }
 
     return language + "_" + name;
-
   }
 
   private <T extends CommonShell> void doAudioExport(OutputStream out, boolean isCommentList, int projectid, AudioExportOptions options,
@@ -1848,7 +1846,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * Sort by english if normal list
-   *
+   * <p>
    * TODO : when would we want the commented list???
    *
    * @param listid
