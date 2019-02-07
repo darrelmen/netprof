@@ -46,7 +46,6 @@ import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.phone.RecordWordAndPhone;
 import mitll.langtest.server.database.phone.SlickPhoneDAO;
 import mitll.langtest.server.database.project.DialogPopulate;
-import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.refaudio.RefResultDAO;
 import mitll.langtest.server.database.refaudio.SlickRefResultDAO;
 import mitll.langtest.server.database.result.Result;
@@ -106,7 +105,7 @@ public class CopyToPostgres<T extends CommonShell> {
   private static final String CONFIG = "config";
   private static final String NO_TRANSCRIPT_FOUND = "no transcript found";
   private static final boolean ALLOW_DELETE = false;
-  public static final String WAR = "war";
+  private static final String WAR = "war";
   //public static final int PASUYA_ID = 736;
 
   private static DatabaseImpl database;
@@ -149,7 +148,7 @@ public class CopyToPostgres<T extends CommonShell> {
       return value;
     }
 
-    public String toLower() {
+    String toLower() {
       return name().toLowerCase();
     }
   }
@@ -177,11 +176,11 @@ public class CopyToPostgres<T extends CommonShell> {
       return value;
     }
 
-    public String toLower() {
+    String toLower() {
       return name().toLowerCase();
     }
 
-    public String getDesc() {
+    String getDesc() {
       return desc;
     }
   }
@@ -450,9 +449,9 @@ public class CopyToPostgres<T extends CommonShell> {
     return new PathHelper(war, serverProps);
   }
 
-  private static DatabaseImpl getSimpleDatabase() {
-    return new DatabaseImpl(getProps(DEFAULT_PROPERTIES_FILE));
-  }
+//  private static DatabaseImpl getSimpleDatabase() {
+//    return new DatabaseImpl(getProps(DEFAULT_PROPERTIES_FILE));
+//  }
 
   private static ServerProperties getProps(String propertiesFile) {
     File file = new File(NETPROF_CONFIG_DIR, propertiesFile);
@@ -570,18 +569,18 @@ public class CopyToPostgres<T extends CommonShell> {
    * @param doSinceCreated
    * @see #copyOneConfigCommand
    */
-  public void copyOneConfig(DatabaseImpl db,
-                            String cc,
-                            String optName,
-                            int displayOrder,
-                            ProjectType projectType,
-                            ProjectStatus status,
-                            boolean skipRefResult,
-                            boolean doUpdate,
-                            long oldSinceWhen,
-                            boolean doLatest,
-                            boolean doSinceCreated,
-                            boolean checkConvert) throws Exception {
+  private void copyOneConfig(DatabaseImpl db,
+                             String cc,
+                             String optName,
+                             int displayOrder,
+                             ProjectType projectType,
+                             ProjectStatus status,
+                             boolean skipRefResult,
+                             boolean doUpdate,
+                             long oldSinceWhen,
+                             boolean doLatest,
+                             boolean doSinceCreated,
+                             boolean checkConvert) throws Exception {
     long then = System.currentTimeMillis();
     Collection<String> typeOrder = db.getTypeOrder(DatabaseImpl.IMPORT_PROJECT_ID);
 
@@ -1518,7 +1517,12 @@ public class CopyToPostgres<T extends CommonShell> {
       action = SEND;
     } else if (cmd.hasOption(DIALOG.toLower())) {
       action = DIALOG;
-      to = Integer.parseInt(cmd.getOptionValue(DIALOG.toLower()));
+      String optionValue = cmd.getOptionValue(DIALOG.toLower());
+      try {
+        to = Integer.parseInt(optionValue);
+      } catch (NumberFormatException e) {
+        logger.warn("can't parse " + optionValue);
+      }
     } else if (cmd.hasOption(CLEANDIALOG.toLower())) {
       action = CLEANDIALOG;
       to = Integer.parseInt(cmd.getOptionValue(CLEANDIALOG.toLower()));
@@ -1527,7 +1531,6 @@ public class CopyToPostgres<T extends CommonShell> {
     } else if (cmd.hasOption(REMAP.toLower())) {
       action = REMAP;
       to = Integer.parseInt(cmd.getOptionValue(REMAP.toLower()));
-
     } else if (cmd.hasOption(NORM.toLower())) {
       action = NORM;
       String optionValue = cmd.getOptionValue(NORM.toLower());
@@ -1666,23 +1669,17 @@ public class CopyToPostgres<T extends CommonShell> {
       case UPDATE:
         logger.info("import netprof 1 content into existing netprof project");
         boolean b = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false, false, optDatabase, propertiesFile);
-        // if (!b) {
         doExit(b);  // ?
-        // }
         break;
       case LATEST:
         logger.info("import netprof 1 content into existing netprof project given latest target project date");
         boolean c = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, true, false, optDatabase, propertiesFile);
-        // if (!b) {
         doExit(c);  // ?
-        // }
         break;
       case CREATED:
         logger.info("import netprof 1 content into existing netprof project given latest target project date");
         boolean d = copyToPostgres.copyOneConfigCommand(config, optConfigValue, optName, displayOrderValue, isEval, skipRefResult, true, false, true, optDatabase, propertiesFile);
-        // if (!b) {
         doExit(d);  // ?
-        // }
         break;
       case IMPORT:
         logger.info("get import date from old config");
@@ -1706,7 +1703,7 @@ public class CopyToPostgres<T extends CommonShell> {
         doExit(true);  // ?
         break;
       case DIALOG:
-        copyDialog(to, propertiesFile);
+        copyDialog(to, cmd.getOptionValue(DIALOG.toLower()), propertiesFile);
         doExit(true);  // ?
         break;
       case CLEANDIALOG:
@@ -1740,7 +1737,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
   /**
    * Cleans the dialogs first...
-   *
+   * <p>
    * There had better be an english project if we're doing interpreter dialogs.
    *
    * @param to
@@ -1748,16 +1745,23 @@ public class CopyToPostgres<T extends CommonShell> {
    * @see #main
    * @see DIALOG
    */
-  private static void copyDialog(int to, String propertiesFile) {
+  private static void copyDialog(int to, String lang, String propertiesFile) {
     database = getDatabase(propertiesFile);
-    if (to == -1) logger.error("copyDialog remember to set the project id");
-    else {
-      Project project = database.getProject(to);
+
+    if (to == -1 && lang == null || lang.isEmpty()) {
+      logger.error("copyDialog remember to set the project id " + to + " or " + lang);
+    } else {
+      database.ensureProjectManagement();
+
+      Project project = to == -1 ?
+          database.getProjectManagement().getProductionByLanguage(Language.valueOf(lang.toUpperCase())) :
+          database.getProject(to);
       if (project == null) {
-        logger.error("\n\n\n\ncopyDialog no project with id " + to);
+        logger.error("\ncopyDialog no project with id " + to);
+        doExit(false);
       } else {
-        logger.info("\n\n\npopulate for " + to + " in " + propertiesFile);
-        logger.info("\n\n\npopulate for " + project);
+        logger.info("\npopulate for " + to + " in " + propertiesFile);
+        logger.info("\npopulate for " + project);
         DialogPopulate dialogPopulate = new DialogPopulate(database, getPathHelper(database));
         //       boolean b = dialogPopulate.cleanDialog(project);
         //     if (b) {
@@ -1770,7 +1774,12 @@ public class CopyToPostgres<T extends CommonShell> {
         }
       }
     }
-    if (database != null) database.close();
+
+    closeDatabase();
+  }
+
+  private static void closeDatabase() {
+    close(database);
   }
 
   @NotNull
@@ -1782,7 +1791,7 @@ public class CopyToPostgres<T extends CommonShell> {
     database = getDatabase(propertiesFile);
     if (to == -1) logger.error("remember to set the project id");
     else {
-      Project project = database.getProject(to);
+      Project project = database.getProject(to, true);
       if (project == null) {
         logger.error("cleanDialog no project with id " + to);
       } else if (project.getStatus() == ProjectStatus.DELETED) {
@@ -1792,6 +1801,10 @@ public class CopyToPostgres<T extends CommonShell> {
         if (!b) logger.info("\n\tcleanDialog project " + project + " already has dialog data.");
       }
     }
+    close(database);
+  }
+
+  private static void close(DatabaseImpl database) {
     if (database != null) database.close();
   }
 
@@ -1819,7 +1832,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
       }
     }
-    if (database != null) database.close();
+    close(database);
   }
 
   private static void listProjects(String propertiesFile) {
@@ -1828,7 +1841,7 @@ public class CopyToPostgres<T extends CommonShell> {
     Collection<Project> projects = database.getProjects();
     logger.info("known projects in " + database.getDbConfig() + " = " + projects.size());
     projects.forEach(project -> logger.info("project #" + project.getID() + " : " + project));
-    if (database != null) database.close();
+    close(database);
   }
 
   private void dumpNorm(int projid, String propertiesFile) {
@@ -1895,13 +1908,11 @@ public class CopyToPostgres<T extends CommonShell> {
     database = getDatabase(propertiesFile);
     database.getProject(2);
     database.sendReports();
-    if (database != null) database.close();
+    close(database);
   }
 
   private static void doExit(boolean b) {
-    if (database != null) {
-      database.close();
-    }
+    close(database);
     System.exit(b ? 0 : 1);
   }
 
@@ -2039,7 +2050,7 @@ public class CopyToPostgres<T extends CommonShell> {
   /**
    * Drop all doesn't require mongo connection, etc.
    */
-  private static void doDropAll() {
+ /* private static void doDropAll() {
     DatabaseImpl database = null;
     try {
       logger.warn("OK hope this is what you want.");
@@ -2050,13 +2061,14 @@ public class CopyToPostgres<T extends CommonShell> {
       String concat = database == null ? "" : database.getTables().concat(",\n");
       logger.info("doDropAll now there are " + concat);
     } finally {
-      try {
-        if (database != null) {
-          database.close();
-        }
-      } catch (Exception e) {
-        logger.error("Got " + e, e);
-      }
+      closeDatabase(database);
+    }
+  }*/
+  private static void closeDatabase(DatabaseImpl database) {
+    try {
+      close(database);
+    } catch (Exception e) {
+      logger.error("Got " + e, e);
     }
   }
 
@@ -2084,13 +2096,7 @@ public class CopyToPostgres<T extends CommonShell> {
       String concat = database == null ? "" : database.getTables().concat(",\n");
       logger.info("tables : now there are " + concat);
     } finally {
-      try {
-        if (database != null) {
-          database.close();
-        }
-      } catch (Exception e) {
-        logger.error("Got " + e, e);
-      }
+      closeDatabase(database);
     }
   }
 

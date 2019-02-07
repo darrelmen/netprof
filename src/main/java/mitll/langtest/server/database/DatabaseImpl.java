@@ -1095,10 +1095,18 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
       return null;
     } else {
-      if (projectManagement == null) {
-        setInstallPath("", null);
-      }
-      return projectManagement.getProject(projectid, false);
+      return getProject(projectid, false);
+    }
+  }
+
+  public Project getProject(int projectid, boolean onlyOne) {
+    ensureProjectManagement();
+    return projectManagement.getProject(projectid, onlyOne);
+  }
+
+  public void ensureProjectManagement() {
+    if (projectManagement == null) {
+      setInstallPath("", null);
     }
   }
 

@@ -126,14 +126,17 @@ public class DialogPopulate {
 
       Map<ClientExercise, String> exToAudio = new HashMap<>();
 
-      Project productionByLanguage = db.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
-      Map<Dialog, SlickDialog> dialogToSlick = new InterpreterReader().getDialogs(defaultUser, exToAudio, project, productionByLanguage);
+      Project engProject = db.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
 
-      logger.info("maybeDoInterpreterImport read " + dialogToSlick.size());
-      addDialogs(project, englishProject, dialogDAO, exToAudio, defaultUser, DialogType.INTERPRETER, dialogToSlick);
-    }
-    else {
-      logger.warn("skipping lang " +languageEnum);
+      if (engProject == null) {
+        logger.error("maybeDoInterpreterImport huh? no english project?");
+      } else {
+        Map<Dialog, SlickDialog> dialogToSlick = new InterpreterReader().getDialogs(defaultUser, exToAudio, project, engProject);
+        logger.info("maybeDoInterpreterImport read " + dialogToSlick.size());
+        addDialogs(project, englishProject, dialogDAO, exToAudio, defaultUser, DialogType.INTERPRETER, dialogToSlick);
+      }
+    } else {
+      logger.warn("skipping lang " + languageEnum);
     }
   }
 

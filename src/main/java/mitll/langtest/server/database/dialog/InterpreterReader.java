@@ -69,9 +69,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
     try {
       FileInputStream inp = new FileInputStream(excelFile);
-
       XSSFWorkbook wb = new XSSFWorkbook(inp);
-
 
       for (int i = 0; i < wb.getNumberOfSheets(); i++) {
         Sheet sheet = wb.getSheetAt(i);

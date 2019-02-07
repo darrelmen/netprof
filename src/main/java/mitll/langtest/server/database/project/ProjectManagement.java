@@ -114,7 +114,7 @@ public class ProjectManagement implements IProjectManagement {
   private static final String DIALOG1 = "dialog";
   private static final String NO_PROJECT_FOR_ID = "NO_PROJECT_FOR_ID";
   public static final String INTERPRETER = "Interpreter";
-  public static final String INTERPRETER1 = "interpreter";
+  //public static final String INTERPRETER1 = "interpreter";
   //public static final String ANSWERS1 = "^.*answers\\/(.+)\\/.+";
   private static final String ANSWERS1 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
   /**
@@ -240,17 +240,21 @@ public class ProjectManagement implements IProjectManagement {
    * If a project is already configured, won't be configured again.
    * Fill in id->project map
    *
+   * @param projID if -1 load all the projects
    * @see #populateProjects(int)
    */
   private void populateProjects(PathHelper pathHelper,
                                 ServerProperties serverProps,
                                 LogAndNotify logAndNotify,
-                                DatabaseImpl db, int projID) {
+                                DatabaseImpl db,
+                                int projID) {
     Collection<SlickProject> allSlickProjects = getAllSlickProjects();
     if (projID != -1) {
-      List<SlickProject> collect = allSlickProjects.stream().filter(slickProject -> slickProject.id() == projID).collect(Collectors.toList());
-      logger.info("just doing " + projID + ": " + collect);
-      allSlickProjects = collect;
+      SlickProject byID = projectDAO.getByID(projID);
+      if (byID != null) {
+        logger.info("just doing " + projID + ": " + byID);
+        allSlickProjects = Collections.singleton(byID);
+      }
     }
     allSlickProjects.forEach(slickProject -> {
       if (!idToProject.containsKey(slickProject.id())) {
@@ -282,6 +286,11 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     configureProjects();
+  }
+
+  @NotNull
+  private List<SlickProject> getProjectsByID(int projID, Collection<SlickProject> allSlickProjects) {
+    return allSlickProjects.stream().filter(slickProject -> slickProject.id() == projID).collect(Collectors.toList());
   }
 
   /**
@@ -894,6 +903,12 @@ public class ProjectManagement implements IProjectManagement {
     return !getNewProjects(idToProject.keySet()).isEmpty();
   }
 
+  /**
+   *
+   * @param projectid
+   * @param onlyOne if false loads all the projects
+   * @return
+   */
   private Project lazyGetProject(int projectid, boolean onlyOne) {
     logger.info("lazyGetProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
         ") - refreshing projects");
@@ -1133,7 +1148,7 @@ public class ProjectManagement implements IProjectManagement {
           DialogType kind = iDialog.getKind();
           if (kind == DialogType.INTERPRETER) {
             name = INTERPRETER;
-            cc = INTERPRETER1;
+            cc = INTERPRETER;
             // logger.info("addModeChoices : found first interpreter dialog : " + iDialog);
           } else {
             logger.info("dialog kind is " + kind);

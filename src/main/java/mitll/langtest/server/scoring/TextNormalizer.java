@@ -1,5 +1,7 @@
 package mitll.langtest.server.scoring;
 
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
 import java.util.*;
@@ -46,14 +48,17 @@ public class TextNormalizer {
   private final Pattern frenchPunct;
   private final Pattern spacepattern;
   private final Pattern oepattern;
-  private final boolean isAccented;
+  private final boolean removeAccents;
   private final boolean isTurkish;
   private static final String TURKISH = "TURKISH";
   private static final Set<String> ACCENTED = new HashSet<>(Arrays.asList("FRENCH", TURKISH, "SERBIAN", "CROATIAN"));
 
   public TextNormalizer(String language) {
-    this.isAccented = !ACCENTED.contains(language);
-    this.isTurkish = TURKISH.equalsIgnoreCase(language);;
+    this.removeAccents = !ACCENTED.contains(language);
+    this.isTurkish = TURKISH.equalsIgnoreCase(language);
+
+//    System.out.println("remove    " + removeAccents);
+//    System.out.println("isTurkish " + isTurkish);
     // and leading upside down question marks...
     tickPattern = Pattern.compile("['’\\u00bf]");  // "don't" or "mustn't"
     punctCleaner = Pattern.compile(REMOVE_ME + "|" + P_P);
@@ -65,7 +70,7 @@ public class TextNormalizer {
   }
 
   public String getNorm(String raw) {
-    return String.join(" ", getTokens(raw, isAccented, false));
+    return String.join(" ", getTokens(raw, removeAccents, false));
   }
 
   /**
@@ -184,18 +189,60 @@ public class TextNormalizer {
     return alt;
   }
 
+  private void convertFile(String infile, String outfile) {
+    try {
+      File fileDir = new File(infile);
+      if (!fileDir.exists()) System.err.println("can't find " + infile + " at "+ fileDir.getAbsolutePath());
+      else {
+        // TextNormalizer textNormalizer = new TextNormalizer(lang.toUpperCase());
+        BufferedReader in = new BufferedReader(
+            new InputStreamReader(
+                new FileInputStream(fileDir), StandardCharsets.UTF_8));
+
+        if (outfile.isEmpty()) {
+          String str;
+
+          while ((str = in.readLine()) != null) {
+            System.out.println(getNorm(str));
+          }
+        } else {
+          BufferedWriter outw = new BufferedWriter(
+              new OutputStreamWriter(
+                  new FileOutputStream(outfile), StandardCharsets.UTF_8));
+
+          String str;
+
+          while ((str = in.readLine()) != null) {
+            outw.write(getNorm(str));
+            outw.write("\n");
+          }
+          outw.close();
+        }
+
+        in.close();
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+  }
+
   public static void main(String[] args) {
     if (args.length < 2) {
-      System.out.println("usage (" + args.length + ") language token1 ... tokenN");
+      System.out.println("usage : language infile outfile (opt)");
 
     } else {
       String lang = args[0];
       try {
-      //  Language language = Language.valueOf(lang.toUpperCase());
-        StringBuilder builder = new StringBuilder();
-        for (int i = 1; i < args.length; i++) builder.append(args[i]).append(" ");
-        // logger.info("norm : " + lang + " " + builder);
-        System.out.println(new TextNormalizer(lang.toUpperCase()).getNorm(builder.toString()));
+        String infile = args[1];
+        String outfile = args.length == 3 ? args[2] : "";
+
+        new TextNormalizer(lang.toUpperCase()).convertFile(infile, outfile);
+//        //  Language language = Language.valueOf(lang.toUpperCase());
+//        StringBuilder builder = new StringBuilder();
+//        for (int i = 1; i < args.length; i++) builder.append(args[i]).append(" ");
+//        // logger.info("norm : " + lang + " " + builder);
+//        System.out.println(new TextNormalizer(lang.toUpperCase()).getNorm(builder.toString()));
       } catch (IllegalArgumentException e) {
         System.err.println("couldn't parse \"" + lang + "\" as a language");
       }
