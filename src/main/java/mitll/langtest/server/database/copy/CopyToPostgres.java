@@ -1525,7 +1525,11 @@ public class CopyToPostgres<T extends CommonShell> {
       }
     } else if (cmd.hasOption(CLEANDIALOG.toLower())) {
       action = CLEANDIALOG;
-      to = Integer.parseInt(cmd.getOptionValue(CLEANDIALOG.toLower()));
+      try {
+        to = Integer.parseInt(cmd.getOptionValue(CLEANDIALOG.toLower()));
+      } catch (NumberFormatException e) {
+        logger.warn("couldn't parse " + cmd.getOptionValue(CLEANDIALOG.toLower()));
+      }
     } else if (cmd.hasOption(LIST.toLower())) {
       action = LIST;
     } else if (cmd.hasOption(REMAP.toLower())) {
@@ -1707,7 +1711,7 @@ public class CopyToPostgres<T extends CommonShell> {
         doExit(true);  // ?
         break;
       case CLEANDIALOG:
-        cleanDialog(to, propertiesFile);
+        cleanDialog(to, cmd.getOptionValue(CLEANDIALOG.toLower()), propertiesFile);
         doExit(true);  // ?
         break;
       case LIST:
@@ -1764,8 +1768,6 @@ public class CopyToPostgres<T extends CommonShell> {
         } else {
           idToUse = database.getProjectManagement().getProjectIDForLanguage(language);
           logger.info("copyDialog found " + idToUse + " for " + language);
-
-
         }
       }
 
@@ -1807,11 +1809,26 @@ public class CopyToPostgres<T extends CommonShell> {
     return getPathHelper(WAR, database.getServerProps());
   }
 
-  private static void cleanDialog(int to, String propertiesFile) {
+  private static void cleanDialog(int to, String lang, String propertiesFile) {
     database = getDatabase(propertiesFile);
-    if (to == -1) logger.error("remember to set the project id");
-    else {
-      Project project = database.getProject(to, true);
+    if (to == -1 && (lang == null || lang.isEmpty())) {
+      logger.error("remember to set the project id");
+    } else {
+      int idToUse = to;
+      database.ensureProjectManagement(false);
+
+      if (to == -1) {
+        Language language = Language.valueOf(lang.toUpperCase());
+        if (language == Language.UNKNOWN) {
+          logger.error("bad language " + lang);
+          return;
+        } else {
+          idToUse = database.getProjectManagement().getProjectIDForLanguage(language);
+          logger.info("copyDialog found " + idToUse + " for " + language);
+        }
+      }
+
+      Project project = database.getProject(idToUse, true);
       if (project == null) {
         logger.error("cleanDialog no project with id " + to);
       } else if (project.getStatus() == ProjectStatus.DELETED) {

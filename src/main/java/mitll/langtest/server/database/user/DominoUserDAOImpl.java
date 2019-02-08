@@ -385,13 +385,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private void doAfterGetDelegate() {
     myDelegate = makeMyServiceDelegate();
     dominoAdminUser = delegate.getAdminUser();
-
     ensureDefaultUsers();
   }
-
-/*  public JSONSerializer getSerializer() {
-    return serializer;
-  }*/
 
   /**
    * DNS LOOKUP.
@@ -427,7 +422,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public void close() {
     if (!usedDominoResources) {
 //      logger.info("closing connection to " + pool, new Exception());
-      pool.closeConnection();
+     if (pool != null) pool.closeConnection();
     }
     if (!usedDominoResources && ignite != null) {
       ignite.close();

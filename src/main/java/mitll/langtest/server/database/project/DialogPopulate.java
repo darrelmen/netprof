@@ -119,6 +119,9 @@ public class DialogPopulate {
    */
   private void maybeDoInterpreterImport(Project project, Project englishProject, IDialogDAO dialogDAO) {
     int defaultUser = db.getUserDAO().getDefaultUser();
+    if (defaultUser == -1) {
+      logger.warn("maybeDoInterpreterImport huh? default user is -1?");
+    }
     Language languageEnum = project.getLanguageEnum();
 
     if (languageEnum == Language.MANDARIN || languageEnum == Language.FRENCH || languageEnum == Language.RUSSIAN) {
@@ -136,7 +139,7 @@ public class DialogPopulate {
         addDialogs(project, englishProject, dialogDAO, exToAudio, defaultUser, DialogType.INTERPRETER, dialogToSlick);
       }
     } else {
-      logger.warn("skipping lang " + languageEnum);
+      logger.warn("maybeDoInterpreterImport skipping lang " + languageEnum);
     }
   }
 
@@ -264,6 +267,8 @@ public class DialogPopulate {
 
   private Map<CommonExercise, Integer> addExercises(int projid, int defaultUser, List<String> typeOrder,
                                                     List<CommonExercise> commonExercisesFromDialog) {
+//    commonExercisesFromDialog
+//        .forEach(ex -> logger.info("ex fl " + ex.getForeignLanguage() + " = " + ex.getEnglish() + " " + ex.hasEnglishAttr()));
     return new ExerciseCopy().addExercisesAndAttributes(
         defaultUser,
         projid,
@@ -328,7 +333,8 @@ public class DialogPopulate {
    * @param dialogID
    * @see #addDialogs(Project, Project, IDialogDAO, Map, int, DialogType, Map)
    */
-  private Set<CommonExercise> addCoreVocab(int projid, int userID, List<String> typeOrder, Timestamp modified, Dialog dialog, int dialogID) {
+  private Set<CommonExercise> addCoreVocab(int projid, int userID, List<String> typeOrder,
+                                           Timestamp modified, Dialog dialog, int dialogID) {
     List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
 
     List<SlickRelatedExercise> relatedExercises = new ArrayList<>();
@@ -550,7 +556,7 @@ public class DialogPopulate {
 
     String imageRef = dialog.getImageRef();
 
-    logger.info("getSlickImage image ref " +imageRef);
+  //  logger.info("getSlickImage image ref " + imageRef);
     return new SlickImage(
         -1,
         projid,
