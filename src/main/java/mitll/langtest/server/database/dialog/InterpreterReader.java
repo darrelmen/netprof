@@ -172,7 +172,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
               Columns columns1 = Columns.valueOf(colNormalized);
               colToIndex.put(columns1, columns.indexOf(col));
             } catch (IllegalArgumentException e) {
-              logger.warn("couldn't parse col header " + col + " = " + colNormalized);
+              logger.warn("\n\ncouldn't parse col header '" + col + "' = " + colNormalized);
             }
           }
           gotHeader = true;
@@ -188,12 +188,11 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
             title = colToValue.get(Columns.TITLE).trim();
             orientation = colToValue.get(Columns.ORIENTATION).trim();
+
             if (!title.isEmpty()) {
               logger.info("row #" + rows + " title " + title);
-            }
-            else {
+            } else {
               logger.info("row EMPTY #" + rows + " title " + title);
-
             }
 
             if (DEBUG) {
@@ -230,12 +229,12 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
               if (!title.isEmpty()) {
                 lastTitle = title;
-                 logger.info("\n\n\ncurrent title       '" + title + "'");
+                logger.info("\n\n\ncurrent title       '" + title + "'");
               }
 
               if (!orientation.isEmpty()) {
                 lastOrientation = orientation;
-                 logger.info("\n\n\ncurrent orientation " + orientation);
+                logger.info("\n\n\ncurrent orientation " + orientation);
               }
 
               try {
@@ -244,7 +243,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
                 String talker = colToValue.get(Columns.TALKER);
 
                 Language projectLang = project.getLanguageEnum();
-                String nativeSpeaker = projectLang.toDisplay() + " Speaker";
+                String nativeSpeaker = project.getLanguageEnum().toDisplay() + " Speaker";
 
                 String interpreterTurn = turnID + "-I";
                 if (colLang == Language.ENGLISH) {
@@ -264,13 +263,12 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
                   {
                     Exercise exercise = getExercise(typeOrder, engText, "", "", ENGLISH_SPEAKER, Language.ENGLISH, turnID);
-                 //   logger.info("readFromSheet add " + turnID + " " + exercise.getFLToShow() + " " + exercise.getEnglish());
-
+                    //   logger.info("readFromSheet add " + turnID + " " + exercise.getFLToShow() + " " + exercise.getEnglish());
                     exercises.add(exercise);
                   }
                   {
                     Exercise exercise1 = getExercise(typeOrder, l2Text, engText, colToValue.get(Columns.TEXTTRANSLITERATION), INTERPRETER1, projectLang, interpreterTurn);
-                //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
+                    //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
                     exercises.add(exercise1);
                   }
                   addCoreVocab(coreFL, colToValue, interpreterTurn, INTERPRETER1);

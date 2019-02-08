@@ -19,7 +19,7 @@ import static mitll.langtest.server.database.phone.SlickPhoneDAO.UNDERSCORE;
 public class MakePhoneReport {
   private static final Logger logger = LogManager.getLogger(MakePhoneReport.class);
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param phoneToScores
@@ -44,7 +44,8 @@ public class MakePhoneReport {
 
     if (DEBUG || true) {
       logger.info(
-          "getPhoneReport : \n\tscore " + overallScore +
+          "getPhoneReport : " +
+              "\n\tscore         " + overallScore +
               "\n\titems         " + totalItems +
               "\n\tpercent       " + percentOverall +
               "\n\tphoneToScores " + phoneToScores.size() +
@@ -63,7 +64,9 @@ public class MakePhoneReport {
 
     Map<String, List<Bigram>> phoneToBigram = getPhoneToBigramReally(phoneToBigramToScore);
 
-    phoneToAvgSorted.keySet().forEach(p -> logger.info("getPhoneReport sorted " + p));
+    if (DEBUG) {
+      phoneToAvgSorted.keySet().forEach(p -> logger.info("getPhoneReport sorted " + p));
+    }
 
 
     List<String> sortedPhones = new ArrayList<>(phoneToAvgSorted.keySet().size());
@@ -123,13 +126,17 @@ public class MakePhoneReport {
 
       sortPhonesByAvg(phoneToAvg, sorted);
 
-      if (DEBUG) logger.info("getPhoneStats sorted " + sorted.size() + " " + sorted);
+      if (DEBUG) {
+        logger.info("getPhoneStats sorted " + sorted.size() + " " + sorted);
+      }
 
       sorted.forEach(phone -> phoneToAvgSorted.put(phone, phoneToAvg.get(phone)));
 
-      phoneToAvgSorted.forEach((k, v) -> {
-        logger.info("getPhoneStats phone " + k + " = " + v.getAvg());
-      });
+      if (DEBUG) {
+        phoneToAvgSorted.forEach((k, v) -> {
+          logger.info("getPhoneStats phone " + k + " = " + v.getAvg());
+        });
+      }
 
       if (DEBUG) {
         logger.info("getPhoneStats phoneToAvgSorted " + phoneToAvgSorted.size() + " " + phoneToAvgSorted);
@@ -172,7 +179,7 @@ public class MakePhoneReport {
       bigramsForPhone.addAll(v.values());
     });
 
-    if (DEBUG) phoneToBigram.forEach((k, v) -> logger.info("after " + k + "->" + v));
+    if (DEBUG) phoneToBigram.forEach((k, v) -> logger.info("getPhoneToBigrams after " + k + "->" + v));
 /*
     phoneToBigram.values().forEach(bigrams -> bigrams.sort(Bigram::compareTo));
     phoneToBigram.forEach((k, v) -> logger.info("after 2 " + k + "->" + v));*/
@@ -225,15 +232,16 @@ public class MakePhoneReport {
   /**
    * don't show multiple examples of same word...?
    * calc avg over returned words
+   *
    * @param phoneToExamples
    * @return
    */
-  private Map<String, List<WordAndScore>>  sortExamplesSimple(Map<String, List<WordAndScore>> phoneToExamples) {
+  private Map<String, List<WordAndScore>> sortExamplesSimple(Map<String, List<WordAndScore>> phoneToExamples) {
     phoneToExamples.forEach((k, v) -> v.sort(getWordAndScoreComparator()));
 
-    Map<String, List<WordAndScore>> phoneToExamplesLimited=new HashMap<>();
+    Map<String, List<WordAndScore>> phoneToExamplesLimited = new HashMap<>();
 
-    phoneToExamples.forEach((k,v)->phoneToExamplesLimited.put(k,v.subList(0,Math.min(v.size(),5))));
+    phoneToExamples.forEach((k, v) -> phoneToExamplesLimited.put(k, v.subList(0, Math.min(v.size(), 5))));
 
     return phoneToExamplesLimited;
   }
