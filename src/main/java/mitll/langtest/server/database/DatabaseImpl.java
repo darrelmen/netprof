@@ -416,7 +416,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     afterDAOSetup(slickAudioDAO);
 
-    logger.info("finalSetup : tables = " + getTables());
+ //   logger.info("finalSetup : tables = " + getTables());
   }
 
   /**

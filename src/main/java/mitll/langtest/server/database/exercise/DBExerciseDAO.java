@@ -126,9 +126,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         boolean refresh = refresh(id);
         if (refresh) {
           commonExercise = getExercise(id);
-          logger.info("getExercise : got it via refresh...");
+          logger.info("getExercise : refresh " +id);
         } else {
-          logger.warn("getExercise : really couldn't find... " + id, new Exception("can't find ex "+id));
+          logger.warn("getExercise : really couldn't find... " + id);
 
         }
       }

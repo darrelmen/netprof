@@ -124,7 +124,12 @@ public class DialogPopulate {
     }
     Language languageEnum = project.getLanguageEnum();
 
-    if (languageEnum == Language.MANDARIN || languageEnum == Language.FRENCH || languageEnum == Language.RUSSIAN) {
+    if (languageEnum == Language.MANDARIN ||
+        languageEnum == Language.FRENCH ||
+        languageEnum == Language.RUSSIAN ||
+        languageEnum == Language.MSA ||
+    languageEnum == Language.KOREAN
+    ) {
       logger.info("maybeDoInterpreterImport found interpreter candidate " + project);
 
       Map<ClientExercise, String> exToAudio = new HashMap<>();
