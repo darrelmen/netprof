@@ -67,12 +67,10 @@ public class ScoreToJSON {
   private static final String END1 = "end";
   private static final String END = END1;
   private static final String EVENT = "event";
- // public static final String CONTENT = "content";
   private static final String SCORE = "score";
   private static final String STR = "str";
   private static final String ID = "id";
   private static final String SEGMENT_SCORE = "s";
-//  public static final String OUR_FORTH_TONE = "uu4";
 
   /**
    * We skip sils, since we wouldn't want to show them to the user.

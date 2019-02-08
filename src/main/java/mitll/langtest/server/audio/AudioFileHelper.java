@@ -1579,7 +1579,7 @@ public class AudioFileHelper implements AlignDecode {
     boolean b = exercise.asCommon().hasEnglishAttr();
 
     Language language = b ? Language.ENGLISH : this.language;
-    logger.info("getAudioAnswer Ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " language " + language);
+    //logger.info("getAudioAnswer Ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " language " + language);
     if (decoderOptions.shouldDoAlignment()) {
       PrecalcScores precalcScores =
           checkForWebservice(

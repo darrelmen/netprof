@@ -85,4 +85,21 @@ public class NormalizerTest extends BaseTest {
     }
   }
 
+  @Test
+  public void toLC() {
+    String dobar = "Dobar tek!";
+    String banco = "Ella quiere robar un banco.";
+
+    {
+      TextNormalizer textNormalizer = new TextNormalizer(Language.CROATIAN.name());
+      List<String> strings = Arrays.asList(dobar);
+      strings.forEach(fl -> logger.info("from " + fl + " -> '" + textNormalizer.getNorm(fl) + "'"));
+    }
+    {
+      TextNormalizer textNormalizer = new TextNormalizer(Language.SPANISH.name());
+      List<String> strings = Arrays.asList(banco);
+      strings.forEach(fl -> logger.info("from " + fl + " -> '" + textNormalizer.getNorm(fl) + "'"));
+    }
+  }
+
 }
