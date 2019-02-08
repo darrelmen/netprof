@@ -119,6 +119,8 @@ public class PronunciationLookup implements IPronunciationLookup {
    */
   @Override
   public int getNumPhonesFromDictionaryOrLTS(String transcript, String transliteration) {
+
+    logger.info("getNumPhonesFromDictionaryOrLTS " + transcript, new Exception());
     //  String[] translitTokens = transliteration.toLowerCase().split(" ");
     String[] transcriptTokens = transcript.split(" ");
     //  boolean canUseTransliteration = (transliteration.trim().length() > 0) && ((transcriptTokens.length == translitTokens.length) || (transcriptTokens.length == 1));
@@ -421,6 +423,7 @@ public class PronunciationLookup implements IPronunciationLookup {
                                          String word,
                                          String[][] translitprocess) {
     List<String> prons = new ArrayList<>();
+    logger.info("addTranslitPhones " + word + " dict " +dict + " num " +translitprocess.length);
     for (String[] pron : translitprocess) {
       dict.append(getPronStringForWord(word, pron, false));
       prons.add(getPhoneSeq(pron));

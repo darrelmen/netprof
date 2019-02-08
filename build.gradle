@@ -13,7 +13,7 @@ buildscript {
 }
 
 plugins {
-    id "com.jfrog.artifactory" //version "4.4.7" // required for common.gradle
+    id "com.jfrog.artifactory" version "4.9.0"
     id "com.github.hierynomus.license" version "0.13.1"
     id "org.sonarqube" version "2.5"
     // this one dies with jna thing!

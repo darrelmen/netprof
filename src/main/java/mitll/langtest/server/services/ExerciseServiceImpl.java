@@ -1031,9 +1031,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     Set<Integer> checkDups = new HashSet<>();
     exercises.forEach(ex -> {
-      if (ex.getNumPhones() == 0 && warn++ < 100) {
-        logger.warn("getExerciseShells : no phones for exercise " + ex.getID());
-      }
+//      if (ex.getNumPhones() == 0 && warn++ < 100) {
+//        logger.warn("getExerciseShells : no phones for exercise " + ex.getID());
+//      }
       if (skipDups && checkDups.contains(ex.getID())) {
         //   logger.info("skip dup " + ex.getID());
       } else {

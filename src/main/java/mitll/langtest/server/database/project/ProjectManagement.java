@@ -232,7 +232,11 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public void populateProjects(int projID) {
-    populateProjects(pathHelper, serverProps, logAndNotify, db, projID);
+    try {
+      populateProjects(pathHelper, serverProps, logAndNotify, db, projID);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -247,15 +251,18 @@ public class ProjectManagement implements IProjectManagement {
                                 ServerProperties serverProps,
                                 LogAndNotify logAndNotify,
                                 DatabaseImpl db,
-                                int projID) {
+                                int projID) throws Exception {
     Collection<SlickProject> allSlickProjects = getAllSlickProjects();
     if (projID != -1) {
       SlickProject byID = projectDAO.getByID(projID);
       if (byID != null) {
-        logger.info("just doing " + projID + ": " + byID);
+        logger.info("populateProjects just doing " + projID + ": " + byID);
         allSlickProjects = Collections.singleton(byID);
       }
+    } else {
+      logger.info("populateProjects loading " + allSlickProjects.size() + " projects.");
     }
+
     allSlickProjects.forEach(slickProject -> {
       if (!idToProject.containsKey(slickProject.id())) {
         if (debugOne) {
@@ -288,9 +295,38 @@ public class ProjectManagement implements IProjectManagement {
     configureProjects();
   }
 
+//  @NotNull
+//  private List<SlickProject> getProjectsByID(int projID, Collection<SlickProject> allSlickProjects) {
+//    return allSlickProjects.stream().filter(slickProject -> slickProject.id() == projID).collect(Collectors.toList());
+//  }
+
+  /**
+   * Production only
+   * @param language
+   * @return
+   */
   @NotNull
-  private List<SlickProject> getProjectsByID(int projID, Collection<SlickProject> allSlickProjects) {
-    return allSlickProjects.stream().filter(slickProject -> slickProject.id() == projID).collect(Collectors.toList());
+  private List<SlickProject> getSlickProjectsByLanguage(Language language) {
+    return getAllSlickProjects()
+        .stream()
+        .filter(slickProject ->
+            slickProject.language().equalsIgnoreCase(language.name()) &&
+            slickProject.status().equalsIgnoreCase(ProjectStatus.PRODUCTION.name()))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public int getProjectIDForLanguage(Language language) {
+    List<SlickProject> slickProjectsByLanguage = getSlickProjectsByLanguage(language);
+    if (slickProjectsByLanguage.isEmpty()) {
+      return -1;
+    }
+    else {
+      if (slickProjectsByLanguage.size() > 1) {
+        logger.warn("found " + slickProjectsByLanguage.size() + " for " +language);
+      }
+      return slickProjectsByLanguage.get(0).id();
+    }
   }
 
   /**
@@ -463,14 +499,14 @@ public class ProjectManagement implements IProjectManagement {
         try {
           sleep(1000);
           logger.info("rememberUsers ---> no default user yet.....");
-        } catch ( Exception e) {
-          logger.warn("got " + e,e);
+        } catch (Exception e) {
+          logger.warn("got " + e, e);
         }
       }
 
-      logger.info("about to remember users for  " +projectID);
+      logger.info("about to remember users for  " + projectID);
       db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUsersForProject(projectID));
-      logger.info("finished remembering users for  " +projectID);
+      logger.info("finished remembering users for  " + projectID);
     }, "ProjectManagement.rememberUsers_" + projectID).start();
   }
 
@@ -853,6 +889,11 @@ public class ProjectManagement implements IProjectManagement {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Only on previously loaded projects.
+   * @param name
+   * @return
+   */
   @Override
   public List<Project> getProjectByLangauge(Language name) {
     return idToProject
@@ -904,9 +945,8 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   *
    * @param projectid
-   * @param onlyOne if false loads all the projects
+   * @param onlyOne   if false loads all the projects
    * @return
    */
   private Project lazyGetProject(int projectid, boolean onlyOne) {

@@ -76,7 +76,7 @@ public interface CommonShell extends HasID {
    * @see mitll.langtest.client.list.ListSorting#compPhones
    * @return
    */
-  int getNumPhones();
+ // int getNumPhones();
 
   boolean isContext();
 

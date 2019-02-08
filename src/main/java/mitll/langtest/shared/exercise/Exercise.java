@@ -38,7 +38,6 @@ import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.dialog.DialogMetadata;
@@ -219,7 +218,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.safeToDecode = candecode;
     safeToDecodeLastChecked = lastChecked;
 
-    this.numPhones = numPhones;
+ //   this.numPhones = numPhones;
     this.dominoID = dominoID;
     this.shouldSwap = shouldSwap;
   }
@@ -269,7 +268,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;
     this.safeToDecode = candecode;
-    this.numPhones = numPhones;
+    //this.numPhones = numPhones;
   }
 
   /**
@@ -300,7 +299,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   public CommonShell getShell() {
-    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, isContext(), getDirectlyRelated().size());
+    return new ExerciseShell(english, meaning, foreignLanguage, getID(), isContext(), getDirectlyRelated().size());
   }
 
   public CommonShell asShell() {
@@ -597,9 +596,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param numPhones
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addExerciseToSectionHelper(SlickExercise, Collection, ISection, Map, IPronunciationLookup, Exercise, Collection, List)
    */
-  public void setNumPhones(int numPhones) {
+/*  public void setNumPhones(int numPhones) {
     this.numPhones = numPhones;
-  }
+  }*/
 
   public void setPredef(boolean isPredef) {
     this.isPredef = isPredef;

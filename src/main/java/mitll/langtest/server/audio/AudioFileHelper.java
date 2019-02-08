@@ -173,6 +173,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   public int getNumPhonesFromDictionary(String transcript, String transliteration) {
+    if (!transcript.isEmpty()) throw new IllegalArgumentException("for " + transcript + " = " + transliteration);
     return getPronunciationLookup().getNumPhonesFromDictionaryOrLTS(transcript, transliteration);
   }
 
@@ -268,7 +269,7 @@ public class AudioFileHelper implements AlignDecode {
   private void writeOOV(Set<String> oov, String suffix) {
     if (!oov.isEmpty()) {
       try {
-        String fileName = "Project_" + suffix+project.getLanguage() + "_" + project.getName() + ".txt";
+        String fileName = "Project_" + suffix + project.getLanguage() + "_" + project.getName() + ".txt";
         File file = new File("/tmp/" + fileName);
         logger.info("writeOOV writing " + oov.size() + " oov items to " + file.getAbsolutePath());
         FileWriter oovTokens = new FileWriter(file);
@@ -290,7 +291,7 @@ public class AudioFileHelper implements AlignDecode {
 
       Set<String> oov1 = getPronunciationLookup().getOOV();
       if (!oov1.isEmpty()) {
-        writeOOV(oov1,suffix);
+        writeOOV(oov1, suffix);
       }
     }
   }
@@ -1287,7 +1288,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private TransNormDict getHydraDict(String foreignLanguage, java.util.List<WordAndProns> possibleProns) {
-   // String s = getSmallVocabDecoder().lcToken(foreignLanguage, removeAccents);
+    // String s = getSmallVocabDecoder().lcToken(foreignLanguage, removeAccents);
     String cleaned = getSegmented(getSmallVocabDecoder().lcToken(foreignLanguage, removeAccents)); // segmentation method will filter out the UNK model
     return getASRScoring().getHydraDict(cleaned.trim(), "", possibleProns);
   }
@@ -1725,7 +1726,7 @@ public class AudioFileHelper implements AlignDecode {
   private HTKDictionary makeDict(String modelsDir) {
     // logger.info("makeDict :" +        "\n\tmodelsDir    " + modelsDir);
     String dictFile = getDictFile(modelsDir);
-  //  logger.info("makeDict :" + "\n\tdictFile    " + dictFile);
+    //  logger.info("makeDict :" + "\n\tdictFile    " + dictFile);
 
     if (dictFile != null && new File(dictFile).exists()) {
       long then = System.currentTimeMillis();

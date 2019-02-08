@@ -44,6 +44,8 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickProject;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -59,8 +61,6 @@ public interface IProjectManagement {
   void rememberProject(int id);
 
   ExerciseDAO<CommonExercise> setDependencies();
-
-
 
   /**
    * @see ProjectServiceImpl#delete
@@ -110,6 +110,8 @@ public interface IProjectManagement {
    * @return number of exercises in the project
    */
   int configureProject(Project project, boolean configureEvenRetired, boolean forceReload);
+
+  int getProjectIDForLanguage(Language language);
 
   /**
    * @see OpenUserServiceImpl#setProject

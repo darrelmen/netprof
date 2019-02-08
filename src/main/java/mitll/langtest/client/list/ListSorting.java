@@ -193,9 +193,9 @@ class ListSorting<T extends CommonShell & Scored, U extends HasID> {
     if (DEBUG) logger.info("START Sort by " + selectedValue + " to sort is null " + (toSort == null));
 
     if (selectedValue.equals(LENGTH_SHORT_TO_LONG)) {
-      sortBy(toSort, (o1, o2) -> compareShells(o1, o2, compPhones(o1, o2)));
+      sortBy(toSort, (o1, o2) -> compareShells(o1, o2, compLength(o1, o2)));
     } else if (selectedValue.equals(LENGTH_LONG_TO_SHORT)) {
-      sortBy(toSort, (o1, o2) -> compareShells(o1, o2, -1 * compPhones(o1, o2)));
+      sortBy(toSort, (o1, o2) -> compareShells(o1, o2, -1 * compLength(o1, o2)));
     } else if (selectedValue.equals(NATURAL_ORDER)) {
       sortBy(toSort, null);
     } else if (selectedValue.equals(ENGLISH_ASC)) {
@@ -272,12 +272,17 @@ class ListSorting<T extends CommonShell & Scored, U extends HasID> {
     }
   }
 
-  private int compPhones(CommonShell o1, CommonShell o2) {
+//  private int compPhones(CommonShell o1, CommonShell o2) {
+////    if (o1.getNumPhones() == 0) logger.info("1 no phones for " + o1.getID());
+////    if (o2.getNumPhones() == 0) logger.info("2 no phones for " + o2.getID());
+//    return Integer.compare(o1.getNumPhones(), o2.getNumPhones());
+//  }
+
+  private int compLength(CommonShell o1, CommonShell o2) {
 //    if (o1.getNumPhones() == 0) logger.info("1 no phones for " + o1.getID());
 //    if (o2.getNumPhones() == 0) logger.info("2 no phones for " + o2.getID());
-    return Integer.compare(o1.getNumPhones(), o2.getNumPhones());
+    return Integer.compare(o1.getForeignLanguage().length(), o2.getForeignLanguage().length());
   }
-
   private int compareShells(CommonShell o1, CommonShell o2, int i) {
     if (i == 0) i = compForeign(o1, o2);
     if (i == 0) i = compEnglish(o1, o2);

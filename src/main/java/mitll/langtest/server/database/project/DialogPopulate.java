@@ -99,7 +99,7 @@ public class DialogPopulate {
     int projid = project.getID();
     IDialogDAO dialogDAO = db.getDialogDAO();
     if (!dialogDAO.getDialogs(projid).isEmpty()) {
-      logger.info("\n\nProject #" + projid + " already has dialog data so not adding any.");
+      logger.warn("\n\nProject #" + projid + " already has dialog data so not adding any.");
       return false;
     } else {
       waitUntilTrieReady(project);
@@ -182,7 +182,10 @@ public class DialogPopulate {
     Set<CommonExercise> allNewInDatabase = new HashSet<>();
     dialogs.forEach(dialog -> {
       // add the image
+
+      logger.info("add dialog image " + projid + " dialog " + dialog.getID() + " modified " + modified);
       int imageID = db.getImageDAO().insert(getSlickImage(projid, now, dialog, modified));
+      logger.info("add dialog image " + projid + " dialog " + dialog.getID() + " id " + imageID);
 
       dialogToSlick.get(dialog).imageid_$eq(imageID);
 
@@ -350,6 +353,7 @@ public class DialogPopulate {
               if (id == -1) {
                 logger.error("addCoreVocab huh? exercise has no id");
               }
+
               relatedExercises.add(new SlickRelatedExercise(-1,
                   id,
                   id,
@@ -359,10 +363,12 @@ public class DialogPopulate {
             }
         ));
 
+    logger.info("about to add " + relatedExercises.size() + " related exercises!");
     db
         .getUserExerciseDAO()
         .getRelatedCoreExercise()
         .addBulkRelated(relatedExercises);
+    logger.info("done adding " + relatedExercises.size() + " related exercises!");
 
     return newInDatabase;
   }
@@ -542,6 +548,9 @@ public class DialogPopulate {
   private SlickImage getSlickImage(int projid, long now, Dialog dialog, Timestamp modified) {
     Timestamp ago = new Timestamp(now - FIVE_YEARS);
 
+    String imageRef = dialog.getImageRef();
+
+    logger.info("getSlickImage image ref " +imageRef);
     return new SlickImage(
         -1,
         projid,
@@ -551,7 +560,7 @@ public class DialogPopulate {
         modified,
 
         "",
-        dialog.getImageRef(),
+        imageRef,
 
         0,
         0,

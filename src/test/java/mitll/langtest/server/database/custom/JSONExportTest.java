@@ -53,7 +53,7 @@ public class JSONExportTest extends JsonExport {
     logger.debug("made " + database);
     String media = parent + File.separator + "media";
     logger.debug("media " + media);
-    database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan(), null);
+    database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan(), null, true);
     database.getExercises(-1, false);
   }
 

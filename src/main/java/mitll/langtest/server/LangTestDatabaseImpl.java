@@ -52,12 +52,10 @@ import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static mitll.hlt.domino.server.ServerInitializationManager.CONFIG_HOME_ATTR_NM;
 import static mitll.hlt.domino.server.ServerInitializationManager.USER_SVC;
 
 /**
@@ -339,7 +337,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     if (db == null) {
       logger.error("no database services created.");
     } else {
-      db.setInstallPath("", servletContext);
+      db.setInstallPath("", servletContext, true);
     }
   }
 }

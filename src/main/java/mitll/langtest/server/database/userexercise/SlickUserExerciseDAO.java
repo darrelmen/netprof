@@ -228,7 +228,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         shared.getID(),
         false,
         never,
-        shared.getNumPhones());
+        0
+        //   shared.getNumPhones()
+    );
   }
 
   /**
@@ -314,7 +316,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         shared.getDominoID(),
         false,
         never,
-        shared.getNumPhones());
+        0);//shared.getNumPhones());
   }
 
   private String getFL(CommonExercise shared) {
@@ -385,7 +387,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
                                                 Exercise exercise,
                                                 Collection<String> attrTypes,
                                                 List<SlickExercisePhone> pairs) {
-    if (exercise.getNumPhones() < 1 &&
+/*    if (exercise.getNumPhones() < 1 &&
         lookup.hasModel() &&
         (hostName.startsWith(HYDRA) ||
             hostName.contains(MITLL))) {  // for local testing
@@ -407,7 +409,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       exercise.setNumPhones(numToUse);
     } else {
       // logger.info("hostName " + hostName + " host addr " + hostAddress + " : " + exercise.getNumPhones() + " " + lookup.hasModel());
-    }
+    }*/
 //    logger.info("addExerciseToSectionHelper for " + exercise.getID() + " num phones = " + numToUse);
 
     return addPhoneInfo(slick, baseTypeOrder, sectionHelper, exercise, attrTypes);
@@ -473,7 +475,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    */
   @NotNull
   private Exercise makeExercise(SlickExercise slick, boolean shouldSwap, List<String> typeOrder) {
-   // int id = slick.id();
+    // int id = slick.id();
     String foreignlanguage = getTruncated(slick.foreignlanguage());
     String noAccentFL = StringUtils.stripAccents(foreignlanguage);
     String english = getTruncated(slick.english());
@@ -481,7 +483,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     Map<String, String> unitToValue = getUnitToValue(slick, typeOrder);
 
-    if (slick.projid() == 16 && slick.id() == 153010) logger.info("makeExercise ex (" +slick.id()+
+    if (slick.projid() == 16 && slick.id() == 153010) logger.info("makeExercise ex (" + slick.id() +
         ") " + typeOrder + " - " + unitToValue);
 
     Exercise exercise = new Exercise(
@@ -618,6 +620,14 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return exercisePhoneInfo;
   }
 
+  /**
+   * @param lookup
+   * @param exid
+   * @param foreignlanguage
+   * @param transliteration
+   * @return
+   * @see UserListManager#setNumPhones(CommonExercise, Project, int)
+   */
   @Override
   public int getAndRememberNumPhones(IPronunciationLookup lookup,
                                      int exid,
@@ -739,7 +749,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     List<String> baseTypeOrder = lookup.getBaseTypeOrder();
 
- //   logger.info("getExercises baseTypeOrder " + baseTypeOrder + " type " +typeOrder);
+    //   logger.info("getExercises baseTypeOrder " + baseTypeOrder + " type " +typeOrder);
 
     List<CommonExercise> copy = new ArrayList<>();
 
@@ -771,11 +781,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
         // remember to set swap flag so fl becomes alt-fl and vice-versa for chinese
 
-        if (WARN_ABOUT_MISSING_PHONES) {
+     /*   if (WARN_ABOUT_MISSING_PHONES) {
           if (exercise.getNumPhones() == 0 && n++ < 10) {
             logger.info("getExercises no phones for exercise " + exercise.getID());
           }
-        }
+        }*/
 
         addAttributeToExercise(allByProject, exToAttrs, exercise);
 //      logger.info("Attr for " + exercise.getID() + " " + exercise.getAttributes());

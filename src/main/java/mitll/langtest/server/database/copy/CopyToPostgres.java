@@ -127,7 +127,7 @@ public class CopyToPostgres<T extends CommonShell> {
     RECORDINGS("r"),
     SEND("s"),
     /**
-     * @see #copyDialog(int, String)
+     * @see #copyDialog
      */
     DIALOG("g"),
     /**
@@ -519,7 +519,7 @@ public class CopyToPostgres<T extends CommonShell> {
     database.setInstallPath(
         configFile.getParentFile().getAbsolutePath() + File.separator +
             database.getServerProps().getLessonPlan(),
-        null);
+        null, true);
 
     return database;
   }
@@ -1748,20 +1748,40 @@ public class CopyToPostgres<T extends CommonShell> {
   private static void copyDialog(int to, String lang, String propertiesFile) {
     database = getDatabase(propertiesFile);
 
-    if (to == -1 && lang == null || lang.isEmpty()) {
+    if (to == -1 && (lang == null || lang.isEmpty())) {
       logger.error("copyDialog remember to set the project id " + to + " or " + lang);
     } else {
-      database.ensureProjectManagement();
+      database.ensureProjectManagement(false);
+      logger.info("copyDialog id " + to + " or " + lang);
 
-      Project project = to == -1 ?
-          database.getProjectManagement().getProductionByLanguage(Language.valueOf(lang.toUpperCase())) :
-          database.getProject(to);
+      int idToUse = to;
+
+      if (to == -1) {
+        Language language = Language.valueOf(lang.toUpperCase());
+        if (language == Language.UNKNOWN) {
+          logger.error("bad language " + lang);
+          return;
+        } else {
+          idToUse = database.getProjectManagement().getProjectIDForLanguage(language);
+          logger.info("copyDialog found " + idToUse + " for " + language);
+
+
+        }
+      }
+
+      {
+        int english = database.getProjectManagement().getProjectIDForLanguage(Language.ENGLISH);
+        if (english == -1) logger.error("can't find english project");
+        database.getProject(english, true);
+      }
+
+      Project project = database.getProject(idToUse, true);
       if (project == null) {
         logger.error("\ncopyDialog no project with id " + to);
         doExit(false);
       } else {
-        logger.info("\npopulate for " + to + " in " + propertiesFile);
-        logger.info("\npopulate for " + project);
+        logger.info("\ncopyDialog populate for " + to + " in " + propertiesFile);
+        logger.info("\ncopyDialog populate for " + project);
         DialogPopulate dialogPopulate = new DialogPopulate(database, getPathHelper(database));
         //       boolean b = dialogPopulate.cleanDialog(project);
         //     if (b) {
@@ -1770,7 +1790,7 @@ public class CopyToPostgres<T extends CommonShell> {
         if (!dialogPopulate.populateDatabase(project, english)) {
           logger.warn("project " + project + " already has dialog data.");
         } else {
-          logger.info("add the dialogs to " + project);
+          logger.info("added the dialogs to " + project);
         }
       }
     }

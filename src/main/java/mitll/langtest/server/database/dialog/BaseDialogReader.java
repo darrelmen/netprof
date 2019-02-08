@@ -105,8 +105,8 @@ public class BaseDialogReader {
   }
 
   @NotNull
-   String getImageRef(String imageBaseDir, String dir) {
-    return imageBaseDir + dir + File.separator + dir + JPG;
+   String getImageRef(String imageBaseDir, String image) {
+    return imageBaseDir +  image + ".png";
   }
 
   /**

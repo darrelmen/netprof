@@ -328,13 +328,17 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.info("populateProjects no project management yet...");
     } else {
       projectManagement.populateProjects(projID);
-      userDAO.setProjectManagement(getProjectManagement());
+      setProjectManagement();
 
       if (TEST_SYNC) {  // right now I can't run the test since I need mongo.. etc.
         new TestSync(this);
       }
     }
     return this;
+  }
+
+  private void setProjectManagement() {
+    userDAO.setProjectManagement(getProjectManagement());
   }
 
   /**
@@ -746,18 +750,19 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @return
    */
   public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport) {
-    return setInstallPath(lessonPlanFileOnlyForImport, null);
+    return setInstallPath(lessonPlanFileOnlyForImport, null, true);
   }
 
   /**
    * @param lessonPlanFileOnlyForImport
    * @param servletContext
+   * @param loadAll
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    */
   @Override
-  public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, ServletContext servletContext) {
+  public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, ServletContext servletContext, boolean loadAll) {
     this.projectManagement = new ProjectManagement(pathHelper, serverProps, getLogAndNotify(), this, servletContext);
-    makeDAO(lessonPlanFileOnlyForImport);
+    makeDAO(lessonPlanFileOnlyForImport, loadAll);
     return this;
   }
 
@@ -1012,9 +1017,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * Special check for amas exercises...
    *
    * @param lessonPlanFileOnlyForImport only for import
-   * @see #setInstallPath(String, ServletContext)
+   * @param loadAll
+   * @see DatabaseServices#setInstallPath(String, ServletContext, boolean)
    */
-  private void makeDAO(String lessonPlanFileOnlyForImport) {
+  private void makeDAO(String lessonPlanFileOnlyForImport, boolean loadAll) {
     logger.info("makeDAO - " + lessonPlanFileOnlyForImport);
 
     if (userManagement == null) {
@@ -1024,7 +1030,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
         if (!serverProps.useH2()) {
           //        userExerciseDAO.useExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
-          populateProjects(-1);
+          if (loadAll) {
+            populateProjects(-1);
+          } else {
+            setProjectManagement();
+          }
+
           //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
           if (projectManagement.getProjects().isEmpty()) {
             logger.warn("\nmakeDAO no projects loaded yet...?");
@@ -1066,7 +1077,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * Here to support import from old individual sites for CopyToPostgres
    *
    * @param lessonPlanFile
-   * @see #makeDAO(String)
+   * @see #makeDAO(String, boolean)
    */
   private void makeExerciseDAO(String lessonPlanFile) {
 //    logger.info("makeExerciseDAO - " + lessonPlanFile + " : use h2 = " + serverProps.useH2());
@@ -1100,13 +1111,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   public Project getProject(int projectid, boolean onlyOne) {
-    ensureProjectManagement();
+    ensureProjectManagement(!onlyOne);
     return projectManagement.getProject(projectid, onlyOne);
   }
 
-  public void ensureProjectManagement() {
+  public void ensureProjectManagement(boolean loadAll) {
     if (projectManagement == null) {
-      setInstallPath("", null);
+      setInstallPath("", null, loadAll);
     }
   }
 
@@ -1772,7 +1783,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       return language + "_Unknown";
     } else {
       IDialog iDialog = collect.get(0);
-      name = language + "_" +(iDialog.getEnglish().isEmpty() ? iDialog.getForeignLanguage() : iDialog.getEnglish());
+      name = language + "_" + (iDialog.getEnglish().isEmpty() ? iDialog.getForeignLanguage() : iDialog.getEnglish());
       doAudioExport(out, false, projectid, options, language, name, iDialog.getBothExercisesAndCore());
     }
 

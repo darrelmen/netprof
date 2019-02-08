@@ -785,7 +785,7 @@ public class UserListManager implements IUserListManager {
 
     int newExerciseID = userExerciseDAO.add(userExercise, false, typeOrder);
 
-    setNumPhones(userExercise, project, newExerciseID);
+  //  setNumPhones(userExercise, project, newExerciseID);
 
     logger.info("newExercise added exercise " + newExerciseID + " from " + userExercise);
 
@@ -800,9 +800,9 @@ public class UserListManager implements IUserListManager {
 
       String foreignLanguage = next.getForeignLanguage();
 
-      if (!foreignLanguage.isEmpty()) {
-        setNumPhones(next.asCommon(), project, contextID);
-      }
+//      if (!foreignLanguage.isEmpty()) {
+//        setNumPhones(next.asCommon(), project, contextID);
+//      }
 
     } catch (Exception e) {
       logger.error("Got " + e, e);
@@ -813,12 +813,15 @@ public class UserListManager implements IUserListManager {
     addItemToList(userListID, newExerciseID);
   }
 
+/*
   private void setNumPhones(CommonExercise userExercise, Project project, int newExerciseID) {
+
     userExercise.getMutable().setNumPhones(
         databaseServices.getUserExerciseDAO().getAndRememberNumPhones(project,
             newExerciseID, userExercise.getForeignLanguage(), userExercise.getTransliteration()
         ));
   }
+*/
 
   public UserList getUserListNoExercises(int userListID) {
     logger.info("getUserListNoExercises for " + userListID);
@@ -868,7 +871,7 @@ public class UserListManager implements IUserListManager {
     boolean update = userExerciseDAO.update(userExercise, userExercise.isContext(), typeOrder);
     if (update) {
       databaseServices.getProject(userExercise.getProjectID()).getExerciseDAO().addUserExercise(userExercise);
-      setNumPhones(userExercise, databaseServices.getProject(userExercise.getProjectID()), userExercise.getID());
+      //setNumPhones(userExercise, databaseServices.getProject(userExercise.getProjectID()), userExercise.getID());
     } else {
       logger.warn("editItem : did not update item  " + userExercise);
     }
