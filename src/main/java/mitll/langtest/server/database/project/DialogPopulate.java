@@ -383,7 +383,7 @@ public class DialogPopulate {
   private Integer getExID(Map<CommonExercise, Integer> importExToID, CommonExercise clientExercise) {
     Integer id = clientExercise.getID();
     if (id == -1) {
-      logger.info("addCoreVocab lookup ex '" + clientExercise.getEnglish() + "' " + clientExercise.getForeignLanguage());
+//      logger.info("addCoreVocab lookup ex '" + clientExercise.getEnglish() + "' " + clientExercise.getForeignLanguage());
       id = importExToID.get(clientExercise);
       if (id == null) {
         logger.error("can't find " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage());

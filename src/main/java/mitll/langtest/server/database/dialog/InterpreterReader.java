@@ -187,9 +187,13 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
             if (l2Text.isEmpty()) continue;
 
             title = colToValue.get(Columns.TITLE).trim();
-            if (title != null && !title.isEmpty()) {
+            orientation = colToValue.get(Columns.ORIENTATION).trim();
+            if (!title.isEmpty()) {
               logger.info("row #" + rows + " title " + title);
-              orientation = colToValue.get(Columns.ORIENTATION).trim();
+            }
+            else {
+              logger.info("row EMPTY #" + rows + " title " + title);
+
             }
 
             if (DEBUG) {
@@ -226,12 +230,12 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
               if (!title.isEmpty()) {
                 lastTitle = title;
-               // logger.info("\n\n\ncurrent title       " + title);
+                 logger.info("\n\n\ncurrent title       '" + title + "'");
               }
 
               if (!orientation.isEmpty()) {
                 lastOrientation = orientation;
-               // logger.info("current orientation " + orientation);
+                 logger.info("\n\n\ncurrent orientation " + orientation);
               }
 
               try {
@@ -260,13 +264,13 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
                   {
                     Exercise exercise = getExercise(typeOrder, engText, "", "", ENGLISH_SPEAKER, Language.ENGLISH, turnID);
-                    logger.info("readFromSheet add " + turnID + " " + exercise.getFLToShow() + " " + exercise.getEnglish());
+                 //   logger.info("readFromSheet add " + turnID + " " + exercise.getFLToShow() + " " + exercise.getEnglish());
 
                     exercises.add(exercise);
                   }
                   {
                     Exercise exercise1 = getExercise(typeOrder, l2Text, engText, colToValue.get(Columns.TEXTTRANSLITERATION), INTERPRETER1, projectLang, interpreterTurn);
-                    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
+                //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
                     exercises.add(exercise1);
                   }
                   addCoreVocab(coreFL, colToValue, interpreterTurn, INTERPRETER1);
@@ -299,6 +303,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
         }
       }
 
+      logger.info("title " + lastTitle + " : " + lastOrientation);
       addDialog(defaultUser, project, engProject, dialogToSlick, modified, typeOrder,
           exercises, coreEng, coreFL, speakers, lastDialogID, imageBaseDir,
           lastTitle, lastOrientation);
