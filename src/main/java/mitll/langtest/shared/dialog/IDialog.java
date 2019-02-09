@@ -33,6 +33,7 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored {
   String getUnit();
 
   String getChapter();
+  String getCountryCode();
 
 
   String getAttributeValue(DialogMetadata metadata);

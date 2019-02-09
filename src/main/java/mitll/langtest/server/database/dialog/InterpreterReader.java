@@ -23,7 +23,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * Read the excel spreadsheet that we're using (for now) to define the interpreter turns.
@@ -607,7 +606,8 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
         orientation.startsWith("Interpreter") ? orientation : title,
         title,
         dialogToSlick,
-        DialogType.INTERPRETER);
+        DialogType.INTERPRETER,
+        project.getProject().countrycode());
   }
 
   /**

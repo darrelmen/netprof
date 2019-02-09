@@ -13,6 +13,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.IBanner;
 import mitll.langtest.client.banner.NewContentChooser;
@@ -149,14 +150,15 @@ public class ListenViewHelper<T extends TurnPanel>
       showDialog(dialogID, dialog, child);
 
       getRefAudio(new ArrayList<RefAudioGetter>(allTurns).iterator());
-    }
-    else {
+    } else {
       logger.info("showDialogGetRef no dialog for " + dialogID);
     }
   }
 
   /**
    * Main method for showing the three sections
+   *
+   * NOTE: ASSUMES the english speaker goes first!
    *
    * @param dialogID
    * @param dialog
@@ -169,6 +171,7 @@ public class ListenViewHelper<T extends TurnPanel>
     } else {
       child.add(dialogHeader = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog));
 
+      boolean firstIsEnglish = dialog.getExercises().isEmpty() || dialog.getExercises().get(0).hasEnglishAttr();
       DivWidget controlAndSpeakers = new DivWidget();
       styleControlRow(controlAndSpeakers);
       child.add(controlAndSpeakers);
@@ -177,24 +180,43 @@ public class ListenViewHelper<T extends TurnPanel>
       outer.addStyleName("inlineFlex");
       outer.setWidth("100%");
 
-      Image w = new Image(LangTest.LANGTEST_IMAGES + "englishSpeaker.png");
-      w.addStyleName("floatLeft");
-      outer.add(w);
+      {
+        Widget w = getFlag(firstIsEnglish ? "us" : dialog.getCountryCode());
+        DivWidget flagContainer = new DivWidget();
+        flagContainer.setWidth("100px");
+        flagContainer.add(w);
+        flagContainer.getElement().getStyle().setMarginLeft(10,PX);
+        flagContainer.addStyleName("floatLeft");
+        outer.add(flagContainer);
+      }
 
       DivWidget controls = getControls();
       controls.setWidth("100%");
       controls.getElement().getStyle().setMarginTop(50, PX);
       outer.add(controls);
 
-      Image w1 = new Image(LangTest.LANGTEST_IMAGES + "chineseSpeaker.png");
-      w1.addStyleName("floatRight");
-      outer.add(w1);
+      {
+        Widget w1 = getFlag(firstIsEnglish ? dialog.getCountryCode() : "us");
+
+        DivWidget flagContainer = new DivWidget();
+        flagContainer.add(w1);
+        flagContainer.setWidth("100px");
+        flagContainer.getElement().getStyle().setMarginRight(10,PX);
+        flagContainer.addStyleName("floatRight");
+
+        outer.add(flagContainer);
+      }
 
       controlAndSpeakers.add(outer);
       controlAndSpeakers.add(getSpeakerRow(dialog));
 
       child.add(getTurns(dialog));
     }
+  }
+
+  @NotNull
+  private com.google.gwt.user.client.ui.Image getFlag(String cc) {
+    return new com.google.gwt.user.client.ui.Image("langtest/cc/" + cc + ".png");
   }
 
   @NotNull
@@ -246,7 +268,7 @@ public class ListenViewHelper<T extends TurnPanel>
           boolean hasEnglishAttr = next.hasEnglishAttr();
 
           if (hasEnglishAttr && !getExerciseSpeaker(next).equalsIgnoreCase(secondSpeaker)) {
-            secondSpeaker = controller.getLanguageInfo().toDisplay()+ " Speaker";
+            secondSpeaker = controller.getLanguageInfo().toDisplay() + " Speaker";
           }
         }
 

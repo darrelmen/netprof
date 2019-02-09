@@ -1,6 +1,5 @@
 package mitll.langtest.shared.dialog;
 
-import mitll.langtest.server.database.dialog.IDialogReader;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +34,7 @@ public class Dialog implements IDialog, MutableShell {
 
   private String unit;
   private String chapter;
+  private String countryCode;
 
   /**
    *
@@ -68,6 +68,7 @@ public class Dialog implements IDialog, MutableShell {
    * @param exercises
    * @param coreExercises
    * @param type
+   * @param countryCode
    * @see mitll.langtest.server.database.dialog.DialogDAO#makeDialog
    * @see BasicDialogReader#addDialogPair
    */
@@ -86,7 +87,7 @@ public class Dialog implements IDialog, MutableShell {
                 List<ExerciseAttribute> attributes,
                 List<ClientExercise> exercises,
                 List<ClientExercise> coreExercises,
-                DialogType type) {
+                DialogType type, String countryCode) {
     this.id = id;
     this.userid = userid;
     this.projid = projid;
@@ -103,6 +104,7 @@ public class Dialog implements IDialog, MutableShell {
     this.exercises = exercises;
     this.coreVocabulary = coreExercises;
     this.kind = type;
+    this.countryCode=countryCode;
   }
 
   @Override
@@ -382,4 +384,13 @@ public class Dialog implements IDialog, MutableShell {
         "\n\t# core      " + coreVocabulary.size() +
         "\n\tattr        " + attributes;
   }
+
+  @Override
+  public String getCountryCode() {
+    return countryCode;
+  }
+
+//  public void setCountryCode(String countryCode) {
+//    this.countryCode = countryCode;
+//  }
 }

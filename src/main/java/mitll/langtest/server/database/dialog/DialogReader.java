@@ -154,7 +154,7 @@ class DialogReader extends BaseDialogReader {
 
           orientation, title, fltitle,
           dialogToSlick,
-          DialogType.INTERPRETER);
+          DialogType.INTERPRETER, project.getProject().countrycode());
       // logger.info("read " + dialog);
       //    dialog.getExercises().forEach(logger::info);
       //logger.info("\tex   " + dialog.getExercises());
