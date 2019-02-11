@@ -32,7 +32,10 @@
 
 package mitll.langtest.client.user;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Fieldset;
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;

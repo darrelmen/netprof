@@ -56,6 +56,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.custom.QuizSpec;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -729,6 +730,9 @@ public class CreateListDialog extends BasicDialog {
       allUnitChapter.forEach(listBox -> unitToChapter.put(typeOrder.get(unitToChapter.size()), listBox.getSelectedValue()));
       // logger.info("addUserList " + unitToChapter);
     }
+
+    QuizSpec quizSpec = new QuizSpec(duration, minScore, playAudio, true, "");
+
     controller.getListService().addUserList(
         safeText,
         sanitize(area.getText()),
@@ -736,9 +740,7 @@ public class CreateListDialog extends BasicDialog {
         isPublic,
         listType,
         quizSize,
-        duration,
-        minScore,
-        playAudio,
+        quizSpec,
         unitToChapter,
         new AsyncCallback<UserList>() {
           @Override

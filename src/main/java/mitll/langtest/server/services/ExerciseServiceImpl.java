@@ -244,7 +244,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
           String prefix1 = prefix.replaceAll("\\s++", "");
           if (!prefix1.equals(prefix)) {
-            logger.info("OK remove the spaces " + prefix1);
+           // logger.info("OK remove the spaces " + prefix1);
             exercisesForSearch = getSearchResult(request, projectID, exercises, predefExercises, prefix1);
           }
         }
@@ -286,8 +286,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       logger.info("getExerciseWhenNoUnitChapter took " + diff + " to get " + commonExercises.size());
     }
 
-    ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, commonExercises, projectID);
-    return exerciseListWrapper;
+    return makeExerciseListWrapper(request, commonExercises, projectID);
   }
 
   private TripleExercises<CommonExercise> getSearchResult(ExerciseListRequest request, int projectID, List<

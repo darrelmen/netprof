@@ -42,7 +42,10 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 

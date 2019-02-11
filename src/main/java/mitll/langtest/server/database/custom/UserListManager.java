@@ -77,20 +77,16 @@ public class UserListManager implements IUserListManager {
   private static final String INCORRECT = "incorrect";
   private static final String FIXED = "fixed";
 
-  //  private static final String FAST = "regular";
-//  private static final String SLOW = "slow";
   private static final String MY_FAVORITES = "My Favorites";
-//  private static final String COMMENTS = "Comments";
-//  private static final String ALL_ITEMS_WITH_COMMENTS = "All items with comments";
-
 
   private static final boolean DEBUG = false;
 
-  private static final int MINUTE = 60 * 1000;
-  private static final int HOUR = 60 * MINUTE;
-  private static final int DAY = 24 * HOUR;
-  private static final int YEAR = 365 * DAY;
-  private static final int FIFTY_YEAR = 50 * YEAR;
+  private static final long MINUTE = 60 * 1000;
+  private static final long HOUR = 60 * MINUTE;
+  private static final long DAY = 24 * HOUR;
+  private static final long YEAR = 365 * DAY;
+  private static final long FIFTY_YEAR = 50 * YEAR;
+  public static final String ALL = "All";
 
   private final IUserDAO userDAO;
   private int i = 0;
@@ -161,17 +157,15 @@ public class UserListManager implements IUserListManager {
    * @param isPublic
    * @param projid
    * @param size
-   * @param duration
-   * @param minScore
-   * @param showAudio
+   * @param quizSpec
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#addUserList
    */
   @Override
   public UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid,
-                          int size, int duration, int minScore, boolean showAudio, Map<String, String> unitChapter) {
-    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, size, false,
-        new TimeRange(), duration, minScore, showAudio, unitChapter);
+                          int size, QuizSpec quizSpec, Map<String, String> unitChapter) {
+    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, size,
+        new TimeRange(), quizSpec, unitChapter);
     if (userList == null) {
       logger.warn("addUserList no user list??? for " + userid + " " + name);
       return null;
@@ -208,7 +202,7 @@ public class UserListManager implements IUserListManager {
       return null;
     } else {
       UserList e = new UserList(i++, userid, userChosenID, firstInitialName, name, description, dliClass, isPrivate,
-          System.currentTimeMillis(), "", "", projid, UserList.LIST_TYPE.NORMAL, start, end, 10, 30, false);
+          System.currentTimeMillis(), "", "", projid, UserList.LIST_TYPE.NORMAL, start, end, 10, 30, false, "");
       rememberList(projid, e);
 //      new Thread(() -> logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total")).start();
       return e;
@@ -224,9 +218,7 @@ public class UserListManager implements IUserListManager {
    * @param projid
    * @param reqSize
    * @param timeRange
-   * @param duration
-   * @param minScore
-   * @param showAudio
+   * @param quizSpec
    * @return
    */
   private UserList<CommonShell> createQuiz(int userid,
@@ -236,9 +228,8 @@ public class UserListManager implements IUserListManager {
                                            boolean isPrivate,
                                            int projid,
                                            int reqSize,
-                                           boolean isDryRun,
                                            TimeRange timeRange,
-                                           int duration, int minScore, boolean showAudio, Map<String, String> unitChapter) {
+                                           QuizSpec quizSpec, Map<String, String> unitChapter) {
     String userChosenID = userDAO.getUserChosenID(userid);
     String firstInitialName = userDAO.getFirstInitialName(userid);
     if (userChosenID == null) {
@@ -248,7 +239,8 @@ public class UserListManager implements IUserListManager {
       long now = System.currentTimeMillis();
 
       UserList<CommonShell> quiz = new UserList<>(i++, userid, userChosenID, firstInitialName, name, description, dliClass, isPrivate,
-          now, "", "", projid, UserList.LIST_TYPE.QUIZ, timeRange.getStart(), timeRange.getEnd(), duration, minScore, showAudio);
+          now, "", "", projid, UserList.LIST_TYPE.QUIZ, timeRange.getStart(), timeRange.getEnd(),
+          quizSpec.getRoundMinutes(), quizSpec.getMinScore(), quizSpec.isShowAudio(), quizSpec.getAccessCode());
       int userListID = rememberList(projid, quiz);
 
       logger.info("createQuiz made new quiz " + quiz + "\n\tfor size " + reqSize);
@@ -256,16 +248,15 @@ public class UserListManager implements IUserListManager {
 
       List<CommonExercise> items = new ArrayList<>();
 
-      if (isDryRun) {
-        getFirstEasyLength(project.getSectionHelper().getFirst());
-        for (CommonExercise exercise : getFirstEasyLength(project.getSectionHelper().getFirst())) {
-          items.add(exercise);
-          if (items.size() == reqSize) break;
-        }
-      } else {
-
-        addRandomItems(reqSize, project, items, unitChapter);
-      }
+//      if (isDryRun) {
+//        getFirstEasyLength(project.getSectionHelper().getFirst());
+//        for (CommonExercise exercise : getFirstEasyLength(project.getSectionHelper().getFirst())) {
+//          items.add(exercise);
+//          if (items.size() == reqSize) break;
+//        }
+//      } else {
+      addRandomItems(reqSize, project, items, unitChapter);
+//      }
 
       List<CommonShell> shells = getShells(items);
       logger.info("createQuiz made random ex list of size " + items.size() +
@@ -283,7 +274,7 @@ public class UserListManager implements IUserListManager {
   private void addRandomItems(int reqSize, Project project, List<CommonExercise> items, Map<String, String> unitChapter) {
     Map<String, Collection<String>> typeToSelection = new HashMap<>();
     unitChapter.forEach((k, v) -> {
-      if (!v.equalsIgnoreCase("All")) {
+      if (!v.equalsIgnoreCase(ALL)) {
         typeToSelection.put(k, Collections.singleton(v));
       }
     });
@@ -332,6 +323,7 @@ public class UserListManager implements IUserListManager {
     }
   }
 
+/*
   @NotNull
   private List<CommonExercise> getFirstEasyLength(Collection<CommonExercise> firstCandidates) {
     List<CommonExercise> first = new ArrayList<>();
@@ -345,6 +337,7 @@ public class UserListManager implements IUserListManager {
     }
     return first;
   }
+*/
 
   private int rememberList(int projid, UserList e) {
     return userListDAO.add(e, projid);
@@ -775,9 +768,7 @@ public class UserListManager implements IUserListManager {
    */
   @Override
   public void newExercise(int userListID, CommonExercise userExercise) {
-    int projectID = userExercise.getProjectID();
-
-    Project project = databaseServices.getProject(projectID);
+    Project project = databaseServices.getProject(userExercise.getProjectID());
     List<String> typeOrder = project.getTypeOrder();
 
 //    exercisePhoneInfo = getExercisePhoneInfo(lookup, foreignlanguage, transliteration);
@@ -785,28 +776,31 @@ public class UserListManager implements IUserListManager {
 
     int newExerciseID = userExerciseDAO.add(userExercise, false, typeOrder);
 
-  //  setNumPhones(userExercise, project, newExerciseID);
+    //  setNumPhones(userExercise, project, newExerciseID);
 
     logger.info("newExercise added exercise " + newExerciseID + " from " + userExercise);
 
     project.getExerciseDAO().addUserExercise(userExercise);
 
-    int contextID = 0;
-    try {
-      contextID = makeContextExercise(userExercise, typeOrder);
+    // int contextID = 0;
+    // try {
+    // contextID =
+    makeContextExercise(userExercise, typeOrder);
 
-      ClientExercise next = userExercise.getDirectlyRelated().iterator().next();
+    ClientExercise next = userExercise.getDirectlyRelated().iterator().next();
+    if (next == null) {
+      logger.error("huh? no context exercise on " + userExercise);
+    } else {
       project.getExerciseDAO().addUserExercise(next.asCommon());
-
-      String foreignLanguage = next.getForeignLanguage();
-
+    }
+    //   String foreignLanguage = next.getForeignLanguage();
 //      if (!foreignLanguage.isEmpty()) {
 //        setNumPhones(next.asCommon(), project, contextID);
 //      }
 
-    } catch (Exception e) {
-      logger.error("Got " + e, e);
-    }
+//    } catch (Exception e) {
+//      logger.error("Got " + e, e);
+//    }
 
 //    logger.info("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
 
@@ -1226,6 +1220,7 @@ public class UserListManager implements IUserListManager {
         idAndName.addProperty("quizMinutes", quizInfo.getRoundMinutes());
         idAndName.addProperty("minScoreToAdvance", quizInfo.getMinScore());
         idAndName.addProperty("playAudio", quizInfo.isShowAudio());
+        idAndName.addProperty("accessCode", quizInfo.getAccessCode());
       }
       lists.add(idAndName);
     }
@@ -1239,8 +1234,8 @@ public class UserListManager implements IUserListManager {
     if (list == null) logger.warn("getQuizInfo no quiz with list id " + userListID);
 
     QuizSpec quizSpec = list != null ?
-        new QuizSpec(list.getRoundTimeMinutes(), list.getMinScore(), list.shouldShowAudio(), list.getListType() != UserList.LIST_TYPE.QUIZ) :
-        new QuizSpec(10, 35, false, true);
+        new QuizSpec(list.getRoundTimeMinutes(), list.getMinScore(), list.shouldShowAudio(), list.getListType() != UserList.LIST_TYPE.QUIZ, list.getAccessCode()) :
+        new QuizSpec(10, 35, false, true, "");
 
     if (DEBUG) logger.info("getQuizInfo returning " + quizSpec + " for " + userListID);
     return quizSpec;

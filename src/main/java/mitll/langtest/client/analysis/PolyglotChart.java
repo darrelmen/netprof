@@ -9,7 +9,6 @@ import org.jetbrains.annotations.NotNull;
 import org.moxieapps.gwt.highcharts.client.*;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.Map;
 import java.util.logging.Logger;
 

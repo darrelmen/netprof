@@ -78,9 +78,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param dliClass
    * @param isPublic
    * @param listType
-   * @param duration
-   * @param minScore
-   * @param showAudio
+   * @param quizSpec
    * @return
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
@@ -88,15 +86,14 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   public UserList addUserList(String name, String description, String dliClass, boolean isPublic,
                               UserList.LIST_TYPE listType,
                               int size,
-                              int duration, int minScore, boolean showAudio,
-                              Map<String, String> unitChapter) throws DominoSessionException {
+                              QuizSpec quizSpec, Map<String, String> unitChapter) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     IUserListManager userListManager = getUserListManager();
     int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
 
     return listType == UserList.LIST_TYPE.NORMAL ?
         userListManager.addUserList(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser) :
-        userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser, size, duration, minScore, showAudio, unitChapter);
+        userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser, size, quizSpec, unitChapter);
   }
 
   /**

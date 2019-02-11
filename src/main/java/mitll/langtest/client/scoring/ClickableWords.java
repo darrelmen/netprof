@@ -18,8 +18,6 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.CharacterIterator;
-import java.text.StringCharacterIterator;
 import java.util.*;
 import java.util.logging.Logger;
 

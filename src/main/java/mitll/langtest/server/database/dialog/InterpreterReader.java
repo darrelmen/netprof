@@ -65,9 +65,21 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
     ORIENTATION
   }
 
+  @Override
+  public Map<Dialog, SlickDialog> getInterpreterDialogs(int defaultUser, Project project, Project englishProject) {
+    File excelFile = getExcelFile(project);
+
+    if (excelFile.exists()) {
+      return getDialogsFromExcel(defaultUser, project, englishProject, excelFile);
+    } else {
+      logger.info("no interpreter spreadsheet for " + project.getName());
+      return Collections.emptyMap();
+    }
+  }
+
   /**
    * @param defaultUser
-   * @param exToAudio
+   * @param exToAudio NOT USED!
    * @param project
    * @param englishProject
    * @return
@@ -77,16 +89,27 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
                                              Map<ClientExercise, String> exToAudio,
                                              Project project,
                                              Project englishProject) {
+//    File excelFile = getExcelFile(project);
+//
+//    if (excelFile.exists()) {
+//      logger.info("no interpreter spreadsheet for " + project.getName());
+//      return Collections.emptyMap();
+//    } else {
+//      return getDialogsFromExcel(defaultUser, project, englishProject, excelFile);
+//    }
+
+    return Collections.emptyMap();
+  }
+
+  private Map<Dialog, SlickDialog> getDialogsFromExcel(int defaultUser,
+                                                       Project project,
+                                                       Project englishProject,
+                                                       File excelFile) {
+    if (defaultUser == -1) {
+      logger.error("default user is not set?");
+    }
+
     Map<Dialog, SlickDialog> dialogToSlick = new HashMap<>();
-    String dialogDataDir = getDialogDataDir(project);
-    String projectLanguage = project.getLanguage().toLowerCase();
-
-    File loc = new File(dialogDataDir);
-    boolean directory = loc.isDirectory();
-    if (!directory) logger.warn("huh? not a dir");
-
-    File excelFile = new File(loc, INTERPRETER_XLSX);
-
     try {
       FileInputStream inp = new FileInputStream(excelFile);
       XSSFWorkbook wb = new XSSFWorkbook(inp);
@@ -94,12 +117,11 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
       int numberOfSheets = wb.getNumberOfSheets();
       for (int i = 0; i < numberOfSheets; i++) {
         Sheet sheet = wb.getSheetAt(i);
-        int physicalNumberOfRows = sheet.getPhysicalNumberOfRows();
+        if (DEBUG) {
+          logger.info("getDialogs sheet " + sheet.getSheetName() + " had " + sheet.getPhysicalNumberOfRows() + " rows.");
+        }
 
-        if (DEBUG)
-          logger.info("getDialogs sheet " + sheet.getSheetName() + " had " + physicalNumberOfRows + " rows.");
-
-        if (physicalNumberOfRows > 0) {
+        if (sheet.getPhysicalNumberOfRows() > 0) {
           if (sheet.getSheetName().equalsIgnoreCase(DIALOGS) || numberOfSheets == 1) {
             dialogToSlick = readFromSheet(defaultUser, sheet, project, englishProject);
           }
@@ -108,10 +130,22 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
       inp.close();
     } catch (IOException e) {
+      String projectLanguage = project.getLanguage().toLowerCase();
       logger.error(projectLanguage + " : looking for " + excelFile.getAbsolutePath() + " got " + e, e);
     }
 
     return dialogToSlick;
+  }
+
+  @NotNull
+  private File getExcelFile(Project project) {
+    String dialogDataDir = getDialogDataDir(project);
+
+    File loc = new File(dialogDataDir);
+    boolean directory = loc.isDirectory();
+    if (!directory) logger.warn("huh? not a dir");
+
+    return new File(loc, INTERPRETER_XLSX);
   }
 
   private final Set<Character> SPLIT_CHARS = new HashSet<>(Arrays.asList('。', '.', '?', '？'));

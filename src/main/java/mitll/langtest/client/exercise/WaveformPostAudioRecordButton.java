@@ -41,8 +41,6 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 
-import java.util.logging.Logger;
-
 /**
  * Tells playAudioPanel to be enabled/disabled in response to recording states
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory

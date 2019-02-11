@@ -3,7 +3,6 @@ package mitll.langtest.client.qc;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.recording.NoListFacetExerciseList;
 import mitll.langtest.client.custom.recording.RecordingFacetExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.HistoryExerciseList;

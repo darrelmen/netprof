@@ -1,7 +1,7 @@
 package mitll.langtest.client.flashcard;
 
-import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.dialog.RehearseViewHelper;
 
 public class SessionStorage {
   private final String key;

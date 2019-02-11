@@ -33,7 +33,6 @@
 package mitll.langtest.client.initial;
 
 import com.google.gwt.user.client.Window;
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.recorder.RecordButton;
 import org.jetbrains.annotations.NotNull;
 

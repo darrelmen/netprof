@@ -4,8 +4,6 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.npdata.dao.SlickDialog;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,7 +13,7 @@ import java.util.Map;
  * Dialog data from Paul - 6/20/18
  */
 public class KPDialogs extends DialogReader implements IDialogReader {
-  private static final Logger logger = LogManager.getLogger(KPDialogs.class);
+ // private static final Logger logger = LogManager.getLogger(KPDialogs.class);
 
   private final String docIDS =
       "333815\n" +
@@ -256,4 +254,6 @@ public class KPDialogs extends DialogReader implements IDialogReader {
                                              Project project, Project englishProject) {
     return getDialogsByProp(defaultUser, exToAudio, project, dialogProps, cv);
   }
+
+
 }

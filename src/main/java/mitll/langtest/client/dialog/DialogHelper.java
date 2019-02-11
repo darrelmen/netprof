@@ -36,7 +36,6 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Widget;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -137,7 +135,8 @@ public class DialogHelper {
 
   //  logger.info("max height " + maxHeight);
     if (width > 900) {
-      DOM.setStyleAttribute(dialogBox.getElement(), "left", 310 + "px");
+      dialogBox.getElement().getStyle().setLeft(310, Style.Unit.PX);
+//      DOM.setStyleAttribute(dialogBox.getElement(), "left", 310 + "px");
     }
 
     this.closeButton = closeButton;

@@ -1,6 +1,5 @@
 package mitll.langtest.client.custom.exercise;
 
-import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DecoratedPopupPanel;
@@ -11,6 +10,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.ListChangedEvent;
 import mitll.langtest.client.scoring.UserListSupport;
+import mitll.langtest.shared.custom.QuizSpec;
 import mitll.langtest.shared.custom.UserList;
 import org.jetbrains.annotations.NotNull;
 
@@ -109,7 +109,7 @@ public class NewListButton {
         "",
         "",
         isPublic,
-        UserList.LIST_TYPE.NORMAL, 100, 10, 30, false, new HashMap<>(), new AsyncCallback<UserList>() {
+        UserList.LIST_TYPE.NORMAL, 100, new QuizSpec(), new HashMap<>(), new AsyncCallback<UserList>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("adding a new list", caught);

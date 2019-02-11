@@ -8,9 +8,6 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.FocusEvent;
-import com.google.gwt.event.dom.client.FocusHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.Command;
@@ -18,14 +15,19 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.userlist.ImportBulk;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.NPExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -322,11 +324,12 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
           public void onSuccess(CommonExercise newExercise) {
             if (newExercise == null) {
               // logger.info("onSuccess not in dict!");
-              message.setText("This is not in our " + controller.getLanguageInfo().toDisplay()+ " dictionary. Please edit.");
+              message.setText("This is not in our " + controller.getLanguageInfo().toDisplay() + " dictionary. Please edit.");
             } else {
-             // logger.info("checkIsValidPhrase got " + newExercise.getID() + " dir " + newExercise.getDirectlyRelated());
+              // logger.info("checkIsValidPhrase got " + newExercise.getID() + " dir " + newExercise.getDirectlyRelated());
               showNewItem(newExercise);
               clearTextBoxField();
+              new ImportBulk().refreshExerciseIDsOnHydra(Collections.singletonList(newExercise), controller);
             }
           }
         });
