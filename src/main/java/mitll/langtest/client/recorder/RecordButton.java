@@ -360,10 +360,7 @@ public class RecordButton extends Button {
    */
   private void showRecording() {
     setIcon(IconType.STOP);
-
-    if (showInitialRecordImage()) {
-      showFirstRecordImage();
-    }
+    showInitialRecordImage();
   }
 
   /**
@@ -371,7 +368,6 @@ public class RecordButton extends Button {
    */
   private void showStopped() {
     setIcon(IconType.MICROPHONE);
-
     hideBothRecordImages();
   }
 
@@ -379,15 +375,8 @@ public class RecordButton extends Button {
    * @return if we want to flip images
    * @see #showRecording()
    */
-  boolean showInitialRecordImage() {
+  void showInitialRecordImage() {
     setText(STOP);
-    return true;
-  }
-
-  /**
-   * @seex #flipImage()
-   */
-  void showFirstRecordImage() {
   }
 
   void hideBothRecordImages() {

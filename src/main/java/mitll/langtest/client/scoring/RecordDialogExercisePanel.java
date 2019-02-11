@@ -301,12 +301,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
-    boolean isRehearse = rehearseView instanceof PerformViewHelper;
-    logger.info("is perform " + isRehearse);
-
+//    boolean isRehearse = rehearseView instanceof PerformViewHelper;
+    // logger.info("is perform " + isRehearse);
     NoFeedbackRecordAudioPanel<ClientExercise> recordPanel =
-//        isRehearse ?
-//            new PushToTalkDialogRecordAudioPanel(exercise, controller, sessionManager, rehearseView, this) :
         new ContinuousDialogRecordAudioPanel(exercise, controller, sessionManager, rehearseView, this);
 
     this.recordAudioPanel = recordPanel;
@@ -388,7 +385,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   /**
    * TODO :subclass!
    */
-   @Override
+  @Override
   public void markCurrent() {
     super.markCurrent();
 
@@ -532,6 +529,11 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       this.recordDialogTurn = recordDialogTurn;
     }
 
+    @Override
+    protected boolean useMicrophoneIcon() {
+      return true;
+    }
+
     /**
      * SO in an async world, this result may not be for this exercise panel!
      *
@@ -554,7 +556,10 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
     @Override
     Widget getPopupTargetWidget() {
-      return recordDialogTurn.myGetPopupTargetWidget();
+      Widget widget = recordDialogTurn.myGetPopupTargetWidget();
+      logger.info("getPopupTargetWidget " + widget.getElement().getId());
+
+      return widget;
     }
 
     /**
@@ -565,11 +570,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     public void usePartial(StreamResponse response) {
       recordDialogTurn.usePartial(response);
     }
-
-//    @Override
-//    public void gotAbort() {
-//      //logger.info("OK got abort!");
-//    }
 
     /**
      *

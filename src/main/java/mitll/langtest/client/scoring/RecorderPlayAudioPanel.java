@@ -1,11 +1,15 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconSize;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Widget;
@@ -35,8 +39,8 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   /**
    * TODO make better relationship with ASRRecordAudioPanel
    */
-  private Image recordImage1;
-
+  private Widget recordImage1;
+  boolean useMicrophoneIcon;
   /**
    *
    */
@@ -47,9 +51,10 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    * @param postAudioRecordButton1
    * @param controller
    * @param exercise
+   * @param useMicrophoneIcon
    * @see SimpleRecordAudioPanel#makePlayAudioPanel
    */
-  RecorderPlayAudioPanel(final Button postAudioRecordButton1, ExerciseController controller, HasID exercise) {
+  RecorderPlayAudioPanel(final Button postAudioRecordButton1, ExerciseController controller, HasID exercise, boolean useMicrophoneIcon) {
     super(new PlayListener() {
             public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
@@ -66,6 +71,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
         null, controller, exercise.getID(), true);
 
     downloadContainer = new DownloadContainer();
+    this.useMicrophoneIcon = useMicrophoneIcon;
     getElement().setId("RecorderPlayAudioPanel");
   }
 
@@ -91,7 +97,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
 
   void showFirstRecord() {
     if (controller.shouldRecord()) {
-   //   logger.info("showFirstRecording " + exid + " red recording signal now visible!");
+      //   logger.info("showFirstRecording " + exid + " red recording signal now visible!");
       recordImage1.setVisible(true);
     } else {
       redX.setVisible(true);
@@ -132,7 +138,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     return playButton;
   }
 
-
   /**
    * @param waitCursor null OK
    * @return
@@ -144,9 +149,9 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     recordFeedback.addStyleName("floatLeft");
     recordFeedback.getElement().setId("recordFeedbackImageContainer");
 
-    recordImage1 = new Image(firstRed);
+    recordImage1 = getRecordImage();
     recordImage1.setVisible(false);
-    recordImage1.setWidth("32px");
+    //recordImage1.setWidth("32px");
 
     recordImage1.addStyleName("hvr-pulse");
 
@@ -160,6 +165,36 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     }
 
     return recordFeedback;
+  }
+
+  @NotNull
+  private Widget getRecordImage() {
+    Icon icon = new Icon(IconType.MICROPHONE);
+    Style style = icon.getElement().getStyle();
+    style.setMarginLeft(4, Style.Unit.PX);
+    style.setColor("white");
+    icon.setSize(IconSize.LARGE);
+     
+    DivWidget container = new DivWidget();
+    container.getElement().setId("micContainer");
+    container.setHeight("20px");
+    container.setWidth("20px");
+
+    Style style1 = container.getElement().getStyle();
+    style1.setPaddingTop(10, Style.Unit.PX);
+    style1.setPaddingBottom(10, Style.Unit.PX);
+    style1.setPaddingLeft(10, Style.Unit.PX);
+    style1.setPaddingRight(10, Style.Unit.PX);
+    style1.setProperty("borderRadius", "24px");
+    style1.setMarginLeft(2, Style.Unit.PX);
+    style1.setMarginRight(5, Style.Unit.PX);
+    style1.setMarginTop(-17, Style.Unit.PX);
+    style1.setMarginBottom(5, Style.Unit.PX);
+
+    container.add(icon);
+    //  container.addStyleName("hvr-pulse");
+    style1.setBackgroundColor("#da4f49");
+    return useMicrophoneIcon ? container : new Image(firstRed);
   }
 
   @NotNull

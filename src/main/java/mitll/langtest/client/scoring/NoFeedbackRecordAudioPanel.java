@@ -91,7 +91,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     postAudioRecordButton.addStyleName("leftFiveMargin");
     postAudioRecordButton.setVisible(controller.getProjectStartupInfo().isHasModel());
 
-    playAudioPanel = new RecorderPlayAudioPanel(postAudioRecordButton, controller, exercise);
+    playAudioPanel = new RecorderPlayAudioPanel(postAudioRecordButton, controller, exercise, useMicrophoneIcon());
 
     playAudioPanel.hidePlayButton();
 
@@ -100,8 +100,13 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     return playAudioPanel;
   }
 
+  protected boolean useMicrophoneIcon() {
+    return false;
+  }
+
   Widget getPopupTargetWidget() {
-    return this;
+  //  logger.info("getPopupTargetWidget " + this.getId());
+    return postAudioRecordButton;
   }
 
   private String getDeviceValue() {

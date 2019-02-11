@@ -261,7 +261,6 @@ public abstract class PostAudioRecordButton extends RecordButton
 
   protected String getDevice() {
     //logger.info("getDevice default " + getClass());
-
     return controller.getBrowserInfo();
   }
 
@@ -450,7 +449,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @return
    */
   Widget getPopupTargetWidget() {
-  //  logger.info("getPopupTargetWidget target is " + this.getElement().getId());
+    logger.info("getPopupTargetWidget target is " + this.getElement().getId());
     return this;
   }
 }
