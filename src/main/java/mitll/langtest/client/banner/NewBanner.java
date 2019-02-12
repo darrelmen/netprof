@@ -43,7 +43,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       Arrays.asList(VIEWS.LEARN, VIEWS.PRACTICE, VIEWS.QUIZ, VIEWS.PROGRESS, VIEWS.LISTS);
 
   private static final List<VIEWS> DIALOG_VIEWS =
-      Arrays.asList(VIEWS.DIALOG, VIEWS.STUDY, VIEWS.LISTEN, VIEWS.REHEARSE, VIEWS.PERFORM, VIEWS.SCORES);
+      Arrays.asList(VIEWS.DIALOG, VIEWS.STUDY, VIEWS.LISTEN, VIEWS.REHEARSE,VIEWS.CORE_REHEARSE, VIEWS.PERFORM, VIEWS.SCORES);
 
   private static final List<VIEWS> BOTH = new ArrayList<>(STANDARD_VIEWS);
 

@@ -40,6 +40,7 @@ public interface INavigation extends IViewContaner {
     STUDY("Study", ProjectMode.DIALOG),
     LISTEN("Listen", ProjectMode.DIALOG),
     REHEARSE("Rehearse", ProjectMode.DIALOG),
+    CORE_REHEARSE("Core Rehearse", ProjectMode.DIALOG),
     PERFORM("Perform", ProjectMode.DIALOG),
     /**
      * @see mitll.langtest.client.banner.NewContentChooser#showScores

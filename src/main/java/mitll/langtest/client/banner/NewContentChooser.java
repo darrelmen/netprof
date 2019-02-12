@@ -56,7 +56,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   private final DialogViewHelper dialogHelper;
   private final ListenViewHelper listenHelper;
-  private final ListenViewHelper rehearseHelper;
+  private final ListenViewHelper rehearseHelper, coreRehearseHelper;
   private final ListenViewHelper performHelper;
 
   private final PracticeHelper practiceHelper;
@@ -84,6 +84,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     studyHelper = new StudyHelper<>(controller);
     listenHelper = new ListenViewHelper(controller);
     rehearseHelper = new RehearseViewHelper(controller);
+    coreRehearseHelper = new CoreRehearseViewHelper(controller);
     performHelper = new PerformViewHelper(controller);
 
     this.controller = controller;
@@ -240,6 +241,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         case REHEARSE:
           clearAndPushKeep(REHEARSE);
           rehearseHelper.showContent(divWidget, REHEARSE);
+          break;
+        case CORE_REHEARSE:
+          clearAndPushKeep(CORE_REHEARSE);
+          coreRehearseHelper.showContent(divWidget, CORE_REHEARSE);
           break;
         case PERFORM:
           clearAndPushKeep(PERFORM);

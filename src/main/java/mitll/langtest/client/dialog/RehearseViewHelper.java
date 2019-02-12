@@ -44,9 +44,10 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     extends ListenViewHelper<T>
     implements SessionManager, IRehearseView {
+  private final Logger logger = Logger.getLogger("RehearseViewHelper");
+
   public static final String DIALOG_INTRO_SHOWN_REHEARSAL = "dialogIntroShownRehearsal";
   public static final String HOLD_THE_RED_RECORD_BUTTON = "When it's your turn, press and hold the red record button.";
-  private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
   private static final double MAX_RATE_RATIO = 3D;
 
@@ -174,7 +175,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   @NotNull
   @Override
   protected INavigation.VIEWS getNextView() {
-    return INavigation.VIEWS.PERFORM;
+    return INavigation.VIEWS.CORE_REHEARSE;
   }
 
   @NotNull
@@ -897,10 +898,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     });
   }
 
+  /**
+   * @see #getSession
+   * @return
+   */
   public INavigation.VIEWS getView() {
     return INavigation.VIEWS.REHEARSE;
   }
-
 
   /**
    * @param wasRecording

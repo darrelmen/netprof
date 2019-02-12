@@ -209,42 +209,93 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @see PerformViewHelper#getTurnPanel
    * Or should we use exact match?
    */
-  public void maybeSetObscure(Collection<String> coreVocab) {
-    IHighlightSegment candidate = getObscureCandidate(coreVocab, true);
-
-    if (candidate == null || flclickables.indexOf(candidate) == 0) {
-      candidate = getObscureCandidate(coreVocab, false);
-    }
-
-    if (candidate != null) {
-      candidate.setObscurable();
+  public void maybeSetObscure(Map<String,ClientExercise> turnToEx) {
+    String oldID = exercise.getOldID();
+    ClientExercise clientExercise = turnToEx.get(oldID);
+    if (clientExercise == null) logger.warning("couldn't find core for " + oldID);
+    else {
+      Set<String> coreVocab = Collections.singleton(clientExercise.getForeignLanguage());
+      logger.info("got " + clientExercise.getForeignLanguage() + " for " + exercise.getForeignLanguage());
+      getObscureCandidates(coreVocab).forEach(IHighlightSegment::setObscurable);
     }
   }
 
-  @Nullable
+/*  @Nullable
   private IHighlightSegment getObscureCandidate(Collection<String> coreVocab, boolean useExact) {
     IHighlightSegment candidate = null;
 
-    boolean isFirst = true;
+    String coreMatch = null;
 
     for (IHighlightSegment segment : flclickables) {
-      List<String> matches = coreVocab
-          .stream()
-          .filter(core ->
-              useExact ?
-                  clickableWords.isExactMatch(segment.getContent(), core) :
-                  clickableWords.isSearchMatch(segment.getContent(), core)
-          ).collect(Collectors.toList());
+      String content = segment.getContent();
 
-      if (!matches.isEmpty()) {
-        // logger.info("getObscureCandidate for " + segment + " found " + matches + (useExact ? " exact" : " contains"));
-        candidate = segment;
-        if (!isFirst && candidate.getContent().length() > 1) break;
+      if (!content.isEmpty()) {
+        for (String core : coreVocab) {
+          if (useExact) {
+            if (clickableWords.isExactMatch(content, core)) {
+              coreMatch = core;
+              candidate = segment;
+            }
+          } else if (clickableWords.isSearchMatch(content, core)) {
+            coreMatch = core;
+            candidate = segment;
+          }
+          if (coreMatch != null) break;
+        }
+        if (coreMatch != null) break;
       }
-
-      isFirst = false;
     }
+
+    if (coreMatch != null) {
+      logger.info("OK, used " + coreMatch);
+      //coreVocab.remove(coreMatch);
+    }
+
     return candidate;
+  }*/
+
+  private Collection<IHighlightSegment> getObscureCandidates(Collection<String> coreVocab) {
+    Collection<IHighlightSegment> candidates = new ArrayList<>();
+
+    String coreMatch = null;
+    for (IHighlightSegment segment : flclickables) {
+      //   logger.warning("no match for " + segment.getContent() + " in " + coreVocab);
+      String content = segment.getContent();
+
+      if (!content.isEmpty()) {
+        for (String core : coreVocab) {
+          if (core.contains(content) || content.contains(core)) {
+            coreMatch = core;
+            //candidate = segment;
+          }
+          if (coreMatch != null) break;
+        }
+        if (coreMatch != null) break;
+      }
+    }
+
+    if (coreMatch != null) {
+      for (IHighlightSegment segment : flclickables) {
+        String content = segment.getContent();
+
+        if (coreMatch.startsWith(content)) {
+          candidates.add(segment);
+          coreMatch = coreMatch.substring(content.length());
+       //   logger.info("getObscureCandidate core match now " + coreMatch + " against " + content);
+          if (coreMatch.isEmpty()) break;
+        }
+        else if (content.startsWith(coreMatch)) {
+          candidates.add(segment);
+          logger.info("getObscureCandidate partial match for " + coreMatch + " against " + content);
+          break;
+        }
+        else {
+       //   logger.info("getObscureCandidate no match for " + coreMatch + " against " + content);
+        }
+      }
+    }
+
+    return candidates;
   }
 
   public void reallyObscure() {
@@ -341,7 +392,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
         flContainer.add(buttonContainer);
       }
 
-     // flContainer.add(recordPanel.getScoreFeedback());
+      // flContainer.add(recordPanel.getScoreFeedback());
 
       {
         Emoticon w = getEmoticonPlaceholder();

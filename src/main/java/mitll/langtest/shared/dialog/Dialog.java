@@ -372,6 +372,11 @@ public class Dialog implements IDialog, MutableShell {
     return both;
   }
 
+  @Override
+  public String getCountryCode() {
+    return countryCode;
+  }
+
   public String toString() {
     return "Dialog #" + id +
         "\n\tunit        " + unit +
@@ -384,13 +389,4 @@ public class Dialog implements IDialog, MutableShell {
         "\n\t# core      " + coreVocabulary.size() +
         "\n\tattr        " + attributes;
   }
-
-  @Override
-  public String getCountryCode() {
-    return countryCode;
-  }
-
-//  public void setCountryCode(String countryCode) {
-//    this.countryCode = countryCode;
-//  }
 }

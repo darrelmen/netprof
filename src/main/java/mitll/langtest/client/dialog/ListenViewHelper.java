@@ -94,12 +94,14 @@ public class ListenViewHelper<T extends TurnPanel>
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PLAY = false;
+
   /**
    *
    */
   protected int dialogID;
   boolean isInterpreter = false;
 
+  INavigation.VIEWS prev,next;
   /**
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
