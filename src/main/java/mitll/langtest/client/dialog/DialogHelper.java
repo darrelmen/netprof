@@ -61,11 +61,13 @@ public class DialogHelper {
 
   public interface CloseListener {
     boolean gotYes();
+
     void gotNo();
+
     void gotHidden();
   }
 
-  public interface  ShownCloseListener extends CloseListener {
+  public interface ShownCloseListener extends CloseListener {
     void gotShown();
   }
 
@@ -82,10 +84,6 @@ public class DialogHelper {
   private void showErrorMessage(String title, Collection<String> msgs) {
     show(title, msgs, null, "Close", "No", null, -1);
   }
-
-/*  public void show(String title, String msg, String buttonName, final CloseListener listener) {
-    show(title, Collections.singletonList(msg), buttonName, listener);
-  }*/
 
   public void show(String title, Collection<String> msgs, final CloseListener listener, String okTitle, String cancelTitle) {
     show(title, msgs, null, okTitle, cancelTitle, listener, -1);
@@ -133,7 +131,7 @@ public class DialogHelper {
                             boolean isBig) {
     dialogBox = new Modal();
 
-  //  logger.info("max height " + maxHeight);
+    //  logger.info("max height " + maxHeight);
     if (width > 900) {
       dialogBox.getElement().getStyle().setLeft(310, Style.Unit.PX);
 //      DOM.setStyleAttribute(dialogBox.getElement(), "left", 310 + "px");
@@ -185,8 +183,8 @@ public class DialogHelper {
 
     if (listener != null) {
       dialogBox.addHiddenHandler(hiddenEvent -> listener.gotHidden());
-      if (listener instanceof  ShownCloseListener) {
-        dialogBox.addShownHandler(shownEvent -> ((ShownCloseListener)listener).gotShown());
+      if (listener instanceof ShownCloseListener) {
+        dialogBox.addShownHandler(shownEvent -> ((ShownCloseListener) listener).gotShown());
       }
     }
     dialogBox.add(container);
@@ -241,5 +239,7 @@ public class DialogHelper {
     return noButton;
   }
 
-  public void close() {dialogBox.hide();}
+  public void close() {
+    dialogBox.hide();
+  }
 }

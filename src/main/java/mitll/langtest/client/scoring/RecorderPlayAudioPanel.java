@@ -21,8 +21,6 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.logging.Logger;
-
 import static mitll.langtest.client.LangTest.RED_X_URL;
 
 /**
@@ -31,16 +29,18 @@ import static mitll.langtest.client.LangTest.RED_X_URL;
  * @see SimpleRecordAudioPanel#makePlayAudioPanel
  */
 class RecorderPlayAudioPanel extends PlayAudioPanel {
-  private final Logger logger = Logger.getLogger("RecorderPlayAudioPanel");
+  //private final Logger logger = Logger.getLogger("RecorderPlayAudioPanel");
 
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   private static final SafeUri firstRed = UriUtils.fromSafeConstant(FIRST_RED);
+  private static final String HEIGHT = 19 + "px";
+  private static final String BORDER_RADIUS = 18 + "px";
 
   /**
    * TODO make better relationship with ASRRecordAudioPanel
    */
   private Widget recordImage1;
-  boolean useMicrophoneIcon;
+  private final boolean useMicrophoneIcon;
   /**
    *
    */
@@ -149,9 +149,12 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     recordFeedback.addStyleName("floatLeft");
     recordFeedback.getElement().setId("recordFeedbackImageContainer");
 
-    recordImage1 = getRecordImage();
+    recordImage1 = useMicrophoneIcon ? getRecordImage() : new Image(firstRed);
     recordImage1.setVisible(false);
-    //recordImage1.setWidth("32px");
+
+    if (!useMicrophoneIcon) {
+      recordImage1.setWidth("32px");
+    }
 
     recordImage1.addStyleName("hvr-pulse");
 
@@ -167,32 +170,32 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     return recordFeedback;
   }
 
+  /**
+   * For when we want just the microphone to show...
+   * @return
+   */
   @NotNull
   private Widget getRecordImage() {
     Icon icon = new Icon(IconType.MICROPHONE);
     Style style = icon.getElement().getStyle();
-    style.setMarginLeft(4, Style.Unit.PX);
+    style.setMarginLeft(1, Style.Unit.PX);
     style.setColor("white");
     icon.setSize(IconSize.LARGE);
-     
+
     DivWidget container = new DivWidget();
     container.getElement().setId("micContainer");
-    container.setHeight("20px");
-    container.setWidth("20px");
+    container.setHeight(HEIGHT);
+    container.setWidth(HEIGHT);
 
     Style style1 = container.getElement().getStyle();
-    style1.setPaddingTop(10, Style.Unit.PX);
-    style1.setPaddingBottom(10, Style.Unit.PX);
-    style1.setPaddingLeft(10, Style.Unit.PX);
-    style1.setPaddingRight(10, Style.Unit.PX);
-    style1.setProperty("borderRadius", "24px");
+    style1.setPadding(8, Style.Unit.PX);
+    style1.setProperty("borderRadius", BORDER_RADIUS);
+    style1.setMarginTop(-5, Style.Unit.PX);
     style1.setMarginLeft(2, Style.Unit.PX);
     style1.setMarginRight(5, Style.Unit.PX);
-    style1.setMarginTop(-17, Style.Unit.PX);
     style1.setMarginBottom(5, Style.Unit.PX);
 
     container.add(icon);
-    //  container.addStyleName("hvr-pulse");
     style1.setBackgroundColor("#da4f49");
     return useMicrophoneIcon ? container : new Image(firstRed);
   }

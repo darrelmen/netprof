@@ -44,6 +44,8 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     extends ListenViewHelper<T>
     implements SessionManager, IRehearseView {
+  public static final String DIALOG_INTRO_SHOWN_REHEARSAL = "dialogIntroShownRehearsal";
+  public static final String HOLD_THE_RED_RECORD_BUTTON = "When it's your turn, press and hold the red record button.";
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
   private static final double MAX_RATE_RATIO = 3D;
@@ -52,7 +54,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   private static final String REHEARSE = "Rehearse";
   /**
-   *
+   * @see
    */
   private static final String HEAR_YOURSELF = "Hear yourself";
   private static final int VALUE = -98;
@@ -105,6 +107,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private boolean doRehearse = true;
 
   private DialogSession dialogSession = null;
+  String rehearsalKey = DIALOG_INTRO_SHOWN_REHEARSAL;
+  String rehearsalPrompt = HOLD_THE_RED_RECORD_BUTTON;
 
   /**
    * @param controller
@@ -706,7 +710,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       getCurrentTurn().cancelRecording();
     } else {
       if (doRehearse) {
-        rehearseTurn();
+        T currentTurn = getCurrentTurn();
+        if (isFirstPrompt(currentTurn)) {
+          doRecordingNoticeMaybe();
+        } else {
+          rehearseTurn();
+        }
       } else {
         ifOnLastJumpBackToFirst();
         playCurrentTurn();
@@ -714,7 +723,46 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     }
   }
 
-  private void rehearseTurn() {
+  private void doRecordingNoticeMaybe() {
+    boolean dialogIntroShown = controller.getStorage().isTrue(rehearsalKey);
+    if (!dialogIntroShown) {
+      controller.getStorage().setBoolean(rehearsalKey, true);
+
+      DialogHelper dialogHelper = new DialogHelper(true);
+      dialogHelper.show("Get ready!",
+          Arrays.asList(
+              getLarger(rehearsalPrompt)),
+          new DialogHelper.CloseListener() {
+            @Override
+            public boolean gotYes() {
+              rehearseTurn();
+              return true;
+            }
+
+            @Override
+            public void gotNo() {
+
+            }
+
+            @Override
+            public void gotHidden() {
+
+            }
+          },
+          "OK",
+          null
+      );
+    } else {
+      rehearseTurn();
+    }
+  }
+
+  @NotNull
+  String getLarger(String s) {
+    return "<span style='font-size:larger'>" + s + "</span>";
+  }
+
+  void rehearseTurn() {
     boolean showingScoresNow = overallSmiley.isVisible();
 
     if (showingScoresNow) {   // start over
@@ -840,8 +888,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
         if (result > 0) {
           //  logger.info("startSession : made new session = " + result);
           dialogSession.setID(result);
-        }
-        else {
+        } else {
           logger.warning("setSession invalid req " + dialogSession);
           controller.getNavigation();
 

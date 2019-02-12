@@ -9,12 +9,20 @@ import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.Set;
+
 public class PerformViewHelper<T extends RecordDialogExercisePanel> extends RehearseViewHelper<T> {
   // private final Logger logger = Logger.getLogger("PerformViewHelper");
-  //private Set<String> uniqueCoreVocab;
+
+  public static final String RED_RECORD_BUTTON = "Speak when you see the red record button.";
+
+  private Set<String> uniqueCoreVocab;
 
   public PerformViewHelper(ExerciseController controller) {
     super(controller);
+    rehearsalKey = "PerformViewKey";
+    rehearsalPrompt = RED_RECORD_BUTTON;
   }
 
   public INavigation.VIEWS getView() {

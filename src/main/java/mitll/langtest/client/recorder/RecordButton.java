@@ -71,7 +71,7 @@ public class RecordButton extends Button {
   /**
    * @see mitll.langtest.client.custom.dialog.NewUserExercise.CreateFirstRecordAudioPanel#makePostAudioRecordButton
    */
-  public static final String RECORD1 = "Record      ";
+  private static final String RECORD1 = "Record      ";
   public static final String STOP1 = "Recording...";
 
   private static final String WINDOWS = "Win32";

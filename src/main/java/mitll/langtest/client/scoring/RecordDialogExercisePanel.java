@@ -135,7 +135,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   public void clearScoreInfo() {
     transcriptToHighlight = null;
     gotStreamStop = false;
-    emoticon.setVisible(false);
+    hideEmoticon();
 
     flclickables.forEach(iHighlightSegment -> {
       iHighlightSegment.setHighlightColor(IHighlightSegment.DEFAULT_HIGHLIGHT);
@@ -143,6 +143,18 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     });
 
     rememberAudio(getRegularSpeedIfAvailable(exercise));
+  }
+
+  private void hideEmoticon() {
+    if (emoticon != null) {
+      emoticon.setVisible(false);
+    }
+  }
+
+  private void showEmoticon() {
+    if (emoticon != null) {
+      emoticon.setVisible(true);
+    }
   }
 
   /**
@@ -154,7 +166,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   @Override
   public void showScoreInfo() {
     //   logger.info("showScoreInfo for " + this);
-    emoticon.setVisible(true);
+    showEmoticon();
 
     if (transcriptToHighlight == null) {
       if (studentAudioAttribute != null) {
@@ -318,25 +330,41 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     }
 
     // add hidden button
-    {
-      PostAudioRecordButton postAudioRecordButton = getPostAudioRecordButton(recordPanel);
-      postAudioRecordButton.setVisible(false);
-      DivWidget buttonContainer = new DivWidget();
-      buttonContainer.setId("recordButtonContainer_" + getExID());
-      buttonContainer.add(postAudioRecordButton);
-      //   postAudioRecordButton.setEnabled(false);
-      flContainer.add(buttonContainer);
-    }
+    if (columns == MIDDLE) {
+      {
+        PostAudioRecordButton postAudioRecordButton = getPostAudioRecordButton(recordPanel);
+        postAudioRecordButton.setVisible(false);
+        DivWidget buttonContainer = new DivWidget();
+        buttonContainer.setId("recordButtonContainer_" + getExID());
+        buttonContainer.add(postAudioRecordButton);
+        //   postAudioRecordButton.setEnabled(false);
+        flContainer.add(buttonContainer);
+      }
 
-    flContainer.add(recordPanel.getScoreFeedback());
-    {
-      Emoticon w = getEmoticonPlaceholder();
-      emoticon = w;
-      flContainer.add(w);
+     // flContainer.add(recordPanel.getScoreFeedback());
+
+      {
+        Emoticon w = getEmoticonPlaceholder();
+        emoticon = w;
+        flContainer.add(w);
+      }
     }
 
     add(flContainer);
     super.addWidgets(showFL, showALTFL, phonesChoices);
+
+    if (columns == MIDDLE) {
+      flClickableRow.addStyleName("inlineFlex");
+
+      if (exercise.hasEnglishAttr()) {
+        int widgetCount = flClickableRow.getWidgetCount();
+        for (int i = 0; i < widgetCount; i++) {
+          flClickableRow.getWidget(i).addStyleName("eightMarginTop");
+        }
+      }
+
+      flClickableRow.insert(recordPanel.getScoreFeedback(), 0);
+    }
   }
 
   private PostAudioRecordButton getPostAudioRecordButton(NoFeedbackRecordAudioPanel<ClientExercise> recordPanel) {
@@ -417,6 +445,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   @NotNull
   private Emoticon getEmoticonPlaceholder() {
     Emoticon w = new Emoticon();
+    w.getElement().setId("emoticon");
     w.setVisible(false);
     w.setHeight(DIM + "px");
     w.setWidth(DIM + "px");

@@ -16,7 +16,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.IBanner;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
@@ -47,12 +46,14 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  */
 public class ListenViewHelper<T extends TurnPanel>
     extends DialogView implements ContentView, PlayListener, IListenView {
-  public static final String INTERPRETER = "Interpreter";
-  public static final String SPEAKER_B = "B";
-  public static final int INTERPRETER_WIDTH = 235;
-  public static final String ENGLISH_SPEAKER = "English Speaker";
-  public static final int SPEAKER_WIDTH = 313;
   private final Logger logger = Logger.getLogger("ListenViewHelper");
+
+  private static final String INTERPRETER = "Interpreter";
+  private static final String SPEAKER_B = "B";
+  private static final int INTERPRETER_WIDTH = 165;//235;
+  private static final String ENGLISH_SPEAKER = "English Speaker";
+  // public static final int SPEAKER_WIDTH = 313;
+  private static final int PADDING_LOZENGE = 14;
 
   private static final String MIDDLE_COLOR = "#00800059";
 
@@ -86,7 +87,7 @@ public class ListenViewHelper<T extends TurnPanel>
   private CheckBox leftSpeakerBox = null;
   private CheckBox rightSpeakerBox = null;
 
-  CheckBox speakerBoxes;
+  // CheckBox speakerBoxes;
   private ComplexWidget slider;
   private Button playButton;
   private DivWidget dialogHeader;
@@ -173,7 +174,7 @@ public class ListenViewHelper<T extends TurnPanel>
     } else {
       child.add(dialogHeader = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog));
 
-      boolean firstIsEnglish = dialog.getExercises().isEmpty() || dialog.getExercises().get(0).hasEnglishAttr();
+      //boolean firstIsEnglish = dialog.getExercises().isEmpty() || dialog.getExercises().get(0).hasEnglishAttr();
       DivWidget controlAndSpeakers = new DivWidget();
       styleControlRow(controlAndSpeakers);
       child.add(controlAndSpeakers);
@@ -182,7 +183,7 @@ public class ListenViewHelper<T extends TurnPanel>
       outer.addStyleName("inlineFlex");
       outer.setWidth("100%");
 
-      {
+/*      {
         Widget w = getFlag(firstIsEnglish ? "us" : dialog.getCountryCode());
         DivWidget flagContainer = new DivWidget();
         flagContainer.setWidth("100px");
@@ -190,14 +191,16 @@ public class ListenViewHelper<T extends TurnPanel>
         flagContainer.getElement().getStyle().setMarginLeft(10,PX);
         flagContainer.addStyleName("floatLeft");
         outer.add(flagContainer);
-      }
+      }*/
 
       DivWidget controls = getControls();
       controls.setWidth("100%");
-      controls.getElement().getStyle().setMarginTop(50, PX);
+
+      // only if flags
+      //   controls.getElement().getStyle().setMarginTop(50, PX);
       outer.add(controls);
 
-      {
+ /*     {
         Widget w1 = getFlag(firstIsEnglish ? dialog.getCountryCode() : "us");
 
         DivWidget flagContainer = new DivWidget();
@@ -207,7 +210,7 @@ public class ListenViewHelper<T extends TurnPanel>
         flagContainer.addStyleName("floatRight");
 
         outer.add(flagContainer);
-      }
+      }*/
 
       controlAndSpeakers.add(outer);
       controlAndSpeakers.add(getSpeakerRow(dialog));
@@ -215,11 +218,11 @@ public class ListenViewHelper<T extends TurnPanel>
       child.add(getTurns(dialog));
     }
   }
-
+/*
   @NotNull
   private com.google.gwt.user.client.ui.Image getFlag(String cc) {
     return new com.google.gwt.user.client.ui.Image("langtest/cc/" + cc + ".png");
-  }
+  }*/
 
   @NotNull
   private DivWidget getSpeakerRow(IDialog dialog) {
@@ -244,14 +247,15 @@ public class ListenViewHelper<T extends TurnPanel>
 
         DivWidget left = new DivWidget();
         left.add(w);
-        left.setWidth(SPEAKER_WIDTH +
-            "px");
+        // left.setWidth(SPEAKER_WIDTH +            "px");
 
         styleLeftSpeaker(w);
 
         left.addStyleName("floatLeft");
         left.addStyleName("bubble");
         left.addStyleName("leftbubble");
+        setPadding(left);
+
         //left.addStyleName("leftFiveMargin");
         left.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
 
@@ -279,12 +283,12 @@ public class ListenViewHelper<T extends TurnPanel>
         Heading w = new Heading(4, secondSpeaker);
 
         DivWidget right = new DivWidget();
-        right.setWidth(SPEAKER_WIDTH +
-            "px");
+        // right.setWidth(SPEAKER_WIDTH +            "px");
         right.add(w);
         right.addStyleName("bubble");
         right.addStyleName("rightbubble");
         right.addStyleName("floatRight");
+        setPadding(right);
         //left.addStyleName("leftFiveMargin");
         right.getElement().getStyle().setBackgroundColor(RIGHT_BKG_COLOR);
         styleRightSpeaker(w);
@@ -307,9 +311,10 @@ public class ListenViewHelper<T extends TurnPanel>
         middle.getElement().getStyle().setMarginBottom(0, PX);
         middle.getElement().getStyle().setProperty("marginLeft", "auto");
         middle.getElement().getStyle().setProperty("marginRight", "auto");
+        setPadding(middle);
         middle.add(w);
         styleLabel(w);
-        w.getElement().getStyle().setMarginLeft(43, PX);
+        //  w.getElement().getStyle().setMarginLeft(43, PX);
 
         middle.getElement().getStyle().setBackgroundColor(MIDDLE_COLOR);
         rowOne.add(middle);
@@ -320,6 +325,11 @@ public class ListenViewHelper<T extends TurnPanel>
 
 
     return rowOne;
+  }
+
+  private void setPadding(DivWidget right) {
+    right.getElement().getStyle().setPaddingLeft(PADDING_LOZENGE, PX);
+    right.getElement().getStyle().setPaddingRight(PADDING_LOZENGE, PX);
   }
 
   private String getExerciseSpeaker(ClientExercise next) {
@@ -406,7 +416,7 @@ public class ListenViewHelper<T extends TurnPanel>
   }
 
   private void styleLabel(UIObject checkBox) {
-    checkBox.getElement().getStyle().setMarginLeft(43, PX);
+    // checkBox.getElement().getStyle().setMarginLeft(43, PX);
     checkBox.getElement().getStyle().setFontSize(32, PX);
   }
 
@@ -935,6 +945,18 @@ public class ListenViewHelper<T extends TurnPanel>
       boolean rightSpeaker = isRightSpeakerSet();
       return leftSpeaker ? rightTurnPanels : rightSpeaker ? leftTurnPanels : null;
     }
+  }
+
+  boolean isMiddle(T turn) {
+    return middleTurnPanels.contains(turn);
+  }
+
+  boolean isFirstMiddle(T turn) {
+    return middleTurnPanels.indexOf(turn) == 0;
+  }
+
+  boolean isFirstPrompt(T turn) {
+    return leftTurnPanels.indexOf(turn) == 0;
   }
 
   Boolean isLeftSpeakerSet() {

@@ -104,7 +104,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
       if (columns == ListenViewHelper.COLUMNS.LEFT) wrapper.addStyleName("leftbubble");
       else if (columns == ListenViewHelper.COLUMNS.RIGHT) wrapper.addStyleName("rightbubble");
       else if (columns == ListenViewHelper.COLUMNS.MIDDLE) {
-        wrapper.addStyleName("middlebubble");
+        wrapper.addStyleName("middlebubble2");
         wrapper.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
       }
     }
