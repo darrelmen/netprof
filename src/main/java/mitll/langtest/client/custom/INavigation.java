@@ -32,7 +32,7 @@ public interface INavigation extends IViewContaner {
     QUIZ("Quiz", VOCABULARY),
 
 
-    DIALOG("Dialog", ProjectMode.DIALOG),
+    DIALOG("Dialogs", ProjectMode.DIALOG),
     /**
      * @see mitll.langtest.client.banner.DialogExerciseList#gotClickOnDialog
      * @see mitll.langtest.client.banner.NewContentChooser#showView

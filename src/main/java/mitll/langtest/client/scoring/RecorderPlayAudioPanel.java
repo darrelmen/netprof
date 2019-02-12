@@ -94,15 +94,38 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     playButton.setVisible(false);
   }
 
-
   void showFirstRecord() {
     if (controller.shouldRecord()) {
       //   logger.info("showFirstRecording " + exid + " red recording signal now visible!");
-      recordImage1.setVisible(true);
+      showFeedback();
     } else {
       redX.setVisible(true);
     }
     downloadContainer.getDownloadContainer().setVisible(false);
+  }
+
+  private void showFeedback() {
+    recordImage1.addStyleName("hvr-pulse");
+    if (useMicrophoneIcon) {
+      Style style1 = recordImage1.getElement().getStyle();
+      //   style1.setBackgroundColor("lightBlue");
+      style1.setBackgroundColor("#da4f49");
+    } else {
+      recordImage1.setVisible(true);
+    }
+  }
+
+  private void hideFeedback() {
+    recordImage1.removeStyleName("hvr-pulse");
+
+    if (useMicrophoneIcon) {
+      Style style1 = recordImage1.getElement().getStyle();
+      style1.setBackgroundColor("#0171bc");//"lightBlue");
+    //  style1.setBackgroundColor("blue");
+//    style1.setBackgroundColor("#da4f49");
+    } else {
+      recordImage1.setVisible(false);
+    }
   }
 
   /**
@@ -111,7 +134,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   void hideRecord() {
     if (controller.shouldRecord()) {
       // logger.info("hideRecord " + exid);
-      recordImage1.setVisible(false);
+      hideFeedback();
       //  recordImage2.setVisible(false);
     } else {
       redX.setVisible(false);
@@ -150,13 +173,13 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     recordFeedback.getElement().setId("recordFeedbackImageContainer");
 
     recordImage1 = useMicrophoneIcon ? getRecordImage() : new Image(firstRed);
-    recordImage1.setVisible(false);
 
+    hideFeedback();
     if (!useMicrophoneIcon) {
       recordImage1.setWidth("32px");
     }
 
-    recordImage1.addStyleName("hvr-pulse");
+  //  recordImage1.addStyleName("hvr-pulse");
 
     if (controller.shouldRecord()) {
       recordFeedback.add(recordImage1);
@@ -172,6 +195,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
 
   /**
    * For when we want just the microphone to show...
+   *
    * @return
    */
   @NotNull
@@ -196,7 +220,8 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     style1.setMarginBottom(5, Style.Unit.PX);
 
     container.add(icon);
-    style1.setBackgroundColor("#da4f49");
+    style1.setBackgroundColor("lightBlue");
+//    style1.setBackgroundColor("#da4f49");
     return useMicrophoneIcon ? container : new Image(firstRed);
   }
 

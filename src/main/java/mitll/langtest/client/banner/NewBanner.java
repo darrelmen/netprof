@@ -34,6 +34,9 @@ import static mitll.langtest.shared.project.ProjectType.DIALOG;
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
+  public static final String DRILL = "Drill";
+  public static final String PRACTICE = "Practice";
+  public static final String DIALOG_PRACTICE = "Rehearse";
   private final Logger logger = Logger.getLogger("NewBanner");
 
   private static final String RECORD = "Record";
@@ -42,8 +45,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final List<VIEWS> STANDARD_VIEWS =
       Arrays.asList(VIEWS.LEARN, VIEWS.PRACTICE, VIEWS.QUIZ, VIEWS.PROGRESS, VIEWS.LISTS);
 
+  private static final List<VIEWS> DIALOG_VIEWS_AFTER =
+      Arrays.asList(VIEWS.STUDY, VIEWS.LISTEN, VIEWS.REHEARSE, VIEWS.CORE_REHEARSE, VIEWS.PERFORM, VIEWS.SCORES);
+
+
   private static final List<VIEWS> DIALOG_VIEWS =
-      Arrays.asList(VIEWS.DIALOG, VIEWS.STUDY, VIEWS.LISTEN, VIEWS.REHEARSE,VIEWS.CORE_REHEARSE, VIEWS.PERFORM, VIEWS.SCORES);
+      Arrays.asList(VIEWS.DIALOG, VIEWS.STUDY, VIEWS.LISTEN, VIEWS.REHEARSE, VIEWS.CORE_REHEARSE, VIEWS.PERFORM, VIEWS.SCORES);
 
   private static final List<VIEWS> BOTH = new ArrayList<>(STANDARD_VIEWS);
 
@@ -75,7 +82,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String DOCUMENTATION = "User Manual";
 
   private final UILifecycle lifecycle;
-  private ComplexWidget recnav, defectnav, dialognav;//, learnNav, drillNav;
+  private ComplexWidget recnav, defectnav, dialognav;//dialognav;//, learnNav, drillNav;
 
   private Nav lnav;
   private Dropdown cog;
@@ -130,7 +137,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     // dialog nav
     {
-      navCollapse.add(dialognav = getDialogNav());
+     // navCollapse.add(dialognav = getDialogNav());
+
+
+      ComplexWidget interpreterNav =getDialogNav();// getInterpreterNav();
+      this.dialognav = interpreterNav;
+      navCollapse.add(interpreterNav);
     }
 
     // rev nav
@@ -163,10 +175,16 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     recnav.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
 
-    DIALOG_VIEWS.forEach(views -> rememberViewAndLink(recnav, views));
+ //   DIALOG_VIEWS.forEach(views -> rememberViewAndLink(recnav, views));
+   // DIALOG_VIEWS.forEach(views -> rememberViewAndLink(recnav, views));
+
+    rememberViewAndLink(recnav, VIEWS.DIALOG);
+
+    Dropdown nav = new Dropdown(DIALOG_PRACTICE);
+    recnav.add(nav);
+    DIALOG_VIEWS_AFTER.forEach(views -> rememberViewAndLink(nav, views));
     return recnav;
   }
-
 
   /**
    * @return
@@ -231,6 +249,25 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     return rnav;
   }
+
+/*
+  @NotNull
+  private ComplexWidget getInterpreterNav() {
+    Nav rnav = new Nav();
+    zeroLeftRightMargins(rnav);
+
+    Dropdown nav = new Dropdown("Interpreter Practice");
+    rnav.add(nav);
+    DIALOG_VIEWS_AFTER.forEach(views -> rememberViewAndLink(nav, views));
+//    rememberViewAndLink(nav, VIEWS.STUDY);
+//    rememberViewAndLink(nav, VIEWS.FIX_ENTRIES);
+//
+//    rememberViewAndLink(nav, VIEWS.QC_SENTENCES);
+//    rememberViewAndLink(nav, VIEWS.FIX_SENTENCES);
+
+    return rnav;
+  }
+*/
 
   private void rememberViewAndLink(ComplexWidget recnav, VIEWS record) {
     viewToLink.put(record, getChoice(recnav, record));
@@ -376,7 +413,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     NavLink learn = getLink(nav, viewName);
     learn.addClickHandler(event -> {
-   //   logger.info("getChoice got click on " + viewName);
+      //   logger.info("getChoice got click on " + viewName);
       controller.logEvent(viewName, "NavLink", "N/A", "click on view");
       gotClickOnChoice(viewName, learn, true);
     });
@@ -402,7 +439,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @param fromClick
    */
   private void gotClickOnChoice(String instanceName, NavLink learn, boolean fromClick) {
-  //  logger.info("gotClickOn " + instanceName + " " + learn + " from click " + fromClick);
+    //  logger.info("gotClickOn " + instanceName + " " + learn + " from click " + fromClick);
     showSectionAfterClick(instanceName, fromClick);
     showActive(learn);  // how can this be null?
   }
@@ -417,7 +454,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     try {
       String name = instance1.toUpperCase();
       name = name.replaceAll(" ", "_");
-      if (name.equalsIgnoreCase("Drill")) name = "Practice".toUpperCase();
+      if (name.equalsIgnoreCase(DRILL)) name = PRACTICE.toUpperCase();
       //  if (name.equalsIgnoreCase("Practice")) name = "Drill".toUpperCase();
 
       //    logger.info("name " + name);
