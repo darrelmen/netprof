@@ -15,11 +15,11 @@ public interface IRehearseView extends IListenView {
    */
   void useInvalidResult(int exid);
 
-  //int getDialogSessionID();
-
   void addPacketValidity(Validity validity);
 
   void stopRecording();
 
   int getNumValidities();
+
+  boolean isRehearse();
 }

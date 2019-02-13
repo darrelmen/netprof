@@ -30,6 +30,7 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel> extends
     rehearsalKey = "PerformViewKey";
     rehearsalPrompt = RED_RECORD_BUTTON;
   }
+  @Override public boolean isRehearse() { return true;}
 
   public INavigation.VIEWS getView() {
     return INavigation.VIEWS.CORE_REHEARSE;

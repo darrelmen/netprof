@@ -121,6 +121,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     this.sessionStorage = new SessionStorage(controller.getStorage(), "rehearseSession");
   }
 
+  @Override public boolean isRehearse() { return true;}
   @Override
   public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
     super.showContent(listContent, instanceName);
@@ -249,7 +250,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     onButton.addClickHandler(handler);
     onButton.setActive(false);
   }
-
 
   private void styleToolbar(ButtonToolbar toolbar) {
     Style style = toolbar.getElement().getStyle();

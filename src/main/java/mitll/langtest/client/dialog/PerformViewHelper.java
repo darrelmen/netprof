@@ -16,12 +16,17 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
 
   private static final String RED_RECORD_BUTTON = "Speak when you see the red record button.";
 
-  private Set<String> uniqueCoreVocab;
+ // private Set<String> uniqueCoreVocab;
 
   public PerformViewHelper(ExerciseController controller) {
     super(controller);
     rehearsalKey = "PerformViewKey";
     rehearsalPrompt = RED_RECORD_BUTTON;
+  }
+
+  @Override
+  public boolean isRehearse() {
+    return false;
   }
 
   public INavigation.VIEWS getView() {
@@ -37,10 +42,6 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
   @NotNull
   @Override
   protected DivWidget getTurns(IDialog dialog) {
-//    uniqueCoreVocab = dialog.getCoreVocabulary()
-//        .stream()
-//        .map(CommonShell::getForeignLanguage)
-//        .collect(Collectors.toSet());
     DivWidget turns = super.getTurns(dialog);
     Scheduler.get().scheduleDeferred(this::obscureRespTurns);
     return turns;
@@ -62,12 +63,7 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
   @Override
   protected T getTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
     T turnPanel = super.getTurnPanel(clientExercise, columns);
-    // if (columns != COLUMNS.MIDDLE) {
     turnPanel.reallyObscure();
-    //   }
-    //   else {
-//      turnPanel.maybeSetObscure(uniqueCoreVocab);
-    // }
     return turnPanel;
   }
 

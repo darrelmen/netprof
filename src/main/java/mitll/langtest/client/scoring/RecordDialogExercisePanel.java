@@ -23,14 +23,14 @@ import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.client.LangTest.RED_X_URL;
 import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.*;
+import static mitll.langtest.client.scoring.RecorderPlayAudioPanel.BLUE_INACTIVE_COLOR;
+import static mitll.langtest.client.scoring.RecorderPlayAudioPanel.RED_ACTIVE_COLOR;
 
 public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialogTurn {
   private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
@@ -66,7 +66,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   private AudioAttribute studentAudioAttribute;
   private boolean gotStreamStop;
   private TreeMap<TranscriptSegment, IHighlightSegment> transcriptToHighlight = null;
-  private boolean doPushToTalk = false;
+  private final boolean doPushToTalk;
 
   /**
    * @param commonExercise
@@ -89,6 +89,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     this.rehearseView = listenView;
     setMinExpectedDur(commonExercise);
     this.sessionManager = sessionManager;
+    doPushToTalk = listenView.isRehearse();
   }
 
   private void setMinExpectedDur(ClientExercise commonExercise) {
@@ -198,7 +199,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
   /**
    * Rules:
-   *
+   * <p>
    * 1) don't obscure everything
    * 2) obscure something
    * 3) Don't obscure more than one or two or three? words?
@@ -209,13 +210,13 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @see PerformViewHelper#getTurnPanel
    * Or should we use exact match?
    */
-  public void maybeSetObscure(Map<String,ClientExercise> turnToEx) {
+  public void maybeSetObscure(Map<String, ClientExercise> turnToEx) {
     String oldID = exercise.getOldID();
     ClientExercise clientExercise = turnToEx.get(oldID);
     if (clientExercise == null) logger.warning("couldn't find core for " + oldID);
     else {
       Set<String> coreVocab = Collections.singleton(clientExercise.getForeignLanguage());
-      logger.info("got " + clientExercise.getForeignLanguage() + " for " + exercise.getForeignLanguage());
+      //  logger.info("got " + clientExercise.getForeignLanguage() + " for " + exercise.getForeignLanguage());
       getObscureCandidates(coreVocab).forEach(IHighlightSegment::setObscurable);
     }
   }
@@ -281,16 +282,14 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
         if (coreMatch.startsWith(content)) {
           candidates.add(segment);
           coreMatch = coreMatch.substring(content.length());
-       //   logger.info("getObscureCandidate core match now " + coreMatch + " against " + content);
+          //   logger.info("getObscureCandidate core match now " + coreMatch + " against " + content);
           if (coreMatch.isEmpty()) break;
-        }
-        else if (content.startsWith(coreMatch)) {
+        } else if (content.startsWith(coreMatch)) {
           candidates.add(segment);
           logger.info("getObscureCandidate partial match for " + coreMatch + " against " + content);
           break;
-        }
-        else {
-       //   logger.info("getObscureCandidate no match for " + coreMatch + " against " + content);
+        } else {
+          //   logger.info("getObscureCandidate no match for " + coreMatch + " against " + content);
         }
       }
     }
@@ -380,16 +379,19 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       flContainer.addStyleName("floatLeft");
     }
 
-    // add hidden button
+    PostAudioRecordButton postAudioRecordButton = null;
+    DivWidget buttonContainer = null;
+    // add  button
     if (columns == MIDDLE) {
       {
-        PostAudioRecordButton postAudioRecordButton = getPostAudioRecordButton(recordPanel);
-        postAudioRecordButton.setVisible(false);
-        DivWidget buttonContainer = new DivWidget();
+        postAudioRecordButton = getPostAudioRecordButton(recordPanel);
+        //postAudioRecordButton.setVisible(false);
+        buttonContainer = new DivWidget();
         buttonContainer.setId("recordButtonContainer_" + getExID());
         buttonContainer.add(postAudioRecordButton);
-        //   postAudioRecordButton.setEnabled(false);
-        flContainer.add(buttonContainer);
+        postAudioRecordButton.setEnabled(false);
+        postAudioRecordButton.getElement().getStyle().setBackgroundColor(BLUE_INACTIVE_COLOR);
+        // flContainer.add(buttonContainer);
       }
 
       // flContainer.add(recordPanel.getScoreFeedback());
@@ -414,7 +416,17 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
         }
       }
 
-      flClickableRow.insert(recordPanel.getScoreFeedback(), 0);
+      if (rehearseView.isRehearse()) {
+        flClickableRow.insert(buttonContainer, 0);
+        Style style = postAudioRecordButton.getElement().getStyle();
+        style.setProperty("borderRadius", "18px");
+        style.setPadding(8, Style.Unit.PX);
+        style.setWidth(19, Style.Unit.PX);
+        style.setMarginRight(5, Style.Unit.PX);
+        style.setHeight(19, Style.Unit.PX);
+      } else {
+        flClickableRow.insert(recordPanel.getScoreFeedback(), 0);
+      }
     }
   }
 
@@ -470,9 +482,18 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
     if (doPushToTalk) {
       if (columns == MIDDLE) {
-        getRecordButton().setVisible(true);
+        enableRecordButton();
+
       }
     }
+  }
+
+  @Override
+  public void enableRecordButton() {
+    PostAudioRecordButton recordButton = getRecordButton();
+    recordButton.setEnabled(true);
+    logger.info("enable record button " + getExID());
+    recordButton.getElement().getStyle().setBackgroundColor("#bd362f");
   }
 
   @Override
@@ -480,10 +501,20 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     super.removeMarkCurrent();
 
     if (doPushToTalk) {
-      if (getRecordButton().isRecording()) {
+      PostAudioRecordButton recordButton = getRecordButton();
+      if (recordButton.isRecording()) {
         cancelRecording();
       }
+
+      disableRecordButton();
     }
+  }
+
+  @Override
+  public void disableRecordButton() {
+    PostAudioRecordButton recordButton = getRecordButton();
+    recordButton.setEnabled(false);
+    recordButton.getElement().getStyle().setBackgroundColor(BLUE_INACTIVE_COLOR);
   }
 
   /**
@@ -530,7 +561,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     firstVAD = -1;
 
     if (columns == MIDDLE && doPushToTalk) {
-      getRecordButton().setVisible(true);
+//      getRecordButton().setVisible(true);
+      enableRecordButton();
     } else {
       getRecordButton().startOrStopRecording();
     }
@@ -601,7 +633,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     IRecordDialogTurn recordDialogTurn;
     private final Logger logger = Logger.getLogger("ContinuousDialogRecordAudioPanel");
 
-    ContinuousDialogRecordAudioPanel(ClientExercise exercise, ExerciseController controller, SessionManager sessionManager,
+    ContinuousDialogRecordAudioPanel(ClientExercise exercise,
+                                     ExerciseController controller,
+                                     SessionManager sessionManager,
                                      IRehearseView rehearseView,
                                      IRecordDialogTurn recordDialogTurn) {
       super(exercise, controller, sessionManager);
@@ -624,7 +658,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     @Override
     public void useResult(AudioAnswer result) {
       super.useResult(result);
-      getPostAudioRecordButton().setVisible(false);
+      // getPostAudioRecordButton().setVisible(false);
+      recordDialogTurn.disableRecordButton();
       rehearseView.useResult(result);
 
       if (DEBUG) {
@@ -671,9 +706,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     public void useInvalidResult(int exid, boolean isValid) {
       super.useInvalidResult(exid, isValid);
       rehearseView.useInvalidResult(exid);
-      getPostAudioRecordButton().setVisible(false);
+      //getPostAudioRecordButton().setVisible(false);
 
-      logger.warning("useInvalidResult got valid = " + isValid);
+      logger.info("useInvalidResult got valid = " + isValid);
     }
 
     /**

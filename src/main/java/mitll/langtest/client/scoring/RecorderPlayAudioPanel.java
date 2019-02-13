@@ -35,6 +35,8 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   private static final SafeUri firstRed = UriUtils.fromSafeConstant(FIRST_RED);
   private static final String HEIGHT = 19 + "px";
   private static final String BORDER_RADIUS = 18 + "px";
+  public static final String RED_ACTIVE_COLOR = "#da4f49";
+  public static final String BLUE_INACTIVE_COLOR = "#0171bc";
 
   /**
    * TODO make better relationship with ASRRecordAudioPanel
@@ -109,7 +111,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     if (useMicrophoneIcon) {
       Style style1 = recordImage1.getElement().getStyle();
       //   style1.setBackgroundColor("lightBlue");
-      style1.setBackgroundColor("#da4f49");
+      style1.setBackgroundColor(RED_ACTIVE_COLOR);
     } else {
       recordImage1.setVisible(true);
     }
@@ -120,7 +122,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
 
     if (useMicrophoneIcon) {
       Style style1 = recordImage1.getElement().getStyle();
-      style1.setBackgroundColor("#0171bc");//"lightBlue");
+      style1.setBackgroundColor(BLUE_INACTIVE_COLOR);//"lightBlue");
     //  style1.setBackgroundColor("blue");
 //    style1.setBackgroundColor("#da4f49");
     } else {

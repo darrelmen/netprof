@@ -26,4 +26,7 @@ public interface IRecordDialogTurn {
 
   void usePartial(StreamResponse response);
   Widget myGetPopupTargetWidget();
+
+  void enableRecordButton();
+  void disableRecordButton();
 }
