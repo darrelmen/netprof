@@ -5,7 +5,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.Emoticon;
 import mitll.langtest.client.banner.SessionManager;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.IRehearseView;
 import mitll.langtest.client.dialog.ListenViewHelper.COLUMNS;
 import mitll.langtest.client.dialog.PerformViewHelper;
@@ -85,7 +84,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
                                    IRehearseView listenView,
                                    SessionManager sessionManager,
                                    COLUMNS columns) {
-    super(commonExercise, controller, listContainer, alignments, listenView, columns);
+    super(commonExercise, controller, listContainer, alignments, listenView, columns, false);
     this.rehearseView = listenView;
     setMinExpectedDur(commonExercise);
     this.sessionManager = sessionManager;
@@ -130,7 +129,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       TranscriptSegment last = transcriptSegments.get(transcriptSegments.size() - 1);
       float end = last.getEnd();
       float dur = end - start;
-      logger.info("getSpeechDur (" + getExID() + ") : " + first.getEvent() + " - " + last.getEvent() + " = " + dur);
+     // logger.info("getSpeechDur (" + getExID() + ") : " + first.getEvent() + " - " + last.getEvent() + " = " + dur);
       return dur;
     }
   }

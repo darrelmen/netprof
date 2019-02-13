@@ -16,6 +16,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.IBanner;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
@@ -110,7 +111,7 @@ public class ListenViewHelper<T extends TurnPanel>
    */
   public ListenViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     this.controller = controller;
-    this.thisView=thisView;
+    this.thisView = thisView;
   }
 
   /**
@@ -649,17 +650,37 @@ public class ListenViewHelper<T extends TurnPanel>
 
   @NotNull
   T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
+    boolean isInterpreter = columns == COLUMNS.MIDDLE;
+
+    boolean rightJustify = isInterpreter &&
+        thisView == INavigation.VIEWS.LISTEN && clientExercise.hasEnglishAttr();
+
     TurnPanel widgets = new TurnPanel(
         clientExercise,
         controller,
         null,
         alignments,
         this,
-        columns);
-    if (columns == COLUMNS.MIDDLE) {
+        columns,
+        rightJustify);
+
+    if (isInterpreter) {
       widgets.addStyleName("inlineFlex");
       widgets.setWidth("100%");
     }
+
+//    logger.info("reallyGetTurnPanel this view " + thisView);
+//    logger.info("reallyGetTurnPanel clientExercise " + clientExercise);
+//
+//    if (rightJustify) {
+//      logger.info("reallyGetTurnPanel got here");
+//      if (widgets != null && widgets.getWidgetCount() > 0) {
+//        Widget widget = widgets.getWidget(0);
+//        if (widget != null) {
+//          widget.getElement().getStyle().setProperty("marginLeft", "auto");
+//        }
+//      }
+//    }
     return (T) widgets;
   }
 

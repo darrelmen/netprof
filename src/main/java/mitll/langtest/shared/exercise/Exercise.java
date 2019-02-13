@@ -660,7 +660,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
         (getAltFL().isEmpty() ? "" : getAltFL()) +
         "meaning '" + getMeaning() +
         "' transliteration '" + getTransliteration() +
-        "' context " + getDirectlyRelated() +
+        "' context " + getDirectlyRelated().size() +
         " audio childCount = " + audioAttributes1.size() +
         (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
         " unit->lesson " + getUnitToValue() +

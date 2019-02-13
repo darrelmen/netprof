@@ -102,9 +102,24 @@ public class DialogHeader {
       outer.add(row);
 
       switch (thisView) {
+        case STUDY:
+          row.add(getHint("<i><b>Study</b> the core words and phrases used in the dialog. " +
+              "<br/><b>Record</b> yourself to get ready for rehearsing the dialog. " +
+              "<br/><b>Press and hold</b> when recording.</i>"));
+          break;
+        case LISTEN:
+          row.add(getHint("<i><b>Listen</b> to the reference dialog to prepare to rehearse it.</i>"));
+          break;
         case REHEARSE:
+          row.add(getHint(ARROW_KEY_TIP));
+          break;
         case CORE_REHEARSE:
-          row.add(this::getKeyBinding);
+          row.add(getHint(ARROW_KEY_TIP_CORE));
+          break;
+        case PERFORM:
+          row.add(getHint("<i>Now carry on a natural conversation. " +
+              "<b>Speak</b> when you see the record icon.</i>"));
+          break;
         default:
           break;
       }
@@ -114,23 +129,30 @@ public class DialogHeader {
 
   private static final int KEY_PRESS_WIDTH = 125;
   private static final String ARROW_KEY_TIP =
-      "<i><b>Space</b> to record (press and hold.) " +
-          "<b>Arrow keys</b> to advance to next turn or go back.";// +
-          //"<b>Enter</b> key to play audio.</i>";
+      "<i>" +
+          "<b>Rehearse</b> the dialog at your own speed.<br/><br/>" +
+          "<b>Space</b> to record (press and hold.) " +
+          "<b>Arrow keys</b> to advance to next turn or go back." +
+          "</i>";
+  private static final String ARROW_KEY_TIP_CORE =
+      "<i>" +
+          "<b>Remember</b> the core words.<br/><br/>" +
+          "<b>Space</b> to record (press and hold.)<br/>" +
+          "<b>Arrow keys</b> to advance to next turn or go back." +
+          "</i>";
 
   @NotNull
-  Widget getKeyBinding() {
-    Widget child = new HTML(getKeyBindings());
+  private Widget getHint(String keyBindings) {
+    Widget child = new HTML(keyBindings);
     child.addStyleName("floatRight");
-  //  child.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
-    child.getElement().getStyle().setProperty("marginLeft","auto");
-    child.setWidth(KEY_PRESS_WIDTH + "px");
+    //  child.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+    child.getElement().getStyle().setProperty("marginLeft", "auto");
+    child.setWidth((2 * KEY_PRESS_WIDTH) + "px");
     return child;
   }
-
-  String getKeyBindings() {
-    return ARROW_KEY_TIP;
-  }
+//  private String getKeyBindings() {
+//    return ARROW_KEY_TIP;
+//  }
 
   @NotNull
   private com.google.gwt.user.client.ui.Image getFlag(String cc) {

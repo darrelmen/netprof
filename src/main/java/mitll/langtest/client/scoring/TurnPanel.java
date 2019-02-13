@@ -29,13 +29,14 @@ import java.util.stream.Collectors;
  * @see ListenViewHelper#reallyGetTurnPanel
  */
 public class TurnPanel extends DialogExercisePanel<ClientExercise> {
- // private final Logger logger = Logger.getLogger("TurnPanel");
+  // private final Logger logger = Logger.getLogger("TurnPanel");
 
   private static final String FLOAT_LEFT = "floatLeft";
 
   final ListenViewHelper.COLUMNS columns;
   private DivWidget bubble;
   private static final String HIGHLIGHT_COLOR = "green";
+  boolean rightJustify;
 
   /**
    * @param clientExercise
@@ -44,6 +45,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
    * @param alignments
    * @param listenView
    * @param columns
+   * @param rightJustify
    * @see ListenViewHelper#reallyGetTurnPanel
    */
   public TurnPanel(final ClientExercise clientExercise,
@@ -51,10 +53,10 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
                    final ListInterface<?, ?> listContainer,
                    Map<Integer, AlignmentOutput> alignments,
                    IListenView listenView,
-                   ListenViewHelper.COLUMNS columns) {
+                   ListenViewHelper.COLUMNS columns, boolean rightJustify) {
     super(clientExercise, controller, listContainer, alignments, listenView);
     this.columns = columns;
-
+    this.rightJustify = rightJustify;
     Style style = getElement().getStyle();
     style.setOverflow(Style.Overflow.HIDDEN);
     style.setClear(Style.Clear.BOTH);
@@ -93,7 +95,10 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
     return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, false);
   }
 
-
+  /**
+   * @param wrapper
+   * @see DialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices)
+   */
   protected void styleMe(DivWidget wrapper) {
     this.bubble = wrapper;
     wrapper.getElement().setId("bubble_" + getExID());
@@ -104,12 +109,16 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
       if (columns == ListenViewHelper.COLUMNS.LEFT) wrapper.addStyleName("leftbubble");
       else if (columns == ListenViewHelper.COLUMNS.RIGHT) wrapper.addStyleName("rightbubble");
       else if (columns == ListenViewHelper.COLUMNS.MIDDLE) {
+        Style style = wrapper.getElement().getStyle();
 
         String middlebubble2 = "middlebubble2";
-        if (exercise.hasEnglishAttr()) middlebubble2 = "middlebubbleRight";
+        if (exercise.hasEnglishAttr()) {
+          middlebubble2 = "middlebubbleRight";
+          if (rightJustify) style.setProperty("marginLeft", "auto");
+        }
 
         wrapper.addStyleName(middlebubble2);
-        wrapper.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+        style.setTextAlign(Style.TextAlign.CENTER);
       }
     }
 
