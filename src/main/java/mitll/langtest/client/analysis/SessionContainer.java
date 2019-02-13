@@ -189,5 +189,4 @@ public class SessionContainer<T extends IDialogSession>
   protected Long getItemDate(IDialogSession shell) {
     return shell.getModified();
   }
-
 }

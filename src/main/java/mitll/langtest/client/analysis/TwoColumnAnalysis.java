@@ -114,12 +114,6 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
     add(bottom);
   }
 
-//  abstract DivWidget getTable(Collection<T> users,
-//                              ExerciseController controller,
-//                              DivWidget bottom,
-//                              DivWidget rightSide,
-//                              String noDataMessage);
-
   protected DivWidget getTable(Collection<T> users,
                                ExerciseController controller,
                                DivWidget bottom,
@@ -128,8 +122,7 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
     if (users.isEmpty()) {
       return showNoData(noDataMessage);
     } else {
-      String userContainer1 = "userContainer";
-      return getContainer(users, controller, bottom, rightSide, userContainer1);
+      return getContainer(users, controller, bottom, rightSide, "userContainer");
     }
   }
 

@@ -506,9 +506,29 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = System.currentTimeMillis();
 
 //    Collection<Integer> dialogExerciseIDs = getDialogExerciseIDs(dialogID);
-//
 //    logger.info("getBestForUser Dialog ids " + dialogExerciseIDs.size());
 
+    List<SlickPerfResult> nonEnglishOnly = getNonEnglishOnly(getSlickPerfResultsForDialog(analysisRequest));
+    long now = System.currentTimeMillis();
+
+    if (DEBUG) {
+      logger.info("getBestForUser best for" +
+          analysisRequest +
+//        " user " + userid + " in project " + projid + " and list " + listid +
+          "\n\twere " + nonEnglishOnly.size());
+    }
+
+    {
+      long diff = now - then;
+      if (diff > WARN_THRESH) {
+        logger.warn("getBestForUser best for " + analysisRequest.getUserid() + " in " + projid + " took " + diff);
+      }
+    }
+
+    return getBest(nonEnglishOnly, analysisRequest.getMinRecordings(), true);
+  }
+
+  private Collection<SlickPerfResult> getSlickPerfResultsForDialog(AnalysisRequest analysisRequest) {
     Collection<SlickPerfResult> perfForUser;
     if (analysisRequest.getDialogSessionID() == -1) {
       int dialogID = analysisRequest.getDialogID();
@@ -525,19 +545,23 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       if (DEBUG) logger.info("got session " + analysisRequest);
       perfForUser = resultDAO.getPerfForDialogSession(analysisRequest.getDialogSessionID());
     }
-    long now = System.currentTimeMillis();
+    return perfForUser;
+  }
 
-    if (DEBUG) logger.info("getBestForUser best for" +
-        analysisRequest +
-//        " user " + userid + " in project " + projid + " and list " + listid +
-        "\n\twere " + perfForUser.size());
+  @NotNull
+  private List<SlickPerfResult> getNonEnglishOnly(Collection<SlickPerfResult> perfForUser) {
+    Project project = database.getProject(projid);
 
-    long diff = now - then;
-    if (diff > WARN_THRESH) {
-      logger.warn("getBestForUser best for " + analysisRequest.getUserid() + " in " + projid + " took " + diff);
+    List<SlickPerfResult> nonEnglishOnly = perfForUser
+        .stream()
+        .filter(slickPerfResult ->
+            !project.getExerciseByID(
+                slickPerfResult.exid()).hasEnglishAttr()).collect(Collectors.toList());
+
+    if (perfForUser.size() != nonEnglishOnly.size()) {
+      logger.info("getBestForUser before filter " + perfForUser.size() + " after removing english " + nonEnglishOnly.size());
     }
-
-    return getBest(perfForUser, analysisRequest.getMinRecordings(), true);
+    return nonEnglishOnly;
   }
 
   @NotNull
@@ -548,7 +572,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
   /**
    * For the current project id.
-   *
+   * <p>
    * TODO : Gets all recordings!!!
    *
    * @param userDAO

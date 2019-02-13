@@ -123,7 +123,6 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
   protected DivWidget getContainerDiv(DivWidget table) {
     DivWidget containerDiv = super.getContainerDiv(table);
     containerDiv.getElement().getStyle().setProperty("maxHeight", 425 + "px");
-
     return containerDiv;
   }
 

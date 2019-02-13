@@ -63,6 +63,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private static final boolean DEBUG_SILENCE = false;
   private static final boolean DEBUG_PLAY_ENDED = true;
 
+  private boolean directClick = false;
 
   /**
    * @see #showScoreFeedback
@@ -317,7 +318,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     return isRightSpeakerSet() ? THEY_SPEAK : YOU_SPEAK;
   }
 
-  private boolean directClick = false;
 
   @Override
   protected void gotTurnClick(T turn) {
