@@ -289,7 +289,6 @@ public class Dialog implements IDialog, MutableShell {
 
   @Override
   public void setMeaning(String meaning) {
-
   }
 
   /**
@@ -299,7 +298,7 @@ public class Dialog implements IDialog, MutableShell {
    */
   @Override
   public void setScore(float score) {
-    logger.info("setScore " + score);
+ //   logger.info("setScore " + score);
     this.score = score;
   }
 

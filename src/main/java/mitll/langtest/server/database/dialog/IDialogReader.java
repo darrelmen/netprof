@@ -20,5 +20,5 @@ public interface IDialogReader {
                                       Map<ClientExercise, String> exToAudio, Project project, Project englishProject);
 
   Map<Dialog, SlickDialog> getInterpreterDialogs(int defaultUser,
-                                      Project project, Project englishProject);
+                                                 Project project, Project englishProject, String excelFile);
 }

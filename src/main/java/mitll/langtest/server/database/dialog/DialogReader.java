@@ -30,7 +30,7 @@ class DialogReader extends BaseDialogReader {
 
   private static final String DIALOG = "dialog";
 
-  public Map<Dialog, SlickDialog> getInterpreterDialogs(int defaultUser, Project project, Project englishProject) {
+  public Map<Dialog, SlickDialog> getInterpreterDialogs(int defaultUser, Project project, Project englishProject, String excelFile) {
     return Collections.emptyMap();
   }
 

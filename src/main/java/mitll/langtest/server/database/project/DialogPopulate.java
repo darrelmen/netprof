@@ -93,19 +93,22 @@ public class DialogPopulate {
    * * and any audio that can be copied in from current known audio
    *
    * @param project
+   * @param keepAudio
+   * @param excel
+   * @param appendOK
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyDialog
    */
-  public boolean populateDatabase(Project project, Project englishProject) {
+  public boolean populateDatabase(Project project, Project englishProject, boolean keepAudio, String excel, boolean appendOK) {
     int projid = project.getID();
     IDialogDAO dialogDAO = db.getDialogDAO();
-    if (!dialogDAO.getDialogs(projid).isEmpty()) {
+    if (!appendOK && !dialogDAO.getDialogs(projid).isEmpty()) {
       logger.warn("\n\nProject #" + projid + " already has dialog data so not adding any.");
       return false;
     } else {
       waitUntilTrieReady(project);
 
-   //   maybeDoDialogImport(project, englishProject, dialogDAO);
-      maybeDoInterpreterImport(project, englishProject, dialogDAO);
+      //   maybeDoDialogImport(project, englishProject, dialogDAO);
+      maybeDoInterpreterImport(project, englishProject, dialogDAO, keepAudio, excel);
 
       return true;
     }
@@ -115,11 +118,13 @@ public class DialogPopulate {
    * Loads data for any excel file we find under
    *
    * /opt/netprof/dialog/LANG/interpreter.xlsx
-   *
    * @param project
    * @param dialogDAO
+   * @param keepAudio
+   * @param excel
    */
-  private void maybeDoInterpreterImport(Project project, Project englishProject, IDialogDAO dialogDAO) {
+  private void maybeDoInterpreterImport(Project project, Project englishProject, IDialogDAO dialogDAO,
+                                        boolean keepAudio, String excel) {
     //logger.info("maybeDoInterpreterImport found interpreter candidate " + project);
     Project engProject = db.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
 
@@ -131,10 +136,16 @@ public class DialogPopulate {
         logger.error("maybeDoInterpreterImport huh? default user is -1?");
       }
 
-      Map<Dialog, SlickDialog> dialogToSlick = new InterpreterReader().getInterpreterDialogs(defaultUser, project, engProject);
+      String aShort = excel.startsWith("short") ? "Short Interpreter" : InterpreterReader.DEFAULT_CHAPTER;
+
+      logger.info("chapter is " +aShort);
+
+      Map<Dialog, SlickDialog> dialogToSlick = new InterpreterReader(InterpreterReader.DEFAULT_UNIT,
+          aShort).getInterpreterDialogs(defaultUser, project, engProject, excel);
+
       if (!dialogToSlick.isEmpty()) {
         logger.info("maybeDoInterpreterImport (" + project.getName() + ") read " + dialogToSlick.size());
-        addDialogs(project, englishProject, dialogDAO, Collections.emptyMap(), defaultUser, DialogType.INTERPRETER, dialogToSlick);
+        addDialogs(project, englishProject, dialogDAO, Collections.emptyMap(), defaultUser, DialogType.INTERPRETER, dialogToSlick, keepAudio);
       }
     }
   }
@@ -166,6 +177,7 @@ public class DialogPopulate {
    * @param defaultUser
    * @param dialogType
    * @param dialogToSlick
+   * @param keepAudio
    */
   private void addDialogs(Project project,
                           Project englishProject,
@@ -174,7 +186,7 @@ public class DialogPopulate {
                           int defaultUser,
                           DialogType dialogType,
 
-                          Map<Dialog, SlickDialog> dialogToSlick) {
+                          Map<Dialog, SlickDialog> dialogToSlick, boolean keepAudio) {
     Set<Dialog> dialogs = dialogToSlick.keySet();
 
     long now = System.currentTimeMillis();
@@ -189,9 +201,9 @@ public class DialogPopulate {
     dialogs.forEach(dialog -> {
       // add the image
 
-      logger.info("add dialog image " + projid + " dialog " + dialog.getID() + " modified " + modified);
+      // logger.info("addDialogs add dialog image " + projid + " dialog " + dialog.getID() + " modified " + modified);
       int imageID = db.getImageDAO().insert(getSlickImage(projid, now, dialog, modified));
-      logger.info("add dialog image " + projid + " dialog " + dialog.getID() + " id " + imageID);
+      //  logger.info("addDialogs add dialog image " + projid + " dialog " + dialog.getID() + " id " + imageID);
 
       dialogToSlick.get(dialog).imageid_$eq(imageID);
 
@@ -216,22 +228,22 @@ public class DialogPopulate {
       addAudio(project, projid, exToAudio, defaultUser, now, audioCheck, allImportExToID);
     }
 
-    if (DO_AUDIO_COPY) {
+    if (keepAudio) {
       Set<ClientExercise> newEx = allImportExToID.keySet();
-      logger.info("found " + newEx.size() + " dialog exercises, " + allNewInDatabase.size() + " core");
+      logger.info("addDialogs found " + newEx.size() + " dialog exercises, " + allNewInDatabase.size() + " core");
       allNewInDatabase.addAll(toCommon(newEx));
 
       Map<Boolean, List<CommonExercise>> englishAndNon = allNewInDatabase.stream().collect(Collectors.partitioningBy(ClientExercise::hasEnglishAttr));
       {
         List<CommonExercise> english = englishAndNon.get(true);
-        logger.info("copy audio for " + english.size() + " english exercises");
+        logger.info("addDialogs copy audio for " + english.size() + " english exercises");
         new AudioCopy(db, db.getProjectManagement(), db)
             .copyAudio(englishProject.getID(), english,
                 new HashMap<>());
       }
       {
         List<CommonExercise> fl = englishAndNon.get(false);
-        logger.info("copy audio for " + fl.size() + " fl exercises");
+        logger.info("addDialogs copy audio for " + fl.size() + " fl exercises");
         new AudioCopy(db, db.getProjectManagement(), db)
             .copyAudio(projid, fl,
                 new HashMap<>());
@@ -336,7 +348,7 @@ public class DialogPopulate {
    * @param modified
    * @param dialog
    * @param dialogID
-   * @see #addDialogs(Project, Project, IDialogDAO, Map, int, DialogType, Map)
+   * @see #addDialogs(Project, Project, IDialogDAO, Map, int, DialogType, Map, boolean)
    */
   private Set<CommonExercise> addCoreVocab(int projid, int userID, List<String> typeOrder,
                                            Timestamp modified, Dialog dialog, int dialogID) {

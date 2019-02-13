@@ -504,9 +504,10 @@ public class ProjectManagement implements IProjectManagement {
         }
       }
 
-      logger.info("about to remember users for  " + projectID);
+     // logger.info("about to remember users for  " + projectID);
+
       db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUsersForProject(projectID));
-      logger.info("finished remembering users for  " + projectID);
+      logger.info("rememberUsers finished remembering users for  " + projectID);
     }, "ProjectManagement.rememberUsers_" + projectID).start();
   }
 

@@ -121,8 +121,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       CorrectAndScore correctAndScore = scoreHistoryPerExercise.get(iDialog.getID());
       if (correctAndScore != null) {
         int percentScore = correctAndScore.getPercentScore();
-        logger.info("scores " + iDialog.getID() + " - " + percentScore);
-
+      //  logger.info("scores " + iDialog.getID() + " - " + percentScore);
         iDialog.getMutableShell().setScore(percentScore);
       }
     });

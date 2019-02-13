@@ -1343,7 +1343,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #initializeDAOs
    */
   public void createTables() {
-    logger.info("createTables create slick tables - has " + getTables());
+   // logger.info("createTables create slick tables - has " + getTables());
     List<String> created = new ArrayList<>();
 
     List<String> known = dbConnection.getJavaListOfTables();

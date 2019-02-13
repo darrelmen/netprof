@@ -34,13 +34,14 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
   private static final String TEXT = "Text";
   private static final String ENG = "ENG";
   private static final String CHN = "CHN";
-  // private static final String M_2_M = "M2M";
-  private static final String DEFAULT_UNIT = "1";
-  private static final String DEFAULT_CHAPTER = "1";
+
+  public static final String DEFAULT_UNIT = "1";
+  public static final String DEFAULT_CHAPTER = "1";
+
   private static final boolean DEBUG = true;
   private static final String DIALOGS = "Dialogs";
   private static final String INTERPRETER = "I";
-  private static final String INTERPRETER1 = "Interpreter";
+  private static final String INTERPRETERSPEAKER = "Interpreter";
   public static final String KEY_WORDS_TO_OMIT = "Key Words to Omit";
   public static final String CORE_WORDS_PHRASES = "Core words / phrases";
   public static final String TITLE = "title";
@@ -49,6 +50,9 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
   public static final String A_TALKER = "A";
   //  private final boolean DEBUG = true;
   private final ExcelUtil excelUtil = new ExcelUtil();
+
+  private String unit;
+  private String chapter;
 
   enum Columns {
     DIALOG,
@@ -65,21 +69,27 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
     ORIENTATION
   }
 
+
+  public InterpreterReader(String unit, String chapter) {
+    this.unit = unit;
+    this.chapter = chapter;
+  }
+
   @Override
-  public Map<Dialog, SlickDialog> getInterpreterDialogs(int defaultUser, Project project, Project englishProject) {
-    File excelFile = getExcelFile(project);
+  public Map<Dialog, SlickDialog> getInterpreterDialogs(int defaultUser, Project project, Project englishProject, String excel) {
+    File excelFile = getExcelFile(project, excel);
 
     if (excelFile.exists()) {
       return getDialogsFromExcel(defaultUser, project, englishProject, excelFile);
     } else {
-      logger.info("no interpreter spreadsheet for " + project.getName());
+      logger.warn("getInterpreterDialogs no interpreter spreadsheet for " + project.getName() + " at " + excelFile.getAbsolutePath());
       return Collections.emptyMap();
     }
   }
 
   /**
    * @param defaultUser
-   * @param exToAudio NOT USED!
+   * @param exToAudio      NOT USED!
    * @param project
    * @param englishProject
    * @return
@@ -138,14 +148,14 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
   }
 
   @NotNull
-  private File getExcelFile(Project project) {
+  private File getExcelFile(Project project, String excelFile) {
     String dialogDataDir = getDialogDataDir(project);
 
     File loc = new File(dialogDataDir);
     boolean directory = loc.isDirectory();
     if (!directory) logger.warn("huh? not a dir");
 
-    return new File(loc, INTERPRETER_XLSX);
+    return new File(loc, excelFile);
   }
 
   private final Set<Character> SPLIT_CHARS = new HashSet<>(Arrays.asList('。', '.', '?', '？'));
@@ -283,11 +293,11 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
                   if (speakers.isEmpty()) {
                     if (talker.equalsIgnoreCase(A_TALKER)) {
                       speakers.add(ENGLISH_SPEAKER);
-                      speakers.add(INTERPRETER1);
+                      speakers.add(INTERPRETERSPEAKER);
                       speakers.add(nativeSpeaker);
                     } else {
                       speakers.add(nativeSpeaker);
-                      speakers.add(INTERPRETER1);
+                      speakers.add(INTERPRETERSPEAKER);
                       speakers.add(ENGLISH_SPEAKER);
                     }
                   }
@@ -300,20 +310,20 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
                     exercises.add(exercise);
                   }
                   {
-                    Exercise exercise1 = getExercise(typeOrder, l2Text, engText, colToValue.get(Columns.TEXTTRANSLITERATION), INTERPRETER1, projectLang, interpreterTurn);
+                    Exercise exercise1 = getExercise(typeOrder, l2Text, engText, colToValue.get(Columns.TEXTTRANSLITERATION), INTERPRETERSPEAKER, projectLang, interpreterTurn);
                     //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
                     exercises.add(exercise1);
                   }
-                  addCoreVocab(coreFL, colToValue, interpreterTurn, INTERPRETER1);
+                  addCoreVocab(coreFL, colToValue, interpreterTurn, INTERPRETERSPEAKER);
                 } else {
                   if (speakers.isEmpty()) {
                     if (talker.equalsIgnoreCase(A_TALKER)) {
                       speakers.add(nativeSpeaker);
-                      speakers.add(INTERPRETER1);
+                      speakers.add(INTERPRETERSPEAKER);
                       speakers.add(ENGLISH_SPEAKER);
                     } else {
                       speakers.add(ENGLISH_SPEAKER);
-                      speakers.add(INTERPRETER1);
+                      speakers.add(INTERPRETERSPEAKER);
                       speakers.add(nativeSpeaker);
                     }
                   }
@@ -321,7 +331,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
                   logger.info("readFromSheet 2 add " + realID + " : " + talker + " @ " + turnID + " " + colToValue.get(Columns.LANGUAGE) + " " + engText);
 
                   exercises.add(getExercise(typeOrder, l2Text, engText, colToValue.get(Columns.TEXTTRANSLITERATION), nativeSpeaker, projectLang, turnID));
-                  exercises.add(getExercise(typeOrder, engText, "", "", INTERPRETER1, Language.ENGLISH, interpreterTurn));
+                  exercises.add(getExercise(typeOrder, engText, "", "", INTERPRETERSPEAKER, Language.ENGLISH, interpreterTurn));
                   addCoreVocab(coreFL, (Map<Columns, String>) colToValue, turnID, nativeSpeaker);
                 }
               } catch (NumberFormatException e) {
@@ -632,7 +642,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
         project.getID(),
         modified,
         imageRef,
-        DEFAULT_UNIT, DEFAULT_CHAPTER,
+        unit, chapter,
         attributes,
         exercises,
         coreExercises,
@@ -688,8 +698,8 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
   @NotNull
   private Map<String, String> getDefaultUnitAndChapter(List<String> typeOrder) {
     Map<String, String> unitToValue = new HashMap<>();
-    unitToValue.put(typeOrder.get(0), DEFAULT_UNIT);
-    unitToValue.put(typeOrder.get(1), INTERPRETER1);
+    unitToValue.put(typeOrder.get(0), unit);
+    unitToValue.put(typeOrder.get(1), chapter);
     return unitToValue;
   }
 }
