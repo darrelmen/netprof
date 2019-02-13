@@ -49,6 +49,7 @@ import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -57,7 +58,8 @@ import java.util.*;
  * @since 3/11/16.
  */
 public class UnitChapterItemHelper<T extends HasID & Details> {
-  //private final Logger logger = Logger.getLogger("UnitChapterItemHelper");
+  public static final String BLANK = "blank";
+  private final Logger logger = Logger.getLogger("UnitChapterItemHelper");
   private static final int MAXLEN = 10;
   /**
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#addInstructions
@@ -106,7 +108,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
   private Widget getItemHeader(HasID e) {
     DivWidget widget = new DivWidget();
     widget.addStyleName("inlineFlex");
-    addProminentLabel(widget,ITEM,"" + e.getID(),false);
+    addProminentLabel(widget, ITEM, "" + e.getID(), false);
     return widget;
 //        new Heading(HEADING_FOR_UNIT_LESSON, ITEM, "" + e.getID());
   }
@@ -134,7 +136,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
    * @see #addUnitChapterItem
    */
   private Panel getUnitLessonForExercise(T exercise) {
-   // Panel flow = new HorizontalPanel();
+    // Panel flow = new HorizontalPanel();
     Panel flow = new DivWidget();
     flow.addStyleName("inlineFlex");
     //flow.getElement().setId("getUnitLessonForExercise_unitLesson");
@@ -143,7 +145,9 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
 
     for (String type : typeOrder) {
       String subtext = exercise.getUnitToValue().get(type);
-      if (subtext != null && !subtext.isEmpty()) {
+   //   logger.info("getUnitLessonForExercise type " + type + " = " + subtext);
+
+      if (subtext != null && !subtext.isEmpty() && !subtext.equalsIgnoreCase(BLANK)) {
 //        Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, subtext);
 //        child.addStyleName("rightFiveMargin");
 
@@ -171,7 +175,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
 
 
   private void addProminentLabel(Panel flow, String npId, String oldID, boolean markProminent) {
-       Heading child = new Heading(HEADING_FOR_UNIT_LESSON, npId);
+    Heading child = new Heading(HEADING_FOR_UNIT_LESSON, npId);
     //HTML child = new HTML(npId);
     child.getElement().getStyle().setColor("gray");
     child.getElement().getStyle().setFontWeight(Style.FontWeight.NORMAL);
@@ -241,6 +245,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
     StringBuilder builder = new StringBuilder();
     for (String type : typeOrder) {
       String subtext = unitToValue.get(type);
+     // logger.info("type " + type + " = " + subtext);
       if (subtext != null && !subtext.isEmpty()) {
         builder.append(getTypeAndValue(type, subtext));
       }
@@ -257,7 +262,6 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
     if (!showDomino && !oldID.isEmpty()) {
       builder.append(getTypeAndValue(NP_ID, oldID));
     }
-
     if (!updateTime.isEmpty()) {
       builder.append(getTypeAndValue(TIME, updateTime));
     }

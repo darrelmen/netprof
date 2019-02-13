@@ -46,8 +46,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     implements SessionManager, IRehearseView {
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
-  public static final String DIALOG_INTRO_SHOWN_REHEARSAL = "dialogIntroShownRehearsal";
-  public static final String HOLD_THE_RED_RECORD_BUTTON = "When it's your turn, press and hold the red record button.";
+  private static final String DIALOG_INTRO_SHOWN_REHEARSAL = "dialogIntroShownRehearsal";
+  private static final String HOLD_THE_RED_RECORD_BUTTON = "When it's your turn, press and hold the red record button.";
 
   private static final double MAX_RATE_RATIO = 3D;
 
@@ -121,7 +121,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     this.sessionStorage = new SessionStorage(controller.getStorage(), "rehearseSession");
   }
 
-  @Override public boolean isRehearse() { return true;}
+  @Override
+  public boolean isRehearse() {
+    return true;
+  }
+
   @Override
   public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
     super.showContent(listContent, instanceName);
@@ -711,11 +715,18 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       getCurrentTurn().cancelRecording();
     } else {
       if (doRehearse) {
-        T currentTurn = getCurrentTurn();
-        if (isFirstPrompt(currentTurn)) {
-          doRecordingNoticeMaybe();
+        if (isSessionGoingNow()) {
+          if (getCurrentTurn() != null &&
+              isCurrentTurnARecordingTurn()) {
+            getCurrentTurn().disableRecordButton();
+          }
+          setPlayButtonToPlay();
         } else {
-          rehearseTurn();
+          if (isFirstPrompt(getCurrentTurn())) {
+            doRecordingNoticeMaybe();
+          } else {
+            rehearseTurn();
+          }
         }
       } else {
         ifOnLastJumpBackToFirst();
@@ -759,11 +770,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   @NotNull
-  String getLarger(String s) {
+  private String getLarger(String s) {
     return "<span style='font-size:larger'>" + s + "</span>";
   }
 
-  void rehearseTurn() {
+  private void rehearseTurn() {
     boolean showingScoresNow = overallSmiley.isVisible();
 
     if (showingScoresNow) {   // start over
@@ -791,6 +802,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     if (onFirstPromptTurn()) {  // if got play on the first turn, start a new session -
       if (currentTurn == null || !currentTurn.isPlaying()) {
         if (!showingScoresNow) { // we already did this above!
+          if (DEBUG) logger.info("gotPlay : start new session");
           sessionStorage.storeSession();
           clearScores();
         }
@@ -799,10 +811,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       }
     }
 
-    // TODO for interpreter, only do recording with interpreter turn
     if (isTurnAPrompt(currentTurn)) {  // is the current turn a prompt? if so play the prompt
+      if (DEBUG) logger.info("gotPlay : current turn a prompt");
       playCurrentTurn();  // could do play/pause!
     } else { // the current turn is a response, start recording it
+      if (DEBUG) logger.info("gotPlay : current turn a recording turn.");
       startRecordingTurn(getCurrentTurn()); // advance automatically
     }
   }
@@ -899,8 +912,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   /**
-   * @see #getSession
    * @return
+   * @see #getSession
    */
   public INavigation.VIEWS getView() {
     return INavigation.VIEWS.REHEARSE;

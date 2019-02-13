@@ -63,7 +63,7 @@ import static mitll.langtest.shared.answer.AudioType.PRACTICE;
  * Time: 5:58 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class FlashcardRecordButton extends PostAudioRecordButton {
+public abstract class FlashcardRecordButton extends PostAudioRecordButton implements KeyPressDelegate {
   private final Logger logger = Logger.getLogger("FlashcardRecordButton");
 
   /**
@@ -73,11 +73,9 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton {
   private static final int WIDTH_FOR_BUTTON = 360;
 
   private final ExerciseController controller;
-  private static final boolean DEBUG = false;
-  private static int count = 0;
-  private final String name;
-  private int id = 0;
+ // private static int count = 0;
   private final RecordButton.RecordingListener outerRecordingListener;
+  private final RecordingKeyPressHelper helper;
 
   /**
    * @param addKeyBinding
@@ -92,12 +90,13 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton {
                                RecordButton.RecordingListener outerRecordingListener,
                                boolean addKeyBinding) {
     super(exerciseID, controller, "", "", WIDTH_FOR_BUTTON);
-    id = count++;
-    name = "FlashcardRecordButton_";
+//    int id = count++;
+//    String name = "FlashcardRecordButton_";
 
     this.outerRecordingListener = outerRecordingListener;
+    helper = makeKeyPressHelper();
     if (addKeyBinding) {
-      addKeyListener(controller);
+      helper.addKeyListener(controller);
       // logger.info("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
     }
     this.controller = controller;
@@ -112,8 +111,11 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton {
     style.setLineHeight(37, Style.Unit.PX);
 
     initRecordButton();
-
     // getElement().setId("FlashcardRecordButton_" + instance + "_" + id);
+  }
+
+  protected RecordingKeyPressHelper makeKeyPressHelper() {
+    return new RecordingKeyPressHelper(this, this, controller);
   }
 
   @Override
@@ -160,141 +162,36 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton {
   }
 
   private void removeListener() {
-    if (listener != null) {
-      controller.removeKeyListener(listener);
-      listener = null;
+    helper.removeListener();
+  }
+
+  public abstract void gotRightArrow();
+
+  public abstract void gotLeftArrow();
+
+  public abstract void gotUpArrow();
+
+  public abstract void gotDownArrow();
+
+  public abstract void gotEnter();
+
+  @Override
+  public void gotSpaceBar() {
+    if (!mouseDown) {
+      mouseDown = true;
+      doClick();
+    }
+  }
+
+  @Override
+  public void gotSpaceBarKeyUp() {
+    if (!mouseDown) {
+      logger.warning("huh? mouse down = false");
     } else {
-      //logger.info("removeListener no listener ");
+      mouseDown = false;
+      doClick();
     }
   }
-
-  private KeyPressHelper.KeyListener listener = null;
-
-  private void addKeyListener(ExerciseController controller) {
-    // if (DEBUG) logger.info("FlashcardRecordButton.addKeyListener : using  for " + instance);
-    listener = new KeyPressHelper.KeyListener() {
-      @Override
-      public String getName() {
-        return name;
-      }
-
-      @Override
-      public void gotPress(NativeEvent ne, boolean isKeyDown) {
-        if (isKeyDown) {
-          checkKeyDown(ne);
-        } else {
-          checkKeyUp(ne);
-        }
-      }
-
-      public String toString() {
-        return "KeyListener " + getName();
-      }
-    };
-    controller.addKeyListener(listener);
-  }
-
-  /**
-   * Remember to prevent default on space event or the window will jump (why?)
-   * @param event
-   */
-  private void checkKeyDown(NativeEvent event) {
-    if (!shouldIgnoreKeyPress()) {
-      boolean isSpace = checkIsSpace(event);
-      if (isSpace) {
-        event.preventDefault();  // critical!
-        if (DEBUG) logger.info("checkKeyDown got space " + event);
-        if (!mouseDown) {
-          mouseDown = true;
-          doClick();
-        }
-      } else {
-        int keyCode = event.getKeyCode();
-        if (DEBUG) logger.info("checkKeyDown key code is " + keyCode);
-
-        switch (keyCode) {
-          case KeyCodes.KEY_LEFT:
-            stopProp(event);
-            gotLeftArrow();
-            break;
-          case KeyCodes.KEY_RIGHT:
-            stopProp(event);
-            gotRightArrow();
-            break;
-          case KeyCodes.KEY_UP:
-            stopProp(event);
-            gotUpArrow();
-            break;
-          case KeyCodes.KEY_DOWN:
-            stopProp(event);
-            gotDownArrow();
-            break;
-          case KeyCodes.KEY_ENTER:
-            stopProp(event);
-            gotEnter();
-            break;
-        }
-      }
-    } else {
-      if (DEBUG) logger.info("ignore key down.");
-    }
-  }
-
-  private void stopProp(NativeEvent event) {
-    event.stopPropagation();
-    event.preventDefault();
-  }
-
-  protected abstract void gotRightArrow();
-
-  protected abstract void gotLeftArrow();
-
-  protected abstract void gotUpArrow();
-
-  protected abstract void gotDownArrow();
-
-  protected abstract void gotEnter();
-
-  private void checkKeyUp(NativeEvent event) {
-    if (!shouldIgnoreKeyPress()) {
-      if (checkIsSpace(event)) {
-        if (!mouseDown) {
-          logger.warning("huh? mouse down = false");
-        } else {
-          mouseDown = false;
-          doClick();
-        }
-      }
-    } else {
-      logger.info("checkKeyUp ignore key up.");
-    }
-  }
-
-  private boolean checkIsSpace(NativeEvent event) {
-    return event.getKeyCode() == KeyCodes.KEY_SPACE;
-  }
-
-  protected boolean shouldIgnoreKeyPress() {
-    boolean notAttached = !isAttached();
-    if (notAttached) {
-      logger.info("shouldIgnoreKeyPress not attached? " + getElement().getId() + " = " + id);
-      removeListener();
-    }
-    boolean hidden = checkHidden(getElement().getId());
-    if (hidden) {
-      //    logger.info("shouldIgnoreKeyPress : hidden");
-      removeListener();
-      stopRecordingSafe();
-    }
-    boolean noUser = controller.getUser() == -1;
-    if (noUser) logger.info("noUser");
-    boolean b = notAttached || hidden || noUser;
-    return b;
-  }
-
-  private native boolean checkHidden(String id)  /*-{
-      return $wnd.jQuery('#' + id).is(":hidden");
-  }-*/;
 
   protected void showInitialRecordImage() {
     setBaseIcon(MyCustomIconType.record1);

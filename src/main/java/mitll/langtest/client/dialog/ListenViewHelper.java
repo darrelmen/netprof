@@ -52,7 +52,6 @@ public class ListenViewHelper<T extends TurnPanel>
   private static final String SPEAKER_B = "B";
   private static final int INTERPRETER_WIDTH = 165;//235;
   private static final String ENGLISH_SPEAKER = "English Speaker";
-  // public static final int SPEAKER_WIDTH = 313;
   private static final int PADDING_LOZENGE = 14;
 
   private static final String MIDDLE_COLOR = "#00800059";
@@ -87,12 +86,11 @@ public class ListenViewHelper<T extends TurnPanel>
   private CheckBox leftSpeakerBox = null;
   private CheckBox rightSpeakerBox = null;
 
-  // CheckBox speakerBoxes;
   private ComplexWidget slider;
   private Button playButton;
   private DivWidget dialogHeader;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_PLAY = false;
 
   /**
@@ -101,7 +99,8 @@ public class ListenViewHelper<T extends TurnPanel>
   protected int dialogID;
   boolean isInterpreter = false;
 
-  INavigation.VIEWS prev,next;
+  INavigation.VIEWS prev, next;
+
   /**
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
@@ -646,7 +645,6 @@ public class ListenViewHelper<T extends TurnPanel>
 
   @NotNull
   T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
-
     TurnPanel widgets = new TurnPanel(
         clientExercise,
         controller,
@@ -679,8 +677,6 @@ public class ListenViewHelper<T extends TurnPanel>
    */
   @NotNull
   DivWidget getControls() {
-
-
     DivWidget rowOne = new DivWidget();
     rowOne.getElement().setId("controls");
     rowOne.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
@@ -1073,12 +1069,19 @@ public class ListenViewHelper<T extends TurnPanel>
     } else return false;
   }
 
+  private boolean sessionGoingNow;
+
   /**
    * @seex #setPlayButtonIcon
    * @see #playStarted
    */
   void setPlayButtonToPause() {
     playButton.setIcon(IconType.PAUSE);
+    sessionGoingNow = true;
+  }
+
+  boolean isSessionGoingNow() {
+    return sessionGoingNow;
   }
 
   /**
@@ -1086,6 +1089,7 @@ public class ListenViewHelper<T extends TurnPanel>
    */
   void setPlayButtonToPlay() {
     playButton.setIcon(IconType.PLAY);
+    sessionGoingNow = false;
   }
 
   void removeMarkCurrent() {

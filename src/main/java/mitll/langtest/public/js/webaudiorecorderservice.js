@@ -35,8 +35,7 @@
     var WORKER_PATH = 'langtest/js/recorderWorker.js';
 
     window.Recorder = function (source, cfg) {
-        console.log("window.Recorder : making recorder at " + new Date());
-
+    //   console.log("window.Recorder : making recorder at " + new Date());
         var config = cfg || {};
         var bufferLen = config.bufferLen || 4096;
 

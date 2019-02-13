@@ -2296,7 +2296,14 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
 }
 
 .middlebubble2 {
-    margin-left: 5%;
+    margin-left: 0px;
+    margin-right: auto;
+    background-color: rgba(0, 128, 0, 0.35);
+}
+
+.middlebubbleRight {
+    margin-left: auto;
+    margin-right: 5px;
     background-color: rgba(0, 128, 0, 0.35);
 }
 

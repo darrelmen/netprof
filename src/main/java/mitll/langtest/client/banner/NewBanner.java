@@ -34,10 +34,11 @@ import static mitll.langtest.shared.project.ProjectType.DIALOG;
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
-  public static final String DRILL = "Drill";
-  public static final String PRACTICE = "Practice";
-  public static final String DIALOG_PRACTICE = "Rehearse";
   private final Logger logger = Logger.getLogger("NewBanner");
+
+  private static final String DRILL = "Drill";
+  private static final String PRACTICE = "Practice";
+  private static final String DIALOG_PRACTICE = "Rehearse";
 
   private static final String RECORD = "Record";
   private static final String QC = "QC";
@@ -336,7 +337,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     subtitle.setVisible(!controller.isRecordingEnabled());
   }
 
-  List<LinkAndTitle> teacherReq = new ArrayList<>();
+  private final List<LinkAndTitle> teacherReq = new ArrayList<>();
 
   /**
    * @param userManager
@@ -455,8 +456,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       String name = instance1.toUpperCase();
       name = name.replaceAll(" ", "_");
       if (name.equalsIgnoreCase(DRILL)) name = PRACTICE.toUpperCase();
-      //  if (name.equalsIgnoreCase("Practice")) name = "Drill".toUpperCase();
-
+      if (name.equalsIgnoreCase("dialogs")) name = VIEWS.DIALOG.name();
       //    logger.info("name " + name);
       choices = VIEWS.valueOf(name);
     } catch (IllegalArgumentException e) {

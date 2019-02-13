@@ -54,6 +54,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
+import mitll.langtest.client.recorder.RecordingKeyPressHelper;
 import mitll.langtest.client.scoring.ClickableWords;
 import mitll.langtest.client.scoring.FieldType;
 import mitll.langtest.client.scoring.ScoreFeedbackDiv;
@@ -175,7 +176,6 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
   }
 
   private DivWidget scoreFeedbackRow;
-  private Panel contextSentenceWhileWaiting;
 
   /**
    * Three rows below the stimulus word/expression:<p></p>
@@ -229,7 +229,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     DivWidget contentWidget = commonExerciseClickableWords.getClickableWordsHighlight(flToShow, toHighlight,
         FieldType.FL, new ArrayList<>(), false, contextSentence.getTokens(), exercise.getTokens());
 
-    contextSentenceWhileWaiting = getCenteredRow(contentWidget);
+    Panel contextSentenceWhileWaiting = getCenteredRow(contentWidget);
 
     contextSentenceWhileWaiting.setVisible(false);
     IconAnchor waiting = new IconAnchor();
@@ -391,6 +391,15 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
             recordingListener,
             addKeyBinding
         ) {
+          @Override
+          protected RecordingKeyPressHelper makeKeyPressHelper() {
+            return new RecordingKeyPressHelper(this, this, controller) {
+              @Override
+              protected boolean shouldIgnoreKeyPress() {
+                return super.shouldIgnoreKeyPress() || otherReasonToIgnoreKeyPress();
+              }
+            };
+          }
 
           /**
            * @see RecordButton#startRecordingWithTimer
@@ -416,24 +425,24 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
            * @see FlashcardRecordButton#checkKeyDown
            */
           @Override
-          protected void gotLeftArrow() {
+          public void gotLeftArrow() {
             exerciseList.loadPrev();
           }
 
           @Override
-          protected void gotRightArrow() {
+          public void gotRightArrow() {
             if (!exerciseList.isPendingReq()) {
               gotClickOnNext();
             }
           }
 
           @Override
-          protected void gotUpArrow() {
+          public void gotUpArrow() {
             gotDownArrow();
           }
 
           @Override
-          protected void gotDownArrow() {
+          public void gotDownArrow() {
             if (!selectShowFL()) {
               flipCard();
             }
@@ -448,16 +457,16 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
            * @see FlashcardRecordButton#checkKeyDown
            */
           @Override
-          protected void gotEnter() {
+          public void gotEnter() {
             playRef();
           }
 
-          @Override
-          protected boolean shouldIgnoreKeyPress() {
-            boolean b = super.shouldIgnoreKeyPress() || otherReasonToIgnoreKeyPress();
-            //   if (b) logger.info("ignore key press?");
-            return b;
-          }
+//          @Override
+//          protected boolean shouldIgnoreKeyPress() {
+//            boolean b = super.shouldIgnoreKeyPress() || otherReasonToIgnoreKeyPress();
+//            //   if (b) logger.info("ignore key press?");
+//            return b;
+//          }
 
           @Override
           public void useResult(AudioAnswer result) {

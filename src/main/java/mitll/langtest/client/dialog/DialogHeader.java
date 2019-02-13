@@ -62,6 +62,8 @@ public class DialogHeader {
       row.add(vert);
       vert.addStyleName("leftTenMargin");
 
+      String foreignLanguage = dialog.getForeignLanguage();
+
       {
         DivWidget titleDiv = new DivWidget();
         titleDiv.addStyleName("titleBlue");
@@ -70,17 +72,22 @@ public class DialogHeader {
       }
 
       String english = dialog.getEnglish();
+      String orientation = dialog.getOrientation();
 
-      {
-        DivWidget titleDiv = new DivWidget();
-        titleDiv.getElement().getStyle().setBackgroundColor("#dff4fc");
-        titleDiv.add(getHeading(5, english));
-        vert.add(titleDiv);
-      }
+      boolean onlyTwoLines = foreignLanguage.equalsIgnoreCase(english);
+      String secondLine = onlyTwoLines ? orientation : english;
+     // if (!foreignLanguage.equalsIgnoreCase(english)) {
+        {
+          DivWidget titleDiv = new DivWidget();
+          titleDiv.getElement().getStyle().setBackgroundColor("#dff4fc");
+          titleDiv.add(getHeading(5, secondLine));
+          vert.add(titleDiv);
+        }
+      //}
 
-      if (!english.equalsIgnoreCase(dialog.getOrientation())) {
+      if (!onlyTwoLines) {
         DivWidget oreintDiv = new DivWidget();
-        Heading w1 = new Heading(5, dialog.getOrientation());
+        Heading w1 = new Heading(5, orientation);
         w1.addStyleName("wrapword");
 
         oreintDiv.add(w1);

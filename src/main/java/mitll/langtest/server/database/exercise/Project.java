@@ -893,6 +893,6 @@ public class Project implements IPronunciationLookup, IProject {
   }
 
   public String toString() {
-    return "Project\n\tproject = " + project + "\n\ttypes " + getTypeOrder() + " exercise dao " + exerciseDAO;
+    return "Project\n\t(" +getTypeOrder()+ ") : project " + project;// + "\n\ttypes " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
 }

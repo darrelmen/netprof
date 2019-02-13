@@ -1189,10 +1189,12 @@ public class LangTest implements
    * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    */
   public void stopRecording(boolean useDelay, boolean abort) {
-    logger.info("stopRecording : " +
-        "\n\ttime recording in UI " + (System.currentTimeMillis() - then) + " millis, " +
-        "\n\tabort                " + abort +
-        "\n\tuse delay            " + useDelay);
+    if (DEBUG) {
+      logger.info("stopRecording : " +
+          "\n\ttime recording in UI " + (System.currentTimeMillis() - then) + " millis, " +
+          "\n\tabort                " + abort +
+          "\n\tuse delay            " + useDelay);
+    }
 
     if (useDelay) {
       BrowserRecording.stopRecording(abort);

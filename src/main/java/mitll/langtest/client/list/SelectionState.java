@@ -51,6 +51,8 @@ import static mitll.langtest.client.list.FacetExerciseList.LISTS;
  * To change this template use File | Settings | File Templates.
  */
 public class SelectionState {
+  public static final String DRILL = "Drill";
+  public static final String PRACTICE = "Practice";
   private final Logger logger = Logger.getLogger("SelectionState");
 
   private static final String POUND = "#";
@@ -263,8 +265,8 @@ public class SelectionState {
     try {
       instance = instance.replaceAll(" ", "_");
 
-      if (instance.equalsIgnoreCase("Drill")) instance = "Practice".toUpperCase();
-      // if (instance.equalsIgnoreCase("Practice")) instance = "Drill".toUpperCase();
+      if (instance.equalsIgnoreCase(DRILL)) instance = PRACTICE.toUpperCase();
+      if (instance.equalsIgnoreCase("dialogs")) instance = INavigation.VIEWS.DIALOG.name();
 
       return instance.isEmpty() ? INavigation.VIEWS.NONE : INavigation.VIEWS.valueOf(instance.toUpperCase());
     } catch (IllegalArgumentException e) {

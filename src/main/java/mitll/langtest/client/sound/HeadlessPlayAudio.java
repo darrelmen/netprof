@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -41,7 +42,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   private static final String FILE_MISSING = "FILE_MISSING";
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PLAY = false;
+  private static final boolean DEBUG_PLAY = true;
   private static final boolean DEBUG_DETAIL = false;
 
   HeadlessPlayAudio(SoundManagerAPI soundManager) {
@@ -252,6 +253,9 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   protected void loadAndPlay() {
     if (currentPath == null) {
       logger.warning("loadAndPlay, current path is null?");
+
+      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("no path?"));
+      logger.info("logException stack " + exceptionAsString);
     } else {
       loadAndPlayOrPlayAudio(currentPath);
     }
