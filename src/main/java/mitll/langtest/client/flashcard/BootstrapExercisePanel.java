@@ -219,26 +219,29 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
 
   private void addContextSentenceToShowWhileWaiting(ExerciseController controller, Panel toAddTo) {
     ClientExercise contextSentence = exercise.getDirectlyRelated().iterator().next();
-    int fontSize = controller.getProjectStartupInfo().getLanguageInfo().getFontSize();
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    if (projectStartupInfo != null) {
+      int fontSize = projectStartupInfo.getLanguageInfo().getFontSize();
 
-    ClickableWords commonExerciseClickableWords =
-        new ClickableWords(null, exercise.getID(), controller.getLanguageInfo(), fontSize, BLUE, true);
+      ClickableWords commonExerciseClickableWords =
+          new ClickableWords(null, exercise.getID(), controller.getLanguageInfo(), fontSize, BLUE, true);
 
-    String flToShow = contextSentence.getFLToShow();
-    String toHighlight = exercise.getFLToShow();
-    DivWidget contentWidget = commonExerciseClickableWords.getClickableWordsHighlight(flToShow, toHighlight,
-        FieldType.FL, new ArrayList<>(), false, contextSentence.getTokens(), exercise.getTokens());
+      String flToShow = contextSentence.getFLToShow();
+      String toHighlight = exercise.getFLToShow();
+      DivWidget contentWidget = commonExerciseClickableWords.getClickableWordsHighlight(flToShow, toHighlight,
+          FieldType.FL, new ArrayList<>(), false, contextSentence.getTokens(), exercise.getTokens());
 
-    Panel contextSentenceWhileWaiting = getCenteredRow(contentWidget);
+      Panel contextSentenceWhileWaiting = getCenteredRow(contentWidget);
 
-    contextSentenceWhileWaiting.setVisible(false);
-    IconAnchor waiting = new IconAnchor();
-    waiting.setBaseIcon(MyCustomIconType.waiting);
+      contextSentenceWhileWaiting.setVisible(false);
+      IconAnchor waiting = new IconAnchor();
+      waiting.setBaseIcon(MyCustomIconType.waiting);
 
-    contextSentenceWhileWaiting.add(waiting);
+      contextSentenceWhileWaiting.add(waiting);
 
-    contextSentenceWhileWaiting.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
-    toAddTo.add(contextSentenceWhileWaiting);
+      contextSentenceWhileWaiting.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
+      toAddTo.add(contextSentenceWhileWaiting);
+    }
   }
 
   private RecordButtonPanel answerWidget;

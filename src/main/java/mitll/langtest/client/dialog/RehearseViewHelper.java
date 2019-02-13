@@ -117,10 +117,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   /**
    * @param controller
+   * @param thisView
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  public RehearseViewHelper(ExerciseController controller) {
-    super(controller);
+  public RehearseViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
+    super(controller, thisView);
     this.sessionStorage = new SessionStorage(controller.getStorage(), "rehearseSession");
   }
 
@@ -538,7 +539,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    */
   private void recordingHasStopped() {
     if (isNextTurnAPrompt(getCurrentTurn())) {
-      // logger.info("recordingHasStopped OK, next turn is a prompt!");
+      logger.info("recordingHasStopped OK, next turn is a prompt!");
       moveOnAfterRecordingStopped();
     } else {
       logger.info("recordingHasStopped next turn not a prompt so not advancing...");
@@ -577,7 +578,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    * @see #useResult
    */
 
-  private void addScore(int exid, float score, IRecordDialogTurn recordDialogTurn) {
+  private boolean addScore(int exid, float score, IRecordDialogTurn recordDialogTurn) {
     exToScore.put(exid, score);
     recordDialogTurns.add(recordDialogTurn);
 
@@ -588,7 +589,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
           "\n\tvs expected   (" + getRespSeq().size() + ") : " + getRespSeq());
     }
 
-    checkAtEnd();
+   return checkAtEnd();
   }
 
   /**
@@ -596,7 +597,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    *
    * @see #addScore(int, float, IRecordDialogTurn)
    */
-  private void checkAtEnd() {
+  private boolean checkAtEnd() {
     boolean hasLast = doWeHaveTheLastResponseScore();
     int numScores = exToScore.size();
     int numResponses = getRespSeq().size();
@@ -604,6 +605,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       if (DEBUG)
         logger.info("checkAtEnd : hasLast show scores! score " + hasLast + " and # known scores = " + numScores + " vs " + numResponses);
       showScores();
+      return true;
     } else {
       if (numScores > numResponses) {
         logger.warning("\n\n\nhuh? something is wrong! checkAtEnd : hasLast score " + hasLast + " and # known scores = " + numScores + " vs " + numResponses);
@@ -611,6 +613,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
         if (DEBUG)
           logger.info("checkAtEnd : hasLast score " + hasLast + " and # known scores = " + numScores + " vs " + numResponses);
       }
+      return false;
     }
   }
 
@@ -885,7 +888,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     rateProgress.setVisible(false);
     exToScore.clear();
     exToStudentDur.clear();
-    exToRefDur.clear();
+   // exToRefDur.clear();
 
     allTurns.forEach(IRecordDialogTurn::clearScoreInfo);
     recordDialogTurns.clear();
@@ -939,14 +942,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
         }
       }
     });
-  }
-
-  /**
-   * @return
-   * @see #getSession
-   */
-  public INavigation.VIEWS getView() {
-    return INavigation.VIEWS.REHEARSE;
   }
 
   /**
@@ -1106,6 +1101,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     }
 
 
+    if (refTotal > 0)
     {
       double actualRatio = studentTotal / refTotal;
 
@@ -1113,6 +1109,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       logger.info("showOverallDialogScore rate to show " + v + " vs raw " + actualRatio);
       rateProgress.setText("Rate " + v + "x");
     }
+
+    rateProgress.setVisible(refTotal > 0);
 
     overallSmiley.setEmoticon(total, controller.getLanguageInfo());
 
@@ -1233,47 +1231,52 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     exToStudentDur.put(exid, matchingTurn.getStudentSpeechDur());
     exToRefDur.put(exid, matchingTurn.getRefSpeechDur());
 
-    addScore(exid, (float) audioAnswer.getScore(), matchingTurn);
+    boolean atEnd =  addScore(exid, (float) audioAnswer.getScore(), matchingTurn);
 
-    maybeMoveOnToNextTurn();
+   // maybeMoveOnToNextTurn();
 
-    if (isRecordingTurn(matchingTurn) && shouldShowScoreNow()) {
-      Scheduler.get().scheduleDeferred((Command) matchingTurn::showScoreInfo);
-    }
+//    if (isRecordingTurn(matchingTurn) && shouldShowScoreNow()) {
+//      Scheduler.get().scheduleDeferred((Command) matchingTurn::showScoreInfo);
+//    }
     //maybeMoveOnIfNextTurnARecordingTurn();
-  }
-
-  protected boolean shouldShowScoreNow() {
-    return false;
   }
 
   @Override
   public void useInvalidResult(int exid) {
     T matchingTurn = getTurnForID(exid);
 
-    addScore(exid, 0F, matchingTurn);
+    boolean atEnd = addScore(exid, 0F, matchingTurn);
     matchingTurn.useInvalidResult();
 
-    maybeMoveOnToNextTurn();
+    if (!isRehearse() && atEnd) {
+      moveOnAfterRecordingStopped();
+    }
+
+    //    maybeMoveOnToNextTurn();
   }
 
-  private void maybeMoveOnToNextTurn() {
+ /* private void maybeMoveOnToNextTurn() {
     T currentTurn = getCurrentTurn();
 
     boolean nextTurnAResp = isNextTurnAResp(currentTurn);
 
     boolean turnAPrompt = isTurnAPrompt(currentTurn);
 
-    logger.info("Current turn is " + currentTurn +
+    logger.info("maybeMoveOnToNextTurn Current turn is " + currentTurn +
         "\n\tis playing " + currentTurn.isPlaying() +
         "\n\tprompt     " + turnAPrompt +
         "\n\tnextTurnAResp " + nextTurnAResp
     );
     //  logger.info("Current turn is a prompt " + turnAPrompt);
 
+    if () moveOnAfterRecordingStopped();
     if (!turnAPrompt && nextTurnAResp) {
-      moveOnAfterRecordingStopped();
+
     }
+  }*/
+
+  private boolean shouldShowScoreNow() {
+    return false;
   }
 
   private T getTurnForID(int exid) {

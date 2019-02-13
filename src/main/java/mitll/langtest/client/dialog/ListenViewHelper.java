@@ -99,14 +99,18 @@ public class ListenViewHelper<T extends TurnPanel>
   protected int dialogID;
   boolean isInterpreter = false;
 
-  INavigation.VIEWS prev, next;
+//  INavigation.VIEWS prev, next;
+
+  INavigation.VIEWS thisView;
 
   /**
    * @param controller
+   * @param thisView
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    */
-  public ListenViewHelper(ExerciseController controller) {
+  public ListenViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     this.controller = controller;
+    this.thisView=thisView;
   }
 
   /**
@@ -173,7 +177,7 @@ public class ListenViewHelper<T extends TurnPanel>
     if (dialog == null) {
       child.add(new HTML("hmmm can't find dialog #" + dialogID + " in database"));
     } else {
-      child.add(dialogHeader = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog));
+      child.add(dialogHeader = new DialogHeader(controller, thisView, getPrevView(), getNextView()).getHeader(dialog));
 
       //boolean firstIsEnglish = dialog.getExercises().isEmpty() || dialog.getExercises().get(0).hasEnglishAttr();
       DivWidget controlAndSpeakers = new DivWidget();
@@ -1017,6 +1021,14 @@ public class ListenViewHelper<T extends TurnPanel>
     } else {
       logger.info("playStopped - no current turn.");
     }
+  }
+
+  /**
+   * @return
+   * @see #getSession
+   */
+  public INavigation.VIEWS getView() {
+    return thisView;
   }
 
   /**

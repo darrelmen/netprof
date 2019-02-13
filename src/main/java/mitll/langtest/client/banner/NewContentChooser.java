@@ -82,8 +82,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     dialogHelper = new DialogViewHelper(controller);
 
     studyHelper = new StudyHelper<>(controller);
-    listenHelper = new ListenViewHelper(controller);
-    rehearseHelper = new RehearseViewHelper(controller);
+    listenHelper = new ListenViewHelper(controller, LISTEN);
+    rehearseHelper = new RehearseViewHelper(controller, REHEARSE);
     coreRehearseHelper = new CoreRehearseViewHelper(controller);
     performHelper = new PerformViewHelper(controller);
 
@@ -324,7 +324,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void showScores(DivWidget divWidget, IDialog dialog) {
-    DivWidget header = new DialogHeader(controller, VIEWS.PERFORM, null).getHeader(dialog);
+    DivWidget header = new DialogHeader(controller, SCORES, VIEWS.PERFORM, null).getHeader(dialog);
     header.addStyleName("bottomFiveMargin");
     divWidget.add(header);
     divWidget.add(isTeacher() ?
@@ -616,7 +616,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     storeValue(mode == ProjectMode.DIALOG ? DIALOG : LEARN);
     getStorage().storeValue(MODE, mode.name());
 
-    logger.info("storeViewForMode OK mode now = " + controller.getMode());
+    if (DEBUG) logger.info("storeViewForMode OK mode now = " + controller.getMode());
   }
 
   @NotNull

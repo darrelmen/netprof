@@ -5,6 +5,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.Emoticon;
 import mitll.langtest.client.banner.SessionManager;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.IRehearseView;
 import mitll.langtest.client.dialog.ListenViewHelper.COLUMNS;
 import mitll.langtest.client.dialog.PerformViewHelper;
@@ -501,6 +502,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     super.removeMarkCurrent();
 
     if (doPushToTalk) {
+    //  logger.info("removeMarkCurrent");
       PostAudioRecordButton recordButton = getRecordButton();
       if (recordButton.isRecording()) {
         cancelRecording();
@@ -512,6 +514,12 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
   @Override
   public void disableRecordButton() {
+//    logger.info("disableRecordButton");
+//
+//
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("disableRecordButton " +getExID()));
+//    logger.info("logException stack " + exceptionAsString);
+
     PostAudioRecordButton recordButton = getRecordButton();
     recordButton.setEnabled(false);
     recordButton.getElement().getStyle().setBackgroundColor(BLUE_INACTIVE_COLOR);
@@ -684,7 +692,11 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     public void useResult(AudioAnswer result) {
       super.useResult(result);
       // getPostAudioRecordButton().setVisible(false);
-      recordDialogTurn.disableRecordButton();
+//      if (result.getExid() == exercise.getID()) {
+//        logger.i
+//        recordDialogTurn.disableRecordButton();
+//      }
+
       rehearseView.useResult(result);
 
       if (DEBUG) {

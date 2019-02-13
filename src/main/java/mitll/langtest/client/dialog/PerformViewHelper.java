@@ -9,8 +9,6 @@ import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Set;
-
 public class PerformViewHelper<T extends RecordDialogExercisePanel> extends RehearseViewHelper<T> {
   // private final Logger logger = Logger.getLogger("PerformViewHelper");
 
@@ -19,7 +17,7 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
  // private Set<String> uniqueCoreVocab;
 
   public PerformViewHelper(ExerciseController controller) {
-    super(controller);
+    super(controller, INavigation.VIEWS.PERFORM);
     rehearsalKey = "PerformViewKey";
     rehearsalPrompt = RED_RECORD_BUTTON;
   }
@@ -47,10 +45,10 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
     return turns;
   }
 
-  @Override
-  protected boolean shouldShowScoreNow() {
-    return false;
-  }
+//  @Override
+//  protected boolean shouldShowScoreNow() {
+//    return false;
+//  }
 
   /**
    * OK, let's go - hide everything!

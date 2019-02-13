@@ -77,7 +77,7 @@ public class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHe
 
   @NotNull
   private DivWidget getHeader(IDialog dialog) {
-    DivWidget header = new DialogHeader(controller, getPrevView(), getNextView()).getHeader(dialog);
+    DivWidget header = new DialogHeader(controller, INavigation.VIEWS.STUDY, getPrevView(), getNextView()).getHeader(dialog);
     header.addStyleName("bottomFiveMargin");
     return header;
   }

@@ -4,6 +4,8 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -22,17 +24,21 @@ public class DialogHeader {
    */
   private static final int ROW_WIDTH = 98;
 
+  private final INavigation.VIEWS thisView;
   private final INavigation.VIEWS prev;
   private final INavigation.VIEWS next;
   private final ExerciseController controller;
 
   /**
    * @param controller
+   * @param thisView
    * @param prev
    * @param next
+   * @see mitll.langtest.client.banner.NewContentChooser#showScores(DivWidget, IDialog)
    */
-  public DialogHeader(ExerciseController controller, INavigation.VIEWS prev, INavigation.VIEWS next) {
+  public DialogHeader(ExerciseController controller, INavigation.VIEWS thisView, INavigation.VIEWS prev, INavigation.VIEWS next) {
     this.controller = controller;
+    this.thisView = thisView;
     this.prev = prev;
     this.next = next;
   }
@@ -76,13 +82,13 @@ public class DialogHeader {
 
       boolean onlyTwoLines = foreignLanguage.equalsIgnoreCase(english);
       String secondLine = onlyTwoLines ? orientation : english;
-     // if (!foreignLanguage.equalsIgnoreCase(english)) {
-        {
-          DivWidget titleDiv = new DivWidget();
-          titleDiv.getElement().getStyle().setBackgroundColor("#dff4fc");
-          titleDiv.add(getHeading(5, secondLine));
-          vert.add(titleDiv);
-        }
+      // if (!foreignLanguage.equalsIgnoreCase(english)) {
+      {
+        DivWidget titleDiv = new DivWidget();
+        titleDiv.getElement().getStyle().setBackgroundColor("#dff4fc");
+        titleDiv.add(getHeading(5, secondLine));
+        vert.add(titleDiv);
+      }
       //}
 
       if (!onlyTwoLines) {
@@ -94,10 +100,37 @@ public class DialogHeader {
         vert.add(oreintDiv);
       }
       outer.add(row);
+
+      switch (thisView) {
+        case REHEARSE:
+        case CORE_REHEARSE:
+          row.add(this::getKeyBinding);
+        default:
+          break;
+      }
     }
     return outer;
   }
 
+  private static final int KEY_PRESS_WIDTH = 125;
+  private static final String ARROW_KEY_TIP =
+      "<i><b>Space</b> to record (press and hold.) " +
+          "<b>Arrow keys</b> to advance to next turn or go back.";// +
+          //"<b>Enter</b> key to play audio.</i>";
+
+  @NotNull
+  Widget getKeyBinding() {
+    Widget child = new HTML(getKeyBindings());
+    child.addStyleName("floatRight");
+  //  child.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+    child.getElement().getStyle().setProperty("marginLeft","auto");
+    child.setWidth(KEY_PRESS_WIDTH + "px");
+    return child;
+  }
+
+  String getKeyBindings() {
+    return ARROW_KEY_TIP;
+  }
 
   @NotNull
   private com.google.gwt.user.client.ui.Image getFlag(String cc) {
@@ -115,7 +148,7 @@ public class DialogHeader {
 
   @NotNull
   private Heading getHeading(int size, String foreignLanguage) {
-    Heading w1 = new Heading(size, foreignLanguage);//, dialog.getEnglish());
+    Heading w1 = new Heading(size, foreignLanguage);
     w1.getElement().getStyle().setMarginTop(0, PX);
     w1.getElement().getStyle().setMarginBottom(5, PX);
     return w1;

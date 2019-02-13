@@ -2,39 +2,33 @@ package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel> extends RehearseViewHelper<T> {
   private final Logger logger = Logger.getLogger("CoreRehearseViewHelper");
 
-  public static final String RED_RECORD_BUTTON = "Speak when you see the red record button.";
-
-  // private Set<String> uniqueCoreVocab;
+  private static final String RED_RECORD_BUTTON = "Speak when you see the red record button.";
   private Map<String, ClientExercise> exidToShell = new HashMap<>();
 
   public CoreRehearseViewHelper(ExerciseController controller) {
-    super(controller);
+    super(controller, INavigation.VIEWS.CORE_REHEARSE);
     rehearsalKey = "PerformViewKey";
     rehearsalPrompt = RED_RECORD_BUTTON;
   }
-  @Override public boolean isRehearse() { return true;}
 
-  public INavigation.VIEWS getView() {
-    return INavigation.VIEWS.CORE_REHEARSE;
-  }
+//  @Override
+//  public boolean isRehearse() {
+//    return true;
+//  }
 
   /**
    * don't have to filter on client...?
@@ -46,23 +40,16 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel> extends
   @NotNull
   @Override
   protected DivWidget getTurns(IDialog dialog) {
-
     dialog.getCoreVocabulary().forEach(clientExercise -> exidToShell.put(clientExercise.getOldID(), clientExercise));
-//    uniqueCoreVocab = dialog.getCoreVocabulary()
-//        .stream()
-//        .map(CommonShell::getForeignLanguage)
-//        .collect(Collectors.toSet());
-
-    // uniqueCoreVocab.forEach(ex->logger.info("core " + ex));
     DivWidget turns = super.getTurns(dialog);
     Scheduler.get().scheduleDeferred(this::obscureRespTurns);
     return turns;
   }
 
-  @Override
-  protected boolean shouldShowScoreNow() {
-    return false;
-  }
+//  @Override
+//  protected boolean shouldShowScoreNow() {
+//    return false;
+//  }
 
   /**
    * OK, let's go - hide everything!
@@ -114,8 +101,6 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel> extends
   }
 
   private void obscureRespTurns() {
-//    getPromptSeq().forEach(RecordDialogExercisePanel::obscureText);
-//    getRespSeq().forEach(RecordDialogExercisePanel::obscureText);
     allTurns.forEach(RecordDialogExercisePanel::obscureText);
   }
 }
