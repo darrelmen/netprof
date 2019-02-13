@@ -337,7 +337,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     synchronized (audioChunks) {
       List<Boolean> completeList = sessionToComplete.get(session);
       if (!completeList.isEmpty()) {
-        logger.warn("getJSONForStream huh? session " +session + " is already complete with " +audioChunks.size() +
+        logger.warn("getJSONForStream huh? session " + session + " is already complete with " + audioChunks.size() +
             " chunks");
       }
       audioChunks.add(newChunk);
@@ -361,7 +361,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         synchronized (audioChunks) {
           completeSet = isCompleteSet(audioChunks);
           if (completeSet) {
-            logger.info("getJSONForStream session " +session + " is complete with " +audioChunks.size() + " chunks.");
+            logger.info("getJSONForStream session " + session + " is complete with " + audioChunks.size() + " chunks.");
             sessionToComplete.get(session).add(Boolean.TRUE);
             combined = getCombined(isRef, audioChunks);
           }
@@ -519,80 +519,64 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @throws IOException
    * @throws DominoSessionException
    */
-/*
-  private JsonObject getJsonObject(String deviceType,
-                                   String device,
-                                   int userIDFromSession,
-                                   int realExID,
-                                   int reqid,
-                                   int projid,
-                                   int dialogSessionID,
-                                   boolean isReference,
-
-                                   AudioType audioType,
-
-                                   List<AudioChunk> audioChunks,
-                                   JsonObject jsonObject) throws IOException {
-//      logger.info("getJSONForStream Session " + session + " state " + state + " packet " + packet);
-
-    AudioChunk combined = getCombined(isReference, audioChunks);
-
-    return getJsonObject(deviceType, device, userIDFromSession, realExID, reqid, projid, dialogSessionID, isReference, audioType, jsonObject, combined);
-  }
-*/
   private JsonObject getJsonObject(String deviceType, String device,
                                    int userIDFromSession, int realExID, int reqid, int projid,
                                    int dialogSessionID, boolean isReference,
                                    AudioType audioType, JsonObject jsonObject, AudioChunk combined) throws IOException {
-    Language language = getProject(projid).getLanguageEnum();
-    File saveFile = new FileSaver().writeAudioFile(pathHelper,
-        new ByteArrayInputStream(combined.getWavFile()),
-        realExID,
-        userIDFromSession,
-        language,
-        true);
+    Project project = getProject(projid);
+    if (project == null) {
+      logger.error("project id is " + projid);
+      return jsonObject;
+    } else {
+      Language language = project.getLanguageEnum();
+      File saveFile = new FileSaver().writeAudioFile(pathHelper,
+          new ByteArrayInputStream(combined.getWavFile()),
+          realExID,
+          userIDFromSession,
+          language,
+          true);
 
-    AudioContext audioContext = new AudioContext(
-        reqid,
-        userIDFromSession,
-        projid,
-        language,
-        realExID,
-        1,
-        audioType)
-        .setDialogSessionID(dialogSessionID);
+      AudioContext audioContext = new AudioContext(
+          reqid,
+          userIDFromSession,
+          projid,
+          language,
+          realExID,
+          1,
+          audioType)
+          .setDialogSessionID(dialogSessionID);
 
-    logger.info("getJsonObject audio context " + audioContext);
+      logger.info("getJsonObject audio context " + audioContext);
 
-    DecoderOptions decoderOptions = new DecoderOptions()
-        .setDoDecode(true)
-        .setDoAlignment(true)
-        .setRecordInResults(true)
-        .setRefRecording(isReference)
-        .setAllowAlternates(false)
-        // .setCompressLater(false)
-        ;
+      DecoderOptions decoderOptions = new DecoderOptions()
+          .setDoDecode(true)
+          .setDoAlignment(true)
+          .setRecordInResults(true)
+          .setRefRecording(isReference)
+          .setAllowAlternates(false)
+          ;
 
-    AudioAnswer audioAnswer = getAudioAnswer(null, // not doing it!
-        audioContext,
-        deviceType,
-        device,
-        decoderOptions,
-        saveFile,
-        projid);
+      AudioAnswer audioAnswer = getAudioAnswer(null, // not doing it!
+          audioContext,
+          deviceType,
+          device,
+          decoderOptions,
+          saveFile,
+          projid);
 
-    if (DEBUG_DETAIL) logger.info("path is " + audioAnswer.getPath());
+      if (DEBUG_DETAIL) logger.info("path is " + audioAnswer.getPath());
 
-    jsonObject = new JsonScoring(getDatabase())
-        .getJsonObject(
-            projid,
-            realExID,
-            decoderOptions,
-            false,
-            jsonObject, false, audioAnswer, true);
+      jsonObject = new JsonScoring(getDatabase())
+          .getJsonObject(
+              projid,
+              realExID,
+              decoderOptions,
+              false,
+              jsonObject, false, audioAnswer, true);
 
 //    logger.info("getJSONForStream getJsonForAudio save file to " + saveFile.getAbsolutePath());
-    return jsonObject;
+      return jsonObject;
+    }
   }
 
   /**

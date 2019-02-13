@@ -484,11 +484,9 @@ public class FilterResponseHelper implements IResponseFilter {
     } else {
       boolean includeLanguage = hasDialogs(projid);
       if (includeLanguage) {
-        logger.info("filterExercises remove english - before " + exercises.size());
-
+//        logger.info("filterExercises remove english - before " + exercises.size());
         exercises = getCommonExercisesWithoutEnglish(exercises);
-
-        logger.info("filterExercises remove english - after  " + exercises.size());
+  //      logger.info("filterExercises remove english - after  " + exercises.size());
       }
     }
 

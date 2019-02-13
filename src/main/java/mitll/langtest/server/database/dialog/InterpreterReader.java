@@ -23,7 +23,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Stream;
 
 /**
  * Read the excel spreadsheet that we're using (for now) to define the interpreter turns.
@@ -66,9 +65,21 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
     ORIENTATION
   }
 
+  @Override
+  public Map<Dialog, SlickDialog> getInterpreterDialogs(int defaultUser, Project project, Project englishProject) {
+    File excelFile = getExcelFile(project);
+
+    if (excelFile.exists()) {
+      return getDialogsFromExcel(defaultUser, project, englishProject, excelFile);
+    } else {
+      logger.info("no interpreter spreadsheet for " + project.getName());
+      return Collections.emptyMap();
+    }
+  }
+
   /**
    * @param defaultUser
-   * @param exToAudio
+   * @param exToAudio NOT USED!
    * @param project
    * @param englishProject
    * @return
@@ -78,16 +89,27 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
                                              Map<ClientExercise, String> exToAudio,
                                              Project project,
                                              Project englishProject) {
+//    File excelFile = getExcelFile(project);
+//
+//    if (excelFile.exists()) {
+//      logger.info("no interpreter spreadsheet for " + project.getName());
+//      return Collections.emptyMap();
+//    } else {
+//      return getDialogsFromExcel(defaultUser, project, englishProject, excelFile);
+//    }
+
+    return Collections.emptyMap();
+  }
+
+  private Map<Dialog, SlickDialog> getDialogsFromExcel(int defaultUser,
+                                                       Project project,
+                                                       Project englishProject,
+                                                       File excelFile) {
+    if (defaultUser == -1) {
+      logger.error("default user is not set?");
+    }
+
     Map<Dialog, SlickDialog> dialogToSlick = new HashMap<>();
-    String dialogDataDir = getDialogDataDir(project);
-    String projectLanguage = project.getLanguage().toLowerCase();
-
-    File loc = new File(dialogDataDir);
-    boolean directory = loc.isDirectory();
-    if (!directory) logger.warn("huh? not a dir");
-
-    File excelFile = new File(loc, INTERPRETER_XLSX);
-
     try {
       FileInputStream inp = new FileInputStream(excelFile);
       XSSFWorkbook wb = new XSSFWorkbook(inp);
@@ -95,12 +117,11 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
       int numberOfSheets = wb.getNumberOfSheets();
       for (int i = 0; i < numberOfSheets; i++) {
         Sheet sheet = wb.getSheetAt(i);
-        int physicalNumberOfRows = sheet.getPhysicalNumberOfRows();
+        if (DEBUG) {
+          logger.info("getDialogs sheet " + sheet.getSheetName() + " had " + sheet.getPhysicalNumberOfRows() + " rows.");
+        }
 
-        if (DEBUG)
-          logger.info("getDialogs sheet " + sheet.getSheetName() + " had " + physicalNumberOfRows + " rows.");
-
-        if (physicalNumberOfRows > 0) {
+        if (sheet.getPhysicalNumberOfRows() > 0) {
           if (sheet.getSheetName().equalsIgnoreCase(DIALOGS) || numberOfSheets == 1) {
             dialogToSlick = readFromSheet(defaultUser, sheet, project, englishProject);
           }
@@ -109,10 +130,22 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
       inp.close();
     } catch (IOException e) {
+      String projectLanguage = project.getLanguage().toLowerCase();
       logger.error(projectLanguage + " : looking for " + excelFile.getAbsolutePath() + " got " + e, e);
     }
 
     return dialogToSlick;
+  }
+
+  @NotNull
+  private File getExcelFile(Project project) {
+    String dialogDataDir = getDialogDataDir(project);
+
+    File loc = new File(dialogDataDir);
+    boolean directory = loc.isDirectory();
+    if (!directory) logger.warn("huh? not a dir");
+
+    return new File(loc, INTERPRETER_XLSX);
   }
 
   private final Set<Character> SPLIT_CHARS = new HashSet<>(Arrays.asList('。', '.', '?', '？'));
@@ -172,7 +205,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
               Columns columns1 = Columns.valueOf(colNormalized);
               colToIndex.put(columns1, columns.indexOf(col));
             } catch (IllegalArgumentException e) {
-              logger.warn("couldn't parse col header " + col + " = " + colNormalized);
+              logger.warn("\n\ncouldn't parse col header '" + col + "' = " + colNormalized);
             }
           }
           gotHeader = true;
@@ -188,12 +221,11 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
             title = colToValue.get(Columns.TITLE).trim();
             orientation = colToValue.get(Columns.ORIENTATION).trim();
+
             if (!title.isEmpty()) {
               logger.info("row #" + rows + " title " + title);
-            }
-            else {
+            } else {
               logger.info("row EMPTY #" + rows + " title " + title);
-
             }
 
             if (DEBUG) {
@@ -230,12 +262,12 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
               if (!title.isEmpty()) {
                 lastTitle = title;
-                 logger.info("\n\n\ncurrent title       '" + title + "'");
+                logger.info("\n\n\ncurrent title       '" + title + "'");
               }
 
               if (!orientation.isEmpty()) {
                 lastOrientation = orientation;
-                 logger.info("\n\n\ncurrent orientation " + orientation);
+                logger.info("\n\n\ncurrent orientation " + orientation);
               }
 
               try {
@@ -244,7 +276,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
                 String talker = colToValue.get(Columns.TALKER);
 
                 Language projectLang = project.getLanguageEnum();
-                String nativeSpeaker = projectLang.toDisplay() + " Speaker";
+                String nativeSpeaker = project.getLanguageEnum().toDisplay() + " Speaker";
 
                 String interpreterTurn = turnID + "-I";
                 if (colLang == Language.ENGLISH) {
@@ -264,13 +296,12 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
 
                   {
                     Exercise exercise = getExercise(typeOrder, engText, "", "", ENGLISH_SPEAKER, Language.ENGLISH, turnID);
-                 //   logger.info("readFromSheet add " + turnID + " " + exercise.getFLToShow() + " " + exercise.getEnglish());
-
+                    //   logger.info("readFromSheet add " + turnID + " " + exercise.getFLToShow() + " " + exercise.getEnglish());
                     exercises.add(exercise);
                   }
                   {
                     Exercise exercise1 = getExercise(typeOrder, l2Text, engText, colToValue.get(Columns.TEXTTRANSLITERATION), INTERPRETER1, projectLang, interpreterTurn);
-                //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
+                    //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
                     exercises.add(exercise1);
                   }
                   addCoreVocab(coreFL, colToValue, interpreterTurn, INTERPRETER1);
@@ -609,7 +640,8 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
         orientation.startsWith("Interpreter") ? orientation : title,
         title,
         dialogToSlick,
-        DialogType.INTERPRETER);
+        DialogType.INTERPRETER,
+        project.getProject().countrycode());
   }
 
   /**

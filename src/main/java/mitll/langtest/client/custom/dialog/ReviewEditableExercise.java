@@ -57,7 +57,6 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.MiniUser;
 
 import java.util.*;

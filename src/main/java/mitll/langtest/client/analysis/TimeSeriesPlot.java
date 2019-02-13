@@ -35,7 +35,10 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import mitll.langtest.shared.analysis.PhoneSession;
-import org.moxieapps.gwt.highcharts.client.*;
+import org.moxieapps.gwt.highcharts.client.Chart;
+import org.moxieapps.gwt.highcharts.client.Point;
+import org.moxieapps.gwt.highcharts.client.Series;
+import org.moxieapps.gwt.highcharts.client.ToolTipData;
 
 import java.util.Date;
 import java.util.List;

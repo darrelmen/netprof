@@ -227,6 +227,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }
 
   private Dialog makeDialog(SlickDialog slickDialog) {
+    String countryCode = database.getProject(slickDialog.projid()).getProject().countrycode();
     return new Dialog(
         slickDialog.id(),
         slickDialog.userid(),
@@ -243,7 +244,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
         new ArrayList<>(),
         new ArrayList<>(),
         new ArrayList<>(),
-        getDialogType(slickDialog));
+        getDialogType(slickDialog), countryCode);
   }
 
   @Nullable

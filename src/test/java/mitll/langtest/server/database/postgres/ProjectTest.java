@@ -46,7 +46,6 @@ import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
-import mitll.langtest.server.scoring.TextNormalizer;
 import mitll.langtest.server.scoring.WordAndProns;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.analysis.UserInfo;

@@ -67,6 +67,7 @@ public class AttachSecurityFilter implements Filter {
   private static final String BEST_AUDIO = "bestAudio";
   private static final String WAV = ".wav";
   private static final int WAV_LEN = WAV.length();
+  public static final String DIALOG = "dialog";
 
   private DatabaseServices db;
 
@@ -83,17 +84,17 @@ public class AttachSecurityFilter implements Filter {
 
     String contextPath = servletContext.getContextPath();
 
-    log.info("context        '" + contextPath + "'");
+   // log.info("context        '" + contextPath + "'");
     String realContextPath = servletContext == null ? "" : servletContext.getRealPath(servletContext.getContextPath());
-    log.info("realContextPath " + realContextPath);
+   // log.info("realContextPath " + realContextPath);
 
     List<String> pathElements = Arrays.asList(realContextPath.split(realContextPath.contains("\\") ? "\\\\" : "/"));
-    log.info("pathElements    " + pathElements);
+   // log.info("pathElements    " + pathElements);
 
     webappName = pathElements.get(pathElements.size() - 1);
-    log.info("webappName " + webappName);
+   // log.info("webappName " + webappName);
 
-    if (!webappName.equalsIgnoreCase("dialog") || !webappName.equalsIgnoreCase(NETPROF)) {
+    if (!webappName.equalsIgnoreCase(DIALOG) || !webappName.equalsIgnoreCase(NETPROF)) {
       log.warn("huh? unexpected : app name is " + webappName);
     }
 

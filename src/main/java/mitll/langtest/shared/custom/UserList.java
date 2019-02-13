@@ -53,6 +53,7 @@ import java.util.List;
 public class UserList<T extends HasID> extends BaseExercise implements IUserListWithIDs {
   public static final String MY_LIST = "Favorites";
 
+
   public enum LIST_TYPE {NORMAL, QUIZ}
 
   private int projid;
@@ -72,9 +73,11 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
 
   private long start;
   private long end;
+
   private int duration;
   private int minScore;
   private boolean showAudio;
+  private String accessCode;
 
   private boolean teacher;
   /**
@@ -104,6 +107,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
    * @param duration
    * @param minScore
    * @param showAudio
+   * @param accessCode
    * @see mitll.langtest.server.database.custom.UserListManager#createUserList
    * @see IUserListDAO#getWhere(int, boolean)
    */
@@ -124,7 +128,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
                   LIST_TYPE listType,
                   long start,
                   long end,
-                  int duration, int minScore, boolean showAudio) {
+                  int duration, int minScore, boolean showAudio, String accessCode) {
     super(uniqueID);
     this.userid = userid;
     this.userChosenID = userChosenID;
@@ -143,6 +147,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     this.duration = duration;
     this.minScore = minScore;
     this.showAudio = showAudio;
+    this.accessCode = accessCode;
   }
 
   @Override
@@ -353,6 +358,10 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   @Override
   public String getFirstInitialName() {
     return firstInitialName;
+  }
+
+  public String getAccessCode() {
+    return accessCode;
   }
 
   @Override

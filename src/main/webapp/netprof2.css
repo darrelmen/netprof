@@ -2295,6 +2295,15 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
     background-color: rgba(0, 128, 0, 0.35);
 }
 
+.middlebubble2 {
+    margin-left: 5%;
+    background-color: rgba(0, 128, 0, 0.35);
+}
+
+.eightMarginTop {
+    margin-top: 8px;
+}
+
 .label .input {
     width: 30px;
     height: 30px;

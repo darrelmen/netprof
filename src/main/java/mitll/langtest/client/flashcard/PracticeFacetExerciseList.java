@@ -5,11 +5,11 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.banner.PracticeHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.flashcard.ControlState;
-import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.list.ListFacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ScoredExercise;
 
 import java.util.ArrayList;
 import java.util.Collection;

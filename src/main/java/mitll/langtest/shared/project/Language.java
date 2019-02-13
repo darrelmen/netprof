@@ -27,7 +27,7 @@ public enum Language implements IsSerializable {
   JAPANESE("ja", "jp"),
   LEVANTINE(true, "ARABIC-LEVANTINE", "ar-SY", "sy"),
   KOREAN(32, "ko", "kr"),
-  MSA(true, "ARABIC (MODERN STANDARD)", "ar", "al"),
+  MSA(true, "ARABIC (MODERN STANDARD)", "ar", "al","MSA"),
   PASHTO(true, "PUSHTU-AFGHAN", "ps", "af"),
   PORTUGUESE("PORTUGUESE-BRAZILIAN", "pt", "br"),
   RUSSIAN("ru", "ru"),
@@ -65,6 +65,12 @@ public enum Language implements IsSerializable {
     this.dominoName = dominoName;
   }
 
+  Language(boolean isRTL, String dominoName, String locale, String cc, String displayName) {
+    this(isRTL, locale, cc);
+    this.dominoName = dominoName;
+    this.displayName = displayName;
+  }
+
   Language(String dominoName, String locale, String cc) {
     this(false, locale, cc);
     this.dominoName = dominoName;
@@ -77,6 +83,7 @@ public enum Language implements IsSerializable {
 
   /**
    * So we can support language renaming - Mandarin->Chinese
+   *
    * @param fontSize
    * @param dominoName
    * @param locale

@@ -2,8 +2,8 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.banner.SessionManager;
+import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.ASRHistoryPanel;
 import mitll.langtest.client.list.ListInterface;
@@ -22,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDENT;
 

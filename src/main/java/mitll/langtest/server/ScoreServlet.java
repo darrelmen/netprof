@@ -211,6 +211,7 @@ public class ScoreServlet extends DatabaseServlet {
     }
   }
 
+
   private final Map<Integer, JsonObject> projectToNestedChaptersEverything = new ConcurrentHashMap<>();
   private final Map<Integer, Long> projectToWhenCachedEverything = new ConcurrentHashMap<>();
 
@@ -620,7 +621,9 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet
    */
   private JsonObject getChapterHistory(String queryString, JsonObject toReturn, int projectid, int userID) {
-    logger.info("getChapterHistory for project " + projectid);
+    Project project = getProject(projectid);
+
+    logger.info("getChapterHistory for project " + projectid + " : " + (project == null ? "" : project.getName()));
 
     if (projectid == -1) {
       toReturn.addProperty(ERROR, "no project specified for user " + userID);
@@ -1366,6 +1369,9 @@ public class ScoreServlet extends DatabaseServlet {
     return db.getProject(projid);
   }
 
+  /**
+   * Do something better here with figuring out which values to use in type->selection
+   */
   private static class UserAndSelection {
     private final String[] split1;
     private Map<String, Collection<String>> selection;
@@ -1387,7 +1393,8 @@ public class ScoreServlet extends DatabaseServlet {
         if (split.length == 2) {
           String key = split[0];
           String value = split[1];
-          if (key.equals(HeaderValue.USER.toString())) {
+          if (key.equals(HeaderValue.USER.toString()) ||
+              key.equalsIgnoreCase(HeaderValue.PROJID.name())          ) {
             //user = value;
           } else {
             selection.put(key, Collections.singleton(value));

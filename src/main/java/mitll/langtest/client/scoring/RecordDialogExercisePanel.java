@@ -135,7 +135,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   public void clearScoreInfo() {
     transcriptToHighlight = null;
     gotStreamStop = false;
-    emoticon.setVisible(false);
+    hideEmoticon();
 
     flclickables.forEach(iHighlightSegment -> {
       iHighlightSegment.setHighlightColor(IHighlightSegment.DEFAULT_HIGHLIGHT);
@@ -143,6 +143,18 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     });
 
     rememberAudio(getRegularSpeedIfAvailable(exercise));
+  }
+
+  private void hideEmoticon() {
+    if (emoticon != null) {
+      emoticon.setVisible(false);
+    }
+  }
+
+  private void showEmoticon() {
+    if (emoticon != null) {
+      emoticon.setVisible(true);
+    }
   }
 
   /**
@@ -154,7 +166,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   @Override
   public void showScoreInfo() {
     //   logger.info("showScoreInfo for " + this);
-    emoticon.setVisible(true);
+    showEmoticon();
 
     if (transcriptToHighlight == null) {
       if (studentAudioAttribute != null) {
@@ -197,42 +209,93 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @see PerformViewHelper#getTurnPanel
    * Or should we use exact match?
    */
-  public void maybeSetObscure(Collection<String> coreVocab) {
-    IHighlightSegment candidate = getObscureCandidate(coreVocab, true);
-
-    if (candidate == null || flclickables.indexOf(candidate) == 0) {
-      candidate = getObscureCandidate(coreVocab, false);
-    }
-
-    if (candidate != null) {
-      candidate.setObscurable();
+  public void maybeSetObscure(Map<String,ClientExercise> turnToEx) {
+    String oldID = exercise.getOldID();
+    ClientExercise clientExercise = turnToEx.get(oldID);
+    if (clientExercise == null) logger.warning("couldn't find core for " + oldID);
+    else {
+      Set<String> coreVocab = Collections.singleton(clientExercise.getForeignLanguage());
+      logger.info("got " + clientExercise.getForeignLanguage() + " for " + exercise.getForeignLanguage());
+      getObscureCandidates(coreVocab).forEach(IHighlightSegment::setObscurable);
     }
   }
 
-  @Nullable
+/*  @Nullable
   private IHighlightSegment getObscureCandidate(Collection<String> coreVocab, boolean useExact) {
     IHighlightSegment candidate = null;
 
-    boolean isFirst = true;
+    String coreMatch = null;
 
     for (IHighlightSegment segment : flclickables) {
-      List<String> matches = coreVocab
-          .stream()
-          .filter(core ->
-              useExact ?
-                  clickableWords.isExactMatch(segment.getContent(), core) :
-                  clickableWords.isSearchMatch(segment.getContent(), core)
-          ).collect(Collectors.toList());
+      String content = segment.getContent();
 
-      if (!matches.isEmpty()) {
-        // logger.info("getObscureCandidate for " + segment + " found " + matches + (useExact ? " exact" : " contains"));
-        candidate = segment;
-        if (!isFirst && candidate.getContent().length() > 1) break;
+      if (!content.isEmpty()) {
+        for (String core : coreVocab) {
+          if (useExact) {
+            if (clickableWords.isExactMatch(content, core)) {
+              coreMatch = core;
+              candidate = segment;
+            }
+          } else if (clickableWords.isSearchMatch(content, core)) {
+            coreMatch = core;
+            candidate = segment;
+          }
+          if (coreMatch != null) break;
+        }
+        if (coreMatch != null) break;
       }
-
-      isFirst = false;
     }
+
+    if (coreMatch != null) {
+      logger.info("OK, used " + coreMatch);
+      //coreVocab.remove(coreMatch);
+    }
+
     return candidate;
+  }*/
+
+  private Collection<IHighlightSegment> getObscureCandidates(Collection<String> coreVocab) {
+    Collection<IHighlightSegment> candidates = new ArrayList<>();
+
+    String coreMatch = null;
+    for (IHighlightSegment segment : flclickables) {
+      //   logger.warning("no match for " + segment.getContent() + " in " + coreVocab);
+      String content = segment.getContent();
+
+      if (!content.isEmpty()) {
+        for (String core : coreVocab) {
+          if (core.contains(content) || content.contains(core)) {
+            coreMatch = core;
+            //candidate = segment;
+          }
+          if (coreMatch != null) break;
+        }
+        if (coreMatch != null) break;
+      }
+    }
+
+    if (coreMatch != null) {
+      for (IHighlightSegment segment : flclickables) {
+        String content = segment.getContent();
+
+        if (coreMatch.startsWith(content)) {
+          candidates.add(segment);
+          coreMatch = coreMatch.substring(content.length());
+       //   logger.info("getObscureCandidate core match now " + coreMatch + " against " + content);
+          if (coreMatch.isEmpty()) break;
+        }
+        else if (content.startsWith(coreMatch)) {
+          candidates.add(segment);
+          logger.info("getObscureCandidate partial match for " + coreMatch + " against " + content);
+          break;
+        }
+        else {
+       //   logger.info("getObscureCandidate no match for " + coreMatch + " against " + content);
+        }
+      }
+    }
+
+    return candidates;
   }
 
   public void reallyObscure() {
@@ -301,12 +364,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
-    boolean isRehearse = rehearseView instanceof PerformViewHelper;
-    logger.info("is perform " + isRehearse);
-
+//    boolean isRehearse = rehearseView instanceof PerformViewHelper;
+    // logger.info("is perform " + isRehearse);
     NoFeedbackRecordAudioPanel<ClientExercise> recordPanel =
-//        isRehearse ?
-//            new PushToTalkDialogRecordAudioPanel(exercise, controller, sessionManager, rehearseView, this) :
         new ContinuousDialogRecordAudioPanel(exercise, controller, sessionManager, rehearseView, this);
 
     this.recordAudioPanel = recordPanel;
@@ -321,25 +381,41 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     }
 
     // add hidden button
-    {
-      PostAudioRecordButton postAudioRecordButton = getPostAudioRecordButton(recordPanel);
-      postAudioRecordButton.setVisible(false);
-      DivWidget buttonContainer = new DivWidget();
-      buttonContainer.setId("recordButtonContainer_" + getExID());
-      buttonContainer.add(postAudioRecordButton);
-      //   postAudioRecordButton.setEnabled(false);
-      flContainer.add(buttonContainer);
-    }
+    if (columns == MIDDLE) {
+      {
+        PostAudioRecordButton postAudioRecordButton = getPostAudioRecordButton(recordPanel);
+        postAudioRecordButton.setVisible(false);
+        DivWidget buttonContainer = new DivWidget();
+        buttonContainer.setId("recordButtonContainer_" + getExID());
+        buttonContainer.add(postAudioRecordButton);
+        //   postAudioRecordButton.setEnabled(false);
+        flContainer.add(buttonContainer);
+      }
 
-    flContainer.add(recordPanel.getScoreFeedback());
-    {
-      Emoticon w = getEmoticonPlaceholder();
-      emoticon = w;
-      flContainer.add(w);
+      // flContainer.add(recordPanel.getScoreFeedback());
+
+      {
+        Emoticon w = getEmoticonPlaceholder();
+        emoticon = w;
+        flContainer.add(w);
+      }
     }
 
     add(flContainer);
     super.addWidgets(showFL, showALTFL, phonesChoices);
+
+    if (columns == MIDDLE) {
+      flClickableRow.addStyleName("inlineFlex");
+
+      if (exercise.hasEnglishAttr()) {
+        int widgetCount = flClickableRow.getWidgetCount();
+        for (int i = 0; i < widgetCount; i++) {
+          flClickableRow.getWidget(i).addStyleName("eightMarginTop");
+        }
+      }
+
+      flClickableRow.insert(recordPanel.getScoreFeedback(), 0);
+    }
   }
 
   private PostAudioRecordButton getPostAudioRecordButton(NoFeedbackRecordAudioPanel<ClientExercise> recordPanel) {
@@ -388,7 +464,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   /**
    * TODO :subclass!
    */
-   @Override
+  @Override
   public void markCurrent() {
     super.markCurrent();
 
@@ -420,6 +496,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   @NotNull
   private Emoticon getEmoticonPlaceholder() {
     Emoticon w = new Emoticon();
+    w.getElement().setId("emoticon");
     w.setVisible(false);
     w.setHeight(DIM + "px");
     w.setWidth(DIM + "px");
@@ -532,6 +609,11 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       this.recordDialogTurn = recordDialogTurn;
     }
 
+    @Override
+    protected boolean useMicrophoneIcon() {
+      return true;
+    }
+
     /**
      * SO in an async world, this result may not be for this exercise panel!
      *
@@ -554,7 +636,10 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
     @Override
     Widget getPopupTargetWidget() {
-      return recordDialogTurn.myGetPopupTargetWidget();
+      Widget widget = recordDialogTurn.myGetPopupTargetWidget();
+      logger.info("getPopupTargetWidget " + widget.getElement().getId());
+
+      return widget;
     }
 
     /**
@@ -565,11 +650,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     public void usePartial(StreamResponse response) {
       recordDialogTurn.usePartial(response);
     }
-
-//    @Override
-//    public void gotAbort() {
-//      //logger.info("OK got abort!");
-//    }
 
     /**
      *

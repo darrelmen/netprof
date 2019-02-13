@@ -6,6 +6,7 @@ import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.PhoneStats;
 import mitll.langtest.shared.analysis.WordAndScore;
 import mitll.langtest.shared.project.Language;
 import org.apache.logging.log4j.LogManager;
@@ -42,6 +43,7 @@ public class PhoneJSON {
   private static final String W = "w";
   private static final String S = "s";
   private static final String RESULT1 = "result";
+  public static final String ORDER_SCORES = "orderScores";
 
   private ServerProperties serverProperties;
 
@@ -74,13 +76,13 @@ public class PhoneJSON {
       Map<Long, String> resToAnswer = new HashMap<>();
       Map<Long, String> resToRef = new HashMap<>();
 
-      if (DEBUG) logger.info("worstPhones phones are " + worstPhones.keySet());
+      if (DEBUG) logger.info("getWorstPhonesJson phones are " + worstPhones.keySet());
 
       {
         JsonObject phones = new JsonObject();
 
         for (Map.Entry<String, List<WordAndScore>> pair : worstPhones.entrySet()) {
-          logger.info("dump " + pair.getKey() + " = " + pair.getValue().size());
+//         logger.info("dump " + pair.getKey() + " = " + pair.getValue().size());
           phones.add(pair.getKey(), getWordsJsonArray(resToAnswer, resToRef, pair.getValue()));
         }
 
@@ -88,12 +90,29 @@ public class PhoneJSON {
       }
 
       {
-        JsonArray order = new JsonArray();
-        // worstPhones.keySet().forEach(order::add);
-        worstPhonesAndScore.getSortedPhones().forEach(order::add);
-        jsonObject.add(ORDER, order);
+        List<String> sortedPhones = worstPhonesAndScore.getSortedPhones();
 
-        if (DEBUG) logger.info("order phones are " + order);
+        {
+          JsonArray order = new JsonArray();
+          // worstPhones.keySet().forEach(order::add);
+          sortedPhones.forEach(order::add);
+          jsonObject.add(ORDER, order);
+          if (DEBUG) logger.info("getWorstPhonesJson order phones are " + order);
+        }
+
+        {
+          JsonArray order = new JsonArray();
+          jsonObject.add(ORDER_SCORES, order);
+          Map<String, PhoneStats> phoneToAvgSorted = worstPhonesAndScore.getPhoneToAvgSorted();
+          sortedPhones.forEach(phone -> {
+            PhoneStats phoneStats = phoneToAvgSorted.get(phone);
+            if (phoneStats == null) {
+              logger.error("getWorstPhonesJson huh? no avg for " + phone);
+            } else {
+              order.add(phoneStats.getAvg());
+            }
+          });
+        }
       }
 
       jsonObject.add(RESULTS, addResults(resToAnswer, resToRef, worstPhonesAndScore.getRidToWords(), language));

@@ -1,11 +1,15 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.IconAnchor;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconSize;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.ui.Widget;
@@ -17,8 +21,6 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.logging.Logger;
-
 import static mitll.langtest.client.LangTest.RED_X_URL;
 
 /**
@@ -27,16 +29,18 @@ import static mitll.langtest.client.LangTest.RED_X_URL;
  * @see SimpleRecordAudioPanel#makePlayAudioPanel
  */
 class RecorderPlayAudioPanel extends PlayAudioPanel {
-  private final Logger logger = Logger.getLogger("RecorderPlayAudioPanel");
+  //private final Logger logger = Logger.getLogger("RecorderPlayAudioPanel");
 
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
   private static final SafeUri firstRed = UriUtils.fromSafeConstant(FIRST_RED);
+  private static final String HEIGHT = 19 + "px";
+  private static final String BORDER_RADIUS = 18 + "px";
 
   /**
    * TODO make better relationship with ASRRecordAudioPanel
    */
-  private Image recordImage1;
-
+  private Widget recordImage1;
+  private final boolean useMicrophoneIcon;
   /**
    *
    */
@@ -47,9 +51,10 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    * @param postAudioRecordButton1
    * @param controller
    * @param exercise
+   * @param useMicrophoneIcon
    * @see SimpleRecordAudioPanel#makePlayAudioPanel
    */
-  RecorderPlayAudioPanel(final Button postAudioRecordButton1, ExerciseController controller, HasID exercise) {
+  RecorderPlayAudioPanel(final Button postAudioRecordButton1, ExerciseController controller, HasID exercise, boolean useMicrophoneIcon) {
     super(new PlayListener() {
             public void playStarted() {
 //          goodwaveExercisePanel.setBusy(true);
@@ -66,6 +71,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
         null, controller, exercise.getID(), true);
 
     downloadContainer = new DownloadContainer();
+    this.useMicrophoneIcon = useMicrophoneIcon;
     getElement().setId("RecorderPlayAudioPanel");
   }
 
@@ -88,15 +94,38 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     playButton.setVisible(false);
   }
 
-
   void showFirstRecord() {
     if (controller.shouldRecord()) {
-   //   logger.info("showFirstRecording " + exid + " red recording signal now visible!");
-      recordImage1.setVisible(true);
+      //   logger.info("showFirstRecording " + exid + " red recording signal now visible!");
+      showFeedback();
     } else {
       redX.setVisible(true);
     }
     downloadContainer.getDownloadContainer().setVisible(false);
+  }
+
+  private void showFeedback() {
+    recordImage1.addStyleName("hvr-pulse");
+    if (useMicrophoneIcon) {
+      Style style1 = recordImage1.getElement().getStyle();
+      //   style1.setBackgroundColor("lightBlue");
+      style1.setBackgroundColor("#da4f49");
+    } else {
+      recordImage1.setVisible(true);
+    }
+  }
+
+  private void hideFeedback() {
+    recordImage1.removeStyleName("hvr-pulse");
+
+    if (useMicrophoneIcon) {
+      Style style1 = recordImage1.getElement().getStyle();
+      style1.setBackgroundColor("#0171bc");//"lightBlue");
+    //  style1.setBackgroundColor("blue");
+//    style1.setBackgroundColor("#da4f49");
+    } else {
+      recordImage1.setVisible(false);
+    }
   }
 
   /**
@@ -105,7 +134,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   void hideRecord() {
     if (controller.shouldRecord()) {
       // logger.info("hideRecord " + exid);
-      recordImage1.setVisible(false);
+      hideFeedback();
       //  recordImage2.setVisible(false);
     } else {
       redX.setVisible(false);
@@ -132,7 +161,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     return playButton;
   }
 
-
   /**
    * @param waitCursor null OK
    * @return
@@ -144,11 +172,14 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     recordFeedback.addStyleName("floatLeft");
     recordFeedback.getElement().setId("recordFeedbackImageContainer");
 
-    recordImage1 = new Image(firstRed);
-    recordImage1.setVisible(false);
-    recordImage1.setWidth("32px");
+    recordImage1 = useMicrophoneIcon ? getRecordImage() : new Image(firstRed);
 
-    recordImage1.addStyleName("hvr-pulse");
+    hideFeedback();
+    if (!useMicrophoneIcon) {
+      recordImage1.setWidth("32px");
+    }
+
+  //  recordImage1.addStyleName("hvr-pulse");
 
     if (controller.shouldRecord()) {
       recordFeedback.add(recordImage1);
@@ -160,6 +191,38 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     }
 
     return recordFeedback;
+  }
+
+  /**
+   * For when we want just the microphone to show...
+   *
+   * @return
+   */
+  @NotNull
+  private Widget getRecordImage() {
+    Icon icon = new Icon(IconType.MICROPHONE);
+    Style style = icon.getElement().getStyle();
+    style.setMarginLeft(1, Style.Unit.PX);
+    style.setColor("white");
+    icon.setSize(IconSize.LARGE);
+
+    DivWidget container = new DivWidget();
+    container.getElement().setId("micContainer");
+    container.setHeight(HEIGHT);
+    container.setWidth(HEIGHT);
+
+    Style style1 = container.getElement().getStyle();
+    style1.setPadding(8, Style.Unit.PX);
+    style1.setProperty("borderRadius", BORDER_RADIUS);
+    style1.setMarginTop(-5, Style.Unit.PX);
+    style1.setMarginLeft(2, Style.Unit.PX);
+    style1.setMarginRight(5, Style.Unit.PX);
+    style1.setMarginBottom(5, Style.Unit.PX);
+
+    container.add(icon);
+    style1.setBackgroundColor("lightBlue");
+//    style1.setBackgroundColor("#da4f49");
+    return useMicrophoneIcon ? container : new Image(firstRed);
   }
 
   @NotNull

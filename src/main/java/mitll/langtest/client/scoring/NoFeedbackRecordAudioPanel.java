@@ -6,7 +6,6 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.ScoredExercise;
@@ -92,7 +91,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     postAudioRecordButton.addStyleName("leftFiveMargin");
     postAudioRecordButton.setVisible(controller.getProjectStartupInfo().isHasModel());
 
-    playAudioPanel = new RecorderPlayAudioPanel(postAudioRecordButton, controller, exercise);
+    playAudioPanel = new RecorderPlayAudioPanel(postAudioRecordButton, controller, exercise, useMicrophoneIcon());
 
     playAudioPanel.hidePlayButton();
 
@@ -101,8 +100,13 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     return playAudioPanel;
   }
 
+  protected boolean useMicrophoneIcon() {
+    return false;
+  }
+
   Widget getPopupTargetWidget() {
-    return this;
+  //  logger.info("getPopupTargetWidget " + this.getId());
+    return postAudioRecordButton;
   }
 
   private String getDeviceValue() {

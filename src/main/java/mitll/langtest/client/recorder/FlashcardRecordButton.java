@@ -296,10 +296,9 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton {
       return $wnd.jQuery('#' + id).is(":hidden");
   }-*/;
 
-  protected boolean showInitialRecordImage() {
+  protected void showInitialRecordImage() {
     setBaseIcon(MyCustomIconType.record1);
     setText("");
-    return true;
   }
 
   protected void hideBothRecordImages() {

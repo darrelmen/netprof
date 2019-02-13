@@ -5,7 +5,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.ScoredExercise;
 
 import java.util.Arrays;
 import java.util.List;

@@ -236,7 +236,6 @@ public abstract class Analysis extends DAO {
   }
 
   PhoneBigrams getPhoneBigramsForPeriod(AnalysisRequest analysisRequest, UserInfo next) {
-    // List<Integer> resultIDs = getResultIDsForRequest(analysisRequest, next);
     List<Integer> resultIDsForRequest = getResultIDsForRequest(analysisRequest, next);
 
     if (DEBUG) logger.info("getPhoneBigramsForPeriod " +

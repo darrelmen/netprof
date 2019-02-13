@@ -104,7 +104,7 @@ public class DialogPopulate {
     } else {
       waitUntilTrieReady(project);
 
-      maybeDoDialogImport(project, englishProject, dialogDAO);
+   //   maybeDoDialogImport(project, englishProject, dialogDAO);
       maybeDoInterpreterImport(project, englishProject, dialogDAO);
 
       return true;
@@ -112,53 +112,51 @@ public class DialogPopulate {
   }
 
   /**
-   * Only some languages
+   * Loads data for any excel file we find under
+   *
+   * /opt/netprof/dialog/LANG/interpreter.xlsx
    *
    * @param project
    * @param dialogDAO
    */
   private void maybeDoInterpreterImport(Project project, Project englishProject, IDialogDAO dialogDAO) {
-    int defaultUser = db.getUserDAO().getDefaultUser();
-    if (defaultUser == -1) {
-      logger.warn("maybeDoInterpreterImport huh? default user is -1?");
-    }
-    Language languageEnum = project.getLanguageEnum();
+    //logger.info("maybeDoInterpreterImport found interpreter candidate " + project);
+    Project engProject = db.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
 
-    if (languageEnum == Language.MANDARIN ||
-        languageEnum == Language.FRENCH ||
-        languageEnum == Language.RUSSIAN ||
-        languageEnum == Language.MSA ||
-    languageEnum == Language.KOREAN
-    ) {
-      logger.info("maybeDoInterpreterImport found interpreter candidate " + project);
-
-      Map<ClientExercise, String> exToAudio = new HashMap<>();
-
-      Project engProject = db.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
-
-      if (engProject == null) {
-        logger.error("maybeDoInterpreterImport huh? no english project?");
-      } else {
-        Map<Dialog, SlickDialog> dialogToSlick = new InterpreterReader().getDialogs(defaultUser, exToAudio, project, engProject);
-        logger.info("maybeDoInterpreterImport read " + dialogToSlick.size());
-        addDialogs(project, englishProject, dialogDAO, exToAudio, defaultUser, DialogType.INTERPRETER, dialogToSlick);
-      }
+    if (engProject == null) {
+      logger.error("maybeDoInterpreterImport huh? no english project?");
     } else {
-      logger.warn("maybeDoInterpreterImport skipping lang " + languageEnum);
+      int defaultUser = db.getUserDAO().getDefaultUser();
+      if (defaultUser == -1) {
+        logger.error("maybeDoInterpreterImport huh? default user is -1?");
+      }
+
+      Map<Dialog, SlickDialog> dialogToSlick = new InterpreterReader().getInterpreterDialogs(defaultUser, project, engProject);
+      if (!dialogToSlick.isEmpty()) {
+        logger.info("maybeDoInterpreterImport (" + project.getName() + ") read " + dialogToSlick.size());
+        addDialogs(project, englishProject, dialogDAO, Collections.emptyMap(), defaultUser, DialogType.INTERPRETER, dialogToSlick);
+      }
     }
   }
 
-  private void maybeDoDialogImport(Project project, Project englishProject, IDialogDAO dialogDAO) {
-    Map<ClientExercise, String> exToAudio = new HashMap<>();
-    int defaultUser = db.getUserDAO().getDefaultUser();
+  /**
+   * Legacy --
+   * @param project
+   * @param englishProject
+   * @param dialogDAO
+   */
+/*  private void maybeDoDialogImport(Project project, Project englishProject, IDialogDAO dialogDAO) {
     Language languageEnum = project.getLanguageEnum();
 
     if (shouldTryToReadDialogInfo(languageEnum)) {
       Project productionByLanguage = db.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
+
+      int defaultUser = db.getUserDAO().getDefaultUser();
+      Map<ClientExercise, String> exToAudio = new HashMap<>();
       addDialogs(project, englishProject, dialogDAO, exToAudio, defaultUser, DialogType.DIALOG,
           getDialogReader(languageEnum).getDialogs(defaultUser, exToAudio, project, productionByLanguage));
     }
-  }
+  }*/
 
   /**
    * @param project
@@ -297,9 +295,11 @@ public class DialogPopulate {
     return commonExercises;
   }
 
+/*
   private boolean shouldTryToReadDialogInfo(Language languageEnum) {
     return languageEnum == Language.KOREAN || languageEnum == Language.ENGLISH;
   }
+*/
 
   private void waitUntilTrieReady(Project project) {
     for (int i = 0; i < 20; i++) {
@@ -561,7 +561,7 @@ public class DialogPopulate {
 
     String imageRef = dialog.getImageRef();
 
-  //  logger.info("getSlickImage image ref " + imageRef);
+    //  logger.info("getSlickImage image ref " + imageRef);
     return new SlickImage(
         -1,
         projid,

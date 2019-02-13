@@ -59,7 +59,7 @@ public interface IUserListManager {
   UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
 
   UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid,
-                   int size, int duration, int minScore, boolean showAudio, Map<String, String> unitChapter);
+                   int size, QuizSpec quizSpec, Map<String, String> unitChapter);
 
   Collection<IUserList> getSimpleListsForUser(int projid, int userid,
                                               boolean listsICreated,
@@ -84,6 +84,7 @@ public interface IUserListManager {
 
 
   UserList<CommonShell> getUserListByID(int id);
+
   List<CommonExercise> getCommonExercisesOnList(int projid, int id);
 
   UserList<CommonShell> getSimpleUserListByID(int id);
@@ -92,15 +93,17 @@ public interface IUserListManager {
 
   /**
    * Really put the exercise in the database.
-   * @see ListServiceImpl#newExercise
+   *
    * @param userListID
    * @param userExercise
+   * @see ListServiceImpl#newExercise
    */
-   void newExercise(int userListID, CommonExercise userExercise);
+  void newExercise(int userListID, CommonExercise userExercise);
 
   void addItemToList(int userListID, int exid);
 
   void editItem(CommonExercise userExercise, Collection<String> typeOrder);
+
   void clearAudio(int audioID);
 
   UserList addVisitor(int userListID, int user);

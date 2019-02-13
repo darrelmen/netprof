@@ -28,8 +28,11 @@ import java.util.stream.Stream;
 class DialogReader extends BaseDialogReader {
   private static final Logger logger = LogManager.getLogger(DialogReader.class);
 
-
   private static final String DIALOG = "dialog";
+
+  public Map<Dialog, SlickDialog> getInterpreterDialogs(int defaultUser, Project project, Project englishProject) {
+    return Collections.emptyMap();
+  }
 
   /**
    * @param defaultUser
@@ -154,7 +157,7 @@ class DialogReader extends BaseDialogReader {
 
           orientation, title, fltitle,
           dialogToSlick,
-          DialogType.INTERPRETER);
+          DialogType.INTERPRETER, project.getProject().countrycode());
       // logger.info("read " + dialog);
       //    dialog.getExercises().forEach(logger::info);
       //logger.info("\tex   " + dialog.getExercises());
@@ -221,10 +224,10 @@ class DialogReader extends BaseDialogReader {
   }
 
   /**
-   * @see #getDialogsByProp
    * @param coreVocabs
    * @param project
    * @return
+   * @see #getDialogsByProp
    */
   private List<CVMatch> getCVs(List<String> coreVocabs, Project project) {
     List<CVMatch> cvs = new ArrayList<>(coreVocabs.size());

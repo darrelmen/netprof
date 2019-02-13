@@ -136,7 +136,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         new Timestamp(shared.getEnd()),
         shared.getDuration(),
         shared.getMinScore(),
-        shared.shouldShowAudio()
+        shared.shouldShowAudio(),
+        shared.getAccessCode()
     );
   }
 
@@ -163,7 +164,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.endtime().getTime(),
         slick.duration(),
         slick.minscore(),
-        slick.showaudio());
+        slick.showaudio(), slick.accesscode());
     return commonShellUserList.setTeacher(!byID.isStudent());
   }
 
@@ -191,7 +192,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.endtime().getTime(),
         slick.duration(),
         slick.minscore(),
-        slick.showaudio());
+        slick.showaudio(), slick.accesscode());
 
     return commonExerciseUserList.setTeacher(!byID.isStudent());
   }

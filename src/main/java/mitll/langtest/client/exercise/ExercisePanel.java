@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.exercise;
 
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;

@@ -32,14 +32,12 @@
 
 package mitll.langtest.client.services;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
-import java.util.Set;
 
 @RemoteServiceRelativePath("exercise-manager")
 public interface ExerciseService<T extends CommonShell & ScoredExercise> extends RemoteService {

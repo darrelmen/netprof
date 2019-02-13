@@ -113,8 +113,8 @@ public class ProjectManagement implements IProjectManagement {
   private static final String VOCAB = "vocab";
   private static final String DIALOG1 = "dialog";
   private static final String NO_PROJECT_FOR_ID = "NO_PROJECT_FOR_ID";
-  public static final String INTERPRETER = "Interpreter";
-  public static final String INTERPRETER1 = "interpreter";
+  private static final String INTERPRETER = "Interpreter";
+  private static final String INTERPRETER1 = "interpreter";
   //public static final String ANSWERS1 = "^.*answers\\/(.+)\\/.+";
   private static final String ANSWERS1 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
   /**
@@ -251,7 +251,7 @@ public class ProjectManagement implements IProjectManagement {
                                 ServerProperties serverProps,
                                 LogAndNotify logAndNotify,
                                 DatabaseImpl db,
-                                int projID) throws Exception {
+                                int projID) {
     Collection<SlickProject> allSlickProjects = getAllSlickProjects();
     if (projID != -1) {
       SlickProject byID = projectDAO.getByID(projID);
@@ -773,11 +773,10 @@ public class ProjectManagement implements IProjectManagement {
    * @param project
    * @see #rememberProject(PathHelper, ServerProperties, LogAndNotify, SlickProject, DatabaseImpl)
    */
-  private ExerciseDAO<CommonExercise> setExerciseDAO(Project project) {
+  private void setExerciseDAO(Project project) {
 //    logger.info("setExerciseDAO on " + project);
     DBExerciseDAO dbExerciseDAO = getExerciseDAO(project);
     project.setExerciseDAO(dbExerciseDAO);
-    return dbExerciseDAO;
   }
 
   @NotNull
@@ -843,10 +842,10 @@ public class ProjectManagement implements IProjectManagement {
     }
 //    logger.info("getExercises " + projectid  + " = " +project);
 
-    if (!project.isConfigured()) {
+/*    if (!project.isConfigured()) {
       logger.info("\tgetExercises configure " + projectid + " and project " + project);
       configureProject(project, false, false);
-    }
+    }*/
 
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (rawExercises.isEmpty()) {
@@ -956,7 +955,9 @@ public class ProjectManagement implements IProjectManagement {
     Project project = idToProject.get(projectid);
 
     if (project == null) {
-      logger.warn("lazyGetProject, even after project set refresh, no project with id " + projectid + " in known projects (" + idToProject.keySet() +
+      logger.warn("lazyGetProject, even after project set refresh, no project with " +
+          "\n\tid              " + projectid + " in " +
+          "\n\tknown projects (" + idToProject.keySet() +
           ") - refreshing projects", new Exception());
     }
 

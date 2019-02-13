@@ -23,7 +23,7 @@ public class BaseDialogReader {
   private static final String OPT_NETPROF_DIALOG = "/opt/netprof/dialog/";
   private static final List<String> SPEAKER_LABELS = Arrays.asList("A", "B", "C", "D", "E", "F", "I");
   private static final String IMAGES = "images/";
-  private static final String JPG = ".jpg";
+ // private static final String JPG = ".jpg";
 
   /**
    * @param defaultUser
@@ -40,6 +40,7 @@ public class BaseDialogReader {
    * @param fltitle
    * @param outputDialogToSlick
    * @param dialogType
+   * @param countryCode
    * @see DialogReader#getDialogsByProp
    */
   protected void addDialogPair(int defaultUser,
@@ -54,7 +55,8 @@ public class BaseDialogReader {
 
                                String orientation, String title, String fltitle,
 
-                               Map<Dialog, SlickDialog> outputDialogToSlick, DialogType dialogType) {
+                               Map<Dialog, SlickDialog> outputDialogToSlick,
+                               DialogType dialogType, String countryCode) {
     List<ExerciseAttribute> dialogAttr = new ArrayList<>(attributes);
     dialogAttr.add(new ExerciseAttribute(FLTITLE.toString().toLowerCase(), fltitle, false));
 
@@ -72,6 +74,7 @@ public class BaseDialogReader {
         orientation
     );
 
+
     Dialog dialog = new Dialog(-1, defaultUser, projID, -1, -1, modified.getTime(),
         unit, chapter,
         orientation,
@@ -81,7 +84,7 @@ public class BaseDialogReader {
 
         dialogAttr,
         exercises,
-        new ArrayList<>(coreExercises), dialogType);
+        new ArrayList<>(coreExercises), dialogType, countryCode);
 
     outputDialogToSlick.put(dialog, slickDialog);
   }
