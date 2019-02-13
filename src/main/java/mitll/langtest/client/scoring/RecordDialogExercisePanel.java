@@ -30,7 +30,6 @@ import java.util.logging.Logger;
 import static mitll.langtest.client.LangTest.RED_X_URL;
 import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.*;
 import static mitll.langtest.client.scoring.RecorderPlayAudioPanel.BLUE_INACTIVE_COLOR;
-import static mitll.langtest.client.scoring.RecorderPlayAudioPanel.RED_ACTIVE_COLOR;
 
 public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialogTurn {
   private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
@@ -90,6 +89,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     setMinExpectedDur(commonExercise);
     this.sessionManager = sessionManager;
     doPushToTalk = listenView.isRehearse();
+
+
   }
 
   private void setMinExpectedDur(ClientExercise commonExercise) {
@@ -127,8 +128,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       float start = first.getStart();
       TranscriptSegment last = transcriptSegments.get(transcriptSegments.size() - 1);
       float end = last.getEnd();
-      // logger.info("getSpeechDur " + first.getEvent() + " - " + last.getEvent());
-      return end - start;
+      float dur = end - start;
+      logger.info("getSpeechDur (" + getExID() + ") : " + first.getEvent() + " - " + last.getEvent() + " = " + dur);
+      return dur;
     }
   }
 
@@ -360,7 +362,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @param showALTFL
    * @param phonesChoices
    */
-
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
 //    boolean isRehearse = rehearseView instanceof PerformViewHelper;
@@ -483,7 +484,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     if (doPushToTalk) {
       if (columns == MIDDLE) {
         enableRecordButton();
-
       }
     }
   }
@@ -530,8 +530,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     w.getElement().setId("emoticon");
     w.setVisible(false);
     w.setHeight(DIM + "px");
-    w.setWidth(DIM + "px");
-    w.getElement().getStyle().setMarginTop(7, Style.Unit.PX);
+    //  w.setWidth(DIM + "px");
+    w.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
     return w;
   }
 
@@ -543,7 +543,17 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   private DivWidget getHorizDiv() {
     DivWidget flContainer = new DivWidget();
     flContainer.addStyleName("inlineFlex");
-    flContainer.getElement().getStyle().setMarginTop(15, Style.Unit.PX);
+    Style style = flContainer.getElement().getStyle();
+    style.setMarginTop(15, Style.Unit.PX);
+
+    if (columns == MIDDLE && exercise.hasEnglishAttr()) {
+      style.setProperty("marginLeft", "auto");
+    }
+//    else {
+//      logger.info("setmargin NOT left  auto on " + getExID());
+//    }
+
+
     flContainer.getElement().setId("RecordDialogExercisePanel_horiz");
     return flContainer;
   }
@@ -560,12 +570,23 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     logger.info("startRecording for " + getExID() + " at " + start + " or " + new Date(start));
     firstVAD = -1;
 
-    if (columns == MIDDLE && doPushToTalk) {
-//      getRecordButton().setVisible(true);
+    if (isPushToTalk()) {
       enableRecordButton();
     } else {
-      getRecordButton().startOrStopRecording();
+      reallyStartOrStopRecording();
     }
+  }
+
+  public boolean reallyStartOrStopRecording() {
+    return getRecordButton().startOrStopRecording();
+  }
+
+  public void stopRecordingSafe() {
+    getRecordButton().stopRecordingSafe();
+  }
+
+  public boolean isPushToTalk() {
+    return columns == MIDDLE && doPushToTalk;
   }
 
   private PostAudioRecordButton getRecordButton() {
@@ -579,36 +600,40 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @see #startRecording
    * @see RehearseViewHelper#stopRecordingTurn()
    */
-  public boolean stopRecording() {
-    long now = System.currentTimeMillis();
-
-    long diff = now - start;
-
-    long minDurPlusMoveOn = minDur + MOVE_ON_DUR;
-    long diffVAD = now - firstVAD;
-    boolean clientVAD = firstVAD > 0 && diffVAD > minDur + END_SILENCE;
-    boolean vadCheck = clientVAD && gotStreamStop;
-
-
-    if (vadCheck || diff > minDurPlusMoveOn || doPushToTalk) {
-      logger.info("stopRecording " + this +
-          "\n\tvadCheck  " + vadCheck +
-          "\n\tgotStreamStop " + gotStreamStop +
-          "\n\tfirstVAD  " + firstVAD +
-          "\n\tVAD delay " + (diffVAD - diff) +
-          "\n\tdiffVAD   " + diffVAD +
-          "\n\tminDur    " + minDur +
-          "\n\tminDur+move on " + minDurPlusMoveOn +
-          "\n\tdiff      " + diff
-      );
-      getRecordButton().startOrStopRecording();
-      return true;
+  public boolean gotEndSilenceMaybeStopRecordingTurn() {
+    if (doPushToTalk) {
+      return false;
     } else {
+      long now = System.currentTimeMillis();
+
+      long diff = now - start;
+
+      long minDurPlusMoveOn = minDur + MOVE_ON_DUR;
+      long diffVAD = now - firstVAD;
+      boolean clientVAD = firstVAD > 0 && diffVAD > minDur + END_SILENCE;
+      boolean vadCheck = clientVAD && gotStreamStop;
+
+      boolean shouldStop = vadCheck || diff > minDurPlusMoveOn;// || doPushToTalk;
+      if (shouldStop) {
+        logger.info("stopRecording " + this +
+            "\n\tvadCheck  " + vadCheck +
+            "\n\tgotStreamStop " + gotStreamStop +
+            "\n\tfirstVAD  " + firstVAD +
+            "\n\tVAD delay " + (diffVAD - diff) +
+            "\n\tdiffVAD   " + diffVAD +
+            "\n\tminDur    " + minDur +
+            "\n\tminDur+move on " + minDurPlusMoveOn +
+            "\n\tdiff      " + diff
+        );
+        reallyStartOrStopRecording();
+        return true;
+      } else {
 /*
       logger.info("stopRecording for " + getExID() +
           " : ignore too short " + diffVAD + " vad vs " + minDur + " expected client " + clientVAD + " vs server " + gotStreamStop);
 */
-      return false;
+        return false;
+      }
     }
   }
 

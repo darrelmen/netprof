@@ -144,7 +144,7 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton implem
   @Override
   protected void onDetach() {
     super.onDetach();
-    removeListener();
+    helper.removeListener();
 
     if (isRecording()) {
       logger.info("stop recording since detach!");
@@ -157,13 +157,10 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton implem
     super.onUnload();
 
     //  logger.info("onUnload ---> ");
-    removeListener();
+    helper.removeListener();
     stopRecordingSafe();
   }
 
-  private void removeListener() {
-    helper.removeListener();
-  }
 
   public abstract void gotRightArrow();
 

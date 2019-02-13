@@ -17,16 +17,26 @@ public interface IRecordDialogTurn {
 
 
   void useResult(AudioAnswer result);
+
   void useInvalidResult();
 
   void switchAudioToStudent();
+
   void switchAudioToReference();
 
   void revealScore();
 
   void usePartial(StreamResponse response);
+
   Widget myGetPopupTargetWidget();
 
   void enableRecordButton();
+
   void disableRecordButton();
+
+  boolean isPushToTalk();
+
+  boolean reallyStartOrStopRecording();
+
+  void stopRecordingSafe();
 }

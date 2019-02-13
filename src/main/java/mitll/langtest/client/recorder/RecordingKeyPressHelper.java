@@ -156,4 +156,7 @@ public class RecordingKeyPressHelper {
       return $wnd.jQuery('#' + id).is(":hidden");
   }-*/;
 
+  public void setWidget(Widget widget) {
+    this.widget = widget;
+  }
 }

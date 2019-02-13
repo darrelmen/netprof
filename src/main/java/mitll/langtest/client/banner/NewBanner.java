@@ -138,10 +138,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     // dialog nav
     {
-     // navCollapse.add(dialognav = getDialogNav());
+      // navCollapse.add(dialognav = getDialogNav());
 
 
-      ComplexWidget interpreterNav =getDialogNav();// getInterpreterNav();
+      ComplexWidget interpreterNav = getDialogNav();// getInterpreterNav();
       this.dialognav = interpreterNav;
       navCollapse.add(interpreterNav);
     }
@@ -176,8 +176,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     recnav.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
 
- //   DIALOG_VIEWS.forEach(views -> rememberViewAndLink(recnav, views));
-   // DIALOG_VIEWS.forEach(views -> rememberViewAndLink(recnav, views));
+    //   DIALOG_VIEWS.forEach(views -> rememberViewAndLink(recnav, views));
+    // DIALOG_VIEWS.forEach(views -> rememberViewAndLink(recnav, views));
 
     rememberViewAndLink(recnav, VIEWS.DIALOG);
 
@@ -215,22 +215,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
   }
 
-/*  @NotNull
-  private ComplexWidget getLearnNav() {
-    Nav rnav = new Nav();
-    zeroLeftRightMargins(rnav);
-
-    Dropdown nav = new Dropdown(QC);
-    rnav.add(nav);
-    rememberViewAndLink(nav, VIEWS.QC);
-    rememberViewAndLink(nav, VIEWS.FIX_ENTRIES);
-
-    rememberViewAndLink(nav, VIEWS.QC_SENTENCES);
-    rememberViewAndLink(nav, VIEWS.FIX_SENTENCES);
-
-    return rnav;
-  }*/
-
   /**
    * @return
    * @see #addWidgets
@@ -250,25 +234,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     return rnav;
   }
-
-/*
-  @NotNull
-  private ComplexWidget getInterpreterNav() {
-    Nav rnav = new Nav();
-    zeroLeftRightMargins(rnav);
-
-    Dropdown nav = new Dropdown("Interpreter Practice");
-    rnav.add(nav);
-    DIALOG_VIEWS_AFTER.forEach(views -> rememberViewAndLink(nav, views));
-//    rememberViewAndLink(nav, VIEWS.STUDY);
-//    rememberViewAndLink(nav, VIEWS.FIX_ENTRIES);
-//
-//    rememberViewAndLink(nav, VIEWS.QC_SENTENCES);
-//    rememberViewAndLink(nav, VIEWS.FIX_SENTENCES);
-
-    return rnav;
-  }
-*/
 
   private void rememberViewAndLink(ComplexWidget recnav, VIEWS record) {
     viewToLink.put(record, getChoice(recnav, record));
@@ -385,9 +350,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see #addWidgets
    */
   private void addChoicesForUser(ComplexWidget nav) {
-    boolean first = true;
     boolean isPoly = controller.getPermissions().size() == 1 && controller.getPermissions().iterator().next() == User.Permission.POLYGLOT;
-
     boolean isDialog = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == DIALOG;
     List<VIEWS> toShow = isPoly ?
         POLY_VIEWS :
@@ -397,6 +360,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     if (DEBUG) logger.info("addChoicesForUser " + toShow.size());
 
+    boolean first = true;
     for (VIEWS choice : toShow) {
       NavLink choice1 = getChoice(nav, choice);
       //   choice1.getElement().setId("Link_" + choice.name());
@@ -523,17 +487,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   public void reflectPermissions(Collection<User.Permission> permissions) {
     recordMenuVisible();
     defectMenuVisible();
-    boolean visible = hasProjectChoice();
-    dialognav.setVisible(visible);
-
-    //  logger.info("reflectPerm " + visible);
-    // setLearnAndDrill(visible);
+    //dialognav.setVisible(hasProjectChoice() && setVisibleChoicesByMode(););
+ //   logger.info("reflectPermissions : " + permissions);
   }
-
-/*  private void setLearnAndDrill(boolean visible) {
-    learnNav.setVisible(visible);
-    drillNav.setVisible(visible);
-  }*/
 
   @Override
   public void setCogVisible(boolean val) {
@@ -546,7 +502,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     }
 
     cog.setVisible(isAdmin());
-    //  setLearnAndDrill(val);
     boolean hasProject = controller.getProjectStartupInfo() != null;
     //  if (DEBUG) logger.info("setCogVisible " + val + " has project " + hasProject + " for " + hasProjectChoices.size());
 
@@ -565,8 +520,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setRecNavVisible(false);
     setDefectNavVisible(false);
     dialognav.setVisible(false);
-
-//    setLearnAndDrill(false);
   }
 
   @Override
@@ -644,7 +597,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   public void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
     reflectPermissions(controller.getPermissions());
-    //   setLearnAndDrill(show);
   }
 
   /**
@@ -654,7 +606,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @Override
   public void setVisibleChoicesByMode(ProjectMode mode) {
     if (DEBUG) logger.info("setVisibleChoicesByMode set visible choices " + mode);
-    hideOrShowByMode((mode == ProjectMode.DIALOG) ? DIALOG_VIEWS : STANDARD_VIEWS);
+    boolean isDialogMode = mode == ProjectMode.DIALOG;
+    hideOrShowByMode(isDialogMode ? DIALOG_VIEWS : STANDARD_VIEWS);
+    //if (!isDialogMode) {
+
+    if (DEBUG) logger.info("setVisibleChoicesByMode dialognav " + dialognav.getElement().getId() + " is " + isDialogMode);
+
+    dialognav.setVisible(isDialogMode);
+   // }
   }
 
   private void hideOrShowByMode(List<VIEWS> standardViews) {
@@ -669,6 +628,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 //            " '" + widgets.getName() + "' display " + widgets.getElement().getStyle().getDisplay() +
 //            " now " + contains);
         widgets.setVisible(contains);
+
       }
     });
   }
@@ -676,7 +636,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private void recordMenuVisible() {
     if (recnav != null) {
       boolean visible = isPermittedToRecord() && hasProjectChoice();
-
 //      boolean learnVisible = viewToLink.get(VIEWS.LEARN).isVisible();
       //    logger.info("recordMenuVisible learn vis " + learnVisible);
       //    visible &= learnVisible;

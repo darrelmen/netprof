@@ -22,6 +22,8 @@ import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.SessionStorage;
+import mitll.langtest.client.recorder.KeyPressDelegate;
+import mitll.langtest.client.recorder.RecordingKeyPressHelper;
 import mitll.langtest.client.scoring.IRecordDialogTurn;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
 import mitll.langtest.client.scoring.ScoreProgressBar;
@@ -43,7 +45,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  */
 public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     extends ListenViewHelper<T>
-    implements SessionManager, IRehearseView {
+    implements SessionManager, IRehearseView, KeyPressDelegate {
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
   private static final String DIALOG_INTRO_SHOWN_REHEARSAL = "dialogIntroShownRehearsal";
@@ -111,6 +113,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private DialogSession dialogSession = null;
   String rehearsalKey = DIALOG_INTRO_SHOWN_REHEARSAL;
   String rehearsalPrompt = HOLD_THE_RED_RECORD_BUTTON;
+  //private final RecordingKeyPressHelper helper;
 
   /**
    * @param controller
@@ -157,7 +160,30 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   @NotNull
   private DivWidget getOverallFeedback() {
-    DivWidget breadRow = new DivWidget();
+    final RecordingKeyPressHelper helper = new RecordingKeyPressHelper(null, this, controller);
+    DivWidget breadRow = new DivWidget() {
+      @Override
+      protected void onDetach() {
+        super.onDetach();
+        helper.removeListener();
+
+        safeStopRecording();
+
+      }
+
+      @Override
+      protected void onUnload() {
+        super.onUnload();
+
+        //  logger.info("onUnload ---> ");
+        helper.removeListener();
+        safeStopRecording();
+
+      }
+
+    };
+
+    helper.setWidget(breadRow);
     breadRow.getElement().setId("overallFeedbackRow");
 
     Style style = breadRow.getElement().getStyle();
@@ -169,8 +195,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     // breadRow.setWidth(WIDTH);  //??? why 97???
     breadRow.add(showScoreFeedback());
 
+    if (true) {
+      helper.addKeyListener(controller);
+      // logger.info("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
+    }
+
     return breadRow;
   }
+
 
   @NotNull
   @Override
@@ -454,7 +486,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
         if (isSilence(penultimateValidity) && isSilence(lastValidity)) {
           if (DEBUG_SILENCE)
             logger.info("mySilenceDetected : OK, server agrees with client side silence detector... have seen " + validities.size());
-          stopRecordingTurn();
+          gotEndSilenceMaybeStopRecordingTurn();
           beforeCount = 0;
         } else {
           if (beforeCount < validities.size()) {
@@ -471,10 +503,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
         }
       } else {
         if (DEBUG_SILENCE) {
-          logger.info("mySilenceDetected : stopRecordingTurn, num validities " + validities.size());
+          logger.info("mySilenceDetected : stop recording, num validities " + validities.size());
         }
 
-        stopRecordingTurn();
+        gotEndSilenceMaybeStopRecordingTurn();
         beforeCount = 0;
       }
     } else if (DEBUG_SILENCE) {
@@ -493,8 +525,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   /**
    * @see #mySilenceDetected()
    */
-  private void stopRecordingTurn() {
-    if (currentRecordingTurn.stopRecording()) {
+  private void gotEndSilenceMaybeStopRecordingTurn() {
+    if (currentRecordingTurn.gotEndSilenceMaybeStopRecordingTurn()) {
       if (DEBUG) logger.info("mySilenceDetected : stopped " + currentRecordingTurn);
       //recordingHasStopped();
     }
@@ -648,18 +680,16 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   @Override
   void gotBackward() {
     super.gotBackward();
-    if (isRecording()) {
-      currentRecordingTurn.cancelRecording();
-//      if (currentRecordingTurn.stopRecording()) {
-//        logger.info("gotBackward : stopped " + currentRecordingTurn);
-//        setCurrentRecordingTurn(null);
-//      }
-    }
+    safeStopRecording();
   }
 
   @Override
   void gotForward() {
     super.gotForward();
+    safeStopRecording();
+  }
+
+  private void safeStopRecording() {
     if (isRecording()) {
       currentRecordingTurn.cancelRecording();
 //      if (currentRecordingTurn.stopRecording()) {
@@ -922,7 +952,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   /**
    * @param wasRecording
    * @see #playStopped()
-   * @see #stopRecordingTurn()
+   * @see #gotEndSilenceMaybeStopRecordingTurn()
    */
   protected void currentTurnPlayEnded(boolean wasRecording) {
     if (directClick) {
@@ -1067,17 +1097,20 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     logger.info("showOverallDialogScore student total " + studentTotal + " vs ref " + refTotal);
 
     total = setScoreProgressLevel(total, num);
+
     {
       double totalRatio = refTotal == 0D ? 0D : studentTotal / (MAX_RATE_RATIO * refTotal);
       //double totalAvgRate = totalRatio / ((float) num);
-      //   logger.info("showOverallDialogScore avg rate " + studentTotal + " vs " + refTotal + " = " + totalRatio);
+      logger.info("showOverallDialogScore avg rate " + studentTotal + " vs " + refTotal + " = " + totalRatio);
       setRateProgress(totalRatio);
     }
+
+
     {
       double actualRatio = studentTotal / refTotal;
 
       float v = roundToTens(actualRatio);
-      //  logger.info("showOverallDialogScore rate to show " + v);
+      logger.info("showOverallDialogScore rate to show " + v + " vs raw " + actualRatio);
       rateProgress.setText("Rate " + v + "x");
     }
 
@@ -1205,7 +1238,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     maybeMoveOnToNextTurn();
 
     if (isRecordingTurn(matchingTurn) && shouldShowScoreNow()) {
-      Scheduler.get().scheduleDeferred((Command) () -> matchingTurn.showScoreInfo());
+      Scheduler.get().scheduleDeferred((Command) matchingTurn::showScoreInfo);
     }
     //maybeMoveOnIfNextTurnARecordingTurn();
   }
@@ -1251,4 +1284,65 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   public String getSession() {
     return "" + sessionStorage.getSession();
   }
+
+
+  @Override
+  public void gotRightArrow() {
+    gotForward();
+  }
+
+  @Override
+  public void gotLeftArrow() {
+    gotBackward();
+  }
+
+  @Override
+  public void gotUpArrow() {
+
+  }
+
+  @Override
+  public void gotDownArrow() {
+
+  }
+
+  @Override
+  public void gotEnter() {
+
+  }
+
+  @Override
+  public void stopRecordingSafe() {
+    T currentTurn = getCurrentTurn();
+    if (currentTurn.isPushToTalk()) {
+      currentTurn.stopRecordingSafe();
+    }
+  }
+
+  @Override
+  public void gotSpaceBar() {
+    if (!mouseDown) {
+      mouseDown = true;
+
+      T currentTurn = getCurrentTurn();
+      if (currentTurn.isPushToTalk()) {
+        currentTurn.reallyStartOrStopRecording();
+      }
+    }
+  }
+
+  @Override
+  public void gotSpaceBarKeyUp() {
+    if (!mouseDown) {
+      logger.warning("huh? mouse down = false");
+    } else {
+      mouseDown = false;
+      T currentTurn = getCurrentTurn();
+      if (currentTurn.isPushToTalk()) {
+        currentTurn.reallyStartOrStopRecording();
+      }
+    }
+  }
+
+  protected boolean mouseDown = false;
 }
