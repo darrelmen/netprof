@@ -168,8 +168,20 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
       if (candidate == null) {
         candidate = dialogSession;
       } else if (candidate.modified().getTime() < dialogSession.modified().getTime()) {
-        INavigation.VIEWS candidateView = INavigation.VIEWS.valueOf(candidate.view().toUpperCase());
-        INavigation.VIEWS currentView = INavigation.VIEWS.valueOf(dialogSession.view().toUpperCase());
+
+
+        INavigation.VIEWS candidateView = INavigation.VIEWS.NONE;
+        try {
+          candidateView = INavigation.VIEWS.valueOf(candidate.view().toUpperCase());
+        } catch (IllegalArgumentException e) {
+        }
+
+        INavigation.VIEWS currentView = INavigation.VIEWS.NONE;
+        try {
+          currentView = INavigation.VIEWS.valueOf(dialogSession.view().toUpperCase());
+        } catch (IllegalArgumentException e) {
+        }
+
         if (currentView != INavigation.VIEWS.STUDY && candidateView == INavigation.VIEWS.STUDY) {  // rehearse or perform trumps STUDY
           candidate = dialogSession;
         }
@@ -257,7 +269,7 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
           dialogid,
           new Timestamp(modified),
           new Timestamp(end),
-          ds.getView().toString(),
+          ds.getView().name(),
           ds.getStatus().toString(),
           ds.getNumRecordings(),
           ds.getScore(),

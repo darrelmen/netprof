@@ -90,7 +90,7 @@ public class ListenViewHelper<T extends TurnPanel>
   private Button playButton;
   private DivWidget dialogHeader;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_PLAY = false;
 
   /**

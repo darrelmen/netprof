@@ -538,10 +538,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    */
   private void recordingHasStopped() {
     if (isNextTurnAPrompt(getCurrentTurn())) {
-      logger.info("recordingHasStopped OK, next turn is a prompt!");
+      if (DEBUG) logger.info("recordingHasStopped OK, next turn is a prompt!");
       moveOnAfterRecordingStopped();
     } else {
-      logger.info("recordingHasStopped next turn not a prompt so not advancing...");
+      if (DEBUG) logger.info("recordingHasStopped next turn not a prompt so not advancing...");
     }
   }
 
@@ -550,9 +550,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     currentTurnPlayEnded(true);
   }
 
+/*
   private boolean isNextTurnAResp(T currentTurn) {
     return !isNextTurnAPrompt(currentTurn);
   }
+*/
 
   private boolean isNextTurnAPrompt(T currentTurn) {
     int i2 = allTurns.indexOf(currentTurn);

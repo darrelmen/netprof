@@ -31,7 +31,7 @@ public class DialogHeader {
   private final INavigation.VIEWS next;
   private final ExerciseController controller;
   // private static final int KEY_PRESS_WIDTH = 125;
-  private static final int HINT_WIDTH = 350;//300;
+  private static final int HINT_WIDTH = 250;//350;//300;
   private static final String SPACE_PRESS_AND_HOLD = "<b>Space</b> to record (press and hold.)";
 
   private String ARROW_KEY_TIP;
@@ -92,6 +92,7 @@ public class DialogHeader {
       vert.getElement().setId("vert");
       row.add(vert);
       vert.addStyleName("leftTenMargin");
+      vert.addStyleName("rightTenMargin");
 
       String foreignLanguage = dialog.getForeignLanguage();
 
@@ -126,42 +127,46 @@ public class DialogHeader {
       }
       outer.add(row);
 
-      switch (thisView) {
-        case STUDY:
-          row.add(getHint("<i><b>Study</b> the core words and phrases used in the dialog. " +
-              "<br/><b>Record</b> yourself to get ready for rehearsing the dialog. " +
-              "<br/>" +
-              PRESS_AND_HOLD_HINT +
-              "</i>"));
-          break;
-        case LISTEN:
-          row.add(getHint("<i><b>Listen</b> to the reference dialog to prepare to rehearse it.</i>"));
-          break;
-        case REHEARSE:
-          row.add(getHint(ARROW_KEY_TIP));
-          break;
-        case CORE_REHEARSE:
-          row.add(getHint(ARROW_KEY_TIP_CORE));
-          break;
-        case PERFORM:
-          row.add(getHint("<i>Now carry on a natural conversation. " +
-              "<br/>" + SPEAK_HINT +
-              "<br/>" +
-
-              "</i>"));
-          break;
-        case PERFORM_PRESS_AND_HOLD:
-          row.add(getHint("<i>Now carry on a natural conversation. " +
-              "<br/>" + PRESS_AND_HOLD_HINT +
-              "<br/>" +
-
-              "</i>"));
-          break;
-        default:
-          break;
-      }
+      addViewHint(row);
     }
     return outer;
+  }
+
+  private void addViewHint(DivWidget row) {
+    switch (thisView) {
+      case STUDY:
+        row.add(getHint("<i><b>Study</b> the core words and phrases used in the dialog. " +
+            "<br/><b>Record</b> yourself to get ready for rehearsing the dialog. " +
+            "<br/>" +
+            PRESS_AND_HOLD_HINT +
+            "</i>"));
+        break;
+      case LISTEN:
+        row.add(getHint("<i><b>Listen</b> to the reference dialog to prepare to rehearse it.</i>"));
+        break;
+      case REHEARSE:
+        row.add(getHint(ARROW_KEY_TIP));
+        break;
+      case CORE_REHEARSE:
+        row.add(getHint(ARROW_KEY_TIP_CORE));
+        break;
+      case PERFORM:
+        row.add(getHint("<i>Now carry on a natural conversation. " +
+            "<br/>" + SPEAK_HINT +
+            "<br/>" +
+
+            "</i>"));
+        break;
+      case PERFORM_PRESS_AND_HOLD:
+        row.add(getHint("<i>Now carry on a natural conversation. " +
+            "<br/>" + PRESS_AND_HOLD_HINT +
+            "<br/>" +
+
+            "</i>"));
+        break;
+      default:
+        break;
+    }
   }
 
 
@@ -169,7 +174,7 @@ public class DialogHeader {
   private Widget getHint(String keyBindings) {
     Widget child = new HTML(keyBindings);
     child.addStyleName("floatRight");
-    //  child.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+  //  child.addStyleName("leftFiveMargin");
     child.getElement().getStyle().setProperty("marginLeft", "auto");
     child.setWidth(HINT_WIDTH + "px");
     return child;

@@ -47,7 +47,7 @@ public class ProjectChoices extends ThumbnailChoices {
 
 
   private static final String EDIT_PROJECT = "Edit project.";
-  private static final String MODES = "2 modes";
+  private static final String MODES = "Interpreter and Vocab";
 
   private static final String GVIDAVER = "gvidaver";
 
@@ -104,7 +104,7 @@ public class ProjectChoices extends ThumbnailChoices {
   private static final String PLEASE_SELECT_A_LANGUAGE = "Select a language";
   private static final String PLEASE_SELECT_A_COURSE = "Select a course";
   /**
-   * @see #getHeader(List, int)
+   * @see #getPromptText
    */
   private static final String PLEASE_SELECT_A_MODE = "Select a mode";
   /**
@@ -350,7 +350,6 @@ public class ProjectChoices extends ThumbnailChoices {
     DivWidget header = new DivWidget();
     header.addStyleName("container");
 
-
     {
       DivWidget left = new DivWidget();
       left.addStyleName("floatLeftAndClear");
@@ -385,6 +384,12 @@ public class ProjectChoices extends ThumbnailChoices {
     return header;
   }
 
+  /**
+   * @see #getHeader
+   * @param result
+   * @param nest
+   * @return
+   */
   @NotNull
   private String getPromptText(List<SlimProject> result, int nest) {
     List<SlimProject> dialogProjects = getDialogProjects(result);

@@ -29,8 +29,6 @@ import java.util.logging.Logger;
 
 import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
-import static mitll.langtest.client.custom.INavigation.VIEWS.PERFORM;
-import static mitll.langtest.client.custom.INavigation.VIEWS.PERFORM_PRESS_AND_HOLD;
 import static mitll.langtest.shared.project.ProjectType.DIALOG;
 
 /**
@@ -40,9 +38,9 @@ import static mitll.langtest.shared.project.ProjectType.DIALOG;
 public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
 
-  private static final String DRILL = "Drill";
-  private static final String PRACTICE = "Practice";
-  private static final String DIALOG_PRACTICE = "Rehearse";
+//  private static final String DRILL = "Drill";
+//  private static final String PRACTICE = "Practice";
+  private static final String DIALOG_PRACTICE = "Practice";//"Rehearse";
 
   private static final String RECORD = "Record";
   private static final String QC = "QC";
@@ -103,7 +101,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String DOCUMENTATION = "User Manual";
 
   private final UILifecycle lifecycle;
-  private ComplexWidget recnav, defectnav, dialognav;//dialognav;//, learnNav, drillNav;
+  private ComplexWidget recnav, defectnav, dialognav;
 
   private Nav lnav;
   private Dropdown cog;
@@ -501,7 +499,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   public void reflectPermissions(Collection<User.Permission> permissions) {
     recordMenuVisible();
     defectMenuVisible();
-    //dialognav.setVisible(hasProjectChoice() && setVisibleChoicesByMode(););
+
+    boolean isDialog = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == DIALOG;
+
+   // logger.info("isDialog " +isDialog);
+    dialognav.setVisible(hasProjectChoice() && isDialog);
     //   logger.info("reflectPermissions : " + permissions);
   }
 
@@ -610,6 +612,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   public void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
+
+    logger.info("setVisibleChoices " +show);
     reflectPermissions(controller.getPermissions());
   }
 

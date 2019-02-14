@@ -194,7 +194,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 //      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("showView "  + view));
 //      logger.info("logException stack " + exceptionAsString);

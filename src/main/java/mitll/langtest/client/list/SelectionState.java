@@ -265,7 +265,7 @@ public class SelectionState {
   @NotNull
   public INavigation.VIEWS getView() {
     INavigation.VIEWS view = viewParser.getView(instance);
-    logger.info("getViews " + instance + " = " + view);
+  //  logger.info("getViews " + instance + " = " + view);
     return view;
   }
 
