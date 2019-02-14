@@ -39,6 +39,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.custom.INavigation.VIEWS.PERFORM;
+import static mitll.langtest.client.custom.INavigation.VIEWS.PERFORM_PRESS_AND_HOLD;
 import static mitll.langtest.client.list.FacetExerciseList.LISTS;
 
 /**
@@ -51,8 +53,7 @@ import static mitll.langtest.client.list.FacetExerciseList.LISTS;
  * To change this template use File | Settings | File Templates.
  */
 public class SelectionState {
-  public static final String DRILL = "Drill";
-  public static final String PRACTICE = "Practice";
+
   private final Logger logger = Logger.getLogger("SelectionState");
 
   private static final String POUND = "#";
@@ -83,6 +84,7 @@ public class SelectionState {
 
   private int project = -1;
   private int dialog = -1;
+  private ViewParser viewParser = new ViewParser();
 
   private static final boolean DEBUG = false;
 
@@ -262,17 +264,10 @@ public class SelectionState {
    */
   @NotNull
   public INavigation.VIEWS getView() {
-    try {
-      instance = instance.replaceAll(" ", "_");
+    INavigation.VIEWS view = viewParser.getView(instance);
 
-      if (instance.equalsIgnoreCase(DRILL)) instance = PRACTICE.toUpperCase();
-      if (instance.equalsIgnoreCase("dialogs")) instance = INavigation.VIEWS.DIALOG.name();
-
-      return instance.isEmpty() ? INavigation.VIEWS.NONE : INavigation.VIEWS.valueOf(instance.toUpperCase());
-    } catch (IllegalArgumentException e) {
-      logger.warning("getView : hmm, couldn't parse " + instance);
-      return INavigation.VIEWS.NONE;
-    }
+  //  logger.info("getViews " + instance + " = " + view);
+    return view;
   }
 
   public String getSearch() {
@@ -309,6 +304,10 @@ public class SelectionState {
 
   public int getDialog() {
     return dialog;
+  }
+
+  public boolean isJump() {
+    return isJump;
   }
 
   public int getList() {
@@ -351,9 +350,5 @@ public class SelectionState {
         "\n\tdialog   " + dialog +
         "\n\tunit->chapter " + getTypeToSection() +
         "\n\tonlyWithAudioDefects " + isOnlyWithAudioDefects();
-  }
-
-  public boolean isJump() {
-    return isJump;
   }
 }

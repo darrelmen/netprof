@@ -12,23 +12,10 @@ import org.jetbrains.annotations.NotNull;
 public class PerformViewHelper<T extends RecordDialogExercisePanel> extends RehearseViewHelper<T> {
   // private final Logger logger = Logger.getLogger("PerformViewHelper");
 
-  private static final String RED_RECORD_BUTTON = "Speak when you see the red record button.";
-
- // private Set<String> uniqueCoreVocab;
-
-  public PerformViewHelper(ExerciseController controller) {
-    super(controller, INavigation.VIEWS.PERFORM);
+  public PerformViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
+    super(controller, thisView);
     rehearsalKey = "PerformViewKey";
-    rehearsalPrompt = RED_RECORD_BUTTON;
-  }
-
-  @Override
-  public boolean isRehearse() {
-    return false;
-  }
-
-  public INavigation.VIEWS getView() {
-    return INavigation.VIEWS.PERFORM;
+   // rehearsalPrompt = RED_RECORD_BUTTON;
   }
 
   /**
@@ -45,11 +32,6 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
     return turns;
   }
 
-//  @Override
-//  protected boolean shouldShowScoreNow() {
-//    return false;
-//  }
-
   /**
    * OK, let's go - hide everything!
    *
@@ -63,18 +45,6 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
     T turnPanel = super.getTurnPanel(clientExercise, columns);
     turnPanel.reallyObscure();
     return turnPanel;
-  }
-
-  @NotNull
-  @Override
-  protected INavigation.VIEWS getPrevView() {
-    return INavigation.VIEWS.CORE_REHEARSE;
-  }
-
-  @NotNull
-  @Override
-  protected INavigation.VIEWS getNextView() {
-    return INavigation.VIEWS.SCORES;
   }
 
   /**
@@ -93,8 +63,6 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
   }
 
   private void obscureRespTurns() {
-//    getPromptSeq().forEach(RecordDialogExercisePanel::obscureText);
-//    getRespSeq().forEach(RecordDialogExercisePanel::restoreText);
     allTurns.forEach(RecordDialogExercisePanel::obscureText);
   }
 }

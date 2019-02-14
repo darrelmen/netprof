@@ -57,7 +57,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private final DialogViewHelper dialogHelper;
   private final ListenViewHelper listenHelper;
   private final ListenViewHelper rehearseHelper, coreRehearseHelper;
-  private final ListenViewHelper performHelper;
+  private final ListenViewHelper performPressAndHoldHelper, performHelper;
 
   private final PracticeHelper practiceHelper;
   private final QuizChoiceHelper quizHelper;
@@ -84,8 +84,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     studyHelper = new StudyHelper<>(controller);
     listenHelper = new ListenViewHelper(controller, LISTEN);
     rehearseHelper = new RehearseViewHelper(controller, REHEARSE);
-    coreRehearseHelper = new CoreRehearseViewHelper(controller);
-    performHelper = new PerformViewHelper(controller);
+    coreRehearseHelper = new CoreRehearseViewHelper(controller, CORE_REHEARSE);
+    performPressAndHoldHelper = new PerformViewHelper(controller, PERFORM_PRESS_AND_HOLD);
+    performHelper = new PerformViewHelper(controller, PERFORM);
 
     this.controller = controller;
     this.banner = banner;
@@ -102,6 +103,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   public void showInitialState() {
     clearCurrent();
     showView(getCurrentView(), true, false);
+  }
+
+  public VIEWS getCurrent() {
+    return currentSection;
   }
 
   /**
@@ -240,15 +245,23 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           break;
         case REHEARSE:
           clearAndPushKeep(REHEARSE);
+          logger.info("show " + REHEARSE);
           rehearseHelper.showContent(divWidget, REHEARSE);
           break;
         case CORE_REHEARSE:
           clearAndPushKeep(CORE_REHEARSE);
+          logger.info("show core " + CORE_REHEARSE);
           coreRehearseHelper.showContent(divWidget, CORE_REHEARSE);
           break;
         case PERFORM:
           clearAndPushKeep(PERFORM);
+          //   logger.info("show perform " + PERFORM);
           performHelper.showContent(divWidget, PERFORM);
+          break;
+        case PERFORM_PRESS_AND_HOLD:
+          clearAndPushKeep(PERFORM);
+          //   logger.info("show press and hold perform " + PERFORM_PRESS_AND_HOLD);
+          performPressAndHoldHelper.showContent(divWidget, PERFORM);
           break;
         case SCORES:
           clearAndPushKeep(SCORES);
@@ -285,7 +298,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           new FixNPFHelper(controller, true, FIX_SENTENCES).showNPF(divWidget, FIX_SENTENCES);
           break;
         case NONE:
-          logger.info("showView skipping choice " + view);
+          logger.warning("showView skipping choice '" + view + "'");
           break;
         default:
           logger.warning("showView huh? unknown view " + view);

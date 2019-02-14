@@ -4,12 +4,10 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -50,6 +48,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   private static final String DIALOG_INTRO_SHOWN_REHEARSAL = "dialogIntroShownRehearsal";
   private static final String HOLD_THE_RED_RECORD_BUTTON = "When it's your turn, press and hold the red record button.";
+  private static final String RED_RECORD_BUTTON = "Speak when you see the red record button.";
 
   private static final double MAX_RATE_RATIO = 3D;
 
@@ -67,9 +66,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   private static final int TOP_TO_USE = 10;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_SILENCE = false;
-  private static final boolean DEBUG_PLAY_ENDED = true;
+  private static final boolean DEBUG_PLAY_ENDED = false;
 
   private boolean directClick = false;
 
@@ -112,8 +111,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   private DialogSession dialogSession = null;
   String rehearsalKey = DIALOG_INTRO_SHOWN_REHEARSAL;
-  String rehearsalPrompt = HOLD_THE_RED_RECORD_BUTTON;
-  //private final RecordingKeyPressHelper helper;
+  private String rehearsalPrompt;
 
   /**
    * @param controller
@@ -123,11 +121,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   public RehearseViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     super(controller, thisView);
     this.sessionStorage = new SessionStorage(controller.getStorage(), "rehearseSession");
+    this.rehearsalPrompt = thisView.isPressAndHold()?HOLD_THE_RED_RECORD_BUTTON:RED_RECORD_BUTTON;
   }
 
   @Override
-  public boolean isRehearse() {
-    return true;
+  public boolean isPressAndHold() {
+    boolean pressAndHold = getView().isPressAndHold();
+//    logger.info("isPressAndHold for " + getView() + " " + pressAndHold);
+    return pressAndHold;
   }
 
   @Override
@@ -179,7 +180,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
         //  logger.info("onUnload ---> ");
         helper.removeListener();
         safeStopRecording();
-
       }
 
     };
@@ -204,18 +204,17 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     return breadRow;
   }
 
-
-  @NotNull
-  @Override
-  protected INavigation.VIEWS getPrevView() {
-    return INavigation.VIEWS.LISTEN;
-  }
-
-  @NotNull
-  @Override
-  protected INavigation.VIEWS getNextView() {
-    return INavigation.VIEWS.CORE_REHEARSE;
-  }
+//  @NotNull
+//  @Override
+//  protected INavigation.VIEWS getPrevView() {
+//    return INavigation.VIEWS.LISTEN;
+//  }
+//
+//  @NotNull
+//  @Override
+//  protected INavigation.VIEWS getNextView() {
+//    return INavigation.VIEWS.CORE_REHEARSE;
+//  }
 
   @NotNull
   @Override
@@ -589,7 +588,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
           "\n\tvs expected   (" + getRespSeq().size() + ") : " + getRespSeq());
     }
 
-   return checkAtEnd();
+    return checkAtEnd();
   }
 
   /**
@@ -888,7 +887,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     rateProgress.setVisible(false);
     exToScore.clear();
     exToStudentDur.clear();
-   // exToRefDur.clear();
+    // exToRefDur.clear();
 
     allTurns.forEach(IRecordDialogTurn::clearScoreInfo);
     recordDialogTurns.clear();
@@ -1101,8 +1100,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     }
 
 
-    if (refTotal > 0)
-    {
+    if (refTotal > 0) {
       double actualRatio = studentTotal / refTotal;
 
       float v = roundToTens(actualRatio);
@@ -1231,9 +1229,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     exToStudentDur.put(exid, matchingTurn.getStudentSpeechDur());
     exToRefDur.put(exid, matchingTurn.getRefSpeechDur());
 
-    boolean atEnd =  addScore(exid, (float) audioAnswer.getScore(), matchingTurn);
+    boolean atEnd = addScore(exid, (float) audioAnswer.getScore(), matchingTurn);
 
-   // maybeMoveOnToNextTurn();
+    // maybeMoveOnToNextTurn();
 
 //    if (isRecordingTurn(matchingTurn) && shouldShowScoreNow()) {
 //      Scheduler.get().scheduleDeferred((Command) matchingTurn::showScoreInfo);
@@ -1248,7 +1246,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     boolean atEnd = addScore(exid, 0F, matchingTurn);
     matchingTurn.useInvalidResult();
 
-    if (!isRehearse() && atEnd) {
+    if (!isPressAndHold() && atEnd) {
       moveOnAfterRecordingStopped();
     }
 

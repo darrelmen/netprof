@@ -11,24 +11,17 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Logger;
 
 public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel> extends RehearseViewHelper<T> {
-  private final Logger logger = Logger.getLogger("CoreRehearseViewHelper");
+  //private final Logger logger = Logger.getLogger("CoreRehearseViewHelper");
 
-  private static final String RED_RECORD_BUTTON = "Speak when you see the red record button.";
   private Map<String, ClientExercise> exidToShell = new HashMap<>();
 
-  public CoreRehearseViewHelper(ExerciseController controller) {
-    super(controller, INavigation.VIEWS.CORE_REHEARSE);
-    rehearsalKey = "PerformViewKey";
-    rehearsalPrompt = RED_RECORD_BUTTON;
+  public CoreRehearseViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
+    super(controller, thisView);
+    rehearsalKey = "CoreRehearseViewKey";
+//    rehearsalPrompt = RED_RECORD_BUTTON;
   }
-
-//  @Override
-//  public boolean isRehearse() {
-//    return true;
-//  }
 
   /**
    * don't have to filter on client...?
@@ -46,11 +39,6 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel> extends
     return turns;
   }
 
-//  @Override
-//  protected boolean shouldShowScoreNow() {
-//    return false;
-//  }
-
   /**
    * OK, let's go - hide everything!
    *
@@ -63,6 +51,7 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel> extends
   @Override
   protected T getTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
     T turnPanel = super.getTurnPanel(clientExercise, columns);
+
     if (columns == COLUMNS.MIDDLE) {
       if (!clientExercise.hasEnglishAttr()) {
         turnPanel.maybeSetObscure(exidToShell);
@@ -71,18 +60,6 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel> extends
       turnPanel.reallyObscure();
     }
     return turnPanel;
-  }
-
-  @NotNull
-  @Override
-  protected INavigation.VIEWS getPrevView() {
-    return INavigation.VIEWS.REHEARSE;
-  }
-
-  @NotNull
-  @Override
-  protected INavigation.VIEWS getNextView() {
-    return INavigation.VIEWS.PERFORM;
   }
 
   /**

@@ -88,9 +88,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     this.rehearseView = listenView;
     setMinExpectedDur(commonExercise);
     this.sessionManager = sessionManager;
-    doPushToTalk = listenView.isRehearse();
-
-
+    doPushToTalk = listenView.isPressAndHold();
   }
 
   private void setMinExpectedDur(ClientExercise commonExercise) {
@@ -364,8 +362,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    */
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
-//    boolean isRehearse = rehearseView instanceof PerformViewHelper;
-    // logger.info("is perform " + isRehearse);
+//    boolean isPressAndHold = rehearseView instanceof PerformViewHelper;
+    // logger.info("is perform " + isPressAndHold);
     NoFeedbackRecordAudioPanel<ClientExercise> recordPanel =
         new ContinuousDialogRecordAudioPanel(exercise, controller, sessionManager, rehearseView, this);
 
@@ -417,7 +415,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
         }
       }
 
-      if (rehearseView.isRehearse()) {
+      if (rehearseView.isPressAndHold()) {
         flClickableRow.insert(buttonContainer, 0);
         Style style = postAudioRecordButton.getElement().getStyle();
         style.setProperty("borderRadius", "18px");

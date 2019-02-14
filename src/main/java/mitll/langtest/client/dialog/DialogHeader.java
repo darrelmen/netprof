@@ -23,11 +23,19 @@ public class DialogHeader {
    * @see #getHeader
    */
   private static final int ROW_WIDTH = 98;
+  public static final String SPEAK_HINT = "<b>Speak</b> when you see the record icon.";
+  public static final String PRESS_AND_HOLD_HINT = "<b>Press and hold</b> when recording.";
 
   private final INavigation.VIEWS thisView;
   private final INavigation.VIEWS prev;
   private final INavigation.VIEWS next;
   private final ExerciseController controller;
+ // private static final int KEY_PRESS_WIDTH = 125;
+  public static final int HINT_WIDTH = 300;
+  private static final String SPACE_PRESS_AND_HOLD = "<b>Space</b> to record (press and hold.)";
+
+  private String ARROW_KEY_TIP;
+  private String ARROW_KEY_TIP_CORE;
 
   /**
    * @param controller
@@ -41,6 +49,23 @@ public class DialogHeader {
     this.thisView = thisView;
     this.prev = prev;
     this.next = next;
+
+    String s = thisView.isPressAndHold() ? SPACE_PRESS_AND_HOLD : SPEAK_HINT;
+    ARROW_KEY_TIP =
+        "<i>" +
+            "<b>Rehearse</b> the dialog at your own speed.<br/><br/>" +
+            s +
+            "<br/>" +
+            "<b>Arrow keys</b> to advance to next turn or go back." +
+            "</i>";
+    ARROW_KEY_TIP_CORE =
+        "<i>" +
+            "<b>Remember</b> the core words.<br/><br/>" +
+            s +
+            "<br/>" +
+            "<b>Arrow keys</b> to advance to next turn or go back." +
+            "</i>";
+
   }
 
   @NotNull
@@ -105,7 +130,9 @@ public class DialogHeader {
         case STUDY:
           row.add(getHint("<i><b>Study</b> the core words and phrases used in the dialog. " +
               "<br/><b>Record</b> yourself to get ready for rehearsing the dialog. " +
-              "<br/><b>Press and hold</b> when recording.</i>"));
+              "<br/>" +
+              PRESS_AND_HOLD_HINT +
+              "</i>"));
           break;
         case LISTEN:
           row.add(getHint("<i><b>Listen</b> to the reference dialog to prepare to rehearse it.</i>"));
@@ -118,7 +145,17 @@ public class DialogHeader {
           break;
         case PERFORM:
           row.add(getHint("<i>Now carry on a natural conversation. " +
-              "<b>Speak</b> when you see the record icon.</i>"));
+              "<br/>" +SPEAK_HINT +
+              "<br/>" +
+
+              "</i>"));
+          break;
+        case PERFORM_PRESS_AND_HOLD:
+          row.add(getHint("<i>Now carry on a natural conversation. " +
+              "<br/>" +  PRESS_AND_HOLD_HINT +
+              "<br/>" +
+
+              "</i>"));
           break;
         default:
           break;
@@ -127,19 +164,6 @@ public class DialogHeader {
     return outer;
   }
 
-  private static final int KEY_PRESS_WIDTH = 125;
-  private static final String ARROW_KEY_TIP =
-      "<i>" +
-          "<b>Rehearse</b> the dialog at your own speed.<br/><br/>" +
-          "<b>Space</b> to record (press and hold.) " +
-          "<b>Arrow keys</b> to advance to next turn or go back." +
-          "</i>";
-  private static final String ARROW_KEY_TIP_CORE =
-      "<i>" +
-          "<b>Remember</b> the core words.<br/><br/>" +
-          "<b>Space</b> to record (press and hold.)<br/>" +
-          "<b>Arrow keys</b> to advance to next turn or go back." +
-          "</i>";
 
   @NotNull
   private Widget getHint(String keyBindings) {
@@ -147,12 +171,9 @@ public class DialogHeader {
     child.addStyleName("floatRight");
     //  child.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
     child.getElement().getStyle().setProperty("marginLeft", "auto");
-    child.setWidth((2 * KEY_PRESS_WIDTH) + "px");
+    child.setWidth(HINT_WIDTH + "px");
     return child;
   }
-//  private String getKeyBindings() {
-//    return ARROW_KEY_TIP;
-//  }
 
   @NotNull
   private com.google.gwt.user.client.ui.Image getFlag(String cc) {

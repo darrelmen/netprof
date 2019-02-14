@@ -21,5 +21,5 @@ public interface IRehearseView extends IListenView {
 
   int getNumValidities();
 
-  boolean isRehearse();
+  boolean isPressAndHold();
 }

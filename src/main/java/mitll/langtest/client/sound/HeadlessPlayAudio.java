@@ -254,8 +254,8 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     if (currentPath == null) {
       logger.warning("loadAndPlay, current path is null?");
 
-      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("no path?"));
-      logger.info("logException stack " + exceptionAsString);
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("no path?"));
+//      logger.info("logException stack " + exceptionAsString);
     } else {
       loadAndPlayOrPlayAudio(currentPath);
     }

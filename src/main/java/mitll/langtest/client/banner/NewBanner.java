@@ -17,6 +17,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.initial.UILifecycle;
+import mitll.langtest.client.list.ViewParser;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -27,6 +28,9 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
+import static mitll.langtest.client.custom.INavigation.VIEWS.*;
+import static mitll.langtest.client.custom.INavigation.VIEWS.PERFORM;
+import static mitll.langtest.client.custom.INavigation.VIEWS.PERFORM_PRESS_AND_HOLD;
 import static mitll.langtest.shared.project.ProjectType.DIALOG;
 
 /**
@@ -44,22 +48,38 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String QC = "QC";
 
   private static final List<VIEWS> STANDARD_VIEWS =
-      Arrays.asList(VIEWS.LEARN, VIEWS.PRACTICE, VIEWS.QUIZ, VIEWS.PROGRESS, VIEWS.LISTS);
+      Arrays.asList(LEARN, VIEWS.PRACTICE, QUIZ, PROGRESS, LISTS);
 
-  private static final List<VIEWS> DIALOG_VIEWS_AFTER =
-      Arrays.asList(VIEWS.STUDY, VIEWS.LISTEN, VIEWS.REHEARSE, VIEWS.CORE_REHEARSE, VIEWS.PERFORM, VIEWS.SCORES);
-
+  private static final List<VIEWS> DIALOG_VIEWS_IN_DROPDOWN =
+      Arrays.asList(
+          STUDY,
+          LISTEN,
+          REHEARSE,
+          CORE_REHEARSE,
+          PERFORM_PRESS_AND_HOLD,
+          PERFORM);//, VIEWS.SCORES);
 
   private static final List<VIEWS> DIALOG_VIEWS =
-      Arrays.asList(VIEWS.DIALOG, VIEWS.STUDY, VIEWS.LISTEN, VIEWS.REHEARSE, VIEWS.CORE_REHEARSE, VIEWS.PERFORM, VIEWS.SCORES);
+      Arrays.asList(
+          VIEWS.DIALOG,
+          STUDY,
+          LISTEN,
+          REHEARSE,
+          CORE_REHEARSE,
+          PERFORM_PRESS_AND_HOLD,
+          PERFORM,
+          SCORES);
 
+  /**
+   * @see #hideOrShowByMode
+   */
   private static final List<VIEWS> BOTH = new ArrayList<>(STANDARD_VIEWS);
 
   static {
     BOTH.addAll(DIALOG_VIEWS);
   }
 
-  private static final List<VIEWS> POLY_VIEWS = Arrays.asList(VIEWS.LEARN, VIEWS.PRACTICE, VIEWS.PROGRESS);
+  private static final List<VIEWS> POLY_VIEWS = Arrays.asList(LEARN, VIEWS.PRACTICE, PROGRESS);
 
   private static final String appNameToUse = "netprof";
   private static final String NETPROF = appNameToUse + (PropertyHandler.IS_BETA ? "BETA" : "");
@@ -98,6 +118,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private final ExerciseController controller;
   private Label subtitle;
+
+  private ViewParser viewParser=new ViewParser();
 
   private static final boolean DEBUG = false;
 
@@ -176,14 +198,15 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     recnav.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
 
-    //   DIALOG_VIEWS.forEach(views -> rememberViewAndLink(recnav, views));
-    // DIALOG_VIEWS.forEach(views -> rememberViewAndLink(recnav, views));
-
     rememberViewAndLink(recnav, VIEWS.DIALOG);
 
     Dropdown nav = new Dropdown(DIALOG_PRACTICE);
     recnav.add(nav);
-    DIALOG_VIEWS_AFTER.forEach(views -> rememberViewAndLink(nav, views));
+
+    DIALOG_VIEWS_IN_DROPDOWN.forEach(views -> rememberViewAndLink(nav, views));
+
+    rememberViewAndLink(recnav, SCORES);
+
     return recnav;
   }
 
@@ -198,8 +221,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     styleNav(recnav);
 
     Dropdown nav = new Dropdown(RECORD);
-    rememberViewAndLink(nav, VIEWS.RECORD_ENTRIES);
-    rememberViewAndLink(nav, VIEWS.RECORD_SENTENCES);
+    rememberViewAndLink(nav, RECORD_ENTRIES);
+    rememberViewAndLink(nav, RECORD_SENTENCES);
 
     recnav.add(nav);
     return recnav;
@@ -226,11 +249,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     Dropdown nav = new Dropdown(QC);
     rnav.add(nav);
-    rememberViewAndLink(nav, VIEWS.QC_ENTRIES);
-    rememberViewAndLink(nav, VIEWS.FIX_ENTRIES);
+    rememberViewAndLink(nav, QC_ENTRIES);
+    rememberViewAndLink(nav, FIX_ENTRIES);
 
-    rememberViewAndLink(nav, VIEWS.QC_SENTENCES);
-    rememberViewAndLink(nav, VIEWS.FIX_SENTENCES);
+    rememberViewAndLink(nav, QC_SENTENCES);
+    rememberViewAndLink(nav, FIX_SENTENCES);
 
     return rnav;
   }
@@ -415,18 +438,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   @NotNull
   private VIEWS getViews(String instance1) {
-    VIEWS choices = VIEWS.NONE;
-    try {
-      String name = instance1.toUpperCase();
-      name = name.replaceAll(" ", "_");
-      if (name.equalsIgnoreCase(DRILL)) name = PRACTICE.toUpperCase();
-      if (name.equalsIgnoreCase("dialogs")) name = VIEWS.DIALOG.name();
-      //    logger.info("name " + name);
-      choices = VIEWS.valueOf(name);
-    } catch (IllegalArgumentException e) {
-      logger.warning("showSectionAfterClick can't parse " + instance1);
-    }
-    return choices;
+    VIEWS view = viewParser.getView(instance1);
+  //  logger.info("getViews " + instance1 + " = " + view);
+    return view;
   }
 
   public void selectView(VIEWS views) {
@@ -488,7 +502,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     recordMenuVisible();
     defectMenuVisible();
     //dialognav.setVisible(hasProjectChoice() && setVisibleChoicesByMode(););
- //   logger.info("reflectPermissions : " + permissions);
+    //   logger.info("reflectPermissions : " + permissions);
   }
 
   @Override
@@ -583,7 +597,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
         linkToShow = viewToLink.get(VIEWS.DIALOG);
       } else {
         if (DEBUG) logger.info("choosing learn view..." + projectStartupInfo);
-        linkToShow = viewToLink.get(VIEWS.LEARN);
+        linkToShow = viewToLink.get(LEARN);
       }
     }
     showActive(linkToShow);
@@ -610,10 +624,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     hideOrShowByMode(isDialogMode ? DIALOG_VIEWS : STANDARD_VIEWS);
     //if (!isDialogMode) {
 
-    if (DEBUG) logger.info("setVisibleChoicesByMode dialognav " + dialognav.getElement().getId() + " is " + isDialogMode);
+    if (DEBUG)
+      logger.info("setVisibleChoicesByMode dialognav " + dialognav.getElement().getId() + " is " + isDialogMode);
 
     dialognav.setVisible(isDialogMode);
-   // }
+    // }
   }
 
   private void hideOrShowByMode(List<VIEWS> standardViews) {

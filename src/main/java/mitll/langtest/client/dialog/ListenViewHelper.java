@@ -16,7 +16,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.IBanner;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
@@ -100,9 +99,8 @@ public class ListenViewHelper<T extends TurnPanel>
   protected int dialogID;
   boolean isInterpreter = false;
 
-//  INavigation.VIEWS prev, next;
-
-  INavigation.VIEWS thisView;
+  private INavigation.VIEWS prev, next;
+  private INavigation.VIEWS thisView;
 
   /**
    * @param controller
@@ -112,6 +110,8 @@ public class ListenViewHelper<T extends TurnPanel>
   public ListenViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     this.controller = controller;
     this.thisView = thisView;
+    this.prev = thisView.getPrev();
+    this.next = thisView.getNext();
   }
 
   /**
@@ -156,7 +156,16 @@ public class ListenViewHelper<T extends TurnPanel>
       this.dialogID = dialog.getID();
       isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
 
-      showDialog(dialogID, dialog, child);
+      INavigation.VIEWS currentView = controller.getNavigation().getCurrentView();
+
+      SelectionState selectionState = new SelectionState();
+      INavigation.VIEWS view = selectionState.getView();
+
+//      if (view != getView()) {
+//        logger.warning("skipping doing this view since out of sync! " + currentView + " vs " + getView() + " vs url view " +view);
+//      } else {
+        showDialog(dialogID, dialog, child);
+//      }
 
       getRefAudio(new ArrayList<RefAudioGetter>(allTurns).iterator());
     } else {
@@ -178,6 +187,8 @@ public class ListenViewHelper<T extends TurnPanel>
     if (dialog == null) {
       child.add(new HTML("hmmm can't find dialog #" + dialogID + " in database"));
     } else {
+     child.clear();  // dangerous???
+
       child.add(dialogHeader = new DialogHeader(controller, thisView, getPrevView(), getNextView()).getHeader(dialog));
 
       //boolean firstIsEnglish = dialog.getExercises().isEmpty() || dialog.getExercises().get(0).hasEnglishAttr();
@@ -340,7 +351,6 @@ public class ListenViewHelper<T extends TurnPanel>
 
   private String getExerciseSpeaker(ClientExercise next) {
     List<ExerciseAttribute> speaker = next.getAttributes().stream().filter(attr -> attr.getProperty().equalsIgnoreCase("Speaker")).collect(Collectors.toList());
-
     return speaker.isEmpty() ? "" : speaker.get(0).getValue();
   }
 
@@ -349,10 +359,6 @@ public class ListenViewHelper<T extends TurnPanel>
     Style style = rowOne.getElement().getStyle();
     style.setProperty("position", "sticky");
     style.setTop(0, PX);
-
-//    setControlRowHeight(rowOne);
-
-//    rowOne.setWidth(97 + "%");
     style.setMarginTop(10, PX);
     style.setMarginBottom(10, PX);
     style.setZIndex(1000);
@@ -771,12 +777,12 @@ public class ListenViewHelper<T extends TurnPanel>
 
   @NotNull
   protected INavigation.VIEWS getPrevView() {
-    return INavigation.VIEWS.STUDY;
+    return prev;
   }
 
   @NotNull
   protected INavigation.VIEWS getNextView() {
-    return INavigation.VIEWS.REHEARSE;
+    return next;
   }
 
   void gotBackward() {

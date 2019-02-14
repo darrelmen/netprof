@@ -1020,7 +1020,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     List<String> tokens = e.getTokens();
     if (tokens == null && !e.hasEnglishAttr()) {
-      logger.warning("no tokens for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage());
+      logger.info("getFLEntry : no tokens for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage());
     }
     flClickableRow = clickableWords.getClickableWords(getFL(e), FieldType.FL, flclickables, isRTL, tokens);
     return flClickableRow;
