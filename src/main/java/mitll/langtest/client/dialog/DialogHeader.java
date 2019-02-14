@@ -23,15 +23,15 @@ public class DialogHeader {
    * @see #getHeader
    */
   private static final int ROW_WIDTH = 98;
-  public static final String SPEAK_HINT = "<b>Speak</b> when you see the record icon.";
-  public static final String PRESS_AND_HOLD_HINT = "<b>Press and hold</b> when recording.";
+  private static final String SPEAK_HINT = "<b>Speak</b> when you see the record icon.";
+  private static final String PRESS_AND_HOLD_HINT = "<b>Press and hold</b> when recording.";
 
   private final INavigation.VIEWS thisView;
   private final INavigation.VIEWS prev;
   private final INavigation.VIEWS next;
   private final ExerciseController controller;
- // private static final int KEY_PRESS_WIDTH = 125;
-  public static final int HINT_WIDTH = 300;
+  // private static final int KEY_PRESS_WIDTH = 125;
+  private static final int HINT_WIDTH = 350;//300;
   private static final String SPACE_PRESS_AND_HOLD = "<b>Space</b> to record (press and hold.)";
 
   private String ARROW_KEY_TIP;
@@ -145,14 +145,14 @@ public class DialogHeader {
           break;
         case PERFORM:
           row.add(getHint("<i>Now carry on a natural conversation. " +
-              "<br/>" +SPEAK_HINT +
+              "<br/>" + SPEAK_HINT +
               "<br/>" +
 
               "</i>"));
           break;
         case PERFORM_PRESS_AND_HOLD:
           row.add(getHint("<i>Now carry on a natural conversation. " +
-              "<br/>" +  PRESS_AND_HOLD_HINT +
+              "<br/>" + PRESS_AND_HOLD_HINT +
               "<br/>" +
 
               "</i>"));

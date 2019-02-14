@@ -8,6 +8,7 @@ import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.*;
+import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.ExerciseListContent;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
@@ -193,7 +194,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @Override
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
 //      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("showView "  + view));
 //      logger.info("logException stack " + exceptionAsString);
@@ -236,32 +237,22 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           dialogHelper.showContent(divWidget, DIALOG);
           break;
         case STUDY:
-          clearAndPushKeep(STUDY);
-          studyHelper.showContent(divWidget, STUDY);
+          clearPushAndShow(studyHelper, STUDY);
           break;
         case LISTEN:
-          clearAndPushKeep(LISTEN);
-          listenHelper.showContent(divWidget, LISTEN);
+          clearPushAndShow(listenHelper, LISTEN);
           break;
         case REHEARSE:
-          clearAndPushKeep(REHEARSE);
-          logger.info("show " + REHEARSE);
-          rehearseHelper.showContent(divWidget, REHEARSE);
+          clearPushAndShow(rehearseHelper, REHEARSE);
           break;
         case CORE_REHEARSE:
-          clearAndPushKeep(CORE_REHEARSE);
-          logger.info("show core " + CORE_REHEARSE);
-          coreRehearseHelper.showContent(divWidget, CORE_REHEARSE);
+          clearPushAndShow(coreRehearseHelper, CORE_REHEARSE);
           break;
         case PERFORM:
-          clearAndPushKeep(PERFORM);
-          //   logger.info("show perform " + PERFORM);
-          performHelper.showContent(divWidget, PERFORM);
+          clearPushAndShow(performHelper, PERFORM);
           break;
         case PERFORM_PRESS_AND_HOLD:
-          clearAndPushKeep(PERFORM);
-          //   logger.info("show press and hold perform " + PERFORM_PRESS_AND_HOLD);
-          performPressAndHoldHelper.showContent(divWidget, PERFORM);
+          clearPushAndShow(performPressAndHoldHelper, PERFORM_PRESS_AND_HOLD);
           break;
         case SCORES:
           clearAndPushKeep(SCORES);
@@ -304,8 +295,14 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           logger.warning("showView huh? unknown view " + view);
       }
     } else {
-      if (DEBUG) logger.info("showView skip current view " + view);
+      if (DEBUG || true) logger.warning("showView skip current view " + view);
     }
+  }
+
+  private void clearPushAndShow(ContentView performHelper, VIEWS perform) {
+    clearAndPushKeep(perform);
+    //   logger.info("show perform " + PERFORM);
+    performHelper.showContent(divWidget, perform);
   }
 
   private boolean shouldKeepList(String currentStoredView) {
@@ -366,10 +363,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       //   logger.info("setInstanceHistory clearing history for instance " + views);
       int dialog = selectionState.getDialog();
       pushItem(getInstanceParam(views) + maybeAddDialogParam(dialog));
+    } else {
+      logger.info("setInstanceHistory NOT clearing history for instance " + views);
     }
-    //else {
-    //  logger.info("setInstanceHistory NOT clearing history for instance " + views);
-    //}
   }
 
   @NotNull

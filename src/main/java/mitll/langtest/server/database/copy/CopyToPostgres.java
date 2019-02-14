@@ -1724,7 +1724,7 @@ public class CopyToPostgres<T extends CommonShell> {
         doExit(true);  // ?
         break;
       case DIALOG:
-        copyDialog(to, cmd.getOptionValue(DIALOG.toLower()), propertiesFile, excelFile,false, false);
+        copyDialog(to, cmd.getOptionValue(DIALOG.toLower()), propertiesFile, excelFile,true, false);
         doExit(true);  // ?
         break;
       case DIALOGADD:

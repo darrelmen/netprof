@@ -180,9 +180,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    */
   void makePlayAudio(T e, DivWidget flContainer) {
     //if (hasAudio(e)) {
-      playAudio = new HeadlessPlayAudio(controller.getSoundManager(), listenView);
-      alignmentFetcher.setPlayAudio(playAudio);
-      rememberAudio(getRegularSpeedIfAvailable(e));
+    playAudio = new HeadlessPlayAudio(controller.getSoundManager(), listenView);
+    alignmentFetcher.setPlayAudio(playAudio);
+    rememberAudio(getRegularSpeedIfAvailable(e));
 //    } else {
 //      logger.warning("makePlayAudio no audio in audio attributes " + e.getAudioAttributes() + " for exercise " + e.getID());
 //    }
@@ -1019,9 +1019,13 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     flclickables = new ArrayList<>();
 
     List<String> tokens = e.getTokens();
-    if (tokens == null && !e.hasEnglishAttr()) {
-      logger.info("getFLEntry : no tokens for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage());
+
+    if (false) {
+      if (tokens == null && !e.hasEnglishAttr()) {
+        logger.info("getFLEntry : no tokens for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage());
+      }
     }
+
     flClickableRow = clickableWords.getClickableWords(getFL(e), FieldType.FL, flclickables, isRTL, tokens);
     return flClickableRow;
   }

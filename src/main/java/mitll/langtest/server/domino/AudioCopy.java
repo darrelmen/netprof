@@ -113,12 +113,11 @@ public class AudioCopy {
     }
   }
 
-
   /**
    * transcript to lower case.
    *
    * @param maxID
-   * @return map of transcript to audio with that transcript
+   * @return map of LC transcript to audio with that transcript
    * @see #copyAudio
    */
   @NotNull
@@ -211,7 +210,7 @@ public class AudioCopy {
       }
 
       if (exid == null || exid == -1) {
-        logger.info("getSlickAudios : no exercise id found for domino ID " + ex.getDominoID() + " or old ID " + ex.getOldID());
+        logger.info("getSlickAudios : no exercise id found for domino ID " + ex.getDominoID() + " or old ID " + ex.getOldID() + " : " + ex.getEnglish() + " " + ex.getForeignLanguage());
       } else {
         boolean hasAudioAlready = daoContainer.getAudioDAO().hasAudio(exid);
         if (hasAudioAlready) {
@@ -221,8 +220,8 @@ public class AudioCopy {
           if (matchInfo.isEmpty()) logger.warn("getSlickAudios can't find match for " + ex.getForeignLanguage() + " in " + transcriptToAudio.size() + " existing items.");
           vocab.add(matchInfo);
         }
-        contextCounts.add(addAudioForContext(projectid,
-            transcriptToAudio, transcriptToContextMatches, ex.getDirectlyRelated()));
+
+        contextCounts.add(addAudioForContext(projectid, transcriptToAudio, transcriptToContextMatches, ex.getDirectlyRelated()));
       }
     }
 

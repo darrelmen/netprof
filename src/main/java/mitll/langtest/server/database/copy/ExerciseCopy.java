@@ -475,6 +475,9 @@ public class ExerciseCopy {
           false, typeOrder));
       exToInt.put(exToUse, exerciseID);
 
+      if (exToUse.getID() == -1) {
+        exToUse.getMutable().setID(exerciseID);
+      }
 
       addAttributesAndRememberIDs(slickUEDAO,
           projectid, importUser,
@@ -483,12 +486,10 @@ public class ExerciseCopy {
           exerciseID, ex.getAttributes(), checkExists);
     }
 
-//    logger.info("addPredefExercises add   bulk  " + bulk.size() + " exercises");
-    // slickUEDAO.addBulk(bulk);
     if (replacements > 0 || converted > 0) {
       logger.info("addPredefExercises " + replacements + " replaced, " + converted + " converted");
     }
-    logger.info("addPredefExercises will add    " + exToJoins.size() + " attributes");
+    logger.info("addPredefExercises will add " + exToJoins.size() + " attributes");
     return exToJoins;
   }
 

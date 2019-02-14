@@ -307,12 +307,6 @@ public class DialogPopulate {
     return commonExercises;
   }
 
-/*
-  private boolean shouldTryToReadDialogInfo(Language languageEnum) {
-    return languageEnum == Language.KOREAN || languageEnum == Language.ENGLISH;
-  }
-*/
-
   private void waitUntilTrieReady(Project project) {
     for (int i = 0; i < 20; i++) {
       if (project.getFullTrie() == null) {
@@ -386,12 +380,12 @@ public class DialogPopulate {
             }
         ));
 
-    logger.info("about to add " + relatedExercises.size() + " related exercises!");
+    logger.info("addCoreVocab about to add " + relatedExercises.size() + " related exercises!");
     db
         .getUserExerciseDAO()
         .getRelatedCoreExercise()
         .addBulkRelated(relatedExercises);
-    logger.info("done adding " + relatedExercises.size() + " related exercises!");
+    logger.info("addCoreVocab done adding " + relatedExercises.size() + " related exercises!");
 
     return newInDatabase;
   }
