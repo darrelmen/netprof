@@ -34,7 +34,14 @@ import java.util.stream.Collectors;
 class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
-  private static final int CHOICES_WIDTH = 800;//970;
+  /**
+   * Gah - doesn't really work very well as me make the window narrower or wider
+   * Gotta turn off the @media thing in bootstrap!
+   */
+  private static final int CHOICES_WIDTH = 762;//970;//800;//970;
+
+
+
 
   private static final int MAX_LENGTH_ID = 19;
   private static final int MAX_LENGTH_ID1 = 2 * MAX_LENGTH_ID + 12;

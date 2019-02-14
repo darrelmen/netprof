@@ -51,6 +51,8 @@ import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.logging.Logger;
 
+import static mitll.langtest.shared.answer.Validity.OK;
+
 /**
  * This binds a record button with the act of posting recorded audio to the server.
  * <p>
@@ -198,7 +200,11 @@ public abstract class PostAudioRecordButton extends RecordButton
       gotAbort();
     } else if (message.equalsIgnoreCase(END)) {
       AudioAnswer audioAnswer = jsonAnswerParser.getAudioAnswer(digestJsonResponse);
-      if (DEBUG_PACKET) logger.info("gotPacketResponse audioAnswer " + audioAnswer);
+      if (DEBUG_PACKET || audioAnswer.getValidity() != OK) {
+        logger.info("gotPacketResponse audioAnswer " + audioAnswer);
+        logger.info("gotPacketResponse json        " + json);
+        controller.logEvent(this, "gotPacketResponse", "" + exerciseID, "invalid recording " + audioAnswer.getValidity());
+      }
       onPostSuccess(audioAnswer, stopRecordingReqTimestamp);
     } else {
       if (DEBUG_PACKET) {
@@ -318,7 +324,7 @@ public abstract class PostAudioRecordButton extends RecordButton
       return;
     }*/
 
-    validAudio = (result.getValidity() == Validity.OK || doQuietAudioCheck(result));
+    validAudio = (result.getValidity() == OK || doQuietAudioCheck(result));
 
     if (result.getAudioAttribute() != null) {
       if (result.getAudioAttribute().getAudioType() == null) {

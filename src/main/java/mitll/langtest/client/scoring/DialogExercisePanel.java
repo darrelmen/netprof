@@ -4,6 +4,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -654,7 +655,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   protected void addFloatLeft(IHighlightSegment current) {
     addFloatLeft(current.asWidget());
   }
-
   protected void addFloatLeft(Widget w) {
     w.addStyleName("floatLeft");
   }
@@ -1063,7 +1063,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   @Override
   public boolean doPlayPauseToggle() {
     if (playAudio != null) {
-      if (DEBUG_PLAY_PAUSE) logger.info("doPlayPauseToggle");
+      if (DEBUG_PLAY_PAUSE) logger.info("doPlayPauseToggle on " + getExID());
+//
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("doing play for " +getExID()));
+//      logger.info("logException stack " + exceptionAsString);
+
       return playAudio.doPlayPauseToggle();
     } else {
       logger.warning("doPlayPauseToggle no play audio???");

@@ -47,7 +47,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
   private static final String DIALOG_INTRO_SHOWN_REHEARSAL = "dialogIntroShownRehearsal";
-  private static final String HOLD_THE_RED_RECORD_BUTTON = "When it's your turn, press and hold the red record button.";
+  private static final String HOLD_THE_RED_RECORD_BUTTON = "When it's your turn, press and hold the red record button or space bar.";
   private static final String RED_RECORD_BUTTON = "Speak when you see the red record button.";
 
   private static final double MAX_RATE_RATIO = 3D;
@@ -1241,6 +1241,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     //maybeMoveOnIfNextTurnARecordingTurn();
   }
 
+  /**
+   * @see RecordDialogExercisePanel.ContinuousDialogRecordAudioPanel#useInvalidResult(int, boolean)
+   * @param exid
+   */
   @Override
   public void useInvalidResult(int exid) {
     T matchingTurn = getTurnForID(exid);

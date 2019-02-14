@@ -39,6 +39,7 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.MouseEvent;
 import com.google.gwt.user.client.Timer;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.initial.PropertyHandler;
@@ -184,7 +185,7 @@ public class RecordButton extends Button {
         if (!mouseDown) {
           // logger.info("gotMouseDown  " + mouseDown);
           mouseDown = true;
-          doClick();
+          doClick(event);
         } else {
           logger.info("setupRecordButton ignoring mouse down since mouse already down ");
         }
@@ -195,7 +196,7 @@ public class RecordButton extends Button {
         // logger.info("gotMouseUp  " + mouseDown);
         if (mouseDown) {
           mouseDown = false;
-          doClick();
+          doClick(event);
         } else {
           logger.info("setupRecordButton ignoring mouse up since mouse already up");
         }
@@ -203,24 +204,28 @@ public class RecordButton extends Button {
 
       addMouseOutHandler(event -> gotMouseOut());
     } else {
-      addClickHandler(event -> doClick());
+      addClickHandler(event -> doClick(event));
     }
   }
 
   private void gotMouseOut() {
     if (mouseDown) {
       mouseDown = false;
-      doClick();
+      doClick(null);
     }
   }
 
   /**
    * NOTE : Can't be private - IDEA mistake...
    *
+   * @param clickEvent
    * @see #setupRecordButton
    */
-  protected void doClick() {
+  protected void doClick(MouseEvent<?> clickEvent) {
     if (isVisible() && isEnabled()) {
+      if (clickEvent != null) {
+        clickEvent.stopPropagation();
+      }
       startOrStopRecording();
     }
   }
@@ -229,8 +234,8 @@ public class RecordButton extends Button {
    * Delay end of recording by some number of milliseconds
    * Wait after the user releases the button, since it seems to get cut off...
    *
-   * @see #doClick
    * @return true if started, false if stopped
+   * @see #doClick
    */
   public boolean startOrStopRecording() {
     //long enter = System.currentTimeMillis();
@@ -264,7 +269,7 @@ public class RecordButton extends Button {
   public void stopRecordingSafe() {
     if (isRecording()) {
       stopRecording();
-     // return true;
+      // return true;
     } else {
 /*      boolean running = afterStopTimer != null && afterStopTimer.isRunning();
       boolean running1 = recordTimer != null && recordTimer.isRunning();

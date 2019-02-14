@@ -34,10 +34,7 @@ package mitll.langtest.client.recorder;
 
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.KeyCodes;
-import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.MyCustomIconType;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
@@ -176,7 +173,7 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton implem
   public void gotSpaceBar() {
     if (!mouseDown) {
       mouseDown = true;
-      doClick();
+      doClick(null);
     }
   }
 
@@ -186,7 +183,7 @@ public abstract class FlashcardRecordButton extends PostAudioRecordButton implem
       logger.warning("huh? mouse down = false");
     } else {
       mouseDown = false;
-      doClick();
+      doClick(null);
     }
   }
 

@@ -93,6 +93,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
+import static mitll.langtest.shared.answer.Validity.OK;
 
 /**
  * does image generation here too - since it's done from a file.
@@ -312,7 +313,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     Validity validity = newChunk.calcValid(audioCheck, isRef, serverProps.isQuietAudioOK());
     AudioCheck.ValidityAndDur validityAndDur = newChunk.getValidityAndDur();
 
-    if (validity != Validity.OK || DEBUG_DETAIL) {
+    if (validity != OK || DEBUG_DETAIL) {
       if (!state.equals(STREAM) || DEBUG_DETAIL) {
         logger.info("getJSONForStream : (" + state + "), \tsession (" + session +
             ") chunk for exid " + realExID + " " + newChunk + " is " + validity + " : " + validityAndDur);
@@ -553,8 +554,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           .setDoAlignment(true)
           .setRecordInResults(true)
           .setRefRecording(isReference)
-          .setAllowAlternates(false)
-          ;
+          .setAllowAlternates(false);
 
       AudioAnswer audioAnswer = getAudioAnswer(null, // not doing it!
           audioContext,
@@ -565,6 +565,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           projid);
 
       if (DEBUG_DETAIL) logger.info("path is " + audioAnswer.getPath());
+
+      if (audioAnswer.getValidity() != OK) {
+        logger.info("getJsonObject not valid " + audioAnswer);
+      }
 
       jsonObject = new JsonScoring(getDatabase())
           .getJsonObject(
@@ -740,7 +744,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           break;
         }
       } else {
-        if (prevQuiet != null && validity == Validity.OK) { // prevQuiet is quiet - too quiet, etc.
+        if (prevQuiet != null && validity == OK) { // prevQuiet is quiet - too quiet, etc.
           start = prevQuiet;
           if (DEBUG_REF_TRIM) logger.info("getCombinedRef start chunk now " + start);
           break;
@@ -776,7 +780,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           break;
         }
       } else {
-        if (nextQuiet != null && validity == Validity.OK) { // assume next is not valid - too quiet, etc.
+        if (nextQuiet != null && validity == OK) { // assume next is not valid - too quiet, etc.
           end = nextQuiet;
           if (DEBUG_REF_TRIM) logger.info("getCombinedRef end chunk now " + end);
           break;

@@ -613,7 +613,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   public void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
 
-    logger.info("setVisibleChoices " +show);
+    //logger.info("setVisibleChoices " +show);
     reflectPermissions(controller.getPermissions());
   }
 
@@ -626,13 +626,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     if (DEBUG) logger.info("setVisibleChoicesByMode set visible choices " + mode);
     boolean isDialogMode = mode == ProjectMode.DIALOG;
     hideOrShowByMode(isDialogMode ? DIALOG_VIEWS : STANDARD_VIEWS);
-    //if (!isDialogMode) {
-
     if (DEBUG)
       logger.info("setVisibleChoicesByMode dialognav " + dialognav.getElement().getId() + " is " + isDialogMode);
 
     dialognav.setVisible(isDialogMode);
-    // }
   }
 
   private void hideOrShowByMode(List<VIEWS> standardViews) {

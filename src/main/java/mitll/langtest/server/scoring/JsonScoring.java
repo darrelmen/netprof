@@ -29,6 +29,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.util.Date;
 
+import static mitll.langtest.shared.answer.Validity.OK;
+
 /**
  * Created by go22670 on 3/7/17.
  */
@@ -196,8 +198,18 @@ public class JsonScoring {
           "\n\tfor      " + answer);
     }
 
+    if (answer == null) {
+      logger.warn("getJsonObject no answer for " +projid + " : " + exerciseID);
+    }
+
+    Validity validity = answer == null ? Validity.INVALID : answer.getValidity();
+
+    if (validity != OK) {
+      logger.warn("getJsonObject invalid " +validity + " : " + answer);
+    }
+
     addValidity(exerciseID, jsonForScore,
-        answer == null ? Validity.INVALID : answer.getValidity(),
+        validity,
         answer == null ? "1" : "" + answer.getReqid());
 
     return jsonForScore;

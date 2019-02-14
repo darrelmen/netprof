@@ -112,10 +112,6 @@ public class ListenViewHelper<T extends TurnPanel>
     this.thisView = thisView;
     this.prev = thisView.getPrev();
     this.next = thisView.getNext();
-
-    logger.info("this " +thisView);
-    logger.info("prev " +prev);
-    logger.info("next " +next);
   }
 
   /**
@@ -817,7 +813,11 @@ public class ListenViewHelper<T extends TurnPanel>
     markCurrent();
 
 
-    if (isPlaying) playCurrentTurn();
+    if (isPlaying) {
+      if (getView() == INavigation.VIEWS.LISTEN) {
+        playCurrentTurn();
+      }
+    }
   }
 
   void gotForward() {

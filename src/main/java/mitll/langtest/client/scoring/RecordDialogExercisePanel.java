@@ -460,7 +460,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
         gotStreamStop = true;
       }
     } else {
-      logger.warning("hmm " + report() + " getting response " + response + " but not recording...?");
+      logger.warning("usePartial hmm " + report() + " getting response " + response + " but not recording...?");
     }
   }
 

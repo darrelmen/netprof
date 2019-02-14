@@ -36,7 +36,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
   final ListenViewHelper.COLUMNS columns;
   private DivWidget bubble;
   private static final String HIGHLIGHT_COLOR = "green";
-  boolean rightJustify;
+  private boolean rightJustify;
 
   /**
    * @param clientExercise
