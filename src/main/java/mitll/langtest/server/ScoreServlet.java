@@ -46,9 +46,10 @@ import mitll.langtest.server.scoring.JsonScoring;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.QuizSpec;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.ModelType;
+import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
@@ -177,6 +178,7 @@ public class ScoreServlet extends DatabaseServlet {
     EXERCISE,
     EXERCISE_TEXT("exerciseText"),
     ENGLISH,
+    KALDI,
     LANGUAGE,
     FULL,
     WIDGET_TYPE("widgetType"),
@@ -433,6 +435,7 @@ public class ScoreServlet extends DatabaseServlet {
    *
    * @param request
    * @return
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private int getTripleProjID(HttpServletRequest request) {
     int projid = getProjID(request);
@@ -455,7 +458,7 @@ public class ScoreServlet extends DatabaseServlet {
       {
         String language = getLanguage(request);
         if (language != null) {
-          projid = getProjectID(language);
+          projid = getProjectID(language, getIsKaldi(request));
         }
       }
     }
@@ -536,10 +539,35 @@ public class ScoreServlet extends DatabaseServlet {
    * PRODUCTION instance - assume only one?
    *
    * @param language
+   * @param isKaldi
    * @return
    */
-  private int getProjectID(String language) {
-    return getDAOContainer().getProjectDAO().getByLanguageProductionOnly(language);
+  private int getProjectID(String language, boolean isKaldi) {
+    Language language1 = null;
+    try {
+      language1 = Language.valueOf(language.toUpperCase());
+      List<Project> productionByLanguage = db.getProjectManagement().getProjectByLangauge(language1);
+
+      if (isKaldi) {
+        productionByLanguage = productionByLanguage.stream().filter(project -> project.getModelType() == ModelType.KALDI).collect(Collectors.toList());
+      } else {
+        productionByLanguage = productionByLanguage.stream().filter(project -> project.getModelType() != ModelType.KALDI).collect(Collectors.toList());
+
+        List<Project> candidates = productionByLanguage;
+        productionByLanguage = candidates.stream().filter(project -> project.getStatus() == ProjectStatus.PRODUCTION).collect(Collectors.toList());
+        if (productionByLanguage.isEmpty()) {
+          productionByLanguage = candidates;
+        }
+      }
+      if (productionByLanguage.size() > 1) {
+        logger.warn("getProjectID more than one production language for " + language1 + " : " + productionByLanguage.size());
+      }
+
+      return productionByLanguage.isEmpty() ? -1 : productionByLanguage.get(0).getID();
+    } catch (IllegalArgumentException e) {
+      logger.error("can't parse language " + language);
+      return -1;
+    }
   }
 
   private DAOContainer getDAOContainer() {
@@ -1151,14 +1179,15 @@ public class ScoreServlet extends DatabaseServlet {
    *
    * @param request
    * @return
+   * @see #getJsonForAudio(HttpServletRequest, PostRequest, String, String)
    */
   private int getProjid(HttpServletRequest request) {
     int projid = getProjectID(request);
 
-    logger.debug("getProjid got projid from session " + projid);
+    logger.info("getProjid got projid from session " + projid);
     if (projid == -1) {
       projid = getProjID(request);
-      logger.debug("getProjid got projid from request " + projid);
+      logger.info("getProjid got projid from request " + projid);
     }
     projid = getProjidFromLanguage(request, projid);
 
@@ -1205,8 +1234,19 @@ public class ScoreServlet extends DatabaseServlet {
     return getHeader(request, HeaderValue.USERID);
   }
 
+  /**
+   * @param request
+   * @return
+   * @see #getTripleProjID(HttpServletRequest)
+   * @see #getProjidFromLanguage(HttpServletRequest, int)
+   */
   private String getLanguage(HttpServletRequest request) {
     return getHeader(request, HeaderValue.LANGUAGE);
+  }
+
+  private boolean getIsKaldi(HttpServletRequest request) {
+    String header = getHeader(request, HeaderValue.KALDI);
+    return header != null && header.equalsIgnoreCase("TRUE");
   }
 
 /*  private int getStreamSession(HttpServletRequest request) {
@@ -1231,6 +1271,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @param request
    * @param projid
    * @return
+   * @see #getProjid(HttpServletRequest)
    * @see #getJsonForAudio
    **/
   private int getProjidFromLanguage(HttpServletRequest request, int projid) {
@@ -1238,12 +1279,12 @@ public class ScoreServlet extends DatabaseServlet {
     //logger.debug("getJsonForAudio got langauge from request " + language);
 
     if (language != null) {
-      projid = getProjectID(language);
-      logger.debug("getJsonForAudio got projid from language " + projid);
+      projid = getProjectID(language, getIsKaldi(request));
+      logger.info("getJsonForAudio got projid from language " + projid);
 
       if (projid == -1) {
         projid = getProjectID(request);
-        logger.debug("getJsonForAudio got projid from request again " + projid);
+        logger.info("getJsonForAudio got projid from request again " + projid);
       }
     }
     return projid;
@@ -1394,7 +1435,7 @@ public class ScoreServlet extends DatabaseServlet {
           String key = split[0];
           String value = split[1];
           if (key.equals(HeaderValue.USER.toString()) ||
-              key.equalsIgnoreCase(HeaderValue.PROJID.name())          ) {
+              key.equalsIgnoreCase(HeaderValue.PROJID.name())) {
             //user = value;
           } else {
             selection.put(key, Collections.singleton(value));

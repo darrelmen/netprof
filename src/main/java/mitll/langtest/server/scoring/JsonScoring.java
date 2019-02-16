@@ -25,6 +25,7 @@ import mitll.langtest.shared.user.MiniUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.Date;
@@ -57,13 +58,18 @@ public class JsonScoring {
   private static final float MIN_HYDRA_ALIGN = 0.3F;
   private static final String BAD_EXERCISE_ID = "bad_exercise_id";
   private static final String DYNAMIC_RANGE = "dynamicRange";
-  public static final String PRETEST = "pretest";
+  private static final String PRETEST = "pretest";
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
+  private final int unknownExID;
 
+  /**
+   * @param db
+   */
   public JsonScoring(DatabaseImpl db) {
     this.db = db;
     this.serverProps = db.getServerProps();
+    unknownExID = db.getUserExerciseDAO().getUnknownExerciseID();
   }
 
 
@@ -100,8 +106,8 @@ public class JsonScoring {
                                            boolean fullJSON) {
     long start = System.currentTimeMillis();
     long then = System.currentTimeMillis();
-    int mostRecentProjectByUser = projid == -1 ? getMostRecentProjectByUser(user) : projid;
-    CommonExercise exercise = db.getCustomOrPredefExercise(mostRecentProjectByUser, exerciseID);  // allow custom items to mask out non-custom items
+
+    CommonExercise exercise = getCommonExercise(projid, exerciseID, user);
 
     JsonObject jsonForScore = new JsonObject();
 
@@ -109,7 +115,7 @@ public class JsonScoring {
     String foreignLanguage = postedWordOrPhrase;
     String transliteration = "";
 
-    if (exercise == null && exerciseID > 1) {
+    if (exercise == null && exerciseID != unknownExID) {
       logger.warn("getJsonForAudioForUser : can't find exercise " + exerciseID + " in " + projid + " giving up.");
       jsonForScore.add(VALID, new JsonPrimitive(BAD_EXERCISE_ID));
       return jsonForScore;
@@ -159,6 +165,16 @@ public class JsonScoring {
     return jsonObject;
   }
 
+  @Nullable
+  private CommonExercise getCommonExercise(int projid, int exerciseID, int user) {
+    if (exerciseID == unknownExID) {
+      return null;
+    } else {
+      int mostRecentProjectByUser = projid == -1 ? getMostRecentProjectByUser(user) : projid;
+      return db.getCustomOrPredefExercise(mostRecentProjectByUser, exerciseID);
+    }
+  }
+
   public JsonObject getJsonObject(int projid,
                                   int exerciseID,
                                   DecoderOptions options,
@@ -188,7 +204,7 @@ public class JsonScoring {
         //    logger.info("getJsonObject timestamp " + timestamp + " " + new Date(timestamp));
         jsonForScore.addProperty("timestamp", timestamp);
       } else {
-        logger.warn("not adding stream info");
+        logger.info("getJsonObject : not adding stream info for req " + projid + " : " +exerciseID);
       }
 
       jsonForScore.addProperty("resultID", answer.getResultID());
@@ -199,13 +215,13 @@ public class JsonScoring {
     }
 
     if (answer == null) {
-      logger.warn("getJsonObject no answer for " +projid + " : " + exerciseID);
+      logger.warn("getJsonObject no answer for " + projid + " : " + exerciseID);
     }
 
     Validity validity = answer == null ? Validity.INVALID : answer.getValidity();
 
     if (validity != OK) {
-      logger.warn("getJsonObject invalid " +validity + " : " + answer);
+      logger.warn("getJsonObject invalid " + validity + " : " + answer);
     }
 
     addValidity(exerciseID, jsonForScore,
@@ -378,15 +394,17 @@ public class JsonScoring {
                                 String device,
                                 DecoderOptions options,
                                 PretestScore pretestScore) {
-    ClientExercise exercise = db.getCustomOrPredefExercise(projectID, exerciseID);  // allow custom items to mask out non-custom items
+    ClientExercise exercise = exerciseID == unknownExID ? null : db.getCustomOrPredefExercise(projectID, exerciseID);  // allow custom items to mask out non-custom items
 
-    if (exerciseID == 0) {
-      exerciseID = db.getUserExerciseDAO().getUnknownExerciseID();
+    if (exerciseID == 0 || exerciseID == unknownExID) {
+      exerciseID = unknownExID;
       // make one up
       exercise = new Exercise();
-      Exercise exercise1 = (Exercise) exercise;
-      exercise1.setForeignLanguage(foreignLanguage);
-      exercise1.setID(exerciseID);
+      {
+        Exercise exercise1 = (Exercise) exercise;
+        exercise1.setForeignLanguage(foreignLanguage);
+        exercise1.setID(exerciseID);
+      }
     }
 
     Language language = getLanguage(projectID);

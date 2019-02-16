@@ -24,7 +24,6 @@ public class AlignmentAndScore extends AlignmentOutput {
   public float getHydecScore() {
     return hydecScore;
   }
-
   public boolean isFullMatch() {
     return fullMatch;
   }

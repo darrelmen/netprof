@@ -571,12 +571,12 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * Don't add nulls to list!
    *
-   * @param group
+   * @param language
    * @return
    */
   @NotNull
-  private List<Project> getProjectsForLanguage(String group) {
-    List<Integer> byLanguage = projectDAO.getByLanguage(group);
+  private List<Project> getProjectsForLanguage(String language) {
+    List<Integer> byLanguage = projectDAO.getByLanguage(language);
 
     List<Project> matches = new ArrayList<>();
     byLanguage.forEach(id -> {

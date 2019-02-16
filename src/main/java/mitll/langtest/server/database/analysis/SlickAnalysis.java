@@ -555,8 +555,10 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     List<SlickPerfResult> nonEnglishOnly = perfForUser
         .stream()
         .filter(slickPerfResult ->
-            !project.getExerciseByID(
-                slickPerfResult.exid()).hasEnglishAttr()).collect(Collectors.toList());
+        {
+          CommonExercise exerciseByID = project.getExerciseByID(slickPerfResult.exid());
+          return exerciseByID == null || !exerciseByID.hasEnglishAttr();
+        }).collect(Collectors.toList());
 
     if (perfForUser.size() != nonEnglishOnly.size()) {
       logger.info("getBestForUser before filter " + perfForUser.size() + " after removing english " + nonEnglishOnly.size());
