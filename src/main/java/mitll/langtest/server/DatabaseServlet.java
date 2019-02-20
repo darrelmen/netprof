@@ -83,7 +83,7 @@ public class DatabaseServlet extends HttpServlet {
    * @return
    * @see #doGet
    */
-  int getProjectID(HttpServletRequest request) {
+  int getProjectIDFromSession(HttpServletRequest request) {
     getDatabase();
     int userIDFromRequest = securityManager.getUserIDFromRequest(request);
     if (userIDFromRequest == -1) {
@@ -101,7 +101,7 @@ public class DatabaseServlet extends HttpServlet {
   /**
    * @param id
    * @return
-   * @see #getProjectID
+   * @see #getProjectIDFromSession
    * @see DownloadServlet#getProjectIDFromUser
    */
   int getMostRecentProjectByUser(int id) {
@@ -110,7 +110,7 @@ public class DatabaseServlet extends HttpServlet {
 
   /**
    * @return
-   * @see #getProjectID
+   * @see #getProjectIDFromSession
    */
   DatabaseImpl getDatabase() {
     if (db == null) {

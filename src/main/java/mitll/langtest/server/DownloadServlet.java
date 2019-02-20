@@ -136,7 +136,7 @@ public class DownloadServlet extends DatabaseServlet {
 
     if (db != null) {
       try {
-        int projid = getProjectID(request);
+        int projid = getProjectIDFromSession(request);
 
         if (projid == -1) {
           projid = getProjectIDFromUser(request);

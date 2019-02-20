@@ -30,17 +30,15 @@
  *
  */
 
-/**
- *
- */
 package mitll.langtest.server.scoring;
 
 import com.google.gson.JsonObject;
-import mitll.langtest.shared.scoring.ImageOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Scores is a simple holder for the combination of scores returned when scoring an utterance.
@@ -57,14 +55,10 @@ public class Scores {
 
   static final String PHONES = "phones";
   static final String WORDS = "words";
-  float hydraScore = 0f;
+  private float hydraScore = 0f;
   private final Map<String, Map<String, Float>> eventScores;
   private int processDur = 0;
   private JsonObject kaldiJsonObject;
-
-  public Scores() {
-    eventScores = Collections.emptyMap();
-  }
 
   /**
    * @param hydecScore
@@ -101,10 +95,6 @@ public class Scores {
     }
   }
 
-  public boolean isValid() {
-    return hydraScore > -0.01;
-  }
-
   /**
    * @return
    * @see ASRWebserviceScoring#scoreRepeatExercise
@@ -115,12 +105,23 @@ public class Scores {
 
   public Scores setKaldiJsonObject(JsonObject kaldiJsonObject) {
     this.kaldiJsonObject = kaldiJsonObject;
-
     return this;
   }
 
   public Map<String, Map<String, Float>> getEventScores() {
     return eventScores;
+  }
+
+  public float getHydraScore() {
+    return hydraScore;
+  }
+
+  public void setHydraScore(float score) {
+    this.hydraScore = score;
+  }
+
+  public boolean isValid() {
+    return hydraScore > -0.01;
   }
 
   public String toString() {

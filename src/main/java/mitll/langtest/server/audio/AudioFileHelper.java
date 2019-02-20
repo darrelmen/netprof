@@ -102,6 +102,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final String TEST_PASSWORD = "domino22";//"demo";
   private static final String COOKIE = "Cookie";
   private static final String SCORE_SERVLET = "scoreServlet";
+  private static final String DEFAULT_EXID = "2";
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -1272,6 +1273,7 @@ public class AudioFileHelper implements AlignDecode {
     HTTPClient httpClient = getHttpClient(hydraHost, isDefault ? "" : project.getWebserviceHost());
     httpClient.addRequestProperty(REQUEST.toString(), requestToServer.toString());
     httpClient.addRequestProperty(ENGLISH.toString(), english);
+    httpClient.addRequestProperty(EXERCISE.toString(), DEFAULT_EXID);
     httpClient.addRequestProperty(EXERCISE_TEXT.toString(), new String(Base64.getEncoder().encode(foreignLanguage.getBytes())));
 
     httpClient.addRequestProperty(LANGUAGE.toString(), language.name().toLowerCase());

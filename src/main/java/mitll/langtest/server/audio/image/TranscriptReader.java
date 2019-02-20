@@ -72,6 +72,13 @@ public class TranscriptReader {
   private final Pattern p = Pattern.compile("\\s+");    /// Splitter for fields in transcript
   private final Pattern semi = Pattern.compile(";");
 
+  /**
+   * @see mitll.langtest.server.audio.imagewriter.TranscriptWriter#getImageTypeMapMap(Map, boolean, Map)
+   * @param labString
+   * @param usePhone
+   * @param phoneToDisplay
+   * @return
+   */
   public SortedMap<Float, TranscriptEvent> readEventsFromString(String labString, boolean usePhone, Map<String,String> phoneToDisplay) {
     // format: start end event;start end event;...
     String[] split = semi.split(labString);

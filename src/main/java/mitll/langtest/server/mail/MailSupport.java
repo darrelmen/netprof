@@ -166,10 +166,9 @@ public class MailSupport {
     this.period = period;
     this.doHeartbeat = doHeartbeat;
     this.recs = recs;
-    if (testEmail) {
-      logger.warn("MailSupport --->using test email");
-    }
-
+//    if (testEmail) {
+//      logger.warn("MailSupport --->using test email");
+//    }
   }
 
  public boolean sendHTMLEmail(String to,

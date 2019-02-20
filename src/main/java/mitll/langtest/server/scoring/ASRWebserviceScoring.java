@@ -55,6 +55,7 @@ import mitll.npdata.dao.lts.HTKDictionary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
@@ -461,7 +462,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       PretestScore pretestScore = getPretestScore(
           imageOutDir,
           imageOptions,
-          decode, prefix, noSuffix,
+          prefix, noSuffix,
           cached,
           cachedDuration, processDur, usePhoneToDisplay, jsonObject, useKaldi);
 
@@ -693,7 +694,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * TODO : don't write images unless we really want them
    *
    * @param imageOutDir
-   * @param decode
    * @param prefix
    * @param noSuffix
    * @param duration
@@ -706,7 +706,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private PretestScore getPretestScore(String imageOutDir,
                                        ImageOptions imageOptions,
 
-                                       boolean decode,
                                        String prefix,
                                        String noSuffix,
                                        HydraOutput result,
@@ -717,61 +716,27 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                        boolean useKaldi) {
     long then = System.currentTimeMillis();
     try {
-      boolean useScoreForBkgColor = imageOptions.isUseScoreToColorBkg();
-      String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (usePhoneToDisplay ? "_phoneToDisplay" : "");
-
-/*
-      logger.info("getPretestScore write images to" +
-          "\n\tout " + imageOutDir +
-          "\n\tnoSuffix " + noSuffix +
-          "\n\tprefix1 " + prefix1
-      );
-*/
-
-// what if we don't want images?
-      int imageWidth = imageOptions.getWidth();
-      int imageHeight = imageOptions.getHeight();
-
       boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay(languageEnum);
-      EventAndFileInfo eventAndFileInfo = jsonObject == null ?
-          writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
-              useScoreForBkgColor,
-              prefix1, "", decode, result.getPhoneLab(), result.getWordLab(), true, usePhoneToDisplay, imageOptions.isWriteImages()) :
-          writeTranscriptsCached(imageOutDir, imageWidth, imageHeight, noSuffix,
-              useScoreForBkgColor,
-              prefix1, decode,
-              jsonObject, reallyUsePhone, imageOptions.isWriteImages(), useKaldi);
 
-      Map<NetPronImageType, String> sTypeToImage;
-      if (eventAndFileInfo == null) {
-        logger.warn("getPretestScore huh? no event and file info? ");
-        sTypeToImage = Collections.emptyMap();
-      } else {
-        Map<ImageType, String> typeToFile = eventAndFileInfo.getTypeToFile();
-        // logger.info("getPretestScore type to file " + typeToFile);
-        sTypeToImage = getTypeToRelativeURLMap(typeToFile);
-      }
+      EventAndFileInfo eventAndFileInfo = getEventAndFileInfo(imageOutDir, imageOptions, prefix, noSuffix, result, usePhoneToDisplay, jsonObject, useKaldi);
 
-      Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent =
-          eventAndFileInfo == null ? Collections.emptyMap() : eventAndFileInfo.getTypeToEvent();
+      Map<NetPronImageType, String> sTypeToImage = getTypeToImage(eventAndFileInfo);
 
-      Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes = generator.getTypeToSegments(typeToEvent, languageEnum);
+      Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(eventAndFileInfo);
 
 /*
       logger.info("getPretestScore sTypeToImage" +
           "\n\tsTypeToImage " + sTypeToImage
       );
 */
-      if (typeToEndTimes.isEmpty()) {
+      if (typeToSegments.isEmpty()) {
         logger.warn("getPretestScore huh? no segments from words " + result);// + " phones " + phoneLab);
       }
-
 /*
-      logger.info("getPretestScore typeToEndTimes" +
-          "\n\ttypeToEndTimes " + typeToEndTimes
+      logger.info("getPretestScore typeToSegments" +
+          "\n\ttypeToSegments " + typeToSegments
       );
 */
-
       Map<String, String> phoneToDisplay = Collections.emptyMap();
       if (reallyUsePhone && this.phoneToDisplay != null) {
         phoneToDisplay = this.phoneToDisplay;
@@ -786,16 +751,25 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         }
       }
 
+      Map<String, Float> phoneToScore = getPhoneToScore(scores.getEventScores(), phoneToDisplay);
+      //  logger.info("getPretestScore phone " + phoneToScore);
+
+      Map<String, Float> wordToScore = getWordToScore(scores.getEventScores());
+      //  logger.info("getPretestScore word  " + wordToScore);
+
+      maybeClampScore(typeToSegments, scores);
+
       PretestScore pretestScore = new PretestScore(
-          scores.hydraScore,
-          getPhoneToScore(scores.getEventScores(), phoneToDisplay),
-          getWordToScore(scores.getEventScores()),
+          scores.getHydraScore(),
+          phoneToScore,
+          wordToScore,
           sTypeToImage,
-          typeToEndTimes,
+          typeToSegments,
           getRecoSentence(eventAndFileInfo),
           (float) duration,
           processDur,
-          isMatch(result, typeToEndTimes));
+          isMatch(result, typeToSegments));
+
       long now = System.currentTimeMillis();
 
       if (now - then > 10) {
@@ -806,6 +780,73 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       logger.error("getPretestScore got " + e, e);
       return new PretestScore(-1).setStatus(e.getMessage());
     }
+  }
+
+  private EventAndFileInfo getEventAndFileInfo(String imageOutDir, ImageOptions imageOptions,
+                                               String prefix, String noSuffix, HydraOutput result,
+                                               boolean usePhoneToDisplay, JsonObject jsonObject, boolean useKaldi) {
+    boolean reallyUsePhone = usePhoneToDisplay || props.usePhoneToDisplay(languageEnum);
+    boolean useScoreForBkgColor = imageOptions.isUseScoreToColorBkg();
+    String prefix1 = prefix + (useScoreForBkgColor ? "bkgColorForRef" : "") + (usePhoneToDisplay ? "_phoneToDisplay" : "");
+
+/*
+      logger.info("getPretestScore write images to" +
+          "\n\tout " + imageOutDir +
+          "\n\tnoSuffix " + noSuffix +
+          "\n\tprefix1 " + prefix1
+      );
+*/
+
+// what if we don't want images?
+    int imageWidth = imageOptions.getWidth();
+    int imageHeight = imageOptions.getHeight();
+
+    return jsonObject == null ?
+        writeTranscripts(imageOutDir, imageWidth, imageHeight, noSuffix,
+            useScoreForBkgColor,
+            prefix1, "", result.getPhoneLab(), result.getWordLab(), usePhoneToDisplay, imageOptions.isWriteImages()) :
+        writeTranscriptsCached(imageOutDir, imageWidth, imageHeight, noSuffix,
+            useScoreForBkgColor,
+            prefix1,
+            jsonObject, reallyUsePhone, imageOptions.isWriteImages(), useKaldi);
+  }
+
+  private void maybeClampScore(Map<NetPronImageType, List<TranscriptSegment>> typeToSegments, Scores scores) {
+    List<TranscriptSegment> transcriptSegments = typeToSegments.get(NetPronImageType.WORD_TRANSCRIPT);
+    if (transcriptSegments != null && transcriptSegments.size() == 1) {
+      TranscriptSegment transcriptSegment = transcriptSegments.get(0);
+      float hydraScore = scores.getHydraScore();
+      float singleWordScore = transcriptSegment.getScore();
+      boolean diff = Math.abs(hydraScore - singleWordScore) > 0.0000001;
+
+      if (diff) {
+        scores.setHydraScore(singleWordScore);
+        logger.info("getPretestScore " +
+            "\n\tdiff = " + diff +
+            "\n\tclamp overall score to single word score " + singleWordScore + " from " + hydraScore);
+      }
+    }
+  }
+
+  @NotNull
+  private Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments(EventAndFileInfo eventAndFileInfo) {
+    Map<ImageType, Map<Float, TranscriptEvent>> typeToEvent =
+        eventAndFileInfo == null ? Collections.emptyMap() : eventAndFileInfo.getTypeToEvent();
+
+    return generator.getTypeToSegments(typeToEvent, languageEnum);
+  }
+
+  private Map<NetPronImageType, String> getTypeToImage(EventAndFileInfo eventAndFileInfo) {
+    Map<NetPronImageType, String> sTypeToImage;
+    if (eventAndFileInfo == null) {
+      logger.warn("getPretestScore huh? no event and file info? ");
+      sTypeToImage = Collections.emptyMap();
+    } else {
+      Map<ImageType, String> typeToFile = eventAndFileInfo.getTypeToFile();
+      // logger.info("getPretestScore type to file " + typeToFile);
+      sTypeToImage = getTypeToRelativeURLMap(typeToFile);
+    }
+    return sTypeToImage;
   }
 
   /**
@@ -950,25 +991,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       // 0th entry-overall score and phone scores,
       // 1st entry-word alignments,
       // 2nd entry-phone alignments
-      long timeToRunHydra = System.currentTimeMillis() - then;
-
-      if (results[0].isEmpty()) {
-        String message = getFailureMessage(audioPath, transcript, lmSentences, decode);
-        logger.error(message);
-        if (logAndNotify != null) {  // skip during testing
-          logAndNotify.logAndNotifyServerException(null, message);
-        }
-        return null;
-      }
-      // TODO makes this a tuple3 type
-      String[] split = results[0].split(SEMI);
-      Scores scores = new Scores(split);
-
-      logger.info("runHydra " + languageEnum +
-          "\n\ttook      " + timeToRunHydra + " millis to run " + (decode ? "decode" : "align") +
-          "\n\ton        " + audioPath +
-          "\n\tscore     " + split[0] /*+
-          "\n\traw reply " + resultsStr*/);
+      Scores scores = getScores(audioPath, transcript, lmSentences, decode, then, results);
+      if (scores == null) return null;
 
       // clean up tmp directory if above score threshold
     /*if (Float.parseFloat(split[0]) > lowScoreThresholdKeepTempDir) {   // keep really bad scores for now
@@ -985,6 +1009,32 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           possibleProns,
           transNormDict); // where are the # coming from?
     }
+  }
+
+  @Nullable
+  private Scores getScores(String audioPath, String transcript, Collection<String> lmSentences, boolean decode, long then, String[] results) {
+    long timeToRunHydra = System.currentTimeMillis() - then;
+
+    if (results[0].isEmpty()) {
+      String message = getFailureMessage(audioPath, transcript, lmSentences, decode);
+      logger.error(message);
+      if (logAndNotify != null) {  // skip during testing
+        logAndNotify.logAndNotifyServerException(null, message);
+      }
+      return null;
+    }
+    // TODO makes this a tuple3 type
+    String[] split = results[0].split(SEMI);
+    Scores scores = new Scores(split);
+
+    logger.info("runHydra " + languageEnum +
+        "\n\ttook      " + timeToRunHydra + " millis to run " + (decode ? "decode" : "align") +
+        "\n\ton        " + audioPath +
+        "\n\tscore     " + split[0] /*+
+        "\n\traw reply " + resultsStr*/);
+
+    for (String r : results) logger.info("getScores hydra : " + r);
+    return scores;
   }
 
   @NotNull

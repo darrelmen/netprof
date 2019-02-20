@@ -44,17 +44,17 @@ public class JsonScoring {
 
   private static final String IS_CORRECT = "isCorrect";
   private static final String SAID_WORD = "saidWord";
+  private static final String FULLMATCH = "fullmatch";
 
   private static final String EXID = "exid";
   private static final String VALID = "valid";
   private static final String REQID = "reqid";
-  //private static final String INVALID = "invalid";
 
   private static final String RESULT_ID = "resultID";
 
   private static final ImageOptions DEFAULT = ImageOptions.getDefault();
   public static final boolean TRY_TO_DO_ALIGNMENT = false;
-  //  public static final String EXERCISE_TEXT = "exerciseText";
+
   private static final float MIN_HYDRA_ALIGN = 0.3F;
   private static final String BAD_EXERCISE_ID = "bad_exercise_id";
   private static final String DYNAMIC_RANGE = "dynamicRange";
@@ -190,21 +190,9 @@ public class JsonScoring {
         jsonForScore.addProperty("isfullmatch", answer.getPretestScore().isFullMatch());
       }
       if (addStream) {
-        jsonForScore.addProperty("duration", answer.getDurationInMillis());
-        jsonForScore.addProperty(DYNAMIC_RANGE, answer.getDynamicRange());
-        String path = answer.getPath();
-        if (path.isEmpty()) logger.warn("no path?");
-        jsonForScore.addProperty("path", path);
-
-        if (jsonForScore.get(PRETEST) == null) {
-          jsonForScore.add(PRETEST, new JsonObject());
-        }
-
-        long timestamp = answer.getTimestamp();
-        //    logger.info("getJsonObject timestamp " + timestamp + " " + new Date(timestamp));
-        jsonForScore.addProperty("timestamp", timestamp);
+        addStreamInfo(jsonForScore, answer);
       } else {
-        logger.info("getJsonObject : not adding stream info for req " + projid + " : " +exerciseID);
+        logger.info("getJsonObject : not adding stream info for req " + projid + " : " + exerciseID);
       }
 
       jsonForScore.addProperty("resultID", answer.getResultID());
@@ -229,6 +217,22 @@ public class JsonScoring {
         answer == null ? "1" : "" + answer.getReqid());
 
     return jsonForScore;
+  }
+
+  private void addStreamInfo(JsonObject jsonForScore, AudioAnswer answer) {
+    jsonForScore.addProperty("duration", answer.getDurationInMillis());
+    jsonForScore.addProperty(DYNAMIC_RANGE, answer.getDynamicRange());
+    String path = answer.getPath();
+    if (path.isEmpty()) logger.warn("no path?");
+    jsonForScore.addProperty("path", path);
+
+    if (jsonForScore.get(PRETEST) == null) {
+      jsonForScore.add(PRETEST, new JsonObject());
+    }
+
+    long timestamp = answer.getTimestamp();
+    //    logger.info("getJsonObject timestamp " + timestamp + " " + new Date(timestamp));
+    jsonForScore.addProperty("timestamp", timestamp);
   }
 
   /**
@@ -261,6 +265,7 @@ public class JsonScoring {
         scoreToJSON.getJsonObject(pretestScore) :
         scoreToJSON.getJsonForScore(pretestScore, usePhoneToDisplay, serverProps, project.getLanguageEnum());
     jsonForScore.addProperty(SCORE, hydecScore);
+    jsonForScore.addProperty(FULLMATCH, pretestScore != null && pretestScore.isFullMatch());
 
     if (doFlashcard) {
       jsonForScore.addProperty(IS_CORRECT, answer.isCorrect());

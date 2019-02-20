@@ -465,7 +465,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     if (projid == -1) {
       // not using header
-      projid = getProjectID(request);
+      projid = getProjectIDFromSession(request);
     }
     return projid;
   }
@@ -556,11 +556,15 @@ public class ScoreServlet extends DatabaseServlet {
         List<Project> candidates = productionByLanguage;
         productionByLanguage = candidates.stream().filter(project -> project.getStatus() == ProjectStatus.PRODUCTION).collect(Collectors.toList());
         if (productionByLanguage.isEmpty()) {
+          logger.warn("can't find any production projects?");
           productionByLanguage = candidates;
         }
       }
+
       if (productionByLanguage.size() > 1) {
-        logger.warn("getProjectID more than one production language for " + language1 + " : " + productionByLanguage.size());
+        logger.warn("getProjectIDFromSession more than one production language for " + language1 + " : " + productionByLanguage.size());
+        Project project = productionByLanguage.get(0);
+        logger.warn("getProjectIDFromSession will choose " + project + " : model = " + project.getModelType());
       }
 
       return productionByLanguage.isEmpty() ? -1 : productionByLanguage.get(0).getID();
@@ -1182,14 +1186,21 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #getJsonForAudio(HttpServletRequest, PostRequest, String, String)
    */
   private int getProjid(HttpServletRequest request) {
-    int projid = getProjectID(request);
+    int projid = getProjID(request);
 
-    logger.info("getProjid got projid from session " + projid);
     if (projid == -1) {
-      projid = getProjID(request);
+      projid = getProjidFromLanguage(request, projid);
+      if (projid != -1) {
+        logger.info("getProjid got projid from language " + projid);
+      }
+    } else {
       logger.info("getProjid got projid from request " + projid);
     }
-    projid = getProjidFromLanguage(request, projid);
+
+    if (projid == -1) {
+      projid = getProjectIDFromSession(request);
+      logger.info("getProjid got projid from session " + projid);
+    }
 
     return projid;
   }
@@ -1283,7 +1294,7 @@ public class ScoreServlet extends DatabaseServlet {
       logger.info("getJsonForAudio got projid from language " + projid);
 
       if (projid == -1) {
-        projid = getProjectID(request);
+        projid = getProjectIDFromSession(request);
         logger.info("getJsonForAudio got projid from request again " + projid);
       }
     }

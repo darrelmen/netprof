@@ -168,24 +168,21 @@ public abstract class Scoring {
    * @param useScoreToColorBkg
    * @param prefix
    * @param suffix
-   * @param decode             if true don't bother to write out images for word and phone
    * @param writeImages
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
    * @see ASRWebserviceScoring#getPretestScore
    */
   EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
                                     String audioFileNoSuffix, boolean useScoreToColorBkg,
-                                    String prefix, String suffix, boolean decode,
-                                    String phoneLab, String wordLab, boolean useWebservice,
+                                    String prefix, String suffix,
+                                    String phoneLab, String wordLab,
                                     boolean usePhoneToDisplay, boolean writeImages) {
     // logger.info("writeTranscripts - " + audioFileNoSuffix + " prefix " + prefix);
-
     Map<ImageType, String> typeToFile = getTypeToFile(audioFileNoSuffix, phoneLab, wordLab);
 
     boolean usePhone = usePhoneToDisplay || props.usePhoneToDisplay(languageEnum);
     if (writeImages) {
-      String pathname = audioFileNoSuffix + ".wav";
-      pathname = prependDeploy(pathname);
+      String pathname = getAudioPath(audioFileNoSuffix);
       if (!new File(pathname).exists()) {
         logger.error("writeTranscripts : can't find " + pathname);
         return new EventAndFileInfo();
@@ -233,7 +230,6 @@ public abstract class Scoring {
    * @param audioFileNoSuffix
    * @param useScoreToColorBkg
    * @param prefix
-   * @param decode
    * @param object
    * @param writeImages
    * @return
@@ -243,7 +239,6 @@ public abstract class Scoring {
                                           int imageWidth, int imageHeight,
                                           String audioFileNoSuffix, boolean useScoreToColorBkg,
                                           String prefix,
-                                          boolean decode,
                                           JsonObject object,
                                           boolean usePhoneToDisplay,
                                           boolean writeImages,
@@ -251,8 +246,7 @@ public abstract class Scoring {
     if (writeImages) {
       Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
           getTypeToTranscriptEvents(object, usePhoneToDisplay, useKaldi);
-      String pathname = audioFileNoSuffix + ".wav";
-      pathname = prependDeploy(pathname);
+      String pathname = getAudioPath(audioFileNoSuffix);
       if (!new File(pathname).exists()) {
         logger.error("writeTranscripts : can't find " + pathname);
         return new EventAndFileInfo();
@@ -265,8 +259,13 @@ public abstract class Scoring {
           imageTypeMapMap);
     } else {
       return new EventAndFileInfo(Collections.emptyMap(), getTypeToTranscriptEvents(object, usePhoneToDisplay, useKaldi));
-
     }
+  }
+
+  private String getAudioPath(String audioFileNoSuffix) {
+    String pathname = audioFileNoSuffix + ".wav";
+    pathname = prependDeploy(pathname);
+    return pathname;
   }
 
   private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,

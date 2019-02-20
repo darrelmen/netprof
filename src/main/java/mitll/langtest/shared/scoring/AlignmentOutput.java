@@ -38,16 +38,16 @@ public class AlignmentOutput implements IsSerializable {
     return sTypeToEndTimes;
   }
 
-  public String toString() {
-    List<TranscriptSegment> transcriptSegments = sTypeToEndTimes.get(NetPronImageType.WORD_TRANSCRIPT);
-    return transcriptSegments.isEmpty() ? " EMPTY " : transcriptSegments.toString();
-  }
-
   public boolean isShowPhoneScores() {
     return showPhoneScores;
   }
 
   public void setShowPhoneScores(boolean showPhoneScores) {
     this.showPhoneScores = showPhoneScores;
+  }
+
+  public String toString() {
+    List<TranscriptSegment> transcriptSegments = sTypeToEndTimes.get(NetPronImageType.WORD_TRANSCRIPT);
+    return transcriptSegments.isEmpty() ? " EMPTY " : transcriptSegments.toString();
   }
 }
