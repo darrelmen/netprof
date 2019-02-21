@@ -1313,7 +1313,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
 
     if (projID == -1) {
-      logger.warn("no projects loaded yet ???");
+      logger.warn("logEvent no projects loaded yet ???");
       return false;
     } else {
       int realExid = -1;
@@ -1327,6 +1327,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
       if (!projectManagement.exists(projID)) projID = projectDAO.getDefault();
       Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device, realExid);
+      if (id.equalsIgnoreCase("WARNING")) {
+        logger.warn("logEvent " + event);
+      }
       return eventDAO != null && eventDAO.addToProject(event, projID);
     }
   }

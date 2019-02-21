@@ -11,15 +11,16 @@ do
     echo `pwd`
 
     mkdir -p /tmp/tempAnswers/$langlc
-    cd /opt/netprof/answers/$langlc
+    cd /opt/netprof/answers/
 
     echo `pwd`
 
     date
-    echo "before tar"
+  #  echo "before tar"
 
  #   tar cfz /tmp/tempAnswers/$langlc/$toPost --exclude='*.raw, *_16K.wav, *_16K_*.wav' answers
-    tar -cfz /tmp/tempAnswers/$langlc/$toPost --newer-mtime='2018-08-01 23:59:59'  --exclude='*.raw' --exclude='*_16K.wav' --exclude='*_16K_*.wav' --exclude='orig_*.wav' --exclude='trim_*.wav' --exclude='*.lab' tempAnswers
+    echo tar cfz /tmp/tempAnswers/$langlc/$toPost --newer-mtime='2018-08-01 23:59:59'  --exclude='*.raw' --exclude='*_16K.wav' --exclude='*_16K_*.wav' --exclude='orig_*.wav' --exclude='trim_*.wav' --exclude='*.lab' $langlc
+    tar cfz /tmp/tempAnswers/$langlc/$toPost --newer-mtime='2018-08-01 23:59:59'  --exclude='*.raw' --exclude='*_16K.wav' --exclude='*_16K_*.wav' --exclude='orig_*.wav' --exclude='trim_*.wav' --exclude='*.lab' $langlc
 
     date
     echo "after  tar"

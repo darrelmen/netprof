@@ -11,15 +11,16 @@ do
     echo `pwd`
 
     mkdir -p /tmp/tempBestAudio/$langlc
-    cd /opt/netprof/bestAudio/$langlc
+    cd /opt/netprof/bestAudio
 
     echo `pwd`
 
     date
-    echo "before tar"
+ #   echo "before tar"
 
  # newer than aug 1 2018
-    tar -cfz /tmp/tempBestAudio/$langlc/$toPost --newer-mtime='2018-08-01 23:59:59'  --exclude='*.raw' --exclude='*_16K.wav' --exclude='*_16K_*.wav' --exclude='orig_*.wav' --exclude='trim_*.wav' --exclude='*.lab' bestAudio
+    echo tar cfz /tmp/tempBestAudio/$langlc/$toPost --newer-mtime='2018-08-01 23:59:59'  --exclude='*.raw' --exclude='*_16K.wav' --exclude='*_16K_*.wav' --exclude='orig_*.wav' --exclude='trim_*.wav' --exclude='*.lab' $langlc
+    tar cfz /tmp/tempBestAudio/$langlc/$toPost --newer-mtime='2018-08-01 23:59:59'  --exclude='*.raw' --exclude='*_16K.wav' --exclude='*_16K_*.wav' --exclude='orig_*.wav' --exclude='trim_*.wav' --exclude='*.lab' $langlc
 
     date
     echo "after  tar"

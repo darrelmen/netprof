@@ -952,10 +952,11 @@ public class ScoreServlet extends DatabaseServlet {
 
       //   logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " + user + " " + exid);
 
+      int projid = getProjid(request);
       if (widgetid == null) {
-        db.logEvent(exid == null ? "N/A" : exid, context, userid, device, -1);
+        db.logEvent(exid == null ? "N/A" : exid, context, userid, device, projid);
       } else {
-        db.logEvent(widgetid, widgetType, exid == null ? "N/A" : exid, context, userid, device, -1);
+        db.logEvent(widgetid, widgetType, exid == null ? "N/A" : exid, context, userid, device, projid);
       }
     }
   }

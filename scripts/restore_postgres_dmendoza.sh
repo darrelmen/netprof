@@ -22,7 +22,10 @@ psql -U postgres --host 127.0.0.1 -c "alter database netprof rename to netprof_o
 
 # create database from dump
 date
-pg_restore -d netprof -U netprof -C /tmp/netprof_pg.dump
+#pg_restore -d netprof -U netprof -C /tmp/netprof_pg.dump
+
+#pg_restore -C -d postgres /tmp/netprof_pg.dump
+pg_restore -U postgres -C -d postgres /tmp/netprof_pg.dump
 
 date
 echo "Done!"
