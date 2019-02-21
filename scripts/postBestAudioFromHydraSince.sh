@@ -2,11 +2,9 @@
 
 for langlc in `ls /opt/netprof/bestAudio | grep -v korean | grep -v levantine | grep -v msa | grep -v russian`;
 do
-    #lang=${file:12}
-    #langlc="${lang,,}"
     echo $langlc
 
-    suffix="BestAudio.tar.gz"
+    suffix="BestAudioIncremental.tar.gz"
     toPost=$langlc$suffix
     echo "Posting best audio for $toPost"
 
@@ -20,7 +18,8 @@ do
     date
     echo "before tar"
 
-    tar cfz /tmp/tempBestAudio/$langlc/$toPost -N date "01 Aug 2018" --exclude='*.raw, *_16K.wav, *_16K_*.wav, orig_*.wav, trim_*.wav, *.lab, *.ogg' bestAudio
+ # newer than aug 1 2018
+    tar -cfz /tmp/tempBestAudio/$langlc/$toPost --newer-mtime='2018-08-01 23:59:59'  --exclude='*.raw' --exclude='*_16K.wav' --exclude='*_16K_*.wav' --exclude='orig_*.wav' --exclude='trim_*.wav' --exclude='*.lab' bestAudio
 
     date
     echo "after  tar"
