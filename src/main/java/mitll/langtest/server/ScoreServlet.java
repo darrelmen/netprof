@@ -59,11 +59,9 @@ import org.jetbrains.annotations.NotNull;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.URLDecoder;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -877,7 +875,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     if (resultID == null) {
       String message = "addRT missing header " + HeaderValue.RESULT_ID;
-      logger.error(message);
+   //   logger.error(message);
       JsonObject.addProperty(ERROR, "addRT " + message);
     } else if (roundTripMillis == null) {
       String message = "addRT missing header " + HeaderValue.ROUND_TRIP1;
@@ -885,20 +883,24 @@ public class ScoreServlet extends DatabaseServlet {
       JsonObject.addProperty(ERROR, "addRT " + message);
     } else {
       try {
-        int resultID1 = Integer.parseInt(resultID);
-        long roundTripMillis1 = Long.parseLong(roundTripMillis);
-        //logger.info("addRT : " + resultID1 + " = " + roundTripMillis1);
-
-        if (roundTripMillis1 == 0) {
-          logger.warn("addRT : huh? got 0 for " + roundTripMillis);
-        }
-
-        addRT(resultID1, roundTripMillis1, JsonObject);
+        addRT(JsonObject, resultID, roundTripMillis);
       } catch (NumberFormatException e) {
         logger.warn("addRT: Got bad format " + e, e);
         addRTError(JsonObject, e);
       }
     }
+  }
+
+  private void addRT(JsonObject JsonObject, String resultID, String roundTripMillis) {
+    int resultID1 = Integer.parseInt(resultID);
+    long roundTripMillis1 = Long.parseLong(roundTripMillis);
+    //logger.info("addRT : " + resultID1 + " = " + roundTripMillis1);
+
+    if (roundTripMillis1 == 0) {
+      logger.warn("addRT : huh? got 0 for " + roundTripMillis);
+    }
+
+    addRT(resultID1, roundTripMillis1, JsonObject);
   }
 
   private void addRTError(JsonObject JsonObject, NumberFormatException e) {
@@ -950,15 +952,41 @@ public class ScoreServlet extends DatabaseServlet {
       String widgetid = request.getHeader(WIDGET);
       String widgetType = getHeader(request, HeaderValue.WIDGET_TYPE);
 
-      //   logger.debug("doPost : Request " + requestType + " for " + deviceType + " user " + user + " " + exid);
+      if (context == null) {
+        context = getContentFromPost(request, context);
+      }
+      else {
+        logger.info("gotLogEvent not reading from stream since got " +context);
+      }
 
       int projid = getProjid(request);
+
+/*      logger.info("gotLogEvent : " +
+          "\n\tprojid " + projid +
+          "\n\tcontext " + context +
+          "\n\texid " + exid +
+          "\n\twidgetid " + widgetid +
+          "\n\twidgetType " + widgetType
+      );*/
+
       if (widgetid == null) {
         db.logEvent(exid == null ? "N/A" : exid, context, userid, device, projid);
       } else {
         db.logEvent(widgetid, widgetType, exid == null ? "N/A" : exid, context, userid, device, projid);
       }
     }
+  }
+
+  private String getContentFromPost(HttpServletRequest request, String context) {
+    StringWriter stringWriter = new StringWriter();
+    try {
+      org.apache.commons.io.IOUtils.copy(request.getInputStream(), stringWriter, Charset.defaultCharset());
+      context = stringWriter.toString();
+    //  logger.info("gotLogEvent context now " + context);
+    } catch (IOException e) {
+      logger.error("Got " + e,e);
+    }
+    return context;
   }
 
   private User getUser(int userid) {

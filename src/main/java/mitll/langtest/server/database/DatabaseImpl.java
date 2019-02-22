@@ -153,6 +153,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final int MAX_PHONES = 7;
   private static final boolean TEST_SYNC = false;
   private static final int WARN_THRESH = 10;
+  public static final String CRASH = "crash";
 
   private IUserDAO userDAO;
   private IUserSessionDAO userSessionDAO;
@@ -416,7 +417,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     afterDAOSetup(slickAudioDAO);
 
- //   logger.info("finalSetup : tables = " + getTables());
+    //   logger.info("finalSetup : tables = " + getTables());
   }
 
   /**
@@ -1327,8 +1328,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
       if (!projectManagement.exists(projID)) projID = projectDAO.getDefault();
       Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device, realExid);
-      if (id.equalsIgnoreCase("WARNING")) {
+      if (id.equalsIgnoreCase(CRASH)) {
+        logger.error("got " + context);
+      } else if (id.equalsIgnoreCase("WARNING")) {
         logger.warn("logEvent " + event);
+      } else {
+        logger.info("logEvent id " + id + " : " + event);
       }
       return eventDAO != null && eventDAO.addToProject(event, projID);
     }
@@ -1346,7 +1351,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #initializeDAOs
    */
   public void createTables() {
-   // logger.info("createTables create slick tables - has " + getTables());
+    // logger.info("createTables create slick tables - has " + getTables());
     List<String> created = new ArrayList<>();
 
     List<String> known = dbConnection.getJavaListOfTables();
