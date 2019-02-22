@@ -47,6 +47,9 @@ public class ProjectChoices extends ThumbnailChoices {
 
 
   private static final String EDIT_PROJECT = "Edit project.";
+  /**
+   *
+   */
   private static final String MODES = "Interpreter and Vocab";
 
   private static final String GVIDAVER = "gvidaver";
@@ -130,6 +133,7 @@ public class ProjectChoices extends ThumbnailChoices {
 
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_CLICK = false;
 
   /**
    * @param langTest
@@ -639,12 +643,12 @@ public class ProjectChoices extends ThumbnailChoices {
   @NotNull
   private DivWidget getContainerWithButtons(String name, SlimProject projectForLang, boolean isQC, int numVisibleChildren) {
     boolean hasChildren = projectForLang.hasChildren();
-    boolean alldialog = areAllChildrenDialogChoices(projectForLang, numVisibleChildren);
+    boolean allDialog = areAllChildrenDialogChoices(projectForLang, numVisibleChildren);
 
     DivWidget container = new DivWidget();
     Heading label;
 
-    container.add(label = getLabel(truncate(name, 23), projectForLang, numVisibleChildren));
+    container.add(label = getLabel(truncate(name, 23), projectForLang, numVisibleChildren, allDialog));
     container.setWidth("100%");
     container.addStyleName("floatLeft");
 
@@ -652,7 +656,7 @@ public class ProjectChoices extends ThumbnailChoices {
     //logger.info("getContainerWithButtons project " + projectForLang.getID() + " " + projectForLang.getName() + " " + projectType);
 
     if (isQC &&
-        ((hasChildren && alldialog) ||
+        ((hasChildren && allDialog) ||
             (!hasChildren && projectType != ProjectType.DIALOG))) {
       // logger.info("getContainerWithButtons add qc buttons " + isQC);
       container.add(getQCButtons(projectForLang, label));
@@ -696,17 +700,16 @@ public class ProjectChoices extends ThumbnailChoices {
    * @param name
    * @param projectForLang
    * @param numVisibleChildren
+   * @param allDialog
    * @return
    * @paramx hasChildren
    * @see #getContainerWithButtons(String, SlimProject, boolean, int)
    */
   @NotNull
-  private Heading getLabel(String name, SlimProject projectForLang, int numVisibleChildren) {
+  private Heading getLabel(String name, SlimProject projectForLang, int numVisibleChildren, boolean allDialog) {
     ProjectStatus status = projectForLang.getStatus();
     String statusText = status == ProjectStatus.PRODUCTION ? "" : status.name();
-
-    boolean alldialog = areAllChildrenDialogChoices(projectForLang, numVisibleChildren);
-    return getLabel(name, projectForLang.hasChildren(), numVisibleChildren, statusText, alldialog);
+    return getLabel(name, projectForLang.hasChildren(), numVisibleChildren, statusText, allDialog);
   }
 
   private boolean areAllChildrenDialogChoices(SlimProject projectForLang, int numVisibleChildren) {
@@ -1030,16 +1033,16 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {
     List<SlimProject> children = projectForLang.getChildren();
-    if (DEBUG) logger.info("gotClickOnFlag project " + projid + " has " + children);
+    if (DEBUG_CLICK) logger.info("gotClickOnFlag project " + projid + " has " + children);
     NavLink breadcrumb = makeBreadcrumb(name);
     if (children.size() < 2) {
-      if (DEBUG) logger.info("gotClickOnFlag onClick select leaf project " + projid +
+      if (DEBUG_CLICK) logger.info("gotClickOnFlag onClick select leaf project " + projid +
           " " + projectForLang.getMode() +
           "\n\tcurrent user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
 
       setProjectForUser(projid, projectForLang.getMode());
     } else { // at this point, the breadcrumb should be empty?
-      if (DEBUG)
+      if (DEBUG_CLICK)
         logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
       breadcrumb.addClickHandler(clickEvent -> {
 //        SlimProject projectForLang1 = projectForLang;

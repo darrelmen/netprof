@@ -71,6 +71,8 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   private static final String NUM_ITEMS = "#";
   private static final String NO = "No";
   private static final String YES = "Yes";
+  public static final int DESC_WIDTH = 180;
+  public static final int DESC_MAX_LENGTH = 25;//30;
   private final boolean slim;
   private final boolean addOwnerToDescrip;
   private final  boolean addTeacherCol;
@@ -217,7 +219,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
     diff.setSortable(true);
     addColumn(diff, new TextHeader(DESCRIPTION));
     table.addColumnSortHandler(getDiffSorter(diff, getList()));
-    table.setColumnWidth(diff, 200 + "px");
+    table.setColumnWidth(diff, DESC_WIDTH + "px");
   }
 
   private void addClass() {
@@ -289,7 +291,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
         String owner = addOwnerToDescrip && (shell.getUserID() != controller.getUser()) ? "(" + shell.getFirstInitialName() + ") " : "";
         String description = owner + shell.getDescription();
         //   logger.info("Desc " + description + " length " + description.length());
-        String truncate = truncate(description, 30);
+        String truncate = truncate(description, DESC_MAX_LENGTH);
         //   logger.info("truncate " + truncate + " length " + truncate.length());
         return getNoWrapContent(truncate);
       }
@@ -321,7 +323,8 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
 
       @Override
       public SafeHtml getValue(UserList<CommonShell> shell) {
-        return getSafeHtml(shell.getFirstInitialName());
+        String firstInitialName = shell.getFirstInitialName();
+        return getSafeHtml(truncate(firstInitialName, 20));
       }
     };
   }

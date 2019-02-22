@@ -12,6 +12,7 @@ import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
@@ -27,6 +28,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.banner.NewContentChooser.MODE;
 import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
 import static mitll.langtest.shared.project.ProjectType.DIALOG;
@@ -38,7 +40,7 @@ import static mitll.langtest.shared.project.ProjectType.DIALOG;
 public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
 
-//  private static final String DRILL = "Drill";
+  //  private static final String DRILL = "Drill";
 //  private static final String PRACTICE = "Practice";
   private static final String DIALOG_PRACTICE = "Practice";//"Rehearse";
 
@@ -101,7 +103,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String DOCUMENTATION = "User Manual";
 
   private final UILifecycle lifecycle;
+  /**
+   *
+   */
   private ComplexWidget recnav, defectnav, dialognav;
+  private Dropdown dialogPracticeNav;
 
   private Nav lnav;
   private Dropdown cog;
@@ -117,7 +123,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final ExerciseController controller;
   private Label subtitle;
 
-  private ViewParser viewParser=new ViewParser();
+  private ViewParser viewParser = new ViewParser();
 
   private static final boolean DEBUG = false;
 
@@ -158,10 +164,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     // dialog nav
     {
-      // navCollapse.add(dialognav = getDialogNav());
-
-
-      ComplexWidget interpreterNav = getDialogNav();// getInterpreterNav();
+      ComplexWidget interpreterNav = getDialogNav();
       this.dialognav = interpreterNav;
       navCollapse.add(interpreterNav);
     }
@@ -198,10 +201,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     rememberViewAndLink(recnav, VIEWS.DIALOG);
 
-    Dropdown nav = new Dropdown(DIALOG_PRACTICE);
-    recnav.add(nav);
+    dialogPracticeNav = new Dropdown(DIALOG_PRACTICE);
+    recnav.add(dialogPracticeNav);
 
-    DIALOG_VIEWS_IN_DROPDOWN.forEach(views -> rememberViewAndLink(nav, views));
+    DIALOG_VIEWS_IN_DROPDOWN.forEach(views -> rememberViewAndLink(dialogPracticeNav, views));
 
     rememberViewAndLink(recnav, SCORES);
 
@@ -437,7 +440,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @NotNull
   private VIEWS getViews(String instance1) {
     VIEWS view = viewParser.getView(instance1);
-  //  logger.info("getViews " + instance1 + " = " + view);
+    //  logger.info("getViews " + instance1 + " = " + view);
     return view;
   }
 
@@ -501,10 +504,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     defectMenuVisible();
 
     boolean isDialog = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == DIALOG;
-
-   // logger.info("isDialog " +isDialog);
-    dialognav.setVisible(hasProjectChoice() && isDialog);
+    boolean visible = hasProjectChoice() && isDialog;
+    setDialogNavVisible(visible);
     //   logger.info("reflectPermissions : " + permissions);
+  }
+
+  private void setDialogNavVisible(boolean visible) {
+    ProjectMode mode = controller.getMode();
+    dialognav.setVisible(visible && mode == ProjectMode.DIALOG);
   }
 
   @Override
@@ -535,7 +542,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setCogVisible(false);
     setRecNavVisible(false);
     setDefectNavVisible(false);
-    dialognav.setVisible(false);
+    setDialogNavVisible(false);
   }
 
   @Override
@@ -629,7 +636,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     if (DEBUG)
       logger.info("setVisibleChoicesByMode dialognav " + dialognav.getElement().getId() + " is " + isDialogMode);
 
-    dialognav.setVisible(isDialogMode);
+    setDialogNavVisible(isDialogMode);
   }
 
   private void hideOrShowByMode(List<VIEWS> standardViews) {
