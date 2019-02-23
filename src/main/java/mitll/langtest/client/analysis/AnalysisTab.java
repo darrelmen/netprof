@@ -69,8 +69,8 @@ import java.util.logging.Logger;
  * @since 10/21/15.
  */
 public class AnalysisTab extends DivWidget {
-  public static final String TIME_SCALE = "timeScale";
-  public static final String TIME_SCALE1 = "Time Scale : ";
+  private static final String TIME_SCALE = "timeScale";
+  private static final String TIME_SCALE1 = "Time Scale : ";
   private final Logger logger = Logger.getLogger("AnalysisTab");
 
   private static final int MIN_HEIGHT = 325;
@@ -127,7 +127,7 @@ public class AnalysisTab extends DivWidget {
       this.offset = offset;
     }
 
-    public String getDisplay() {
+    String getDisplay() {
       return display;
     }
 
@@ -457,7 +457,7 @@ public class AnalysisTab extends DivWidget {
    * @see #AnalysisTab
    */
   @NotNull
-  protected DivWidget getBottom(boolean isTeacherView) {
+  private DivWidget getBottom(boolean isTeacherView) {
     DivWidget bottom = new DivWidget();
     //  bottom.addStyleName("inlineFlex");
     bottom.setWidth("100%");
@@ -781,8 +781,8 @@ public class AnalysisTab extends DivWidget {
     return wordsContainer;
   }
 
-  PhoneExampleContainer exampleContainer;
-  WordContainerAsync wordContainer;
+  private PhoneExampleContainer exampleContainer;
+  private WordContainerAsync wordContainer;
 
   /**
    * @param controller
