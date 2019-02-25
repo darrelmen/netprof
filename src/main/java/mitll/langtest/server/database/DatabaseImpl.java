@@ -93,6 +93,7 @@ import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.analysis.PhoneReportRequest;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.IDialog;
@@ -1262,12 +1263,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @return
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    */
-  public JsonObject getJsonPhoneReport(int userid, int projid, Map<String, Collection<String>> typeToValues) {
+  public JsonObject getJsonPhoneReport(PhoneReportRequest request) {
+    int projid = request.getProjid();
     if (projid == -1) {
-      projid = projectForUser(userid);
+      projid = projectForUser(request.getUserid());
     }
-    return getJsonSupportForProject(projid)
-        .getJsonPhoneReport(userid, typeToValues, getLanguage(projid));
+    return getJsonSupportForProject(projid).getJsonPhoneReport(request);
   }
 
   @Override

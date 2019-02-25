@@ -95,9 +95,8 @@ public class TimeAndScore extends SimpleTimeAndScore implements Comparable<Simpl
   }
 
   public String toString() {
-    String format = getTimeString();
-    return exid + "\tat\t" + format + " avg score for " + //getWordAndScore().getWord() +
-        //childCount + "\t" +
-        " =\t" + getScore() + "\t" + getCumulativeAverage();
+ //   String format = getTimeString();
+    return exid + "\t" +super.toString()+
+        "\tcumulative avg " + getCumulativeAverage();
   }
 }

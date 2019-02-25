@@ -35,12 +35,14 @@ package mitll.langtest.server.database;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.server.sorter.ExerciseSorter;
+import mitll.langtest.shared.analysis.PhoneReportRequest;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -268,13 +270,28 @@ public class JsonSupport {
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    * @see DatabaseImpl#getJsonPhoneReport
    */
-  JsonObject getJsonPhoneReport(int userid, Map<String, Collection<String>> typeToValues, String language) {
+  JsonObject getJsonPhoneReport(PhoneReportRequest request) {
+    Map<String, Collection<String>> typeToValues = request.getTypeToValues();
     Collection<String> listid = typeToValues.get(LISTID);
 
     Collection<CommonExercise> exercisesForState;
     if (listid == null || listid.isEmpty()) {
+      // remove the session...
+      typeToValues.remove(ScoreServlet.HeaderValue.SESSION.name().toLowerCase());
+      typeToValues.remove(ScoreServlet.HeaderValue.SENTENCES.name().toLowerCase());
+
       exercisesForState = sectionHelper.getExercisesForSelectionState(typeToValues);
-      logger.info("getJsonPhoneReport : for user " + userid + " and" +
+
+      if (request.isSentencesOnly()) {
+        List<CommonExercise> sentences = new ArrayList<>(exercisesForState.size());
+        exercisesForState.forEach(ex -> ex.getDirectlyRelated().forEach(sentence -> sentences.add(sentence.asCommon())));
+
+        logger.info("getJsonPhoneReport from " + exercisesForState.size() + " to " + sentences.size() + " sentences");
+        exercisesForState = sentences;
+      } else {
+        logger.info("getJsonPhoneReport not converting to just sentences");
+      }
+      logger.info("getJsonPhoneReport : for user " + request.getUserid() + " and" +
           "\n\tsel " +
           typeToValues +
           "\n\tgot " + exercisesForState.size() + " exercises");
@@ -282,6 +299,6 @@ public class JsonSupport {
       exercisesForState = userListManager.getCommonExercisesOnList(project.getID(), getListID(listid));
     }
     List<Integer> ids = exercisesForState.stream().map(HasID::getID).collect(Collectors.toList());
-    return phoneDAO.getWorstPhonesJson(userid, ids, language, project);
+    return phoneDAO.getWorstPhonesJson(ids, project, request);
   }
 }

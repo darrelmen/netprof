@@ -129,22 +129,22 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   /**
    * TODO : consider if we need to add transcript or not.
    *
-   * @param userid
    * @param exids
-   * @param language
    * @param project
+   * @param request
    * @return
    * @see mitll.langtest.server.database.JsonSupport#getJsonPhoneReport
    */
   @Override
-  public JsonObject getWorstPhonesJson(int userid,
-                                       Collection<Integer> exids,
-                                       String language,
-                                       Project project) {
-    Collection<SlickPhoneReport> phoneReportByExercises = dao.getPhoneReportByExercises(userid, exids);
+  public JsonObject getWorstPhonesJson(Collection<Integer> exids,
+                                       Project project,
+                                       PhoneReportRequest request) {
+    int userid = request.getUserid();
+    Collection<SlickPhoneReport> phoneReportByExercises = dao.getPhoneReportByExercises(userid, exids, request.getSessionID());
     PhoneReport report = getPhoneReport(phoneReportByExercises, false, userid, project);
     logger.info("getWorstPhonesJson phone report for" +
         "\n\tuser          " + userid +
+        "\n\tsessionID     " + request.getSessionID() +
         "\n\texids         " + exids.size() +
         "\n\treport        " + report +
         "\n\tphone reports " + phoneReportByExercises.size()
@@ -439,6 +439,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
       c++;
 
       if (DEBUG_PHONE) logger.info("getPhoneReport #" + c + " : " + report);
+
 
       // info from result table
       int exid = report.exid();

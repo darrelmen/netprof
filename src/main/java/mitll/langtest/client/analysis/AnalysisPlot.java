@@ -248,12 +248,14 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     float totalScore = 0f;
 
     int n = simpleTimeAndScores.size();
-    int sessionSize = -1;
+  //  int sessionSize = -1;
     for (TimeAndScore exerciseCorrectAndScore : simpleTimeAndScores) {
       float score = exerciseCorrectAndScore.getScore();
-      if (sessionSize == -1 && exerciseCorrectAndScore.getSessionSize() > 0) {
-        sessionSize = exerciseCorrectAndScore.getSessionSize();
-      }
+
+//      if (sessionSize == -1 && exerciseCorrectAndScore.getSessionSize() > 0) {
+//        sessionSize = exerciseCorrectAndScore.getSessionSize();
+//      }
+
       if (score > 0) {
         totalScore += score;
       }
@@ -1183,7 +1185,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
       return "";
     } else {
       int denom = simpleTimeAndScores.iterator().next().getSessionSize();
-      // logger.info("getScoreText session size = " + denom + " n " + n + " fround " + fround1);
+       logger.info("getScoreText session size = " + denom + " n " + n + " fround " + fround1);
 
       if (denom < 0) {
         denom = n;

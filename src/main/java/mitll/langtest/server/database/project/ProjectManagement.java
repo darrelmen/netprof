@@ -117,6 +117,8 @@ public class ProjectManagement implements IProjectManagement {
   private static final String INTERPRETER1 = "interpreter";
   //public static final String ANSWERS1 = "^.*answers\\/(.+)\\/.+";
   private static final String ANSWERS1 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
+  private static final Pattern pattern = Pattern.compile(ANSWERS1);
+
   /**
    * JUST FOR TESTING
    */
@@ -302,6 +304,7 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * Production only
+   *
    * @param language
    * @return
    */
@@ -311,7 +314,7 @@ public class ProjectManagement implements IProjectManagement {
         .stream()
         .filter(slickProject ->
             slickProject.language().equalsIgnoreCase(language.name()) &&
-            slickProject.status().equalsIgnoreCase(ProjectStatus.PRODUCTION.name()))
+                slickProject.status().equalsIgnoreCase(ProjectStatus.PRODUCTION.name()))
         .collect(Collectors.toList());
   }
 
@@ -320,10 +323,9 @@ public class ProjectManagement implements IProjectManagement {
     List<SlickProject> slickProjectsByLanguage = getSlickProjectsByLanguage(language);
     if (slickProjectsByLanguage.isEmpty()) {
       return -1;
-    }
-    else {
+    } else {
       if (slickProjectsByLanguage.size() > 1) {
-        logger.warn("found " + slickProjectsByLanguage.size() + " for " +language);
+        logger.warn("found " + slickProjectsByLanguage.size() + " for " + language);
       }
       return slickProjectsByLanguage.get(0).id();
     }
@@ -504,7 +506,7 @@ public class ProjectManagement implements IProjectManagement {
         }
       }
 
-     // logger.info("about to remember users for  " + projectID);
+      // logger.info("about to remember users for  " + projectID);
 
       db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUsersForProject(projectID));
       logger.info("rememberUsers finished remembering users for  " + projectID);
@@ -512,7 +514,8 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   /**
-   * We should be able to look at the file and figure out the project and owner id
+   * NO : these are imported files - can't trust the UID.
+   * NO : We should be able to look at the file and figure out the project and owner id
    *
    * answers/spanish/answers/plan/1711/0/subject-896/answer_1511623283958.wav
    * /opt/netprof/answers/spanish/answers/plan/1711/0/subject-896/answer_1511623283958.wav
@@ -526,45 +529,34 @@ public class ProjectManagement implements IProjectManagement {
   @Override
   public int getUserForFile(String requestURI) {
     int userID = -1;
+    Matcher matcher = pattern.matcher(requestURI);
+    if (matcher.find()) {
+      String group = matcher.group(1);
+      // logger.info("getUserForFile lang " + group);
+      List<Project> matches = getProjectsForLanguage(group);
 
-    String[] split = requestURI.split("subject-");
-    if (split.length == 2) {
-      String s1 = split[1];
-      String[] split1 = s1.split("/");
-      String s = split1[0];
-      try {
-        // logger.info("getUserForFile parse " + s);
-        userID = Integer.parseInt(s);
-      } catch (NumberFormatException e) {
-        logger.warn("getUserForFile couldn't parse " + s + " in " + s1 + " of " + requestURI);
-      }
-    } else {  // fallback???
-      Pattern pattern = Pattern.compile(ANSWERS1);
-      Matcher matcher = pattern.matcher(requestURI);
-
-      if (matcher.find()) {
-        String group = matcher.group(1);
-        // logger.info("getUserForFile lang " + group);
-        List<Project> matches = getProjectsForLanguage(group);
-
-        if (matches.isEmpty()) {
-          logger.warn("getUserForFile lang " + group + " match no projects?");
-          userID = getUserIDFromAll(requestURI);
-        } else {
-          // logger.info("getUserForFile lang " + group + " matches " + matches.size());
-          userID = getUserIDFrom(requestURI, matches);
-          if (userID == -1) {
-            logger.info("getUserForFile lang " + group + " project matches " + matches.size());
-          }
-          return userID;
-        }
+      if (matches.isEmpty()) {
+        logger.warn("getUserForFile lang '" + group + "' match no projects in " + requestURI);
+        userID = getUserIDFromAll(requestURI);
       } else {
-        return getUserIDFromAll(requestURI);
+        // logger.info("getUserForFile lang " + group + " matches " + matches.size());
+        userID = getUserIDFrom(requestURI, matches);
+
+        if (false) {
+          if (userID == -1) {
+            logger.info("getUserForFile NO USER ID for lang '" + group + "' project matches " + matches.size());
+          }
+        }
+        return userID;
       }
+    } else {
+      return getUserIDFromAll(requestURI);
     }
+
     if (userID == -1) {
       logger.info("getUserForFile couldn't find recorder of " + requestURI);
     }
+
     return userID;
   }
 
@@ -891,6 +883,7 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * Only on previously loaded projects.
+   *
    * @param name
    * @return
    */

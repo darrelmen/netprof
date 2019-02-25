@@ -64,6 +64,7 @@ public class UserInfo extends SimpleUser {
   /**
    * @param bestScores
    * @see mitll.langtest.server.database.analysis.Analysis#getBestForQuery
+   * @see mitll.langtest.server.database.analysis.Analysis#getUserIDToInfo(int, Map, Map)
    */
   public UserInfo(List<BestScore> bestScores, long startTime) {
     this.bestScores = bestScores;
@@ -180,7 +181,7 @@ public class UserInfo extends SimpleUser {
   }
 
   public int getLastSessionScore() {
-    return lastSessionScore;//Integer.valueOf(lastSessionScore).floatValue() / 10F;
+    return lastSessionScore;
   }
 
   /**
@@ -191,7 +192,6 @@ public class UserInfo extends SimpleUser {
   public int getLastSessionNum() {
     return lastSessionNum;
   }
-
   public int getLastSessionSize() {
     return lastSessionSize;
   }

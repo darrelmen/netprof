@@ -44,6 +44,7 @@ import mitll.langtest.server.json.ProjectExport;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.scoring.JsonScoring;
 import mitll.langtest.server.sorter.ExerciseSorter;
+import mitll.langtest.shared.analysis.PhoneReportRequest;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.QuizSpec;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -116,7 +117,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final boolean CONVERT_DECODE_TO_ALIGN = true;
   private static final String MESSAGE = "message";
   private static final String UTF_8 = "UTF-8";
-  private static final String LIST = "list";
+  //private static final String LIST = "list";
   public static final String SORT_BY_LATEST_SCORE = "sortByLatestScore";
   public static final String TRUE = "true";
   public static final String FALSE = "false";
@@ -128,6 +129,8 @@ public class ScoreServlet extends DatabaseServlet {
       "connection",
       "password",
       "pass"));
+  public static final String SENTENCES_PARAM = HeaderValue.SENTENCES.name().toLowerCase();
+//  public static final String SESSION = "session";
 
 
   private boolean removeExercisesWithMissingAudioDefault = true;
@@ -174,6 +177,9 @@ public class ScoreServlet extends DatabaseServlet {
     USERID,
     REQUEST,
     EXERCISE,
+    LIST,
+    SESSION,
+    SENTENCES, // only
     EXERCISE_TEXT("exerciseText"),
     ENGLISH,
     KALDI,
@@ -328,21 +334,22 @@ public class ScoreServlet extends DatabaseServlet {
           if (split1.length < 2) {
             toReturn.addProperty(ERROR, "expecting at least two query parameters");
           } else {
-            toReturn = getPhoneReport(toReturn, split1, projid, userID);
+            long sessionID = getLong(queryString, HeaderValue.SESSION.name().toLowerCase());
+            toReturn = getPhoneReport(toReturn, split1, projid, userID, sessionID);
           }
         } else if (realRequest == GetRequest.LIST) {
           toReturn = db.getUserListManager().getListsJson(userID, projid, false);
         } else if (realRequest == GetRequest.QUIZ) {
           toReturn = db.getUserListManager().getListsJson(userID, projid, true);
         } else if (realRequest == GetRequest.CONTENT) {
-          int listid = getListParam(queryString);
+          long listid = getListParam(queryString);
           //logger.info("list id " + listid);
       /*    try {
             new Thread().sleep(10000);
           } catch (InterruptedException e) {
             e.printStackTrace();
           }*/
-          toReturn = getJsonForListContent(projid, listid);
+          toReturn = getJsonForListContent(projid, Long.valueOf(listid).intValue());
         } else {
           toReturn.addProperty(ERROR, "unknown req " + queryString);
         }
@@ -406,17 +413,21 @@ public class ScoreServlet extends DatabaseServlet {
     return nestedChapters;
   }
 
-  private int getListParam(String queryString) {
+  private long getListParam(String queryString) {
+    return getLong(queryString, HeaderValue.LIST.name().toLowerCase());
+  }
+
+  private long getLong(String queryString, String paramToLookFor) {
     String[] split1 = queryString.split("&");
-    int listid = -1;
+    long listid = -1;
     for (String arg : split1) {
       String[] split = arg.split("=");
       if (split.length == 2) {
         String key = split[0];
-        if (key.equals(LIST)) {
+        if (key.equals(paramToLookFor)) {
           String value = split[1];
           try {
-            listid = Integer.parseInt(value);
+            listid = Long.parseLong(value);
           } catch (NumberFormatException e) {
             logger.warn("can't parse " + value);
           }
@@ -607,23 +618,28 @@ public class ScoreServlet extends DatabaseServlet {
    * @param toReturn
    * @param split1
    * @param projid
+   * @param sessionID
    * @return
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private JsonObject getPhoneReport(JsonObject toReturn, String[] split1, int projid, int userid) {
+  private JsonObject getPhoneReport(JsonObject toReturn, String[] split1, int projid, int userid, long sessionID) {
     Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke().getSelection();
 
-    logger.info("getPhoneSummary : user " + userid + " selection " + selection + " proj " + projid);
     try {
       long then = System.currentTimeMillis();
 
       int projectID = getProjectID(projid, userid);
-      toReturn = db.getJsonPhoneReport(userid, projectID, selection);
+      Collection<String> strings = selection.get(SENTENCES_PARAM);
+      boolean sentencesOnly = (strings != null && strings.iterator().next().equalsIgnoreCase("TRUE"));
+      logger.info("getPhoneSummary : user " + userid + " selection " + selection + " proj " + projid + " sentencesOnly " + sentencesOnly);
+      PhoneReportRequest phoneReportRequest = new PhoneReportRequest(userid, projid, selection, sessionID, sentencesOnly);
+      toReturn = db.getJsonPhoneReport(phoneReportRequest);
       long now = System.currentTimeMillis();
       if (now - then > 5) {
         logger.info("getPhoneSummary :" +
             "\n\tuser      " + userid +
             "\n\tselection " + selection +
+            "\n\tsentences " + sentencesOnly +
             "\n\tprojectID " + projectID +
             "\n\ttook      " + (now - then) + " millis");
       }
@@ -804,7 +820,9 @@ public class ScoreServlet extends DatabaseServlet {
     writeJsonToOutput(response, JsonObject);
 
     long now = System.currentTimeMillis();
-    logger.info("doPost request " + requestType + " took " + (now - then) + " millis");
+    if (now - then > 10) {
+      logger.info("doPost request " + requestType + " took " + (now - then) + " millis");
+    }
   }
 
   @NotNull
@@ -875,7 +893,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     if (resultID == null) {
       String message = "addRT missing header " + HeaderValue.RESULT_ID;
-   //   logger.error(message);
+      //   logger.error(message);
       JsonObject.addProperty(ERROR, "addRT " + message);
     } else if (roundTripMillis == null) {
       String message = "addRT missing header " + HeaderValue.ROUND_TRIP1;
@@ -954,9 +972,8 @@ public class ScoreServlet extends DatabaseServlet {
 
       if (context == null) {
         context = getContentFromPost(request, context);
-      }
-      else {
-        logger.info("gotLogEvent not reading from stream since got " +context);
+      } else {
+//        logger.info("gotLogEvent not reading from stream since got " + context);
       }
 
       int projid = getProjid(request);
@@ -982,9 +999,9 @@ public class ScoreServlet extends DatabaseServlet {
     try {
       org.apache.commons.io.IOUtils.copy(request.getInputStream(), stringWriter, Charset.defaultCharset());
       context = stringWriter.toString();
-    //  logger.info("gotLogEvent context now " + context);
+      //  logger.info("gotLogEvent context now " + context);
     } catch (IOException e) {
-      logger.error("Got " + e,e);
+      logger.error("Got " + e, e);
     }
     return context;
   }
@@ -1040,6 +1057,13 @@ public class ScoreServlet extends DatabaseServlet {
     }
     return JsonObject;
   }
+
+  /**
+   * @param projectid
+   * @param listid
+   * @return
+   * @see #doGet(HttpServletRequest, HttpServletResponse)
+   */
 
   private JsonObject getJsonForListContent(int projectid, int listid) {
     JsonExport jsonExport = getJsonExport(projectid);
@@ -1223,7 +1247,7 @@ public class ScoreServlet extends DatabaseServlet {
         logger.info("getProjid got projid from language " + projid);
       }
     } else {
-      logger.info("getProjid got projid from request " + projid);
+//      logger.info("getProjid got projid from request " + projid);
     }
 
     if (projid == -1) {
@@ -1376,14 +1400,14 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private boolean getUsePhoneToDisplay(HttpServletRequest request) {
-    return getParam(request, USE_PHONE_TO_DISPLAY);
+    return getBooleanParam(request, USE_PHONE_TO_DISPLAY);
   }
 
   private boolean getAllowAlternates(HttpServletRequest request) {
-    return getParam(request, ALLOW_ALTERNATES);
+    return getBooleanParam(request, ALLOW_ALTERNATES);
   }
 
-  private boolean getParam(HttpServletRequest request, String param) {
+  private boolean getBooleanParam(HttpServletRequest request, String param) {
     String use_phone_to_display = request.getHeader(param);
     return use_phone_to_display != null && !use_phone_to_display.equals(FALSE);
   }

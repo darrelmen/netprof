@@ -747,27 +747,16 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   }
 
   /**
-   * TODO : also in basePhoneDAO.
+   * TODO : also in basePhoneDAO.getSessionTime
    *
    * @param sessionToLong
    * @param device
    * @return
    */
-  private Long getSessionTime(Map<String, Long> sessionToLong, String device) {
-    Long parsedTime = sessionToLong.get(device);
-
-    if (parsedTime == null) {
-      try {
-        parsedTime = Long.parseLong(device);
-//        logger.info("getSessionTime " + parsedTime);
-      } catch (NumberFormatException e) {
-        //      logger.info("can't parse " + device);
-        parsedTime = -1L;
-      }
-      sessionToLong.put(device, parsedTime);
-    }
-    return parsedTime;
-  }
+//  private Long getSessionTime(Map<String, Long> sessionToLong, String device) {
+//    Long parsedTime = super.getSessionTime(sessionToLong, device);
+//    return parsedTime;
+//  }
 
   private Integer getNumInSession(Map<String, Integer> sessionToLong, String deviceType) {
     Integer parsedTime = sessionToLong.get(deviceType);

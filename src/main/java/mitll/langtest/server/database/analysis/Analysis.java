@@ -583,10 +583,18 @@ public abstract class Analysis extends DAO {
     userToBest2.forEach((userID, bestScores) -> {
       if (bestScores.size() >= minRecordings) {
         UserInfo value = new UserInfo(bestScores, userToEarliest.get(userID));
+
         if (value.getUserID().equalsIgnoreCase(D_ADMIN)) {
           logger.info("getUserIDToInfo : skipping " + D_ADMIN);
         } else {
           userToUserInfo.put(userID, value);
+          if (value.getLastSessionSize() > 0) {
+            logger.info("user info for " + userID + " value " +
+                "\n\tlast session num   " + value.getLastSessionNum() +
+                "\n\tlast session size  " + value.getLastSessionSize() +
+                "\n\tlast session score " + value.getLastSessionScore()
+            );
+          }
         }
       } else {
         if (DEBUG)

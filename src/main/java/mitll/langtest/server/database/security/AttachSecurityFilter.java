@@ -278,11 +278,12 @@ public class AttachSecurityFilter implements Filter {
 
   private int getUserForFile(String requestURI) {
 //    if (DEBUG) log.info("getUserForFile checking owner of " + fileToFind);
-    log.info("getUserForFile checking owner of " + requestURI);
     String fileToFind = requestURI.startsWith(ANSWERS) ? requestURI.substring(ANSWERS.length()) : requestURI;
     fileToFind = removeNetprof(fileToFind);
     if (DEBUG) log.info("getUserForFile user for " + fileToFind);
-    return getUserForWavFile(removeAnswers(fileToFind));
+   // return getUserForWavFile(removeAnswers(fileToFind));
+    log.info("getUserForFile checking owner of " + requestURI + " actually " + fileToFind);
+    return getUserForWavFile(fileToFind);
   }
 
   @NotNull

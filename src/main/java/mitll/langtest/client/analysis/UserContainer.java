@@ -53,6 +53,7 @@ import mitll.langtest.shared.custom.IUserListLight;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -61,7 +62,7 @@ import java.util.*;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> implements TypeaheadListener, ReqCounter {
-//  private final Logger logger = Logger.getLogger("UserContainer");
+  private final Logger logger = Logger.getLogger("UserContainer");
 
   private static final int SESSION_AVG_WIDTH = 85;
 
@@ -800,14 +801,19 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     // return getSafeHtml("" + Integer.valueOf(lastSessionScore).floatValue()/10F);
     // return getSafeHtml("" + lastSessionScore);
 
+    logger.info("getAdjustedScore shell " +shell);
     float lastf = v;//(float) lastSessionScore;
     if (percent < 50) {
+      logger.info("getAdjustedScore 1 adjusting given " + percent + " from "+ lastf);
       lastf *= 0.8f;
     } else if (percent < 60) {
+      logger.info("getAdjustedScore 2 adjusting given " + percent + " from "+ lastf);
       lastf *= 0.9f;
     }
+    else {
+      logger.info("getAdjustedScore lastf "+ lastf);
+    }
 
-    // return Math.round(lastf) / 10F;
     return Integer.valueOf(Math.round(lastf)).floatValue() / 10F;
   }
 

@@ -35,6 +35,7 @@ package mitll.langtest.shared.analysis;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -91,7 +92,6 @@ public class SimpleTimeAndScore implements Serializable {
   }
 
   /**
-   *
    * @return
    */
   public float getScore() {
@@ -131,11 +131,14 @@ public class SimpleTimeAndScore implements Serializable {
     return sessionStart;
   }
 
-  public String toString() {
-    return "at\t" + getTimeString() + " avg score for " + "=\t" + score;
-  }
-
   public int getSessionSize() {
     return sessionSize;
+  }
+
+  public String toString() {
+    return "at" +
+        "\t" + getTimeString() + " " + new Date(getSessionStart()) +
+        "\tn " + getSessionSize() +
+        "\tavg score \t" + getScore();
   }
 }

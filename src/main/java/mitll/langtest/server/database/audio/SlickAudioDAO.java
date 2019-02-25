@@ -908,7 +908,9 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       AudioAttribute audioAttributePrefGender = exercise.getAudioAttributePrefGender(genderOfUser == Male, true);
 
       if (audioAttributePrefGender == null) {
-        logger.warn("getNativeAudio no audio for " + exercise.getID());
+        if (DEBUG) {
+          logger.warn("getNativeAudio no audio for " + exercise.getID());
+        }
         return null;
       } else {
         return audioAttributePrefGender.getAudioRef();

@@ -41,6 +41,7 @@ import org.apache.logging.log4j.Logger;
 import java.sql.*;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -364,6 +365,28 @@ public abstract class DAO {
 
   protected String getPrimaryKey(String col) {
     return "";
+  }
+
+  /**
+   * @param sessionToLong
+   * @param device
+   * @return
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getSessionTime
+   */
+  protected Long getSessionTime(Map<String, Long> sessionToLong, String device) {
+    Long parsedTime = sessionToLong.get(device);
+
+    if (parsedTime == null) {
+      try {
+        parsedTime = Long.parseLong(device);
+//        logger.info("getSessionTime " + parsedTime);
+      } catch (NumberFormatException e) {
+        //      logger.info("can't parse " + device);
+        parsedTime = -1L;
+      }
+      sessionToLong.put(device, parsedTime);
+    }
+    return parsedTime;
   }
 
   public String toString() {

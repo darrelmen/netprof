@@ -56,6 +56,7 @@ class BasePhoneDAO extends DAO {
   static final String SCORE = "score";
   static final String DURATION = "duration";
   static final String RID1 = "RID";
+  public static final boolean DEBUG = false;
 
   final Map<String, Long> sessionToLong = new HashMap<>();
 
@@ -140,39 +141,19 @@ class BasePhoneDAO extends DAO {
         scoreJson,
         resultTime);
 
-    logger.info("getAndRememberWordAndScore : " +
-        "\n\tfrom " + audioAnswer +
-        "\n\tto   " + webPageAudioRef +
-        "\n\tfor  " + language +
-        "\n\twordAndScore  " + wordAndScore
-    );
+    if (DEBUG) {
+      logger.info("getAndRememberWordAndScore : " +
+          "\n\tfrom " + audioAnswer +
+          "\n\tto   " + webPageAudioRef +
+          "\n\tfor  " + language +
+          "\n\twordAndScore  " + wordAndScore
+      );
+    }
 
     wordAndScores1.add(wordAndScore);
     phoneAndScore.setWordAndScore(wordAndScore);
 
     return wordAndScore;
-  }
-
-  /**
-   * @param sessionToLong
-   * @param device
-   * @return
-   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getSessionTime
-   */
-  Long getSessionTime(Map<String, Long> sessionToLong, String device) {
-    Long parsedTime = sessionToLong.get(device);
-
-    if (parsedTime == null) {
-      try {
-        parsedTime = Long.parseLong(device);
-//        logger.info("getSessionTime " + parsedTime);
-      } catch (NumberFormatException e) {
-        //      logger.info("can't parse " + device);
-        parsedTime = -1L;
-      }
-      sessionToLong.put(device, parsedTime);
-    }
-    return parsedTime;
   }
 
   /**

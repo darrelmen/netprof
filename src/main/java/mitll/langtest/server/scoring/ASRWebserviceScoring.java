@@ -404,7 +404,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         then = System.currentTimeMillis();
 
         if (useKaldi) {
-          cached = runKaldi(getTokensForKaldi(sentence, transliteration), filePath + WAV1, port, transNormDict);
+          cached = runKaldi(getTokensForKaldi(sentence, transliteration), filePath + WAV1, port, transNormDict, sentence);
           if (cached == null || cached.getScores() == null) {
             logger.warn("scoreRepeatExercise kaldi didn't run properly....");
           } else {
@@ -482,12 +482,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param sentence
    * @param audioPath
    * @param port
+   * @param rawSentence
    * @return
    * @see #scoreRepeatExercise
    */
-  private HydraOutput runKaldi(String sentence, String audioPath, int port, TransNormDict transNormDict) {
+  private HydraOutput runKaldi(String sentence, String audioPath, int port, TransNormDict transNormDict, String rawSentence) {
     try {
       long then = System.currentTimeMillis();
+      sentence = rawSentence;
+      logger.info("replace " + sentence + " with " + rawSentence);
       String json = callKaldi(sentence, audioPath, port);
       long now = System.currentTimeMillis();
       long processDur = now - then;
@@ -606,6 +609,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     jsonObject.addProperty("reqid", "1234");
     jsonObject.addProperty("request", "decode");
     jsonObject.addProperty("phrase", sentence.trim());
+    jsonObject.addProperty("transcript", sentence.trim());
     jsonObject.addProperty("file", audioPath);
 
     return jsonObject.toString();
