@@ -99,10 +99,19 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
    */
   @Override
   public void timeChanged(long from, long to) {
-    if (DEBUG) logger.info("PhoneContainer.timeChanged From " + debugFormat(from) + " : " + debugFormat(to));
+    long diff = to - from;
+    if (DEBUG) {
+      logger.info("PhoneContainer.timeChanged From (" + diff +
+          ") " + debugFormat(from) + " : " + debugFormat(to));
+    }
 
     this.from = from;
     this.to = to;
+
+    if (diff == 1) {
+      this.from--;
+      this.to++;
+    }
     long then = System.currentTimeMillis();
 
     AnalysisRequest analysisRequest = getAnalysisRequest(from, to);
@@ -167,7 +176,8 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
 
       getPhoneStatuses(phoneAndStatsList, phoneToAvgSorted, first, last);
       if (phoneAndStatsList.isEmpty()) {
-        logger.warning("getPhoneAndStatsListForPeriod phoneAndStatsList is empty? ");
+        logger.warning("getPhoneAndStatsListForPeriod phoneAndStatsList is empty? (" + (last - first) +
+            ") ");
       }
     }
     return phoneAndStatsList;

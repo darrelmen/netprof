@@ -284,6 +284,9 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
       if (!sortedHistory.isEmpty()) {
         table.getSelectionModel().setSelected(sortedHistory.get(0), true);
       }
+      else {
+
+      }
     } catch (Exception e) {
       logger.warning("Got " + e);
     }

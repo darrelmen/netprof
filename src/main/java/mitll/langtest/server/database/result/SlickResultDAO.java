@@ -494,7 +494,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     correctAndScoresForReal.forEach((k, v) -> idToScore.put(k, v.pronscore()));
     return idToScore;
   }*/
-  private <T extends HasID> Map<Integer, Float> getScores(Collection<T> exercises,
+/*  private <T extends HasID> Map<Integer, Float> getScores(Collection<T> exercises,
                                                           Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
     Map<Integer, Float> idToScore = new HashMap<>();
 
@@ -520,7 +520,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     }
 
     return idToScore;
-  }
+  }*/
 
   /**
    * @param slickCorrectAndScores
@@ -714,6 +714,10 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   public Collection<Integer> getPracticedByUser(int userid, int projid) {
     return dao.practicedByUser(userid, projid);
+  }
+
+  public Collection<Integer> getInWindowByUser(int userid, int projid, long from, long to) {
+    return dao.inWindowByUser(userid, projid, new Timestamp(from), new Timestamp(to));
   }
 
   public int getDefaultResult() {

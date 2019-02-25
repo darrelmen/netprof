@@ -538,12 +538,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     return current;
   }*/
 
-  private Column<UserInfo, SafeHtml> addLastOverallScore(List<UserInfo> list) {
+  private void addLastOverallScore(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getOverall();
     addColumn(current, new TextHeader(OVERALL_SCORE));
     table.setColumnWidth(current, SESSION_AVG_WIDTH + "px");
     table.addColumnSortHandler(getOverallSorter(current, list));
-    return current;
+   // return current;
   }
 
 /*  private void addMine(List<UserInfo> list) {

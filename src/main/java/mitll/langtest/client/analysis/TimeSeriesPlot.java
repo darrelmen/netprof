@@ -60,6 +60,7 @@ class TimeSeriesPlot extends DivWidget {
   protected final DateTimeFormat format = DateTimeFormat.getFormat("E MMM d yy h:mm a");
   // private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("E MMM d h:mm a");
   private final DateTimeFormat noYearFormat = DateTimeFormat.getFormat("MMM d h:mm a");
+  private final DateTimeFormat noYearFormatSeconds = DateTimeFormat.getFormat("MMM d h:mm:ss a");
   private final DateTimeFormat shortFormat = DateTimeFormat.getFormat("MMM d, yy");
   private final DateTimeFormat superShortFormat = DateTimeFormat.getFormat("MMM d");
   private final String nowFormat = shortFormat.format(new Date());
@@ -155,7 +156,7 @@ class TimeSeriesPlot extends DivWidget {
   private String getDateToShow(long xAsLong) {
     Date date = new Date(xAsLong);
     String shortForDate = shortFormat.format(date);
-    DateTimeFormat toUse = sameYear(shortForDate) ? noYearFormat : format;
+    DateTimeFormat toUse = sameYear(shortForDate) ? noYearFormatSeconds : format;
     return toUse.format(date);
   }
 

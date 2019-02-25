@@ -257,9 +257,21 @@ public abstract class Analysis extends DAO {
 
   protected abstract Collection<Integer> getDialogExerciseIDs(int dialogID);
 
+  /**
+   * sigh - filter first on date or exids, like via the database...
+   * @param next
+   * @param from
+   * @param to
+   * @param exids
+   * @return
+   */
   @NotNull
   private List<Integer> getResultIDsInTimeWindow(UserInfo next, long from, long to, Collection<Integer> exids) {
     List<BestScore> resultsForQuery = next.getBestScores();
+
+    if (DEBUG) {
+      logger.info("getResultIDsInTimeWindow : " + new Date(from) + " - " + new Date(to) + " exids " + exids + " results " + resultsForQuery.size());
+    }
 
     if (!exids.isEmpty()) {
       int before = resultsForQuery.size();
@@ -280,10 +292,10 @@ public abstract class Analysis extends DAO {
 
     resultsForQuery.forEach(bs -> {
       long timestamp = bs.getTimestamp();
-      if (timestamp > from && timestamp <= to) {
+      if (timestamp >= from && timestamp <= to) {
         resultIDs.add(bs.getResultID());
-      } else {
-//        logger.info("getResultIDsInTimeWindow : skip " + bs.getResultID() + " at " + new Date(timestamp));
+      } else if (DEBUG) {
+        logger.info("getResultIDsInTimeWindow : skip " + bs.getResultID() + " at " + new Date(timestamp) + " : " +timestamp + " not in (" + from + " - " + to + ")");
       }
     });
 
@@ -339,6 +351,7 @@ public abstract class Analysis extends DAO {
       return phoneReport;
     }
   }*/
+
   public PhoneSummary getPhoneSummary(int userid, UserInfo next) {
     if (next == null) {
       return new PhoneSummary();

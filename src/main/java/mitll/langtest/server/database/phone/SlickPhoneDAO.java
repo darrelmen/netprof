@@ -62,12 +62,10 @@ import java.util.stream.Collectors;
 public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   private static final Logger logger = LogManager.getLogger(SlickPhoneDAO.class);
 
-  static final String UNDERSCORE = "_";
-
-  // public static final String NJ_E = "nj-e";
-
   private final PhoneDAOWrapper dao;
 
+  static final String UNDERSCORE = "_";
+  
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PHONE = false;
 
@@ -180,7 +178,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
   private Collection<SlickPhoneReport> getSlickPhoneReports(int userid, Collection<Integer> resultIDs) {
     long then = System.currentTimeMillis();
-    if (DEBUG) logger.info("getPhoneReports " + userid + " project ids " + resultIDs);
+    if (DEBUG) logger.info("getPhoneReports " + userid + " result ids " + resultIDs);
 
     Collection<SlickPhoneReport> phoneReportByResult = dao.getPhoneReportByResult(userid, resultIDs);
 
@@ -259,11 +257,15 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
 
   private PhoneSummary getPhoneSummary(Collection<SlickPhoneReport> phoneReportByResult) {
     Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<>();
+    if (phoneReportByResult.isEmpty()) {
+      logger.warn("no phone reports");
+    }
     for (SlickPhoneReport report : phoneReportByResult) {  // for every phone the user has uttered
       getAndRememberPhoneAndScore(phoneToScores,
           report.phone(), report.pscore(), report.modified(),
           getSessionTime(sessionToLong, report.device()));
     }
+
     return new MakePhoneReport().getPhoneSummary(phoneToScores);
   }
 

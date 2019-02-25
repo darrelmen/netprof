@@ -56,6 +56,7 @@ class BasePhoneDAO extends DAO {
   static final String SCORE = "score";
   static final String DURATION = "duration";
   static final String RID1 = "RID";
+
   public static final boolean DEBUG = false;
 
   final Map<String, Long> sessionToLong = new HashMap<>();

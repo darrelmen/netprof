@@ -95,7 +95,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private static final int CHART_HEIGHT = 275;//295;
 
   /**
-   *
+   * @see #getScoreText(SortedSet, int)
    */
   private static final String PREFIX = "Sess. #";//"Sess. #";
   private static final String SCORE = "";
@@ -136,7 +136,11 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private long firstTime;
   private long lastTime;
 
-  private final List<Long> sessions = new ArrayList<>();
+  /**
+   *
+   */
+  private final List<Long> sessionStarts = new ArrayList<>();
+  private final List<Long> sessionEnds = new ArrayList<>();
 
   /**
    *
@@ -223,7 +227,8 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
       {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(-1L);
-        sessions.addAll(getEasyPeriods(phoneSessions));
+        sessionStarts.addAll(getEasyPeriods(phoneSessions));
+        sessionEnds.addAll(getEasyPeriodsEnds(phoneSessions));
       }
       {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(TIME_HORIZON.DAY.getDuration());
@@ -248,7 +253,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     float totalScore = 0f;
 
     int n = simpleTimeAndScores.size();
-  //  int sessionSize = -1;
+    //  int sessionSize = -1;
     for (TimeAndScore exerciseCorrectAndScore : simpleTimeAndScores) {
       float score = exerciseCorrectAndScore.getScore();
 
@@ -365,6 +370,12 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private SortedSet<Long> getEasyPeriods(List<PhoneSession> sessions) {
     SortedSet<Long> months2 = new TreeSet<>();
     sessions.forEach(phoneSession -> months2.add(phoneSession.getStart()));
+    return months2;
+  }
+
+  private SortedSet<Long> getEasyPeriodsEnds(List<PhoneSession> sessions) {
+    SortedSet<Long> months2 = new TreeSet<>();
+    sessions.forEach(phoneSession -> months2.add(phoneSession.getEnd()));
     return months2;
   }
 
@@ -557,7 +568,10 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    * @see #gotExtremes(AxisSetExtremesEvent)
    */
   private void setVisibility(long start, long end) {
-    if (DEBUG) logger.info("setVisibility from " + start + "/" + new Date(start) + " - " + new Date(end));
+    if (DEBUG) {
+      logger.info("setVisibility from (" + (end - start) +
+          ") " + start + "/" + new Date(start) + " - " + new Date(end));
+    }
 
     //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
 //    logger.info("logException stack " + exceptionAsString);
@@ -773,11 +787,14 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
           long start = min.longValue();
           long end = max.longValue();
 
-          long l = end - start;
+     /*     long l = end - start;
           if (l < 61) {
             // logger.info("time window is empty?");
+            logger.info("gotExtremes moved time window ( " +l+
+                ") back from " + start + " : " + new Date(start));
             start -= 60 * 1000;
-          }
+            logger.info("gotExtremes moved time window back to " + start);
+          }*/
 
           if (DEBUG_EXTREMES) {
             logger.info("gotExtremes 1 now min " + new Date(start) + " max " + new Date(end));
@@ -822,7 +839,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private void setTimeRange(List<TimeAndScore> rawBestScores) {
     this.firstTime = rawBestScores.get(0).getTimestamp();
     this.lastTime = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
-//    logger.info("setTimeRange " + new Date(firstTime) + " - " + new Date(lastTime));
+    if (DEBUG) logger.info("setTimeRange " + new Date(firstTime) + " - " + new Date(lastTime));
   }
 
   /**
@@ -863,8 +880,9 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     long lastPlusSlack = lastTime + TIME_SLACK;
     switch (timeHorizon) {
       case SESSION:
-        Long lastSessionStart = sessions.get(sessions.size() - 1);
-        return showLastTimePeriod(xAxis, this.sessions, lastSessionStart, lastPlusSlack);
+        Long lastSessionStart = sessionStarts.get(sessionStarts.size() - 1);
+        // Long lastSessionEnd   = sessionEnds.get(sessionEnds.size() - 1);
+        return showLastTimePeriod(xAxis, this.sessionStarts, lastSessionStart, lastPlusSlack);
       case DAY:
         return showLastDay(xAxis, lastPlusSlack);
       case WEEK:
@@ -1053,12 +1071,19 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   }
 
   private long getOffsetPerSession() {
-    long offset = getOffset();
+    long offset;
     if (timeHorizon == SESSION) {
       Long thisPeriodStart = getPeriods().get(index);
       List<PhoneSession> phoneSessions = granularityToSessions.get(SESSION.getDuration());
       PhoneSession currentSession = phoneSessions.get(index);
       offset = currentSession.getEnd() + 1 - thisPeriodStart;
+
+      if (DEBUG) {
+        logger.info("getOffsetPerSession offset is " + offset);
+        logger.info("getOffsetPerSession currentSession " + currentSession);
+      }
+    } else {
+      offset = getOffset();
     }
     return offset;
   }
@@ -1079,7 +1104,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private List<Long> getPeriods() {
     switch (timeHorizon) {
       case SESSION:
-        return sessions;
+        return sessionStarts;
       case DAY:
         return days;
       case WEEK:
@@ -1101,11 +1126,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     Long periodStart = periods.get(index);
     long end = periodStart + offset;
 
-/*    logger.info("showTimePeriod From      " + format.format(new Date(periodStart)));
-     logger.info("showTimePeriod to        " + format.format(new Date(end)));
-    logger.info("showTimePeriod" +
-        // "\n\tdur     " + offset +
-        "\n\t offset " + offset);*/
+    if (DEBUG) {
+      logger.info("showTimePeriod (" + index + "/" + periods.size() + ") From      " + format.format(new Date(periodStart)));
+      logger.info("showTimePeriod to        " + format.format(new Date(end)));
+      logger.info("showTimePeriod" +
+          // "\n\tdur     " + offset +
+          "\n\t offset " + offset);
+    }
 
     chart.getXAxis().setExtremes(periodStart, end); // triggers a time changed event to go to listeners
     setTitleScore(periodStart, end, index);
@@ -1185,7 +1212,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
       return "";
     } else {
       int denom = simpleTimeAndScores.iterator().next().getSessionSize();
-       logger.info("getScoreText session size = " + denom + " n " + n + " fround " + fround1);
+      logger.info("getScoreText session size = " + denom + " n " + n + " fround " + fround1);
 
       if (denom < 0) {
         denom = n;
@@ -1199,11 +1226,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
       int score = getAdjustedScore(fround1, percent);
       String ratio = (n == denom) ? "" + n : n + "/" + denom;
 
+      String sessionLabel = timeHorizon == SESSION ? PREFIX + (index + 1) + " : " : "";
+
       String text = simpleTimeAndScores.size() > 100 ? "" :
-          PREFIX + (index + 1) + " : " +
+          sessionLabel +
               SCORE + score +
               //"%" +
-              " for " + ratio + " " + percentPart
+              " for " + ratio + " items " + percentPart
           //+
           //ITEMS
           ;

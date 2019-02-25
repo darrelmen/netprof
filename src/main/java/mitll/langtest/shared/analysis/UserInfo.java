@@ -117,7 +117,6 @@ public class UserInfo extends SimpleUser {
   private static int toRound(float total, float size) {
     return Math.round(1000f * total / size);
   }
-
   private static int toPercent(float total, float size) {
     return Math.round(100f * total / size);
   }
@@ -197,6 +196,7 @@ public class UserInfo extends SimpleUser {
   }
 
   public String toString() {
-    return getID() + "/" + getUserID() + " :\t\t# = " + getNum() + "\tavg " + getCurrent();// + "\tfinal " + getFinalScores() + "\tdiff " +  getDiff();
+    return getID() + "/" + getUserID() +
+        " :\t\t# = " + getNum() + "\tavg " + getCurrent();// + "\tfinal " + getFinalScores() + "\tdiff " +  getDiff();
   }
 }
