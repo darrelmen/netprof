@@ -127,8 +127,6 @@ public class UserPerformance implements Serializable {
       float moving = total / count;
 
       TimeAndScore timeAndScore = new TimeAndScore(bs, moving);
-      //System.err.println("time " + timeAndScore + " " + timeAndScore.getSessionStart());
-
       rawTimeAndScores.add(timeAndScore);
       if (bs.isiPad()) {
         iPadTimeAndScores.add(timeAndScore);

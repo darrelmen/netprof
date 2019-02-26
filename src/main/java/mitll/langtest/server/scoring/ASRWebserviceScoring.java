@@ -226,7 +226,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param usePhoneToDisplay
    * @param kaldi
    * @return PretestScore object
-   * @seex AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, String, ImageOptions, String, PrecalcScores, DecoderOptions)
+   * @see AudioFileHelper#getASRScoreForAudio
    */
   public PretestScore scoreRepeat(String testAudioDir,
                                   String testAudioFileNoSuffix,
@@ -1037,7 +1037,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         "\n\tscore     " + split[0] /*+
         "\n\traw reply " + resultsStr*/);
 
-    for (String r : results) logger.info("getScores hydra : " + r);
+  //  for (String r : results) logger.info("getScores hydra : " + r);
     return scores;
   }
 

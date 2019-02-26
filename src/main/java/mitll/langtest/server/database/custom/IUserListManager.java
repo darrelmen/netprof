@@ -65,6 +65,8 @@ public interface IUserListManager {
                                               boolean listsICreated,
                                               boolean visitedLists);
 
+  int getNumOnList(int listid);
+
   Collection<IUserListWithIDs> getListsWithIdsForUser(int userid,
                                                       int projid,
                                                       boolean listsICreated,

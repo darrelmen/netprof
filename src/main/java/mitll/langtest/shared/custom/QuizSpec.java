@@ -6,7 +6,7 @@ public class QuizSpec implements IsSerializable {
   private int roundMinutes;
   private int minScore;
   private boolean showAudio;
-  private boolean isDefault = true;
+  private boolean isDefault;
   private String accessCode = "";
 
   public QuizSpec() {

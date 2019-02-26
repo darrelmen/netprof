@@ -1368,14 +1368,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       permissionSet.add(User.Permission.PROJECT_ADMIN); // a little redundant with isAdmin...
     }
 
-    if (user.isPoly()) {
+ /*   if (user.isPoly()) {
       //logger.info("\n\n\ntoUser user " + user.getUserID() + " is a polyglot user.");
       handleAffiliationUser(dominoUser, permissionSet, user, true);
     } else if (user.isNPQ()) {
       handleAffiliationUser(dominoUser, permissionSet, user, false);
     } else {
 //      logger.info("toUser  user " + user.getUserID() + " is not a polyglot user.");
-    }
+    }*/
     user.setPermissions(permissionSet);
 //    logger.info("\ttoUser return " + user);
     return user;

@@ -1,9 +1,5 @@
 package mitll.langtest.shared.analysis;
 
-import mitll.langtest.client.analysis.ReqCounter;
-import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.exercise.ExerciseController;
-
 import java.io.Serializable;
 import java.util.Date;
 

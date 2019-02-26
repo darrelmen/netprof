@@ -92,4 +92,6 @@ public interface ListServiceAsync {
   void reallyCreateNewItems(int userListID, String userExerciseText, AsyncCallback<List<CommonShell>> async);
 
   void clearAudio(int audioID, AsyncCallback<Void> async);
+
+  void getNumOnList(int listid, AsyncCallback<Integer> async);
 }

@@ -1532,6 +1532,8 @@ public class AudioFileHelper implements AlignDecode {
    */
   private String getSentenceToUse(String sentence) {
     boolean english = isEnglish() && sentence.equals("%") || sentence.equals("％");
+
+
     return english ? "percent" : sentence;
   }
 

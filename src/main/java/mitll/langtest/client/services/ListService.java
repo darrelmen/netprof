@@ -114,6 +114,7 @@ public interface ListService extends RemoteService {
 
   Collection<IUserListWithIDs> getListsWithIDsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException;
 
+  int getNumOnList(int listid);
   /**
    * @param userListID
    * @param exID

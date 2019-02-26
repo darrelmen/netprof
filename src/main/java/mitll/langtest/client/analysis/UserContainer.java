@@ -146,6 +146,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   //private List<UserInfo> remembered;
   private Collection<UserInfo> orig;
 
+  private List<Integer> rememberedLists;
+  private int listid = -1;
+
   /**
    * @param controller
    * @param rightSide
@@ -439,9 +442,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     });
     return listBox;
   }
-
-  private List<Integer> rememberedLists;
-  private int listid = -1;
 
   private void useLists(Collection<IUserListLight> result, ListBox quizListBox) {
     this.rememberedLists = new ArrayList<>();
@@ -894,7 +894,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     addRightSideContent(selectedUser);
   }
 
-  protected void addRightSideContent(UserInfo selectedUser) {
+  private void addRightSideContent(UserInfo selectedUser) {
     rightSide.add(getAnalysisTab(selectedUser));
   }
 

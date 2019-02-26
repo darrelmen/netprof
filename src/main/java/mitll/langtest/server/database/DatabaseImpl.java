@@ -1334,7 +1334,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       } else if (id.equalsIgnoreCase("WARNING")) {
         logger.warn("logEvent " + event);
       } else {
-        logger.info("logEvent id " + id + " : " + event);
+//        logger.info("logEvent id " + id + " : " + event);
       }
       return eventDAO != null && eventDAO.addToProject(event, projID);
     }

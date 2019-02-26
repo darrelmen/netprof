@@ -75,7 +75,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.lang.Thread.sleep;
-import static mitll.langtest.server.database.exercise.SectionHelper.ANY;
 
 public class EasyReportTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(EasyReportTest.class);
@@ -1111,8 +1110,8 @@ public class EasyReportTest extends BaseTest {
 
     typeToValues.put("Unit", Collections.singleton("2"));
     typeToValues.put("Chapter", Collections.singleton("2"));
-    JsonObject jsonPhoneReport = db.getJsonPhoneReport(659, projectid, typeToValues);
-    logger.info("got \n" + jsonPhoneReport);
+//    JsonObject jsonPhoneReport = db.getJsonPhoneReport(new PhoneReportRequest());
+//    logger.info("got \n" + jsonPhoneReport);
   }
 
   @Test
@@ -1464,10 +1463,10 @@ public class EasyReportTest extends BaseTest {
     //   Project project = andPopulate.getProject(3);
     HashMap<String, Collection<String>> typeToValues = new HashMap<>();
     typeToValues.put("Unit", Collections.singleton("21"));
-    JsonObject jsonPhoneReport = andPopulate.getJsonPhoneReport(295, 2, typeToValues);
-    // long now = System.currentTimeMillis();
-
-    logger.info("Got\n\t" + jsonPhoneReport);
+//    JsonObject jsonPhoneReport = andPopulate.getJsonPhoneReport(request);
+//    // long now = System.currentTimeMillis();
+//
+//    logger.info("Got\n\t" + jsonPhoneReport);
   }
 
 

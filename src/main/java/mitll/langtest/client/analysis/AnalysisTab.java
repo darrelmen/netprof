@@ -46,15 +46,13 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.PolyglotPracticePanel;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
-import mitll.langtest.shared.analysis.AnalysisReport;
-import mitll.langtest.shared.analysis.AnalysisRequest;
-import mitll.langtest.shared.analysis.PhoneSummary;
-import mitll.langtest.shared.analysis.UserPerformance;
+import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.custom.TimeRange;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
@@ -153,6 +151,7 @@ public class AnalysisTab extends DivWidget {
    * @param controller
    * @param isPolyglot
    * @param jumpView
+   * @param listid
    * @see NewContentChooser#showProgress
    * @see PolyglotPracticePanel#getScoreHistory
    */
@@ -160,19 +159,33 @@ public class AnalysisTab extends DivWidget {
                      boolean isPolyglot,
                      int req,
                      ReqCounter reqCounter,
-                     INavigation.VIEWS jumpView) {
+                     INavigation.VIEWS jumpView,
+                     int listid) {
     this(controller,
         1,
         null,
         controller.getUser(),
         controller.getUserManager().getUserID(),
-        -1,
+        listid,
         isPolyglot,
         req,
         reqCounter,
         jumpView);
   }
 
+  /**
+   * @see UserContainer#getAnalysisTab(UserInfo)
+   * @param controller
+   * @param minRecordings
+   * @param overallBottom
+   * @param userid
+   * @param userChosenID
+   * @param listid
+   * @param isPolyglot
+   * @param req
+   * @param reqCounter
+   * @param jumpView
+   */
   public AnalysisTab(final ExerciseController controller,
                      int minRecordings,
                      DivWidget overallBottom,
@@ -267,7 +280,7 @@ public class AnalysisTab extends DivWidget {
         if (reqCounter.getReq() != result.getReq() + 1) {
           logger.info("getPerformanceReportForUser : skip " + reqCounter.getReq() + " vs " + result.getReq());
         } else {
-          useReport(result, then, userChosenID, isTeacherView, bottom, new ReqInfo(analysisRequest), analysisPlot, exerciseLookup);
+          useReport(result, then, userChosenID, isTeacherView, bottom, new ReqInfo(analysisRequest), analysisPlot);
         }
       }
     });
@@ -305,7 +318,7 @@ public class AnalysisTab extends DivWidget {
     analysisPlot = new AnalysisPlot(controller.getExerciseService(), userid,
         controller.getSoundManager(), playFeedback, controller,
         controller.getMessageHelper(),
-        isPolyglot, maxWidth);
+        isPolyglot, maxWidth, controller.getListService());
     exerciseLookup = analysisPlot;
     {
       Panel timeControls = getTimeControls(playFeedback, isTeacherView);
@@ -377,8 +390,7 @@ public class AnalysisTab extends DivWidget {
                          boolean isTeacherView,
                          DivWidget bottom,
                          ReqInfo reqInfo,
-                         AnalysisPlot<CommonShell> analysisPlot,
-                         ExerciseLookup<CommonShell> exerciseLookup) {
+                         AnalysisPlot<CommonShell> analysisPlot) {
     long now = System.currentTimeMillis();
 
     PhoneSummary phoneSummary = result.getPhoneSummary();
@@ -503,10 +515,7 @@ public class AnalysisTab extends DivWidget {
     Button nextButton = getNextButton();
     stepper.add(nextButton);
 
-    Heading scoreHeader = new Heading(3);
-    scoreHeader.addStyleName("leftFiveMargin");
-    scoreHeader.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
-    scoreHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    Heading scoreHeader = getScoreHeader();
     stepper.add(scoreHeader);
 
     timeWidgets = new TimeWidgets(prevButton, nextButton, currentDate,
@@ -519,6 +528,16 @@ public class AnalysisTab extends DivWidget {
 
         scoreHeader, timeScale);
     return stepper;
+  }
+
+  @NotNull
+  private Heading getScoreHeader() {
+    Heading scoreHeader = new Heading(3);
+    scoreHeader.getElement().setId("scoreHeader");
+    scoreHeader.addStyleName("leftFiveMargin");
+    scoreHeader.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
+    scoreHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    return scoreHeader;
   }
 
   private Panel getStepperContainer() {

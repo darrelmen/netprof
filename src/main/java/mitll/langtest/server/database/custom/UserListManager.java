@@ -453,6 +453,13 @@ public class UserListManager implements IUserListManager {
     return names;
   }
 
+  @Override
+  public int getNumOnList(int listid) {
+    Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(Collections.singleton(listid));
+    if (numForList.isEmpty()) return -1;
+    else return numForList.values().iterator().next();
+  }
+
   @NotNull
   private SimpleUserList getSimpleUserList(SlickUserExerciseList l, Integer numItems, int userid1, String name, String fullName) {
     return new SimpleUserList(

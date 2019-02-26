@@ -179,6 +179,11 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     return listsForUser;
   }
 
+  @Override
+  public int getNumOnList(int listid) {
+    return getUserListManager().getNumOnList(listid);
+  }
+
   /**
    * TODO : consider not doing it separately from other facets.
    *

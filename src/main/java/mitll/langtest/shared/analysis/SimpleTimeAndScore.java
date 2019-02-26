@@ -106,7 +106,7 @@ public class SimpleTimeAndScore implements Serializable {
     return ((float) value) / SCALE;
   }
 
-  String getTimeString() {
+  private  String getTimeString() {
     return "" + getTimestamp();
   }
 

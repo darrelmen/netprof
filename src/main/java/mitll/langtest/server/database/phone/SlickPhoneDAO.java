@@ -65,7 +65,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   private final PhoneDAOWrapper dao;
 
   static final String UNDERSCORE = "_";
-  
+
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PHONE = false;
 

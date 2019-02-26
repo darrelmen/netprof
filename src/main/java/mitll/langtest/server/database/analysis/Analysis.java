@@ -143,23 +143,23 @@ public abstract class Analysis extends DAO {
    * @param id
    * @param best
    * @return
-   * @see IAnalysis#getPerformanceReportForUser
+   * @see SlickAnalysis#getPerformanceReportForUser
    */
   UserPerformance getUserPerformance(long id, Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();
     if (values.isEmpty()) {
-      if (DEBUG) logger.debug("getUserPerformance no results for " + id);
+      if (DEBUG) logger.info("getUserPerformance no results for " + id);
       return new UserPerformance();
     } else {
       if (values.size() > 1) logger.error("getUserPerformance only expecting one user for " + id);
       UserInfo firstUser = values.iterator().next();
-      if (DEBUG) logger.debug("getUserPerformance results for " + values.size() + "  first  " + firstUser);
-      if (DEBUG) logger.debug("getUserPerformance resultsForQuery for " + firstUser.getBestScores().size());
+      if (DEBUG) logger.info("getUserPerformance results for " + values.size() + "  first  " + firstUser);
+      if (DEBUG) logger.info("getUserPerformance resultsForQuery for " + firstUser.getBestScores().size());
       UserPerformance userPerformance = new UserPerformance(id, firstUser.getBestScores(), firstUser.getFirst(), firstUser.getLast());
 
       {
         List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
-        logger.debug("getUserPerformance for " + id + " found " + rawBestScores.size() + " scores");
+        if (DEBUG) logger.info("getUserPerformance for " + id + " found " + rawBestScores.size() + " scores");
         userPerformance.setGranularityToSessions(
             new PhoneAnalysis().getGranularityToSessions(rawBestScores));
       }
@@ -494,6 +494,8 @@ public abstract class Analysis extends DAO {
   }
 
   /**
+   * Partition into sessions.
+   *
    * remember the last best attempt we have in a sequence for an item, but if they come back to practice it more than 5 minutes later
    * consider it a new score
    *
@@ -514,7 +516,7 @@ public abstract class Analysis extends DAO {
 
     Map<Integer, Long> userToEarliest = new HashMap<>();
 
-    userToBest.forEach((userID, bestScores1) -> {
+    userToBest.forEach((userID, bestScoresForUser) -> {
       List<BestScore> bestScores = userToBest2.get(userID);
 
       if (bestScores == null) {
@@ -528,11 +530,11 @@ public abstract class Analysis extends DAO {
         BestScore lastBest = null;
         Set<Integer> seen = new HashSet<>();
 
-        if (DEBUG) logger.info("getBestForQuery examining " + bestScores1.size() + " best scores for " + userID);
+        if (DEBUG) logger.info("getBestForQuery examining " + bestScoresForUser.size() + " best scores for " + userID);
 
         // remember the last best attempt we have in a sequence, but if they come back to practice it more than 5 minutes later
         // consider it a new score
-        for (BestScore bs : bestScores1) {
+        for (BestScore bs : bestScoresForUser) {
           int id = bs.getResultID();
           int exid = bs.getExId();
           long time = bs.getTimestamp();

@@ -39,12 +39,14 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.client.services.ExerciseServiceAsync;
+import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
 import mitll.langtest.shared.analysis.PhoneSession;
@@ -140,7 +142,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    *
    */
   private final List<Long> sessionStarts = new ArrayList<>();
-  private final List<Long> sessionEnds = new ArrayList<>();
+  // private final List<Long> sessionEnds = new ArrayList<>();
 
   /**
    *
@@ -150,16 +152,21 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private final List<Long> months = new ArrayList<>();
 
   private int index = 0;
-
+  private int numOnList;
+  /**
+   *
+   */
   private TimeWidgets timeWidgets;
   private Chart chart = null;
   private final boolean useSessionTimeHorizon;
   private SortedSet<TimeAndScore> rawBestScores;
+  private final ListServiceAsync listServiceAsync;
 
   /**
    * @param service
-   * @param userid   either for yourself if you're a student or a selected student if you're a teacher
+   * @param userid           either for yourself if you're a student or a selected student if you're a teacher
    * @param maxWidth
+   * @param listServiceAsync
    * @see AnalysisTab#AnalysisTab
    * @see #setRawBestScores
    */
@@ -170,10 +177,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
                       ExceptionSupport exceptionSupport,
                       MessageHelper messageHelper,
                       boolean useSessionTimeHorizon,
-                      int maxWidth) {
+                      int maxWidth,
+                      ListServiceAsync listServiceAsync) {
     super(exceptionSupport, messageHelper);
     this.userid = userid;
     this.useSessionTimeHorizon = useSessionTimeHorizon;
+
+    this.listServiceAsync = listServiceAsync;
 
     setMinHeight(this, 275);
 
@@ -228,7 +238,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
       {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(-1L);
         sessionStarts.addAll(getEasyPeriods(phoneSessions));
-        sessionEnds.addAll(getEasyPeriodsEnds(phoneSessions));
+        //sessionEnds.addAll(getEasyPeriodsEnds(phoneSessions));
       }
       {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(TIME_HORIZON.DAY.getDuration());
@@ -246,7 +256,25 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
         months.addAll(getPeriods(phoneSessions1, TIME_HORIZON.MONTH.getDuration(), last));
       }
     }
-    addChart(userPerformance, userChosenID, listid != -1, isTeacherView);
+
+    // get the number of items on the list so we can show the header with a percentage completion.
+    if (listid == -1) {
+      logger.info("showUserPerformance no listid");
+      addChart(userPerformance, userChosenID, false, isTeacherView, 0);
+    } else {
+      listServiceAsync.getNumOnList(listid, new AsyncCallback<Integer>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          //  LangTest.handleNonFatalError("no type to values", caught);
+        }
+
+        @Override
+        public void onSuccess(Integer result) {
+//          logger.info("showUserPerformance num on list for " + listid + " = " + result);
+          addChart(userPerformance, userChosenID, true, isTeacherView, result);
+        }
+      });
+    }
   }
 
   private int getPercentScore(SortedSet<TimeAndScore> simpleTimeAndScores) {
@@ -383,12 +411,14 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    * @param userPerformance
    * @param userChosenID
    * @param isTeacherView
+   * @param numOnList
    * @see #showUserPerformance
    */
   private void addChart(UserPerformance userPerformance, String userChosenID, boolean filterOnList,
-                        boolean isTeacherView) {
+                        boolean isTeacherView, int numOnList) {
     clear();
 
+    this.numOnList = numOnList;
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
 
     if (rawBestScores.isEmpty()) {
@@ -1191,8 +1221,11 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 //      if (DEBUG)
 //        logger.info("setTitleScore found " + timeAndScoresInRange.size() + " samples between " + new Date(from) + " and " + new Date(to));
     }
-    timeWidgets.setScore("<div style='white-space: nowrap;'><span>" + getScoreText(timeAndScoresInRange, index) +
-        "</span>");
+    String scoreText = getScoreText(timeAndScoresInRange, index);
+//    logger.info("setTitleScore " + from + " : " + to + " " + index + " : (" + scoreText.length() + ") " + scoreText);
+    /* boolean didIt =*/
+    timeWidgets.setScore("<div style='white-space: nowrap;'><span>" + scoreText + "</span>");
+    //  if (!didIt) logger.warning("setTitleScore : didn't set the score header???");
     setYAxisTitle(chart, getChartSubtitle(getPercentScore(timeAndScoresInRange), timeAndScoresInRange.size()));
   }
 
@@ -1208,16 +1241,19 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     int fround1 = getPercentScore(simpleTimeAndScores);
     int n = simpleTimeAndScores.size();
     if (n == 0) {
-      logger.warning("huh? no samples at " + index);
+      logger.warning("getScoreText huh? no samples at " + index);
       return "";
     } else {
       int denom = simpleTimeAndScores.iterator().next().getSessionSize();
-      logger.info("getScoreText session size = " + denom + " n " + n + " fround " + fround1);
+     // logger.info("getScoreText session size = " + denom + " n " + n + " fround " + fround1);
 
+      if (numOnList > 0) {
+        denom = numOnList;
+      }
       if (denom < 0) {
         denom = n;
       } else if (n > denom) {
-        //logger.info("denom " + denom + " n " + n);
+        logger.warning("getScoreText denom " + denom + " n " + n);
         denom = n; // denom never larger than numerator...
       }
 
@@ -1228,11 +1264,11 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
       String sessionLabel = timeHorizon == SESSION ? PREFIX + (index + 1) + " : " : "";
 
-      String text = simpleTimeAndScores.size() > 100 ? "" :
-          sessionLabel +
-              SCORE + score +
+      String suffix = " for " + ratio + " items " + percentPart;
+      String text = //simpleTimeAndScores.size() > 100 ? "" :
+          sessionLabel + score +
               //"%" +
-              " for " + ratio + " items " + percentPart
+              suffix
           //+
           //ITEMS
           ;

@@ -126,7 +126,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     VIEWS currentStoredView;
     try {
       currentStoredView = currentView == null ? VIEWS.NONE : // Not sure how this can ever happen but saw exceptions.
-          (currentView.isEmpty()) ? getInitialView(isNPQUser()) : VIEWS.valueOf(currentView);
+          (currentView.isEmpty()) ? getInitialView() : VIEWS.valueOf(currentView);
     } catch (IllegalArgumentException e) {
       currentStoredView = VIEWS.NONE;
     }
@@ -150,18 +150,18 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     return currentStoredView;
   }
 
-  private boolean isNPQUser() {
-    boolean isNPQ = false;
-    String affiliation = controller.getUserState().getCurrent().getAffiliation();
-    if (affiliation != null && affiliation.equalsIgnoreCase("NPQ")) {
-      isNPQ = true;
-    }
-    return isNPQ;
-  }
-
+  /* private boolean isNPQUser() {
+     boolean isNPQ = false;
+     String affiliation = controller.getUserState().getCurrent().getAffiliation();
+     if (affiliation != null && affiliation.equalsIgnoreCase("NPQ")) {
+       isNPQ = true;
+     }
+     return isNPQ;
+   }
+ */
   @NotNull
-  private VIEWS getInitialView(boolean npqUser) {
-    return npqUser ? VIEWS.QUIZ : isPolyglotProject() ? PRACTICE : LEARN;
+  private VIEWS getInitialView() {
+    return isPolyglotProject() ? PRACTICE : LEARN;
   }
 
   private boolean isPolyglotProject() {
@@ -650,7 +650,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     boolean polyglotProject = isPolyglotProject();
     divWidget.add(isTeacher() ?
         new StudentAnalysis(controller) :
-        new AnalysisTab(controller, polyglotProject, 0, () -> 1, LEARN));
+        new AnalysisTab(controller, polyglotProject, 0, () -> 1, LEARN, -1));
 
     currentSection = PROGRESS;
   }

@@ -144,7 +144,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
       {
         long now = System.currentTimeMillis();
-        logger.info("getPerformanceReportForUser (took " + (now - then) + ") analysis report for " + userid +
+        logger.info("getPerformanceReportForUser (took " + (now - then) + ") analysis report for user " + userid +
             " and list " + analysisRequest.getListid());// + analysisReport);
       }
       return analysisReport;
@@ -530,6 +530,9 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
   private Collection<SlickPerfResult> getSlickPerfResultsForDialog(AnalysisRequest analysisRequest) {
     Collection<SlickPerfResult> perfForUser;
+
+//    logger.info("getSlickPerfResultsForDialog request : " + analysisRequest);
+
     if (analysisRequest.getDialogSessionID() == -1) {
       int dialogID = analysisRequest.getDialogID();
       int userid = analysisRequest.getUserid();
@@ -694,6 +697,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       }
       String device = perf.devicetype();
       Long sessionTime = getSessionTime(sessionToLong, perf.device());
+      // ?? can't really get the session size here ...?
       Integer sessionSize = getNumInSession(sessionNumToInteger, perf.devicetype());
       String path = perf.answer();
 
@@ -745,18 +749,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
     return userToBest;
   }
-
-  /**
-   * TODO : also in basePhoneDAO.getSessionTime
-   *
-   * @param sessionToLong
-   * @param device
-   * @return
-   */
-//  private Long getSessionTime(Map<String, Long> sessionToLong, String device) {
-//    Long parsedTime = super.getSessionTime(sessionToLong, device);
-//    return parsedTime;
-//  }
 
   private Integer getNumInSession(Map<String, Integer> sessionToLong, String deviceType) {
     Integer parsedTime = sessionToLong.get(deviceType);
