@@ -31,12 +31,12 @@ public class SimpleUserList extends UserListLight implements IUserList {
     this.projid = projid;
     this.userid = userid;
     this.userChosenID = userChosenID;
-    this.fullName=fullName;
+    this.fullName = fullName;
     this.numItems = numItems;
     this.duration = duration;
     this.minScore = minScore;
     this.showAudio = showAudio;
-    this.isPrivate=isPrivate;
+    this.isPrivate = isPrivate;
   }
 
   @Override
@@ -47,6 +47,11 @@ public class SimpleUserList extends UserListLight implements IUserList {
   @Override
   public int getNumItems() {
     return numItems;
+  }
+
+  @Override
+  public void setNumItems(int numItems) {
+    this.numItems = numItems;
   }
 
   @Override
@@ -76,8 +81,9 @@ public class SimpleUserList extends UserListLight implements IUserList {
 
   /**
    * TODOx: allow teacher to choose.
-   * @see mitll.langtest.server.services.ListServiceImpl#getQuizInfo
+   *
    * @return
+   * @see mitll.langtest.server.services.ListServiceImpl#getQuizInfo
    */
   public int getRoundTimeMinutes() {
     return duration;

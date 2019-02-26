@@ -86,6 +86,8 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
   private String contextURL;
 
   private List<T> exercises = new ArrayList<>();
+
+  private int numItems;
   private String richText;
 
   public UserList() {
@@ -184,9 +186,18 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return exercises;
   }
 
+  /**
+   * OK to have an empty exercise list here.
+   * @return
+   */
   @Override
   public int getNumItems() {
-    return exercises.size();
+    return exercises.size() == 0 ? numItems : exercises.size();
+  }
+
+  @Override
+  public void setNumItems(int numItems) {
+    this.numItems = numItems;
   }
 
   /**

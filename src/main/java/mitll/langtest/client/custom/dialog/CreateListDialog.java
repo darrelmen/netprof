@@ -73,6 +73,8 @@ import java.util.logging.Logger;
  */
 public class CreateListDialog extends BasicDialog {
   private final Logger logger = Logger.getLogger("CreateListDialog");
+
+  private static final int DESC_WIDTH = 455;
   private static final int LIST_WIDTH = 60;
 
   private static final String ALL = "All";
@@ -207,8 +209,11 @@ public class CreateListDialog extends BasicDialog {
     child.add(row);
 
     {
-      titleBox = addControlFormField(row, TITLE);
+      titleBox = addControlFormField(row, "", "");
+      titleBox.getWidget().getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+
       final TextBoxBase box = titleBox.box;
+      titleBox.setHint(TITLE);
       if (isEditing()) box.setText(current.getName());
       box.getElement().setId("CreateListDialog_Title");
       box.addKeyUpHandler(this::checkEnter);
@@ -220,11 +225,15 @@ public class CreateListDialog extends BasicDialog {
       child.add(row);
 
       theDescription = new TextArea();
-      theDescription.setPlaceholder("(optional)");
+      theDescription.setWidth(DESC_WIDTH +
+          "px");
+
+      theDescription.setPlaceholder(DESCRIPTION_OPTIONAL + " (optional)");
       theDescription.addKeyUpHandler(this::checkEnter);
 
       if (isEditing()) theDescription.setText(current.getDescription());
-      final FormField description = getSimpleFormField(row, DESCRIPTION_OPTIONAL, theDescription, 1);
+      final FormField description = getSimpleFormField(row, "", theDescription, 1, "");
+
       description.box.getElement().setId("CreateListDialog_Description");
       description.box.addBlurHandler(event -> controller.logEvent(description.box, TEXT_BOX, CREATE_NEW_LIST, "Description = " + description.box.getValue()));
     }
@@ -233,8 +242,8 @@ public class CreateListDialog extends BasicDialog {
       row = new FluidRow();
       child.add(row);
 
-      classBox = addControlFormField(row, CLASS);
-      classBox.setHint("(optional)");
+      classBox = addControlFormField(row);
+      classBox.setHint(CLASS + " (optional)");
       classBox.box.addKeyUpHandler(this::checkEnter);
       if (isEditing()) classBox.setText(current.getClassMarker());
       classBox.box.getElement().setId("CreateListDialog_CourseInfo");
@@ -443,7 +452,7 @@ public class CreateListDialog extends BasicDialog {
       // logger.info("got " + current.getID() + " " + current.shouldShowAudio());
       w.setValue(current.shouldShowAudio());
     } else {
-      logger.warning("getPlayAudioCheck no current list?");
+      logger.info("getPlayAudioCheck no current list?");
     }
     return w;
   }

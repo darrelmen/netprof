@@ -127,6 +127,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   /**
    * @see ContentView#showContent
+   * @see #showYourLists(Collection, DivWidget)
    */
   private static final String YOUR_LISTS = "Your Lists and Quizzes";
 
@@ -338,6 +339,8 @@ public class ListView implements ContentView, CreateListComplete {
     new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.RIGHT);
     addPagerAndHeader(tableWithPager, canMakeQuiz() ? YOUR_LISTS : YOUR_LISTS1, left);
     tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
+    tableWithPager.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+
     left.add(getButtons(ListView.this.myLists));
   }
 
@@ -909,9 +912,7 @@ public class ListView implements ContentView, CreateListComplete {
       super.gotClickOnItem(user);
       setShareHREF(user);
       enableQuizButton(quizButton);
-
     }
-
 
     @Override
     protected boolean hasDoubleClick() {
@@ -924,7 +925,6 @@ public class ListView implements ContentView, CreateListComplete {
       //showLearnOrQuiz(selected);
       editList();
     }
-
   }
 
   private void setShareHREF(UserList<CommonShell> user) {

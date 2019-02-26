@@ -14,4 +14,6 @@ public interface IUserList extends IUserListLight {
   boolean shouldShowAudio();
 
   boolean isPrivate();
+
+  void setNumItems(int numItems);
 }

@@ -324,7 +324,7 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
       @Override
       public SafeHtml getValue(UserList<CommonShell> shell) {
         String firstInitialName = shell.getFirstInitialName();
-        return getSafeHtml(truncate(firstInitialName, 20));
+        return getSafeHtml(truncate(firstInitialName, 15));
       }
     };
   }

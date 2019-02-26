@@ -32,6 +32,7 @@
 
 package mitll.langtest.server.services;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import mitll.langtest.client.analysis.UserContainer;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.userlist.ListContainer;
@@ -149,7 +150,7 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @param visited
    * @param includeQuiz
    * @return
-   * @see ContentView#showContent
+   * @see mitll.langtest.client.custom.userlist.ListView#addYourLists(DivWidget)
    */
   public Collection<UserList<CommonShell>> getListsForUser(boolean onlyCreated, boolean visited, boolean includeQuiz) throws DominoSessionException {
     //  if (!onlyCreated && !visited) logger.error("getListsForUser huh? asking for neither your lists nor  your visited lists.");

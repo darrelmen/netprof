@@ -704,9 +704,19 @@ public class UserListManager implements IUserListManager {
       addIfNotThere(listsForUser, ids, listsForUser1);
     }
 
-    boolean isAdmin = userDAO.isAdmin(userid);
-    if (isAdmin && includeQuiz) {
-      addIfNotThere(listsForUser, ids, userListDAO.getAllQuiz(projid));
+    if (includeQuiz && userDAO.isAdmin(userid)) {
+      Collection<UserList<CommonShell>> allQuiz = userListDAO.getAllQuiz(projid);
+
+      List<Integer> listids = new ArrayList<>();
+      allQuiz.forEach(commonShellUserList -> listids.add(commonShellUserList.getID()));
+      Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(listids);
+      allQuiz.forEach(commonShellUserList -> {
+        if (numForList.containsKey(commonShellUserList.getID())) {
+          Integer numItems = numForList.get(commonShellUserList.getID());
+          commonShellUserList.setNumItems(numItems);
+        }
+      });
+      addIfNotThere(listsForUser, ids, allQuiz);
     }
 
     // put favorite at front
