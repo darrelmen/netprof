@@ -136,11 +136,11 @@ public class CreateListDialog extends BasicDialog {
   private TextArea theDescription;
   private FormField classBox;
   private RadioButton publicChoice, privateChoice;
-  private RadioButton vocabChoice, sentenceChoice, bothChoice;
+  private RadioButton sentenceChoice;
+  private RadioButton bothChoice;
   private UserList current = null;
   private boolean isEdit;
   private ControlGroup publicPrivateGroup;
-  private ControlGroup contentChoiceGroup;
   /**
    *
    */
@@ -637,7 +637,7 @@ public class CreateListDialog extends BasicDialog {
   private Widget getContentChoices() {
     FluidRow row = new FluidRow();
 
-    vocabChoice = new RadioButton(CONTENT_GROUP, "Items");
+    RadioButton vocabChoice = new RadioButton(CONTENT_GROUP, "Items");
     // vocabChoice.addClickHandler(event -> gotClickOnPublic());
 
     RadioButton radioButton2 = new RadioButton(CONTENT_GROUP, "Sentences");
@@ -661,6 +661,7 @@ public class CreateListDialog extends BasicDialog {
     hp.add(sentenceChoice);
     hp.add(bothChoice);
 
+    ControlGroup contentChoiceGroup;
     row.add(contentChoiceGroup = addControlGroupEntry(row, "Content Type", hp, ""));
     contentChoiceGroup.getElement().getStyle().setMarginTop(-23, Style.Unit.PX);
     return row;

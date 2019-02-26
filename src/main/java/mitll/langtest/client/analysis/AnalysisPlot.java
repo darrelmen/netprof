@@ -1253,7 +1253,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
       if (denom < 0) {
         denom = n;
       } else if (n > denom) {
-        logger.warning("getScoreText denom " + denom + " n " + n);
+        logger.info("getScoreText denom " + denom + " < n " + n);
         denom = n; // denom never larger than numerator...
       }
 

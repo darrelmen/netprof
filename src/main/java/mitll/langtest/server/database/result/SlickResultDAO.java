@@ -698,12 +698,14 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     List<Integer> uniqueex = new ArrayList<>();
     slickPerfResults.forEach(p -> uniqueex.add(p.exid()));
 
-    logger.info("getPerfForUserOnList perf for" +
-        "\n\tuser   " + userid +
-        "\n\tlist   " + listid + " : got " + slickPerfResults.size() +
-        "\n\tids    " + unique +
-        "\n\tex ids " + uniqueex
-    );
+    if (DEBUG) {
+      logger.info("getPerfForUserOnList perf for" +
+          "\n\tuser   " + userid +
+          "\n\tlist   " + listid + " : got " + slickPerfResults.size() +
+          "\n\tids    " + unique +
+          "\n\tex ids " + uniqueex
+      );
+    }
 
     return slickPerfResults;
   }

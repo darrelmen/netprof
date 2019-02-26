@@ -130,7 +130,7 @@ public class DialogHelper {
                             CloseListener listener, int maxHeight, int width, Button closeButton,
                             boolean isBig) {
     dialogBox = new Modal();
-
+    dialogBox.getElement().getStyle().setTop(5, Style.Unit.PCT);
     //  logger.info("max height " + maxHeight);
     if (width > 900) {
       dialogBox.getElement().getStyle().setLeft(310, Style.Unit.PX);

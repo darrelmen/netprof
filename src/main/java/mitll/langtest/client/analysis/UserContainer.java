@@ -801,7 +801,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     // return getSafeHtml("" + Integer.valueOf(lastSessionScore).floatValue()/10F);
     // return getSafeHtml("" + lastSessionScore);
 
-    logger.info("getAdjustedScore shell " +shell);
+//    logger.info("getAdjustedScore shell " +shell);
     float lastf = v;//(float) lastSessionScore;
     if (percent < 50) {
       logger.info("getAdjustedScore 1 adjusting given " + percent + " from "+ lastf);
@@ -810,9 +810,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
       logger.info("getAdjustedScore 2 adjusting given " + percent + " from "+ lastf);
       lastf *= 0.9f;
     }
-    else {
-      logger.info("getAdjustedScore lastf "+ lastf);
-    }
+  //  else {
+  //    logger.info("getAdjustedScore lastf "+ lastf);
+  //  }
 
     return Integer.valueOf(Math.round(lastf)).floatValue() / 10F;
   }

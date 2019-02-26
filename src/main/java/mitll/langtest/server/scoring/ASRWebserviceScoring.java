@@ -611,6 +611,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     jsonObject.addProperty("phrase", sentence.trim());
     jsonObject.addProperty("transcript", sentence.trim());
     jsonObject.addProperty("file", audioPath);
+    jsonObject.addProperty("waveform", audioPath);
 
     return jsonObject.toString();
   }

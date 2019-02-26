@@ -335,7 +335,7 @@ public class ListView implements ContentView, CreateListComplete {
   private void showYourLists(Collection<UserList<CommonShell>> result, DivWidget left) {
     ListContainer myLists = new MyListContainer();
     Panel tableWithPager = (ListView.this.myLists = myLists).getTableWithPager(result);
-    //   tableWithPager.setHeight("520px");
+
     new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.RIGHT);
     addPagerAndHeader(tableWithPager, canMakeQuiz() ? YOUR_LISTS : YOUR_LISTS1, left);
     tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
@@ -774,7 +774,6 @@ public class ListView implements ContentView, CreateListComplete {
     CreateListDialog createListDialog = new CreateListDialog(this, controller, names).setIsQuiz(true);
     createListDialog.doCreate(contents);
 
-
     return getNewListButton(contents, createListDialog, "Create New Quiz");
   }
 
@@ -782,7 +781,6 @@ public class ListView implements ContentView, CreateListComplete {
   private DialogHelper getNewListButton(DivWidget contents, CreateListDialog createListDialog, String title) {
     DialogHelper dialogHelper = new DialogHelper(true);
     createListDialog.setDialogHelper(dialogHelper);
-    //String createNewList = CREATE_NEW_LIST + (canMakeQuiz() ? " or Quiz" : "");
     Button closeButton = dialogHelper.show(
         title,
         Collections.emptyList(),
