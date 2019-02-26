@@ -229,7 +229,8 @@ public class UserListManager implements IUserListManager {
                                            int projid,
                                            int reqSize,
                                            TimeRange timeRange,
-                                           QuizSpec quizSpec, Map<String, String> unitChapter) {
+                                           QuizSpec quizSpec,
+                                           Map<String, String> unitChapter) {
     String userChosenID = userDAO.getUserChosenID(userid);
     String firstInitialName = userDAO.getFirstInitialName(userid);
     if (userChosenID == null) {
@@ -243,20 +244,13 @@ public class UserListManager implements IUserListManager {
           quizSpec.getRoundMinutes(), quizSpec.getMinScore(), quizSpec.isShowAudio(), quizSpec.getAccessCode());
       int userListID = rememberList(projid, quiz);
 
-      logger.info("createQuiz made new quiz " + quiz + "\n\tfor size " + reqSize);
-      Project project = databaseServices.getProject(projid);
-
-      List<CommonExercise> items = new ArrayList<>();
-
-//      if (isDryRun) {
-//        getFirstEasyLength(project.getSectionHelper().getFirst());
-//        for (CommonExercise exercise : getFirstEasyLength(project.getSectionHelper().getFirst())) {
-//          items.add(exercise);
-//          if (items.size() == reqSize) break;
-//        }
-//      } else {
-      addRandomItems(reqSize, project, items, unitChapter);
-//      }
+      QuizSpec.EXERCISETYPES exercisetypes = quizSpec.getExercisetypes();
+      logger.info("createQuiz made new quiz " + quiz +
+          "\n\tfor size      " + reqSize +
+          "\n\texercisetypes " + exercisetypes
+      );
+      List<CommonExercise> items = getRandomItems(reqSize, databaseServices.getProject(projid), unitChapter,
+          exercisetypes);
 
       List<CommonShell> shells = getShells(items);
       logger.info("createQuiz made random ex list of size " + items.size() +
@@ -271,7 +265,8 @@ public class UserListManager implements IUserListManager {
     }
   }
 
-  private void addRandomItems(int reqSize, Project project, List<CommonExercise> items, Map<String, String> unitChapter) {
+  private List<CommonExercise> getRandomItems(int reqSize, Project project, Map<String, String> unitChapter, QuizSpec.EXERCISETYPES exercisetypes) {
+    List<CommonExercise> items = new ArrayList<>();
     Map<String, Collection<String>> typeToSelection = new HashMap<>();
     unitChapter.forEach((k, v) -> {
       if (!v.equalsIgnoreCase(ALL)) {
@@ -286,18 +281,40 @@ public class UserListManager implements IUserListManager {
       exercisesForSelectionState = project.getSectionHelper().getExercisesForSelectionState(typeToSelection);
     }
     List<CommonExercise> rawExercises = new ArrayList<>(exercisesForSelectionState);
-    addRandomItems(reqSize, items, rawExercises);
+
+    if (exercisetypes == QuizSpec.EXERCISETYPES.BOTH) {
+      items = getRandomItems(reqSize / 2, rawExercises);
+     // logger.info("first was " + items.size());
+      items.addAll(getRandomItems(reqSize - items.size(), getContextSentences(rawExercises)));
+     // logger.info("second was " + items.size());
+    } else if (exercisetypes == QuizSpec.EXERCISETYPES.SENTENCES) {
+      items = getRandomItems(reqSize, getContextSentences(rawExercises));
+    } else {
+      items = getRandomItems(reqSize, rawExercises);
+    }
 
     logger.info("exercisesForSelectionState " + typeToSelection + " : " + exercisesForSelectionState.size() + " items " + items.size());
+    return items;
   }
 
-  private void addRandomItems(int reqSize, List<CommonExercise> items, List<CommonExercise> toChooseFrom) {
+  @NotNull
+  private List<CommonExercise> getContextSentences(List<CommonExercise> rawExercises) {
+    List<CommonExercise> context = new ArrayList<>();
+    //  if (DEBUG) logger.info("getFilteredExercises for " + typeToValues + " found " + exercisesForState.size());
+    rawExercises.forEach(ex -> {
+      ex.getDirectlyRelated().forEach(c -> context.add(c.asCommon()));
+    });
+    return context;
+  }
+
+  private List<CommonExercise> getRandomItems(int reqSize, List<CommonExercise> toChooseFrom) {
     Random random = new Random();
 
     Set<Integer> exids = new TreeSet<>();
 
     reqSize = Math.min(reqSize, toChooseFrom.size());
 
+    List<CommonExercise> items = new ArrayList<>();
     while (items.size() < reqSize) {
       int i = random.nextInt(toChooseFrom.size());
       CommonExercise commonExercise = toChooseFrom.get(i);
@@ -321,6 +338,7 @@ public class UserListManager implements IUserListManager {
 */
       }
     }
+    return items;
   }
 
 /*

@@ -9,6 +9,9 @@ public class QuizSpec implements IsSerializable {
   private boolean isDefault;
   private String accessCode = "";
 
+  public  enum EXERCISETYPES implements IsSerializable { VOCAB, SENTENCES, BOTH }
+  private EXERCISETYPES exercisetypes = EXERCISETYPES.VOCAB;
+
   public QuizSpec() {
     this(10, 30, false, true, "");
   }
@@ -51,6 +54,15 @@ public class QuizSpec implements IsSerializable {
   public String getAccessCode() {
     return accessCode;
   }
+
+  public EXERCISETYPES getExercisetypes() {
+    return exercisetypes;
+  }
+
+  public void setExercisetypes(EXERCISETYPES exercisetypes) {
+    this.exercisetypes = exercisetypes;
+  }
+
 
   public String toString() {
     return "quiz " +

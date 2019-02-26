@@ -164,7 +164,7 @@ public class EditItem {
         //else
         // logger.info("unit " + exercise.getUnitToValue());
 
-        if (exercise.isPredefined()) {
+        if (exercise.isPredefined() || exercise.isContext()) {
           TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<>(exercise,
               controller,
               exerciseList,

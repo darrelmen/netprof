@@ -108,6 +108,9 @@ public class CreateListDialog extends BasicDialog {
   private static final int MIN_QUIZ_SIZE = 0;
 
   private static final String SHOW_AS_QUIZ = "Show as Quiz";
+  /**
+   *
+   */
   private static final String CREATE_A_NEW_QUIZ = "Create a new quiz. (Items are chosen randomly.)";
   private static final String IS_A_QUIZ = "Is a quiz?";
 
@@ -119,6 +122,7 @@ public class CreateListDialog extends BasicDialog {
   private static final String CREATE_NEW_LIST = "Create New List";
   private static final String TEXT_BOX = "TextBox";
   private static final String PUBLIC_PRIVATE_GROUP = "Public_Private_Group";
+  private static final String CONTENT_GROUP = "Content_Group";
 
   private static final String PLEASE_FILL_IN_A_TITLE = "Please fill in a title";
 
@@ -132,9 +136,11 @@ public class CreateListDialog extends BasicDialog {
   private TextArea theDescription;
   private FormField classBox;
   private RadioButton publicChoice, privateChoice;
+  private RadioButton vocabChoice, sentenceChoice, bothChoice;
   private UserList current = null;
   private boolean isEdit;
   private ControlGroup publicPrivateGroup;
+  private ControlGroup contentChoiceGroup;
   /**
    *
    */
@@ -296,6 +302,9 @@ public class CreateListDialog extends BasicDialog {
     createQuizOptions.add(getQuizChoices(true));
   }
 
+  /**
+   * @param child
+   */
   private void addEditOptions(Panel child) {
     editQuizOptions = new DivWidget();
     styleQuizOptions(editQuizOptions);
@@ -350,6 +359,7 @@ public class CreateListDialog extends BasicDialog {
 
       }
 
+      grid.setWidget(row, col++, getContentChoices());
 
       row++;
       col = 0;
@@ -602,6 +612,7 @@ public class CreateListDialog extends BasicDialog {
 
     publicChoice = new RadioButton(PUBLIC_PRIVATE_GROUP, PUBLIC);
     publicChoice.addClickHandler(event -> gotClickOnPublic());
+
     RadioButton radioButton2 = new RadioButton(PUBLIC_PRIVATE_GROUP, PRIVATE);
     privateChoice = radioButton2;
     privateChoice.addClickHandler(event -> gotClickOnPrivate());
@@ -621,6 +632,40 @@ public class CreateListDialog extends BasicDialog {
     row.add(publicPrivateGroup = addControlGroupEntry(row, KEEP_LIST_PUBLIC_PRIVATE, hp, ""));
     return row;
   }
+
+  @NotNull
+  private Widget getContentChoices() {
+    FluidRow row = new FluidRow();
+
+    vocabChoice = new RadioButton(CONTENT_GROUP, "Items");
+    // vocabChoice.addClickHandler(event -> gotClickOnPublic());
+
+    RadioButton radioButton2 = new RadioButton(CONTENT_GROUP, "Sentences");
+    sentenceChoice = radioButton2;
+
+    bothChoice = new RadioButton(CONTENT_GROUP, "Both");
+
+    //privateChoice.addClickHandler(event -> gotClickOnPrivate());
+    // students by default have private lists - ?
+    {
+      // boolean isPrivate = getDefaultPrivacy();
+
+      vocabChoice.setValue(true);
+      // radioButton2.setValue(isPrivate);
+    }
+
+    Panel hp = new VerticalPanel();
+    hp.addStyleName("inlineFlex");
+    hp.add(vocabChoice);
+    //radioButton2.addStyleName("leftFiveMargin");
+    hp.add(sentenceChoice);
+    hp.add(bothChoice);
+
+    row.add(contentChoiceGroup = addControlGroupEntry(row, "Content Type", hp, ""));
+    contentChoiceGroup.getElement().getStyle().setMarginTop(-23, Style.Unit.PX);
+    return row;
+  }
+
 
   private void gotClickOnPublic() {
     modeDep.setVisible(isQuiz);
@@ -741,6 +786,8 @@ public class CreateListDialog extends BasicDialog {
     }
 
     QuizSpec quizSpec = new QuizSpec(duration, minScore, playAudio, true, "");
+    if (sentenceChoice.getValue()) quizSpec.setExercisetypes(QuizSpec.EXERCISETYPES.SENTENCES);
+    else if (bothChoice.getValue()) quizSpec.setExercisetypes(QuizSpec.EXERCISETYPES.BOTH);
 
     controller.getListService().addUserList(
         safeText,

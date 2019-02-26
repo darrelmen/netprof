@@ -866,7 +866,6 @@ public class ListView implements ContentView, CreateListComplete {
    * @param userList
    * @see CreateListDialog#addUserList
    */
-
   @Override
   public void madeIt(UserList userList) {
     // logger.info("madeIt made it " + userList.getName());
@@ -875,6 +874,7 @@ public class ListView implements ContentView, CreateListComplete {
       myLists.addExerciseAfter(null, userList);
       myLists.enableAll();
       names.add(userList.getName());
+      editButton.setEnabled(true);
     } catch (Exception e) {
       logger.warning("got " + e);
     }
