@@ -286,20 +286,20 @@ public class AttachSecurityFilter implements Filter {
     return getUserForWavFile(fileToFind);
   }
 
-  @NotNull
-  private String removeAnswers(String fileToFind) {
-    int answers = fileToFind.indexOf(ANSWERS);
-    if (answers != -1) {
-      fileToFind = fileToFind.substring(answers + ANSWERS.length());
-
-      answers = fileToFind.indexOf(ANSWERS);
-      if (answers != -1) {
-        fileToFind = fileToFind.substring(answers);
-      }
-      if (DEBUG) log.info("getUserForFile test " + fileToFind);
-    }
-    return fileToFind;
-  }
+//  @NotNull
+//  private String removeAnswers(String fileToFind) {
+//    int answers = fileToFind.indexOf(ANSWERS);
+//    if (answers != -1) {
+//      fileToFind = fileToFind.substring(answers + ANSWERS.length());
+//
+//      answers = fileToFind.indexOf(ANSWERS);
+//      if (answers != -1) {
+//        fileToFind = fileToFind.substring(answers);
+//      }
+//      if (DEBUG) log.info("getUserForFile test " + fileToFind);
+//    }
+//    return fileToFind;
+//  }
 
 
   @NotNull

@@ -81,6 +81,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -163,6 +164,7 @@ public class ProjectManagement implements IProjectManagement {
   private final boolean debugOne;
 
   private final IDominoImport dominoImport;
+  private Map<Integer, Integer> oldToNew = new ConcurrentHashMap<>();
 
   /**
    * @param pathHelper
@@ -528,35 +530,67 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public int getUserForFile(String requestURI) {
-    int userID = -1;
-    Matcher matcher = pattern.matcher(requestURI);
-    if (matcher.find()) {
-      String group = matcher.group(1);
-      // logger.info("getUserForFile lang " + group);
-      List<Project> matches = getProjectsForLanguage(group);
+    int oldUser = getUserFromFile(requestURI);
 
-      if (matches.isEmpty()) {
-        logger.warn("getUserForFile lang '" + group + "' match no projects in " + requestURI);
-        userID = getUserIDFromAll(requestURI);
-      } else {
-        // logger.info("getUserForFile lang " + group + " matches " + matches.size());
-        userID = getUserIDFrom(requestURI, matches);
+    Integer mappedUser = oldToNew.get(oldUser);
+    if (mappedUser == null) {
+      int userID = -1;
 
-        if (false) {
-          if (userID == -1) {
-            logger.info("getUserForFile NO USER ID for lang '" + group + "' project matches " + matches.size());
+      Matcher matcher = pattern.matcher(requestURI);
+      if (matcher.find()) {
+        String group = matcher.group(1);
+        // logger.info("getUserForFile lang " + group);
+        List<Project> matches = getProjectsForLanguage(group);
+
+        if (matches.isEmpty()) {
+          logger.warn("getUserForFile lang '" + group + "' match no projects in " + requestURI);
+          userID = getUserIDFromAll(requestURI);
+        } else {
+          // logger.info("getUserForFile lang " + group + " matches " + matches.size());
+          userID = getUserIDFrom(requestURI, matches);
+
+          if (false) {
+            if (userID == -1) {
+              logger.info("getUserForFile NO USER ID for lang '" + group + "' project matches " + matches.size());
+            }
           }
         }
-        return userID;
+      } else {
+        userID = getUserIDFromAll(requestURI);
+//        if (oldUser != -1 && userIDFromAll != -1) {
+//          logger.info("remember 2 " + oldUser + "->" + userIDFromAll);
+//          oldToNew.put(oldUser, userIDFromAll);
+//        }
+//        return userIDFromAll;
       }
+
+      if (userID == -1) {
+        logger.info("getUserForFile couldn't find recorder of (" +oldUser+ ") " + requestURI);
+      }
+      if (oldUser != -1 && userID != -1) {
+        logger.info("getUserForFile remember " + oldUser + "->" + userID);
+        oldToNew.put(oldUser, userID);
+      }
+      return userID;
     } else {
-      return getUserIDFromAll(requestURI);
+      return mappedUser;
     }
+  }
 
-    if (userID == -1) {
-      logger.info("getUserForFile couldn't find recorder of " + requestURI);
+  private int getUserFromFile(String requestURI) {
+    int userID = -1;
+    String[] split = requestURI.split("subject-");
+    if (split.length == 2) {
+      String s1 = split[1];
+      String[] split1 = s1.split("\\/");
+      String s = split1[0];
+      try {
+        userID = Integer.parseInt(s);
+//        logger.info("getUserForFile parse '" + s + "' = " + userID + " from " + s1);
+      } catch (NumberFormatException e) {
+        logger.warn("getUserFromFile couldn't parse " + s + " in " + s1 + " of " + requestURI);
+      }
     }
-
     return userID;
   }
 

@@ -101,6 +101,7 @@ public class Project implements IPronunciationLookup, IProject {
   public static final String MANDARIN = "Mandarin";
 
   private static final boolean REPORT_ON_DIALOG_TYPES = false;
+  public static final boolean DEBUG_FILE_LOOKUP = false;
 
   /**
    * @see #getWebservicePort
@@ -250,6 +251,7 @@ public class Project implements IPronunciationLookup, IProject {
 
   /**
    * Cheesy code to avoid adding a duplicate type -- needed?
+   *
    * @return
    */
   @NotNull
@@ -508,7 +510,7 @@ public class Project implements IPronunciationLookup, IProject {
     propCache.putAll(db.getProjectDAO().getProps(getID()));
   }
 
-  private  int spew = 0;
+  private int spew = 0;
 
   /**
    * @param id
@@ -777,20 +779,25 @@ public class Project implements IPronunciationLookup, IProject {
 
     if (user == null) {
       if (unknownFiles.containsKey(requestURI)) {
-        //  logger.warn("getUserForFile (" + getID() + ") OK, already know we can't find the user for " + requestURI);
+        //logger.warn("getUserForFile (" + getID() + ") OK, already know we can't find the user for " + requestURI);
       } else {
         int studentForPath = db.getResultDAO().getStudentForPath(getID(), requestURI);
         if (studentForPath > 0) {
           fileToRecorder.put(requestURI, studentForPath);
-          //      logger.info("getUserForFile (" + getID() + ") remember '" + requestURI + "' = " + studentForPath + " now " + fileToRecorder.size());
+          //logger.info("getUserForFile (" + getID() + ") remember '" + requestURI + "' = " + studentForPath + " now " + fileToRecorder.size());
           user = studentForPath;
         } else {
           unknownFiles.put(requestURI, false);
-          //        logger.info("getUserForFile (" + getID() + ") can't find user for " + requestURI + " = " + studentForPath + " now " + unknownFiles.size() + " " + unknownFiles.containsKey(requestURI));
+          if (DEBUG_FILE_LOOKUP) {
+            logger.info("getUserForFile (" + getID() + ") can't find user " +
+                "for " + requestURI + " = " + studentForPath + " now " + unknownFiles.size() + " " + unknownFiles.containsKey(requestURI));
+          }
         }
       }
     } else {
-//      logger.info("getUserForFile (" + getID() + ") remember '" + requestURI + "' = " + user + " now " + fileToRecorder.size());
+      if (DEBUG_FILE_LOOKUP) {
+        logger.info("getUserForFile (" + getID() + ") remember '" + requestURI + "' = " + user + " now " + fileToRecorder.size());
+      }
     }
 //    if (integer == null) {
     //     logger.warn("getUserForFile  can't find " + requestURI + " in " + fileToRecorder.size());
@@ -893,6 +900,6 @@ public class Project implements IPronunciationLookup, IProject {
   }
 
   public String toString() {
-    return "Project\n\t(" +getTypeOrder()+ ") : project " + project;// + "\n\ttypes " + getTypeOrder() + " exercise dao " + exerciseDAO;
+    return "Project\n\t(" + getTypeOrder() + ") : project " + project;// + "\n\ttypes " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
 }
