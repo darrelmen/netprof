@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.client.recorder;
@@ -50,22 +47,6 @@ import mitll.langtest.shared.answer.Validity;
 
 import java.util.logging.Logger;
 
-/**
- * Basically a click handler and a timer to click stop recording, if the user doesn't.
- * <p/>
- * Two kinds of record buttons -- simple ones where clicking on the button starts and stop the recording, and there's a little
- * image next to it to give feedback that recording is occurring.
- * <p/>
- * The other kinds is the flashcard button, which records while the space bar is held down, (or maybe while the mouse button is held down).
- * It's feedback is the button itself flipping the record images.
- * <p/>
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 9/7/12
- * Time: 5:58 PM
- * To change this template use File | Settings | File Templates.
- */
 public class RecordButton extends Button {
   private final Logger logger = Logger.getLogger("RecordButton");
 

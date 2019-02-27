@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.server.database.reviewed;
@@ -43,21 +40,6 @@ import org.apache.logging.log4j.Logger;
 import java.sql.*;
 import java.util.*;
 
-/**
- * Records {@link STATE} transitions of each exercise as it is marked by quality control reviewers.
- * <p/>
- * So for instance an exercise can go from UNSET->DEFECT->FIXED and back again, or APPROVED->UNSET->APPROVED.
- * <p/>
- * All state changes are recorded, nothing is overwritten. To get the current state you have to get the latest
- * entry.
- * <p>
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 12/9/13
- * Time: 2:23 PM
- * To change this template use File | Settings | File Templates.
- */
 public class ReviewedDAO extends DAO implements IReviewedDAO {
   private static final Logger logger = LogManager.getLogger(ReviewedDAO.class);
 

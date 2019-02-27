@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.server.scoring;
@@ -75,21 +72,6 @@ import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.ERROR;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.SUCCESS;
 import static mitll.langtest.server.scoring.Scores.PHONES;
 
-/**
- * Does ASR scoring using hydra.
- * <p>
- * Results in either alignment or decoding, depending on the mode.
- * Decoding is used with autoCRT of audio.
- * <p>
- * Takes the label files and generates transcript images for display in the client.
- * <p>
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 9/10/12
- * Time: 11:16 AM
- * To change this template use File | Settings | File Templates.
- */
 public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final Logger logger = LogManager.getLogger(ASRWebserviceScoring.class);
 
