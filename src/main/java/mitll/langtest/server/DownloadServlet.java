@@ -76,7 +76,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String AUDIO = "audio";
   private static final String LIST = "list";
   private static final String DIALOG = "d";
-  public static final String S = DIALOG + "=";
+  private static final String DIALOG_ARG = DIALOG + "=";
   private static final String FILE = "file";
 
   private static final String COMPRESSED_SUFFIX = "mp3";
@@ -142,10 +142,7 @@ public class DownloadServlet extends DatabaseServlet {
           projid = getProjectIDFromUser(request);
         }
         if (projid == -1) {
-          logger.warn("doGet no current project for request ");
-          response.setContentType("text/html");
-          response.getOutputStream().write("no project for request".getBytes());
-          closeOutputStream(response);
+          handleNoProject(response);
           return;
         }
         //       logger.info("doGet : current session found projid " + project1);
@@ -154,33 +151,21 @@ public class DownloadServlet extends DatabaseServlet {
         String language = project.getLanguageEnum().toDisplay();
 
         String requestURI = request.getRequestURI();
+
+        logger.info("doGet :" +
+            "\n\tRequest " + request.getQueryString() +
+            "\n\tRequest decode " + URLDecoder.decode(request.getQueryString(), "UTF-8") +
+            "\n\tpath    " + request.getPathInfo() +
+            "\n\turi     " + requestURI +
+            "\n\turl     " + request.getRequestURL() +
+            "\n\tpath    " + request.getServletPath());
+
         if (requestURI.toLowerCase().contains(AUDIO)) {
-          String queryString = request.getQueryString();
-
-          String decode = URLDecoder.decode(queryString, "UTF-8");
-
-          logger.debug("doGet :" +
-              "\n\tRequest " + queryString +
-              "\n\tRequest decode " + decode +
-              "\n\tpath    " + request.getPathInfo() +
-              "\n\turi     " + requestURI +
-              "\n\turl     " + request.getRequestURL() +
-              "\n\tpath    " + request.getServletPath());
-
-          queryString = decode;
-
-          if (queryString.contains(S)) {
-            String[] split = queryString.split(S);
-
-            if (split.length == 2) {
-              String[] splitArgs = split[1].split(REGEXAMPERSAND);
-              String listid = splitArgs[0];
-              if (!listid.isEmpty()) {
-                writeDialogList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
-              }
-            }
+          String queryString = URLDecoder.decode(request.getQueryString(), "UTF-8");
+          if (queryString.contains(DIALOG_ARG)) {
+            downloadDialogContent(response, db, projid, hasProjectSpecificAudio, queryString);
           } else if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
-            donwloadAList(response, db, projid, hasProjectSpecificAudio, queryString);
+            downloadAList(response, db, projid, hasProjectSpecificAudio, queryString);
           } else if (queryString.startsWith(FILE)) {
             returnAudioFile(response, db, queryString, language, projid);
           } else if (queryString.startsWith(REQUEST)) {
@@ -200,7 +185,26 @@ public class DownloadServlet extends DatabaseServlet {
     closeOutputStream(response);
   }
 
-  private void donwloadAList(HttpServletResponse response, DatabaseImpl db, int projid, boolean hasProjectSpecificAudio, String queryString) {
+  private void handleNoProject(HttpServletResponse response) throws IOException {
+    logger.warn("doGet no current project for request ");
+    response.setContentType("text/html");
+    response.getOutputStream().write("no project for request".getBytes());
+    closeOutputStream(response);
+  }
+
+  private void downloadDialogContent(HttpServletResponse response, DatabaseImpl db, int projid, boolean hasProjectSpecificAudio, String queryString) {
+    String[] split = queryString.split(DIALOG_ARG);
+
+    if (split.length == 2) {
+      String[] splitArgs = split[1].split(REGEXAMPERSAND);
+      String listid = splitArgs[0];
+      if (!listid.isEmpty()) {
+        writeDialogList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
+      }
+    }
+  }
+
+  private void downloadAList(HttpServletResponse response, DatabaseImpl db, int projid, boolean hasProjectSpecificAudio, String queryString) {
     if (queryString.contains(LISTS)) {
       String s = queryString.split("Lists=\\[")[1];
       String[] split = s.split(("\\]"));
@@ -492,13 +496,16 @@ public class DownloadServlet extends DatabaseServlet {
     ServletOutputStream outputStream = response.getOutputStream();
     String projectName = getProjectName(projectid);
     String prefix = language + "_" + projectName.replaceAll("\\s++", "_") + "_";
-/*    if (encodedFileName.toLowerCase().contains(USERS)) {
+
+    /*    if (encodedFileName.toLowerCase().contains(USERS)) {
       String filename = prefix + "users.xlsx";
       response.setHeader("Content-Disposition", "attachment; filename=" + filename);
       db.usersToXLSX(response.getOutputStream());
     } else
       */
-    logger.info("returnSpreadsheet : req " + encodedFileName);
+
+    logger.info("returnSpreadsheet : (" + projectName + ") req " + encodedFileName);
+
     if (encodedFileName.toLowerCase().contains(RESULTS)) {
       setFilenameHeader(response, prefix + RESULTS_XLSX);
       new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid), db.getTypeOrder(projectid), outputStream);

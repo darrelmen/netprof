@@ -65,6 +65,9 @@ public class DownloadHelper implements IShowStatus {
   public static final String COMMA = "___COMMA___";
 
   private static final String VOCABULARY = "Vocabulary";
+  /**
+   * @see #showDialog(String, FacetExerciseList)
+   */
   private static final String DOWNLOAD_AUDIO_AND_SPREADSHEET = "Download Content Spreadsheet (and Audio)";
   private static final String SPEED = "Speed";
   private static final String CONTENT = "Content";
@@ -424,10 +427,11 @@ public class DownloadHelper implements IShowStatus {
         " = '" + encode +
         "'");*/
 
+    String dialogParam = selectionState.getDialog() > 0 ? "&d=" + selectionState.getDialog() : "";
     return "?" +
         "request=" + DownloadContainer.DOWNLOAD_AUDIO +
         "&unit=" + encode +
-        "&d=" + selectionState.getDialog() +
+        dialogParam +
         "&male=" + isMale +
         "&regular=" + speedChoices.isRegular() +
         "&context=" + isContext +
