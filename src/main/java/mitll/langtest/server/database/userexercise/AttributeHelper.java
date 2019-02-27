@@ -26,16 +26,28 @@ public class AttributeHelper implements IAttribute {
   @Override
   public boolean updateProject(int oldID, int newprojid) { return attributeDAOWrapper.updateProject(oldID, newprojid) > 0; }
 
-  public int addAttribute(int projid,
-                          long now,
-                          int userid,
-                          ExerciseAttribute attribute, boolean checkExists) {
+  /**
+   * If the attribute already exists, just return it's ID.
+   *
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#addAttributes
+   * @param projid
+   * @param now
+   * @param userid
+   * @param attribute
+   * @param checkExists
+   * @return
+   */
+  public int findOrAddAttribute(int projid,
+                                long now,
+                                int userid,
+                                ExerciseAttribute attribute,
+                                boolean checkExists) {
     if (checkExists) {
       Collection<SlickExerciseAttribute> exists = attributeDAOWrapper.exists(new SlickExerciseAttribute(-1,
           projid,
           userid,
           new Timestamp(now),
-          attribute.getProperty(), attribute.getValue(),true));
+          attribute.getProperty(), attribute.getValue(),attribute.isFacet()));
       if (exists.isEmpty()) {
         return insertAttribute(projid, now, userid, attribute.getProperty(), attribute.getValue(), attribute.isFacet());
       } else {

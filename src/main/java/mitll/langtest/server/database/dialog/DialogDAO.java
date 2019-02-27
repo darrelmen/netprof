@@ -36,6 +36,7 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
+import mitll.langtest.server.database.exercise.IProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogStatus;
@@ -50,6 +51,7 @@ import mitll.npdata.dao.dialog.DialogAttributeJoinDAOWrapper;
 import mitll.npdata.dao.dialog.DialogDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -62,6 +64,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
   private static final long HOUR = 60 * MIN;
   private static final long DAY = 24 * HOUR;
   public static final long YEAR = 365 * DAY;
+  public static final String FLTITLE = "fltitle";
 
   private final DialogDAOWrapper dao;
 
@@ -167,13 +170,15 @@ public class DialogDAO extends DAO implements IDialogDAO {
     // add dialog attributes
     Map<Integer, ExerciseAttribute> idToPair = databaseImpl.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
 
+    logger.info("getDialogs got " + idToPair.size() + " attributes for project #" + projid);
+
     Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated =
         databaseImpl.getUserExerciseDAO().getRelatedExercise().getDialogIDToRelated(projid);
 
     Map<Integer, List<SlickRelatedExercise>> dialogIDToCoreRelated =
         databaseImpl.getUserExerciseDAO().getRelatedCoreExercise().getDialogIDToRelated(projid);
 
-    Project project = databaseImpl.getProject(projid);
+    IProject project = databaseImpl.getIProject(projid);
 
     allJoinByProject.forEach((dialogID, slickDialogAttributeJoins) -> {
       Dialog dialog = idToDialog.get(dialogID);
@@ -182,7 +187,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
       addAttributes(idToPair, slickDialogAttributeJoins, dialog);
 
       {
-        List<ExerciseAttribute> fltitle = dialog.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase("fltitle")).collect(Collectors.toList());
+        List<ExerciseAttribute> fltitle =
+            dialog.getAttributes()
+                .stream()
+                .filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(FLTITLE)).collect(Collectors.toList());
         if (!fltitle.isEmpty()) dialog.getMutableShell().setForeignLanguage(fltitle.iterator().next().getValue());
       }
 
@@ -190,6 +198,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
       addExercises(projid, dialogIDToRelated, dialogID, dialog);
 
       addCoreVocab(dialogIDToCoreRelated.get(dialogID), project, dialog);
+
       // add images
       addImage(projid, dialog);
     });
@@ -201,7 +210,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return dao.byProjID(projid);
   }
 
-  private void addCoreVocab(List<SlickRelatedExercise> relatedExercises, Project project, Dialog dialog) {
+  private void addCoreVocab(List<SlickRelatedExercise> relatedExercises, IProject project, Dialog dialog) {
     if (relatedExercises != null) {
       Set<CommonExercise> uniq = new HashSet<>();
 
@@ -218,6 +227,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }
 
   private Dialog makeDialog(SlickDialog slickDialog) {
+    String countryCode = database.getProject(slickDialog.projid()).getProject().countrycode();
     return new Dialog(
         slickDialog.id(),
         slickDialog.userid(),
@@ -233,7 +243,20 @@ public class DialogDAO extends DAO implements IDialogDAO {
         slickDialog.entitle(),
         new ArrayList<>(),
         new ArrayList<>(),
-        new ArrayList<>());
+        new ArrayList<>(),
+        getDialogType(slickDialog), countryCode);
+  }
+
+  @Nullable
+  private DialogType getDialogType(SlickDialog slickDialog) {
+    String kind = slickDialog.kind();
+    DialogType dialogType = null;
+    try {
+      dialogType = DialogType.valueOf(kind);
+    } catch (IllegalArgumentException e) {
+      logger.warn("got unknown type " + kind);
+    }
+    return dialogType;
   }
 
   /**
@@ -313,13 +336,14 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
       slickRelatedExercises.forEach(slickRelatedExercise -> {
 //        logger.info("addExercises relation " + slickRelatedExercise);
-
         int exid = slickRelatedExercise.exid();
         CommonExercise exercise = idToEx.get(exid);
 
         if (exercise == null) {
           exercise = databaseImpl.getExercise(projid, exid);
+
           if (exercise != null) {
+            logger.info("addExercises ex #"+ exercise.getID() + " " +exercise.getForeignLanguage() + " -> tokens : " + exercise.getTokens());
             idToEx.put(exid, exercise = new Exercise(exercise));
           }
         }
@@ -396,8 +420,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }*/
 
   /**
-   * @see mitll.langtest.server.database.project.DialogPopulate#cleanDialog
    * @param id
+   * @see mitll.langtest.server.database.project.DialogPopulate#cleanDialog
    */
   @Override
   public void removeForProject(int id) {
@@ -414,7 +438,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }
 
   /**
-   *
    * @param userid
    * @param dominoID
    * @param modified

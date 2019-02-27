@@ -110,7 +110,8 @@ public class DialogSession implements IDialogSession {
   public String toString() {
     return "DialogSession #" + getID() +
         "\n\tdialog " + getDialogid() +
-        " by " + getUserid() + " " + getView() +
-        " at " + new Date(getModified());
+        "\n\tby   " + getUserid() +
+        "\n\tview " + getView() +
+        "\n\tat   " + new Date(getModified());
   }
 }

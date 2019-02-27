@@ -39,7 +39,6 @@ import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
@@ -160,12 +159,11 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
      * @param e
      * @param controller1
      * @param exerciseList1
-     * @param instance
      * @see RecorderNPFHelper#getFactory
      */
-    RecordRefAudioPanel(ClientExercise e, ExerciseController controller1, ListInterface<T, ClientExercise> exerciseList1, String instance) {
-      super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording, instance, false);
-      //  logger.info("RecordRefAudioPanel : Do normal recording " + doNormalRecording);
+    RecordRefAudioPanel(ClientExercise e, ExerciseController controller1, ListInterface<T, ClientExercise> exerciseList1) {
+      super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording);
+   //   logger.info("normal recording " + RecorderNPFHelper.this.doNormalRecording);
     }
 
     @Override
@@ -177,7 +175,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
     protected void enableNext() {
       super.enableNext();
       if (isCompleted()) {
-        showRecordedState(exercise);
+        showRecordedState();
       }
     }
 
@@ -199,9 +197,6 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
         ((Panel) parent).add(c);
         added = true;
       }
-      //else {
-      //getProgressInfo();
-      //}
     }
 
     /**
@@ -274,7 +269,8 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
 
     /**
      * @param exid
-     * @param field         @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
+     * @param field
+     * @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
      * @param commentToPost
      */
     @Override
@@ -313,13 +309,11 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
     @Override
     public Panel getExercisePanel(ClientExercise e) {
       getProgressInfoLater();
-      return new RecordRefAudioPanel(e, controller, exerciseList, myView.toString());
+      return new RecordRefAudioPanel(e, controller, exerciseList);
     }
   }
 
   private void getProgressInfoLater() {
     Scheduler.get().scheduleDeferred(RecorderNPFHelper.this::getProgressInfo);
   }
-
-
 }

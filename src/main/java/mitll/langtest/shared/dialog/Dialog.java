@@ -9,7 +9,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
- * @see
+ * @see mitll.langtest.server.database.dialog.DialogDAO#getDialogs
+ * @see mitll.langtest.server.database.dialog.DialogReader#addDialogPair
  */
 public class Dialog implements IDialog, MutableShell {
   private final transient Logger logger = Logger.getLogger("Dialog");
@@ -33,7 +34,11 @@ public class Dialog implements IDialog, MutableShell {
 
   private String unit;
   private String chapter;
+  private String countryCode;
 
+  /**
+   *
+   */
   private DialogType kind = DialogType.DIALOG;
   private String orientation;
   private String imageRef;
@@ -62,8 +67,10 @@ public class Dialog implements IDialog, MutableShell {
    * @param attributes
    * @param exercises
    * @param coreExercises
+   * @param type
+   * @param countryCode
    * @see mitll.langtest.server.database.dialog.DialogDAO#makeDialog
-   * @see mitll.langtest.server.database.dialog.KPDialogs#getDialogs
+   * @see BasicDialogReader#addDialogPair
    */
   public Dialog(int id,
                 int userid,
@@ -79,7 +86,8 @@ public class Dialog implements IDialog, MutableShell {
                 String entitle,
                 List<ExerciseAttribute> attributes,
                 List<ClientExercise> exercises,
-                List<ClientExercise> coreExercises) {
+                List<ClientExercise> coreExercises,
+                DialogType type, String countryCode) {
     this.id = id;
     this.userid = userid;
     this.projid = projid;
@@ -95,6 +103,8 @@ public class Dialog implements IDialog, MutableShell {
     this.attributes = attributes;
     this.exercises = exercises;
     this.coreVocabulary = coreExercises;
+    this.kind = type;
+    this.countryCode=countryCode;
   }
 
   @Override
@@ -120,7 +130,7 @@ public class Dialog implements IDialog, MutableShell {
    * @return empty if no attribute of that type
    */
   @Override
-  public String getAttributeValue(IDialog.METADATA metadata) {
+  public String getAttributeValue(DialogMetadata metadata) {
     List<ExerciseAttribute> collect1 = getAttributes().stream().filter(
         exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(metadata.toString())
     ).collect(Collectors.toList());
@@ -148,6 +158,9 @@ public class Dialog implements IDialog, MutableShell {
     return modified;
   }
 
+  /**
+   * @return
+   */
   @Override
   public DialogType getKind() {
     return kind;
@@ -210,8 +223,6 @@ public class Dialog implements IDialog, MutableShell {
 
   @Override
   public List<String> getSpeakers() {
-    //   List<String> speakers = new ArrayList<>();
-    //Set<ExerciseAttribute> speakerAttr = new TreeSet<>();
     List<ExerciseAttribute> speakers = attributes
         .stream()
         .filter(exerciseAttribute -> (exerciseAttribute.getProperty().toLowerCase().startsWith(SPEAKER)))
@@ -220,8 +231,6 @@ public class Dialog implements IDialog, MutableShell {
 
     return speakers.stream().map(Pair::getValue)
         .collect(Collectors.toList());
-
-    // return speakers;
   }
 
   @Override
@@ -280,7 +289,6 @@ public class Dialog implements IDialog, MutableShell {
 
   @Override
   public void setMeaning(String meaning) {
-
   }
 
   /**
@@ -290,7 +298,7 @@ public class Dialog implements IDialog, MutableShell {
    */
   @Override
   public void setScore(float score) {
-    logger.info("setScore " + score);
+ //   logger.info("setScore " + score);
     this.score = score;
   }
 
@@ -331,10 +339,10 @@ public class Dialog implements IDialog, MutableShell {
     return this;
   }
 
-  @Override
-  public int getNumPhones() {
-    return 0;
-  }
+//  @Override
+//  public int getNumPhones() {
+//    return 0;
+//  }
 
   @Override
   public boolean isContext() {
@@ -353,6 +361,19 @@ public class Dialog implements IDialog, MutableShell {
   @Override
   public List<ClientExercise> getCoreVocabulary() {
     return coreVocabulary;
+  }
+
+  @Override
+  public List<ClientExercise> getBothExercisesAndCore() {
+    List<ClientExercise> both = new ArrayList<>(coreVocabulary.size() + exercises.size());
+    both.addAll(exercises);
+    both.addAll(coreVocabulary);
+    return both;
+  }
+
+  @Override
+  public String getCountryCode() {
+    return countryCode;
   }
 
   public String toString() {

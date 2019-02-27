@@ -32,6 +32,8 @@
 
 package mitll.langtest.server.audio.image;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
@@ -43,9 +45,11 @@ import java.text.NumberFormat;
 public class TranscriptEvent implements Comparable<TranscriptEvent>, ITranscriptEvent {
   private static final NumberFormat format = new DecimalFormat("#.#####");
 
+/*
   public TranscriptEvent(float s, float e, String name) {
     this(s, e, name, 0);
   }
+*/
 
   /**
    * Constructor
@@ -69,7 +73,7 @@ public class TranscriptEvent implements Comparable<TranscriptEvent>, ITranscript
   private final float score;                  /// posterior score
 
   @Override
-  public int compareTo(TranscriptEvent o) {
+  public int compareTo(@NotNull TranscriptEvent o) {
     return Float.compare(start, o.start);
   }
 
@@ -93,15 +97,15 @@ public class TranscriptEvent implements Comparable<TranscriptEvent>, ITranscript
     return score;
   }
 
-  public String toString() {
-    return "[" + format.format(start) + "-" + format.format(end) + "] " + event + "(" + format.format(score) + ")";
-  }
-
   public void setEnd(float end) {
     this.end = end;
   }
 
   public void setStart(float start) {
     this.start = start;
+  }
+
+  public String toString() {
+    return "[" + format.format(start) + "-" + format.format(end) + "] " + event + "(" + format.format(score) + ")";
   }
 }

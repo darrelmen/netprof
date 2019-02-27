@@ -50,6 +50,7 @@ import mitll.langtest.client.custom.tabs.RememberTabAndContent;
 import mitll.langtest.client.exercise.*;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.qc.FixNPFHelper;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
@@ -115,7 +116,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    * @param originalList
    * @param exerciseList
    * @paramx predefinedContent   - this should be a reference to the Learn tab exercise list, but it's not getting set.
-   * @see mitll.langtest.client.custom.FixNPFHelper#getFactory
+   * @see FixNPFHelper#getFactory
    */
   public ReviewEditableExercise(ExerciseController controller,
                                 U changedUserExercise,
@@ -130,7 +131,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    * @param listInterface
    * @param toAddTo
    * @return
-   * @see mitll.langtest.client.custom.FixNPFHelper#getFactory
+   * @see FixNPFHelper#getFactory
    */
   public Panel addFields(final ListInterface<T, U> listInterface, final Panel toAddTo) {
     Panel widgets = super.addFields(listInterface, toAddTo);
@@ -448,14 +449,11 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
       audioRef = CompressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
     }
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getFLToShow(),
-        //exercise.getTransliteration(),
         "",
         controller,
         controller.getProps().showSpectrogram(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED,
         exercise
     ) {
-      //audio.isRegularSpeed() ? Result.AUDIO_TYPE_REGULAR : Result.AUDIO_TYPE_SLOW) {
-
       /**
        * @see mitll.langtest.client.scoring.AudioPanel#addWidgets(String, String)
        * @return
@@ -491,7 +489,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    */
   private Widget getDeleteButton(final Panel widgets, final AudioAttribute audio, final HasID exercise, String tip) {
     return getDeleteButton(tip, event -> {
-      logger.info("marking audio defect for " + audio + " on " + exercise.getID());
+//      logger.info("marking audio defect for " + audio + " on " + exercise.getID());
       controller.getQCService().markAudioDefect(audio, exercise, new AsyncCallback<Void>() {    // delete comment too?
         @Override
         public void onFailure(Throwable caught) {
@@ -501,9 +499,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
         @Override
         public void onSuccess(Void result) {
           widgets.getParent().setVisible(false);
-          //   reloadLearnList();
-          LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance.toString()));
-          // TODO : need to update other lists too?
+          //LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance.toString()));
         }
       });
     });
@@ -821,7 +817,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
 
   @Override
   protected String getEnglishLabel() {
-    return controller.getLanguage().equalsIgnoreCase("english") ? "Meaning<br/>" : "English<br/>";
+    return isEnglish() ? "Meaning<br/>" : "English<br/>";
   }
 
   @Override
@@ -871,13 +867,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
         public void useResult(AudioAnswer result) {
           super.useResult(result);
           if (result.isValid()) {
-            //  exercise.getMutableAudio().addAudio(result.getAudioAttribute());
             deleteButton.setEnabled(true);
-
-            /**
-             * Who receives this?
-             */
-            LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance.toString()));
           }
         }
       };
@@ -908,7 +898,6 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
             if (comment != null) {
               comment.setVisible(false);
             }
-            LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance.toString()));
           }
         });
       };

@@ -1,10 +1,12 @@
 package mitll.langtest.server.domino;
 
 import mitll.langtest.server.database.DAOContainer;
+import mitll.langtest.server.database.dialog.IDialogDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.Language;
@@ -45,6 +47,7 @@ public class AudioCopy {
    * @param dominoToExID
    * @see ProjectSync#addPending
    * @see mitll.langtest.server.services.ListServiceImpl#reallyCreateNewItems
+   * @see mitll.langtest.server.database.project.DialogPopulate#addDialogs(Project, Project, IDialogDAO, Map, int, DialogType, Map, boolean)
    */
   public <T extends ClientExercise> void copyAudio(int projectid,
                                                    Collection<T> newEx,
@@ -67,11 +70,13 @@ public class AudioCopy {
       for (Project source : sourceProjects) {
         Map<String, List<SlickAudio>> transcriptToAudio = getTranscriptToAudio(source.getID());
         logger.info("copyAudio for " +
+            "\n\tnew ex  " + newEx.size()+
             "\n\tproject " + source.getID() + "/" + source.getProject().name() +
             "\n\tgot     " + transcriptToAudio.size() + " source candidates");
         getSlickAudios(projectid,
             newEx,
-            dominoToExID, transcriptToAudio,
+            dominoToExID,
+            transcriptToAudio,
 
             copyAudioForEx,
             copyAudioForContext);
@@ -79,6 +84,9 @@ public class AudioCopy {
 
       if (!sourceProjects.isEmpty()) {
         addCopiesToDatabase(newEx, sourceProjects, nSourceProjects, copyAudioForEx, copyAudioForContext);
+      }
+      else {
+        logger.warn("copyAudio can't find source projects for " + projectid);
       }
     } catch (Exception e) {
       logger.info("Got " + e, e);
@@ -105,12 +113,11 @@ public class AudioCopy {
     }
   }
 
-
   /**
    * transcript to lower case.
    *
    * @param maxID
-   * @return map of transcript to audio with that transcript
+   * @return map of LC transcript to audio with that transcript
    * @see #copyAudio
    */
   @NotNull
@@ -203,16 +210,18 @@ public class AudioCopy {
       }
 
       if (exid == null || exid == -1) {
-        logger.info("getSlickAudios : no exercise id found for domino ID " + ex.getDominoID() + " or old ID " + ex.getOldID());
+        logger.info("getSlickAudios : no exercise id found for domino ID " + ex.getDominoID() + " or old ID " + ex.getOldID() + " : " + ex.getEnglish() + " " + ex.getForeignLanguage());
       } else {
         boolean hasAudioAlready = daoContainer.getAudioDAO().hasAudio(exid);
         if (hasAudioAlready) {
           logger.info("getSlickAudios skipping " + exid + " since it already has audio");
         } else {
-          vocab.add(addAudioForVocab(projectid, transcriptToAudio, transcriptToMatches, ex, exid));
+          MatchInfo matchInfo = addAudioForVocab(projectid, transcriptToAudio, transcriptToMatches, ex, exid);
+          if (matchInfo.isEmpty()) logger.warn("getSlickAudios can't find match for " + ex.getForeignLanguage() + " in " + transcriptToAudio.size() + " existing items.");
+          vocab.add(matchInfo);
         }
-        contextCounts.add(addAudioForContext(projectid,
-            transcriptToAudio, transcriptToContextMatches, ex.getDirectlyRelated()));
+
+        contextCounts.add(addAudioForContext(projectid, transcriptToAudio, transcriptToContextMatches, ex.getDirectlyRelated()));
       }
     }
 
@@ -323,17 +332,20 @@ public class AudioCopy {
     List<SlickAudio> audioAttributes = transcriptToAudio.get(fl);
 
     String english = ex.getEnglish();
-    logger.info("addAudioForVocab looking for match to ex " + exid + "/" + ex.getID() + " '" + english + "' = '" + fl + "'");
+
+    logger.info("addAudioForVocab (" + projectid +
+        ") looking for match to ex " + exid + "/" + ex.getID() + " '" + english + "' = '" + fl + "'");
+
     if (audioAttributes != null) {
       transcriptMatches.add(copyMatchingAudio(projectid, exid, audioAttributes, false));
       match++;
     } else {
-      logger.info("\taddAudioForVocab vocab no match " + english + " '" + fl + "'");
+      logger.info("\taddAudioForVocab vocab no match english '" + english + "' = '" + fl + "'");
       nomatch++;
     }
 
     if (match == 0) {
-      logger.info("\taddAudioForVocab vocab no match '" + english + "' = '" + fl + "' in " +
+      logger.info("\taddAudioForVocab vocab no match english '" + english + "' = '" + fl + "' in " +
           transcriptToAudio.size() + " transcripts");
     }
 
@@ -384,11 +396,11 @@ public class AudioCopy {
   }
 
   /**
-   * @see mitll.langtest.server.database.audio.SlickAudioDAO#copyOne
    * @param exid
    * @param isContext
    * @param audio
    * @return
+   * @see mitll.langtest.server.database.audio.SlickAudioDAO#copyOne
    */
   public SlickAudio getCopiedAudio(int exid, boolean isContext, SlickAudio audio) {
     return getCopiedAudio(audio.projid(), exid, isContext, new Timestamp(System.currentTimeMillis()), audio);
@@ -540,6 +552,8 @@ public class AudioCopy {
       this.match += matchInfo.match;
       this.noMatch += matchInfo.noMatch;
     }
+
+    boolean isEmpty() { return match == 0;}
 
     public String toString() {
       return match + "/" + noMatch;

@@ -66,7 +66,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   /**
    * @see Exercise#setNumPhones
    */
-  int numPhones;
+ // int numPhones;
   private int numContext;
 
   /**
@@ -83,7 +83,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @see AudioExercise#AudioExercise(int, int, boolean)
    */
   ExerciseShell(int realID, boolean isContext) {
-    this("", "", "", realID, 0, isContext, 0);
+    this("", "", "", realID, isContext, 0);
   }
 
   /**
@@ -99,14 +99,13 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
                 String meaning,
                 String foreignLanguage,
                 int realID,
-                int numPhones,
                 boolean isContext,
                 int numContext) {
     super(realID);
     this.english = english;
     this.meaning = meaning;
     this.foreignLanguage = foreignLanguage;
-    this.numPhones = numPhones;
+   // this.numPhones = numPhones;
     this.isContext = isContext;
     this.numContext = numContext;
   }
@@ -153,10 +152,10 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @return
    * @see mitll.langtest.client.list.ListSorting#compPhones
    */
-  @Override
+/*  @Override
   public int getNumPhones() {
     return numPhones;
-  }
+  }*/
 
   /**
    * @param score

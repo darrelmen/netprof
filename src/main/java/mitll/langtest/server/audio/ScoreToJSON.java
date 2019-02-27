@@ -64,14 +64,13 @@ public class ScoreToJSON {
   private static final Logger logger = LogManager.getLogger(ScoreToJSON.class);
 
   private static final String START = "start";
-  public static final String END1 = "end";
+  private static final String END1 = "end";
   private static final String END = END1;
   private static final String EVENT = "event";
-  public static final String CONTENT = "content";
   private static final String SCORE = "score";
-  public static final String STR = "str";
-  public static final String ID = "id";
-  public static final String SEGMENT_SCORE = "s";
+  private static final String STR = "str";
+  private static final String ID = "id";
+  private static final String SEGMENT_SCORE = "s";
 
   /**
    * We skip sils, since we wouldn't want to show them to the user.
@@ -97,9 +96,9 @@ public class ScoreToJSON {
   private static final JsonObject jsonNULL = new JsonObject();
 
   /**
-   * @see DecodeAlignOutput#DecodeAlignOutput(PretestScore, boolean)
    * @param pretestScore
    * @return
+   * @see DecodeAlignOutput#DecodeAlignOutput(PretestScore, boolean)
    */
   public JsonObject getJsonObject(PretestScore pretestScore) {
     JsonObject jsonObject = new JsonObject();
@@ -221,26 +220,29 @@ public class ScoreToJSON {
    * @return
    * @see mitll.langtest.server.scoring.JsonScoring#getJsonForAudioForUser
    */
-  public JsonObject getJsonForScore(PretestScore score, boolean usePhoneDisplay, ServerProperties serverProps, Language languageEnum) {
+  public JsonObject getJsonForScore(PretestScore score, boolean usePhoneDisplay, ServerProperties serverProps,
+                                    Language languageEnum) {
     JsonObject jsonObject = new JsonObject();
-
     jsonObject.addProperty(SCORE, score.getHydecScore());
 
     for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : score.getTypeToSegments().entrySet()) {
-      List<TranscriptSegment> value = pair.getValue();
-      JsonArray value1 = new JsonArray();
+      List<TranscriptSegment> segments = pair.getValue();
+      JsonArray eventArray = new JsonArray();
       NetPronImageType imageType = pair.getKey();
 
       boolean usePhone = imageType == NetPronImageType.PHONE_TRANSCRIPT &&
           (serverProps.usePhoneToDisplay(languageEnum) || usePhoneDisplay);
 
-      for (TranscriptSegment segment : value) {
+      int numSegments = segments.size();
+      for (int i = 0; i < numSegments; i++) {
+        TranscriptSegment segment = segments.get(i);
+
         JsonObject object = new JsonObject();
         String event = segment.getEvent();
 
         if (isValidEvent(event)) {
           if (usePhone) {  // remap to display labels
-            event = serverProps.getDisplayPhoneme(languageEnum, event);
+            event = serverProps.getDisplayPhoneme(languageEnum, segments, numSegments, i, event);
           }
 
           object.addProperty(EVENT, event);
@@ -248,11 +250,11 @@ public class ScoreToJSON {
           object.addProperty(END, segment.getEnd());
           object.addProperty(SCORE, segment.getScore());
 
-          value1.add(object);
+          eventArray.add(object);
         }
       }
 
-      jsonObject.add(imageType.toString(), value1);
+      jsonObject.add(imageType.toString(), eventArray);
     }
     return jsonObject;
   }

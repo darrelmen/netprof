@@ -1034,8 +1034,8 @@ public class ProjectSync implements IProjectSync {
                                           long now,
                                           List<ExerciseAttribute> newAttributes) {
     for (ExerciseAttribute newAttr : newAttributes) {
-      //  int i = slickUEDAO.addAttribute(projectid, now, importUser, newAttr);
-      attrToID.put(newAttr, slickUEDAO.getExerciseAttribute().addAttribute(projectid, now, importUser, newAttr, false));
+      //  int i = slickUEDAO.findOrAddAttribute(projectid, now, importUser, newAttr);
+      attrToID.put(newAttr, slickUEDAO.getExerciseAttribute().findOrAddAttribute(projectid, now, importUser, newAttr, false));
       //   logger.info("doUpdate remember new import attribute " + i + " = " + newAttr);
     }
   }

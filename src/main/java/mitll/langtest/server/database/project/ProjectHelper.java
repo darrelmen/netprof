@@ -18,6 +18,7 @@ public class ProjectHelper {
   /**
    * @see LangTestDatabaseImpl#getStartupInfo
    * @see AudioServiceImpl#getStartupInfo
+   * @see ProjectManagement#getNestedProjectInfo
    * @param db
    * @param securityManager
    * @return

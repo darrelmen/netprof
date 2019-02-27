@@ -41,8 +41,6 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 
-import java.util.logging.Logger;
-
 /**
  * Tells playAudioPanel to be enabled/disabled in response to recording states
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -56,7 +54,13 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
   //private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
 
   private static final String RECORD_BUTTON = "RecordButton";
+  /**
+   *
+   */
   private static final String ANIMATED_PROGRESS_GIF = "animated_progress.gif";
+  /**
+   * @see #stopRecording(long, boolean)
+   */
   private static final String WAIT_URL = LangTest.LANGTEST_IMAGES + ANIMATED_PROGRESS_GIF;
   private final RecordAudioPanel recordAudioPanel;
   private PlayAudioPanel playAudioPanel;

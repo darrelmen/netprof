@@ -2,6 +2,7 @@ package mitll.langtest.server.scoring;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 public interface IPronunciationLookup {
   /**
@@ -26,12 +27,13 @@ public interface IPronunciationLookup {
   String getUsedTokens(Collection<String> lmSentences, List<String> background);
 
   SmallVocabDecoder getSmallVocabDecoder();
+  Set<String> getOOV();
 
-  public static class InDictStat {
+  class InDictStat {
     private int numTokens;
     private int numInDict;
 
-    public InDictStat(int numInDict, int numTokens) {
+    InDictStat(int numInDict, int numTokens) {
       this.numInDict = numInDict;
       this.numTokens = numTokens;
     }

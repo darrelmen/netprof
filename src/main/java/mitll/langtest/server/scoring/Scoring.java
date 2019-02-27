@@ -39,7 +39,6 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.SLFFile;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
-import mitll.langtest.server.audio.image.TranscriptReader;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.audio.imagewriter.TranscriptWriter;
 import mitll.langtest.server.database.exercise.Project;
@@ -104,9 +103,8 @@ public abstract class Scoring {
   final boolean removeAllAccents;
 
   private LTSFactory ltsFactory;
-  final String language;
   final Language languageEnum;
-  private Map<String, String> phoneToDisplay;
+//  private Map<String, String> phoneToDisplay;
 
   /**
    * @param deployPath
@@ -120,19 +118,17 @@ public abstract class Scoring {
     this.deployPath = deployPath;
     this.props = props;
     this.logAndNotify = langTestDatabase;
-    String language = project.getLanguage();
-    this.language = language;
     this.languageEnum = project.getLanguageEnum();
-    removeAllAccents = !language.equalsIgnoreCase("french");
-    isAsianLanguage = isAsianLanguage(language);
-    phoneToDisplay = props.getPhoneToDisplay(languageEnum);
+    removeAllAccents = languageEnum != Language.FRENCH;
+    isAsianLanguage = isAsianLanguage(languageEnum);
+ //   phoneToDisplay = props.getPhoneToDisplay(languageEnum);
 
 //    logger.info("isAsian " + isAsianLanguage + " lang " + language);
 //    if (isAsianLanguage) {
 //      logger.warn("using mandarin segmentation.");
 //    }
     setLTSFactory();
-    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, language, project.getLanguageEnum(), project.hasModel(), isAsianLanguage);
+    checkLTSHelper = new CheckLTS(getLTS(), htkDictionary, project.getLanguageEnum(), project.hasModel(), isAsianLanguage);
   }
 
   private void setLTSFactory() {
@@ -141,13 +137,13 @@ public abstract class Scoring {
       ltsFactory = new LTSFactory(languageEnum);
     } catch (Exception e) {
       ltsFactory = null;
-      logger.error("\n" + this + " : Scoring for " + language + " got " + e);
+      logger.error("\n" + this + " : Scoring for " + languageEnum + " got " + e);
     }
   }
 
-  private boolean isAsianLanguage(String language) {
-    return language.equalsIgnoreCase(MANDARIN) ||
-        language.equalsIgnoreCase(JAPANESE)
+  private boolean isAsianLanguage(Language language) {
+    return language == Language.MANDARIN ||
+        language == Language.JAPANESE
 //        ||
 //        language.equalsIgnoreCase(KOREAN)
         ;
@@ -172,24 +168,21 @@ public abstract class Scoring {
    * @param useScoreToColorBkg
    * @param prefix
    * @param suffix
-   * @param decode             if true don't bother to write out images for word and phone
    * @param writeImages
    * @return map of image type to image path, suitable using in setURL on a GWT Image (must be relative to deploy location)
    * @see ASRWebserviceScoring#getPretestScore
    */
   EventAndFileInfo writeTranscripts(String imageOutDir, int imageWidth, int imageHeight,
                                     String audioFileNoSuffix, boolean useScoreToColorBkg,
-                                    String prefix, String suffix, boolean decode,
-                                    String phoneLab, String wordLab, boolean useWebservice,
+                                    String prefix, String suffix,
+                                    String phoneLab, String wordLab,
                                     boolean usePhoneToDisplay, boolean writeImages) {
     // logger.info("writeTranscripts - " + audioFileNoSuffix + " prefix " + prefix);
-
     Map<ImageType, String> typeToFile = getTypeToFile(audioFileNoSuffix, phoneLab, wordLab);
 
     boolean usePhone = usePhoneToDisplay || props.usePhoneToDisplay(languageEnum);
     if (writeImages) {
-      String pathname = audioFileNoSuffix + ".wav";
-      pathname = prependDeploy(pathname);
+      String pathname = getAudioPath(audioFileNoSuffix);
       if (!new File(pathname).exists()) {
         logger.error("writeTranscripts : can't find " + pathname);
         return new EventAndFileInfo();
@@ -197,9 +190,9 @@ public abstract class Scoring {
 
       return new TranscriptWriter().writeTranscripts(pathname,
           deployPath + File.separator + imageOutDir, imageWidth, imageHeight, typeToFile, SCORE_SCALAR, useScoreToColorBkg, prefix, suffix,
-          usePhone, phoneToDisplay);
+          usePhone, Collections.emptyMap());
     } else { //  skip image generation
-      return new EventAndFileInfo(Collections.emptyMap(), new TranscriptWriter().getImageTypeMapMap(typeToFile, usePhone, phoneToDisplay));
+      return new EventAndFileInfo(Collections.emptyMap(), new TranscriptWriter().getImageTypeMapMap(typeToFile, usePhone, Collections.emptyMap()));
     }
   }
 
@@ -237,7 +230,6 @@ public abstract class Scoring {
    * @param audioFileNoSuffix
    * @param useScoreToColorBkg
    * @param prefix
-   * @param decode
    * @param object
    * @param writeImages
    * @return
@@ -247,7 +239,6 @@ public abstract class Scoring {
                                           int imageWidth, int imageHeight,
                                           String audioFileNoSuffix, boolean useScoreToColorBkg,
                                           String prefix,
-                                          boolean decode,
                                           JsonObject object,
                                           boolean usePhoneToDisplay,
                                           boolean writeImages,
@@ -255,8 +246,7 @@ public abstract class Scoring {
     if (writeImages) {
       Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
           getTypeToTranscriptEvents(object, usePhoneToDisplay, useKaldi);
-      String pathname = audioFileNoSuffix + ".wav";
-      pathname = prependDeploy(pathname);
+      String pathname = getAudioPath(audioFileNoSuffix);
       if (!new File(pathname).exists()) {
         logger.error("writeTranscripts : can't find " + pathname);
         return new EventAndFileInfo();
@@ -269,8 +259,13 @@ public abstract class Scoring {
           imageTypeMapMap);
     } else {
       return new EventAndFileInfo(Collections.emptyMap(), getTypeToTranscriptEvents(object, usePhoneToDisplay, useKaldi));
-
     }
+  }
+
+  private String getAudioPath(String audioFileNoSuffix) {
+    String pathname = audioFileNoSuffix + ".wav";
+    pathname = prependDeploy(pathname);
+    return pathname;
   }
 
   private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,

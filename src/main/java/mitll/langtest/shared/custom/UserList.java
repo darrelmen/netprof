@@ -53,13 +53,6 @@ import java.util.List;
 public class UserList<T extends HasID> extends BaseExercise implements IUserListWithIDs {
   public static final String MY_LIST = "Favorites";
 
-  public long getStart() {
-    return start;
-  }
-
-  public long getEnd() {
-    return end;
-  }
 
   public enum LIST_TYPE {NORMAL, QUIZ}
 
@@ -67,6 +60,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
 
   private int userid;
   private String userChosenID;
+  private String firstInitialName;
 
   private String name;
   private String description;
@@ -75,18 +69,25 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
 
   private boolean isPrivate;
 
-  private boolean isReview;
-
   private long modified;
+
   private long start;
   private long end;
+
   private int duration;
   private int minScore;
   private boolean showAudio;
+  private String accessCode;
+
   private boolean teacher;
+  /**
+   * Notional
+   */
   private String contextURL;
 
   private List<T> exercises = new ArrayList<>();
+
+  private int numItems;
   private String richText;
 
   public UserList() {
@@ -96,6 +97,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
    * @param uniqueID
    * @param userid
    * @param userChosenID
+   * @param firstInitialName
    * @param name
    * @param description
    * @param classMarker
@@ -107,15 +109,19 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
    * @param duration
    * @param minScore
    * @param showAudio
+   * @param accessCode
    * @see mitll.langtest.server.database.custom.UserListManager#createUserList
    * @see IUserListDAO#getWhere(int, boolean)
    */
   public UserList(int uniqueID,
                   int userid,
                   String userChosenID,
+                  String firstInitialName,
+
                   String name,
                   String description,
                   String classMarker,
+
                   boolean isPrivate,
                   long modified,
                   String contextURL,
@@ -124,10 +130,11 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
                   LIST_TYPE listType,
                   long start,
                   long end,
-                  int duration, int minScore, boolean showAudio) {
+                  int duration, int minScore, boolean showAudio, String accessCode) {
     super(uniqueID);
     this.userid = userid;
     this.userChosenID = userChosenID;
+    this.firstInitialName = firstInitialName;
     this.name = name;
     this.description = description;
     this.classMarker = classMarker;
@@ -142,6 +149,7 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     this.duration = duration;
     this.minScore = minScore;
     this.showAudio = showAudio;
+    this.accessCode = accessCode;
   }
 
   @Override
@@ -178,9 +186,18 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return exercises;
   }
 
+  /**
+   * OK to have an empty exercise list here.
+   * @return
+   */
   @Override
   public int getNumItems() {
-    return exercises.size();
+    return exercises.size() == 0 ? numItems : exercises.size();
+  }
+
+  @Override
+  public void setNumItems(int numItems) {
+    this.numItems = numItems;
   }
 
   /**
@@ -241,10 +258,6 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return getName().equals(MY_LIST);
   }
 
-  public void setReview(boolean isReview) {
-    this.isReview = isReview;
-  }
-
   public long getModified() {
     return modified;
   }
@@ -296,6 +309,10 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return duration;
   }
 
+  /**
+   * @return
+   * @see mitll.langtest.client.flashcard.QuizIntro#onQuizChoice
+   */
   @Override
   public int getMinScore() {
     return minScore;
@@ -322,6 +339,11 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     this.duration = duration;
   }
 
+  /**
+   * So we can show which lists are owned by a teacher.
+   *
+   * @return
+   */
   public boolean isTeacher() {
     return teacher;
   }
@@ -331,11 +353,33 @@ public class UserList<T extends HasID> extends BaseExercise implements IUserList
     return this;
   }
 
+  /**
+   * Notional idea of when a list or quiz is visible - additional dimension on top of private/public
+   *
+   * @return
+   */
+  public long getStart() {
+    return start;
+  }
+
+  public long getEnd() {
+    return end;
+  }
+
+  @Override
+  public String getFirstInitialName() {
+    return firstInitialName;
+  }
+
+  public String getAccessCode() {
+    return accessCode;
+  }
+
   @Override
   public String toString() {
-    return "UserList #" + getID() + " '" + name + "' by " + getUserID() +
-        "\n\tshow audio " +shouldShowAudio()+
-        "\n\t : " + (isReview ? " REVIEW " : "") +
+    return "UserList #" + getID() + " '" + name + "' by " + getUserID() + "/" + getFirstInitialName() +
+        "\n\tshow audio " + shouldShowAudio() +
+        //  "\n\t : " + (isReview ? " REVIEW " : "") +
         " : with " + getNumItems() + " exercises.";
   }
 }

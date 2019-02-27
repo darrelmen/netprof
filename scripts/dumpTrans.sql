@@ -1,0 +1,1 @@
+select t.doc_id, max(t.physical_translation_id), p.data from translations t, physical_translations p where p.physical_translation_id = t.physical_translation_id group by t.doc_id;

@@ -269,7 +269,6 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     Panel tableWithPager = getTableWithPager(new ListOptions().setCompact(true));
     table.getElement().getStyle().setProperty("minWidth", PHONE_CONTAINER_MIN_WIDTH + "px");
 
-    //  tableWithPager.getElement().setId("PhoneContainerTableScoreHistory");
     tableWithPager.addStyleName("floatLeftAndClear");
     tableWithPager.addStyleName("leftTenMargin");
 
@@ -284,6 +283,9 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     try {
       if (!sortedHistory.isEmpty()) {
         table.getSelectionModel().setSelected(sortedHistory.get(0), true);
+      }
+      else {
+
       }
     } catch (Exception e) {
       logger.warning("Got " + e);

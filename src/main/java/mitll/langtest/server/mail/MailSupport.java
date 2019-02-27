@@ -109,11 +109,15 @@ public class MailSupport {
     );
   }
 
-  private final Timer timer = new Timer();
+  private Timer timer;
   private Date startDate = null;
 
+  /**
+   * Cheesy test of our unreliable mail service.
+   */
   public void addHeartbeat() {
     if (doHeartbeat) {
+      timer = new Timer();
       //  logger.info("\n\n\n\naddHearbeat --- \n\n\n\n");
       TimerTask myTask = new TimerTask() {
         @Override
@@ -134,7 +138,9 @@ public class MailSupport {
 
   public void stopHeartbeat() {
 //    logger.info("stopHeartbeat ");
-    timer.cancel();
+    if (timer != null) {
+      timer.cancel();
+    }
   }
 
   protected String getHostName() {
@@ -160,10 +166,9 @@ public class MailSupport {
     this.period = period;
     this.doHeartbeat = doHeartbeat;
     this.recs = recs;
-    if (testEmail) {
-      logger.warn("MailSupport --->using test email");
-    }
-
+//    if (testEmail) {
+//      logger.warn("MailSupport --->using test email");
+//    }
   }
 
  public boolean sendHTMLEmail(String to,

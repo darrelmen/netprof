@@ -5,6 +5,7 @@ public interface IUserList extends IUserListLight {
 
   int getUserID();
   String getUserChosenID();
+  String getFirstInitialName();
 
   int getNumItems();
 
@@ -13,4 +14,6 @@ public interface IUserList extends IUserListLight {
   boolean shouldShowAudio();
 
   boolean isPrivate();
+
+  void setNumItems(int numItems);
 }

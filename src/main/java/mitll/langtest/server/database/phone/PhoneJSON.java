@@ -2,10 +2,15 @@ package mitll.langtest.server.database.phone;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.word.Word;
 import mitll.langtest.shared.analysis.PhoneReport;
+import mitll.langtest.shared.analysis.PhoneStats;
 import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.project.Language;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -36,6 +41,13 @@ public class PhoneJSON {
   private static final String W = "w";
   private static final String S = "s";
   private static final String RESULT1 = "result";
+  public static final String ORDER_SCORES = "orderScores";
+
+  private ServerProperties serverProperties;
+
+  PhoneJSON(ServerProperties serverProperties) {
+    this.serverProperties = serverProperties;
+  }
 
   /**
    * NOTE: JSON is read by iOS - EAFPhoneScoreTableViewController.useJsonChapterData
@@ -45,69 +57,132 @@ public class PhoneJSON {
    *
    * @param worstPhonesAndScore
    * @return
-   * @see SlickPhoneDAO#getWorstPhonesJson(int, java.util.Collection, String, mitll.langtest.server.database.exercise.Project)
+   * @see IPhoneDAO#getWorstPhonesJson(Collection, mitll.langtest.server.database.exercise.Project, mitll.langtest.shared.analysis.PhoneReportRequest)
    */
   JsonObject getWorstPhonesJson(PhoneReport worstPhonesAndScore) {
     JsonObject jsonObject = new JsonObject();
 
     if (worstPhonesAndScore != null) {
-      Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted =
-          worstPhonesAndScore.getPhoneToWordAndScoreSorted();
+      Language language = worstPhonesAndScore.getLanguage();
+//      Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted =
+//          worstPhonesAndScore.getPhoneToWordAndScoreSorted();
 
-      Map<String, List<WordAndScore>> worstPhones = new HashMap<>();
-      phoneToWordAndScoreSorted.forEach((k, v) -> {
-        Collection<List<WordAndScore>> values = v.values();
-        List<WordAndScore> wordAndScores = worstPhones.computeIfAbsent(k, k1 -> new ArrayList<>());
-
-        for (List<WordAndScore> value : values) {
-          wordAndScores.addAll(value);
-        }
-//        wordAndScores.addAll(values);
-      });
+      Map<String, List<WordAndScore>> worstPhones = worstPhonesAndScore.getPhoneToExamples();
+//          getPhoneToExamples(language, phoneToWordAndScoreSorted);
 
       ///Map<String, List<WordAndScore>> worstPhones = (Map<String, List<WordAndScore>>) phoneToWordAndScoreSorted;
       Map<Long, String> resToAnswer = new HashMap<>();
       Map<Long, String> resToRef = new HashMap<>();
-      Map<Long, String> resToResult = new HashMap<>();
-      if (DEBUG) logger.debug("worstPhones phones are " + worstPhones.keySet());
+
+      if (DEBUG) logger.info("getWorstPhonesJson phones are " + worstPhones.keySet());
 
       {
         JsonObject phones = new JsonObject();
 
         for (Map.Entry<String, List<WordAndScore>> pair : worstPhones.entrySet()) {
-          phones.add(pair.getKey(), getWordsJsonArray(resToAnswer, resToRef, resToResult, pair.getValue()));
+//         logger.info("dump " + pair.getKey() + " = " + pair.getValue().size());
+          phones.add(pair.getKey(), getWordsJsonArray(resToAnswer, resToRef, pair.getValue()));
         }
 
         jsonObject.add(PHONES, phones);
       }
 
       {
-        JsonArray order = new JsonArray();
-        worstPhones.keySet().forEach(order::add);
+        List<String> sortedPhones = worstPhonesAndScore.getSortedPhones();
 
-        jsonObject.add(ORDER, order);
-
-        if (DEBUG) logger.debug("order phones are " + order);
-      }
-
-      {
-        JsonObject results = new JsonObject();
-        for (Map.Entry<Long, String> pair : resToAnswer.entrySet()) {
-          JsonObject result = new JsonObject();
-
-          Long key = pair.getKey();
-          result.addProperty(ANSWER, pair.getValue());
-          result.addProperty(REF, resToRef.get(key));
-          result.addProperty(RESULT, resToResult.get(key));
-
-          results.add(Long.toString(key), result);
+        {
+          JsonArray order = new JsonArray();
+          // worstPhones.keySet().forEach(order::add);
+          sortedPhones.forEach(order::add);
+          jsonObject.add(ORDER, order);
+          if (DEBUG) logger.info("getWorstPhonesJson order phones are " + order);
         }
-        jsonObject.add(RESULTS, results);
+
+        {
+          JsonArray order = new JsonArray();
+          jsonObject.add(ORDER_SCORES, order);
+          Map<String, PhoneStats> phoneToAvgSorted = worstPhonesAndScore.getPhoneToAvgSorted();
+          sortedPhones.forEach(phone -> {
+            PhoneStats phoneStats = phoneToAvgSorted.get(phone);
+            if (phoneStats == null) {
+              logger.error("getWorstPhonesJson huh? no avg for " + phone);
+            } else {
+              order.add(phoneStats.getAvg());
+            }
+          });
+        }
       }
+
+      jsonObject.add(RESULTS, addResults(resToAnswer, resToRef, worstPhonesAndScore.getRidToWords(), language));
       jsonObject.addProperty(PHONE_SCORE, Integer.toString(worstPhonesAndScore.getOverallPercent())); // TODO : not sure where this is used
     }
 
     return jsonObject;
+  }
+
+  private JsonObject addResults(Map<Long, String> resToAnswer, Map<Long, String> resToRef,
+                                Map<Integer, List<Word>> ridToWords,
+                                Language language) {
+    JsonObject results = new JsonObject();
+    for (Map.Entry<Long, String> pair : resToAnswer.entrySet()) {
+      JsonObject result = new JsonObject();
+
+      Long resultID = pair.getKey();
+      result.addProperty(ANSWER, pair.getValue());
+      result.addProperty(REF, resToRef.get(resultID));
+      result.add(RESULT, addResultWordAndPhones(ridToWords, language, resultID));
+
+      results.add(Long.toString(resultID), result);
+    }
+
+    return results;
+  }
+
+  private JsonObject addResultWordAndPhones(Map<Integer, List<Word>> ridToWords, Language language, Long resultID) {
+    JsonObject wordsObject = new JsonObject();
+    JsonArray words = new JsonArray();
+
+    wordsObject.add("words", words);
+    List<Word> words1 = ridToWords.get(resultID.intValue());
+    words1.forEach(word -> {
+      JsonObject wordJSON = new JsonObject();
+      words.add(wordJSON);
+      wordJSON.addProperty("id", word.getSeq());
+      wordJSON.addProperty("w", word.getWord());
+      wordJSON.addProperty("s", word.getScore());
+
+      JsonArray phones = new JsonArray();
+      wordJSON.add("phones", phones);
+      word.getPhones().forEach(phone -> {
+        JsonObject phoneJSON = new JsonObject();
+        phones.add(phoneJSON);
+        phoneJSON.addProperty("id", phone.getSeq());
+
+        phoneJSON.addProperty("p", serverProperties.getDisplayPhoneme(language, phone.getPhone()));
+        phoneJSON.addProperty("s", phone.getScore());
+      });
+    });
+    return wordsObject;
+  }
+
+  @NotNull
+  private Map<String, List<WordAndScore>> getPhoneToExamples(Language language,
+                                                             Map<String, Map<String, List<WordAndScore>>> phoneToBigramToScoreSorted) {
+    Map<String, List<WordAndScore>> worstPhones = new LinkedHashMap<>();
+    phoneToBigramToScoreSorted.forEach((k, v) -> {
+      if (!k.equalsIgnoreCase("_")) {
+        String phone = serverProperties.getDisplayPhoneme(language, k);
+
+        List<WordAndScore> wordAndScores = worstPhones.computeIfAbsent(phone, k1 -> new ArrayList<>());
+
+        logger.info("getPhoneToExamples " + k + " = " + wordAndScores.size());
+        for (List<WordAndScore> value : v.values()) {
+          wordAndScores.addAll(value);
+        }
+      }
+//        wordAndScores.addAll(values);
+    });
+    return worstPhones;
   }
 
   /**
@@ -118,14 +193,14 @@ public class PhoneJSON {
    *
    * @param resToAnswer
    * @param resToRef
-   * @param resToResult
    * @param value
    * @return
+   * @paramx resToResult
    * @see #getWorstPhonesJson
    */
   private JsonArray getWordsJsonArray(Map<Long, String> resToAnswer,
                                       Map<Long, String> resToRef,
-                                      Map<Long, String> resToResult,
+                                      //Map<Long, String> resToResult,
                                       List<WordAndScore> value) {
     JsonArray words = new JsonArray();
 
@@ -136,7 +211,7 @@ public class PhoneJSON {
       long resultID = wordAndScore.getResultID();
       resToAnswer.put(resultID, wordAndScore.getAnswerAudio());
       resToRef.put(resultID, wordAndScore.getRefAudio());
-      resToResult.put(resultID, wordAndScore.getScoreJson());
+      //resToResult.put(resultID, wordAndScore.getScoreJson());
 
       if (count++ > MAX_EXAMPLES) {
         break;

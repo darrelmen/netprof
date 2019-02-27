@@ -35,11 +35,15 @@ public class FirstLastUser extends SimpleUser {
     this.affiliation = affilation;
   }
 
+/*
   public boolean isPoly() {
     return affiliation.toLowerCase().startsWith("poly");
   }
+*/
 
+/*
   public boolean isNPQ() {
     return affiliation.toLowerCase().startsWith("npq");
   }
+*/
 }

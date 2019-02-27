@@ -48,8 +48,6 @@ import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.domino.common.*;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
-import mitll.langtest.client.user.BasicDialog;
-import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserDialog;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.user.User;

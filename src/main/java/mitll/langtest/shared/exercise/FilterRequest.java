@@ -33,6 +33,8 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.project.ProjectMode;
+import mitll.langtest.shared.project.ProjectType;
 
 import java.util.*;
 
@@ -42,7 +44,7 @@ import java.util.*;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/30/16.
  */
-public class FilterRequest implements IsSerializable {
+public class FilterRequest implements IsSerializable, IRequest {
   private int reqID = 1;
   private List<Pair> typeToSelection = new ArrayList<>();
   private String prefix = "";
@@ -52,6 +54,8 @@ public class FilterRequest implements IsSerializable {
   private boolean exampleRequest = false;
   private boolean onlyUninspected = false;
   private boolean onlyWithAnno = false;
+  //private ProjectType projectType = ProjectType.DEFAULT;
+  private ProjectMode mode = ProjectMode.VOCABULARY;
 
   public FilterRequest() {
   }
@@ -69,7 +73,6 @@ public class FilterRequest implements IsSerializable {
   }
 
   public void addPair(Pair pair) {
-
     Optional<Pair> first = typeToSelection.stream().filter(pair1 -> pair1.property.equalsIgnoreCase(pair.getProperty())).findFirst();
 
     first.ifPresent(pair1 -> typeToSelection.remove(pair1));
@@ -98,6 +101,7 @@ public class FilterRequest implements IsSerializable {
         typeToSelection.equals(other.getTypeToSelection());
   }
 
+  @Override
   public int getReqID() {
     return reqID;
   }
@@ -204,6 +208,25 @@ public class FilterRequest implements IsSerializable {
     pv.forEach((k, v) -> typeToSelection.add(new Pair(k, v)));
   }
 
+//  public ProjectType getProjectType() {
+//    return projectType;
+//  }
+//
+//  public FilterRequest setProjectType(ProjectType projectType) {
+//    this.projectType = projectType;
+//    return this;
+//  }
+
+  @Override
+  public ProjectMode getMode() {
+    return mode;
+  }
+
+  public FilterRequest setMode(ProjectMode mode) {
+    this.mode = mode;
+    return this;
+  }
+
   /**
    * @return
    */
@@ -215,6 +238,9 @@ public class FilterRequest implements IsSerializable {
             (recordRequest ? "recordRequest " : "") +
             (onlyUninspected ? "onlyUninspected " : "") +
             (onlyWithAnno ? "onlyWithAnno " : "") +
-            (getTypeToSelection().isEmpty() ? "" : "\n\tselection " + getTypeToSelection());
+            (mode != ProjectMode.VOCABULARY ?
+                  "\n\tmode      " + mode : "") +
+            (getTypeToSelection().isEmpty() ? "" :
+                  "\n\tselection " + getTypeToSelection());
   }
 }

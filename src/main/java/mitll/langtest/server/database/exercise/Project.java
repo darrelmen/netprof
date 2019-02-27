@@ -34,16 +34,24 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
+import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
+import mitll.langtest.server.database.project.DialogPopulate;
 import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.project.ProjectDAO;
 import mitll.langtest.server.database.project.ProjectManagement;
+import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.decoder.RefResultDecoder;
+import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.scoring.ASRWebserviceScoring;
+import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.server.services.AudioServiceImpl;
+import mitll.langtest.server.services.ScoringServiceImpl;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -70,7 +78,7 @@ import static mitll.langtest.shared.project.ProjectProperty.*;
  * <p>
  * TODO : give this an interface
  */
-public class Project implements IPronunciationLookup {
+public class Project implements IPronunciationLookup, IProject {
   private static final Logger logger = LogManager.getLogger(Project.class);
 
   private static final String HYDRA_2 = "hydra2";
@@ -80,7 +88,7 @@ public class Project implements IPronunciationLookup {
 
   /**
    * @see #getWebserviceHost
-   * @see mitll.langtest.server.database.project.ProjectDAO#update
+   * @see ProjectDAO#update
    * @see ProjectManagement#getProjectInfo
    */
   /**
@@ -92,9 +100,12 @@ public class Project implements IPronunciationLookup {
   public static final String TRUE = Boolean.TRUE.toString();
   public static final String MANDARIN = "Mandarin";
 
+  private static final boolean REPORT_ON_DIALOG_TYPES = false;
+  public static final boolean DEBUG_FILE_LOOKUP = false;
+
   /**
    * @see #getWebservicePort
-   * @see mitll.langtest.server.database.project.ProjectDAO#update(int, ProjectInfo)
+   * @see ProjectDAO#update(int, ProjectInfo)
    */
 
   private SlickProject project;
@@ -117,15 +128,19 @@ public class Project implements IPronunciationLookup {
   private Map<String, Integer> fileToRecorder = new ConcurrentHashMap<>();
   private Map<String, Boolean> unknownFiles = new ConcurrentHashMap<>();
 
+  /**
+   * @see #setDialogs
+   */
   private List<IDialog> dialogs = new ArrayList<>();
   private final ISection<IDialog> dialogSectionHelper = new SectionHelper<>();
+  private JsonExport jsonExport;
 
   //private ExerciseTrie<CommonExercise> phoneTrie;
   //private Map<Integer, ExercisePhoneInfo> exToPhone;
 
   /**
    * @param exerciseDAO
-   * @see mitll.langtest.server.database.project.ProjectManagement#addSingleProject
+   * @see ProjectManagement#addSingleProject
    */
   public Project(ExerciseDAO<CommonExercise> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
@@ -163,6 +178,7 @@ public class Project implements IPronunciationLookup {
     return project == null ? "No project yet" : project.language();
   }
 
+  @Override
   public Language getLanguageEnum() {
     return project == null ? Language.UNKNOWN : getLanguageFor();
   }
@@ -233,24 +249,36 @@ public class Project implements IPronunciationLookup {
     return types;
   }
 
+  /**
+   * Cheesy code to avoid adding a duplicate type -- needed?
+   *
+   * @return
+   */
   @NotNull
   public List<String> getBaseTypeOrder() {
     List<String> typeOrder = new ArrayList<>();
     SlickProject project1 = getProject();
-    if (!project1.first().isEmpty()) {
-      typeOrder.add(project1.first());
-    } else {
-      logger.error("huh? project " + project + " first type is empty?");
+    {
+      String first = project1.first();
+      if (!first.isEmpty()) {
+        typeOrder.add(first);
+      } else {
+        logger.error("getBaseTypeOrder huh? project " + project + " first type is empty?");
+      }
     }
-    if (!project1.second().isEmpty()) {
-      typeOrder.add(project1.second());
+
+    {
+      String second = project1.second();
+      if (!second.isEmpty() && !typeOrder.contains(second)) {
+        typeOrder.add(second);
+      }
     }
     return typeOrder;
   }
 
   /**
    * @param exerciseDAO
-   * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO
+   * @see ProjectManagement#setExerciseDAO
    */
   public void setExerciseDAO(ExerciseDAO<CommonExercise> exerciseDAO) {
     this.exerciseDAO = exerciseDAO;
@@ -336,7 +364,7 @@ public class Project implements IPronunciationLookup {
   }
 
   /**
-   * @see mitll.langtest.server.services.AudioServiceImpl#recalcRefAudio
+   * @see AudioServiceImpl#recalcRefAudio
    */
   public RecalcRefResponse recalcRefAudio() {
     Collection<CommonExercise> exercisesForUser = getRawExercises();
@@ -482,13 +510,14 @@ public class Project implements IPronunciationLookup {
     propCache.putAll(db.getProjectDAO().getProps(getID()));
   }
 
-  int spew = 0;
+  private int spew = 0;
 
   /**
    * @param id
    * @return
    * @see
    */
+  @Override
   public CommonExercise getExerciseByID(int id) {
     if (id == 2) {
       logger.warn("getExerciseByID project # " + getID() + " : skip request for unknown exercise (2)");
@@ -511,7 +540,7 @@ public class Project implements IPronunciationLookup {
    * @param prefix
    * @return
    * @seex mitll.langtest.server.services.ListServiceImpl#getExerciseByVocab
-   * @see mitll.langtest.server.ScoreServlet#getExerciseIDFromText
+   * @see ScoreServlet#getExerciseIDFromText
    */
   public CommonExercise getExerciseByExactMatch(String prefix) {
     return getMatchEitherFLOrEnglish(prefix, fullTrie.getExercises(prefix));
@@ -653,7 +682,7 @@ public class Project implements IPronunciationLookup {
    * @param transcript
    * @param transliteration
    * @return
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict
+   * @see SlickUserExerciseDAO#getExercisePhoneInfoFromDict
    */
   @Override
   public String getPronunciationsFromDictOrLTS(String transcript, String transliteration) {
@@ -702,7 +731,7 @@ public class Project implements IPronunciationLookup {
 
   /**
    * @return
-   * @see mitll.langtest.server.scoring.AlignmentHelper#addAlignmentOutput(int, Project, Collection)
+   * @see AlignmentHelper#addAlignmentOutput(int, Project, Collection)
    */
   public Map<Integer, AlignmentOutput> getAudioToAlignment() {
     return audioToAlignment;
@@ -750,20 +779,25 @@ public class Project implements IPronunciationLookup {
 
     if (user == null) {
       if (unknownFiles.containsKey(requestURI)) {
-      //  logger.warn("getUserForFile (" + getID() + ") OK, already know we can't find the user for " + requestURI);
+        //logger.warn("getUserForFile (" + getID() + ") OK, already know we can't find the user for " + requestURI);
       } else {
         int studentForPath = db.getResultDAO().getStudentForPath(getID(), requestURI);
         if (studentForPath > 0) {
           fileToRecorder.put(requestURI, studentForPath);
-    //      logger.info("getUserForFile (" + getID() + ") remember '" + requestURI + "' = " + studentForPath + " now " + fileToRecorder.size());
+          //logger.info("getUserForFile (" + getID() + ") remember '" + requestURI + "' = " + studentForPath + " now " + fileToRecorder.size());
           user = studentForPath;
         } else {
           unknownFiles.put(requestURI, false);
-  //        logger.info("getUserForFile (" + getID() + ") can't find user for " + requestURI + " = " + studentForPath + " now " + unknownFiles.size() + " " + unknownFiles.containsKey(requestURI));
+          if (DEBUG_FILE_LOOKUP) {
+            logger.info("getUserForFile (" + getID() + ") can't find user " +
+                "for " + requestURI + " = " + studentForPath + " now " + unknownFiles.size() + " " + unknownFiles.containsKey(requestURI));
+          }
         }
       }
     } else {
-//      logger.info("getUserForFile (" + getID() + ") remember '" + requestURI + "' = " + user + " now " + fileToRecorder.size());
+      if (DEBUG_FILE_LOOKUP) {
+        logger.info("getUserForFile (" + getID() + ") remember '" + requestURI + "' = " + user + " now " + fileToRecorder.size());
+      }
     }
 //    if (integer == null) {
     //     logger.warn("getUserForFile  can't find " + requestURI + " in " + fileToRecorder.size());
@@ -774,7 +808,7 @@ public class Project implements IPronunciationLookup {
   /**
    * @param testAudioFile
    * @param userIDFromSessionOrDB
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
+   * @see ScoringServiceImpl#getPretestScore
    */
   public void addAnswerToUser(String testAudioFile, int userIDFromSessionOrDB) {
     fileToRecorder.put(testAudioFile, userIDFromSessionOrDB);
@@ -796,6 +830,9 @@ public class Project implements IPronunciationLookup {
     return project.name();
   }
 
+  /**
+   * @return
+   */
   public List<IDialog> getDialogs() {
     return dialogs;
   }
@@ -814,7 +851,7 @@ public class Project implements IPronunciationLookup {
 
   /**
    * @param dialogs
-   * @see mitll.langtest.server.database.project.DialogPopulate#addDialogInfo
+   * @see DialogPopulate#addDialogInfo
    */
   public void setDialogs(List<IDialog> dialogs) {
     this.dialogs = dialogs;
@@ -847,9 +884,22 @@ public class Project implements IPronunciationLookup {
     });
 
     dialogSectionHelper.rememberTypesInOrder(typeOrder, seen);
+
+    if (REPORT_ON_DIALOG_TYPES) {
+      logger.info("report on dialog types");
+      dialogSectionHelper.report();
+    }
+  }
+
+  public JsonExport getJsonExport() {
+    return jsonExport;
+  }
+
+  public void setJsonExport(JsonExport jsonExport) {
+    this.jsonExport = jsonExport;
   }
 
   public String toString() {
-    return "Project\n\tproject = " + project + "\n\ttypes " + getTypeOrder() + " exercise dao " + exerciseDAO;
+    return "Project\n\t(" + getTypeOrder() + ") : project " + project;// + "\n\ttypes " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
 }

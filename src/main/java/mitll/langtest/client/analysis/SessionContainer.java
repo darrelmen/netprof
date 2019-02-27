@@ -16,10 +16,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class SessionContainer<T extends IDialogSession>
     extends MemoryItemContainer<T> implements ReqCounter {
-  // private final Logger logger = Logger.getLogger("SessionContainer");
+ private final Logger logger = Logger.getLogger("SessionContainer");
 
   public static final String SCORE = "Score";
   public static final int ITEM_COLUMN_WIDTH = 450;
@@ -95,6 +96,7 @@ public class SessionContainer<T extends IDialogSession>
 
   @NotNull
   private AnalysisTab getAnalysisTab(T selectedUser, int user) {
+   // logger.info("getAnalysisTab " + selectedUser + " " + user);
     return new DialogSessionAnalysisTab<T>(this.controller,
         selectedUser,
         overallBottom,
@@ -189,5 +191,4 @@ public class SessionContainer<T extends IDialogSession>
   protected Long getItemDate(IDialogSession shell) {
     return shell.getModified();
   }
-
 }

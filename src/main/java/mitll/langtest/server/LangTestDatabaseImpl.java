@@ -52,12 +52,10 @@ import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
-import static mitll.hlt.domino.server.ServerInitializationManager.CONFIG_HOME_ATTR_NM;
 import static mitll.hlt.domino.server.ServerInitializationManager.USER_SVC;
 
 /**
@@ -75,10 +73,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   private static final String NO_POSTGRES = "Can't connect to postgres.<br/>please check the database configuration in application.conf or netprof.properties.";
   private static final String GOT_BROWSER_EXCEPTION = "got browser exception";
 
-  /**
-   * @see
-   */
-  private String relativeConfigDir;
   private String startupMessage = "";
 
   /**
@@ -88,14 +82,13 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   public void init() {
     try {
       ServletContext servletContext = getServletContext();
-      String property = System.getProperty(CONFIG_HOME_ATTR_NM);
+      //String property = System.getProperty(CONFIG_HOME_ATTR_NM);
       //  logger.info("init : prop for domino = '" + property + "'");
       this.pathHelper = new PathHelper(servletContext);
       this.serverProps = readProperties(servletContext);
       pathHelper.setProperties(serverProps);
       setInstallPath(db, servletContext);
       // logger.info("finished init");
-
     } catch (Exception e) {
       startupMessage = e.getMessage();
       logger.error("Got " + e, e);
@@ -111,12 +104,6 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
       if (db != null) db.doReport();
     } catch (Exception e) {
       logger.error("optionalInit couldn't load database " + e, e);
-    }
-
-    try {
-      if (serverProps.isAMAS()) getAudioFileHelper().makeAutoCRT(relativeConfigDir);
-    } catch (Exception e) {
-      logger.error("Got " + e, e);
     }
   }
 
@@ -297,10 +284,13 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     ServerInitializationManagerNetProf serverInitializationManagerNetProf = new ServerInitializationManagerNetProf();
     ServerProperties serverProps = serverInitializationManagerNetProf.getServerProps(servletContext);
 
-    File configDir = serverInitializationManagerNetProf.getConfigDir();
+//    File configDir = serverInitializationManagerNetProf.getConfigDir();
     //   logger.info("readProperties : configDir from props " + configDir);
 
-    this.relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
+    /**
+     * @see
+     */
+  //  String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     //åString configDir1 = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
     // logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
 
@@ -347,7 +337,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     if (db == null) {
       logger.error("no database services created.");
     } else {
-      db.setInstallPath("", servletContext);
+      db.setInstallPath("", servletContext, true);
     }
   }
 }

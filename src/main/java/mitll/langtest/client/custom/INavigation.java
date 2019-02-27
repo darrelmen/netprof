@@ -28,21 +28,24 @@ public interface INavigation extends IViewContaner {
     PROGRESS("Progress", VOCABULARY),
 
     LEARN("Learn", VOCABULARY),
-    //LEARN_SENTENCES("Learn Sentences", VOCABULARY, true),
     PRACTICE("Practice", VOCABULARY),
-    //PRACTICE_SENTENCES("Practice Sentences", VOCABULARY, true),
     QUIZ("Quiz", VOCABULARY),
 
 
-    DIALOG("Dialog", ProjectMode.DIALOG),
+    DIALOG("Dialogs", ProjectMode.DIALOG),
     /**
      * @see mitll.langtest.client.banner.DialogExerciseList#gotClickOnDialog
      * @see mitll.langtest.client.banner.NewContentChooser#showView
      */
     STUDY("Study", ProjectMode.DIALOG),
     LISTEN("Listen", ProjectMode.DIALOG),
-    REHEARSE("Rehearse", ProjectMode.DIALOG),
-    PERFORM("Perform", ProjectMode.DIALOG),
+
+    REHEARSE("Rehearse", ProjectMode.DIALOG, true),
+    CORE_REHEARSE("Rehearse (auto play)", ProjectMode.DIALOG, false),
+
+    PERFORM_PRESS_AND_HOLD("Perform", ProjectMode.DIALOG, true),
+    PERFORM("Perform (auto play)", ProjectMode.DIALOG, false),
+
     /**
      * @see mitll.langtest.client.banner.NewContentChooser#showScores
      */
@@ -63,6 +66,7 @@ public interface INavigation extends IViewContaner {
     private boolean isQC;
     private boolean isFix;
     private boolean isContext;
+    private boolean isPressAndHold;
 
     final String display;
 
@@ -87,6 +91,23 @@ public interface INavigation extends IViewContaner {
       this.mode = mode;
     }
 
+    VIEWS(String display, ProjectMode mode, boolean isPressAndHold) {
+      this.display = display;
+      this.perms = Collections.emptyList();
+      this.mode = mode;
+      this.isPressAndHold = isPressAndHold;
+    }
+
+    public VIEWS getPrev() {
+      VIEWS[] vals = values();
+      return vals[(this.ordinal() - 1) % vals.length];
+    }
+
+    public VIEWS getNext() {
+      VIEWS[] vals = values();
+      return vals[(this.ordinal() + 1) % vals.length];
+    }
+
     public List<User.Permission> getPerms() {
       return perms;
     }
@@ -109,6 +130,10 @@ public interface INavigation extends IViewContaner {
 
     public boolean isContext() {
       return isContext;
+    }
+
+    public boolean isPressAndHold() {
+      return isPressAndHold;
     }
 
   }
@@ -142,4 +167,6 @@ public interface INavigation extends IViewContaner {
   void showPreviousState();
 
   void clearCurrent();
+
+  VIEWS getCurrent();
 }

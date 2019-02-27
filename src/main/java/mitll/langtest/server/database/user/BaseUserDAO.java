@@ -135,7 +135,9 @@ public abstract class BaseUserDAO extends DAO {
     return importUser;
   }
 
-  public int getDefaultUser() {    return defaultUser;  }
+  public int getDefaultUser() {
+    return defaultUser;
+  }
 
   public int getDefaultMale() {
     return defaultMale;
@@ -156,37 +158,29 @@ public abstract class BaseUserDAO extends DAO {
    * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    */
   public User addUser(SignUpUser user) {
-    String userID = user.getUserID();
-    User currentUser = getUserByID(userID);
+    User currentUser = getUserByID(user.getUserID());
     if (currentUser == null) {
       LoginResult loginResult = addUserAndGetID(user);
       int userid = loginResult.getId();
+      if (loginResult.getResultType() == LoginResult.ResultType.Unknown) {
+        logger.warn("got result " + loginResult.getResultType());
+      } else {
+        logger.info("result " + loginResult.getResultType() + " for user " + userid);
+      }
 
       User userWhere = userid == -1 ? null : getUserWhere(userid);
       if (userWhere != null) {
-        userWhere.setResetKey(loginResult.getToken());
+        String token = loginResult.getToken();
+        userWhere.setResetKey(token);
+        if (token.isEmpty()) logger.warn("addUser huh? empty token?");
+      } else {
+        logger.warn("addUser : can't find user with id " + userid);
       }
-      logger.info(" : addUser : added new user " + userWhere);
-
+      logger.info("addUser : added new " + userWhere);
       return userWhere;
     } else {
-      logger.warn(" : addUser : user exists ");
-      // user exists!
+      logger.warn("addUser : user exists ");
       return null;
-      /*String emailHash = currentUser.getEmailHash();
-
-      if (emailHash != null &&
-          !emailHash.isEmpty()
-          ) {
-        logger.debug(" : addUser : user " + userID + " is an existing user.");
-        return null; // existing user!
-      } else {
-        int id = currentUser.getID();
-        updateUser(id, user.getKind(), user.getEmailH(), user.getEmail());
-        User userWhere = getUserWhere(id);
-        logger.debug(" : addUser : returning updated user " + userWhere);
-        return userWhere;
-      }*/
     }
   }
 

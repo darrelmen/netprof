@@ -14,6 +14,7 @@ import java.util.Map;
 public class AlignmentOutput implements IsSerializable {
   private Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
 
+  private boolean showPhoneScores;
   /**
    * Required by RPC.
    */
@@ -35,6 +36,14 @@ public class AlignmentOutput implements IsSerializable {
    */
   public Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments() {
     return sTypeToEndTimes;
+  }
+
+  public boolean isShowPhoneScores() {
+    return showPhoneScores;
+  }
+
+  public void setShowPhoneScores(boolean showPhoneScores) {
+    this.showPhoneScores = showPhoneScores;
   }
 
   public String toString() {

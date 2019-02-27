@@ -190,13 +190,14 @@ function sendBlob(framesBeforeRound, audioBlob, isLast, abort, sendMoment) {
 
         if (framesBeforeRound === 0) {
             xhr.setRequestHeader("STREAMSTATE", "START");
+ //           console.log("worker.sendBlob START '" + myurl + "' exid '" + myexid + "' - abort " +abort + " is last " + isLast + " session " +session);
         }
         else if (abort) {
             console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "' - abort " + abort);
             xhr.setRequestHeader("STREAMSTATE", "ABORT");
         }
         else if (isLast) {
-            //      console.log("worker.sendBlob '" + myurl + "' exid '" + myexid + "' - abort " +abort + " is last " + isLast);
+  //         console.log("worker.sendBlob END '" + myurl + "' exid '" + myexid + "' - abort " +abort + " is last " + isLast + " session " +session);
             xhr.setRequestHeader("STREAMSTATE", "END");
         }
         else {
@@ -320,7 +321,7 @@ function clear() {
     frameRecBuffersL = [];
 
     session = new Date().getTime();
-    // console.log("clear - session after  " + session);
+//    console.log("recorderWorker : clear - session after  " + session);
 }
 
 function getAllZero() {

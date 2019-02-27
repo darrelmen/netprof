@@ -34,6 +34,7 @@ package mitll.langtest.server.audio;
 
 import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.shared.project.Language;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,7 +59,7 @@ public class SLFFile {
   private static final String UNKNOWN_MODEL_BIAS = "-1.20";
   private static final String STANDARD_WEIGHT = "-1.00";
   private static final String SIL = "SIL";
-  private final SmallVocabDecoder svd = new SmallVocabDecoder();
+  private final SmallVocabDecoder svd;
 
   /**
    * Unknown Model Bias Weight balances the likelihood between matching one of the decode words or the unknown model.
@@ -136,13 +137,17 @@ public class SLFFile {
     return tmpDir + File.separator + Scoring.SMALL_LM_SLF;
   }
 */
+  public SLFFile(Language language) {
+    svd = new SmallVocabDecoder(language);
+
+  }
 
   /**
    * creates string LM for hydra
    *
    * @param lmSentences
-   * @param addSil true usually
-   * @param includeUnk if decode
+   * @param addSil             true usually
+   * @param includeUnk         if decode
    * @param includeSelfSILLink only true if trimming
    * @param removeAllAccents
    * @return
@@ -176,7 +181,7 @@ public class SLFFile {
     int ctr = 0;
     for (String sentence : sentencesToUse) {
 //      logger.info("createSimpleSLFFile sentence " + sentence);
-      Collection<String> tokens = svd.getTokens(sentence, removeAllAccents);
+      Collection<String> tokens = svd.getTokens(sentence, removeAllAccents, false);
 
       int prevNode = 0;  // points to initial node
       int currentSil = 0;
@@ -280,8 +285,8 @@ public class SLFFile {
    * @see #createSimpleSLFFile(Collection, boolean, boolean, boolean, boolean)
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#runHydra(String, String, String, Collection, String, boolean, int)
    */
-/*  private String lcToken(String token) {
-*//*    String s = token
+  /*  private String lcToken(String token) {
+   *//*    String s = token
         .replaceAll(REMOVE_ME, " ")
         .replaceAll("\\p{Z}+", " ")
         .replaceAll("\\p{P}", "");

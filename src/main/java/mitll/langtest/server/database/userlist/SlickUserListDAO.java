@@ -46,6 +46,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickLightList;
 import mitll.npdata.dao.SlickUserExerciseList;
 import mitll.npdata.dao.userexercise.UserExerciseListDAOWrapper;
 import mitll.npdata.dao.userexercise.UserExerciseListVisitorDAOWrapper;
@@ -64,7 +65,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   private final UserExerciseListDAOWrapper dao;
   private final UserExerciseListVisitorDAOWrapper visitorDAOWrapper;
   private final IUserExerciseDAO userExerciseDAO;
-  final IProjectDAO projectDAO;
+  private final IProjectDAO projectDAO;
   private final IUserDAO userDAO;
 
   /**
@@ -135,7 +136,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         new Timestamp(shared.getEnd()),
         shared.getDuration(),
         shared.getMinScore(),
-        shared.shouldShowAudio()
+        shared.shouldShowAudio(),
+        shared.getAccessCode()
     );
   }
 
@@ -148,6 +150,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.id(),
         slick.userid(),
         byID.getUserID(),
+        byID.getFirstInitialName(),
         slick.name(),
         slick.description(),
         slick.classmarker(),
@@ -161,7 +164,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.endtime().getTime(),
         slick.duration(),
         slick.minscore(),
-        slick.showaudio());
+        slick.showaudio(), slick.accesscode());
     return commonShellUserList.setTeacher(!byID.isStudent());
   }
 
@@ -175,6 +178,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.id(),
         slick.userid(),
         userChosenID,
+        byID.getFirstInitialName(),
         slick.name(),
         slick.description(),
         slick.classmarker(),
@@ -188,7 +192,7 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
         slick.endtime().getTime(),
         slick.duration(),
         slick.minscore(),
-        slick.showaudio());
+        slick.showaudio(), slick.accesscode());
 
     return commonExerciseUserList.setTeacher(!byID.isStudent());
   }
@@ -239,11 +243,6 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     dao.updateModified((int) uniqueID);
   }
 
-  @Override
-  public int getCount() {
-    return dao.getNumRows();
-  }
-
   /**
    * Side effect is to add user exercises to lists.
    * <p>
@@ -285,9 +284,6 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @see #getWithExercises(int)
    */
   private void populateList(UserList<CommonShell> where, boolean shouldSwap) {
-
-
-
     //   List<CommonShell> onList = userExerciseDAO.getOnList(where.getID());
     where.setExercises(userExerciseDAO.getOnList(where.getID(), shouldSwap));
     // for (CommonShell shell : onList) logger.info("for " + where.getOldID() + " found " + shell);
@@ -306,21 +302,6 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     }*/
   }
 
-  /**
-   * Add the exercises to the list.
-   *
-   * @param where
-   * @param shouldSwap
-   * @see #getWithExercisesEx
-   */
-  private void populateListEx(UserList<CommonExercise> where, boolean shouldSwap) {
-    where.setExercises(userExerciseDAO.getCommonExercises(where.getID(), shouldSwap));
-  }
-
-  @Override
-  public boolean hasByName(long userid, String name, int projid) {
-    return dao.hasByName((int) userid, name, projid);
-  }
 
   @Override
   public List<UserList<CommonShell>> getByName(long userid, String name, int projid) {
@@ -330,11 +311,6 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
   @Override
   public boolean remove(int unique) {
     return dao.markDeleted(unique);
-  }
-
-  @Override
-  public void bringBack(long unique) {
-    dao.markNotDeleted((int) unique);
   }
 
   /**
@@ -347,21 +323,9 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     UserList<CommonShell> where = getWhere(unique, true);
 
     if (where != null) {
-      boolean shouldSwap = projectDAO.getShouldSwap(where.getProjid());
-      populateList(where, shouldSwap);
+      populateList(where, projectDAO.getShouldSwap(where.getProjid()));
     }
     return where;
-  }
-
-  @Override
-  public UserList<CommonExercise> getWithExercisesEx(int unique) {
-    UserList<CommonExercise> list = getList(unique);
-    if (list == null) return null;
-    else {
-      boolean shouldSwap = projectDAO.getShouldSwap(list.getProjid());
-      populateListEx(list, shouldSwap);
-      return list;
-    }
   }
 
   /**
@@ -409,30 +373,11 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     List<UserList<CommonShell>> ret = new ArrayList<>();
     boolean shouldSwap = projectDAO.getShouldSwap(projid);
 
-    getAllListsForUser(userid, projid)
+    dao.allPublicNotThisUser(projid,userid)
         .forEach(ue -> ret.add(fromSlick(ue)));
     ret.forEach(where -> populateList(where, shouldSwap));
 
     return getNonEmpty(ret);
-  }
-
-  /**
-   * Both created, visited, and public
-   *
-   * @param userid don't return lists by this user
-   * @param projid for this project
-   * @return
-   * @see #getAllPublicNotMine
-   */
-  @NotNull
-  private List<SlickUserExerciseList> getAllListsForUser(int userid, int projid) {
-    List<SlickUserExerciseList> temp = new ArrayList<>();
-    {
-      dao.allPublic(projid).forEach(ue -> {
-        if (ue.userid() != userid) temp.add(ue);
-      });
-    }
-    return temp;
   }
 
   /**
@@ -448,33 +393,45 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     return ret;
   }
 
+  /**
+   * First we need to get the names of the lists or quizzes, so we can build a trie...?
+   *
+   * so when you don't search, you just see all of the lists or all quizzes
+   *
+   * then you choose one and see the content for that list or quiz
+   *
+   * @param projid
+   * @param userid
+   * @param isQuiz
+   * @return
+   * @see ListServiceImpl#getAllQuiz
+   * @see UserContainer#getQuizListBox
+   */
   @Override
-  public Collection<IUserListLight> getAllQuizLight(int projid) {
-    Collection<SlickUserExerciseList> slickUserExerciseLists = getSlickAllQuiz(projid, -1);
+  public List<IUserListLight> getAllOrMineLight(int projid, int userid, boolean isQuiz) {
+    Collection<SlickLightList> slickUserExerciseLists = getSlickAllOrMineLight(projid, userid, isQuiz);
     List<IUserListLight> names = new ArrayList<>(slickUserExerciseLists.size());
-    slickUserExerciseLists.forEach(slickUserExerciseList -> names.add(new UserListLight(slickUserExerciseList.id(), slickUserExerciseList.name())));
+    slickUserExerciseLists
+        .forEach(slickUserExerciseList ->
+            names.add(new UserListLight(slickUserExerciseList.id(), slickUserExerciseList.name())));
     return names;
   }
-
-/*  @Override public Collection<IUserList> getAllQuizUserList(int projid) {
-    Collection<SlickUserExerciseList> slickUserExerciseLists = getSlickAllQuiz(projid);
-    List<IUserList> names = new ArrayList<>(slickUserExerciseLists.size());
-    slickUserExerciseLists.forEach(slickUserExerciseList -> names.add(
-        new SimpleUserList(
-            slickUserExerciseList.id(),
-            slickUserExerciseList.name(),projid,)));
-    return names;
-  }*/
 
   /**
    * All public or mine.
    *
    * @param projid
    * @param userID
+   * @param isQuiz
    * @return
    */
-  public Collection<SlickUserExerciseList> getSlickAllQuiz(int projid, int userID) {
-    return dao.allQuiz(projid, userID);
+  public Collection<SlickUserExerciseList> getSlickAllPublicOrMine(int projid, int userID, boolean isQuiz) {
+    return dao.allPublicOrMine(projid, userID,isQuiz);
+  }
+
+  @Override
+  public Collection<SlickLightList> getSlickAllOrMineLight(int projid, int userID, boolean isQuiz){
+    return dao.allPublicOrMineLight(projid, userID, isQuiz);
   }
 
   @NotNull
@@ -506,7 +463,6 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
     return ret;
   }
 
-
   @Override
   public Collection<SlickUserExerciseList> getByUser(int userid, int projid) {
     return dao.byUser(userid, projid);
@@ -524,12 +480,6 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    */
   @Override
   public void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO) {
-  }
-
-  @Override
-  public void setPublicOnList(long userListID, boolean isPublic) {
-    int i = dao.setPublic((int) userListID, isPublic);
-    if (i == 0) logger.error("setPublicOnList : huh? didn't update the userList for " + userListID);
   }
 
   @Override

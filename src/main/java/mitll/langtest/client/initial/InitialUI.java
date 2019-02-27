@@ -608,7 +608,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private boolean showLogin() {
     final EventRegistration eventRegistration = lifecycleSupport;
 
-
     // check if we're here as a result of resetting a password
     final String resetPassToken = props.getResetPassToken();
     if (!resetPassToken.isEmpty()) {
@@ -664,10 +663,15 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
                                final Panel firstRow,
                                final EventRegistration eventRegistration,
                                final String resetPassToken) {
-    //logger.info("showLogin token '" + resetPassToken + "' for password reset");
-    Panel resetPassword = new ResetPassword(props, eventRegistration, userManager, controller.getStorage()).getResetPassword(resetPassToken);
-    resetPassword.setWidth("630px");
-    firstRow.add(resetPassword);
+   // logger.info("handleResetPass token '" + resetPassToken + "' for password reset");
+
+    {
+      Panel resetPassword =
+          new ResetPassword(props, eventRegistration, userManager, controller.getStorage()).getResetPassword(resetPassToken);
+      resetPassword.setWidth("630px");
+      firstRow.add(resetPassword);
+    }
+
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
     hideCogMenu();

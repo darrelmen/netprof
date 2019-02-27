@@ -415,10 +415,14 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
     table.setColumnWidth(itemCol, itemColWidth + "px");
 
-    String headerForFL = controller.getLanguageInfo() == Language.ENGLISH ? "Meaning" : controller.getLanguage();
+    String headerForFL = isEnglish() ? "Meaning" : controller.getLanguageInfo().toDisplay();
     addColumn(itemCol, new TextHeader(headerForFL));
 
     tableSortHelper.rememberColumn(itemCol, WORD);
+  }
+
+  private boolean isEnglish() {
+    return controller.getLanguageInfo() == Language.ENGLISH;
   }
 
   private int getItemColWidth() {
@@ -499,7 +503,16 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
       } else {
 /*       logger.info("timeChanged Starting from " +from + " : " +to);
       logger.info("timeChanged : from " + format.format(new Date(from)) + " to " + format.format(new Date(to)));*/
-        heading.setSubtext(yearShortFormat.format(new Date(from)) + " - " + yearShortFormat.format(new Date(to)));
+        String format = yearShortFormat.format(new Date(from));
+        String format1 = yearShortFormat.format(new Date(to));
+
+//        logger.info("timeChanged : from " + format + " -> " + format1);
+
+        if (format.equalsIgnoreCase(format1)) {
+          format = longerYearFormat.format(new Date(from));
+          format1 = longerYearFormat.format(new Date(to));
+        }
+        heading.setSubtext(format + " - " + format1);
         this.from = from;
         this.to = to;
       }

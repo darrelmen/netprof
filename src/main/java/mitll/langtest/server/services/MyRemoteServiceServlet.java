@@ -220,6 +220,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     int userIDFromSession = getUserIDFromSessionOrDB();
     if (userIDFromSession == -1) {
       // it's not in the current session - can we recover it from the remember me cookie?
+      logger.warn("getProject no user session?");
       return null;
     } else {
       return getProjectForUser(userIDFromSession);
@@ -454,7 +455,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return getSectionHelper(getProjectIDFromUser());
   }
 
-  protected ISection<CommonExercise> getSectionHelper(int projectID) {
+  private ISection<CommonExercise> getSectionHelper(int projectID) {
     return db.getSectionHelper(projectID);
   }
 
@@ -462,7 +463,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return getDialogSectionHelper(getProjectIDFromUser());
   }
 
-  ISection<IDialog> getDialogSectionHelper(int projectID) {
+  private ISection<IDialog> getDialogSectionHelper(int projectID) {
     return db.getDialogSectionHelper(projectID);
   }
 
@@ -470,20 +471,11 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @return
    */
   protected AudioFileHelper getAudioFileHelper() throws DominoSessionException {
-    Project project = getProject();
-    if (serverProps.isAMAS()) {
-      return audioFileHelper;
-    } else {
-      return getAudioFileHelper(project);
-    }
+    return getAudioFileHelper(getProject());
   }
 
   protected AudioFileHelper getAudioFileHelper(int projectID) {
-    if (serverProps.isAMAS()) {
-      return audioFileHelper;
-    } else {
-      return getAudioFileHelper(db.getProject(projectID));
-    }
+    return getAudioFileHelper(db.getProject(projectID));
   }
 
   @Nullable
@@ -572,7 +564,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   public IDialog getDialog(int id) throws DominoSessionException {
     IDialog iDialog = getOneDialog(id);
 
-    logger.info("getDialog get dialog " + id + "\n\treturns " + iDialog);
+    //  logger.info("getDialog get dialog " + id + "\n\treturns " + iDialog);
 
     if (iDialog != null) {
       int projid = iDialog.getProjid();
@@ -581,8 +573,12 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
       {
         Language language = project.getLanguageEnum();
         iDialog.getExercises().forEach(clientExercise ->
-            db.getAudioDAO().attachAudioToExercise(clientExercise, language, new HashMap<>())
+            db.getAudioDAO().attachAudioToExercise(clientExercise, language, new HashMap<>(), project.getAudioFileHelper().getSmallVocabDecoder())
         );
+
+    /*    iDialog.getExercises().forEach(exercise ->
+            logger.info("lang for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " " + language)
+        );*/
       }
 
       new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(projid, project, iDialog.getExercises());
@@ -593,8 +589,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
 
   private IDialog getOneDialog(int id) throws DominoSessionException {
-    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    return getOneDialog(userIDFromSessionOrDB, id);
+    return getOneDialog(getUserIDFromSessionOrDB(), id);
   }
 
   /**
@@ -607,25 +602,35 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @return the first dialog if the id is -1 or bogus...
    */
   @Nullable
-  protected IDialog getOneDialog(int userIDFromSessionOrDB, int dialogID) {
+  private IDialog getOneDialog(int userIDFromSessionOrDB, int dialogID) {
     List<IDialog> iDialogs = getDialogs(userIDFromSessionOrDB);
     if (dialogID == -1) {
       return iDialogs.isEmpty() ? null : iDialogs.get(0);
     } else {
       List<IDialog> collect = iDialogs.stream().filter(iDialog -> iDialog.getID() == dialogID).collect(Collectors.toList());
-      return collect.isEmpty() ? iDialogs.isEmpty() ? null : iDialogs.iterator().next() : collect.iterator().next();
+      IDialog iDialog = collect.isEmpty() ? iDialogs.isEmpty() ? null : iDialogs.iterator().next() : collect.iterator().next();
+      if (iDialog == null) {
+        logger.warn("\n\n\nno dialog for " + dialogID + " From " + iDialogs.size());
+      }
+      return iDialog;
     }
   }
 
   protected List<IDialog> getDialogs(int userIDFromSessionOrDB) {
-    return getDialogsForProject(getProjectIDFromUser(userIDFromSessionOrDB));
+    int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+    if (projectIDFromUser == -1) {
+      logger.warn("no project id?");
+    }
+    return getDialogsForProject(projectIDFromUser);
   }
 
-  protected List<IDialog> getDialogsForProject(int projectIDFromUser) {
+  List<IDialog> getDialogsForProject(int projectIDFromUser) {
     List<IDialog> dialogList = new ArrayList<>();
     {
       if (projectIDFromUser != -1) {
         dialogList = getProject(projectIDFromUser).getDialogs();
+      } else {
+        logger.warn("no project id?");
       }
     }
     return dialogList;

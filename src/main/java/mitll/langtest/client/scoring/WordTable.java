@@ -402,7 +402,7 @@ public class WordTable {
 
     new TooltipHelper().addTooltip(header, CLICK_TO_HEAR_WORD);
 
-    DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, phonesForWord, false, null /*isRTL*/);
+    DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, phonesForWord, false, null, /*isRTL*/true);
     phones.addStyleName("inlineFlex");
 
     header.setSouthScore(phones);
@@ -439,6 +439,7 @@ public class WordTable {
    * @param phoneSegments
    * @param simpleLayout
    * @param wordSegment
+   * @param doFloatLeft
    * @return
    * @paramz isRTL
    * @see TwoColumnExercisePanel#getPhoneDivBelowWord
@@ -448,10 +449,15 @@ public class WordTable {
                                  TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                  List<TranscriptSegment> phoneSegments,
                                  boolean simpleLayout,
-                                 TranscriptSegment wordSegment
-  ) {
+                                 TranscriptSegment wordSegment,
+                                 boolean doFloatLeft) {
     DivWidget phones = new DivWidget();
-    phones.addStyleName("phoneContainer");
+    if (doFloatLeft) {
+      phones.addStyleName("phoneContainer");
+    } else {
+      phones.addStyleName("simplePhoneContainer");
+    }
+
     addPhonesBelowWord2(phoneSegments, phones, audioControl, phoneMap, simpleLayout, wordSegment);
     return phones;
   }
@@ -581,12 +587,18 @@ public class WordTable {
     Iterator<TranscriptSegment> iterator = phoneSegments.iterator();
     boolean hasAudioControl = audioControl != null;
 
+//   if (simpleLayout) logger.info("addPhonesBelowWord2 simple layout for " +wordSegment + " and " + phoneSegments);
     while (iterator.hasNext()) {
       TranscriptSegment phoneSegment = iterator.next();
       String phoneLabel = getPhoneEvent(phoneSegment);
       if (!shouldSkipPhone(phoneLabel)) {
         boolean b = iterator.hasNext();
-        SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel + (b ? NBSP : ""), BLUE);
+        String phoneLabel1 = phoneLabel;
+        String displayEvent = phoneSegment.getDisplayEvent();
+        if (!phoneLabel1.equals(displayEvent)) {
+          phoneLabel1 = displayEvent;
+        }
+        SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel1 + (b ? NBSP : ""), BLUE);
 
         //  logger.info("\taddPhonesBelowWord2 word " + wordSegment + " phone " + phoneLabel + " : " + h.getContent());
 
@@ -631,7 +643,7 @@ public class WordTable {
     if (audioControl != null) {
       if (false) logger.info("addClickHandler add handler for " + segmentToPlay + " when click on " + header.getText());
       header.addClickHandler(event -> {
-        logger.info("addClickHandler click on " + segmentToPlay + " header " + header.getText());
+      //  logger.info("addClickHandler click on " + segmentToPlay + " header " + header.getText());
         audioControl.loadAndPlaySegment(segmentToPlay.getStart(), segmentToPlay.getEnd());
       });
     }

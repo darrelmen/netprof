@@ -32,14 +32,15 @@
 
 package mitll.langtest.server.database.custom;
 
+import com.google.gson.JsonObject;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.userlist.IUserExerciseListVisitorDAO;
 import mitll.langtest.server.database.userlist.IUserListDAO;
 import mitll.langtest.server.database.userlist.IUserListExerciseJoinDAO;
 import mitll.langtest.server.services.ListServiceImpl;
 import mitll.langtest.shared.custom.IUserList;
-import mitll.langtest.shared.custom.IUserListLight;
 import mitll.langtest.shared.custom.IUserListWithIDs;
+import mitll.langtest.shared.custom.QuizSpec;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -58,17 +59,13 @@ public interface IUserListManager {
   UserList addUserList(int userid, String name, String description, String dliClass, boolean isPublic, int projid);
 
   UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid,
-                   int size, int duration, int minScore, boolean showAudio, Map<String, String> unitChapter);
+                   int size, QuizSpec quizSpec, Map<String, String> unitChapter);
 
-  Collection<IUserListLight> getNamesForUser(int userid,
-                                             int projid,
-                                             boolean listsICreated,
-                                             boolean visitedLists);
-
-  Collection<IUserList> getSimpleListsForUser(int userid,
-                                              int projid,
+  Collection<IUserList> getSimpleListsForUser(int projid, int userid,
                                               boolean listsICreated,
                                               boolean visitedLists);
+
+  int getNumOnList(int listid);
 
   Collection<IUserListWithIDs> getListsWithIdsForUser(int userid,
                                                       int projid,
@@ -77,7 +74,7 @@ public interface IUserListManager {
 
   Collection<UserList<CommonShell>> getListsForUser(int userid, int projid, boolean listsICreated, boolean visitedLists, boolean includeQuiz);
 
-  Collection<IUserList> getAllQuizUserList(int projid, int userID);
+  Collection<IUserList> getAllPublicOrMine(int projid, int userID, boolean isQuiz, boolean onlyWithAudio);
 
   /**
    * @param userid
@@ -90,21 +87,25 @@ public interface IUserListManager {
 
   UserList<CommonShell> getUserListByID(int id);
 
+  List<CommonExercise> getCommonExercisesOnList(int projid, int id);
+
   UserList<CommonShell> getSimpleUserListByID(int id);
 
   UserList getUserListNoExercises(int userListID);
 
   /**
    * Really put the exercise in the database.
-   * @see ListServiceImpl#newExercise
+   *
    * @param userListID
    * @param userExercise
+   * @see ListServiceImpl#newExercise
    */
-   void newExercise(int userListID, CommonExercise userExercise);
+  void newExercise(int userListID, CommonExercise userExercise);
 
   void addItemToList(int userListID, int exid);
 
   void editItem(CommonExercise userExercise, Collection<String> typeOrder);
+
   void clearAudio(int audioID);
 
   UserList addVisitor(int userListID, int user);
@@ -139,4 +140,8 @@ public interface IUserListManager {
   void update(UserList userList);
 
   boolean updateProject(int oldID, int newprojid);
+
+  JsonObject getListsJson(int userID, int projid, boolean isQuiz);
+
+  QuizSpec getQuizInfo(int userListID);
 }

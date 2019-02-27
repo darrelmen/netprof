@@ -36,7 +36,6 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.constants.BackdropType;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.DOM;
 import com.google.gwt.user.client.ui.Widget;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -52,7 +50,7 @@ import java.util.logging.Logger;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  */
 public class DialogHelper {
-  private final Logger logger = Logger.getLogger("DialogHelper");
+  //private final Logger logger = Logger.getLogger("DialogHelper");
 
   private static final String OK = "OK";
   private static final String CANCEL = "Cancel";
@@ -63,11 +61,13 @@ public class DialogHelper {
 
   public interface CloseListener {
     boolean gotYes();
+
     void gotNo();
+
     void gotHidden();
   }
 
-  public interface  ShownCloseListener extends CloseListener {
+  public interface ShownCloseListener extends CloseListener {
     void gotShown();
   }
 
@@ -84,10 +84,6 @@ public class DialogHelper {
   private void showErrorMessage(String title, Collection<String> msgs) {
     show(title, msgs, null, "Close", "No", null, -1);
   }
-
-/*  public void show(String title, String msg, String buttonName, final CloseListener listener) {
-    show(title, Collections.singletonList(msg), buttonName, listener);
-  }*/
 
   public void show(String title, Collection<String> msgs, final CloseListener listener, String okTitle, String cancelTitle) {
     show(title, msgs, null, okTitle, cancelTitle, listener, -1);
@@ -134,10 +130,11 @@ public class DialogHelper {
                             CloseListener listener, int maxHeight, int width, Button closeButton,
                             boolean isBig) {
     dialogBox = new Modal();
-
-  //  logger.info("max height " + maxHeight);
+    dialogBox.getElement().getStyle().setTop(5, Style.Unit.PCT);
+    //  logger.info("max height " + maxHeight);
     if (width > 900) {
-      DOM.setStyleAttribute(dialogBox.getElement(), "left", 310 + "px");
+      dialogBox.getElement().getStyle().setLeft(310, Style.Unit.PX);
+//      DOM.setStyleAttribute(dialogBox.getElement(), "left", 310 + "px");
     }
 
     this.closeButton = closeButton;
@@ -186,8 +183,8 @@ public class DialogHelper {
 
     if (listener != null) {
       dialogBox.addHiddenHandler(hiddenEvent -> listener.gotHidden());
-      if (listener instanceof  ShownCloseListener) {
-        dialogBox.addShownHandler(shownEvent -> ((ShownCloseListener)listener).gotShown());
+      if (listener instanceof ShownCloseListener) {
+        dialogBox.addShownHandler(shownEvent -> ((ShownCloseListener) listener).gotShown());
       }
     }
     dialogBox.add(container);
@@ -242,5 +239,7 @@ public class DialogHelper {
     return noButton;
   }
 
-  public void close() {dialogBox.hide();}
+  public void close() {
+    dialogBox.hide();
+  }
 }

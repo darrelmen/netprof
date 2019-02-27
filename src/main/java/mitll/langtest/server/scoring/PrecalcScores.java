@@ -94,6 +94,12 @@ public class PrecalcScores {
     parseJSON(usePhoneToDisplay, pronScore, precalcResult.getJsonScore());
   }
 
+  /**
+   * @see #parseJSON(ISlimResult, boolean, float)
+   * @param usePhoneToDisplay
+   * @param pronScore
+   * @param jsonScore
+   */
   private void parseJSON(boolean usePhoneToDisplay, float pronScore, String jsonScore) {
     JsonParser parser = new JsonParser();
     jsonObject = parser.parse(jsonScore).getAsJsonObject();
@@ -131,7 +137,7 @@ public class PrecalcScores {
    * @param pronScore
    * @param jsonObject
    * @return
-   * @seex #PrecalcScores(ServerProperties, Result, boolean)
+   * @see #parseJSON(boolean, float, String)
    */
   private Scores getCachedScores(float pronScore, JsonObject jsonObject, boolean usePhones) {
     Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =

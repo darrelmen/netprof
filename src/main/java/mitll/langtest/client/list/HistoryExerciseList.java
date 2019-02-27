@@ -42,7 +42,10 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
@@ -329,25 +332,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     History.newItem(historyToken);
   }
 
-  /**
-   * @param selectionState
-   * @param newState
-   */
-  private void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
-    if (DEBUG) logger.info("loadFromSelectionState" +
-        "\n\told state " + selectionState.getInfo() +
-        "\n\tnew state " + newState.getInfo());
-
-    loadExercisesUsingPrefix(
-        newState.getTypeToSection(),
-        selectionState.getSearch(),
-        selectionState.getItem(),
-
-        newState.isOnlyWithAudioDefects(),
-        newState.isOnlyDefault(),
-        newState.isOnlyUninspected());
-  }
-
 
   /**
    * @param e
@@ -498,6 +482,25 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   }
 
   /**
+   * @param selectionState
+   * @param newState
+   */
+  private void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
+    if (DEBUG) logger.info("loadFromSelectionState" +
+        "\n\told state " + selectionState.getInfo() +
+        "\n\tnew state " + newState.getInfo());
+
+    loadExercisesUsingPrefix(
+        newState.getTypeToSection(),
+        selectionState.getSearch(),
+        selectionState.getItem(),
+
+        newState.isOnlyWithAudioDefects(),
+        newState.isOnlyDefault(),
+        newState.isOnlyUninspected());
+  }
+
+  /**
    * TODO : gah - why so complicated??? replace with request
    *
    * @param typeToSection
@@ -516,8 +519,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
                                           boolean onlyWithAudioAnno,
                                           boolean onlyDefaultUser,
                                           boolean onlyUninspected) {
-    ExerciseListRequest request =
-        getExerciseListRequest(typeToSection, prefix, onlyUninspected);
+    ExerciseListRequest request = getExerciseListRequest(typeToSection, prefix, onlyUninspected);
 
     if (DEBUG) {
       logger.info("loadExercisesUsingPrefix got" +

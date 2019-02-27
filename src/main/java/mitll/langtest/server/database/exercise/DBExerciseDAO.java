@@ -84,6 +84,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   /**
    * so first look in the main id->ex map and then in the context->exercise map
    *
+   * back off is to try to refresh the exercise if we can't find it...
    * @param id
    * @return
    */
@@ -121,16 +122,36 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           logger.error("getExercise " + id + " != " + commonExercise);
         }
       }
+//      if (commonExercise == null) {
+//        commonExercise = maybeRefresh(id, commonExercise);
+//      }
+
       return commonExercise;
     }
   }
 
+  private CommonExercise maybeRefresh(int id) {
+    CommonExercise commonExercise = null;
+    if (userExerciseDAO.getByID(id) != null) {  // is it in the database by this id at all?
+      boolean refresh = refresh(id);
+      if (refresh) {
+        commonExercise = getExercise(id);
+        logger.info("getExercise : refresh " + id);
+      } else {
+        logger.warn("getExercise : really couldn't find... " + id);
+      }
+    }
+    else {
+      logger.warn("getExercise : no known exercise with id " +id);
+    }
+    return commonExercise;
+  }
+
   @Override
-  public List<CommonExercise> getExactMatch(String fl, int userIDFromSession) {
-    List<Integer> byProjectExactMatch = userExerciseDAO.getByProjectExactMatch(project.id(), userIDFromSession, fl);
+  public List<CommonExercise> getUserDefinedByProjectExactMatch(String fl, int userIDFromSession) {
+    List<Integer> byProjectExactMatch = userExerciseDAO.getUserDefinedByProjectExactMatch(project.id(), userIDFromSession, fl);
     List<CommonExercise> matches = new ArrayList<>(byProjectExactMatch.size());
-    byProjectExactMatch
-        .forEach(id -> matches.add(getExercise(id)));
+    byProjectExactMatch.forEach(id -> matches.add(getExercise(id)));
     return matches;
   }
 
@@ -246,9 +267,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         List<CommonExercise> userCreatedExercises = getUserCreatedExercises(typeOrder, allRelated);
         userCreatedExercises.forEach(c -> idToUserExercise.put(c.getID(), c));
         userCreatedExercises.forEach(c -> c.getDirectlyRelated().forEach(d -> idToUserExercise.put(d.getID(), d.asCommon())));
-        //   logger.info("added " + userCreatedExercises.size() + " vs " + idToUserExercise.size());
+        //  logger.info("added " + userCreatedExercises.size() + " vs " + idToUserExercise.size());
       }
-      return allNonContextExercises;
+      return Collections.unmodifiableList(allNonContextExercises);
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
@@ -399,9 +420,17 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       attributeTypes.remove(SEMESTER.toString());
     }
 
-    typeOrder.addAll(attributeTypes);
-    getSectionHelper().reorderTypes(typeOrder);
-    return typeOrder;
+    final List<String> ftypeOrder = new ArrayList<>(typeOrder);
+    List<String> withAttr = new ArrayList<>(typeOrder);
+    attributeTypes.forEach(type -> {
+      if (!ftypeOrder.contains(type)) {
+        withAttr.add(type);
+      }
+    });
+
+    withAttr.addAll(attributeTypes);
+    getSectionHelper().reorderTypes(withAttr);
+    return withAttr;
   }
 
   @NotNull
@@ -452,10 +481,18 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     sectionHelper.setParentToChildTypes(parentToChild);
     if (DEBUG) {
       logger.info("setRootTypes roots " + rootTypes);
-
     }
-    sectionHelper.setPredefinedTypeOrder(typeOrder);
-    if (DEBUG) logger.info("parentToChild " + parentToChild);
+
+    Set<String> seen = new HashSet<>();
+    List<String> uniq = new ArrayList<>();
+    typeOrder.forEach(type -> {
+      if (!seen.contains(type)) {
+        seen.add(type);
+        uniq.add(type);
+      }
+    });
+    sectionHelper.setPredefinedTypeOrder(uniq);
+    if (DEBUG) logger.info("setRootTypes parentToChild " + parentToChild);
   }
 
   private void setParentChild(Collection<String> rootTypes, Map<String, String> parentToChild, String lowerTopic) {
@@ -545,7 +582,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * @see mitll.langtest.server.services.AudioServiceImpl#refreshExercises
    * @see mitll.langtest.server.services.ExerciseServiceImpl#refreshExercise
    */
-  public void refresh(int exid) {
+  public boolean refresh(int exid) {
     if (DEBUG) {
       CommonExercise commonExercise = idToUserExercise.get(exid);
       if (commonExercise == null) {
@@ -553,25 +590,31 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       } else {
         logger.info("refresh found " + commonExercise.getID() + " " + commonExercise.getEnglish() + " " + commonExercise.getForeignLanguage());
         ClientExercise next = commonExercise.getDirectlyRelated().iterator().next();
-        logger.info("found context " + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage());
+        logger.info("refresh found context " + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage());
       }
     }
 
+    boolean added = false;
     CommonExercise byExID = userExerciseDAO.getByExID(exid, false);
-    if (byExID == null) logger.error("huh? no known exid " + exid);
-    else idToUserExercise.put(exid, byExID);
+    if (byExID == null) {
+      logger.error("refresh huh? no known exid " + exid);
+    } else {
+      idToUserExercise.put(exid, byExID);
+      added = true;
 
-    ClientExercise next = byExID != null && byExID.hasContext() ? byExID.getDirectlyRelated().iterator().next() : null;
+      ClientExercise next = byExID.hasContext() ? byExID.getDirectlyRelated().iterator().next() : null;
 
-    if (next != null) {
-      idToUserExercise.put(next.getID(), next.asCommon());
+      if (next != null) {
+        idToUserExercise.put(next.getID(), next.asCommon());
+      }
+      if (DEBUG) {
+        String s1 = "refresh after " + byExID.getEnglish() + " " + byExID.getForeignLanguage();
+        String s = next == null ? "" : "\n\trefresh after context " + next.getEnglish() + " " + next.getForeignLanguage();
+        logger.info(s1 + s);
+      }
     }
 
-    if (DEBUG) {
-      String s1 = byExID == null ? "" : "refresh after " + byExID.getEnglish() + " " + byExID.getForeignLanguage();
-      String s = next == null ? "" : "\n\trefresh after context " + next.getEnglish() + " " + next.getForeignLanguage();
-      logger.info(s1 + s);
-    }
+    return added;
   }
 
   private ExerciseDAOWrapper getDao() {

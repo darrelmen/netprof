@@ -39,6 +39,8 @@ import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.instrumentation.SlimSegment;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -53,6 +55,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.*;
 import java.util.jar.Attributes;
 import java.util.stream.Collectors;
@@ -134,8 +138,12 @@ public class ServerProperties {
   private static final String MAIL_SERVER = "mail.server";
   private static final String SERVER_NAME = "SERVER_NAME";
   private static final String DEBUG_ONE_PROJECT = "debugOneProject";
-  private static final String IOS_VERSION = "1.0.1";
+
+
+  private static final String IOS_VERSION = "2.0.0";
+
   private static final String I_OS_VERSION = "iOSVersion";
+
   private static final String IMPL_VERSION = Attributes.Name.IMPLEMENTATION_VERSION.toString();
   public static final String DEFAULT_MAIL_FROM = "netprof-admin@ll.mit.edu";
   private static final String MAIL_REPLYTO = "mail.replyto";
@@ -146,27 +154,33 @@ public class ServerProperties {
   private static final String LOG_MAILFROM = "log.mailfrom";
   private static final String MAIL_FROM = "mail.from";
 
-  //  private static final String IMAGE = "image";
   private static final String NETPROF = "netprof";
 
   private static final String POSTGRES_HYDRA = "postgresHydra";
-  private static final String POSTGRES_DATA2_DIALOG = "postgresData2Dialog";
+//  private static final String POSTGRES_DATA2_DIALOG = "postgresData2Dialog";
 
 
-  public static final String ADD_USER_VIA_EMAIL = "addUserViaEmail";
-  public static final String SEND_HEARTBEAT = "sendHeartbeat";
-  public static final String HEARTBEAT_PERIOD = "heartbeatPeriod";
-  public static final String HEARTBEAT_REC1 = "heartbeatRec";
-
-  // private String dbConfig = POSTGRES_DATA2_DIALOG;
+  private static final String ADD_USER_VIA_EMAIL = "addUserViaEmail";
+  private static final String SEND_HEARTBEAT = "sendHeartbeat";
+  private static final String HEARTBEAT_PERIOD = "heartbeatPeriod";
+  private static final String HEARTBEAT_REC1 = "heartbeatRec";
 
   private static final String SCORING_MODEL = "scoringModel";
   private static final String TALKS_TO_DOMINO = "talksToDomino";
 
+//  public static final String OUR_FORTH_TONE = "uu4";
+
+  private static final String FORTH_U_TONE = "ù";
+  private static final String THIRD_U_TONE = "ǔ";
+  private static final String SECOND_U_TONE = "ú";
+  private static final String FIRST_U_TONE = "ū";
+//  public static final String UU = "uu";
+ // public static final String NORMAL_U = "u";
+
   //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
 
   @Deprecated
-  private String miraClassifierURL = MIRA_DEVEL;// MIRA_LEN; //MIRA_DEVEL;
+  private String miraClassifierURL = MIRA_DEVEL;
 
   private static final String LESSON_PLAN_FILE = "lessonPlanFile";
   private static final String USE_H_2 = "useH2";
@@ -267,7 +281,6 @@ public class ServerProperties {
    */
   private final Set<Integer> preferredVoices = new HashSet<>();
   private EmailList emailList;
-  //  private final Map<String, String> phoneToDisplay = new HashMap<>();
   private final Map<Language, Map<String, String>> langToPhoneToDisplay = new HashMap<>();
 
   private List<Affiliation> affliations = new ArrayList<>();
@@ -282,7 +295,6 @@ public class ServerProperties {
   private String configFileFullPath;
 
   public ServerProperties() {
-
     Map<String, String> value = new HashMap<>();
 
     // ā	á	ǎ	à	ē	é	ě	è	ī	í	ǐ	ì	ō	ó	ǒ	ò	ū	ú	ǔ	ù	ǖ	ǘ	ǚ	ǜ
@@ -307,14 +319,37 @@ public class ServerProperties {
     value.put("o3", "ǒ");
     value.put("o4", "ò");
 
-    value.put("u1", "ū");
-    value.put("u2", "ú");
-    value.put("u3", "ǔ");
-    value.put("u4", "ù");
+    value.put("u1", FIRST_U_TONE);
+    value.put("u2", SECOND_U_TONE);
+    value.put("u3", THIRD_U_TONE);
+    value.put("u4", FORTH_U_TONE);
 
-//    langToPhoneToDisplay.put("mandarin", value);
-//    logger.info("now " + langToPhoneToDisplay);
+    value.put("uu1", FIRST_U_TONE);
+    value.put("uu2", SECOND_U_TONE);
+    value.put("uu3", THIRD_U_TONE);
+    value.put("uu4", FORTH_U_TONE);
+
+    langToPhoneToDisplay.put(Language.MANDARIN, value);
+    //logger.info("\n\n\nServerProperties now " + langToPhoneToDisplay);
   }
+
+  public String toDict(String pinyin) {
+    Map<String, String> reverse = new HashMap<>();
+    langToPhoneToDisplay.get(Language.MANDARIN).forEach((k, v) -> {
+      reverse.put(v, k);
+    });
+
+    StringBuilder builder = new StringBuilder();
+    final CharacterIterator it = new StringCharacterIterator(pinyin);
+
+    for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
+      String key =  Character.toString(c);
+      String s = reverse.get(key);
+      builder.append(s == null ? key : s);
+    }
+    return builder.toString();
+  }
+
 
   /**
    * @param props
@@ -343,9 +378,9 @@ public class ServerProperties {
    * @seex mitll.langtest.server.database.ImportCourseExamples#makeDatabaseImpl
    */
   public ServerProperties(String configDir, String configFile) {
+    this();
     if (configFile == null) configFile = DEFAULT_PROPERTIES_FILE;
     readProps(configDir, configFile);
-    //readPhonemeMap(configDir);
   }
 
   /**
@@ -692,9 +727,105 @@ public class ServerProperties {
     return preferredVoices;
   }
 
-  public Map<String, String> getPhoneToDisplay(Language languageEnum) {
+  private Map<String, String> getPhoneToDisplay(Language languageEnum) {
     Map<String, String> stringStringMap = langToPhoneToDisplay.get(languageEnum);
     return stringStringMap == null ? Collections.emptyMap() : stringStringMap;
+  }
+
+  /**
+   * Gotta do a look ahead.
+   *
+   * @param languageEnum
+   * @param segments
+   * @param numSegments
+   * @param i
+   * @param event
+   * @return
+   */
+  public <T extends SlimSegment> String getDisplayPhoneme(Language languageEnum, List<T> segments,
+                                                          int numSegments, int i, String event) {
+    String prevEvent = i == 0 ? null : segments.get(i - 1).getEvent();
+    String nextEvent = i < numSegments - 1 ? segments.get(i + 1).getEvent() : null;
+    return getDisplayPhoneme(languageEnum, event, prevEvent, nextEvent);
+  }
+
+  /**
+   * Fancy pinyin conversion.
+   *
+   * Chinese pinyin rules:
+   * 1) a and e trump others
+   * 2) in ou, o gets the mark
+   * 3) otherwise, final vowel gets the mark
+   *
+   * @param languageEnum
+   * @param event
+   * @param prevEvent
+   * @param nextEvent
+   * @return
+   * @see <a href='http://www.pinyin.info/rules/where.html'>tone marks</a>
+   */
+  public String getDisplayPhoneme(Language languageEnum, String event, String prevEvent, String nextEvent) {
+    if (languageEnum == Language.MANDARIN) {
+      event = convertToPinyin(languageEnum, event, prevEvent, nextEvent);
+    }
+    return event;
+  }
+
+  private String convertToPinyin(Language languageEnum, String event, String prevEvent, String nextEvent) {
+    String displayPhoneme = getDisplayPhoneme(languageEnum, event);
+    boolean prevHasTone = hasTone(prevEvent);
+    boolean thisEventHasTone = hasTone(event);
+    boolean nextHasTone = hasTone(nextEvent);
+
+    if (prevHasTone && thisEventHasTone) {   // vowel-VOWEL-?
+      if (isAOrE(prevEvent)) {  // they get it, on i of a-i
+        event = getPrefix(event);
+      } else if (prevEvent.startsWith("o") && event.startsWith("u")) {
+        event = getPrefix(event); // o gets the mark, u doesn't
+      } else {
+        event = displayPhoneme; // final vowel gets the mark
+      }
+    } else if (thisEventHasTone) {  // consonant-vowel-?
+      if (isAOrE(event)) {  // they get it, on a of a-i
+//          logger.info("from " + event + " -> " + displayPhoneme);
+        event = displayPhoneme;
+      } else if (nextHasTone) { // ?-VOWEL-vowel
+        if (event.startsWith("o") && nextEvent.startsWith("u")) {
+          event = displayPhoneme; // o gets the mark!
+        } else {
+          event = getPrefix(event); // final vowel gets the mark , not this one
+        }
+      } else {
+        event = displayPhoneme;
+      }
+    } else {
+      event = displayPhoneme;
+    }
+    return event;
+  }
+
+  @NotNull
+  private String getPrefix(String event) {
+    return event.substring(0, 1);
+  }
+
+  private boolean isAOrE(String prevEvent) {
+
+    return prevEvent != null && (prevEvent.startsWith("a") || prevEvent.startsWith("e"));
+  }
+
+  private boolean hasTone(String nextEvent) {
+    if (nextEvent == null) {
+      return false;
+    } else {
+      char c = nextEvent.charAt(nextEvent.length() - 1);
+      return (c >= '1' && c <= '4');
+    }
+
+/*
+    return nextEvent != null &&
+        (nextEvent.endsWith("1") || nextEvent.endsWith("2") || nextEvent.endsWith("3") || nextEvent.endsWith("4"));
+*/
   }
 
   /**
@@ -706,9 +837,11 @@ public class ServerProperties {
   public String getDisplayPhoneme(Language language, String phone) {
     Map<String, String> phoneToDisplay = getPhoneToDisplay(language);
     if (phoneToDisplay == null) {
+      //  if (language == Language.MANDARIN) logger.warn("no display map for " + language);
       return phone;
     } else {
       String s = phoneToDisplay.get(phone);
+      //if (language == Language.MANDARIN && s == null) logger.warn("2 no display map value for '" + phone +"' in " +phoneToDisplay.size());
       return (s == null) ? phone : s;
     }
   }
@@ -723,8 +856,7 @@ public class ServerProperties {
    * @see mitll.langtest.server.audio.ScoreToJSON#getJsonForScore(PretestScore, boolean, ServerProperties, Language)
    */
   public boolean usePhoneToDisplay(Language languageEnum) {
-    return languageEnum == Language.KOREAN;
-//    return getDefaultFalse(USE_PHONE_TO_DISPLAY);
+    return languageEnum == Language.KOREAN || languageEnum == Language.MANDARIN;
   }
 
   // EMAIL ------------------------
@@ -857,7 +989,7 @@ public class ServerProperties {
    * @see mitll.langtest.server.database.copy.CopyToPostgres#getDatabaseLight
    */
   public void setDBConfig(String optDatabase) {
-    //this.dbConfig = optDatabase;
+
   }
 
   /**

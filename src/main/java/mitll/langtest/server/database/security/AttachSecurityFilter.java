@@ -45,6 +45,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * AttachSecurityFilter: A security filter that ensures a user is allowed
@@ -65,11 +67,13 @@ public class AttachSecurityFilter implements Filter {
   private static final String BEST_AUDIO = "bestAudio";
   private static final String WAV = ".wav";
   private static final int WAV_LEN = WAV.length();
+  public static final String DIALOG = "dialog";
 
   private DatabaseServices db;
 
   private IUserSecurityManager securityManager;
   private ServletContext servletContext;
+  private String webappName = NETPROF;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_RESPONSE = false;
@@ -77,6 +81,23 @@ public class AttachSecurityFilter implements Filter {
 
   public void init(FilterConfig filterConfig) {
     this.servletContext = filterConfig.getServletContext();
+
+    String contextPath = servletContext.getContextPath();
+
+   // log.info("context        '" + contextPath + "'");
+    String realContextPath = servletContext == null ? "" : servletContext.getRealPath(servletContext.getContextPath());
+   // log.info("realContextPath " + realContextPath);
+
+    List<String> pathElements = Arrays.asList(realContextPath.split(realContextPath.contains("\\") ? "\\\\" : "/"));
+   // log.info("pathElements    " + pathElements);
+
+    webappName = pathElements.get(pathElements.size() - 1);
+   // log.info("webappName " + webappName);
+
+    if (!webappName.equalsIgnoreCase(DIALOG) || !webappName.equalsIgnoreCase(NETPROF)) {
+      log.warn("huh? unexpected : app name is " + webappName);
+    }
+
 //    if (DEBUG) log.info("found servlet context " + servletContext);
   }
 
@@ -257,32 +278,33 @@ public class AttachSecurityFilter implements Filter {
 
   private int getUserForFile(String requestURI) {
 //    if (DEBUG) log.info("getUserForFile checking owner of " + fileToFind);
-    log.info("getUserForFile checking owner of " + requestURI);
     String fileToFind = requestURI.startsWith(ANSWERS) ? requestURI.substring(ANSWERS.length()) : requestURI;
     fileToFind = removeNetprof(fileToFind);
     if (DEBUG) log.info("getUserForFile user for " + fileToFind);
-    return getUserForWavFile(removeAnswers(fileToFind));
+   // return getUserForWavFile(removeAnswers(fileToFind));
+    log.info("getUserForFile checking owner of " + requestURI + " actually " + fileToFind);
+    return getUserForWavFile(fileToFind);
   }
 
-  @NotNull
-  private String removeAnswers(String fileToFind) {
-    int answers = fileToFind.indexOf(ANSWERS);
-    if (answers != -1) {
-      fileToFind = fileToFind.substring(answers + ANSWERS.length());
-
-      answers = fileToFind.indexOf(ANSWERS);
-      if (answers != -1) {
-        fileToFind = fileToFind.substring(answers);
-      }
-      if (DEBUG) log.info("getUserForFile test " + fileToFind);
-    }
-    return fileToFind;
-  }
+//  @NotNull
+//  private String removeAnswers(String fileToFind) {
+//    int answers = fileToFind.indexOf(ANSWERS);
+//    if (answers != -1) {
+//      fileToFind = fileToFind.substring(answers + ANSWERS.length());
+//
+//      answers = fileToFind.indexOf(ANSWERS);
+//      if (answers != -1) {
+//        fileToFind = fileToFind.substring(answers);
+//      }
+//      if (DEBUG) log.info("getUserForFile test " + fileToFind);
+//    }
+//    return fileToFind;
+//  }
 
 
   @NotNull
   private String removeNetprof(String fileToFind) {
-    return fileToFind.startsWith(NETPROF) ? fileToFind.substring(NETPROF.length()) : fileToFind;
+    return fileToFind.startsWith(webappName) ? fileToFind.substring(webappName.length()) : fileToFind;
   }
 
   private int getUserForWavFile(String fileToFind) {

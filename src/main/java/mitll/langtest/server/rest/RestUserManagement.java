@@ -43,7 +43,7 @@ import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.user.*;
- 
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -75,7 +75,7 @@ public class RestUserManagement {
    * @see #doGet
    */
   private static final String RESET_PASS = "resetPassword";
-  private static final String SET_PASSWORD = "setPassword";
+  private static final String SET_PASSWORD = "request=setPassword";
 
   /**
    * Where is this used ???
@@ -119,6 +119,15 @@ public class RestUserManagement {
   private static final String LOGIN_RESULT = "loginResult";
   private static final String TRUE = "TRUE";
   private static final String SUCCESS = "success";
+  private static final String AFFILIATION = "affiliation";
+  private static final String FIRST1 = "first";
+  private static final String LAST1 = "last";
+  /**
+   * on iOS:
+   * @see EAFSignUpViewController.useJsonChapterData
+   * @see #addUser(HttpServletRequest, String, String, String, JsonObject)
+   */
+  private static final String RESET_PASS_KEY = "resetPassKey";
 
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
@@ -155,50 +164,71 @@ public class RestUserManagement {
       }
       return true;
     } else if (queryString.startsWith(RESET_PASS)) {
-      logger.info(" - calling reset " + queryString);
+      logger.info("doGet - calling reset " + queryString);
       String[] split1 = getParams(queryString);
       if (split1.length != 2) {
         toReturn.addProperty(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
       } else {
-        String user = getFirst(split1[0]);
-        String second = split1[1];
-        String optionalEmail = getArg(second);//second.split("=")[1];
-
-        String token = resetPassword(user, request, optionalEmail);//emailFromDevice, request.getRequestURL().toString());
-        toReturn.addProperty(TOKEN, token);
+        resetPassword(getBaseURL(request), toReturn, split1);
       }
       return true;
-    }
-/*    else if (queryString.startsWith(RESET_PASSWORD_FROM_EMAIL)) {
-      logger.warn("\n\n\n calling reset password? ");
+    } else if (queryString.startsWith(SET_PASSWORD)) {
       String[] split1 = getParams(queryString);
-      if (split1.length != 1) {
-        toReturn.put(ERROR, EXPECTING_ONE_QUERY_PARAMETER);
+      if (split1.length < 3) {
+        toReturn.addProperty(ERROR, "expecting 3");
       } else {
-        String token = getFirst(split1[0]);
-
-        // OK the real person clicked on their email link
-        response.setContentType("text/html");
-
-        String rep = (getUserIDForToken(token) == -1) ?
-            getHTML("Note : your password has already been reset. Please go back to NetProF.", "Password has already been reset") :
-            getHTML("OK, your password has been reset. Please go back to NetProF and login.", "Password has been reset");
-        reply(response, rep);
-      }
-      return true;
-    } */
-    else if (queryString.startsWith(SET_PASSWORD)) {
-      String[] split1 = getParams(queryString);
-      if (split1.length != 2) {
-        toReturn.addProperty(ERROR, EXPECTING_TWO_QUERY_PARAMETERS);
-      } else {
-        String token = getFirst(split1[0]);
-        String passwordH = getArg(split1[1]);
-        toReturn.addProperty(VALID, changePFor(token, passwordH, getBaseURL(request)));
+        // request=setPassword&token=oaNLq6fnjnrfoVhstj6XtWdWY4iwsU&pass=domino22&userid=14480
+        doSetPassword(getBaseURL(request), queryString, toReturn, split1);
       }
       return true;
     }
     return false;
+  }
+
+  private void resetPassword( String baseURL, JsonObject toReturn, String[] split1) {
+    String user = getFirst(split1[0]);
+    String optionalEmail = getArg(split1[1]);
+    String token = resetPassword(user, baseURL, optionalEmail);//emailFromDevice, request.getRequestURL().toString());
+    toReturn.addProperty(TOKEN, token);
+  }
+
+  /**
+   * e.g. request=setPassword&token=oaNLq6fnjnrfoVhstj6XtWdWY4iwsU&pass=domino22&userid=14480
+   *
+   * @param baseURL
+   * @param queryString
+   * @param toReturn
+   * @param split1
+   */
+  private void doSetPassword(String baseURL, String queryString, JsonObject toReturn, String[] split1) {
+    logger.info("setPassword : req " + queryString);// + " pass " +passwordH);
+
+    int i = 1;
+    String token = getFirst(split1[i++]);
+    String passwordH = getArg(split1[i++]);
+    String userID = getArg(split1[i++]);
+    if (token.isEmpty()) {
+      toReturn.addProperty(ERROR, "no token in request - expecting it first");
+    } else if (passwordH.isEmpty()) {
+      toReturn.addProperty(ERROR, "no password in request - expecting it second");
+    }
+    if (userID.isEmpty()) {
+      toReturn.addProperty(ERROR, "no user id in request - expecting it first");
+    }
+    int user = getUserID(userID);
+    logger.info("setPassword : userid " + userID + " token " + token);// + " pass " +passwordH);
+    toReturn.addProperty(VALID, changePFor(user, passwordH, baseURL, token));
+  }
+
+  private int getUserID(String userID) {
+    int user = -1;
+
+    try {
+      user = Integer.parseInt(userID);
+    } catch (NumberFormatException e) {
+      logger.warn("couldn't parse " + userID);
+    }
+    return user;
   }
 
   private String getFirst(String first1) {
@@ -211,7 +241,13 @@ public class RestUserManagement {
   }
 
   private String getArg(String first) {
-    return first.split("=")[1];
+    String[] split = first.split("=");
+    if (split.length == 2) {
+      return split[1];
+    } else {
+      logger.warn("getArg couldn't get arg value from " + first + " expecting A=B");
+      return "";
+    }
   }
 
   /**
@@ -331,15 +367,14 @@ public class RestUserManagement {
    * @return
    * @see #doGet(HttpServletRequest, String, JsonObject)
    */
-  private String resetPassword(String user, HttpServletRequest request, String optionalEmail) {
+  private String resetPassword(String user, String baseURL, String optionalEmail) {
     if (user.length() == 4) user = user + "_";
     else if (user.length() == 3) user = user + "__";
 
-    logger.warn("resetPassword for '" + user + "'");// and " + email);
+    logger.info("resetPassword for '" + user + "' opt email " + optionalEmail);
 
-    boolean knownUser = db.getUserDAO().isKnownUser(user);
-    if (knownUser) {
-      db.getUserDAO().forgotPassword(user, getBaseURL(request), optionalEmail);
+    if (db.getUserDAO().isKnownUser(user)) {
+      db.getUserDAO().forgotPassword(user, baseURL, optionalEmail);
       return PASSWORD_EMAIL_SENT;
     } else {
       return NOT_VALID;
@@ -357,15 +392,20 @@ public class RestUserManagement {
    * @seex UserServiceImpl#changePFor
    * @see #doGet
    */
-  private boolean changePFor(String userid, String freeTextPassword, String baseURL) {
-    User userByID = db.getUserDAO().getUserByID(userid);
-    boolean b = db.getUserDAO().changePassword(userByID.getID(), freeTextPassword, baseURL);
+  private boolean changePFor(int userid, String freeTextPassword, String baseURL, String userKey) {
+    User userByID = db.getUserDAO().getByID(userid);
+    //  boolean b = db.getUserDAO().changePassword(userByID.getID(), freeTextPassword, baseURL);
 
-    if (!b) {
+    String email = userByID != null ? userByID.getEmail() : "";
+
+    String userID = userByID != null ? userByID.getUserID() : "unknown";
+    boolean result = db.getUserDAO().changePasswordForToken(userID, userKey, freeTextPassword, baseURL, email);
+
+    if (!result) {
       logger.error("changePFor : couldn't update user password for user " + userByID);
     }
 
-    return b;
+    return result;
   }
 
   private String getBaseURL(HttpServletRequest r) {
@@ -407,55 +447,29 @@ public class RestUserManagement {
     User existingUser = db.getUserDAO().getUserByID(user);
 
     logger.info("addUser user " + user + " match " + existingUser);
-    int projid = -1;
-    try {
-      String project = request.getHeader("projid");
-      if (project != null) {
-        projid = Integer.parseInt(project); // TODO : figure out which project a user is in right now
-      }
-
-      logger.info("Got " + projid + " projid");
-
-    } catch (NumberFormatException e) {
-      logger.error("Got " + e, e);
-    }
+    //getProjID(request);
     if (existingUser == null) { // OK, nobody with matching user and password
       String age = request.getHeader(AGE);
       String gender = request.getHeader(GENDER);
       String dialect = request.getHeader(DIALECT);
       String emailH = request.getHeader(EMAIL_H);
       String email = request.getHeader(EMAIL);
+      String affiliation1 = request.getHeader(AFFILIATION);
+      if (affiliation1 == null) affiliation1 = "OTHER";
       if (email == null) email = "";
 
-      logger.warn("addUser : Request " + requestType + " for " + deviceType + "\n\tuser " + user +
-          " adding " + gender +
+      logger.info("addUser : Request " + requestType +
+          "\n\tfor    " + deviceType +
+          "\n\tdevice " + device +
+          "\n\tuser " + user +
+          "\n\tadding " + gender +
           " age " + age + " dialect " + dialect);
 
       User user1 = null;
-      //String appURL = serverProps.getAppURL();
+
       if (age != null && gender != null && dialect != null) {
-        try {
-          int age1 = Integer.parseInt(age);
-          boolean male = gender.equalsIgnoreCase(MALE);
-
-          SignUpUser user2 = new SignUpUser(user,
-              emailH,
-              email,
-              Kind.CONTENT_DEVELOPER,
-              male,
-              male ? MiniUser.Gender.Male : MiniUser.Gender.Female,
-              age1,
-              deviceType,
-              device,
-              "",
-              "",
-              "OTHER");
-
-          user1 = getUserManagement().addUser(user2);
-        } catch (NumberFormatException e) {
-          logger.warn("couldn't parse age " + age);
-          jsonObject.addProperty(ERROR, "bad age");
-        }
+        // not really supported anymore
+        user1 = doDataCollectSignUp(deviceType, device, jsonObject, user, age, gender, emailH, email, affiliation1, user1);
       } else {
         try {
           user1 = addUserFromIPAD(request, deviceType, device, user, gender, emailH, email);
@@ -469,24 +483,71 @@ public class RestUserManagement {
         jsonObject.addProperty(EXISTING_USER_NAME, "");
       } else {
         jsonObject.addProperty(USERID, user1.getID());
+        String resetKey = user1.getResetKey();
+        if (resetKey.isEmpty()) {
+          logger.warn("empty reset key?");
+        }
+        jsonObject.addProperty(RESET_PASS_KEY, resetKey);
       }
 
     } else {
-      logger.warn("addUser - found existing user for " + user +
-          //" pass " + passwordH +
-          " -> " + existingUser);
-
-/*      if (existingUser.hasResetKey()) {
-        jsonObject.addProperty(ERROR, "password was reset");
-      } else {
-        jsonObject.addProperty(USERID, existingUser.getID());
-      }*/
-
+      logger.info("addUser - found existing user for " + user + " -> " + existingUser);
       jsonObject.addProperty(EXISTING_USER_NAME, "");
-
     }
   }
 
+/*
+  private void getProjID(HttpServletRequest request) {
+    int projid = -1;
+    try {
+      String project = request.getHeader("projid");
+      if (project != null) {
+        projid = Integer.parseInt(project); // TODO : figure out which project a user is in right now
+      }
+      logger.info("Got " + projid + " projid");
+
+    } catch (NumberFormatException e) {
+      logger.error("Got " + e, e);
+    }
+  }
+*/
+
+  private User doDataCollectSignUp(String deviceType, String device, JsonObject jsonObject, String user, String age, String gender, String emailH, String email, String affiliation1, User user1) {
+    try {
+      int age1 = Integer.parseInt(age);
+      boolean male = gender.equalsIgnoreCase(MALE);
+
+      SignUpUser user2 = new SignUpUser(user,
+          emailH,
+          email,
+          Kind.CONTENT_DEVELOPER,
+          male,
+          male ? MiniUser.Gender.Male : MiniUser.Gender.Female,
+          age1,
+          deviceType,
+          device,
+          "",
+          "",
+          affiliation1);
+
+      user1 = getUserManagement().addUser(user2);
+    } catch (NumberFormatException e) {
+      logger.warn("couldn't parse age " + age);
+      jsonObject.addProperty(ERROR, "bad age");
+    }
+    return user1;
+  }
+
+  /**
+   * @param request
+   * @param deviceType
+   * @param device
+   * @param user
+   * @param gender
+   * @param emailH
+   * @param email
+   * @return
+   */
   private User addUserFromIPAD(HttpServletRequest request,
                                String deviceType,
                                String device,
@@ -494,15 +555,14 @@ public class RestUserManagement {
                                String gender,
                                String emailH,
                                String email) {
-    User user1;
     String appURL = request.getRequestURL().toString().replaceAll(request.getServletPath(), "");
 
     logger.info("addUserFromIPAD AppURL " + appURL + " user " + user + " email '" + email + "' emailH " + emailH);
-    String first = request.getHeader("first");
+    String first = request.getHeader(FIRST1);
     if (first == null) first = FIRST;
-    String last = request.getHeader("last");
+    String last = request.getHeader(LAST1);
     if (last == null) last = LAST;
-    String affiliation = request.getHeader("affiliation");
+    String affiliation = request.getHeader(AFFILIATION);
     if (affiliation == null) {
       affiliation = DLIFLC;
     }
@@ -515,8 +575,8 @@ public class RestUserManagement {
         Kind.STUDENT,
         isMale,
         isMale ? MiniUser.Gender.Male : MiniUser.Gender.Female, 89, deviceType, device, first, last, affiliation);
-    user1 = getUserManagement().addUser(user2);
-    return user1;
+
+    return getUserManagement().addUser(user2);
   }
 
   private UserManagement getUserManagement() {
@@ -536,10 +596,12 @@ public class RestUserManagement {
 
   public int getUserFromParam(String user) {
     int i = -1;
-    try {
-      i = Integer.parseInt(user);
-    } catch (NumberFormatException e) {
-      logger.error("expecting a number for user id " + user);
+    if (user != null) {
+      try {
+        i = Integer.parseInt(user);
+      } catch (NumberFormatException e) {
+        logger.warn("getUserFromParam expecting a number for user id " + user);
+      }
     }
     return i;
   }

@@ -71,7 +71,7 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
                        int projid,
                        Database database, boolean isMyProject);
 
-  List<CommonExercise> getExactMatch(String fl, int userIDFromSession);
+  List<CommonExercise> getUserDefinedByProjectExactMatch(String fl, int userIDFromSession);
 
   void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp);
 
@@ -94,5 +94,7 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
 
   int getParentFor(int exid);
 
-  void refresh(int exid);
+  boolean refresh(int exid);
+
+ // void bulkImport();
 }

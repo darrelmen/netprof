@@ -529,7 +529,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
         }
       }
     }
-    else logger.info("no add remove dao...");
+//    else logger.info("no add remove dao...");
   }
 
   private boolean isKnownExercise(int id) {
@@ -623,5 +623,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   }
 
   public void updatePhones(int id, int count) {
+  }
+
+  public void bulkImport() {
+
   }
 }

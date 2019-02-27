@@ -66,7 +66,7 @@ import java.util.logging.Logger;
 public class PlayAudioPanel extends HeadlessPlayAudio {
   protected final Logger logger = Logger.getLogger("PlayAudioPanel");
 
-  public static final String PLAY_AUDIO_PANEL = "PlayAudioPanel_";
+  private static final String PLAY_AUDIO_PANEL = "PlayAudioPanel_";
 
   private static final boolean DEBUG = false;
 

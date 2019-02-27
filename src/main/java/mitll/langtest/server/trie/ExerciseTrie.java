@@ -141,7 +141,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
       String meaning = exercise.getMeaning().trim();
       if (!meaning.isEmpty()) {
         smallVocabDecoder
-            .getTokens(getTrimmed(meaning), false)
+            .getTokens(getTrimmed(meaning), false, debug)
             .forEach(token -> addEntry(exercise, token));
       }
     }
@@ -191,7 +191,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   }
 
   private void addTransliteration(String transliteration, T exercise) {
-    for (String token : smallVocabDecoder.getTokens(transliteration, false)) {
+    for (String token : smallVocabDecoder.getTokens(transliteration, false, debug)) {
       addEntry(exercise, token);
       String noAccents = StringUtils.stripAccents(token);
 
@@ -212,25 +212,27 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private void addFL(boolean isMandarin, boolean hasClickableCharacters, T exToReturnOnMatch, String fl) {
     fl = getTrimmed(fl);
 
-    if (debug) logger.info("addFL " + fl + " for " + exToReturnOnMatch.getID());
-    addEntryToTrie(new ExerciseWrapper<>(fl, exToReturnOnMatch));
-    //addSubstrings(exToReturnOnMatch, fl);
+    if (!fl.isEmpty()) {
+      if (debug) logger.info("addFL " + fl + " for " + exToReturnOnMatch.getID());
+      addEntryToTrie(new ExerciseWrapper<>(fl, exToReturnOnMatch));
+      //addSubstrings(exToReturnOnMatch, fl);
 
-    addSuffixes(exToReturnOnMatch, fl);
+      addSuffixes(exToReturnOnMatch, fl);
 
-    Collection<String> tokens = smallVocabDecoder.getTokensAllLanguages(isMandarin, fl, removeAllPunct);
-    for (String token : tokens) {
-      addEntry(exToReturnOnMatch, token);
-      // String noAccents = removeDiacritics(token);
-      String noAccents = StringUtils.stripAccents(token);
+      Collection<String> tokens = smallVocabDecoder.getTokensAllLanguages(isMandarin, fl, removeAllPunct);
+      for (String token : tokens) {
+        addEntry(exToReturnOnMatch, token);
+        // String noAccents = removeDiacritics(token);
+        String noAccents = StringUtils.stripAccents(token);
 
-      if (!token.equals(noAccents) && !noAccents.isEmpty()) {
-        addEntry(exToReturnOnMatch, noAccents);
+        if (!token.equals(noAccents) && !noAccents.isEmpty()) {
+          addEntry(exToReturnOnMatch, noAccents);
+        }
       }
-    }
 
-    if (hasClickableCharacters) {
-      addClickableCharacters(exToReturnOnMatch, fl);
+      if (hasClickableCharacters) {
+        addClickableCharacters(exToReturnOnMatch, fl);
+      }
     }
   }
 
@@ -244,14 +246,16 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private void addEnglish(T exercise, String english) {
     if (english != null && !english.isEmpty()) {
       String trimmed = getTrimmed(english);
-      if (debug) logger.info("addEnglish 2 " + trimmed);
-      addEntryToTrie(new ExerciseWrapper<>(trimmed, exercise));
-      addSuffixes(exercise, trimmed);
+      if (!trimmed.isEmpty()) {
+        if (debug) logger.info("addEnglish 2 " + trimmed);
+        addEntryToTrie(new ExerciseWrapper<>(trimmed, exercise));
+        addSuffixes(exercise, trimmed);
+      }
     }
   }
 
   private void addSuffixes(T exercise, String trimmed) {
-    Collection<String> tokens = smallVocabDecoder.getTokens(trimmed, false);
+    Collection<String> tokens = smallVocabDecoder.getTokens(trimmed, false, debug);
 
     trimmed = trimmed.toLowerCase();
 
@@ -263,7 +267,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
         } else {
           String substring = trimmed.substring(token.length());
 
-          String trimmed1 = smallVocabDecoder.getTrimmed(substring );
+          String trimmed1 = smallVocabDecoder.getTrimmed(substring);
           if (trimmed1.isEmpty()) {
             //logger.error("is empty ");
           } else {
@@ -278,7 +282,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
 
   private String getTrimmed(String english) {
     String sentence = english.toLowerCase();
-    String trimmed = smallVocabDecoder.getTrimmedLeaveLastSpace(sentence);
+    String trimmed = smallVocabDecoder.getTrimmed(sentence);
 //    if (!sentence.equals(trimmed)) {
 //      logger.info("before " + sentence);
 //      logger.info("after  " + trimmed);
@@ -290,9 +294,8 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     final CharacterIterator it = new StringCharacterIterator(fl);
 
     for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
-      Character character = c;
       if (!Character.isSpaceChar(c)) {
-        addEntry(exercise, character.toString());
+        addEntry(exercise, Character.toString(c));
       }
     }
   }

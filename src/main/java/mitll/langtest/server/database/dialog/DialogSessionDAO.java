@@ -51,10 +51,7 @@ import java.util.stream.Collectors;
 public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
   private static final Logger logger = LogManager.getLogger(DialogSessionDAO.class);
 
-
   private final DialogSessionDAOWrapper dao;
-
-  // private final DatabaseImpl databaseImpl;
 
   /**
    * @param database
@@ -171,8 +168,20 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
       if (candidate == null) {
         candidate = dialogSession;
       } else if (candidate.modified().getTime() < dialogSession.modified().getTime()) {
-        INavigation.VIEWS candidateView = INavigation.VIEWS.valueOf(candidate.view().toUpperCase());
-        INavigation.VIEWS currentView = INavigation.VIEWS.valueOf(dialogSession.view().toUpperCase());
+
+
+        INavigation.VIEWS candidateView = INavigation.VIEWS.NONE;
+        try {
+          candidateView = INavigation.VIEWS.valueOf(candidate.view().toUpperCase());
+        } catch (IllegalArgumentException e) {
+        }
+
+        INavigation.VIEWS currentView = INavigation.VIEWS.NONE;
+        try {
+          currentView = INavigation.VIEWS.valueOf(dialogSession.view().toUpperCase());
+        } catch (IllegalArgumentException e) {
+        }
+
         if (currentView != INavigation.VIEWS.STUDY && candidateView == INavigation.VIEWS.STUDY) {  // rehearse or perform trumps STUDY
           candidate = dialogSession;
         }
@@ -231,33 +240,46 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
 
   /**
    * @param ds
+   * @return  session id;
    * @see mitll.langtest.server.services.DialogServiceImpl#addSession
    */
   @Override
   public int add(DialogSession ds) {
     logger.info("Add session " + ds);
 
-    long modified = ds.getModified();
-    if (modified == 0) modified = System.currentTimeMillis();
-    long end = ds.getEnd();
-    if (end == 0) end = modified;
+    int dialogid = ds.getDialogid();
+    if (dialogid < 1) {
+      logger.warn("\n\n\ninvalid dialog id " + dialogid + " for " +ds);
+      return -1;
+    } else {
+      long modified = ds.getModified();
+      if (modified == 0) modified = System.currentTimeMillis();
 
-    int insert = dao.insert(new SlickDialogSession(
-        -1,
-        ds.getUserid(),
-        ds.getProjid(),
-        ds.getDialogid(),
-        new Timestamp(modified),
-        new Timestamp(end),
-        ds.getView().toString(),
-        ds.getStatus().toString(),
-        ds.getNumRecordings(),
-        ds.getScore(),
-        ds.getSpeakingRate()
-    ));
+      long end = ds.getEnd();
+      if (end == 0) end = modified;
 
-    logger.info("add " + ds + " id " + insert);
-    return insert;
+      int userid = ds.getUserid();
+      int projid = ds.getProjid();
+      logger.info("add for user " +userid + " in " + projid + " for dialog "+dialogid);
+
+      int insert = dao.insert(new SlickDialogSession(
+          -1,
+          userid,
+          projid,
+          dialogid,
+          new Timestamp(modified),
+          new Timestamp(end),
+          ds.getView().name(),
+          ds.getStatus().toString(),
+          ds.getNumRecordings(),
+          ds.getScore(),
+          ds.getSpeakingRate()
+      ));
+
+      logger.info("add " + ds +
+          "\n\tid " + insert);
+      return insert;
+    }
   }
 
   @Override

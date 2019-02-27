@@ -35,15 +35,19 @@ package mitll.langtest.client.exercise;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.LangTest;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
@@ -51,6 +55,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 /**
  * Does fancy flashing record bulb while recording.
@@ -64,31 +69,34 @@ import java.util.logging.Logger;
 public class WaveformExercisePanel<L extends CommonShell, T extends ClientExercise> extends ExercisePanel<L, T> {
   private Logger logger = Logger.getLogger("WaveformExercisePanel");
 
+  /**
+   *
+   */
   private static final String NO_AUDIO_TO_RECORD = "No in-context sentence for this exercise.";
   public static final String CONTEXT = "context=";
 
   /**
    * @see #addInstructions
    */
-  private static final String RECORD_PROMPT = "Record the word or phrase at normal speed.";//, first at normal speed, then again at slow speed.";
-  private static final String RECORD_PROMPT2 = "Record the word or phrase, first at normal speed, then again at slow speed.";
+  private static final String RECORD_PROMPT = "Record the word or phrase at normal speed.";
+  private static final String PROMPT_BOTH_SPEEDS = "Record the word or phrase, first at normal speed, then again at slow speed.";
   private boolean isBusy = false;
   private Collection<RecordAudioPanel> audioPanels;
+
+  private static final String LANGUAGE_META_DATA = DialogMetadata.LANGUAGE.name();
+  private static final String SPEAKER_META_DATA = DialogMetadata.SPEAKER.name();
+  //private final String instance;
 
   /**
    * @param e
    * @param controller
    * @param doNormalRecording
-   * @param instance
-   * @param enableNextOnlyWhenBothCompleted
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#getFactory(mitll.langtest.client.list.PagingExerciseList)
    */
   public WaveformExercisePanel(T e,
                                ExerciseController controller, ListInterface<L, T> exerciseList,
-                               boolean doNormalRecording,
-                               String instance,
-                               boolean enableNextOnlyWhenBothCompleted) {
-    super(e, controller, exerciseList, instance, doNormalRecording, enableNextOnlyWhenBothCompleted);
+                               boolean doNormalRecording) {
+    super(e, controller, exerciseList, doNormalRecording);
   }
 
   @Override
@@ -123,18 +131,26 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
    * @see ExercisePanel#ExercisePanel
    */
   protected void addInstructions() {
-
     if (logger == null) logger = Logger.getLogger("WaveformExercisePanel");
-    List<String> typeOrder = getTypeOrder();
-
-
-    UIObject flow = new UnitChapterItemHelper<T>(typeOrder).addUnitChapterItem(exercise, this);
+    UIObject flow = new UnitChapterItemHelper<T>(getTypeOrder()).addUnitChapterItem(exercise, this);
     if (flow != null) {
       flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     }
     boolean normalRecord = isNormalRecord();
-    //  logger.info("addInstructions normal  "+normalRecord);
-    add(new Heading(4, normalRecord ? RECORD_PROMPT2 : RECORD_PROMPT));//isExampleRecord() ? RECORD_PROMPT2 : RECORD_PROMPT));
+    List<ExerciseAttribute> dialogAttributes = getDialogAttributes(exercise);
+  //  logger.info("normal " + normalRecord + " attr " + dialogAttributes);
+    if (!dialogAttributes.isEmpty()) {
+      normalRecord = false;
+    }
+    add(new Heading(4, normalRecord ? PROMPT_BOTH_SPEEDS : RECORD_PROMPT));
+  }
+
+  /**
+   * @return
+   * @see #getAnswerWidget
+   */
+  private boolean isNormalRecord() {
+    return doNormalRecording;
   }
 
   @NotNull
@@ -142,16 +158,29 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     List<String> typeOrder = new ArrayList<>(controller.getTypeOrder());
 
     if (exercise != null && exercise.getAttributes() != null) {
-//      exercise.getAttributes().forEach(exerciseAttribute -> logger.info("for " + exercise.getID() + " " + exerciseAttribute));
       exercise.getAttributes().forEach(exerciseAttribute -> {
-        exercise.getUnitToValue().put(exerciseAttribute.getProperty(), exerciseAttribute.getValue());
-        if (!typeOrder.contains(exerciseAttribute.getProperty())) {
-          typeOrder.add(exerciseAttribute.getProperty());
+        String property = exerciseAttribute.getProperty();
+        exercise.getUnitToValue().put(property, exerciseAttribute.getValue());
+        if (!typeOrder.contains(property)) {
+          typeOrder.add(property);
         }
       });
     }
     return typeOrder;
   }
+
+
+  @NotNull
+  private List<ExerciseAttribute> getDialogAttributes(ClientExercise ex) {
+    return ex.getAttributes()
+        .stream()
+        .filter(exerciseAttribute -> {
+          String property = exerciseAttribute.getProperty();
+          return (
+              property.equalsIgnoreCase(SPEAKER_META_DATA) || property.equalsIgnoreCase(LANGUAGE_META_DATA));
+        }).collect(Collectors.toList());
+  }
+
 
   /**
    * TODO : support recording audio for multiple context sentences...?
@@ -168,7 +197,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     String recordPrompt = getRecordPrompt(e);
   /*  logger.info("getExerciseContent for " + e.getID() + " context " + e.isContext() + " " + isNormalRecord() +
         "\n\tprompt " +recordPrompt);*/
-    return ExerciseFormatter.getArabic(recordPrompt, controller.getLanguage());
+    return ExerciseFormatter.getArabic(recordPrompt, controller.getLanguageInfo());
   }
 
   private String getRecordPrompt(T e) {
@@ -212,7 +241,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     }
     // add slow speed recording widget
 
-    if (!exercise.isContext()) {
+    if (!exercise.isContext() && !hasLanguageAttr(exercise)) {
       AudioType slow = normalRecord ? AudioType.SLOW : AudioType.CONTEXT_SLOW;
 
 //      logger.info("getAnswerWidget audio type " + slow + " user " + controller.getUser() +
@@ -223,6 +252,15 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     }
 
     return vp;
+  }
+
+  private boolean hasLanguageAttr(T ex) {
+    return !ex.getAttributes()
+        .stream()
+        .filter(attr ->
+            attr.getProperty().equalsIgnoreCase(DialogMetadata.LANGUAGE.name())
+        )
+        .collect(Collectors.toSet()).isEmpty();
   }
 
   private boolean hasContext(T exercise) {
@@ -249,8 +287,15 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     audioPanels.add(fast);
     vp.add(fast);
 
-    if (fast.isAudioPathSet()) recordCompleted(fast);
     addAnswerWidget(index, fast);
+
+    if (fast.isAudioPathSet()) {
+//      logger.info("found audio path for " +exercise.getRefAudio());
+      recordCompleted(fast);
+    } else {
+      logger.info("addRecordAudioPanelNoCaption no audio path for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
+    }
+
     return fast;
   }
 
@@ -276,12 +321,12 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
    */
   @Override
   public void postAnswers(ExerciseController controller, HasID completedExercise) {
-    showRecordedState(completedExercise);
+    // logger.info("postAnswers " + completedExercise.getID());
+    showRecordedState();
     exerciseList.loadNextExercise(completedExercise);
   }
 
-  protected void showRecordedState(HasID completedExercise) {
-    LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance));
+  protected void showRecordedState() {
     exerciseList.redraw();
   }
 }

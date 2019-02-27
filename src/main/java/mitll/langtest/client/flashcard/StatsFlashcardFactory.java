@@ -34,7 +34,6 @@ package mitll.langtest.client.flashcard;
 
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.PracticeFacetExerciseList;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -43,14 +42,12 @@ import mitll.langtest.client.list.ListChangeListener;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -65,7 +62,7 @@ import java.util.logging.Logger;
 public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExercise>
     extends ExercisePanelFactory<L, T>
     implements FlashcardContainer {
-  private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
+  //private final Logger logger = Logger.getLogger("StatsFlashcardFactory");
 
   final ControlState controlState;
   private List<L> allExercises;
@@ -83,9 +80,10 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
   private INavigation navigation;
   final KeyStorage storage;
 
-  protected final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
-  //  private static final boolean DEBUG = false;
+  final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
   final INavigation.VIEWS instance;
+
+  //  private static final boolean DEBUG = false;
 
   /**
    * @param controller
@@ -96,20 +94,11 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
   public StatsFlashcardFactory(ExerciseController controller, ListInterface<L, T> exerciseList, INavigation.VIEWS instance) {
     super(controller, exerciseList);
     controlState = new ControlState();
-    this.instance =instance;
+    this.instance = instance;
 
     if (exerciseList != null) { // TODO ? can this ever happen?
-      exerciseList.addListChangedListener(new ListChangeListener<L>() {
-        /**
-         * @param items
-         * @param selectionID
-         * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst
-         */
-        @Override
-        public void listChanged(List<L> items, String selectionID) {
-          StatsFlashcardFactory.this.listChanged(items, selectionID);
-        }
-      });
+      addListChangedListener(exerciseList);
+
       if (exerciseList instanceof PracticeFacetExerciseList) {
         PracticeFacetExerciseList exerciseList1 = (PracticeFacetExerciseList) exerciseList;
         exerciseList1.setControlState(controlState);
@@ -129,6 +118,20 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
     if (exerciseList != null) {
       exerciseList.simpleSetShuffle(controlState.isShuffle());
     }
+  }
+
+  private void addListChangedListener(ListInterface<L, T> exerciseList) {
+    exerciseList.addListChangedListener(new ListChangeListener<L>() {
+      /**
+       * @param items
+       * @param selectionID
+       * @see mitll.langtest.client.list.ExerciseList#rememberAndLoadFirst
+       */
+      @Override
+      public void listChanged(List<L> items, String selectionID) {
+        StatsFlashcardFactory.this.listChanged(items, selectionID);
+      }
+    });
   }
 
   @NotNull
@@ -189,7 +192,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
     sticky.populateCorrectMap();
   }
 
-  public void resetStorage() {
+  void resetStorage() {
     sticky.resetStorage();
   }
 
@@ -217,7 +220,9 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
   public void startOver() {
     int lastID = allExercises.isEmpty() ? -1 : allExercises.get(allExercises.size() - 1).getID();
     int currentExerciseID = getCurrentExerciseID();
- logger.info("startOver : current " + currentExerciseID + ", last ID " + lastID);
+
+  //  logger.info("startOver : current " + currentExerciseID + ", last ID " + lastID);
+
     if (currentExerciseID != -1 && currentExerciseID != lastID) {
       exerciseList.loadExercise(currentExerciseID);
     } else {
@@ -253,7 +258,6 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
   public void showDrill() {
     navigation.showView(instance);
   }
-
   public void showQuiz() {
     navigation.showView(INavigation.VIEWS.QUIZ);
   }

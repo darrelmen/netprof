@@ -40,8 +40,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.RecordAudioPanel;
-import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AnnotationExercise;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -190,9 +188,11 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
    * @seex #checkForForeignChange()
    * @seex ReviewEditableExercise#checkForForeignChange()
    */
+/*
   String getWarningHeader() {
-    return "Consistent with " + controller.getLanguage() + "?";
+    return "Consistent with " + controller.getLanguageInfo().toDisplay()+ "?";
   }
+*/
 
   /**
    * @return

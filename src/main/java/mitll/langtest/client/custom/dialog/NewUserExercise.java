@@ -32,7 +32,8 @@
 
 package mitll.langtest.client.custom.dialog;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.ControlGroup;
+import com.github.gwtbootstrap.client.ui.FluidContainer;
 import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
@@ -41,7 +42,10 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
@@ -57,6 +61,7 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -424,7 +429,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     foreignAnno.getElement().setId("foreignLanguageAnnotation");
 //    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
     foreignLang = makeBoxAndAnno(row, "", foreignAnno);
-    if (getLanguage().equalsIgnoreCase("urdu")) {
+    if (getLanguage() == Language.URDU) {
       foreignLang.getWidget().getElement().getStyle().setProperty("fontFamily", "'MyUrduWebFont'");
     }
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
@@ -436,8 +441,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     foreignLang.box.getElement().getStyle().setFontSize(18, Style.Unit.PX);
   }
 
-  private String getLanguage() {
-    return controller.getLanguage();
+  private Language getLanguage() {
+    return controller.getLanguageInfo();
   }
 
   protected void setMarginBottom(FormField foreignLang) {
@@ -785,7 +790,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   protected boolean isEnglish() {
-    return controller.getLanguage().equalsIgnoreCase("english");
+    return controller.getLanguageInfo() == Language.ENGLISH;
   }
 
   void formInvalid() {
@@ -812,7 +817,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     if (safeText.isEmpty()) {
       checkContext(toAddTo, onClick);
     } else {
-      controller.getScoringService().isValidForeignPhrase(safeText, "", new AsyncCallback<Collection<String>>() {
+      controller.getScoringService().isValidForeignPhrase(controller.getProjectID(), safeText, "", new AsyncCallback<Collection<String>>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("is valid exercise", caught);
@@ -847,7 +852,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
     return "The" +
         words + oovs + are +
-        "not in our " + getLanguage() + " dictionary. Please edit.";
+        "not in our " + getLanguage().toDisplay() + " dictionary. Please edit.";
   }
 
   private void checkContext(Panel toAddTo, boolean onClick) {
@@ -855,10 +860,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     if (safeText1.isEmpty()) {
       afterValidForeignPhrase(toAddTo, onClick);
     } else {
-      controller.getScoringService().isValidForeignPhrase(safeText1, "", new AsyncCallback<Collection<String>>() {
+      controller.getScoringService().isValidForeignPhrase(controller.getProjectID(), safeText1, "", new AsyncCallback<Collection<String>>() {
         @Override
         public void onFailure(Throwable caught) {
-          controller.handleNonFatalError("is valid exercise", caught);
+          controller.handleNonFatalError("is valid context exercise", caught);
         }
 
         @Override

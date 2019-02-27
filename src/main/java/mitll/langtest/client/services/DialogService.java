@@ -2,9 +2,6 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
-import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.custom.ContentView;
-import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;
@@ -23,7 +20,7 @@ public interface DialogService extends RemoteService {
   ExerciseListWrapper<IDialog> getDialogs(ExerciseListRequest request) throws DominoSessionException;
 
   /**
-   * @see ContentView#showContent(Panel, INavigation.VIEWS)
+   * @see mitll.langtest.client.dialog.ListenViewHelper#showContent
    * @param id
    * @return
    * @throws DominoSessionException

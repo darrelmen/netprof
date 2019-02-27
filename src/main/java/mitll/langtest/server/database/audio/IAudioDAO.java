@@ -37,6 +37,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.AudioCopy;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
@@ -81,13 +82,15 @@ public interface IAudioDAO extends IDAO {
    */
   List<SlickAudio> getAllNoExistsCheck(int projid);
 
+  Set<Integer> getExercisesThatHaveAudio(int projID, Collection<Integer> exids);
+
   /**
    * @param firstExercise
    * @param language
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
    */
-  int attachAudioToExercise(ClientExercise firstExercise, Language language, Map<Integer, MiniUser> idToMini);
+  int attachAudioToExercise(ClientExercise firstExercise, Language language, Map<Integer, MiniUser> idToMini, SmallVocabDecoder smallVocabDecoder);
 
   /**
    * @param exercises
@@ -106,7 +109,7 @@ public interface IAudioDAO extends IDAO {
    * @return
    * @see mitll.langtest.server.database.exercise.FilterResponseHelper#getRecordedByMatchingGender
    */
-  Collection<Integer> getRecordedBySameGender(int userid, int projid, Map<Integer, String> exToTranscript);
+  Collection<Integer> getRecordedBySameGender(int userid, int projid, Map<Integer, String> exToTranscript, boolean filterOnBothSpeeds);
 
   Set<Integer> getRecordedBySameGenderContext(int userid, int projid, Map<Integer, String> exToTranscript);
 
@@ -141,11 +144,12 @@ public interface IAudioDAO extends IDAO {
    * @param exercise
    * @param language
    * @param idToMini
+   * @param smallVocabDecoder
    * @return
    * @see Database#getNativeAudio(Map, int, int, Project, Map)
    */
   String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise,
-                        Language language, Map<Integer, MiniUser> idToMini);
+                        Language language, Map<Integer, MiniUser> idToMini, SmallVocabDecoder smallVocabDecoder);
 
   Map<String, Integer> getPairs(int projid);
 

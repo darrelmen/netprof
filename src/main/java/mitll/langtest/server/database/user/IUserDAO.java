@@ -168,6 +168,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   Map<Integer, FirstLastUser> getFirstLastFor(Collection<Integer> userDBIds);
 
   String getUserChosenID(int userid);
+  String getFirstInitialName(int userid);
 
   boolean isMale(int userid);
 
@@ -188,6 +189,8 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    */
   boolean changePassword(int user, String newHashPassword, String baseURL);
 
+  boolean shouldUseUsualDominoEmail(String email);
+
   /**
    * @param user
    * @param currentHashPassword
@@ -195,6 +198,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    * @param baseURL
    * @return
    * @see UserServiceImpl#changePasswordWithCurrent(String, String)
+   * @see ChangePasswordView#changePassword
    */
   boolean changePasswordWithCurrent(int user, String currentHashPassword, String newHashPassword, String baseURL);
 

@@ -5,7 +5,9 @@ import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.ScoredExercise;
 
 import java.util.Arrays;
 import java.util.List;
@@ -55,7 +57,8 @@ public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends C
   @Override
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
     return super.getExerciseListRequest(prefix)
-        .setDialogID(getDialogFromURL());
+        .setDialogID(getDialogFromURL())
+        .setOnlyFL(true);
   }
 
   private int getDialogFromURL() {

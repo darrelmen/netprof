@@ -32,14 +32,13 @@
 
 package mitll.langtest.server.scoring;
 
+import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.lts.HTKDictionary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.text.CharacterIterator;
 import java.text.Normalizer;
-import java.text.StringCharacterIterator;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -53,7 +52,7 @@ import java.util.regex.Pattern;
  * Time: 12:24 PM
  * To change this template use File | Settings | File Templates.
  */
-public class SmallVocabDecoder {
+public class SmallVocabDecoder extends  TextNormalizer {
   private static final Logger logger = LogManager.getLogger(SmallVocabDecoder.class);
 
   /**
@@ -61,8 +60,12 @@ public class SmallVocabDecoder {
    * @see #lcToken
    * <p>
    * remove latin capital letter i with dot above - 0130
+   * 0x2026 = three dot elipsis
+   * FF01 = full width exclamation
+   * FF1B - full semi
+   * 002D - hyphen
    */
-  private static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193;~/']";
+  private static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193\\u2026\\uFF01\\uFF1B\\u002D;~/']";
   private static final String REPLACE_ME_OE = "[\\u0152\\u0153]";
 
   /**
@@ -70,49 +73,45 @@ public class SmallVocabDecoder {
    *
    * @see #segmentation
    */
-  private static final String JAPANESE_PUNCT = "[\\u3001\\u3002\\uFF0C\\uFF1F\\u2019\\u2026\\u003A\\u0022\\u00B7]";
-  private static final String OE = "oe";
+  private static final String JAPANESE_PUNCT = "[\\u3001\\u3002\\uFF0C\\uFF1F\\u2019\\u2026\\u003A\\u0022\\u00B7\\uFF01\\uFF1B\\u300A]";
 
-  private static final char FULL_WIDTH_ZERO = '\uFF10';
-  private static final char ZERO = '0';
   private static final String P_Z = "\\p{Z}+";
   /**
    * @see #getTrimmedLeaveAccents
    */
   private static final String FRENCH_PUNCT = "[,.?!]";
-  private static final boolean DEBUG = false;
-  private static final String TURKISH_CAP_I = "İ";
+  private static final boolean WARN_ABOUT_BAD_CHINESE = false;
+
   private static final String P_P = "\\p{P}";
-  private static final String ONE_SPACE = " ";
+  private static final String INTERNAL_PUNCT_REGEX = "(?:(?<!\\S)\\p{Punct}+)|(?:\\p{Punct}+(?!\\S))";
 
   private HTKDictionary htkDictionary;
   private boolean isAsianLanguage;
 
   private static final int TOO_LONG = 8;
 
-  // private static final boolean DEBUG = false;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_PREFIX = false;
   private static final boolean DEBUG_SEGMENT = false;
-  private final Pattern pattern;
-  private final Pattern spacepattern;
-  private final Pattern oepattern;
+  private static final boolean DEBUG_MANDARIN = true;
 
   /**
    * Compiles some handy patterns.
+   *
+   * @param language
    */
-  public SmallVocabDecoder() {
-    pattern = Pattern.compile(REMOVE_ME + "|" + P_P);
-    spacepattern = Pattern.compile(P_Z);
-    oepattern = Pattern.compile(REPLACE_ME_OE);
+  public SmallVocabDecoder(Language language) {
+    super(language.name());
   }
 
   /**
    * @param htkDictionary
    * @param isAsianLanguage
+   * @param language
    * @see PronunciationLookup#makeDecoder
    */
-  public SmallVocabDecoder(HTKDictionary htkDictionary, boolean isAsianLanguage) {
-    this();
+  public SmallVocabDecoder(HTKDictionary htkDictionary, boolean isAsianLanguage, Language language) {
+    this(language);
     this.htkDictionary = htkDictionary;
     this.isAsianLanguage = isAsianLanguage;
 //    logger.info("SmallVocabDecoder dict now " + ((htkDictionary != null) ? htkDictionary.size() : " null dict") + " asian " + isAsianLanguage);
@@ -133,27 +132,6 @@ public class SmallVocabDecoder {
   }
 
   /**
-   * @param s
-   * @return
-   * @see #getTokens(String, boolean)
-   */
-  String toFull(String s) {
-    StringBuilder builder = new StringBuilder();
-
-    final CharacterIterator it = new StringCharacterIterator(s);
-    for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
-      if (c >= ZERO && c <= '9') {
-        int offset = c - ZERO;
-        int full = FULL_WIDTH_ZERO + offset;
-        builder.append(Character.valueOf((char) full).toString());
-      } else {
-        builder.append(c);
-      }
-    }
-    return builder.toString();
-  }
-
-  /**
    * @param sentences
    * @param vocabSizeLimit
    * @return
@@ -162,7 +140,7 @@ public class SmallVocabDecoder {
   List<String> getSimpleVocab(Collection<String> sentences, int vocabSizeLimit) {
     // childCount the tokens
     final Map<String, Integer> sc = new HashMap<>();
-    sentences.forEach(sent -> getTokens(sent, false).forEach(token -> {
+    sentences.forEach(sent -> getTokens(sent, false, false).forEach(token -> {
       Integer c = sc.get(token);
       sc.put(token, (c == null) ? 1 : c + 1);
     }));
@@ -197,16 +175,17 @@ public class SmallVocabDecoder {
   }
 
   public String getSegmented(String longPhrase, boolean removeAllAccents) {
-    Collection<String> tokens = getTokens(longPhrase, removeAllAccents);
-    boolean debug = longPhrase.startsWith("sel");
-    if (debug) {
-      tokens.forEach(token -> logger.info("getSegmented " + token));
-    }
+    Collection<String> tokens = getTokens(longPhrase, removeAllAccents, false);
     StringBuilder builder = new StringBuilder();
     tokens.forEach(token -> {
-      String segmentation = segmentation(token.trim());
-      if (debug) {
-        logger.info("getSegmented segmentation " + segmentation);
+      String trim = token.trim();
+      char c = trim.charAt(0);
+      String segmentation = trim;
+
+      if (c >= 'A' && c <= 'ž') { // so skip it. it's pinyin
+        if (WARN_ABOUT_BAD_CHINESE) logger.info("getSegmented token is not chinese '" + trim + "'");
+      } else {
+        segmentation = segmentation(trim);
       }
       builder.append(segmentation).append(ONE_SPACE);
     });
@@ -221,61 +200,7 @@ public class SmallVocabDecoder {
    * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#isCorrect(Collection, String, boolean, boolean)
    */
   public List<String> getTokensAllLanguages(boolean isMandarin, String fl, boolean removeAllAccents) {
-    return isMandarin ? getMandarinTokens(fl) : getTokens(fl, removeAllAccents);
-  }
-
-  /**
-   * @param sentence
-   * @param removeAllAccents
-   * @return
-   * @see IPronunciationLookup#getPronunciationsFromDictOrLTS
-   * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile
-   */
-  public List<String> getTokens(String sentence, boolean removeAllAccents) {
-    List<String> all = new ArrayList<>();
-    if (sentence.isEmpty()) {
-      logger.warn("huh? empty sentence?");
-    }
-    //  logger.info("getTokens initial    '" + sentence + "'");
-    String trimmedSent = getTrimmedSent(sentence, removeAllAccents);
-    //if (removeAllAccents) {
-
-
-    if (DEBUG && !sentence.equalsIgnoreCase(trimmedSent)) {
-      logger.info("getTokens " +
-          "\n\tbefore     '" + sentence + "'" +
-          "\n\tafter trim '" + trimmedSent + "'");
-    }
-    // }
-
-    for (String untrimedToken : trimmedSent.split(P_Z)) { // split on spaces
-      //String tt = untrimedToken.replaceAll("\\p{P}", ""); // remove all punct
-      String token = untrimedToken.trim();  // necessary?
-      if (token.length() > 0) {
-        String trim = token.trim();
-        if (!trim.equalsIgnoreCase("–") &&
-            !trim.equalsIgnoreCase("؟") &&
-            !trim.equalsIgnoreCase("+"))
-          all.add(toFull(token));
-//        if (!token.equals("UNKNOWNMODEL")) {
-//          logger.debug("\ttoken " + token);
-//        }
-      }
-    }
-
-    if (DEBUG) logger.info("getTokens " +
-        "\n\tbefore     '" + sentence + "'" +
-        "\n\tafter trim '" + trimmedSent + "'" +
-        "\n\tall        (" + all.size() + ")" + all
-    );
-
-    return all;
-  }
-
-  private String getTrimmedSent(String sentence, boolean removeAllAccents) {
-    return removeAllAccents ?
-        getTrimmed(sentence) :
-        getTrimmedLeaveAccents(sentence);
+    return isMandarin ? getMandarinTokens(fl) : getTokens(fl, removeAllAccents, false);
   }
 
   /**
@@ -286,45 +211,8 @@ public class SmallVocabDecoder {
    */
   private List<String> getMandarinTokens(String foreignLanguage) {
     String segmentation = segmentation(foreignLanguage);
-    if (DEBUG) logger.info("getMandarinTokens '" + foreignLanguage + "' = '" + segmentation + "'");
-    return getTokens(segmentation, false);
-  }
-
-  /**
-   * Tries to remove junky characters from the sentence so hydec won't choke on them.
-   * <p>
-   * Also removes the chinese unicode bullet character, like in Bill Gates.
-   * <p>
-   * TODO : really slow - why not smarter?
-   *
-   * @param sentence
-   * @return
-   * @see #getTokens
-   * @see mitll.langtest.server.trie.ExerciseTrie#addSuffixes
-   */
-  public String getTrimmed(String sentence) {
-    String trim = getTrimmedLeaveLastSpace(sentence).trim();
-    //logger.warn("getTrimmed before " + sentence + " after "+ trim);
-    return trim;
-  }
-
-  /**
-   * For the moment we replace the Turkish Cap I with I
-   *
-   * @param sentence
-   * @return
-   * @see PronunciationLookup#getPronStringForWord(String, Collection, boolean)
-   */
-  private String getTrimmedLeaveAccents(String sentence) {
-    String trim = sentence
-        .replaceAll(FRENCH_PUNCT, "")
-        .replaceAll(REPLACE_ME_OE, OE)
-        .replaceAll(TURKISH_CAP_I, "I")
-        .replaceAll(P_P, ONE_SPACE)
-        //.replaceAll("\\s+", " ")
-        .trim();
-    //logger.warn("getTrimmedLeaveAccents before " + sentence + " after "+ trim);
-    return trim;
+//    if (DEBUG_MANDARIN) logger.info("getMandarinTokens '" + foreignLanguage + "' = '" + segmentation + "'");
+    return getTokens(segmentation, false, false);
   }
 
   /**
@@ -346,55 +234,8 @@ public class SmallVocabDecoder {
    */
   public String lcToken(String token, boolean removeAllPunct) {
     return removeAllPunct ?
-        getTrimmedLeaveLastSpace(token).toLowerCase() :
+        getTrimmed(token).toLowerCase() :
         getTrimmedLeaveAccents(token).toLowerCase();
-  }
-/*
-  private String lcToken(String token) {
-*//*    String s = token
-        .replaceAll(REMOVE_ME, " ")
-        .replaceAll("\\p{Z}+", " ")
-        .replaceAll("\\p{P}", "");
-
-    // return StringUtils.stripAccents(s).toLowerCase();*//*
-
-    String s = getTrimmedLeaveLastSpace(token);
-    return s.toLowerCase();
-  }*/
-
-  /**
-   * We want to keep accents - french accents especially...
-   * They are in the dictionary.
-   *
-   * @param sentence
-   * @return
-   * @see #getTrimmed
-   * @see mitll.langtest.server.trie.ExerciseTrie#getTrimmed
-   */
-  public String getTrimmedLeaveLastSpace(String sentence) {
-/*    String s = sentence
-        .replaceAll(REMOVE_ME, ONE_SPACE)
-        //   .replaceAll("", " ")
-        .replaceAll(P_Z, ONE_SPACE)  // normalize all whitespace
-
-        // .replaceAll(";", " ")
-        // .replaceAll("~", " ")
-        //  .replaceAll("\\u2191", " ")
-        // .replaceAll("\\u2193", " ")
-        // .replaceAll("/", " ")
-        // .replaceAll("'", "")
-        .replaceAll(P_P, ONE_SPACE)
-        .replaceAll(REPLACE_ME_OE, OE);*/
-
-    String alt = pattern.matcher(sentence).replaceAll(ONE_SPACE);
-    alt = oepattern.matcher(alt).replaceAll(OE);
-    alt = spacepattern.matcher(alt).replaceAll(ONE_SPACE);
-    //  s = s.trim();
-    alt = alt.trim();
-//    if (!s.equals(alt)) {
-//      logger.warn("bug '" + sentence + "' old '" + s + "' vs new '" + alt + "'");
-//    }
-    return alt;
   }
 
   /**
@@ -501,7 +342,7 @@ public class SmallVocabDecoder {
       }
       //else {
 //        logger.info("found " + substring + " = " + memo);
-     // }
+      // }
       String rest = memo;
 
       if (!rest.isEmpty()) {
@@ -522,6 +363,12 @@ public class SmallVocabDecoder {
     return longest_prefix(phrase, i + 1, phraseToPrefix);
   }
 
+  /**
+   * @see #segmentation(String)
+   * @see #longest_prefix(String, int, Map)
+   * @param token
+   * @return
+   */
   private boolean inDict(String token) {
     try {
       scala.collection.immutable.List<?> apply = htkDictionary.apply(token);

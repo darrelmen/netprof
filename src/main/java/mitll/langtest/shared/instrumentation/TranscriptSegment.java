@@ -44,12 +44,6 @@ import org.jetbrains.annotations.NotNull;
 public class TranscriptSegment extends SlimSegment implements IsSerializable, Comparable<TranscriptSegment> {
   private int start;                  // Start time in seconds
   private int end;                    // End time in seconds
-
-  /**
-   * @deprecated
-   */
-  private transient int index;                  // character index from start of string
-
   private String displayEvent = "";
 
   public TranscriptSegment() {
@@ -63,22 +57,20 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
    * @param name        event name (i.e. phone, word, etc.)
    * @param score
    * @param displayName
-   * @param index
    * @seex mitll.langtest.server.scoring.ParseResultJson#getNetPronImageTypeToEndTimes
    */
-  public TranscriptSegment(float s, float e, String name, float score, String displayName, int index) {
+  public TranscriptSegment(float s, float e, String name, float score, String displayName) {
     super(name, score);
     this.start = toInt(s);
     this.end = toInt(e);
     this.displayEvent = displayName;
-    this.index = index;
   }
 
   /**
    * @param segment
    */
   public TranscriptSegment(TranscriptSegment segment) {
-    this(segment.getStart(), segment.getEnd(), segment.getEvent(), segment.getScore(), segment.getDisplayEvent(), segment.index);
+    this(segment.getStart(), segment.getEnd(), segment.getEvent(), segment.getScore(), segment.getDisplayEvent());
   }
 
   public SlimSegment toSlim() { return new SlimSegment(getEvent(),getScore()); }
@@ -116,8 +108,6 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
     return displayEvent;
   }
 
-
-
   public boolean isIn(TranscriptSegment other) {
     return getStart() >= other.getStart() && getEnd() <= other.getEnd();
   }
@@ -126,12 +116,6 @@ public class TranscriptSegment extends SlimSegment implements IsSerializable, Co
     this.event = str;
     return this;
   }
-
-/*
-  public int getIndex() {
-    return index;
-  }
-*/
 
   public String toString() {
     return "[" + roundToHundredth(getStart()) + "-" + roundToHundredth(getEnd()) + "] '" +

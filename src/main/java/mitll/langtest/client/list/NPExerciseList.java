@@ -35,7 +35,6 @@ package mitll.langtest.client.list;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 

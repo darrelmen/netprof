@@ -32,7 +32,10 @@
 
 package mitll.langtest.client.user;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Fieldset;
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
@@ -127,15 +130,16 @@ public class ResetPassword extends UserDialog {
 
     final FormField firstPassword = getPasswordField(fieldset, PASSWORD);
 
-    Button changePasswordButton =
-        getChangePasswordButton(
-            token,
-            useridField,
-            firstPassword,
-            getPasswordField(fieldset, HINT));
+    {
+      Button changePasswordButton =
+          getChangePasswordButton(
+              token,
+              useridField,
+              firstPassword,
+              getPasswordField(fieldset, HINT));
 
-    fieldset.add(changePasswordButton);
-
+      fieldset.add(changePasswordButton);
+    }
 
     setFocusOn((pendingUserID == null || pendingUserID.isEmpty()) ? useridField.getWidget() : firstPassword.getWidget());
     return container;

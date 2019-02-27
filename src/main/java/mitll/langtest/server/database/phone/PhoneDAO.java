@@ -10,10 +10,7 @@ import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.word.WordDAO;
-import mitll.langtest.shared.analysis.PhoneBigrams;
-import mitll.langtest.shared.analysis.PhoneReport;
-import mitll.langtest.shared.analysis.PhoneSummary;
-import mitll.langtest.shared.analysis.WordAndScore;
+import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
@@ -200,18 +197,17 @@ public class PhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
   }
 
   /**
-   * @param userid
    * @param exids
-   * @param language
    * @param project
+   * @param request
    * @return
    * @seex JsonSupport#getJsonPhoneReport(long, int, Map)
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonPhoneReport
    */
-  public JsonObject getWorstPhonesJson(int userid, Collection<Integer> exids, String language, Project project) {
-    PhoneReport phoneReport = getPhoneReport(userid, exids, null);
+  public JsonObject getWorstPhonesJson(Collection<Integer> exids, Project project, PhoneReportRequest request) {
+    PhoneReport phoneReport = getPhoneReport(request.getUserid(), exids, null);
     logger.info("getWorstPhonesJson phone report " + phoneReport);
-    return new PhoneJSON().getWorstPhonesJson(phoneReport);
+    return new PhoneJSON(database.getServerProps()).getWorstPhonesJson(phoneReport);
   }
 
   /**

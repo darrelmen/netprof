@@ -41,7 +41,10 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.shared.answer.ActivityType;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -58,13 +61,16 @@ import java.util.logging.Logger;
  * Time: 5:35 PM
  * To change this template use File | Settings | File Templates.
  */
-public abstract class PagingExerciseList<T extends CommonShell, U extends HasID> extends ExerciseList<T, U> {
+public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
+    extends ExerciseList<T, U>
+    implements ContainerList<T> {
   private final Logger logger = Logger.getLogger("PagingExerciseList");
 
   static final String SEARCH = "Search";
   protected final WaitCursorHelper waitCursorHelper;
 
   protected ClickablePagingContainer<T> pagingContainer;
+  private List<T> inOrderResult;
 
   /**
    * @see #addTypeAhead
@@ -100,7 +106,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    * @param comp
    * @see ListSorting#sortBy
    */
-  void sortBy(Comparator<T> comp) {
+ /* void sortBy(Comparator<T> comp) {
     if (DEBUG) logger.info("start - sortBy ");
     scheduleWaitTimer();
 
@@ -109,8 +115,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
 
     showFinishedGettingExercises();
     if (DEBUG) logger.info("end  - sortBy ");
-  }
-
+  }*/
   public void loadFirst() {
     pushFirstSelection(getFirstID(), getTypeAheadText());
   }
@@ -125,12 +130,16 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    * @see #PagingExerciseList
    */
   private void addComponents() {
-    addTableWithPager(makePagingContainer());
+    ClickablePagingContainer<T> pagingContainer = makePagingContainer();
+    pagingContainer.setContainerList(this);
+    addTableWithPager(pagingContainer);
   }
 
+/*
   private void scheduleWaitTimer() {
     waitCursorHelper.scheduleWaitTimer();
   }
+*/
 
   /**
    * @param prefix
@@ -342,19 +351,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    */
   @Override
   public void flushWith(Comparator<T> comparator) {
-    if (comparator == null) {
-      logger.info("use in order comparator");
-      comparator = (o1, o2) -> {
-        int i = inOrderResult.indexOf(o1);
-        int j = inOrderResult.indexOf(o2);
-        return Integer.compare(i, j);
-      };
-    }
     pagingContainer.setComparator(comparator);
     flush();
   }
-
-  private List<T> inOrderResult;
 
   /**
    * A little complicated -- if {@link #doShuffle} is true, shuffles the exercises
@@ -366,6 +365,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
   @Override
   public List<T> rememberExercises(List<T> toRemember) {
     inOrderResult = toRemember;
+   // logger.info(getInstance() + " : rememberExercises " + toRemember.size() + " items");
     if (doShuffle) {
       // logger.info(getInstance() + " : rememberExercises - shuffling " + toRemember.size() + " items");
       ArrayList<T> ts = new ArrayList<>(toRemember);
@@ -387,7 +387,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
   }
 
   @Override
-  protected List<T> getInOrder() {
+  public List<T> getInOrder() {
     return inOrderResult;
   }
 

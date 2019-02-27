@@ -74,6 +74,7 @@ import java.util.logging.Logger;
 public class ListView implements ContentView, CreateListComplete {
   private final Logger logger = Logger.getLogger("ListView");
 
+  private static final String QUIZ = "Quiz";
   private static final String DO_QUIZ = "Do quiz";
   private static final String DELETE_LIST = "Delete list.";
 
@@ -126,6 +127,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   /**
    * @see ContentView#showContent
+   * @see #showYourLists(Collection, DivWidget)
    */
   private static final String YOUR_LISTS = "Your Lists and Quizzes";
 
@@ -333,10 +335,12 @@ public class ListView implements ContentView, CreateListComplete {
   private void showYourLists(Collection<UserList<CommonShell>> result, DivWidget left) {
     ListContainer myLists = new MyListContainer();
     Panel tableWithPager = (ListView.this.myLists = myLists).getTableWithPager(result);
-    //   tableWithPager.setHeight("520px");
+
     new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.RIGHT);
     addPagerAndHeader(tableWithPager, canMakeQuiz() ? YOUR_LISTS : YOUR_LISTS1, left);
     tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
+    tableWithPager.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+
     left.add(getButtons(ListView.this.myLists));
   }
 
@@ -555,7 +559,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   @NotNull
   private Button getQuizButton(ListContainer container) {
-    Button drill = getSuccessButton("Quiz");
+    Button drill = getSuccessButton(QUIZ);
     drill.setType(ButtonType.INFO);
 
     drill.addClickHandler(event -> showQuiz(getCurrentSelection(container)));
@@ -599,7 +603,7 @@ public class ListView implements ContentView, CreateListComplete {
 
   @NotNull
   private Button getAddQuizButton() {
-    final Button add = new Button("Quiz", IconType.PLUS);
+    final Button add = new Button(QUIZ, IconType.PLUS);
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> dialogHelper = doAddQuiz());
     add.setType(ButtonType.SUCCESS);
@@ -770,7 +774,6 @@ public class ListView implements ContentView, CreateListComplete {
     CreateListDialog createListDialog = new CreateListDialog(this, controller, names).setIsQuiz(true);
     createListDialog.doCreate(contents);
 
-
     return getNewListButton(contents, createListDialog, "Create New Quiz");
   }
 
@@ -778,7 +781,6 @@ public class ListView implements ContentView, CreateListComplete {
   private DialogHelper getNewListButton(DivWidget contents, CreateListDialog createListDialog, String title) {
     DialogHelper dialogHelper = new DialogHelper(true);
     createListDialog.setDialogHelper(dialogHelper);
-    //String createNewList = CREATE_NEW_LIST + (canMakeQuiz() ? " or Quiz" : "");
     Button closeButton = dialogHelper.show(
         title,
         Collections.emptyList(),
@@ -862,7 +864,6 @@ public class ListView implements ContentView, CreateListComplete {
    * @param userList
    * @see CreateListDialog#addUserList
    */
-
   @Override
   public void madeIt(UserList userList) {
     // logger.info("madeIt made it " + userList.getName());
@@ -871,6 +872,7 @@ public class ListView implements ContentView, CreateListComplete {
       myLists.addExerciseAfter(null, userList);
       myLists.enableAll();
       names.add(userList.getName());
+      editButton.setEnabled(true);
     } catch (Exception e) {
       logger.warning("got " + e);
     }
@@ -908,9 +910,7 @@ public class ListView implements ContentView, CreateListComplete {
       super.gotClickOnItem(user);
       setShareHREF(user);
       enableQuizButton(quizButton);
-
     }
-
 
     @Override
     protected boolean hasDoubleClick() {
@@ -923,7 +923,6 @@ public class ListView implements ContentView, CreateListComplete {
       //showLearnOrQuiz(selected);
       editList();
     }
-
   }
 
   private void setShareHREF(UserList<CommonShell> user) {

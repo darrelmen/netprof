@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface IRelatedExercise  extends IDAO {
+public interface IRelatedExercise extends IDAO {
   Collection<SlickExercise> getContextExercises(int id);
 
   void addBulkRelated(List<SlickRelatedExercise> relatedExercises);
@@ -20,6 +20,8 @@ public interface IRelatedExercise  extends IDAO {
   void deleteForProject(int projID);
 
   int deleteRelated(int related);
+
+  int deleteRelatedForDialog(int dialog);
 
   Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(int projid);
 

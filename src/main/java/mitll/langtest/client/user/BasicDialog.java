@@ -33,9 +33,9 @@
 package mitll.langtest.client.user;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.PasswordTextBox;
 import com.github.gwtbootstrap.client.ui.TextBox;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ControlGroupType;
@@ -75,16 +75,20 @@ public class BasicDialog {
   private static final boolean DEBUG = false;
   static final String TRY_AGAIN = "Try Again";
 
-  protected FormField addControlFormField(Panel dialogBox, String label) {
-    return addControlFormField(dialogBox, label, false, 0, 30, -1);
+  protected FormField addControlFormField(Panel dialogBox) {
+    return addControlFormField(dialogBox, "", false, 0, 30, -1, "");
+  }
+
+  protected FormField addControlFormField(Panel dialogBox, String label, String hint) {
+    return addControlFormField(dialogBox, label, false, 0, 30, -1, hint);
   }
 
   private FormField addControlFormField(Panel dialogBox, String label, boolean isPassword,
-                                        int minLength, int maxLength, int optWidth) {
+                                        int minLength, int maxLength, int optWidth, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     if (optWidth > 0) user.setWidth(optWidth + "px");
     user.setMaxLength(maxLength);
-    return getSimpleFormField(dialogBox, label, user, minLength);
+    return getSimpleFormField(dialogBox, label, user, minLength, hint);
   }
 
   protected FormField addControlFormFieldHorizontal(Panel dialogBox,
@@ -125,8 +129,8 @@ public class BasicDialog {
   protected FormField getSimpleFormField(Panel dialogBox,
                                          String label,
                                          TextBoxBase user,
-                                         int minLength) {
-    final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user, "");
+                                         int minLength, String hint) {
+    final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user, hint);
     return new FormField(user, userGroup, minLength);
   }
 
@@ -154,14 +158,18 @@ public class BasicDialog {
    * @param widget
    * @param hint      if empty, skips adding it.
    * @return
-   * @see mitll.langtest.client.user.UserDialog#getSimpleFormField(com.google.gwt.user.client.ui.Panel, String, com.github.gwtbootstrap.client.ui.base.TextBoxBase, int)
+   * @see BasicDialog#getSimpleFormField(Panel, String, TextBoxBase, int, String)
    */
   protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget, String hint) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
-    ControlLabel labelWidget = new ControlLabel(label);
-    labelWidget.getElement().setId("Label_" + label);
-    userGroup.add(labelWidget);
+
+    if (label != null && label.length() > 0) {
+      ControlLabel labelWidget = new ControlLabel(label);
+      labelWidget.getElement().setId("Label_" + label);
+      userGroup.add(labelWidget);
+    }
+
     widget.addStyleName("leftFiveMargin");
 
     if (hint.isEmpty()) {

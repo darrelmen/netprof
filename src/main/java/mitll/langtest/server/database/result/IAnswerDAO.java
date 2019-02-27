@@ -36,13 +36,13 @@ import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 
 public interface IAnswerDAO {
-  int addTextAnswer(AudioContext audioContext,
+/*  int addTextAnswer(AudioContext audioContext,
                     String answer,
                     boolean correct,
                     float pronScore,
 
                     float classifierScore,
-                    String session, long timeSpent);
+                    String session, long timeSpent);*/
 
   /**
    * @see mitll.langtest.server.audio.AudioFileHelper#rememberAnswer
@@ -52,9 +52,11 @@ public interface IAnswerDAO {
    */
   int addAnswer(AnswerInfo answerInfo, long timestamp);
 
-  void addRoundTrip(int resultID, int roundTrip);
+  void addRoundTrip(int resultID, long roundTrip);
 
+/*
   void addUserScore(int id, float score);
+*/
 
   void changeAnswer(int id, float score, int processDur, String json, boolean isCorrect);
 

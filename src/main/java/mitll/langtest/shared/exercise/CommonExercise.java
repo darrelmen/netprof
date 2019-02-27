@@ -58,6 +58,7 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
    */
   List<String> getFirstPron();
 
+
   /**
    * SERVER Only
    * @return
@@ -107,7 +108,6 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
    * @param exerciseAttributes
    */
   void setAttributes(List<ExerciseAttribute> exerciseAttributes);
-
 
   /**
    *

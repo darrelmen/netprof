@@ -55,7 +55,6 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.langtest.shared.scoring.RecalcResponses;
-import mitll.npdata.dao.lts.MandarinLTS;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

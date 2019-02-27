@@ -101,7 +101,6 @@ public class WordAndScore extends WordScore {
   @Override
   public int compareTo(WordScore o) {
     int i = Integer.compare(getIntPronScore(), o.getIntPronScore());
-
     return getTieBreaker((WordAndScore) o, i);
   }
 

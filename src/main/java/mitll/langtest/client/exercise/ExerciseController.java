@@ -51,6 +51,7 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.User;
 
@@ -109,6 +110,10 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
   void getImage(int reqid, String path, String type, int toUse, int height, int exerciseID, AsyncCallback<ImageResponse> client);
 
+  /**
+   * @deprecated
+   * @return
+   */
   String getLanguage();
   Language getLanguageInfo();
 
@@ -120,6 +125,7 @@ public interface ExerciseController extends Services, ExceptionSupport {
 
 
   ProjectStartupInfo getProjectStartupInfo();
+  int getProjectID();
 
   boolean hasModel();
 
@@ -136,6 +142,8 @@ public interface ExerciseController extends Services, ExceptionSupport {
   boolean isMicAvailable();
 
   KeyStorage getStorage();
+
+  ProjectMode getMode();
 
   void showListIn(int listID, INavigation.VIEWS views);
 

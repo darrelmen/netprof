@@ -87,7 +87,7 @@ class TimeWidgets {
     this.month = month;
     this.minute = minute;
     this.score = score;
-    this.timeScale=timeScale;
+    this.timeScale = timeScale;
   }
 
   /**
@@ -98,9 +98,16 @@ class TimeWidgets {
     this.display.setHTML(text);
   }
 
-  void setScore(String text) {
+  /**
+   * @param text
+   * @see AnalysisPlot#setTitleScore(long, long, int)
+   */
+  boolean setScore(String text) {
     if (this.score != null) {
       this.score.setText(text);
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -110,14 +117,14 @@ class TimeWidgets {
     if (week != null) week.setActive(false);
     if (month != null) month.setActive(false);
     if (minute != null) minute.setActive(false);
-    if (timeScale != null) timeScale.setSelectedIndex(timeScale.getItemCount()-1);
+    if (timeScale != null) timeScale.setSelectedIndex(timeScale.getItemCount() - 1);
   }
 
   Button getPrevButton() {
     return prevButton;
   }
 
-  public Button getNextButton() {
+  Button getNextButton() {
     return nextButton;
   }
 }

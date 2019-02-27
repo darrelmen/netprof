@@ -40,21 +40,18 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasID;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 7/7/17.
  */
-class ImportBulk {
-  private final Logger logger = Logger.getLogger("ImportBulk");
-
+public class ImportBulk {
+//  private final Logger logger = Logger.getLogger("ImportBulk");
 
   private static final int IMPORT_WIDTH = 500;
   private static final int VISIBLE_LINES = 20;
@@ -117,21 +114,25 @@ class ImportBulk {
 
             myLists.flush();
             myLists.redraw();
-            Set<Integer> exids = new HashSet<>();
-            newExercises.forEach(ex -> exids.add(ex.getID()));
+            refreshExerciseIDsOnHydra(newExercises, controller);
+          }
+        });
+  }
 
-            controller.getAudioService().refreshExercises(controller.getProjectStartupInfo().getProjectid(), exids,
-                new AsyncCallback<Void>() {
-                  @Override
-                  public void onFailure(Throwable throwable) {
-                    controller.handleNonFatalError("doing list import", throwable);
-                  }
+  public <T extends HasID> void refreshExerciseIDsOnHydra(List<T> newExercises, ExerciseController controller) {
+    Set<Integer> exids = new HashSet<>();
+    newExercises.forEach(ex -> exids.add(ex.getID()));
 
-                  @Override
-                  public void onSuccess(Void aVoid) {
-                    logger.info("updated " + exids.size() + " items on netprof");
-                  }
-                });
+    controller.getAudioService().refreshExercises(controller.getProjectStartupInfo().getProjectid(), exids,
+        new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable throwable) {
+            controller.handleNonFatalError("refresh exercises on import", throwable);
+          }
+
+          @Override
+          public void onSuccess(Void aVoid) {
+         //   logger.info("updated " + exids.size() + " items on netprof");
           }
         });
   }

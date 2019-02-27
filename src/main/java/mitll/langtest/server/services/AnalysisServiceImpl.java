@@ -286,7 +286,8 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   @Override
   public List<WordAndScore> getPerformanceReportForUserForPhone(AnalysisRequest analysisRequest)
       throws DominoSessionException, RestrictedOperationException {
-    logger.info("getPerformanceReportForUserForPhone " + analysisRequest);
+//    logger.info("getPerformanceReportForUserForPhone " + analysisRequest);
+
     long then = System.currentTimeMillis();
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     int projectID = getProjectIDFromUser(userIDFromSessionOrDB);

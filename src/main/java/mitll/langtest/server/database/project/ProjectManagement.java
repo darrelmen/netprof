@@ -61,6 +61,8 @@ import mitll.langtest.server.domino.IDominoImport;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.scoring.LTSFactory;
+import mitll.langtest.shared.dialog.DialogType;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.*;
@@ -79,6 +81,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -100,13 +103,23 @@ public class ProjectManagement implements IProjectManagement {
    * @see #addOtherProps
    */
   private static final String DOMINO_NAME = "Domino Project";
+  /**
+   * @see #addModeChoices
+   */
   private static final String VOCABULARY = "Vocabulary";
+  /**
+   * @see #addModeChoices
+   */
   private static final String DIALOG = "Dialog";
   private static final String VOCAB = "vocab";
   private static final String DIALOG1 = "dialog";
   private static final String NO_PROJECT_FOR_ID = "NO_PROJECT_FOR_ID";
+  private static final String INTERPRETER = "Interpreter";
+  private static final String INTERPRETER1 = "interpreter";
   //public static final String ANSWERS1 = "^.*answers\\/(.+)\\/.+";
   private static final String ANSWERS1 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
+  private static final Pattern pattern = Pattern.compile(ANSWERS1);
+
   /**
    * JUST FOR TESTING
    */
@@ -151,6 +164,7 @@ public class ProjectManagement implements IProjectManagement {
   private final boolean debugOne;
 
   private final IDominoImport dominoImport;
+  private Map<Integer, Integer> oldToNew = new ConcurrentHashMap<>();
 
   /**
    * @param pathHelper
@@ -222,7 +236,11 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public void populateProjects(int projID) {
-    populateProjects(pathHelper, serverProps, logAndNotify, db, projID);
+    try {
+      populateProjects(pathHelper, serverProps, logAndNotify, db, projID);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -230,18 +248,25 @@ public class ProjectManagement implements IProjectManagement {
    * If a project is already configured, won't be configured again.
    * Fill in id->project map
    *
+   * @param projID if -1 load all the projects
    * @see #populateProjects(int)
    */
   private void populateProjects(PathHelper pathHelper,
                                 ServerProperties serverProps,
                                 LogAndNotify logAndNotify,
-                                DatabaseImpl db, int projID) {
+                                DatabaseImpl db,
+                                int projID) {
     Collection<SlickProject> allSlickProjects = getAllSlickProjects();
     if (projID != -1) {
-      List<SlickProject> collect = allSlickProjects.stream().filter(slickProject -> slickProject.id() == projID).collect(Collectors.toList());
-      logger.info("just doing " + projID + ": " + collect);
-      allSlickProjects = collect;
+      SlickProject byID = projectDAO.getByID(projID);
+      if (byID != null) {
+        logger.info("populateProjects just doing " + projID + ": " + byID);
+        allSlickProjects = Collections.singleton(byID);
+      }
+    } else {
+      logger.info("populateProjects loading " + allSlickProjects.size() + " projects.");
     }
+
     allSlickProjects.forEach(slickProject -> {
       if (!idToProject.containsKey(slickProject.id())) {
         if (debugOne) {
@@ -272,6 +297,40 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     configureProjects();
+  }
+
+//  @NotNull
+//  private List<SlickProject> getProjectsByID(int projID, Collection<SlickProject> allSlickProjects) {
+//    return allSlickProjects.stream().filter(slickProject -> slickProject.id() == projID).collect(Collectors.toList());
+//  }
+
+  /**
+   * Production only
+   *
+   * @param language
+   * @return
+   */
+  @NotNull
+  private List<SlickProject> getSlickProjectsByLanguage(Language language) {
+    return getAllSlickProjects()
+        .stream()
+        .filter(slickProject ->
+            slickProject.language().equalsIgnoreCase(language.name()) &&
+                slickProject.status().equalsIgnoreCase(ProjectStatus.PRODUCTION.name()))
+        .collect(Collectors.toList());
+  }
+
+  @Override
+  public int getProjectIDForLanguage(Language language) {
+    List<SlickProject> slickProjectsByLanguage = getSlickProjectsByLanguage(language);
+    if (slickProjectsByLanguage.isEmpty()) {
+      return -1;
+    } else {
+      if (slickProjectsByLanguage.size() > 1) {
+        logger.warn("found " + slickProjectsByLanguage.size() + " for " + language);
+      }
+      return slickProjectsByLanguage.get(0).id();
+    }
   }
 
   /**
@@ -379,6 +438,7 @@ public class ProjectManagement implements IProjectManagement {
     project.setJsonSupport(new JsonSupport(project.getSectionHelper(),
         db.getResultDAO(),
         db.getPhoneDAO(),
+        db.getUserListManager(),
         project));
 
     if (slickProject != null) {
@@ -415,12 +475,7 @@ public class ProjectManagement implements IProjectManagement {
       // side effect is to cache the users.
       new Thread(() -> rememberUsers(projectID), "rememberUsers_" + projectID).start();
 
-      if (project.getLanguageEnum() == Language.KOREAN) {
-        addDialogInfo(project);
-      }
-      if (project.getLanguageEnum() == Language.ENGLISH) {
-        addDialogInfo(project);
-      }
+      addDialogInfo(project);
       return rawExercises.size();
     } else {
       logger.warn("\n\n\nconfigureProject huh? no slick project for " + project);
@@ -429,9 +484,8 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   private void addDialogInfo(Project project) {
-    if (project.getKind() == ProjectType.DIALOG || true) {
-      if (new DialogPopulate(db, pathHelper).addDialogInfo(project)) {
-      }
+    if (new DialogPopulate(db, pathHelper).addDialogInfo(project)) {
+      logger.info("add dialog info to " + project.getID() + " " + project.getName());
     }
   }
 
@@ -449,16 +503,22 @@ public class ProjectManagement implements IProjectManagement {
         try {
           sleep(1000);
           logger.info("rememberUsers ---> no default user yet.....");
-        } catch (InterruptedException e) {
-          e.printStackTrace();
+        } catch (Exception e) {
+          logger.warn("got " + e, e);
         }
       }
 
+      // logger.info("about to remember users for  " + projectID);
+
       db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUsersForProject(projectID));
+      logger.info("rememberUsers finished remembering users for  " + projectID);
     }, "ProjectManagement.rememberUsers_" + projectID).start();
   }
 
   /**
+   * NO : these are imported files - can't trust the UID.
+   * NO : We should be able to look at the file and figure out the project and owner id
+   *
    * answers/spanish/answers/plan/1711/0/subject-896/answer_1511623283958.wav
    * /opt/netprof/answers/spanish/answers/plan/1711/0/subject-896/answer_1511623283958.wav
    *
@@ -470,40 +530,79 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public int getUserForFile(String requestURI) {
-    Pattern pattern = Pattern.compile(ANSWERS1);
-    Matcher matcher = pattern.matcher(requestURI);
+    int oldUser = getUserFromFile(requestURI);
 
-    if (matcher.find()) {
-      String group = matcher.group(1);
-      // logger.info("getUserForFile lang " + group);
-      List<Project> matches = getProjectsForLanguage(group);
+    Integer mappedUser = oldToNew.get(oldUser);
+    if (mappedUser == null) {
+      int userID = -1;
 
-      if (matches.isEmpty()) {
-        //  logger.info("getUserForFile lang " + group + " matches " + matches.size());
-        int userID = getUserIDFromAll(requestURI);
-        if (userID != -1) {
-          return userID;
+      Matcher matcher = pattern.matcher(requestURI);
+      if (matcher.find()) {
+        String group = matcher.group(1);
+        // logger.info("getUserForFile lang " + group);
+        List<Project> matches = getProjectsForLanguage(group);
+
+        if (matches.isEmpty()) {
+          logger.warn("getUserForFile lang '" + group + "' match no projects in " + requestURI);
+          userID = getUserIDFromAll(requestURI);
+        } else {
+          // logger.info("getUserForFile lang " + group + " matches " + matches.size());
+          userID = getUserIDFrom(requestURI, matches);
+
+          if (false) {
+            if (userID == -1) {
+              logger.info("getUserForFile NO USER ID for lang '" + group + "' project matches " + matches.size());
+            }
+          }
         }
       } else {
-        // logger.info("getUserForFile lang " + group + " matches " + matches.size());
-        return getUserIDFrom(requestURI, matches);
+        userID = getUserIDFromAll(requestURI);
+//        if (oldUser != -1 && userIDFromAll != -1) {
+//          logger.info("remember 2 " + oldUser + "->" + userIDFromAll);
+//          oldToNew.put(oldUser, userIDFromAll);
+//        }
+//        return userIDFromAll;
       }
+
+      if (userID == -1) {
+        logger.info("getUserForFile couldn't find recorder of (" +oldUser+ ") " + requestURI);
+      }
+      if (oldUser != -1 && userID != -1) {
+        logger.info("getUserForFile remember " + oldUser + "->" + userID);
+        oldToNew.put(oldUser, userID);
+      }
+      return userID;
     } else {
-      return getUserIDFromAll(requestURI);
+      return mappedUser;
     }
-    //}
-//    logger.info("getUserForFile couldn't find recorder of " + requestURI);
-    return -1;
+  }
+
+  private int getUserFromFile(String requestURI) {
+    int userID = -1;
+    String[] split = requestURI.split("subject-");
+    if (split.length == 2) {
+      String s1 = split[1];
+      String[] split1 = s1.split("\\/");
+      String s = split1[0];
+      try {
+        userID = Integer.parseInt(s);
+//        logger.info("getUserForFile parse '" + s + "' = " + userID + " from " + s1);
+      } catch (NumberFormatException e) {
+        logger.warn("getUserFromFile couldn't parse " + s + " in " + s1 + " of " + requestURI);
+      }
+    }
+    return userID;
   }
 
   /**
    * Don't add nulls to list!
-   * @param group
+   *
+   * @param language
    * @return
    */
   @NotNull
-  private List<Project> getProjectsForLanguage(String group) {
-    List<Integer> byLanguage = projectDAO.getByLanguage(group);
+  private List<Project> getProjectsForLanguage(String language) {
+    List<Integer> byLanguage = projectDAO.getByLanguage(language);
 
     List<Project> matches = new ArrayList<>();
     byLanguage.forEach(id -> {
@@ -535,6 +634,7 @@ public class ProjectManagement implements IProjectManagement {
     } catch (Exception e) {
       logger.warn("getUserIDFrom for " + requestURI + " got " + e, e);
     }
+
     return -1;
   }
 
@@ -700,11 +800,10 @@ public class ProjectManagement implements IProjectManagement {
    * @param project
    * @see #rememberProject(PathHelper, ServerProperties, LogAndNotify, SlickProject, DatabaseImpl)
    */
-  private ExerciseDAO<CommonExercise> setExerciseDAO(Project project) {
+  private void setExerciseDAO(Project project) {
 //    logger.info("setExerciseDAO on " + project);
     DBExerciseDAO dbExerciseDAO = getExerciseDAO(project);
     project.setExerciseDAO(dbExerciseDAO);
-    return dbExerciseDAO;
   }
 
   @NotNull
@@ -770,10 +869,10 @@ public class ProjectManagement implements IProjectManagement {
     }
 //    logger.info("getExercises " + projectid  + " = " +project);
 
-    if (!project.isConfigured()) {
+/*    if (!project.isConfigured()) {
       logger.info("\tgetExercises configure " + projectid + " and project " + project);
       configureProject(project, false, false);
-    }
+    }*/
 
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (rawExercises.isEmpty()) {
@@ -801,6 +900,11 @@ public class ProjectManagement implements IProjectManagement {
     return first.orElse(null);
   }
 
+  public Project getProductionByLanguage(Language language) {
+    List<Project> matchingProjects = getMatchingProjects(language, false);
+    return (matchingProjects.isEmpty()) ? null : matchingProjects.get(0);
+  }
+
   @Override
   public List<Project> getMatchingProjects(Language languageMatchingGroup, boolean isPoly) {
     List<Project> projectByLangauge = getProjectByLangauge(languageMatchingGroup);
@@ -811,6 +915,12 @@ public class ProjectManagement implements IProjectManagement {
         .collect(Collectors.toList());
   }
 
+  /**
+   * Only on previously loaded projects.
+   *
+   * @param name
+   * @return
+   */
   @Override
   public List<Project> getProjectByLangauge(Language name) {
     return idToProject
@@ -861,6 +971,11 @@ public class ProjectManagement implements IProjectManagement {
     return !getNewProjects(idToProject.keySet()).isEmpty();
   }
 
+  /**
+   * @param projectid
+   * @param onlyOne   if false loads all the projects
+   * @return
+   */
   private Project lazyGetProject(int projectid, boolean onlyOne) {
     logger.info("lazyGetProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
         ") - refreshing projects");
@@ -868,7 +983,9 @@ public class ProjectManagement implements IProjectManagement {
     Project project = idToProject.get(projectid);
 
     if (project == null) {
-      logger.warn("lazyGetProject, even after project set refresh, no project with id " + projectid + " in known projects (" + idToProject.keySet() +
+      logger.warn("lazyGetProject, even after project set refresh, no project with " +
+          "\n\tid              " + projectid + " in " +
+          "\n\tknown projects (" + idToProject.keySet() +
           ") - refreshing projects", new Exception());
     }
 
@@ -929,7 +1046,7 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public void setStartupInfo(User userWhere, int projid) {
-    logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
+//    logger.info("setStartupInfo : For user " + userWhere.getUserID() + " projid " + projid);
     if (projid == -1) {
       logger.info("setStartupInfo for\n\t" + userWhere + "\n\tno current project.");
       clearStartupInfo(userWhere);
@@ -1075,20 +1192,46 @@ public class ProjectManagement implements IProjectManagement {
    * @param projectInfo
    */
   private void addModeChoices(Project project, SlimProject projectInfo) {
+    //   logger.info("addModeChoices for " + project.getID() + " " + project.getName() + " " + project.getKind());
     if (project.getKind() == ProjectType.DIALOG) {
-      SlimProject vocab = getProjectInfo(project);
-      projectInfo.addChild(vocab);
-      vocab.setName(VOCABULARY);
-      vocab.setProjectType(ProjectType.DIALOG);
-      vocab.setMode(ProjectMode.VOCABULARY);
-      vocab.setCountryCode(VOCAB);
+      {
+        SlimProject vocab = getProjectInfo(project);
+        projectInfo.addChild(vocab);
 
-      SlimProject dialog = getProjectInfo(project);
-      projectInfo.addChild(dialog);
-      dialog.setName(DIALOG);
-      dialog.setProjectType(ProjectType.DIALOG);
-      dialog.setMode(ProjectMode.DIALOG);
-      dialog.setCountryCode(DIALOG1);
+        vocab.setName(VOCABULARY);
+        vocab.setProjectType(ProjectType.DIALOG);
+        vocab.setMode(ProjectMode.VOCABULARY);
+        vocab.setCountryCode(VOCAB);
+      }
+
+      {
+        SlimProject dialog = getProjectInfo(project);
+
+        List<IDialog> dialogs = project.getDialogs();
+        String name = DIALOG;
+        String cc = DIALOG1;
+
+        if (dialogs.isEmpty()) logger.warn("addModeChoices no dialogs in " + project);
+        else {
+          IDialog iDialog = dialogs.get(0);
+          DialogType kind = iDialog.getKind();
+          if (kind == DialogType.INTERPRETER) {
+            name = INTERPRETER;
+            cc = INTERPRETER1;
+            // logger.info("addModeChoices : found first interpreter dialog : " + iDialog);
+          } else {
+            logger.info("dialog kind is " + kind);
+          }
+        }
+        dialog.setName(name);
+
+        dialog.setProjectType(ProjectType.DIALOG);
+        dialog.setMode(ProjectMode.DIALOG);
+
+        dialog.setCountryCode(cc);
+
+        projectInfo.addChild(dialog);
+      }
     }
   }
 
@@ -1115,14 +1258,11 @@ public class ProjectManagement implements IProjectManagement {
    * @see #getNestedProjectInfo
    */
   private SlimProject getProjectInfo(Project pproject) {
-    Map<String, String> info = new LinkedHashMap<>();
-
     SlickProject project = pproject.getProject();
-    {
-      User creator = db.getUserDAO().getByID(project.userid());
-      String userInfo = creator == null ? "" : " : " + creator.getUserID();
-      info.put(CREATED_BY, project.userid() + userInfo);
-    }
+    int userid = project.userid();
+
+    Map<String, String> info = new LinkedHashMap<>();
+    addCreatedBy(info, userid);
 
     info.put(ProjectProperty.MODEL_TYPE.toString(), pproject.getModelType().toString());
 
@@ -1158,7 +1298,13 @@ public class ProjectManagement implements IProjectManagement {
         pproject.isOnIOS(),
         project.dominoid(),
         info,
-        project.userid());
+        userid);
+  }
+
+  private void addCreatedBy(Map<String, String> info, int userid) {
+    User creator = db.getUserDAO().getByID(userid);
+    String userInfo = creator == null ? "" : " : " + creator.getUserID();
+    info.put(CREATED_BY, userid + userInfo);
   }
 
 

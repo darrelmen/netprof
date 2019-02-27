@@ -37,7 +37,6 @@ import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.shared.exercise.*;
 
 import java.util.Collection;
-import java.util.Set;
 
 public interface ExerciseServiceAsync<T extends CommonShell & HasUnitChapter> {
   /**

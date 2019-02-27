@@ -54,10 +54,10 @@ public interface ScoringServiceAsync {
                            AsyncCallback<PretestScore> async);
 
   /**
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT
    * @param resultid
    * @param roundTrip
    * @param async
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT
    */
   void addRoundTrip(int resultid, int roundTrip, AsyncCallback<Void> async);
 
@@ -82,5 +82,5 @@ public interface ScoringServiceAsync {
    * @seex mitll.langtest.client.custom.dialog.NewUserExercise#isValidForeignPhrase
    */
 
-  void isValidForeignPhrase(String foreign, String transliteration, AsyncCallback<Collection<String>> async);
+  void isValidForeignPhrase(int projID, String foreign, String transliteration, AsyncCallback<Collection<String>> async);
 }

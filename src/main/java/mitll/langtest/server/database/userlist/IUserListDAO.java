@@ -39,6 +39,7 @@ import mitll.langtest.shared.custom.IUserListLight;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.npdata.dao.SlickLightList;
 import mitll.npdata.dao.SlickUserExerciseList;
 
 import java.util.Collection;
@@ -48,25 +49,11 @@ public interface IUserListDAO extends IDAO {
   void updateModified(long uniqueID);
 
   /**
-   * @param uniqueID
-   * @param context
-   * @see mitll.langtest.server.services.ListServiceImpl#updateContext(long, String)
-   */
-/*
-  void updateContext(long uniqueID, String context);
-
-  void updateRichText(long uniqueID, String richText);
-
-  void updateName(long id, String name);
-*/
-
-  /**
    * @param listid
    * @param userid
    * @see IUserListManager#addVisitor(int, int)
    */
   void addVisitor(int listid, int userid);
-
   void removeVisitor(int listid, int userid);
 
   /**
@@ -78,14 +65,6 @@ public interface IUserListDAO extends IDAO {
   int add(UserList<?> userList, int projid);
 
   /**
-   * JUST FOR DEBUGGING
-   *
-   * @return
-   * @see mitll.langtest.server.database.custom.UserListManager#createUserList
-   */
-  int getCount();
-
-  /**
    * @see mitll.langtest.server.database.custom.UserListManager#getListsForUser
    * @param userid
    * @param projectID
@@ -93,26 +72,21 @@ public interface IUserListDAO extends IDAO {
    */
   List<UserList<CommonShell>> getAllByUser(int userid, int projectID);
 
-  boolean hasByName(long userid, String name, int projid);
-
   List<UserList<CommonShell>> getByName(long userid, String name, int projid);
 
   boolean remove(int unique);
 
-  void bringBack(long unique);
-
   UserList<CommonShell> getWithExercises(int unique);
-
-  UserList<CommonExercise> getWithExercisesEx(int unique);
 
   UserList<CommonExercise> getList(int unique);
 
   UserList<CommonShell> getWhere(int unique, boolean warnIfMissing);
 
   Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid);
-  Collection<IUserListLight> getAllQuizLight(int projid);
+  List<IUserListLight> getAllOrMineLight(int projid, int userid, boolean isQuiz);
   Collection<UserList<CommonShell>> getAllQuiz(int projid);
-  Collection<SlickUserExerciseList> getSlickAllQuiz(int projid, int userID);
+  Collection<SlickUserExerciseList> getSlickAllPublicOrMine(int projid, int userID, boolean isQuiz);
+  Collection<SlickLightList> getSlickAllOrMineLight(int projid, int userID, boolean isQuiz);
 
   /**
    * @see IUserListManager#getListsForUser(int, int, boolean, boolean, boolean)
@@ -134,8 +108,6 @@ public interface IUserListDAO extends IDAO {
   Collection<SlickUserExerciseList> getVisitedBy(int userid, int projid);
 
   void setUserExerciseDAO(IUserExerciseDAO userExerciseDAO);
-
-  void setPublicOnList(long userListID, boolean isPublic);
 
   void update(UserList<?> userList);
 }

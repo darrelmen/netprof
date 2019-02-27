@@ -21,6 +21,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -78,12 +79,12 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
    * @see StatsFlashcardFactory#getFlashcard
    */
   StatsPracticePanel(FlashcardContainer statsFlashcardFactory,
-                            ControlState controlState,
-                            ExerciseController controller,
-                            MySoundFeedback soundFeedback,
-                            T e,
-                            StickyState stickyState,
-                            ListInterface<L, T> exerciseListToUse) {
+                     ControlState controlState,
+                     ExerciseController controller,
+                     MySoundFeedback soundFeedback,
+                     T e,
+                     StickyState stickyState,
+                     ListInterface<L, T> exerciseListToUse) {
     super(e,
         controller,
         ADD_KEY_BINDING,
@@ -202,7 +203,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
       rememberCurrentExercise();
     }
 
-  //  logger.info("onSetComplete - show charts!");
+    //  logger.info("onSetComplete - show charts!");
     showFeedbackCharts();
   }
 
@@ -212,7 +213,6 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
   }
 
   /**
-   *
    * @see #onSetComplete
    */
   private void showFeedbackCharts() {
@@ -246,7 +246,9 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
   }
 
   AnalysisTab getScoreHistory() {
-    return new AnalysisTab(controller, true, -1, () -> 0, INavigation.VIEWS.LEARN);
+    int list = new SelectionState(History.getToken(), false).getList();
+    // logger.info("getScoreHistory list id  " + list);
+    return new AnalysisTab(controller, true, -1, () -> 0, INavigation.VIEWS.LEARN, list);
   }
 
   /**
@@ -322,7 +324,7 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
    * @see #doStartOver
    */
   private void startOver() {
-   // logger.info("startOver!");
+    // logger.info("startOver!");
     makeFlashcardButtonsVisible();
     statsFlashcardFactory.startOver();
   }

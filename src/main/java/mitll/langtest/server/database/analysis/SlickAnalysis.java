@@ -124,58 +124,32 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    */
   @Override
   public AnalysisReport getPerformanceReportForUser(AnalysisRequest analysisRequest) {
-    Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
-
-    Collection<UserInfo> userInfos = bestForUser.values();
-    UserInfo firstUser = bestForUser.isEmpty() ? null : getFirstUser(userInfos);
-
-    long then = System.currentTimeMillis();
-
     int userid = analysisRequest.getUserid();
-    AnalysisReport analysisReport = new AnalysisReport(
-        getUserPerformance(userid, bestForUser),
-        getPhoneSummary(userid, firstUser),
-        getCount(userInfos),
-        analysisRequest.getReqid());
 
-    {
-      long now = System.currentTimeMillis();
-      logger.info("getPerformanceReportForUser (took " + (now - then) + ") analysis report for " + userid +
-          " and list " + analysisRequest.getListid());// + analysisReport);
+    if (userid == -1) {
+      throw new IllegalArgumentException("must specify a user to make a request for");
+    } else {
+      Map<Integer, UserInfo> bestForUser = getBestForUser(analysisRequest);
+
+      Collection<UserInfo> userInfos = bestForUser.values();
+      UserInfo firstUser = bestForUser.isEmpty() ? null : getFirstUser(userInfos);
+
+      long then = System.currentTimeMillis();
+
+      AnalysisReport analysisReport = new AnalysisReport(
+          getUserPerformance(userid, bestForUser),
+          getPhoneSummary(userid, firstUser),
+          getCount(userInfos),
+          analysisRequest.getReqid());
+
+      {
+        long now = System.currentTimeMillis();
+        logger.info("getPerformanceReportForUser (took " + (now - then) + ") analysis report for user " + userid +
+            " and list " + analysisRequest.getListid());// + analysisReport);
+      }
+      return analysisReport;
     }
-    return analysisReport;
   }
-
-  /**
-   * @see AnalysisServiceImpl#getPhoneSummary(int, int, int, int)
-   * @param userid
-   * @param minRecordings
-   * @param listid
-   * @return
-   */
-/*  public PhoneSummary getPhoneSummary(int userid, int minRecordings, int listid) {
-    long then = System.currentTimeMillis();
-
-    PhoneSummary phoneSummary = getPhoneSummary(userid, getUserInfo(userid, listid, minRecordings), project);
-
-    long now = System.currentTimeMillis();
-
-    logger.info("getPhoneSummary (took " + (now - then) + ") for " + userid + " and list " + listid);
-
-    return phoneSummary;
-  }*/
-
-  /**
-   * @param userid
-   * @param listid
-   * @param from
-   * @param to
-   * @return
-   * @seex AnalysisServiceImpl#getPhoneReport
-   */
-/*  public PhoneReport getPhoneReportForPeriod(int userid, int listid, long from, long to) {
-    return getPhoneReportForPeriod(userid, getUserInfo(userid, listid, 0), project, from, to);
-  }*/
 
   /**
    * @param analysisRequest
@@ -191,9 +165,14 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @see AnalysisServiceImpl#getPhoneBigrams
    */
   public PhoneBigrams getPhoneBigramsForPeriod(AnalysisRequest analysisRequest) {
-    return getPhoneBigramsForPeriod(analysisRequest, getUserInfo(analysisRequest));
+    UserInfo userInfo = getUserInfo(analysisRequest);
+    if (userInfo == null) {
+      logger.warn("getPhoneBigramsForPeriod no user info for " + analysisRequest);
+      return new PhoneBigrams();
+    } else {
+      return getPhoneBigramsForPeriod(analysisRequest, userInfo);
+    }
   }
-
 
   /**
    * @param analysisRequest
@@ -527,10 +506,33 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = System.currentTimeMillis();
 
 //    Collection<Integer> dialogExerciseIDs = getDialogExerciseIDs(dialogID);
-//
 //    logger.info("getBestForUser Dialog ids " + dialogExerciseIDs.size());
 
+    List<SlickPerfResult> nonEnglishOnly = getNonEnglishOnly(getSlickPerfResultsForDialog(analysisRequest));
+    long now = System.currentTimeMillis();
+
+    if (DEBUG) {
+      logger.info("getBestForUser best for" +
+          analysisRequest +
+//        " user " + userid + " in project " + projid + " and list " + listid +
+          "\n\twere " + nonEnglishOnly.size());
+    }
+
+    {
+      long diff = now - then;
+      if (diff > WARN_THRESH) {
+        logger.warn("getBestForUser best for " + analysisRequest.getUserid() + " in " + projid + " took " + diff);
+      }
+    }
+
+    return getBest(nonEnglishOnly, analysisRequest.getMinRecordings(), true);
+  }
+
+  private Collection<SlickPerfResult> getSlickPerfResultsForDialog(AnalysisRequest analysisRequest) {
     Collection<SlickPerfResult> perfForUser;
+
+//    logger.info("getSlickPerfResultsForDialog request : " + analysisRequest);
+
     if (analysisRequest.getDialogSessionID() == -1) {
       int dialogID = analysisRequest.getDialogID();
       int userid = analysisRequest.getUserid();
@@ -546,19 +548,25 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       if (DEBUG) logger.info("got session " + analysisRequest);
       perfForUser = resultDAO.getPerfForDialogSession(analysisRequest.getDialogSessionID());
     }
-    long now = System.currentTimeMillis();
+    return perfForUser;
+  }
 
-    if (DEBUG) logger.info("getBestForUser best for" +
-        analysisRequest +
-//        " user " + userid + " in project " + projid + " and list " + listid +
-        "\n\twere " + perfForUser.size());
+  @NotNull
+  private List<SlickPerfResult> getNonEnglishOnly(Collection<SlickPerfResult> perfForUser) {
+    Project project = database.getProject(projid);
 
-    long diff = now - then;
-    if (diff > WARN_THRESH) {
-      logger.warn("getBestForUser best for " + analysisRequest.getUserid() + " in " + projid + " took " + diff);
+    List<SlickPerfResult> nonEnglishOnly = perfForUser
+        .stream()
+        .filter(slickPerfResult ->
+        {
+          CommonExercise exerciseByID = project.getExerciseByID(slickPerfResult.exid());
+          return exerciseByID == null || !exerciseByID.hasEnglishAttr();
+        }).collect(Collectors.toList());
+
+    if (perfForUser.size() != nonEnglishOnly.size()) {
+      logger.info("getBestForUser before filter " + perfForUser.size() + " after removing english " + nonEnglishOnly.size());
     }
-
-    return getBest(perfForUser, analysisRequest.getMinRecordings(), true);
+    return nonEnglishOnly;
   }
 
   @NotNull
@@ -569,7 +577,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
   /**
    * For the current project id.
-   *
+   * <p>
    * TODO : Gets all recordings!!!
    *
    * @param userDAO
@@ -689,6 +697,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       }
       String device = perf.devicetype();
       Long sessionTime = getSessionTime(sessionToLong, perf.device());
+      // ?? can't really get the session size here ...?
       Integer sessionSize = getNumInSession(sessionNumToInteger, perf.devicetype());
       String path = perf.answer();
 
@@ -739,29 +748,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     }
 
     return userToBest;
-  }
-
-  /**
-   * TODO : also in basePhoneDAO.
-   *
-   * @param sessionToLong
-   * @param device
-   * @return
-   */
-  private Long getSessionTime(Map<String, Long> sessionToLong, String device) {
-    Long parsedTime = sessionToLong.get(device);
-
-    if (parsedTime == null) {
-      try {
-        parsedTime = Long.parseLong(device);
-//        logger.info("getSessionTime " + parsedTime);
-      } catch (NumberFormatException e) {
-        //      logger.info("can't parse " + device);
-        parsedTime = -1L;
-      }
-      sessionToLong.put(device, parsedTime);
-    }
-    return parsedTime;
   }
 
   private Integer getNumInSession(Map<String, Integer> sessionToLong, String deviceType) {

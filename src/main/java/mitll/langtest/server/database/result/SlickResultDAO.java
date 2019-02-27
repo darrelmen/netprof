@@ -54,7 +54,6 @@ import mitll.npdata.dao.result.SlickExerciseScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
-import scala.Tuple2;
 import scala.collection.Seq;
 
 import java.sql.Timestamp;
@@ -69,6 +68,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   private final ResultDAOWrapper dao;
   private SlickResult defaultResult;
   private final ServerProperties serverProps;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param database
@@ -493,7 +494,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     correctAndScoresForReal.forEach((k, v) -> idToScore.put(k, v.pronscore()));
     return idToScore;
   }*/
-  private <T extends HasID> Map<Integer, Float> getScores(Collection<T> exercises,
+/*  private <T extends HasID> Map<Integer, Float> getScores(Collection<T> exercises,
                                                           Map<Integer, SlickExerciseScore> correctAndScoresForReal) {
     Map<Integer, Float> idToScore = new HashMap<>();
 
@@ -519,7 +520,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     }
 
     return idToScore;
-  }
+  }*/
 
   /**
    * @param slickCorrectAndScores
@@ -661,10 +662,13 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    */
   public Collection<SlickPerfResult> getPerfForDialogSession(int dialogsessionid) {
     Collection<SlickPerfResult> slickPerfResults = dao.perfByDialogSession(dialogsessionid);
-    logger.info("getPerfForDialogSession for " + dialogsessionid);
 
-    slickPerfResults.forEach(slickPerfResult -> logger.info("perf " + slickPerfResult.id() + " by " + slickPerfResult.userid() + " @ "
-        + slickPerfResult.modified() + " ex " + slickPerfResult.exid() + " answer " + slickPerfResult.answer()));
+    if (DEBUG) {
+      logger.info("getPerfForDialogSession for " + dialogsessionid);
+
+      slickPerfResults.forEach(slickPerfResult -> logger.info("perf " + slickPerfResult.id() + " by " + slickPerfResult.userid() + " @ "
+          + slickPerfResult.modified() + " ex " + slickPerfResult.exid() + " answer " + slickPerfResult.answer()));
+    }
 
     return slickPerfResults;
   }
@@ -694,12 +698,14 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     List<Integer> uniqueex = new ArrayList<>();
     slickPerfResults.forEach(p -> uniqueex.add(p.exid()));
 
-    logger.info("getPerfForUserOnList perf for" +
-        "\n\tuser   " + userid +
-        "\n\tlist   " + listid + " : got " + slickPerfResults.size() +
-        "\n\tids    " + unique +
-        "\n\tex ids " + uniqueex
-    );
+    if (DEBUG) {
+      logger.info("getPerfForUserOnList perf for" +
+          "\n\tuser   " + userid +
+          "\n\tlist   " + listid + " : got " + slickPerfResults.size() +
+          "\n\tids    " + unique +
+          "\n\tex ids " + uniqueex
+      );
+    }
 
     return slickPerfResults;
   }
@@ -710,6 +716,10 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   public Collection<Integer> getPracticedByUser(int userid, int projid) {
     return dao.practicedByUser(userid, projid);
+  }
+
+  public Collection<Integer> getInWindowByUser(int userid, int projid, long from, long to) {
+    return dao.inWindowByUser(userid, projid, new Timestamp(from), new Timestamp(to));
   }
 
   public int getDefaultResult() {

@@ -89,9 +89,11 @@ import mitll.langtest.server.database.word.SlickWordDAO;
 import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.mail.MailSupport;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
+import mitll.langtest.shared.analysis.PhoneReportRequest;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.IDialog;
@@ -105,7 +107,6 @@ import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.DBConnection;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -115,10 +116,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static java.lang.Thread.sleep;
 import static mitll.langtest.server.PathHelper.ANSWERS;
@@ -153,6 +154,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final int MAX_PHONES = 7;
   private static final boolean TEST_SYNC = false;
   private static final int WARN_THRESH = 10;
+  public static final String CRASH = "crash";
 
   private IUserDAO userDAO;
   private IUserSessionDAO userSessionDAO;
@@ -163,6 +165,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private IPhoneDAO<Phone> phoneDAO;
 
   private IAudioDAO audioDAO;
+  private ITrainingAudioDAO trainingAudioDAO;
   private IAnswerDAO answerDAO;
   private IUserListManager userListManager;
   private IStateManager stateManager;
@@ -327,13 +330,17 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.info("populateProjects no project management yet...");
     } else {
       projectManagement.populateProjects(projID);
-      userDAO.setProjectManagement(getProjectManagement());
+      setProjectManagement();
 
       if (TEST_SYNC) {  // right now I can't run the test since I need mongo.. etc.
         new TestSync(this);
       }
     }
     return this;
+  }
+
+  private void setProjectManagement() {
+    userDAO.setProjectManagement(getProjectManagement());
   }
 
   /**
@@ -354,6 +361,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     this.userSessionDAO = new SlickUserSessionDAOImpl(this, userProjectDAO, dbConnection);
     SlickAudioDAO slickAudioDAO = new SlickAudioDAO(this, dbConnection, this.userDAO);
     audioDAO = slickAudioDAO;
+    trainingAudioDAO = new SlickTrainingAudioDAO(this, dbConnection, this.userDAO);
     resultDAO = new SlickResultDAO(this, dbConnection);
     answerDAO = new SlickAnswerDAO(this, dbConnection);
 
@@ -410,7 +418,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     afterDAOSetup(slickAudioDAO);
 
-    logger.info("finalSetup : tables = " + getTables());
+    //   logger.info("finalSetup : tables = " + getTables());
   }
 
   /**
@@ -444,6 +452,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     reportHelper = new ReportHelper(this, getProjectDAO(),
         getUserDAO(), pathHelper, getMailSupport());
+
+    // trainingAudioDAO.checkAndAddForEachProject();
   }
 
   private int getDefaultProject() {
@@ -735,19 +745,26 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return userDAO;
   }
 
+  /**
+   * ONLY FOR TESTING
+   *
+   * @param lessonPlanFileOnlyForImport
+   * @return
+   */
   public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport) {
-    return setInstallPath(lessonPlanFileOnlyForImport, null);
+    return setInstallPath(lessonPlanFileOnlyForImport, null, true);
   }
 
   /**
    * @param lessonPlanFileOnlyForImport
    * @param servletContext
+   * @param loadAll
    * @see mitll.langtest.server.LangTestDatabaseImpl#setInstallPath
    */
   @Override
-  public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, ServletContext servletContext) {
+  public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, ServletContext servletContext, boolean loadAll) {
     this.projectManagement = new ProjectManagement(pathHelper, serverProps, getLogAndNotify(), this, servletContext);
-    makeDAO(lessonPlanFileOnlyForImport);
+    makeDAO(lessonPlanFileOnlyForImport, loadAll);
     return this;
   }
 
@@ -844,6 +861,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
+   * DUDE: super expensive...
+   * <p>
+   * SUPER EXPENSIVE the first time
+   *
    * @param projectid
    * @return
    * @seex ScoreServlet#getJSONForExercises
@@ -853,21 +874,26 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Project project = getProject(projectid);
     if (project == null) {
       logger.warn("asking for unknown project " + projectid);
-      return new JsonExport(null, null, Collections.emptyList(), false);
+      return new JsonExport(null, null, Collections.emptyList(), false, null);
     } else {
-      getExercises(projectid, false);
+      if (project.getJsonExport() == null) {
+        getExercises(projectid, false);
 
-      AudioFileHelper audioFileHelper = project.getAudioFileHelper();
+        AudioFileHelper audioFileHelper = project.getAudioFileHelper();
 
-      JsonExport jsonExport = new JsonExport(
-          audioFileHelper == null ? Collections.emptyMap() : audioFileHelper.getPhoneToCount(),
-          getSectionHelper(projectid),
-          serverProps.getPreferredVoices(),
-          getLanguage(projectid).equalsIgnoreCase("english")
-      );
+        JsonExport jsonExport = new JsonExport(
+            audioFileHelper == null ? Collections.emptyMap() : audioFileHelper.getPhoneToCount(),
+            getSectionHelper(projectid),
+            serverProps.getPreferredVoices(),
+            getLanguageEnum(projectid) == Language.ENGLISH,
+            project.getAudioFileHelper()
+        );
 
-      attachAllAudio(projectid);
-      return jsonExport;
+        attachAllAudio(projectid);
+        project.setJsonExport(jsonExport);
+      }
+
+      return project.getJsonExport();
     }
   }
 
@@ -993,45 +1019,44 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * Special check for amas exercises...
    *
    * @param lessonPlanFileOnlyForImport only for import
-   * @see #setInstallPath(String, ServletContext)
+   * @param loadAll
+   * @see DatabaseServices#setInstallPath(String, ServletContext, boolean)
    */
-  private void makeDAO(String lessonPlanFileOnlyForImport) {
-    // logger.info("makeDAO - " + lessonPlanFileOnlyForImport);
+  private void makeDAO(String lessonPlanFileOnlyForImport, boolean loadAll) {
+    logger.info("makeDAO - " + lessonPlanFileOnlyForImport);
+
     if (userManagement == null) {
       synchronized (this) {
-        // boolean isURL = serverProps.getLessonPlan().startsWith("http");
-        boolean amas = isAmas();
-        // int numExercises;
+        //  logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFileOnlyForImport);
+        makeExerciseDAO(lessonPlanFileOnlyForImport);
 
-        if (amas) {
-//          logger.info("Got " + lessonPlanFileOnlyForImport);
-          // TODO : get media directory from properties
-          // TODO : get install path directory from properties
-          // readAMASExercises(lessonPlanFileOnlyForImport, "", "", isURL);
-        } else {
-          //  logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFileOnlyForImport);
-          makeExerciseDAO(lessonPlanFileOnlyForImport);
-
-          if (!serverProps.useH2()) {
-            //        userExerciseDAO.useExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
+        if (!serverProps.useH2()) {
+          //        userExerciseDAO.useExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
+          if (loadAll) {
             populateProjects(-1);
-            //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
-            if (projectManagement.getProjects().isEmpty()) {
-              logger.warn("\nmakeDAO no projects loaded yet...?");
-            }
+          } else {
+            setProjectManagement();
+          }
+
+          //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
+          if (projectManagement.getProjects().isEmpty()) {
+            logger.warn("\nmakeDAO no projects loaded yet...?");
+          }
       /*      else {
               ExerciseDAO<CommonExercise> exerciseDAO = projectManagement.getFirstProject().getExerciseDAO();
               logger.info("using exercise dao from first project " + exerciseDAO);
               userExerciseDAO.setExerciseDAO(exerciseDAO);
             }*/
-          }
-
-          if (serverProps.useH2()) {
-            userExerciseDAO.setExerciseDAO(projectManagement.setDependencies());
-          }
         }
-        userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO);
+
+        if (serverProps.useH2()) {
+          userExerciseDAO.setExerciseDAO(projectManagement.setDependencies());
+        }
+
+        trainingAudioDAO.checkAndAddAudio(projectManagement.getProjects(), audioDAO);
       }
+      userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO);
+
     }
   }
 
@@ -1054,7 +1079,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * Here to support import from old individual sites for CopyToPostgres
    *
    * @param lessonPlanFile
-   * @see #makeDAO(String)
+   * @see #makeDAO(String, boolean)
    */
   private void makeExerciseDAO(String lessonPlanFile) {
 //    logger.info("makeExerciseDAO - " + lessonPlanFile + " : use h2 = " + serverProps.useH2());
@@ -1064,6 +1089,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     } else {
 //      logger.info("*not* making import project");
     }
+  }
+
+  public IProject getIProject(int projID) {
+    return getProject(projID);
   }
 
   /**
@@ -1079,10 +1108,18 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
       return null;
     } else {
-      if (projectManagement == null) {
-        setInstallPath("", null);
-      }
-      return projectManagement.getProject(projectid, false);
+      return getProject(projectid, false);
+    }
+  }
+
+  public Project getProject(int projectid, boolean onlyOne) {
+    ensureProjectManagement(!onlyOne);
+    return projectManagement.getProject(projectid, onlyOne);
+  }
+
+  public void ensureProjectManagement(boolean loadAll) {
+    if (projectManagement == null) {
+      setInstallPath("", null, loadAll);
     }
   }
 
@@ -1172,17 +1209,20 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
+   * @param projid
    * @param userid
    * @param typeToSection
-   * @param projid
+   * @param forContext
+   * @param sortByLatestScore
    * @return
    * @paramx collator
-   * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   * @see mitll.langtest.server.ScoreServlet#getChapterHistory
    */
-  public JsonObject getJsonScoreHistory(int userid,
+  public JsonObject getJsonScoreHistory(int projid,
+                                        int userid,
                                         Map<String, Collection<String>> typeToSection,
-                                        ExerciseSorter sorter,
-                                        int projid) {
+                                        boolean forContext,
+                                        boolean sortByLatestScore, ExerciseSorter sorter) {
 
     if (projid == -1) {
       projid = projectForUser(userid);
@@ -1192,7 +1232,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     } else {
       JsonSupport jsonSupportForProject = getJsonSupportForProject(projid);
       // TODO :  maybe if the project is retired...?  how to handle this on iOS???
-      return jsonSupportForProject == null ? new JsonObject() : jsonSupportForProject.getJsonScoreHistory(userid, typeToSection, sorter);
+      return jsonSupportForProject == null ? new JsonObject() : jsonSupportForProject.getJsonScoreHistory(userid, typeToSection, forContext, sorter, sortByLatestScore);
     }
   }
 
@@ -1223,12 +1263,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @return
    * @see mitll.langtest.server.ScoreServlet#getPhoneReport
    */
-  public JsonObject getJsonPhoneReport(int userid, int projid, Map<String, Collection<String>> typeToValues) {
+  public JsonObject getJsonPhoneReport(PhoneReportRequest request) {
+    int projid = request.getProjid();
     if (projid == -1) {
-      projid = projectForUser(userid);
+      projid = projectForUser(request.getUserid());
     }
-    return getJsonSupportForProject(projid)
-        .getJsonPhoneReport(userid, typeToValues, getLanguage(projid));
+    return getJsonSupportForProject(projid).getJsonPhoneReport(request);
   }
 
   @Override
@@ -1275,7 +1315,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
 
     if (projID == -1) {
-      logger.warn("no projects loaded yet ???");
+      logger.warn("logEvent no projects loaded yet ???");
       return false;
     } else {
       int realExid = -1;
@@ -1289,6 +1329,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
       if (!projectManagement.exists(projID)) projID = projectDAO.getDefault();
       Event event = new Event(id, widgetType, exid, context, userid, System.currentTimeMillis(), device, realExid);
+      if (id.equalsIgnoreCase(CRASH)) {
+        logger.error("got " + context);
+      } else if (id.equalsIgnoreCase("WARNING")) {
+        logger.warn("logEvent " + event);
+      } else {
+//        logger.info("logEvent id " + id + " : " + event);
+      }
       return eventDAO != null && eventDAO.addToProject(event, projID);
     }
   }
@@ -1305,7 +1352,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see #initializeDAOs
    */
   public void createTables() {
-    logger.info("createTables create slick tables - has " + getTables());
+    // logger.info("createTables create slick tables - has " + getTables());
     List<String> created = new ArrayList<>();
 
     List<String> known = dbConnection.getJavaListOfTables();
@@ -1336,7 +1383,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
           dialogSessionDAO,
           relatedResultDAO,
           imageDAO,
-          pendingUserDAO
+          pendingUserDAO,
+          trainingAudioDAO
       ).forEach(idao -> {
         if (createIfNotThere(idao, known)) {
           created.add(idao.getName());
@@ -1565,7 +1613,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       exercise = getUserExerciseByExID(exid, swap);
     }
 
-    String nativeAudio = audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguageEnum(), idToMini);
+    String nativeAudio = audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguageEnum(), idToMini, project.getAudioFileHelper().getSmallVocabDecoder());
     return new NativeAudioResult(nativeAudio, exercise != null && exercise.isContext());
     // return nativeAudio;
   }
@@ -1674,6 +1722,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return serverProps.getLanguage();
   }
 
+  /**
+   * JUST FOR TESTING?
+   *
+   * @param request
+   * @param projid
+   * @param userid
+   * @return
+   */
   public FilterResponse getTypeToValues(FilterRequest request, int projid, int userid) {
     return getFilterResponseHelper().getTypeToValues(request, projid, userid);
   }
@@ -1681,12 +1737,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public List<CommonExercise> filterExercises(ExerciseListRequest request,
                                               List<CommonExercise> exercises,
                                               int projid) {
-    return getFilterResponseHelper().filterExercises(request, exercises, projid);
+    return getFilterResponseHelper().filter(request, exercises, projid);
   }
 
-  public FilterResponseHelper getFilterResponseHelper() {
+  public IResponseFilter getFilterResponseHelper() {
     return new FilterResponseHelper(this);
   }
+
 
   /**
    * For downloading a user list.
@@ -1706,42 +1763,72 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Language language = getLanguageEnum(projectid);
     if (listid == -1) return language + "_Unknown";
 
-   // logger.info("writeUserList " + listid + " in " + projectid);
+    // logger.info("writeUserList " + listid + " in " + projectid);
 
     UserList<CommonShell> userListByID = getUserListManager().getSimpleUserListByID(listid);
-
+    String name = "";
     if (userListByID == null) {
       logger.error("huh? can't find user list " + listid);
       return language + "_Unknown";
     } else {
       //logger.debug("writing contents of " + userListByID);
-      long then = System.currentTimeMillis();
-      List<CommonExercise> copyAsExercises = new ArrayList<>();
-
-      for (CommonShell ex : userListByID.getExercises()) {
-        CommonExercise customOrPredefExercise = getCustomOrPredefExercise(projectid, ex.getID());
-        if (customOrPredefExercise != null) {
-          copyAsExercises.add(customOrPredefExercise);
-        }
-        else logger.warn("writeUserListAudio no exercise found = " + ex.getID());
-      }
-      Map<Integer, MiniUser> idToMini = new HashMap<>();
-      for (CommonExercise ex : copyAsExercises) {
-        userListManager.addAnnotations(ex);
-        getAudioDAO().attachAudioToExercise(ex, language, idToMini);
-      }
-      long now = System.currentTimeMillis();
-      logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
-      new AudioExport(getServerProps()).writeUserListAudio(
-          out,
-          userListByID.getName(),
-          getSectionHelper(projectid),
-          copyAsExercises,
-          language.getLanguage(),
-          listid == COMMENT_MAGIC_ID,
-          options);
+      name = userListByID.getName();
+      boolean isCommentList = listid == COMMENT_MAGIC_ID;
+      doAudioExport(out, isCommentList, projectid, options, language, name, userListByID.getExercises());
     }
-    return language + "_" + userListByID.getName();
+    return language + "_" + name;
+  }
+
+  public String writeDialogItems(OutputStream out,
+                                 int dialogID,
+                                 int projectid,
+                                 AudioExportOptions options) throws Exception {
+    Language language = getLanguageEnum(projectid);
+    if (dialogID == -1) return language + "_Unknown";
+    String name = "";
+    List<IDialog> collect = getProject(projectid).getDialogs().stream().filter(d -> d.getID() == dialogID).collect(Collectors.toList());
+    if (collect.isEmpty()) {
+      logger.error("huh? can't find user list " + dialogID);
+      return language + "_Unknown";
+    } else {
+      IDialog iDialog = collect.get(0);
+      name = language + "_" + (iDialog.getEnglish().isEmpty() ? iDialog.getForeignLanguage() : iDialog.getEnglish());
+      doAudioExport(out, false, projectid, options, language, name, iDialog.getBothExercisesAndCore());
+    }
+
+    return language + "_" + name;
+  }
+
+  private <T extends CommonShell> void doAudioExport(OutputStream out, boolean isCommentList, int projectid, AudioExportOptions options,
+                                                     Language language, String name, List<T> exercises) throws Exception {
+
+    long then = System.currentTimeMillis();
+    List<CommonExercise> copyAsExercises = new ArrayList<>();
+    for (CommonShell ex : exercises) {
+      CommonExercise customOrPredefExercise = getCustomOrPredefExercise(projectid, ex.getID());
+      if (customOrPredefExercise != null) {
+        copyAsExercises.add(customOrPredefExercise);
+      } else logger.warn("writeUserListAudio no exercise found = " + ex.getID());
+    }
+    Map<Integer, MiniUser> idToMini = new HashMap<>();
+    Project project = getProject(projectid);
+    SmallVocabDecoder smallVocabDecoder = project == null ? null : project.getAudioFileHelper().getSmallVocabDecoder();
+    for (CommonExercise ex : copyAsExercises) {
+      userListManager.addAnnotations(ex);
+      if (smallVocabDecoder != null) {
+        getAudioDAO().attachAudioToExercise(ex, language, idToMini, smallVocabDecoder);
+      }
+    }
+    long now = System.currentTimeMillis();
+    logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
+    new AudioExport(getServerProps()).writeUserListAudio(
+        out,
+        name,
+        getSectionHelper(projectid),
+        copyAsExercises,
+        language.getLanguage(),
+        isCommentList,
+        options);
   }
 
   /**
@@ -1761,8 +1848,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     getAudioDAO().attachAudioToExercises(exercises, project.getLanguageEnum(), project.getID());
 
     {
-      String name = project.getName();
-      logger.info("attachAllAudio " + name + "/" + language +
+      logger.info("attachAllAudio " + project.getName() + "/" + language +
           " took " + (System.currentTimeMillis() - then) +
           " millis to attachAllAudio to " + exercises.size() + " exercises");
     }
@@ -1774,14 +1860,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.error("getUserListName : can't find user list " + listid);
       return "_Unknown";
     } else {
-      String language1 = getLanguage(userListByID.getProjid());
-      return language1 + "_" + userListByID.getName();
+      return getLanguage(userListByID.getProjid()) + "_" + userListByID.getName();
     }
   }
 
   /**
    * Sort by english if normal list
-   *
+   * <p>
    * TODO : when would we want the commented list???
    *
    * @param listid
@@ -1854,9 +1939,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public void doReport() {
     if (serverProps.isFirstHydra()) {
       if (reportHelper.isTodayAGoodDay()) {
-        reportHelper.sendReports(getReport());
+        sendReports();
       } else {
-        logger.info("doReport : not sending email report since this is not Sunday...");
+        logger.info("doReport : not sending email report since this is not the day to send them...");
       }
     } else {
       // logger.info("doReport host " + serverProps.getHostName() + " not generating a report.");
@@ -1913,16 +1998,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @return
    * @deprecated
    */
-  public List<JsonObject> doReportAllYears() {
-    return doReportForYear(-1);
-  }
+//  public List<JsonObject> doReportAllYears() {
+//    return doReportForYear(-1);
+//  }
 
   /**
    * JUST FOR TESTING
    *
    * @deprecated JUST FOR TESTING
    */
-  public List<JsonObject> doReportForYear(int year) {
+  /*public List<JsonObject> doReportForYear(int year) {
     List<JsonObject> jsons = new ArrayList<>();
     IReport report = getReport();
 
@@ -1944,7 +2029,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     report.getSummaryReport(allReports, pathHelper);
     return jsons;
-  }
+  }*/
 
   /**
    * @param projID

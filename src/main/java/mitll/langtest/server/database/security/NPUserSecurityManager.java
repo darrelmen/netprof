@@ -507,12 +507,14 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     if (session != null) {
       int uidI = getUserIDFromSession(session);
 
-      log.info("lookupUserFromHttpSession Lookup user from HTTP session. " +
-              //"SID={} " +
-              "Request SID={}, Session Created={}, isNew={}, result={}",
-          //session.getID(),
-          request.getRequestedSessionId(),
-          request.getSession().getCreationTime(), request.getSession().isNew(), uidI);
+      if (DEBUG) {
+        log.info("lookupUserFromHttpSession Lookup user from HTTP session. " +
+                //"SID={} " +
+                "Request SID={}, Session Created={}, isNew={}, result={}",
+            //session.getID(),
+            request.getRequestedSessionId(),
+            request.getSession().getCreationTime(), request.getSession().isNew(), uidI);
+      }
 
       if (uidI > 0) {
         sessUser = getUserForID(uidI);

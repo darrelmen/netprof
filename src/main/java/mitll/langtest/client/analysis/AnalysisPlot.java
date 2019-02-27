@@ -39,12 +39,14 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.client.services.AnalysisServiceAsync;
 import mitll.langtest.client.services.ExerciseServiceAsync;
+import mitll.langtest.client.services.ListServiceAsync;
 import mitll.langtest.client.sound.SoundManagerAPI;
 import mitll.langtest.client.sound.SoundPlayer;
 import mitll.langtest.shared.analysis.PhoneSession;
@@ -95,7 +97,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private static final int CHART_HEIGHT = 275;//295;
 
   /**
-   *
+   * @see #getScoreText(SortedSet, int)
    */
   private static final String PREFIX = "Sess. #";//"Sess. #";
   private static final String SCORE = "";
@@ -136,7 +138,11 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private long firstTime;
   private long lastTime;
 
-  private final List<Long> sessions = new ArrayList<>();
+  /**
+   *
+   */
+  private final List<Long> sessionStarts = new ArrayList<>();
+  // private final List<Long> sessionEnds = new ArrayList<>();
 
   /**
    *
@@ -146,16 +152,21 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private final List<Long> months = new ArrayList<>();
 
   private int index = 0;
-
+  private int numOnList;
+  /**
+   *
+   */
   private TimeWidgets timeWidgets;
   private Chart chart = null;
   private final boolean useSessionTimeHorizon;
   private SortedSet<TimeAndScore> rawBestScores;
+  private final ListServiceAsync listServiceAsync;
 
   /**
    * @param service
-   * @param userid   either for yourself if you're a student or a selected student if you're a teacher
+   * @param userid           either for yourself if you're a student or a selected student if you're a teacher
    * @param maxWidth
+   * @param listServiceAsync
    * @see AnalysisTab#AnalysisTab
    * @see #setRawBestScores
    */
@@ -166,10 +177,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
                       ExceptionSupport exceptionSupport,
                       MessageHelper messageHelper,
                       boolean useSessionTimeHorizon,
-                      int maxWidth) {
+                      int maxWidth,
+                      ListServiceAsync listServiceAsync) {
     super(exceptionSupport, messageHelper);
     this.userid = userid;
     this.useSessionTimeHorizon = useSessionTimeHorizon;
+
+    this.listServiceAsync = listServiceAsync;
 
     setMinHeight(this, 275);
 
@@ -223,7 +237,8 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
       {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(-1L);
-        sessions.addAll(getEasyPeriods(phoneSessions));
+        sessionStarts.addAll(getEasyPeriods(phoneSessions));
+        //sessionEnds.addAll(getEasyPeriodsEnds(phoneSessions));
       }
       {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(TIME_HORIZON.DAY.getDuration());
@@ -241,19 +256,39 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
         months.addAll(getPeriods(phoneSessions1, TIME_HORIZON.MONTH.getDuration(), last));
       }
     }
-    addChart(userPerformance, userChosenID, listid != -1, isTeacherView);
+
+    // get the number of items on the list so we can show the header with a percentage completion.
+    if (listid == -1) {
+      logger.info("showUserPerformance no listid");
+      addChart(userPerformance, userChosenID, false, isTeacherView, 0);
+    } else {
+      listServiceAsync.getNumOnList(listid, new AsyncCallback<Integer>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          //  LangTest.handleNonFatalError("no type to values", caught);
+        }
+
+        @Override
+        public void onSuccess(Integer result) {
+//          logger.info("showUserPerformance num on list for " + listid + " = " + result);
+          addChart(userPerformance, userChosenID, true, isTeacherView, result);
+        }
+      });
+    }
   }
 
   private int getPercentScore(SortedSet<TimeAndScore> simpleTimeAndScores) {
     float totalScore = 0f;
 
     int n = simpleTimeAndScores.size();
-    int sessionSize = -1;
+    //  int sessionSize = -1;
     for (TimeAndScore exerciseCorrectAndScore : simpleTimeAndScores) {
       float score = exerciseCorrectAndScore.getScore();
-      if (sessionSize == -1 && exerciseCorrectAndScore.getSessionSize() > 0) {
-        sessionSize = exerciseCorrectAndScore.getSessionSize();
-      }
+
+//      if (sessionSize == -1 && exerciseCorrectAndScore.getSessionSize() > 0) {
+//        sessionSize = exerciseCorrectAndScore.getSessionSize();
+//      }
+
       if (score > 0) {
         totalScore += score;
       }
@@ -366,16 +401,24 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     return months2;
   }
 
+  private SortedSet<Long> getEasyPeriodsEnds(List<PhoneSession> sessions) {
+    SortedSet<Long> months2 = new TreeSet<>();
+    sessions.forEach(phoneSession -> months2.add(phoneSession.getEnd()));
+    return months2;
+  }
+
   /**
    * @param userPerformance
    * @param userChosenID
    * @param isTeacherView
+   * @param numOnList
    * @see #showUserPerformance
    */
   private void addChart(UserPerformance userPerformance, String userChosenID, boolean filterOnList,
-                        boolean isTeacherView) {
+                        boolean isTeacherView, int numOnList) {
     clear();
 
+    this.numOnList = numOnList;
     List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
 
     if (rawBestScores.isEmpty()) {
@@ -555,7 +598,10 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    * @see #gotExtremes(AxisSetExtremesEvent)
    */
   private void setVisibility(long start, long end) {
-    if (DEBUG) logger.info("setVisibility from " + start + "/" + new Date(start) + " - " + new Date(end));
+    if (DEBUG) {
+      logger.info("setVisibility from (" + (end - start) +
+          ") " + start + "/" + new Date(start) + " - " + new Date(end));
+    }
 
     //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception());
 //    logger.info("logException stack " + exceptionAsString);
@@ -771,11 +817,14 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
           long start = min.longValue();
           long end = max.longValue();
 
-          long l = end - start;
+     /*     long l = end - start;
           if (l < 61) {
             // logger.info("time window is empty?");
+            logger.info("gotExtremes moved time window ( " +l+
+                ") back from " + start + " : " + new Date(start));
             start -= 60 * 1000;
-          }
+            logger.info("gotExtremes moved time window back to " + start);
+          }*/
 
           if (DEBUG_EXTREMES) {
             logger.info("gotExtremes 1 now min " + new Date(start) + " max " + new Date(end));
@@ -820,7 +869,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private void setTimeRange(List<TimeAndScore> rawBestScores) {
     this.firstTime = rawBestScores.get(0).getTimestamp();
     this.lastTime = rawBestScores.get(rawBestScores.size() - 1).getTimestamp();
-//    logger.info("setTimeRange " + new Date(firstTime) + " - " + new Date(lastTime));
+    if (DEBUG) logger.info("setTimeRange " + new Date(firstTime) + " - " + new Date(lastTime));
   }
 
   /**
@@ -861,8 +910,9 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     long lastPlusSlack = lastTime + TIME_SLACK;
     switch (timeHorizon) {
       case SESSION:
-        Long lastSessionStart = sessions.get(sessions.size() - 1);
-        return showLastTimePeriod(xAxis, this.sessions, lastSessionStart, lastPlusSlack);
+        Long lastSessionStart = sessionStarts.get(sessionStarts.size() - 1);
+        // Long lastSessionEnd   = sessionEnds.get(sessionEnds.size() - 1);
+        return showLastTimePeriod(xAxis, this.sessionStarts, lastSessionStart, lastPlusSlack);
       case DAY:
         return showLastDay(xAxis, lastPlusSlack);
       case WEEK:
@@ -1051,12 +1101,19 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   }
 
   private long getOffsetPerSession() {
-    long offset = getOffset();
+    long offset;
     if (timeHorizon == SESSION) {
       Long thisPeriodStart = getPeriods().get(index);
       List<PhoneSession> phoneSessions = granularityToSessions.get(SESSION.getDuration());
       PhoneSession currentSession = phoneSessions.get(index);
       offset = currentSession.getEnd() + 1 - thisPeriodStart;
+
+      if (DEBUG) {
+        logger.info("getOffsetPerSession offset is " + offset);
+        logger.info("getOffsetPerSession currentSession " + currentSession);
+      }
+    } else {
+      offset = getOffset();
     }
     return offset;
   }
@@ -1077,7 +1134,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private List<Long> getPeriods() {
     switch (timeHorizon) {
       case SESSION:
-        return sessions;
+        return sessionStarts;
       case DAY:
         return days;
       case WEEK:
@@ -1099,11 +1156,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     Long periodStart = periods.get(index);
     long end = periodStart + offset;
 
-/*    logger.info("showTimePeriod From      " + format.format(new Date(periodStart)));
-     logger.info("showTimePeriod to        " + format.format(new Date(end)));
-    logger.info("showTimePeriod" +
-        // "\n\tdur     " + offset +
-        "\n\t offset " + offset);*/
+    if (DEBUG) {
+      logger.info("showTimePeriod (" + index + "/" + periods.size() + ") From      " + format.format(new Date(periodStart)));
+      logger.info("showTimePeriod to        " + format.format(new Date(end)));
+      logger.info("showTimePeriod" +
+          // "\n\tdur     " + offset +
+          "\n\t offset " + offset);
+    }
 
     chart.getXAxis().setExtremes(periodStart, end); // triggers a time changed event to go to listeners
     setTitleScore(periodStart, end, index);
@@ -1162,8 +1221,11 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 //      if (DEBUG)
 //        logger.info("setTitleScore found " + timeAndScoresInRange.size() + " samples between " + new Date(from) + " and " + new Date(to));
     }
-    timeWidgets.setScore("<div style='white-space: nowrap;'><span>" + getScoreText(timeAndScoresInRange, index) +
-        "</span>");
+    String scoreText = getScoreText(timeAndScoresInRange, index);
+//    logger.info("setTitleScore " + from + " : " + to + " " + index + " : (" + scoreText.length() + ") " + scoreText);
+    /* boolean didIt =*/
+    timeWidgets.setScore("<div style='white-space: nowrap;'><span>" + scoreText + "</span>");
+    //  if (!didIt) logger.warning("setTitleScore : didn't set the score header???");
     setYAxisTitle(chart, getChartSubtitle(getPercentScore(timeAndScoresInRange), timeAndScoresInRange.size()));
   }
 
@@ -1179,16 +1241,19 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     int fround1 = getPercentScore(simpleTimeAndScores);
     int n = simpleTimeAndScores.size();
     if (n == 0) {
-      logger.warning("huh? no samples at " + index);
+      logger.warning("getScoreText huh? no samples at " + index);
       return "";
     } else {
       int denom = simpleTimeAndScores.iterator().next().getSessionSize();
-      // logger.info("getScoreText session size = " + denom + " n " + n + " fround " + fround1);
+     // logger.info("getScoreText session size = " + denom + " n " + n + " fround " + fround1);
 
+      if (numOnList > 0) {
+        denom = numOnList;
+      }
       if (denom < 0) {
         denom = n;
       } else if (n > denom) {
-        //logger.info("denom " + denom + " n " + n);
+        logger.info("getScoreText denom " + denom + " < n " + n);
         denom = n; // denom never larger than numerator...
       }
 
@@ -1197,11 +1262,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
       int score = getAdjustedScore(fround1, percent);
       String ratio = (n == denom) ? "" + n : n + "/" + denom;
 
-      String text = simpleTimeAndScores.size() > 100 ? "" :
-          PREFIX + (index + 1) + " : " +
-              SCORE + score +
+      String sessionLabel = timeHorizon == SESSION ? PREFIX + (index + 1) + " : " : "";
+
+      String suffix = " for " + ratio + " items " + percentPart;
+      String text = //simpleTimeAndScores.size() > 100 ? "" :
+          sessionLabel + score +
               //"%" +
-              " for " + ratio + " " + percentPart
+              suffix
           //+
           //ITEMS
           ;

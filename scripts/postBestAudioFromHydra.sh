@@ -13,14 +13,15 @@ do
     echo `pwd`
 
     mkdir -p /tmp/tempBestAudio/$langlc
-    cd /opt/netprof/bestAudio/$langlc
+    cd /opt/netprof/bestAudio
 
     echo `pwd`
 
     date
     echo "before tar"
 
-    tar cfz /tmp/tempBestAudio/$langlc/$toPost --exclude='*.raw, *_16K.wav, *_16K_*.wav' bestAudio
+    echo tar cfz /tmp/tempBestAudio/$langlc/$toPost -N date "01 Aug 2018" --exclude='*.raw, *_16K.wav, *_16K_*.wav, orig_*.wav, trim_*.wav, *.lab, *.ogg' $langlc
+    tar cfz /tmp/tempBestAudio/$langlc/$toPost -N date "01 Aug 2018" --exclude='*.raw, *_16K.wav, *_16K_*.wav, orig_*.wav, trim_*.wav, *.lab, *.ogg' $langlc
 
     date
     echo "after  tar"

@@ -32,16 +32,13 @@
 
 package mitll.langtest.client.custom.dialog;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
-import mitll.langtest.client.banner.IListenView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.userlist.ListView;
+import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
@@ -53,9 +50,7 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.logging.Logger;
 
 /**
  * Coordinates editing an item -
@@ -169,7 +164,7 @@ public class EditItem {
         //else
         // logger.info("unit " + exercise.getUnitToValue());
 
-        if (exercise.isPredefined()) {
+        if (exercise.isPredefined() || exercise.isContext()) {
           TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<>(exercise,
               controller,
               exerciseList,
@@ -184,7 +179,7 @@ public class EditItem {
               return -1;
             }
           },
-              false);
+              false, () -> "");
           widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
           return widgets;
         } else {

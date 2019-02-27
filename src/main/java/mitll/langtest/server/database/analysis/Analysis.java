@@ -143,23 +143,23 @@ public abstract class Analysis extends DAO {
    * @param id
    * @param best
    * @return
-   * @see IAnalysis#getPerformanceReportForUser
+   * @see SlickAnalysis#getPerformanceReportForUser
    */
   UserPerformance getUserPerformance(long id, Map<Integer, UserInfo> best) {
     Collection<UserInfo> values = best.values();
     if (values.isEmpty()) {
-      if (DEBUG) logger.debug("getUserPerformance no results for " + id);
+      if (DEBUG) logger.info("getUserPerformance no results for " + id);
       return new UserPerformance();
     } else {
       if (values.size() > 1) logger.error("getUserPerformance only expecting one user for " + id);
       UserInfo firstUser = values.iterator().next();
-      if (DEBUG) logger.debug("getUserPerformance results for " + values.size() + "  first  " + firstUser);
-      if (DEBUG) logger.debug("getUserPerformance resultsForQuery for " + firstUser.getBestScores().size());
+      if (DEBUG) logger.info("getUserPerformance results for " + values.size() + "  first  " + firstUser);
+      if (DEBUG) logger.info("getUserPerformance resultsForQuery for " + firstUser.getBestScores().size());
       UserPerformance userPerformance = new UserPerformance(id, firstUser.getBestScores(), firstUser.getFirst(), firstUser.getLast());
 
       {
         List<TimeAndScore> rawBestScores = userPerformance.getRawBestScores();
-        logger.debug("getUserPerformance for " + id + " found " + rawBestScores.size() + " scores");
+        if (DEBUG) logger.info("getUserPerformance for " + id + " found " + rawBestScores.size() + " scores");
         userPerformance.setGranularityToSessions(
             new PhoneAnalysis().getGranularityToSessions(rawBestScores));
       }
@@ -236,7 +236,6 @@ public abstract class Analysis extends DAO {
   }
 
   PhoneBigrams getPhoneBigramsForPeriod(AnalysisRequest analysisRequest, UserInfo next) {
-    // List<Integer> resultIDs = getResultIDsForRequest(analysisRequest, next);
     List<Integer> resultIDsForRequest = getResultIDsForRequest(analysisRequest, next);
 
     if (DEBUG) logger.info("getPhoneBigramsForPeriod " +
@@ -258,9 +257,21 @@ public abstract class Analysis extends DAO {
 
   protected abstract Collection<Integer> getDialogExerciseIDs(int dialogID);
 
+  /**
+   * sigh - filter first on date or exids, like via the database...
+   * @param next
+   * @param from
+   * @param to
+   * @param exids
+   * @return
+   */
   @NotNull
   private List<Integer> getResultIDsInTimeWindow(UserInfo next, long from, long to, Collection<Integer> exids) {
     List<BestScore> resultsForQuery = next.getBestScores();
+
+    if (DEBUG) {
+      logger.info("getResultIDsInTimeWindow : " + new Date(from) + " - " + new Date(to) + " exids " + exids + " results " + resultsForQuery.size());
+    }
 
     if (!exids.isEmpty()) {
       int before = resultsForQuery.size();
@@ -281,10 +292,10 @@ public abstract class Analysis extends DAO {
 
     resultsForQuery.forEach(bs -> {
       long timestamp = bs.getTimestamp();
-      if (timestamp > from && timestamp <= to) {
+      if (timestamp >= from && timestamp <= to) {
         resultIDs.add(bs.getResultID());
-      } else {
-//        logger.info("getResultIDsInTimeWindow : skip " + bs.getResultID() + " at " + new Date(timestamp));
+      } else if (DEBUG) {
+        logger.info("getResultIDsInTimeWindow : skip " + bs.getResultID() + " at " + new Date(timestamp) + " : " +timestamp + " not in (" + from + " - " + to + ")");
       }
     });
 
@@ -340,6 +351,7 @@ public abstract class Analysis extends DAO {
       return phoneReport;
     }
   }*/
+
   public PhoneSummary getPhoneSummary(int userid, UserInfo next) {
     if (next == null) {
       return new PhoneSummary();
@@ -482,6 +494,8 @@ public abstract class Analysis extends DAO {
   }
 
   /**
+   * Partition into sessions.
+   *
    * remember the last best attempt we have in a sequence for an item, but if they come back to practice it more than 5 minutes later
    * consider it a new score
    *
@@ -502,7 +516,7 @@ public abstract class Analysis extends DAO {
 
     Map<Integer, Long> userToEarliest = new HashMap<>();
 
-    userToBest.forEach((userID, bestScores1) -> {
+    userToBest.forEach((userID, bestScoresForUser) -> {
       List<BestScore> bestScores = userToBest2.get(userID);
 
       if (bestScores == null) {
@@ -516,11 +530,11 @@ public abstract class Analysis extends DAO {
         BestScore lastBest = null;
         Set<Integer> seen = new HashSet<>();
 
-        if (DEBUG) logger.info("getBestForQuery examining " + bestScores1.size() + " best scores for " + userID);
+        if (DEBUG) logger.info("getBestForQuery examining " + bestScoresForUser.size() + " best scores for " + userID);
 
         // remember the last best attempt we have in a sequence, but if they come back to practice it more than 5 minutes later
         // consider it a new score
-        for (BestScore bs : bestScores1) {
+        for (BestScore bs : bestScoresForUser) {
           int id = bs.getResultID();
           int exid = bs.getExId();
           long time = bs.getTimestamp();
@@ -584,10 +598,18 @@ public abstract class Analysis extends DAO {
     userToBest2.forEach((userID, bestScores) -> {
       if (bestScores.size() >= minRecordings) {
         UserInfo value = new UserInfo(bestScores, userToEarliest.get(userID));
+
         if (value.getUserID().equalsIgnoreCase(D_ADMIN)) {
           logger.info("getUserIDToInfo : skipping " + D_ADMIN);
         } else {
           userToUserInfo.put(userID, value);
+          if (value.getLastSessionSize() > 0) {
+            logger.info("user info for " + userID + " value " +
+                "\n\tlast session num   " + value.getLastSessionNum() +
+                "\n\tlast session size  " + value.getLastSessionSize() +
+                "\n\tlast session score " + value.getLastSessionScore()
+            );
+          }
         }
       } else {
         if (DEBUG)

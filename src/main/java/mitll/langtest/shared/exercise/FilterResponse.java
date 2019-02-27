@@ -56,11 +56,11 @@ public class FilterResponse implements IsSerializable {
   }
 
   /**
-   * @see ISection#getTypeToValues(FilterRequest, boolean)
    * @param reqid
    * @param typeToValues
    * @param typesToInclude
    * @param userListID
+   * @see mitll.langtest.server.database.exercise.SectionHelper#getTypeToValues(FilterRequest, boolean)
    */
   public FilterResponse(int reqid,
                         Map<String, Set<MatchInfo>> typeToValues,
@@ -73,22 +73,25 @@ public class FilterResponse implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.client.list.FacetExerciseList#gotFilterResponse
    * @return
+   * @see mitll.langtest.client.list.FacetExerciseList#gotFilterResponse
    */
   public Map<String, Set<MatchInfo>> getTypeToValues() {
     return typeToValues;
   }
 
   /**
-   * @see mitll.langtest.client.list.FacetExerciseList#gotFilterResponse
    * @return
+   * @see mitll.langtest.client.list.FacetExerciseList#gotFilterResponse
    */
   public Set<String> getTypesToInclude() {
     return typesToInclude;
   }
 
-  public void addTypeToInclude(String type) {typesToInclude.add(type);}
+  public void addTypeToInclude(String type) {
+    typesToInclude.add(type);
+  }
+
   public int getReqid() {
     return reqid;
   }

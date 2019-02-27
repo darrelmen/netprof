@@ -33,6 +33,8 @@
 package mitll.langtest.shared.analysis;
 
 import mitll.langtest.server.database.analysis.IAnalysis;
+import mitll.langtest.server.database.word.Word;
+import mitll.langtest.shared.project.Language;
 
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +54,10 @@ public class PhoneReport extends PhoneSummary {
   // can't be final!
   private boolean valid;
   private long serverTime;
+  private transient Language language;
+  private List<String> sortedPhones;
+  private transient Map<Integer, List<Word>> ridToWords;
+  private transient Map<String, List<WordAndScore>> phoneToExamples;
 
   public PhoneReport() {
     valid = false;
@@ -59,6 +65,7 @@ public class PhoneReport extends PhoneSummary {
 
   /**
    * @param overallPercent
+   * @param language
    * @paramx phoneToWordAndScoreSorted
    * @see mitll.langtest.client.analysis.PhoneContainer
    * @see mitll.langtest.server.database.phone.MakePhoneReport#getPhoneReport
@@ -66,13 +73,20 @@ public class PhoneReport extends PhoneSummary {
   public PhoneReport(int overallPercent,
                      Map<String, List<Bigram>> phoneToBigrams,
                      Map<String, PhoneStats> phoneToAvgSorted,
-                     Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted) {
+                     Map<String, Map<String, List<WordAndScore>>> phoneToWordAndScoreSorted,
+                     Map<String, List<WordAndScore>> phoneToExamples,
+                     List<String> sortedPhones,
+                     Language language,
+                     Map<Integer, List<Word>> ridToWords) {
     super(phoneToAvgSorted);
 
     this.overallPercent = overallPercent;
     this.phoneToBigrams = phoneToBigrams;
     this.phoneToWordAndScoreSorted = phoneToWordAndScoreSorted;
-
+    this.sortedPhones = sortedPhones;
+    this.language = language;
+    this.ridToWords = ridToWords;
+    this.phoneToExamples = phoneToExamples;
     valid = true;
   }
 
@@ -111,7 +125,23 @@ public class PhoneReport extends PhoneSummary {
     return this;
   }
 
+  public Language getLanguage() {
+    return language;
+  }
+
+  public List<String> getSortedPhones() {
+    return sortedPhones;
+  }
+
   public String toString() {
     return "valid " + valid + " : " + super.toString();
+  }
+
+  public Map<Integer, List<Word>> getRidToWords() {
+    return ridToWords;
+  }
+
+  public Map<String, List<WordAndScore>> getPhoneToExamples() {
+    return phoneToExamples;
   }
 }

@@ -47,14 +47,13 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.text.CollationKey;
-import java.text.Collator;
 import java.util.*;
 
 public abstract class BaseResultDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseResultDAO.class);
 
-  private static final int MINUTE = 60 * 1000;
-  private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
+  // private static final int MINUTE = 60 * 1000;
+  //private static final int SESSION_GAP = 5 * MINUTE;  // 5 minutes
   private final boolean DEBUG = false;
   List<MonitorResult> cachedMonitorResultsForQuery = null;
 
@@ -171,13 +170,15 @@ public abstract class BaseResultDAO extends DAO {
         correctAndScores.add(r);
       }
     }
+
     for (ExerciseCorrectAndScore exerciseCorrectAndScore : idToScores.values()) {
-      exerciseCorrectAndScore.sort();
+      exerciseCorrectAndScore.sortByTime();
     }
 
     for (Integer id : allIds) {
       if (!idToScores.containsKey(id)) idToScores.put(id, new ExerciseCorrectAndScore(id));
     }
+
     return new ArrayList<>(idToScores.values());
   }
 
@@ -191,7 +192,7 @@ public abstract class BaseResultDAO extends DAO {
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
    */
-  public <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises,
+/*  public <T extends CommonShell> List<T> getExercisesSortedIncorrectFirst(Collection<T> exercises,
                                                                           int userid,
                                                                           Collator collator,
                                                                           Language language) {
@@ -214,7 +215,7 @@ public abstract class BaseResultDAO extends DAO {
       commonExercises.add(idToEx.get(score.getId()));
     }
     return commonExercises;
-  }
+  }*/
 
   /**
    * @param userid
@@ -225,6 +226,7 @@ public abstract class BaseResultDAO extends DAO {
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
    * @see IResultDAO#getExercisesSortedIncorrectFirst
    */
+/*
   private List<ExerciseCorrectAndScore> getExerciseCorrectAndScores(int userid,
                                                                     List<Integer> allIds,
                                                                     Map<Integer, CollationKey> idToKey,
@@ -233,62 +235,78 @@ public abstract class BaseResultDAO extends DAO {
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
     return getSortedAVPHistory(results, allIds, idToKey);
   }
+*/
 
   /**
    * @param results
    * @param allIds
    * @param idToEx
-   * @param sorter
    * @return
    * @see #getExerciseCorrectAndScoresByPhones
    */
-  private List<ExerciseCorrectAndScore> getSortedAVPHistoryByPhones(List<CorrectAndScore> results,
+  private List<ExerciseCorrectAndScore> getSortedHistory(List<CorrectAndScore> results,
                                                                     Collection<Integer> allIds,
-                                                                    final Map<Integer, CommonExercise> idToEx,
-                                                                    final ExerciseSorter sorter
+                                                                    final Map<Integer, CommonExercise> idToEx
   ) {
     List<ExerciseCorrectAndScore> sortedResults = getExerciseCorrectAndScores(results, allIds);
     sortedResults.sort((o1, o2) -> {
-      CommonExercise o1Ex = idToEx.get(o1.getId());
-      CommonExercise o2Ex = idToEx.get(o2.getId());
-      return compareUsingPhones(o1, o2, o1Ex, o2Ex, sorter);
+      CommonShell o1Ex = idToEx.get(o1.getId());
+      CommonShell o2Ex = idToEx.get(o2.getId());
+      return compareUsingScores(o1, o2, o1Ex, o2Ex);
     });
+
+
     return sortedResults;
   }
 
-  private int compareUsingPhones(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2,
-                                 CommonExercise o1Ex, CommonExercise o2Ex, final ExerciseSorter sorter) {
-    if (o1.isEmpty() && o2.isEmpty()) {
-      return sorter.phoneCompByFirst(o1Ex, o2Ex);
-    } else if (o1.isEmpty()) return -1;
-    else if (o2.isEmpty()) return +1;
-    else { // neither is empty
-      return compScoresPhones(o1, o2, o1Ex, o2Ex, sorter);
-    }
+  private int compareFLThenEnglish(CommonShell o1Ex, CommonShell o2Ex) {
+    int i = o1Ex.getForeignLanguage().compareTo(o2Ex.getForeignLanguage());
+    return i == 0 ? o1Ex.getEnglish().compareTo(o2Ex.getEnglish()) : i;
   }
 
   /**
+   * If no scores for either exercise, compare by phone length...?
+   *
    * @param o1
    * @param o2
    * @param o1Ex
    * @param o2Ex
    * @param sorter
    * @return
+   */
+
+  private int compareUsingScores(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2,
+                                 CommonShell o1Ex, CommonShell o2Ex) {
+    if (o1.isEmpty() && o2.isEmpty()) {
+      return compareFLThenEnglish(o1Ex, o2Ex);
+    } else if (o1.isEmpty()) {
+      return -1;
+    } else if (o2.isEmpty()) {
+      return +1;
+    } else { // neither is empty
+      return compScores(o1, o2, o1Ex, o2Ex);
+    }
+  }
+
+
+  /**
+   * Break tie scores with phone comparison -- why?
+   *
+   * @param o1
+   * @param o2
+   * @param o1Ex
+   * @param o2Ex
+   * @return
    * @see #compareUsingPhones
    */
-  private int compScoresPhones(ExerciseCorrectAndScore o1, ExerciseCorrectAndScore o2,
-                               CommonExercise o1Ex, CommonExercise o2Ex, final ExerciseSorter sorter) {
-    int myI = o1.getDiff();
-    int oI = o2.getDiff();
-    int i = Integer.compare(myI, oI);
-    if (i == 0) {
-      float myScore = o1.getAvgScore();
-      float otherScore = o2.getAvgScore();
-      int comp = Float.compare(myScore, otherScore);
-      return (comp == 0) ? sorter.phoneCompByFirst(o1Ex, o2Ex) : comp;
-    } else {
-      return i;
-    }
+  private int compScores(ExerciseCorrectAndScore o1,
+                         ExerciseCorrectAndScore o2,
+                         CommonShell o1Ex,
+                         CommonShell o2Ex) {
+    float myScore = o1.getLatestScore();
+    float otherScore = o2.getLatestScore();
+    int comp = Float.compare(myScore, otherScore);
+    return (comp == 0) ? compareFLThenEnglish(o1Ex, o2Ex) : comp;
   }
 
   /**
@@ -297,20 +315,17 @@ public abstract class BaseResultDAO extends DAO {
    * @param userid
    * @param allIds
    * @param idToEx
-   * @param sorter
    * @param language
    * @return
    * @see mitll.langtest.server.database.JsonSupport#getJsonScoreHistory(int, Map, ExerciseSorter)
-   *
    */
-  public Collection<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
-                                                                                  List<Integer> allIds,
-                                                                                  Map<Integer, CommonExercise> idToEx,
-                                                                                  ExerciseSorter sorter,
-                                                                                  Language language) {
+  public List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
+                                                                           List<Integer> allIds,
+                                                                           Map<Integer, CommonExercise> idToEx,
+                                                                           Language language) {
     List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, userid, language);
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
-    return getSortedAVPHistoryByPhones(results, allIds, idToEx, sorter);
+    return getSortedHistory(results, allIds, idToEx);
   }
 
   /**

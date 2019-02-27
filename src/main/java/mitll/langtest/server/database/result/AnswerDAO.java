@@ -243,7 +243,7 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
   }
 
   @Override
-  public void addRoundTrip(int resultID, int roundTrip) {
+  public void addRoundTrip(int resultID, long roundTrip) {
     Connection connection = getConnection();
     try {
       String sql = "UPDATE " +
@@ -267,11 +267,11 @@ public class AnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
       database.closeConnection(connection);
     }
   }
-
+/*
   @Override
   public void addUserScore(int id, float score) {
     changeScore(id, score, ResultDAO.USER_SCORE);
-  }
+  }*/
 
   private void changeScore(int id, float score, String scoreColumn) {
     Connection connection = getConnection();

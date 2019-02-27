@@ -56,7 +56,9 @@ public class ExerciseSorter<T extends CommonShell> extends SimpleSorter<T> {
   /**
    * @see mitll.langtest.server.services.ExerciseServiceImpl#sortExercises
    */
-  public ExerciseSorter() { super(false); }
+  public ExerciseSorter() {
+    super(false);
+  }
 
   /**
    * @param phoneToCount
@@ -68,30 +70,36 @@ public class ExerciseSorter<T extends CommonShell> extends SimpleSorter<T> {
   }
 
   /**
-   * @see mitll.langtest.server.json.JsonExport#getJsonForSelection
+   * why would this be a good idea???
+   *
    * @param toSort
    * @param phoneToCount
+   * @see mitll.langtest.server.json.JsonExport#getJsonForSelection
    */
-  public void sortedByPronLengthThenPhone(List<? extends CommonExercise> toSort,final Map<String, Integer> phoneToCount) {
-    toSort.sort((Comparator<CommonExercise>) (o1, o2) -> {
-      // items in same chapter alphabetical by tooltip
-      return phoneCompFirst(o1, o2, phoneToCount);
-    });
+  public void sortedByPronLengthThenPhone(List<? extends CommonExercise> toSort, final Map<String, Integer> phoneToCount) {
+    // items in same chapter alphabetical by tooltip
+
+    toSort.sort((Comparator<CommonExercise>) (o1, o2) -> phoneCompFirst(o1, o2, phoneToCount));
   }
 
-    /**
-     * @param o1
-     * @param o2
-     * @return
-     * @see mitll.langtest.server.database.result.BaseResultDAO#compareUsingPhones(ExerciseCorrectAndScore, ExerciseCorrectAndScore, CommonExercise, CommonExercise, ExerciseSorter)
-     */
-  public int phoneCompByFirst(CommonExercise o1, CommonExercise o2) { return phoneCompFirst(o1, o2, phoneToCount);  }
+  /**
+   * @param o1
+   * @param o2
+   * @return
+   * @see mitll.langtest.server.database.result.BaseResultDAO#compareUsingPhones(ExerciseCorrectAndScore, ExerciseCorrectAndScore, CommonExercise, CommonExercise, ExerciseSorter)
+   */
+  public int phoneCompByFirst(CommonExercise o1, CommonExercise o2) {
+    return phoneCompFirst(o1, o2, phoneToCount);
+  }
 
   /**
+   * TODO : why so complicated?
+   *
    * Compare and put shorter pronunciations before longer ones.
    * When they are the same length, compare phones, and when you get to a difference, use their relative occurrence
    * frequency, with rarer phones first.
    * If the phones have the same frequency, compare the phone names (ideally this is unlikely).
+   *
    * @param o1
    * @param o2
    * @param phoneToCount
@@ -114,7 +122,7 @@ public class ExerciseSorter<T extends CommonShell> extends SimpleSorter<T> {
     }
 
     if (pron1 == null) {
-      //logger.warn("phoneCompFirst missing pron?");
+      logger.warn("phoneCompFirst missing pron, falling back to alphabetic ordering");
       return o1.getForeignLanguage().toLowerCase().compareTo(o2.getForeignLanguage().toLowerCase());
     }
 
@@ -132,16 +140,16 @@ public class ExerciseSorter<T extends CommonShell> extends SimpleSorter<T> {
         if (!a.equals(b)) {
           Integer a1 = phoneToCount.get(a);
           if (a1 == null) {
-            logger.error("phoneCompFirst huh? no phone childCount for " + a + " in " + phoneToCount.keySet() + " for " +o1.getID());
+            logger.error("phoneCompFirst huh? no phone childCount for " + a + " in " + phoneToCount.keySet() + " for " + o1.getID());
             a1 = -1;
           }
           Integer b1 = phoneToCount.get(b);
           if (b1 == null) {
-            logger.error("phoneCompFirst huh? no phone childCount for " + b + " in " + phoneToCount.keySet() + " for " +o2.getID());
+            logger.error("phoneCompFirst huh? no phone childCount for " + b + " in " + phoneToCount.keySet() + " for " + o2.getID());
             b1 = -1;
           }
           int compt = a1.compareTo(b1);
-          return compt == 0 ? a.compareTo(b) :compt;
+          return compt == 0 ? a.compareTo(b) : compt;
         }
       }
       return 0;

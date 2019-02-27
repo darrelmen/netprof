@@ -132,7 +132,6 @@ public interface IUserExerciseDAO extends IDAO {
    */
   int add(CommonExercise userExercise, boolean isContext, Collection<String> typeOrder);
 
-
   int insert(SlickExercise UserExercise);
 
   List<CommonShell> getOnList(int listID, boolean shouldSwap);
@@ -191,7 +190,7 @@ public interface IUserExerciseDAO extends IDAO {
       Map<Integer, ExerciseAttribute> allByProject,
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs, boolean isPredef);
 
-  List<Integer> getByProjectExactMatch(int projid, int creator, String fl);
+  List<Integer> getUserDefinedByProjectExactMatch(int projid, int creator, String fl);
 
   /**
    *

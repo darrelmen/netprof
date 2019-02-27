@@ -10,7 +10,6 @@ public class AudioExportOptions {
   private boolean justRegularSpeed = true;
   private boolean justContext = false;
   private boolean isUserList = false;
-//  private boolean hasProjectSpecificAudio = false;
   private String search = "";
   private boolean includeAudio;
 

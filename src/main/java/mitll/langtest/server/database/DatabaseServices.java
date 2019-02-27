@@ -35,7 +35,6 @@ package mitll.langtest.server.database;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.custom.IStateManager;
-import mitll.langtest.server.database.dliclass.IDLIClassJoinDAO;
 import mitll.langtest.server.database.exercise.ExerciseServices;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.project.IProjectManagement;
@@ -43,8 +42,8 @@ import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.report.ReportingServices;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.services.AmasServices;
-import mitll.langtest.server.database.user.IPendingUserDAO;
 import mitll.langtest.server.database.userlist.UserListServices;
+import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -90,7 +89,7 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
 
   CommonExercise getCustomOrPredefExercise(int projid, int id);
 
-  DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, ServletContext servletContext);
+  DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, ServletContext servletContext, boolean loadAll);
 
   ISection<CommonExercise> getSectionHelper(int projectid);
   ISection<IDialog> getDialogSectionHelper(int projectid);
@@ -131,4 +130,6 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, AmasSer
   boolean isHasValidDB();
 
   String getDbConfig();
+
+  JsonExport getJSONExport(int projectid);
 }

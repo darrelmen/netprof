@@ -1,5 +1,6 @@
 package mitll.langtest.server;
 
+import mitll.langtest.shared.project.Language;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -17,6 +18,7 @@ public class FileSaver {
    * @param inputStream
    * @param realExID
    * @param userid
+   * @param language
    * @param makeDir
    * @return
    * @throws IOException
@@ -27,7 +29,7 @@ public class FileSaver {
                              InputStream inputStream,
                              int realExID,
                              int userid,
-                             String language,
+                             Language language,
                              boolean makeDir) throws IOException {
     File saveFile = new File(
         pathHelper.getAbsoluteToAnswer(

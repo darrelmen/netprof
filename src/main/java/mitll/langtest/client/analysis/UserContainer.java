@@ -53,6 +53,7 @@ import mitll.langtest.shared.custom.IUserListLight;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
@@ -61,7 +62,7 @@ import java.util.*;
  * @since 10/20/15.
  */
 public class UserContainer extends BasicUserContainer<UserInfo> implements TypeaheadListener, ReqCounter {
-//  private final Logger logger = Logger.getLogger("UserContainer");
+  private final Logger logger = Logger.getLogger("UserContainer");
 
   private static final int SESSION_AVG_WIDTH = 85;
 
@@ -77,9 +78,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    */
   private static final String POLY_NUMBER = "Session Compl.";//"Session Completed";
   private static final int LIFETIME_WIDTH = 60;
-  private static final String LIFETIME = "Life. #";
+  private static final String LIFETIME = "Life #";
   private static final int LIFETIME_AVG_WIDTH = 65;
-  private static final String LIFETIME_AVG = "Life. Avg";
+  private static final String LIFETIME_AVG = "Life Avg";
   private static final String OVERALL_SCORE = "Session Avg";//"Adjust.";
 
   /**
@@ -144,6 +145,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private final UserTypeahead userTypeahead = new UserTypeahead(this);
   //private List<UserInfo> remembered;
   private Collection<UserInfo> orig;
+
+  private List<Integer> rememberedLists;
+  private int listid = -1;
 
   /**
    * @param controller
@@ -341,7 +345,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     DivWidget c = new DivWidget();
     c.addStyleName("leftFiveMargin");
     c.addStyleName("floatRight");
-    c.add(getListBox());
+    c.add(getQuizListBox());
     filterContainer.add(c);
   }
 
@@ -418,14 +422,14 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   }
 */
   @NotNull
-  private ListBox getListBox() {
+  private ListBox getQuizListBox() {
     ListBox listBox = new ListBox();
 
     listBox.setWidth(LIST_BOX_WIDTH + "px");
     listBox.addStyleName("floatLeft");
     listBox.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
 
-    controller.getListService().getLightListsForUser(true, false, new AsyncCallback<Collection<IUserListLight>>() {
+    controller.getListService().getAllQuiz(new AsyncCallback<Collection<IUserListLight>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting my lists", caught);
@@ -439,29 +443,31 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     return listBox;
   }
 
-  private List<Integer> rememberedLists;
-  private int listid = -1;
-
-  private void useLists(Collection<IUserListLight> result, ListBox listBox) {
+  private void useLists(Collection<IUserListLight> result, ListBox quizListBox) {
     this.rememberedLists = new ArrayList<>();
+
     result.forEach(ul -> rememberedLists.add(ul.getID()));
 
     // logger.info("There are " + result.size() + " lists");
-    listBox.addItem(NO_LIST);
-    result.forEach(ul -> listBox.addItem(ul.getName()));
-    listBox.addChangeHandler(event -> {
-      int selectedIndex = listBox.getSelectedIndex();
+    quizListBox.addItem(NO_LIST);
+    result.forEach(ul -> quizListBox.addItem(ul.getName()));
 
-      if (selectedIndex == 0) {
-        listid = -1;
-      } else {
-        Integer listID = rememberedLists.get(selectedIndex - 1);
-        //    logger.info("selected index " + selectedIndex + " " + listID);
-        listid = listID;
-      }
-
+    quizListBox.addChangeHandler(event -> {
+      rememberSelectedQuiz(quizListBox);
       changeSelectedUser(getSelected());
     });
+  }
+
+  private void rememberSelectedQuiz(ListBox listBox) {
+    int selectedIndex = listBox.getSelectedIndex();
+
+    if (selectedIndex == 0) {
+      listid = -1;
+    } else {
+      Integer listID = rememberedLists.get(selectedIndex - 1);
+      //    logger.info("selected index " + selectedIndex + " " + listID);
+      listid = listID;
+    }
   }
 
   /**
@@ -532,12 +538,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     return current;
   }*/
 
-  private Column<UserInfo, SafeHtml> addLastOverallScore(List<UserInfo> list) {
+  private void addLastOverallScore(List<UserInfo> list) {
     Column<UserInfo, SafeHtml> current = getOverall();
     addColumn(current, new TextHeader(OVERALL_SCORE));
     table.setColumnWidth(current, SESSION_AVG_WIDTH + "px");
     table.addColumnSortHandler(getOverallSorter(current, list));
-    return current;
+   // return current;
   }
 
 /*  private void addMine(List<UserInfo> list) {
@@ -795,14 +801,19 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     // return getSafeHtml("" + Integer.valueOf(lastSessionScore).floatValue()/10F);
     // return getSafeHtml("" + lastSessionScore);
 
+//    logger.info("getAdjustedScore shell " +shell);
     float lastf = v;//(float) lastSessionScore;
     if (percent < 50) {
+      logger.info("getAdjustedScore 1 adjusting given " + percent + " from "+ lastf);
       lastf *= 0.8f;
     } else if (percent < 60) {
+      logger.info("getAdjustedScore 2 adjusting given " + percent + " from "+ lastf);
       lastf *= 0.9f;
     }
+  //  else {
+  //    logger.info("getAdjustedScore lastf "+ lastf);
+  //  }
 
-    // return Math.round(lastf) / 10F;
     return Integer.valueOf(Math.round(lastf)).floatValue() / 10F;
   }
 
@@ -883,7 +894,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     addRightSideContent(selectedUser);
   }
 
-  protected void addRightSideContent(UserInfo selectedUser) {
+  private void addRightSideContent(UserInfo selectedUser) {
     rightSide.add(getAnalysisTab(selectedUser));
   }
 

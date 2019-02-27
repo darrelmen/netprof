@@ -32,7 +32,6 @@
 
 package mitll.langtest.client.exercise;
 
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
@@ -41,6 +40,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -61,19 +61,23 @@ import java.util.logging.Logger;
  */
 abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends VerticalPanel implements
     BusyPanel, PostAnswerProvider, ProvidesResize, RequiresResize {
+  protected final boolean doNormalRecording;
   private final Logger logger = Logger.getLogger("ExercisePanel");
 
   private static final int CONTENT_SCROLL_HEIGHT = 220;
   private static final String PROMPT = "Read the following text and answer the question or questions below.";
+  /**
+   * @see #addAnswerWidget(int, Widget)
+   */
   private final List<Widget> answers = new ArrayList<>();
   private final Set<Widget> completed = new HashSet<>();
-  protected T exercise = null;
+  protected T exercise;
   final ExerciseController controller;
   private final NavigationHelper navigationHelper;
   final ListInterface<L, T> exerciseList;
   private final Map<Integer, Set<Widget>> indexToWidgets = new HashMap<>();
-  final String instance;
-  private final boolean doNormalRecording;
+
+  private static final boolean DEBUG = false;
 
   /**
    * Includes fix for
@@ -82,20 +86,13 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
    * @param e
    * @param controller
    * @param exerciseList
-   * @param instance
-   * @param enableNextOnlyWhenBothCompleted
    * @see ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.list.ListInterface#loadExercise
    */
-  ExercisePanel(final T e,
-                final ExerciseController controller,
-                ListInterface<L, T> exerciseList,
-                String instance,
-                boolean doNormalRecording, boolean enableNextOnlyWhenBothCompleted) {
+  ExercisePanel(final T e, final ExerciseController controller, ListInterface<L, T> exerciseList, boolean doNormalRecording) {
     this.exercise = e;
     this.controller = controller;
     this.exerciseList = exerciseList;
-    this.instance = instance;
     this.doNormalRecording = doNormalRecording;
 
 /*
@@ -182,9 +179,7 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
     return false;
   }
 
-  void addInstructions() {
-    add(new Heading(4, PROMPT));
-  }
+  abstract void addInstructions();
 
   /**
    * @param e
@@ -201,13 +196,6 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
     return (content.length() > 200) ? getContentScroller(maybeRTLContent) : maybeRTLContent;
   }
 
-  /**
-   * @return
-   * @see #getAnswerWidget
-   */
-  boolean isNormalRecord() {
-    return doNormalRecording;
-  }
 
   protected abstract String getExerciseContent(T e);
 
@@ -259,7 +247,7 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
   }
 
   private boolean isPashto() {
-    return controller.getLanguage().equalsIgnoreCase("Pashto");
+    return controller.getLanguageInfo() == Language.PASHTO;
   }
 
   public void onResize() {
@@ -305,8 +293,7 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
    */
   void addAnswerWidget(int index, Widget answerWidget) {
     answers.add(answerWidget);
-    Set<Widget> objects = indexToWidgets.get(index);
-    if (objects == null) indexToWidgets.put(index, objects = new HashSet<>());
+    Set<Widget> objects = indexToWidgets.computeIfAbsent(index, k -> new HashSet<>());
     objects.add(answerWidget);
   }
 
@@ -371,15 +358,16 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
   }
 
   protected void enableNext() {
-//    logger.info("enableNext : answered " + completed.size() + " vs total " + answers.size());
+    if (DEBUG) logger.info("enableNext : answered " + completed.size() + " vs total " + answers.size());
     navigationHelper.enableNextButton(isCompleted());
   }
 
   protected boolean isCompleted() {
     boolean b = completed.size() == answers.size();
-//    if (b) {
-//      logger.info("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : " + b);
-//    }
+
+    if (DEBUG)
+      logger.info("isCompleted : answered " + completed.size() + " vs total " + answers.size() + " : completed? = " + b);
+
     return b;
   }
 

@@ -64,8 +64,7 @@ public class ResultDAOToExcel {
     writeToStream(out, writeExcel(results, typeOrder));
   }
 
-  private SXSSFWorkbook writeExcel(Collection<MonitorResult> results, Collection<String> typeOrder
-  ) {
+  private SXSSFWorkbook writeExcel(Collection<MonitorResult> results, Collection<String> typeOrder) {
     long now;
     long then = System.currentTimeMillis();
 
@@ -94,7 +93,6 @@ public class ResultDAOToExcel {
         ResultDAO.CORRECT,
         ResultDAO.PRON_SCORE,
         "Device",
-      //  "w/Flash",
         "Process",
         "RoundTrip"
     );
@@ -152,9 +150,6 @@ public class ResultDAOToExcel {
 
       cell = row.createCell(j++);
       cell.setCellValue(result.getDevice());
-
-      cell = row.createCell(j++);
-      cell.setCellValue(result.isWithFlash() ? YES : NO);
 
       cell = row.createCell(j++);
       cell.setCellValue(result.getProcessDur());

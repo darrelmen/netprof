@@ -32,10 +32,11 @@
 
 package mitll.langtest.server.services;
 
-import mitll.langtest.client.banner.RehearseViewHelper;
+import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.services.DialogService;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.dialog.IDialogSession;
@@ -72,7 +73,9 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
       return new FilterResponse();
     } else {
-      return sectionHelper.getTypeToValues(request, false);
+      FilterResponse typeToValues = sectionHelper.getTypeToValues(request, false);
+      logger.info("getTypeToValues for " + request + " got " + typeToValues);
+      return typeToValues;
     }
   }
 
@@ -118,8 +121,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       CorrectAndScore correctAndScore = scoreHistoryPerExercise.get(iDialog.getID());
       if (correctAndScore != null) {
         int percentScore = correctAndScore.getPercentScore();
-        logger.info("scores " + iDialog.getID() + " - " + percentScore);
-
+      //  logger.info("scores " + iDialog.getID() + " - " + percentScore);
         iDialog.getMutableShell().setScore(percentScore);
       }
     });
@@ -166,8 +168,8 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       i = o1.getChapter().compareTo(o2.getChapter());
     }
     if (i == 0) {
-      String page1 = o1.getAttributeValue(IDialog.METADATA.PAGE);
-      String page2 = o2.getAttributeValue(IDialog.METADATA.PAGE);
+      String page1 = o1.getAttributeValue(DialogMetadata.PAGE);
+      String page2 = o2.getAttributeValue(DialogMetadata.PAGE);
       i = page1.compareTo(page2);
     }
     if (i == 0) i = o1.getForeignLanguage().compareTo(o2.getForeignLanguage());

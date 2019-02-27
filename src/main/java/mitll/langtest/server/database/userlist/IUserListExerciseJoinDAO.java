@@ -57,5 +57,5 @@ public interface IUserListExerciseJoinDAO extends IDAO {
 
   Map<Integer, Collection<Integer>> getExidsForList(Collection<Integer> listids);
 
-  Map<Integer,Integer> getNumExidsForList(Collection<Integer> listids);
+  Map<Integer, Integer> getNumExidsForList(Collection<Integer> listids);
 }

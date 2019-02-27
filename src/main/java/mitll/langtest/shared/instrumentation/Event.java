@@ -104,7 +104,7 @@ public class Event extends SlimEvent {
   public String toString() {
     long timestamp = getTimestamp();
     if (timestamp == -1) timestamp = System.currentTimeMillis();
-    return "Event on " + getWidgetID() +
+    return "Event on " + getWidgetID() + "/" + getWidgetType()+
         " by " + getUserID() +
         " at " + new Date(timestamp) +
         " info " + getExerciseID() + "/" + getExid() + " : " + getContext() +

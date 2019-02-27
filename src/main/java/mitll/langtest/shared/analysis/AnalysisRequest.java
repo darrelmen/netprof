@@ -20,10 +20,6 @@ public class AnalysisRequest implements Serializable {
 
   public AnalysisRequest() {}
 
-  public int getUserid() {
-    return userid;
-  }
-
   public int getListid() {
     return listid;
   }
@@ -52,6 +48,15 @@ public class AnalysisRequest implements Serializable {
     return minRecordings;
   }
 
+  public int getUserid() {
+    return userid;
+  }
+
+  /**
+   * @see mitll.langtest.client.analysis.AnalysisTab#AnalysisTab
+   * @param userid
+   * @return
+   */
   public AnalysisRequest setUserid(int userid) {
     this.userid = userid;
     return this;

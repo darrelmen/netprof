@@ -38,6 +38,7 @@ import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.SimpleUser;
 import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
@@ -271,7 +272,7 @@ public class UserManager {
    * @param user
    * @see #storeUser
    */
-  void rememberUser(User user) {
+  void rememberUser(SimpleUser user) {
     Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     userChosenID = user.getUserID();
     localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getID());

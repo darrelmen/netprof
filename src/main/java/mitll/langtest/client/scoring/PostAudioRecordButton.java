@@ -51,6 +51,8 @@ import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.logging.Logger;
 
+import static mitll.langtest.shared.answer.Validity.OK;
+
 /**
  * This binds a record button with the act of posting recorded audio to the server.
  * <p>
@@ -145,7 +147,7 @@ public abstract class PostAudioRecordButton extends RecordButton
         getDialogSessionID(),
         getDevice()  // device = session id in quiz
     );
-    if (DEBUG || true) logger.info("startRecording : " + clientAudioContext);
+    if (DEBUG) logger.info("startRecording : " + clientAudioContext);
 
     controller.startStream(clientAudioContext, this::gotPacketResponse);
   }
@@ -161,12 +163,12 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @see RecordButton#stop
    */
   public boolean stopRecording(long duration, boolean abort) {
-    //logger.warning("stopRecording ");
+    if (DEBUG) logger.info("stopRecording " + duration);
     stopRecordingReqTimestamp = System.currentTimeMillis();
     controller.stopRecording(USE_DELAY, abort);
 
     if (duration > MIN_DURATION) {
-      // logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
+      if (DEBUG)  logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
       return true;
     } else {
       hideWaveform();
@@ -198,7 +200,11 @@ public abstract class PostAudioRecordButton extends RecordButton
       gotAbort();
     } else if (message.equalsIgnoreCase(END)) {
       AudioAnswer audioAnswer = jsonAnswerParser.getAudioAnswer(digestJsonResponse);
-      if (DEBUG_PACKET) logger.info("gotPacketResponse audioAnswer " + audioAnswer);
+      if (DEBUG_PACKET || audioAnswer.getValidity() != OK) {
+        logger.info("gotPacketResponse audioAnswer " + audioAnswer);
+        logger.info("gotPacketResponse json        " + json);
+        controller.logEvent(this, "gotPacketResponse", "" + exerciseID, "invalid recording " + audioAnswer.getValidity());
+      }
       onPostSuccess(audioAnswer, stopRecordingReqTimestamp);
     } else {
       if (DEBUG_PACKET) {
@@ -261,7 +267,6 @@ public abstract class PostAudioRecordButton extends RecordButton
 
   protected String getDevice() {
     //logger.info("getDevice default " + getClass());
-
     return controller.getBrowserInfo();
   }
 
@@ -319,7 +324,7 @@ public abstract class PostAudioRecordButton extends RecordButton
       return;
     }*/
 
-    validAudio = (result.getValidity() == Validity.OK || doQuietAudioCheck(result));
+    validAudio = (result.getValidity() == OK || doQuietAudioCheck(result));
 
     if (result.getAudioAttribute() != null) {
       if (result.getAudioAttribute().getAudioType() == null) {
@@ -410,8 +415,6 @@ public abstract class PostAudioRecordButton extends RecordButton
 
   abstract protected int getDialogSessionID();
 
-
-
   private void logRoundtripTime(long durationInMillis, long roundtrip) {
     //  long durationInMillis = result.getDurationInMillis();
     String message = "PostAudioRecordButton : (success) User #" + getUser() +
@@ -452,7 +455,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @return
    */
   Widget getPopupTargetWidget() {
-  //  logger.info("getPopupTargetWidget target is " + this.getElement().getId());
+    logger.info("getPopupTargetWidget target is " + this.getElement().getId());
     return this;
   }
 }

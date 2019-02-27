@@ -108,7 +108,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final mitll.hlt.domino.shared.model.user.User.Gender DFEMALE = mitll.hlt.domino.shared.model.user.User.Gender.Female;
   private static final mitll.hlt.domino.shared.model.user.User.Gender UNSPECIFIED = mitll.hlt.domino.shared.model.user.User.Gender.Unspecified;
   private static final String NETPROF1 = "Netprof";
-  //  private static final String PRIMARY = NETPROF1;
   private static final String DEFAULT_AFFILIATION = "";
 
   private static final String UID_F = "userId";
@@ -122,6 +121,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   private static final boolean DEBUG_STUDENTS = false;
   private static final boolean DEBUG_TEACHERS = false;
+  private static final String F_LAST = "F. Last";
 
   private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
@@ -130,7 +130,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
           "dliflc.edu",
           "mail.mil", //146
           "us.af.mil",
-          "gmail.com,",
+          "gmail.com",
           "yahoo.com",
           "mail.mil",
           "ll.mit.edu",
@@ -162,10 +162,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   private static final String VALID_EMAIL = "^[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,6}$";
 
+/*
   private static final String EMAIL_REGEX =
       "^[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*" +
           "@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+" +
           "(?:[A-Z]{2}|com|org|net|edu|gov|mil|biz|info|mobi|name|aero|asia|jobs|museum)\\b";
+*/
 
   private static final long STALE_DUR = 24L * 60L * 60L * 1000L;
   private static final boolean SWITCH_USER_PROJECT = false;
@@ -243,6 +245,18 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             }
           });
 
+
+  private final LoadingCache<Integer, FirstLastUser> idToFirstLastUser = CacheBuilder.newBuilder()
+      .maximumSize(10000)
+      .expireAfterWrite(CACHE_TIMEOUT, TimeUnit.MINUTES)
+      .build(
+          new CacheLoader<Integer, FirstLastUser>() {
+            @Override
+            public User load(Integer key) {
+              //    logger.info("idToUser Load " + key);
+              return getUser(lookupUser(key));
+            }
+          });
 
   /**
    * @param database
@@ -371,13 +385,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private void doAfterGetDelegate() {
     myDelegate = makeMyServiceDelegate();
     dominoAdminUser = delegate.getAdminUser();
-
     ensureDefaultUsers();
   }
-
-/*  public JSONSerializer getSerializer() {
-    return serializer;
-  }*/
 
   /**
    * DNS LOOKUP.
@@ -413,7 +422,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public void close() {
     if (!usedDominoResources) {
 //      logger.info("closing connection to " + pool, new Exception());
-      pool.closeConnection();
+     if (pool != null) pool.closeConnection();
     }
     if (!usedDominoResources && ignite != null) {
       ignite.close();
@@ -651,7 +660,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     boolean useUsualLogin = shouldUseUsualDominoEmail(email);
 
-    logger.info("usual login " + useUsualLogin + " for " + email);
+    if (useUsualLogin) {
+      logger.info("addUser : usual login " + useUsualLogin + " for " + email);
+    }
 
     MyUserService.LoginResult loginResult =
         useUsualLogin ?
@@ -663,8 +674,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       return new LoginResult(-1, ""); // password error?
     } else {
       ClientUserDetail clientUserDetail = clientUserDetailSResult.get();
+      String emailToken = loginResult.emailToken;
+      if (emailToken.isEmpty()) {
+        logger.error("addUser (useUsualLogin = " + useUsualLogin +
+            ") : no email token for " + clientUserDetail);
+      }
       return new LoginResult(clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID(),
-          useUsualLogin ? "" : loginResult.emailToken);
+          useUsualLogin ? "" : emailToken);
     }
   }
 
@@ -688,7 +704,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @NotNull
   public Group getGroup() {
     if (primaryGroup == null) {
-      logger.info("getGroup : Search groups for " +NETPROF1);
+      logger.info("getGroup : Search groups for " + NETPROF1);
 
       List<Group> groups = delegate.getGroupDAO().searchGroups(NETPROF1);
       if (groups.isEmpty()) {
@@ -753,7 +769,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private Group getGroupOrMake(String name) {
     Group group = nameToGroup.get(name);
     if (group == null) {
-      logger.info("getGroupOrMake : Search groups for " +name);
+      logger.info("getGroupOrMake : Search groups for " + name);
       List<Group> groups = delegate.getGroupDAO().searchGroups(name);
       group = groups.isEmpty() ? null : groups.iterator().next();
 
@@ -801,7 +817,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param newHashedPassword
    * @param baseURL
    * @return
-   * @see IUserDAO#changePassword
+   * @see #changePassword
+   * @see #changePasswordWithCurrent
    */
   private DBUser savePasswordAndGetUser(int id, String currentPassword, String newHashedPassword, String baseURL) {
     DBUser dbUser = lookupUser(id);
@@ -1112,8 +1129,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @Override
   public User getUserByID(String userID) {
     mitll.hlt.domino.shared.model.user.DBUser dominoUser = getDBUser(userID);
+
     if (dominoUser == null) {
-      logger.warn("getUserByID no user by '" + userID + "'");
+      logger.info("getUserByID no user by '" + userID + "'");
     } else {
       logger.info("getUserByID found " + userID + " user #" + dominoUser.getDocumentDBID());
     }
@@ -1171,6 +1189,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       logger.warn("lookupUser got " + e);
       return delegate.lookupDBUser(id);
     }
+  }
+
+  public String lookupUserId(int id) {
+    return delegate.lookupUserId(id);
   }
 
   public void refreshCacheFor(int userid) {
@@ -1322,7 +1344,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       if (DEBUG_TEACHERS) {
         logger.info("toUser : User #" + documentDBID + " " + userId + " is a " + userKind);
       }
-    } else if (DEBUG_STUDENTS){
+    } else if (DEBUG_STUDENTS) {
       logger.info("toUser : User #" + documentDBID + " " + userId + " is a " + userKind + " with roles " + dominoUser.getRoleAbbreviations());
     }
 
@@ -1346,14 +1368,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       permissionSet.add(User.Permission.PROJECT_ADMIN); // a little redundant with isAdmin...
     }
 
-    if (user.isPoly()) {
+ /*   if (user.isPoly()) {
       //logger.info("\n\n\ntoUser user " + user.getUserID() + " is a polyglot user.");
       handleAffiliationUser(dominoUser, permissionSet, user, true);
     } else if (user.isNPQ()) {
       handleAffiliationUser(dominoUser, permissionSet, user, false);
     } else {
 //      logger.info("toUser  user " + user.getUserID() + " is not a polyglot user.");
-    }
+    }*/
     user.setPermissions(permissionSet);
 //    logger.info("\ttoUser return " + user);
     return user;
@@ -1763,6 +1785,28 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return firstLastUser == null ? null : firstLastUser.getUserID();
   }
 
+  public String getFirstInitialName(int userid) {
+    Map<Integer, FirstLastUser> firstLastFor = getFirstLastFor(Collections.singleton(userid));
+    return getFirstInitialName(firstLastFor.get(userid));
+  }
+
+  @Nullable
+  private String getFirstInitialName(SimpleUser firstLastUser) {
+    String s = firstLastUser == null ? null :
+        (firstLastUser.getFirst().length() > 0 ?
+            firstLastUser.getFirst().substring(0, 1) + ". " : "") +
+            firstLastUser.getLast();
+
+    // logger.info("getFirstInitialName Got " +userid + " " + firstLastUser + " : " + s);
+
+    if (s != null && s.equalsIgnoreCase(F_LAST)) {
+      s = firstLastUser.getUserID();
+    }
+    // logger.info("now Got " +userid + " " + firstLastUser + " : " + s);
+
+    return s;
+  }
+
   /**
    * adds gender
    *
@@ -1837,9 +1881,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         myUserService.changePassword(userId, userKey, newPassword, url);
   }
 
-  private boolean shouldUseUsualDominoEmail(String email) {
+  @Override
+  public boolean shouldUseUsualDominoEmail(String email) {
     boolean b = hasBlessedEmail(email);
-    logger.info("shouldUseUsualDominoEmail '" + email + "' - " + b);
+
+   // logger.info("shouldUseUsualDominoEmail (addUserViaEmail = " + addUserViaEmail + ") '" + email + "' - " + b);
+
     return addUserViaEmail && !b;
   }
 
@@ -1856,6 +1903,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param baseURL
    * @return
    * @see mitll.langtest.server.services.UserServiceImpl#changePasswordWithCurrent
+   * @see ChangePasswordView#changePassword
    */
   public boolean changePasswordWithCurrent(int user, String currentHashPass, String newHashPass, String baseURL) {
     return savePasswordAndGetUser(user, currentHashPass, newHashPass, baseURL) != null;

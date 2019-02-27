@@ -39,6 +39,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.custom.INavigation.VIEWS.PERFORM;
+import static mitll.langtest.client.custom.INavigation.VIEWS.PERFORM_PRESS_AND_HOLD;
 import static mitll.langtest.client.list.FacetExerciseList.LISTS;
 
 /**
@@ -51,6 +53,7 @@ import static mitll.langtest.client.list.FacetExerciseList.LISTS;
  * To change this template use File | Settings | File Templates.
  */
 public class SelectionState {
+
   private final Logger logger = Logger.getLogger("SelectionState");
 
   private static final String POUND = "#";
@@ -79,9 +82,11 @@ public class SelectionState {
   private boolean isJump;
   private boolean onlyWithAudioDefects, onlyUnrecorded, onlyDefault, onlyUninspected;
 
-  private static final boolean DEBUG = false;
   private int project = -1;
   private int dialog = -1;
+  private ViewParser viewParser = new ViewParser();
+
+  private static final boolean DEBUG = false;
 
   public SelectionState() {
     this(History.getToken(), false);
@@ -94,8 +99,7 @@ public class SelectionState {
    * @see HistoryExerciseList#getSelectionState(String)
    */
   public SelectionState(String token, boolean removePlus) {
-    String token1 = removePlus ? unencodeToken(token) : unencodeToken2(token);
-    parseToken(token1);
+    parseToken(removePlus ? unencodeToken(token) : unencodeToken2(token));
   }
 
   private String unencodeToken(String token) {
@@ -260,17 +264,9 @@ public class SelectionState {
    */
   @NotNull
   public INavigation.VIEWS getView() {
-    try {
-      instance = instance.replaceAll(" ", "_");
-
-      if (instance.equalsIgnoreCase("Drill")) instance = "Practice".toUpperCase();
-      // if (instance.equalsIgnoreCase("Practice")) instance = "Drill".toUpperCase();
-
-      return instance.isEmpty() ? INavigation.VIEWS.NONE : INavigation.VIEWS.valueOf(instance.toUpperCase());
-    } catch (IllegalArgumentException e) {
-      logger.warning("getView : hmm, couldn't parse " + instance);
-      return INavigation.VIEWS.NONE;
-    }
+    INavigation.VIEWS view = viewParser.getView(instance);
+  //  logger.info("getViews " + instance + " = " + view);
+    return view;
   }
 
   public String getSearch() {
@@ -307,6 +303,10 @@ public class SelectionState {
 
   public int getDialog() {
     return dialog;
+  }
+
+  public boolean isJump() {
+    return isJump;
   }
 
   public int getList() {
@@ -349,9 +349,5 @@ public class SelectionState {
         "\n\tdialog   " + dialog +
         "\n\tunit->chapter " + getTypeToSection() +
         "\n\tonlyWithAudioDefects " + isOnlyWithAudioDefects();
-  }
-
-  public boolean isJump() {
-    return isJump;
   }
 }

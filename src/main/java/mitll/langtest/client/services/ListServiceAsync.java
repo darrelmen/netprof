@@ -34,7 +34,6 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.custom.*;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 
@@ -43,7 +42,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ListServiceAsync {
-  void getLightListsForUser(boolean onlyCreated, boolean visited, AsyncCallback<Collection<IUserListLight>> async);
+  void getAllQuiz(AsyncCallback<Collection<IUserListLight>> async);
 
   void getListsForUser(boolean onlyCreated, boolean visited, boolean includeQuiz, AsyncCallback<Collection<UserList<CommonShell>>> async);
 
@@ -65,15 +64,13 @@ public interface ListServiceAsync {
    * @param dliClass
    * @param isPublic
    * @param listType
-   * @param duration
-   * @param minScore
-   * @param showAudio
+   * @param quizSpec
    * @param async
    * @see mitll.langtest.client.custom.exercise.NewListButton#addUserList
    */
   void addUserList(String name, String description, String dliClass,
-                   boolean isPublic, UserList.LIST_TYPE listType, int size, int duration, int minScore, boolean showAudio,
-                   Map<String, String> unitChapter,
+                   boolean isPublic, UserList.LIST_TYPE listType, int size,
+                   QuizSpec quizSpec, Map<String, String> unitChapter,
                    AsyncCallback<UserList> async);
 
   void addVisitor(int userListID, int user, AsyncCallback<UserList> asyncCallback);
@@ -95,4 +92,6 @@ public interface ListServiceAsync {
   void reallyCreateNewItems(int userListID, String userExerciseText, AsyncCallback<List<CommonShell>> async);
 
   void clearAudio(int audioID, AsyncCallback<Void> async);
+
+  void getNumOnList(int listid, AsyncCallback<Integer> async);
 }

@@ -39,6 +39,7 @@ import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
@@ -55,6 +56,7 @@ import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Deals with downloads from site -- for excel spreadsheets and zips of audio.
@@ -73,6 +75,8 @@ public class DownloadServlet extends DatabaseServlet {
   private static final Logger logger = LogManager.getLogger(DownloadServlet.class);
   private static final String AUDIO = "audio";
   private static final String LIST = "list";
+  private static final String DIALOG = "d";
+  public static final String S = DIALOG + "=";
   private static final String FILE = "file";
 
   private static final String COMPRESSED_SUFFIX = "mp3";
@@ -88,13 +92,12 @@ public class DownloadServlet extends DatabaseServlet {
   /**
    * @see #getAudioExportOptions
    */
-//  private static final String ALLCONTEXT = "allcontext";
   private static final String LISTS = "Lists=[";
 
   private static final String REGEXAMPERSAND = "&";
 
-  private static final String AMPERSAND = DownloadHelper.AMPERSAND;//"___AMPERSAND___";
-  private static final String COMMA = DownloadHelper.COMMA;//"___COMMA___";
+  private static final String AMPERSAND = DownloadHelper.AMPERSAND;
+  private static final String COMMA = DownloadHelper.COMMA;
   private static final String RESULTS_XLSX = "results.xlsx";
   private static final String EVENTS_XLSX = "events.xlsx";
   private static final String WAV = ".wav";
@@ -133,7 +136,7 @@ public class DownloadServlet extends DatabaseServlet {
 
     if (db != null) {
       try {
-        int projid = getProjectID(request);
+        int projid = getProjectIDFromSession(request);
 
         if (projid == -1) {
           projid = getProjectIDFromUser(request);
@@ -148,7 +151,7 @@ public class DownloadServlet extends DatabaseServlet {
         //       logger.info("doGet : current session found projid " + project1);
         Project project = getDatabase().getProject(projid);
         boolean hasProjectSpecificAudio = project.hasProjectSpecificAudio();
-        String language = project.getLanguage();
+        String language = project.getLanguageEnum().toDisplay();
 
         String requestURI = request.getRequestURI();
         if (requestURI.toLowerCase().contains(AUDIO)) {
@@ -166,26 +169,18 @@ public class DownloadServlet extends DatabaseServlet {
 
           queryString = decode;
 
-          if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
-            if (queryString.contains(LISTS)) {
-              String s = queryString.split("Lists=\\[")[1];
-              String[] split = s.split(("\\]"));
-              String listid = split[0];
-              if (!listid.isEmpty()) {
-                String[] splitArgs = split[1].split(REGEXAMPERSAND);
-                writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
-              }
-            } else {
-              String[] split = queryString.split("list=");
+          if (queryString.contains(S)) {
+            String[] split = queryString.split(S);
 
-              if (split.length == 2) {
-                String[] splitArgs = split[1].split(REGEXAMPERSAND);
-                String listid = splitArgs[0];
-                if (!listid.isEmpty()) {
-                  writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
-                }
+            if (split.length == 2) {
+              String[] splitArgs = split[1].split(REGEXAMPERSAND);
+              String listid = splitArgs[0];
+              if (!listid.isEmpty()) {
+                writeDialogList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
               }
             }
+          } else if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
+            donwloadAList(response, db, projid, hasProjectSpecificAudio, queryString);
           } else if (queryString.startsWith(FILE)) {
             returnAudioFile(response, db, queryString, language, projid);
           } else if (queryString.startsWith(REQUEST)) {
@@ -203,6 +198,28 @@ public class DownloadServlet extends DatabaseServlet {
     }
 
     closeOutputStream(response);
+  }
+
+  private void donwloadAList(HttpServletResponse response, DatabaseImpl db, int projid, boolean hasProjectSpecificAudio, String queryString) {
+    if (queryString.contains(LISTS)) {
+      String s = queryString.split("Lists=\\[")[1];
+      String[] split = s.split(("\\]"));
+      String listid = split[0];
+      if (!listid.isEmpty()) {
+        String[] splitArgs = split[1].split(REGEXAMPERSAND);
+        writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
+      }
+    } else {
+      String[] split = queryString.split("list=");
+
+      if (split.length == 2) {
+        String[] splitArgs = split[1].split(REGEXAMPERSAND);
+        String listid = splitArgs[0];
+        if (!listid.isEmpty()) {
+          writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
+        }
+      }
+    }
   }
 
   /**
@@ -481,6 +498,7 @@ public class DownloadServlet extends DatabaseServlet {
       db.usersToXLSX(response.getOutputStream());
     } else
       */
+    logger.info("returnSpreadsheet : req " + encodedFileName);
     if (encodedFileName.toLowerCase().contains(RESULTS)) {
       setFilenameHeader(response, prefix + RESULTS_XLSX);
       new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid), db.getTypeOrder(projectid), outputStream);
@@ -527,6 +545,38 @@ public class DownloadServlet extends DatabaseServlet {
 
       options.setUserList(true);
       db.writeUserListAudio(response.getOutputStream(),
+          id == null ? -1 : id,
+          projectid,
+          options);
+    } catch (Exception e) {
+      logger.error("couldn't write zip?", e);
+    }
+  }
+
+  private void writeDialogList(HttpServletResponse response,
+                               DatabaseImpl db,
+                               String dialogID,
+                               int projectid,
+                               AudioExportOptions options) {
+    Integer id = null;
+    try {
+      id = Integer.parseInt(dialogID);
+    } catch (NumberFormatException e) {
+      logger.error("couldn't parse " + dialogID);
+    }
+
+    try {
+      final int fid = id == null ? -1 : id;
+
+      List<IDialog> collect = db.getProject(projectid).getDialogs().stream().filter(d -> d.getID() == fid).collect(Collectors.toList());
+
+      String name = id == null | collect.isEmpty() ? "unknown" : collect.get(0).getEnglish();
+      name = name.replaceAll(",", "_").replaceAll(" ", "_");
+      name += ".zip";
+      setHeader(response, name);
+
+      options.setUserList(true);
+      db.writeDialogItems(response.getOutputStream(),
           id == null ? -1 : id,
           projectid,
           options);
@@ -611,7 +661,6 @@ public class DownloadServlet extends DatabaseServlet {
   }
 
   /**
-   *
    * @param inputStream
    * @param saveFile
    * @throws IOException

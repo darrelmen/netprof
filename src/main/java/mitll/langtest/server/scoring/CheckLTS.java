@@ -55,7 +55,7 @@ class CheckLTS {
   private static final int WARN_LTS_COUNT = 1;
 
   private final LTS letterToSoundClass;
-  private final String language;
+  // private final String language;
 
   private final HTKDictionary htkDictionary;
   private final SmallVocabDecoder smallVocabDecoder;
@@ -70,25 +70,24 @@ class CheckLTS {
   /**
    * @param lts
    * @param htkDictionary
-   * @param languageProperty
    * @param isAsianLanguage
    * @see Scoring#Scoring
    */
-  CheckLTS(LTS lts, HTKDictionary htkDictionary, String languageProperty, Language languageInfo, boolean hasModel, boolean isAsianLanguage) {
+  CheckLTS(LTS lts, HTKDictionary htkDictionary, Language languageInfo, boolean hasModel, boolean isAsianLanguage) {
     this.letterToSoundClass = lts;
     this.htkDictionary = htkDictionary;
     this.languageInfo = languageInfo;
     if (htkDictionary == null || (htkDictionary.isEmpty() && hasModel)) {
       logger.warn("CheckLTS : dict is empty? lts = " + lts);
     }
-    smallVocabDecoder = new SmallVocabDecoder(htkDictionary, isAsianLanguage);
-    this.language = languageProperty != null ? languageProperty : "";
+    smallVocabDecoder = new SmallVocabDecoder(htkDictionary, isAsianLanguage, languageInfo);
+    //  this.language = languageInfo != null ? languageInfo.getLanguage() : "";
     this.isAsianLanguage = isAsianLanguage;
     removeAllAccents =
-        !language.equalsIgnoreCase("french") &&
-            !language.equalsIgnoreCase("turkish") &&
-            !language.equalsIgnoreCase("croatian") &&
-            !language.equalsIgnoreCase("serbian")
+        languageInfo != Language.FRENCH &&
+            languageInfo != Language.TURKISH &&
+            languageInfo != Language.CROATIAN &&
+            languageInfo != Language.SERBIAN
     ;
 
 //    logger.info("lang " + languageProperty  + " asian " + isAsianLanguage);
@@ -151,15 +150,15 @@ class CheckLTS {
 
 //    if (removeAllAccents) logger.info("checkLTS " +foreignLanguagePhrase);
 
-    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, removeAllAccents);
-    Collection<String> translitTokens = transliteration.isEmpty() ? Collections.emptyList() : smallVocabDecoder.getTokens(transliteration, removeAllAccents);
+    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, removeAllAccents, false);
+    Collection<String> translitTokens = transliteration.isEmpty() ? Collections.emptyList() : smallVocabDecoder.getTokens(transliteration, removeAllAccents, false);
 
     boolean translitOk = isTranslitOk(lts, transliteration, tokens, translitTokens);
 
     //   String language = isAsianLanguage ? " MANDARIN " : "";
 
     if (DEBUG) {
-      logger.info("checkLTS '" + language + "'" +
+      logger.info("checkLTS '" + languageInfo + "'" +
           "\n\tfl          " + foreignLanguagePhrase +
           "\n\ttokens      " + tokens
       );
@@ -185,7 +184,8 @@ class CheckLTS {
           }
         } else {
           boolean htkEntry = htkDictionary.contains(token) || htkDictionary.contains(token.toLowerCase());
-          if (DEBUG && !htkEntry) logger.info("checkLTS NOT IN DICT for '" + token + "' and not '" +token.toLowerCase()+  "'");
+          if (DEBUG && !htkEntry)
+            logger.info("checkLTS NOT IN DICT for '" + token + "' and not '" + token.toLowerCase() + "'");
 
           if (!htkEntry && isSpanish() && token.equalsIgnoreCase("Sί")) {
             htkEntry = htkDictionary.contains("si");
@@ -249,7 +249,7 @@ class CheckLTS {
         i++;
       }
     } catch (Exception e) {
-      logger.error("lts " + language + "/" + lts + " failed on '" + foreignLanguagePhrase + "'", e);
+      logger.error("lts " + languageInfo + "/" + lts + " failed on '" + foreignLanguagePhrase + "'", e);
       oov.add(e.getMessage());
       return oov;
     }
@@ -260,7 +260,8 @@ class CheckLTS {
         logger.info("checkLTS : for phrase '" + foreignLanguagePhrase + "' : inlts " + inlts + " indict " + indict);
     }
     if (DEBUG || (DEBUG_OOV && !oov.isEmpty()))
-      logger.info("checkLTS '" + language + "' tokens : '" + tokens + "' oov " + oov.size() + " : " + oov + " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
+      logger.info("checkLTS '" + languageInfo + "' tokens : '" + tokens + "' oov " + oov.size() + " : " + oov +
+          " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
 
     return oov;
   }
@@ -270,7 +271,7 @@ class CheckLTS {
   }
 
   private String getDebugInfo(LTS lts, String foreignLanguagePhrase, int i, String token) {
-    return "checkLTS with " + lts + "/" + language + " token #" + i +
+    return "checkLTS with " + lts + "/" + languageInfo + " token #" + i +
         " : '" + token + "' hash " + token.hashCode() +
         " is invalid in '" + foreignLanguagePhrase +
         "' and not in dictionary of size " + htkDictionary.size();
@@ -359,8 +360,8 @@ class CheckLTS {
   //this seems to be dead code - it's called by a method that isn't so far as I can tell, called by anything else. Going to not mess with trying to get the transliteration in here
   private PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
     //   logger.info("lang  " + language + " is asian " + isAsianLanguage);
-    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary, isAsianLanguage);
-    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, false);
+    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary, isAsianLanguage, languageInfo);
+    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, languageInfo != Language.FRENCH, false);
 
     List<String> firstPron = new ArrayList<>();
     Set<String> uphones = new TreeSet<>();

@@ -6,6 +6,8 @@ import java.util.Set;
 
 public class WordAndProns {
   private final String word;
+  private boolean fromLTS = false;
+  private boolean isUNK = false;
   private final Set<String> prons = new LinkedHashSet<>();
 
   WordAndProns(String word, Collection<String> prons) {
@@ -34,8 +36,26 @@ public class WordAndProns {
     return prons.add(pron);
   }
 
+  WordAndProns setFromLTS(boolean fromLTS) {
+    this.fromLTS = fromLTS;
+    return this;
+  }
+
+  public boolean isFromLTS() {
+    return fromLTS;
+  }
+
+  public boolean isUNK() {
+    return isUNK;
+  }
+
+  public WordAndProns setUNK(boolean UNK) {
+    isUNK = UNK;
+    return this;
+  }
+
   @Override
   public String toString() {
-    return word + " : " + prons;
+    return word + " : " + prons + (fromLTS ? " (LTS)" : "")+ (isUNK ? " (UNK)" : "");
   }
 }

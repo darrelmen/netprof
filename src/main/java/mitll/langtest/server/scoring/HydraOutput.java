@@ -1,10 +1,12 @@
 package mitll.langtest.server.scoring;
 
+import com.google.gson.JsonObject;
+import mitll.langtest.shared.scoring.ImageOptions;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 public class HydraOutput {
   private static final Logger logger = LogManager.getLogger(HydraOutput.class);
@@ -51,6 +53,10 @@ public class HydraOutput {
     this.scores = scores;
   }
 
+  /**
+   * @see ASRWebserviceScoring#getPretestScore(String, ImageOptions, String, String, HydraOutput, double, int, boolean, JsonObject, boolean)
+   * @return
+   */
   String getWordLab() {
     return wordLab;
   }
@@ -65,6 +71,7 @@ public class HydraOutput {
    *
    * @param reco
    * @return
+   * @see ASRWebserviceScoring#isMatch(HydraOutput, Map)
    */
   boolean isMatch(List<WordAndProns> reco) {
     if (reco.size() != wordAndProns.size()) {
@@ -78,7 +85,7 @@ public class HydraOutput {
     }
   }
 
-  private boolean doPhoneComparison(List<WordAndProns> reco, List<WordAndProns> expectedSeq) {
+/*  private boolean doPhoneComparison(List<WordAndProns> reco, List<WordAndProns> expectedSeq) {
     boolean res = true;
     for (int i = 0; i < reco.size(); i++) {
       WordAndProns recoWordAndProns = reco.get(i);
@@ -103,15 +110,15 @@ public class HydraOutput {
       }
     }
     return res;
-  }
+  }*/
 
   List<WordAndProns> getWordAndProns() {
     return wordAndProns;
   }
 
-  public TransNormDict getTransNormDict() {
-    return transNormDict;
-  }
+//  public TransNormDict getTransNormDict() {
+//    return transNormDict;
+//  }
 
   public STATUS_CODES getStatus() {
     return status;
@@ -120,10 +127,6 @@ public class HydraOutput {
   public HydraOutput setStatus(STATUS_CODES status) {
     this.status = status;
     return this;
-  }
-
-  public String getLog() {
-    return log;
   }
 
   public HydraOutput setLog(String log) {

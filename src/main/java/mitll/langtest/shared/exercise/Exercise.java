@@ -34,14 +34,18 @@ package mitll.langtest.shared.exercise;
 
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.custom.dialog.EditItem;
+import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.shared.dialog.DialogMetadata;
+import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.SlickExercise;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.user.BaseUserDAO.UNDEFINED_USER;
 
@@ -64,10 +68,14 @@ public class Exercise extends AudioExercise implements CommonExercise,
   private transient Collection<String> refSentences = new ArrayList<String>();
 
   private transient List<String> firstPron = new ArrayList<>();
+  private List<String> tokens;
   private long updateTime = 0;
 
   private List<ClientExercise> directlyRelated = new ArrayList<>();
 
+  /**
+   * @see #setSafeToDecode
+   */
   private boolean safeToDecode;
   private transient long safeToDecodeLastChecked;
 
@@ -210,7 +218,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.safeToDecode = candecode;
     safeToDecodeLastChecked = lastChecked;
 
-    this.numPhones = numPhones;
+ //   this.numPhones = numPhones;
     this.dominoID = dominoID;
     this.shouldSwap = shouldSwap;
   }
@@ -260,7 +268,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;
     this.safeToDecode = candecode;
-    this.numPhones = numPhones;
+    //this.numPhones = numPhones;
   }
 
   /**
@@ -272,19 +280,16 @@ public class Exercise extends AudioExercise implements CommonExercise,
   public <T extends CommonExercise> Exercise(T exercise) {
     super(exercise.getID(), exercise.getProjectID(), exercise.isContext());
     this.isPredef = exercise.isPredefined();
-//    this.isContext = exercise.isContext();
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getForeignLanguage();
     this.transliteration = exercise.getTransliteration();
     this.meaning = exercise.getMeaning();
     this.dominoID = exercise.getDominoID();
     this.oldid = exercise.getOldID();
+    this.tokens = exercise.getTokens();
 
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
-    //   setState(exercise.getState());
-    //setSecondState(exercise.getSecondState());
-
     setAttributes(exercise.getAttributes());
 
     exercise.getDirectlyRelated().forEach(this::addContextExercise);
@@ -294,7 +299,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   public CommonShell getShell() {
-    return new ExerciseShell(english, meaning, foreignLanguage, getID(), numPhones, isContext(), getDirectlyRelated().size());
+    return new ExerciseShell(english, meaning, foreignLanguage, getID(), isContext(), getDirectlyRelated().size());
   }
 
   public CommonShell asShell() {
@@ -364,11 +369,25 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   /**
    * @return
-   * @see mitll.langtest.client.banner.ListenViewHelper#getTurns
+   * @see ListenViewHelper#getTurns
    */
   @Override
   public List<ExerciseAttribute> getAttributes() {
     return attributes;
+  }
+
+  /**
+   * Is it marked with the english attribute? so we can check if we have an interpreter exercise sequence
+   * with alternating english and fl phrases.
+   * @return
+   */
+  public boolean hasEnglishAttr() {
+    return !getAttributes()
+        .stream()
+        .filter(attr ->
+            attr.getProperty().equalsIgnoreCase(DialogMetadata.LANGUAGE.name()) &&
+                attr.getValue().equalsIgnoreCase(Language.ENGLISH.name()))
+        .collect(Collectors.toSet()).isEmpty();
   }
 
   public boolean addAttribute(ExerciseAttribute attribute) {
@@ -412,6 +431,19 @@ public class Exercise extends AudioExercise implements CommonExercise,
   @Override
   public List<String> getFirstPron() {
     return firstPron;
+  }
+
+  @Override
+  public List<String> getTokens() {
+    return tokens;
+  }
+
+  /**
+   * @param tokens
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises
+   */
+  public void setTokens(List<String> tokens) {
+    this.tokens = tokens;
   }
 
   /**
@@ -564,9 +596,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param numPhones
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addExerciseToSectionHelper(SlickExercise, Collection, ISection, Map, IPronunciationLookup, Exercise, Collection, List)
    */
-  public void setNumPhones(int numPhones) {
+/*  public void setNumPhones(int numPhones) {
     this.numPhones = numPhones;
-  }
+  }*/
 
   public void setPredef(boolean isPredef) {
     this.isPredef = isPredef;
@@ -628,7 +660,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
         (getAltFL().isEmpty() ? "" : getAltFL()) +
         "meaning '" + getMeaning() +
         "' transliteration '" + getTransliteration() +
-        "' context " + getDirectlyRelated() +
+        "' context " + getDirectlyRelated().size() +
         " audio childCount = " + audioAttributes1.size() +
         (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
         " unit->lesson " + getUnitToValue() +

@@ -1,7 +1,7 @@
 package mitll.langtest.client.project;
 
-import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -47,7 +47,10 @@ public class ProjectChoices extends ThumbnailChoices {
 
 
   private static final String EDIT_PROJECT = "Edit project.";
-  private static final String MODES = "2 modes";
+  /**
+   *
+   */
+  private static final String MODES = "Interpreter and Vocab";
 
   private static final String GVIDAVER = "gvidaver";
 
@@ -104,7 +107,7 @@ public class ProjectChoices extends ThumbnailChoices {
   private static final String PLEASE_SELECT_A_LANGUAGE = "Select a language";
   private static final String PLEASE_SELECT_A_COURSE = "Select a course";
   /**
-   * @see #getHeader(List, int)
+   * @see #getPromptText
    */
   private static final String PLEASE_SELECT_A_MODE = "Select a mode";
   /**
@@ -130,6 +133,7 @@ public class ProjectChoices extends ThumbnailChoices {
 
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_CLICK = false;
 
   /**
    * @param langTest
@@ -318,6 +322,7 @@ public class ProjectChoices extends ThumbnailChoices {
 
   /**
    * Sort by display name not enum name.
+   *
    * @param nest
    * @param languages
    */
@@ -348,20 +353,13 @@ public class ProjectChoices extends ThumbnailChoices {
   private DivWidget getHeader(List<SlimProject> result, int nest) {
     DivWidget header = new DivWidget();
     header.addStyleName("container");
-    List<SlimProject> dialogProjects = getDialogProjects(result);
-
-    //  logger.info("getHeader " + result.size() + " nest  " + nest);
-
-    String text = dialogProjects.size() == result.size() ? PLEASE_SELECT_A_MODE : (nest == 1) ? PLEASE_SELECT_A_COURSE : PLEASE_SELECT_A_LANGUAGE;
-
-    if (result.isEmpty()) {
-      text = NO_LANGUAGES_LOADED_YET;
-    }
 
     {
       DivWidget left = new DivWidget();
       left.addStyleName("floatLeftAndClear");
-      Heading child = new Heading(3, text);
+
+      String promptText = (result.isEmpty()) ? NO_LANGUAGES_LOADED_YET : getPromptText(result, nest);
+      Heading child = new Heading(3, promptText);
       child.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
       left.add(child);
       header.add(left);
@@ -388,6 +386,21 @@ public class ProjectChoices extends ThumbnailChoices {
     }
 
     return header;
+  }
+
+  /**
+   * @see #getHeader
+   * @param result
+   * @param nest
+   * @return
+   */
+  @NotNull
+  private String getPromptText(List<SlimProject> result, int nest) {
+    List<SlimProject> dialogProjects = getDialogProjects(result);
+    //  logger.info("getHeader " + result.size() + " nest  " + nest);
+
+    return dialogProjects.size() == result.size() ?
+        PLEASE_SELECT_A_MODE : (nest == 1) ? PLEASE_SELECT_A_COURSE : PLEASE_SELECT_A_LANGUAGE;
   }
 
   private List<SlimProject> getDialogProjects(List<SlimProject> projects) {
@@ -589,7 +602,7 @@ public class ProjectChoices extends ThumbnailChoices {
       boolean isQC = isQC();
       {
         String countryCode = projectForLang.getCountryCode();
-    //    logger.info("for " + name +" cc " + countryCode);
+        //    logger.info("for " + name +" cc " + countryCode);
         PushButton button = new PushButton(getFlag(countryCode));
         final int projid = projectForLang.getID();
         button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projid, 1));
@@ -630,12 +643,12 @@ public class ProjectChoices extends ThumbnailChoices {
   @NotNull
   private DivWidget getContainerWithButtons(String name, SlimProject projectForLang, boolean isQC, int numVisibleChildren) {
     boolean hasChildren = projectForLang.hasChildren();
-    boolean alldialog = areAllChildrenDialogChoices(projectForLang, numVisibleChildren);
+    boolean allDialog = areAllChildrenDialogChoices(projectForLang, numVisibleChildren);
 
     DivWidget container = new DivWidget();
     Heading label;
 
-    container.add(label = getLabel(truncate(name, 23), projectForLang, numVisibleChildren));
+    container.add(label = getLabel(truncate(name, 23), projectForLang, numVisibleChildren, allDialog));
     container.setWidth("100%");
     container.addStyleName("floatLeft");
 
@@ -643,7 +656,7 @@ public class ProjectChoices extends ThumbnailChoices {
     //logger.info("getContainerWithButtons project " + projectForLang.getID() + " " + projectForLang.getName() + " " + projectType);
 
     if (isQC &&
-        ((hasChildren && alldialog) ||
+        ((hasChildren && allDialog) ||
             (!hasChildren && projectType != ProjectType.DIALOG))) {
       // logger.info("getContainerWithButtons add qc buttons " + isQC);
       container.add(getQCButtons(projectForLang, label));
@@ -687,17 +700,16 @@ public class ProjectChoices extends ThumbnailChoices {
    * @param name
    * @param projectForLang
    * @param numVisibleChildren
+   * @param allDialog
    * @return
    * @paramx hasChildren
    * @see #getContainerWithButtons(String, SlimProject, boolean, int)
    */
   @NotNull
-  private Heading getLabel(String name, SlimProject projectForLang, int numVisibleChildren) {
+  private Heading getLabel(String name, SlimProject projectForLang, int numVisibleChildren, boolean allDialog) {
     ProjectStatus status = projectForLang.getStatus();
     String statusText = status == ProjectStatus.PRODUCTION ? "" : status.name();
-
-    boolean alldialog = areAllChildrenDialogChoices(projectForLang, numVisibleChildren);
-    return getLabel(name, projectForLang.hasChildren(), numVisibleChildren, statusText, alldialog);
+    return getLabel(name, projectForLang.hasChildren(), numVisibleChildren, statusText, allDialog);
   }
 
   private boolean areAllChildrenDialogChoices(SlimProject projectForLang, int numVisibleChildren) {
@@ -1021,16 +1033,16 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {
     List<SlimProject> children = projectForLang.getChildren();
-    if (DEBUG) logger.info("gotClickOnFlag project " + projid + " has " + children);
+    if (DEBUG_CLICK) logger.info("gotClickOnFlag project " + projid + " has " + children);
     NavLink breadcrumb = makeBreadcrumb(name);
     if (children.size() < 2) {
-      if (DEBUG) logger.info("gotClickOnFlag onClick select leaf project " + projid +
+      if (DEBUG_CLICK) logger.info("gotClickOnFlag onClick select leaf project " + projid +
           " " + projectForLang.getMode() +
           "\n\tcurrent user " + controller.getUser() + " : " + controller.getUserManager().getUserID());
 
       setProjectForUser(projid, projectForLang.getMode());
     } else { // at this point, the breadcrumb should be empty?
-      if (DEBUG)
+      if (DEBUG_CLICK)
         logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
       breadcrumb.addClickHandler(clickEvent -> {
 //        SlimProject projectForLang1 = projectForLang;
@@ -1078,7 +1090,7 @@ public class ProjectChoices extends ThumbnailChoices {
    * @see #gotClickOnFlag
    */
   private void setProjectForUser(int projectid, ProjectMode mode) {
-    // logger.info("setProjectForUser set project for " + projectid);
+    logger.info("setProjectForUser set project for " + projectid + " mode " + mode);
     uiLifecycle.clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override

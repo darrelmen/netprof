@@ -41,7 +41,6 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   private static final List<String> messages = Arrays.asList(
       "You've recorded all the items. ",
       "Click on a dot in the chart to jump back and re-record.",
-      //"Or use the arrow keys to review.",
       "Or to see your overall score click See Your Scores."
   );
   private static final boolean DO_AUTOLOAD = true;
@@ -66,6 +65,8 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   QuizSpec quizSpec;
   private final INavigation.VIEWS instance;
 
+  private static final boolean DEBUG = false;
+
   /**
    * @param statsFlashcardFactory
    * @param controlState
@@ -88,8 +89,10 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
     this.instance = instance;
 
     if (this.polyglotFlashcardContainer.getQuizSpec() == null) {
+      int chosenList = getChosenList();
+      logger.info("PolyglotPracticePanel chosen list " + chosenList);
 
-      controller.getListService().getQuizInfo(getChosenList(), new AsyncCallback<QuizSpec>() {
+      controller.getListService().getQuizInfo(chosenList, new AsyncCallback<QuizSpec>() {
         @Override
         public void onFailure(Throwable caught) {
         }
@@ -271,8 +274,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
 
   @Override
   AnalysisTab getScoreHistory() {
-    //   logger.info("getScoreHistory - ");
-    AnalysisTab widgets = new AnalysisTab(controller, true, -1, () -> 0, INavigation.VIEWS.LEARN);
+    AnalysisTab widgets = super.getScoreHistory();
     widgets.getElement().getStyle().setMarginTop(-25, Style.Unit.PX);
     return widgets;
   }
@@ -325,6 +327,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
 
   private void stopTimerShowBanner() {
     controller.setBannerVisible(true);
+    if (DEBUG) logger.info("PolyglotPracticePanel : stopTimerShowBanner");
     polyglotFlashcardContainer.cancelRoundTimer();
   }
 
@@ -342,6 +345,10 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   void flipCard() {
   }
 
+  /**
+   * @param l
+   * @see PolyglotFlashcardFactory#sessionComplete
+   */
   void showTimeRemaining(long l) {
     String value;
     if (l > 0) {
@@ -362,7 +369,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
       value = "";
     }
     timeLeft.setText(value);
-    // logger.info("showTimeRemaining : time left " + l);
+    //   logger.info("showTimeRemaining : time left " + l);
   }
 
   public void onSetComplete() {

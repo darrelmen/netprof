@@ -61,7 +61,10 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.SoundFeedback;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseAnnotation;
+import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -173,7 +176,7 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>
     this.exerciseList = exerciseList;
     this.timer = new FlashcardTimer(this);
     this.soundFeedback = soundFeedback;
-    isUrdu = controller.getLanguage().equalsIgnoreCase("Urdu");
+    isUrdu = controller.getLanguageInfo() == Language.URDU;
 
     controlState.setStorage(new KeyStorage(controller));
   }
@@ -974,8 +977,9 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>
   }
 
   private Button getOn(final ControlState controlState) {
-    Button onButton = new Button(controller.getLanguage());
-    onButton.getElement().setId("Show_On_" + controller.getLanguage());
+    String caption = controller.getLanguageInfo().toDisplay();
+    Button onButton = new Button(caption);
+    onButton.getElement().setId("Show_On_" + caption);
     controller.register(onButton, getID());
 
     onButton.addClickHandler(event -> showForeign(controlState));
@@ -991,7 +995,7 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>
   }
 
   private String getLanguage() {
-    return controller.getLanguage();
+    return controller.getLanguageInfo().toDisplay();
   }
 
   private Button getOff(final ControlState controlState) {
@@ -1013,7 +1017,7 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>
 
   private Button getBoth(final ControlState controlState) {
     Button both = new Button(BOTH);
-    both.getElement().setId("Show_Both_" + controller.getLanguage() + "_and_English");
+    both.getElement().setId("Show_Both_" + controller.getLanguageInfo().toDisplay() + "_and_English");
     controller.register(both, getID());
 
     both.addClickHandler(event -> gotClickOnBoth(controlState));

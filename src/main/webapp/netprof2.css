@@ -677,14 +677,16 @@ Where should this font live? under src?
     font-family: 'MyUrduWebFont', sans-serif;
 }
 
+/*
 .urduflfont {
     font-size: 24px;
-    word-wrap: normal; /* Internet Explorer 5.5+ */
+    word-wrap: normal; !* Internet Explorer 5.5+ *!
     word-break: keep-all;
     white-space: normal;
     font-family: 'MyUrduWebFont', sans-serif;
     line-height: 100%;
 }
+*/
 
 .urdubigflfont {
     font-size: 36px;
@@ -2078,6 +2080,16 @@ h1, h2, h3, h4, h5, h6 {
     background-color: #EEF3E2;
 }
 
+.simplePhoneContainer {
+    margin-bottom: 3px;
+    padding-bottom: 3px;
+    display: inline-block;
+}
+
+.simplePhoneContainer .phoneColor {
+    background-color: #EEF3E2;
+}
+
 .phoneColor {
     background-color: #EEF3E2;
 }
@@ -2267,11 +2279,36 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
 .leftbubble {
     margin-right: 5px;
     background-color: rgb(231, 230, 236);
+    float: left;
 }
 
 .rightbubble {
     margin-right: 5px;
     background-color: rgba(74, 168, 238, 0.69);
+    float: right;
+}
+
+.middlebubble {
+    margin-left: 20px;
+    margin-right: 75px;
+    width:100%;
+    background-color: rgba(0, 128, 0, 0.35);
+}
+
+.middlebubble2 {
+    margin-left: 0px;
+    margin-right: auto;
+    background-color: rgba(0, 128, 0, 0.35);
+}
+
+.middlebubbleRight {
+    /*margin-left: auto;*/
+    margin-right: 5px;
+    background-color: rgba(0, 128, 0, 0.35);
+}
+
+.eightMarginTop {
+    margin-top: 8px;
 }
 
 .label .input {

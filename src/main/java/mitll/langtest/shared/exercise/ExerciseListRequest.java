@@ -36,13 +36,14 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.MarkDefectsChapterNPFHelper;
+import mitll.langtest.client.qc.MarkDefectsChapterNPFHelper;
 import mitll.langtest.client.custom.dialog.SearchTypeahead;
 import mitll.langtest.client.list.HistoryExerciseList;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.services.ExerciseServiceImpl;
 import mitll.langtest.shared.answer.ActivityType;
-import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.project.ProjectMode;
+import mitll.langtest.shared.project.ProjectType;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -54,7 +55,7 @@ import java.util.Map;
  * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
  * @since 3/30/16.
  */
-public class ExerciseListRequest implements IsSerializable {
+public class ExerciseListRequest implements IsSerializable,IRequest {
   private int reqID = 1;
   private Map<String, Collection<String>> typeToSelection = new HashMap<>();
   private String prefix = "";
@@ -67,7 +68,6 @@ public class ExerciseListRequest implements IsSerializable {
   // TODO : which of these are mutually exclusive???
   private boolean onlyUnrecordedByMe = false;
   private boolean onlyExamples = false;
-  private boolean incorrectFirstOrder = false;
   private boolean onlyWithAnno = false;
   private boolean onlyUninspected = false;
   private boolean onlyForUser = false;
@@ -76,7 +76,10 @@ public class ExerciseListRequest implements IsSerializable {
   private boolean QC = false;
   private boolean addContext = false;
   private boolean plainVocab = false;
+  private boolean isOnlyFL = false;
   private int dialogID = -1;
+ // private ProjectType projectType = ProjectType.DEFAULT;
+  private ProjectMode mode = ProjectMode.VOCABULARY;
 
   public ExerciseListRequest() {
   }
@@ -94,7 +97,6 @@ public class ExerciseListRequest implements IsSerializable {
         !isFilterActivity(activityType) &&
         !onlyUnrecordedByMe &&
         !onlyExamples &&
-        !incorrectFirstOrder &&
         !onlyWithAnno &&
         !onlyUninspected &&
         !onlyForUser;
@@ -114,12 +116,8 @@ public class ExerciseListRequest implements IsSerializable {
     return prefix.equals(other.getPrefix()) &&
         typeToSelection.equals(other.getTypeToSelection()) &&
         onlyUnrecordedByMe == other.onlyUnrecordedByMe &&
-        //  onlyRecordedByMatchingGender == other.onlyRecordedByMatchingGender &&
         onlyExamples == other.onlyExamples &&
-        incorrectFirstOrder == other.incorrectFirstOrder &&
         onlyWithAnno == other.onlyWithAnno &&
-        //      onlyWithAudioAnno == other.onlyWithAudioAnno &&
-        //   onlyDefaultAudio == other.onlyDefaultAudio &&
         onlyUninspected == other.onlyUninspected &&
         userListID == other.userListID;
   }
@@ -142,6 +140,7 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
+  @Override
   public String getPrefix() {
     return prefix;
   }
@@ -216,16 +215,6 @@ public class ExerciseListRequest implements IsSerializable {
     return this;
   }
 
-  public boolean isIncorrectFirstOrder() {
-    return incorrectFirstOrder;
-  }
-
-  public ExerciseListRequest setIncorrectFirstOrder(boolean incorrectFirstOrder) {
-    this.incorrectFirstOrder = incorrectFirstOrder;
-    return this;
-  }
-
-
   public boolean isOnlyWithAnno() {
     return onlyWithAnno;
   }
@@ -253,6 +242,7 @@ public class ExerciseListRequest implements IsSerializable {
    * @return
    * @see ExerciseServiceImpl#getFirstFew
    */
+  @Override
   public int getLimit() {
     return limit;
   }
@@ -322,6 +312,24 @@ public class ExerciseListRequest implements IsSerializable {
     return plainVocab;
   }
 
+
+  /**
+   * @return
+   */
+  public boolean isOnlyFL() {
+    return isOnlyFL;
+  }
+
+  /**
+   * @param onlyExamples
+   * @return
+   * @see HistoryExerciseList#getExerciseListRequest
+   */
+  public ExerciseListRequest setOnlyFL(boolean isOnlyFL) {
+    this.isOnlyFL = isOnlyFL;
+    return this;
+  }
+
   public ExerciseListRequest setUserID(int userID) {
     this.userID = userID;
     return this;
@@ -338,6 +346,29 @@ public class ExerciseListRequest implements IsSerializable {
 
   public ExerciseListRequest setReqID(int currentReq) {
     this.reqID = currentReq;
+    return this;
+  }
+
+  /**
+   * @see mitll.langtest.server.database.exercise.FilterResponseHelper#getSectionHelperFromFiltered
+   * @return
+   */
+//  public ProjectType getProjectType() {
+//    return projectType;
+//  }
+
+//  public ExerciseListRequest setProjectType(ProjectType projectType) {
+//    this.projectType = projectType;
+//    return this;
+//  }
+
+  @Override
+  public ProjectMode getMode() {
+    return mode;
+  }
+
+  public ExerciseListRequest setMode(ProjectMode mode) {
+    this.mode = mode;
     return this;
   }
 
@@ -359,9 +390,10 @@ public class ExerciseListRequest implements IsSerializable {
             (onlyExamples ? "\n\tonly examples       " : "") +
             (onlyWithAnno ? "\n\tonly with anno " : "") +
             (onlyForUser ? "\n\tonlyForUser     " : "") +
-            (incorrectFirstOrder ? "\n\tincorrectFirstOrder     " : "") +
+            //   (incorrectFirstOrder ? "\n\tincorrectFirstOrder     " : "") +
             (onlyUninspected ? "\n\tonly uninspected    " : "") +
             (addContext ? "\n\tadd context    " : "") +
+            "\n\tmode    "  + mode +
             (addFirst ? "\n\tadd first ex    " : "\n\tdon't add first") +
             (QC ? "\n\tqc request    " : "")
         ;

@@ -3,7 +3,6 @@ package mitll.langtest.client.list;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.custom.IUserList;
@@ -118,7 +117,7 @@ public class ListFacetHelper {
       @Override
       public void onSuccess(Collection<IUserList> result) {
         long l = System.currentTimeMillis();
-        if (l - then > 250) {
+        if (l - then > 350) {
           logger.info("addListsAsLinks : took " + (l - then) + " to get lists for user.");
         }
         addListsAsLinks(result, finalTypeToValues, liForDimensionForType);
@@ -148,7 +147,7 @@ public class ListFacetHelper {
     int currentUser = controller.getUser();
     for (IUserList list : result) {
       boolean isVisit = list.getUserID() != currentUser;
-      String tooltip = isVisit ? " from " + list.getUserChosenID() : "";
+      String tooltip = isVisit ? " from " + list.getFirstInitialName() : "";
       value.add(new MatchInfo(list.getName(), list.getNumItems(), list.getID(), isVisit, tooltip));
       idToListName.put(list.getID(), list.getName());
       idToList.put(list.getID(), list);

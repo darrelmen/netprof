@@ -171,6 +171,7 @@ public class ExerciseCopy {
    * @param exercises  to add
    * @param typeOrder  with this project type order (e.g. unit, chapter)
    * @return map of domino id->netprof id
+   * @see mitll.langtest.server.domino.ProjectSync#getDominoUpdateResponse
    */
   public Map<Integer, Integer> addExercisesSimple(int importUser,
                                                   int projectid,
@@ -235,7 +236,7 @@ public class ExerciseCopy {
    * @param typeOrder
    * @param idToCandidateOverride
    * @param dominoToExID
-   * @param checkExists
+   * @param checkExists           if true, don't add redundant exercise attributes
    * @return
    * @see #addExercises(int, int, Map, IUserExerciseDAO, Collection, Collection, Map, Map, int)
    * @see #addPredefExercises
@@ -404,6 +405,7 @@ public class ExerciseCopy {
    * @param typeOrder
    * @param idToCandidateOverride
    * @param exToInt
+   * @param checkExists           if true, don't add an attribute if it's already in there
    * @see #addExercisesAndAttributes(int, int, IUserExerciseDAO, Collection, Collection, Map, Map, boolean)
    */
   private Map<Integer, List<Integer>> addPredefExercises(int projectid,
@@ -473,6 +475,9 @@ public class ExerciseCopy {
           false, typeOrder));
       exToInt.put(exToUse, exerciseID);
 
+      if (exToUse.getID() == -1) {
+        exToUse.getMutable().setID(exerciseID);
+      }
 
       addAttributesAndRememberIDs(slickUEDAO,
           projectid, importUser,
@@ -481,10 +486,10 @@ public class ExerciseCopy {
           exerciseID, ex.getAttributes(), checkExists);
     }
 
-//    logger.info("addPredefExercises add   bulk  " + bulk.size() + " exercises");
-    // slickUEDAO.addBulk(bulk);
-    logger.info("addPredefExercises " + replacements + " replaced, " + converted + " converted");
-    logger.info("addPredefExercises will add    " + exToJoins.size() + " attributes");
+    if (replacements > 0 || converted > 0) {
+      logger.info("addPredefExercises " + replacements + " replaced, " + converted + " converted");
+    }
+    logger.info("addPredefExercises will add " + exToJoins.size() + " attributes");
     return exToJoins;
   }
 
@@ -493,9 +498,11 @@ public class ExerciseCopy {
    * @param projectid
    * @param importUser
    * @param now
-   * @param attrToID   map of attribute to db id
-   * @param exToJoins  map of old ex id to new attribute db id
-   * @param newID      - at this point we don't have exercise db ids - could be done differently...
+   * @param attrToID    map of attribute to db id
+   * @param exToJoins   map of old ex id to new attribute db id
+   * @param newID       - at this point we don't have exercise db ids - could be done differently...
+   * @param attributes
+   * @param checkExists
    * @see #addPredefExercises
    */
   private void addAttributesAndRememberIDs(IUserExerciseDAO slickUEDAO,
@@ -507,7 +514,8 @@ public class ExerciseCopy {
 
 
                                            int newID,
-                                           List<ExerciseAttribute> attributes, boolean checkExists) {
+                                           List<ExerciseAttribute> attributes,
+                                           boolean checkExists) {
     if (attributes != null && !attributes.isEmpty()) {
       List<Integer> joins = new ArrayList<>();
       exToJoins.put(newID, joins);
@@ -517,7 +525,8 @@ public class ExerciseCopy {
           attributes,
           now,
           attrToID,
-          joins, checkExists);
+          joins,
+          checkExists);
     }
   }
 
@@ -544,10 +553,9 @@ public class ExerciseCopy {
       if (attrToID.containsKey(attribute)) {
         id = attrToID.get(attribute);
       } else {
-        id = slickUEDAO.getExerciseAttribute().addAttribute(projectid, now, importUser, attribute, checkExists);
+        id = slickUEDAO.getExerciseAttribute().findOrAddAttribute(projectid, now, importUser, attribute, checkExists);
         attrToID.put(attribute, id);
-
-        logger.info("addPredef " + attribute + " = " + id);
+//        logger.info("addPredef " + attribute + " = " + id);
       }
       joins.add(id);
     }

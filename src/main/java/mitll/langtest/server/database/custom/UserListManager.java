@@ -32,6 +32,8 @@
 
 package mitll.langtest.server.database.custom;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
@@ -75,20 +77,16 @@ public class UserListManager implements IUserListManager {
   private static final String INCORRECT = "incorrect";
   private static final String FIXED = "fixed";
 
-  //  private static final String FAST = "regular";
-//  private static final String SLOW = "slow";
   private static final String MY_FAVORITES = "My Favorites";
-//  private static final String COMMENTS = "Comments";
-//  private static final String ALL_ITEMS_WITH_COMMENTS = "All items with comments";
-
 
   private static final boolean DEBUG = false;
 
-  private static final int MINUTE = 60 * 1000;
-  private static final int HOUR = 60 * MINUTE;
-  private static final int DAY = 24 * HOUR;
-  private static final int YEAR = 365 * DAY;
-  private static final int FIFTY_YEAR = 50 * YEAR;
+  private static final long MINUTE = 60 * 1000;
+  private static final long HOUR = 60 * MINUTE;
+  private static final long DAY = 24 * HOUR;
+  private static final long YEAR = 365 * DAY;
+  private static final long FIFTY_YEAR = 50 * YEAR;
+  public static final String ALL = "All";
 
   private final IUserDAO userDAO;
   private int i = 0;
@@ -159,17 +157,15 @@ public class UserListManager implements IUserListManager {
    * @param isPublic
    * @param projid
    * @param size
-   * @param duration
-   * @param minScore
-   * @param showAudio
+   * @param quizSpec
    * @return
    * @see mitll.langtest.server.services.ListServiceImpl#addUserList
    */
   @Override
   public UserList addQuiz(int userid, String name, String description, String dliClass, boolean isPublic, int projid,
-                          int size, int duration, int minScore, boolean showAudio, Map<String, String> unitChapter) {
-    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, size, false,
-        new TimeRange(), duration, minScore, showAudio, unitChapter);
+                          int size, QuizSpec quizSpec, Map<String, String> unitChapter) {
+    UserList userList = createQuiz(userid, name, description, dliClass, !isPublic, projid, size,
+        new TimeRange(), quizSpec, unitChapter);
     if (userList == null) {
       logger.warn("addUserList no user list??? for " + userid + " " + name);
       return null;
@@ -200,12 +196,13 @@ public class UserListManager implements IUserListManager {
                                   long start,
                                   long end) {
     String userChosenID = userDAO.getUserChosenID(userid);
+    String firstInitialName = userDAO.getFirstInitialName(userid);
     if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);
       return null;
     } else {
-      UserList e = new UserList(i++, userid, userChosenID, name, description, dliClass, isPrivate,
-          System.currentTimeMillis(), "", "", projid, UserList.LIST_TYPE.NORMAL, start, end, 10, 30, false);
+      UserList e = new UserList(i++, userid, userChosenID, firstInitialName, name, description, dliClass, isPrivate,
+          System.currentTimeMillis(), "", "", projid, UserList.LIST_TYPE.NORMAL, start, end, 10, 30, false, "");
       rememberList(projid, e);
 //      new Thread(() -> logger.debug("createUserList : now there are " + userListDAO.getCount() + " lists total")).start();
       return e;
@@ -221,9 +218,7 @@ public class UserListManager implements IUserListManager {
    * @param projid
    * @param reqSize
    * @param timeRange
-   * @param duration
-   * @param minScore
-   * @param showAudio
+   * @param quizSpec
    * @return
    */
   private UserList<CommonShell> createQuiz(int userid,
@@ -233,35 +228,29 @@ public class UserListManager implements IUserListManager {
                                            boolean isPrivate,
                                            int projid,
                                            int reqSize,
-                                           boolean isDryRun,
                                            TimeRange timeRange,
-                                           int duration, int minScore, boolean showAudio, Map<String, String> unitChapter) {
+                                           QuizSpec quizSpec,
+                                           Map<String, String> unitChapter) {
     String userChosenID = userDAO.getUserChosenID(userid);
+    String firstInitialName = userDAO.getFirstInitialName(userid);
     if (userChosenID == null) {
       logger.error("createUserList huh? no user with id " + userid);
       return null;
     } else {
       long now = System.currentTimeMillis();
 
-      UserList<CommonShell> quiz = new UserList<>(i++, userid, userChosenID, name, description, dliClass, isPrivate,
-          now, "", "", projid, UserList.LIST_TYPE.QUIZ, timeRange.getStart(), timeRange.getEnd(), duration, minScore, showAudio);
+      UserList<CommonShell> quiz = new UserList<>(i++, userid, userChosenID, firstInitialName, name, description, dliClass, isPrivate,
+          now, "", "", projid, UserList.LIST_TYPE.QUIZ, timeRange.getStart(), timeRange.getEnd(),
+          quizSpec.getRoundMinutes(), quizSpec.getMinScore(), quizSpec.isShowAudio(), quizSpec.getAccessCode());
       int userListID = rememberList(projid, quiz);
 
-      logger.info("createQuiz made new quiz " + quiz + "\n\tfor size " + reqSize);
-      Project project = databaseServices.getProject(projid);
-
-      List<CommonExercise> items = new ArrayList<>();
-
-      if (isDryRun) {
-        getFirstEasyLength(project.getSectionHelper().getFirst());
-        for (CommonExercise exercise : getFirstEasyLength(project.getSectionHelper().getFirst())) {
-          items.add(exercise);
-          if (items.size() == reqSize) break;
-        }
-      } else {
-
-        addRandomItems(reqSize, project, items, unitChapter);
-      }
+      QuizSpec.EXERCISETYPES exercisetypes = quizSpec.getExercisetypes();
+      logger.info("createQuiz made new quiz " + quiz +
+          "\n\tfor size      " + reqSize +
+          "\n\texercisetypes " + exercisetypes
+      );
+      List<CommonExercise> items = getRandomItems(reqSize, databaseServices.getProject(projid), unitChapter,
+          exercisetypes);
 
       List<CommonShell> shells = getShells(items);
       logger.info("createQuiz made random ex list of size " + items.size() +
@@ -276,10 +265,11 @@ public class UserListManager implements IUserListManager {
     }
   }
 
-  private void addRandomItems(int reqSize, Project project, List<CommonExercise> items, Map<String, String> unitChapter) {
+  private List<CommonExercise> getRandomItems(int reqSize, Project project, Map<String, String> unitChapter, QuizSpec.EXERCISETYPES exercisetypes) {
+    List<CommonExercise> items = new ArrayList<>();
     Map<String, Collection<String>> typeToSelection = new HashMap<>();
     unitChapter.forEach((k, v) -> {
-      if (!v.equalsIgnoreCase("All")) {
+      if (!v.equalsIgnoreCase(ALL)) {
         typeToSelection.put(k, Collections.singleton(v));
       }
     });
@@ -291,21 +281,40 @@ public class UserListManager implements IUserListManager {
       exercisesForSelectionState = project.getSectionHelper().getExercisesForSelectionState(typeToSelection);
     }
     List<CommonExercise> rawExercises = new ArrayList<>(exercisesForSelectionState);
-    addRandomItems(reqSize, items, rawExercises);
+
+    if (exercisetypes == QuizSpec.EXERCISETYPES.BOTH) {
+      items = getRandomItems(reqSize / 2, rawExercises);
+     // logger.info("first was " + items.size());
+      items.addAll(getRandomItems(reqSize - items.size(), getContextSentences(rawExercises)));
+     // logger.info("second was " + items.size());
+    } else if (exercisetypes == QuizSpec.EXERCISETYPES.SENTENCES) {
+      items = getRandomItems(reqSize, getContextSentences(rawExercises));
+    } else {
+      items = getRandomItems(reqSize, rawExercises);
+    }
 
     logger.info("exercisesForSelectionState " + typeToSelection + " : " + exercisesForSelectionState.size() + " items " + items.size());
+    return items;
   }
 
-  private void addRandomItems(int reqSize, List<CommonExercise> items, List<CommonExercise> toChooseFrom) {
-    //  int misses = 0;
-    Random random = new Random();
+  @NotNull
+  private List<CommonExercise> getContextSentences(List<CommonExercise> rawExercises) {
+    List<CommonExercise> context = new ArrayList<>();
+    //  if (DEBUG) logger.info("getFilteredExercises for " + typeToValues + " found " + exercisesForState.size());
+    rawExercises.forEach(ex -> {
+      ex.getDirectlyRelated().forEach(c -> context.add(c.asCommon()));
+    });
+    return context;
+  }
 
-    //  int size = toChooseFrom.size();
+  private List<CommonExercise> getRandomItems(int reqSize, List<CommonExercise> toChooseFrom) {
+    Random random = new Random();
 
     Set<Integer> exids = new TreeSet<>();
 
     reqSize = Math.min(reqSize, toChooseFrom.size());
 
+    List<CommonExercise> items = new ArrayList<>();
     while (items.size() < reqSize) {
       int i = random.nextInt(toChooseFrom.size());
       CommonExercise commonExercise = toChooseFrom.get(i);
@@ -329,15 +338,15 @@ public class UserListManager implements IUserListManager {
 */
       }
     }
+    return items;
   }
 
+/*
   @NotNull
   private List<CommonExercise> getFirstEasyLength(Collection<CommonExercise> firstCandidates) {
     List<CommonExercise> first = new ArrayList<>();
     int misses = 0;
-//          while (first.size() < 10 && misses < 100) {
     for (CommonExercise candidate : firstCandidates) {
-      //CommonExercise exercise = getExercise(projectid, exid);
       int length = candidate.getForeignLanguage().length();
       if (length > 4 && length < 10 || misses++ > 100) {
         first.add(candidate);
@@ -346,51 +355,108 @@ public class UserListManager implements IUserListManager {
     }
     return first;
   }
+*/
 
   private int rememberList(int projid, UserList e) {
     return userListDAO.add(e, projid);
   }
 
   /**
-   * @param userid
    * @param projid
-   * @param listsICreated
-   * @param visitedLists
    * @return
-   * @see mitll.langtest.server.services.ListServiceImpl#getLightListsForUser(boolean, boolean)
+   * @see mitll.langtest.server.services.ListServiceImpl#getLightListsForUser
+   * @see mitll.langtest.client.list.ListFacetHelper#populateListChoices
+   * @see mitll.langtest.client.banner.QuizChoiceHelper#getQuizIntro
    */
   @Override
-  public Collection<IUserListLight> getNamesForUser(int userid,
-                                                    int projid,
-                                                    boolean listsICreated,
-                                                    boolean visitedLists) {
-    return getUserListDAO().getAllQuizLight(projid);
-  }
-
-  @Override
-  public Collection<IUserList> getSimpleListsForUser(int userid,
-                                                     int projid,
+  public Collection<IUserList> getSimpleListsForUser(int projid,
+                                                     int userid,
                                                      boolean listsICreated,
                                                      boolean visitedLists) {
-    List<SlickUserExerciseList> lists = getRawLists(userid, projid, listsICreated, visitedLists);
-    //logger.info("getSimpleListsForUser for " + userid + " in " + projid + " found " + lists.size());
-    return getSimpleLists(lists);
+    return getSimpleLists(getRawLists(userid, projid, listsICreated, visitedLists));
   }
 
+  /**
+   * @param projid
+   * @param userID
+   * @param isQuiz
+   * @param onlyWithAudio
+   * @return
+   * @see mitll.langtest.server.services.ListServiceImpl#getSimpleListsForUser
+   */
   @Override
-  public Collection<IUserList> getAllQuizUserList(int projid, int userID) {
-    return getSimpleLists(userListDAO.getSlickAllQuiz(projid, userID));
+  public Collection<IUserList> getAllPublicOrMine(int projid, int userID, boolean isQuiz, boolean onlyWithAudio) {
+    Collection<SlickUserExerciseList> slickAllPublicOrMine = userListDAO.getSlickAllPublicOrMine(projid, userID, isQuiz);
+    if (onlyWithAudio) {
+      return getSimpleListsOnlyWithAudio(slickAllPublicOrMine, !isQuiz);
+    } else {
+      return getSimpleLists(slickAllPublicOrMine);
+    }
+  }
+
+  /**
+   * TODO consider checking for not scoreable?
+   *
+   * @param lists
+   * @param filterOutNoAudio
+   * @return
+   */
+  @NotNull
+  private Collection<IUserList> getSimpleListsOnlyWithAudio(Collection<SlickUserExerciseList> lists, boolean filterOutNoAudio) {
+    //  Map<Integer, Collection<Integer>> exidsForList = userListExerciseJoinDAO.getExidsForList(getListIDs(lists));
+    //  logger.info("asking for number of exercises for " + listIDs + "\n\tgot " + numForList);
+
+    List<IUserList> userLists = new ArrayList<>(lists.size());
+    Map<Integer, String> idToName = new HashMap<>();
+    Map<Integer, String> idToFullName = new HashMap<>();
+    Set<Integer> listIDs = getListIDs(lists);
+    logger.info("getSimpleListsOnlyWithAudio asking for " + listIDs.size() + " lists");
+
+    Map<Integer, Collection<Integer>> exidsForList = userListExerciseJoinDAO.getExidsForList(listIDs);
+    if (listIDs.size() != exidsForList.size()) {
+      logger.info("getSimpleListsOnlyWithAudio got back " + exidsForList.size() + " ids->items");
+    }
+    long then = System.currentTimeMillis();
+    lists.forEach(l -> {
+      int listid = l.id();
+      Collection<Integer> exidsOnList = exidsForList.get(listid);
+
+      int numItems = 0;
+      if (exidsOnList == null) {
+        logger.warn("getSimpleListsOnlyWithAudio huh? no exercise ids for " + listid + " : " + l.name());
+      } else if (exidsOnList.isEmpty()) {
+        logger.info("getSimpleListsOnlyWithAudio empty exercise ids for " + listid + " : " + l.name());
+
+      } else {
+        Collection<Integer> exercisesThatHaveAudio =
+            filterOutNoAudio ? databaseServices.getAudioDAO().getExercisesThatHaveAudio(l.projid(), exidsOnList) : exidsOnList;
+//        logger.info("getSimpleListsOnlyWithAudio found " + commonExercisesOnList.size() + " exercises for list #" + listid);
+        if (exercisesThatHaveAudio.size() < exidsOnList.size()) {
+          logger.info("getSimpleListsOnlyWithAudio after filter " + exercisesThatHaveAudio.size() + " exercises for list #" + listid);
+        }
+        numItems = exercisesThatHaveAudio.size();
+      }
+
+      {
+        int userid1 = l.userid();
+        String name = getUserName(userid1, idToName);
+        String fullName = getFullName(userid1, idToFullName);
+        userLists.add(getSimpleUserList(l, numItems, userid1, name, fullName));
+      }
+    });
+    long now = System.currentTimeMillis();
+
+    logger.info("getSimpleListsOnlyWithAudio took " + (now - then) + " millis");
+
+    return userLists;
   }
 
   @NotNull
   private Collection<IUserList> getSimpleLists(Collection<SlickUserExerciseList> lists) {
-//    lists.forEach(slickUserExerciseList -> logger.info("\t" + slickUserExerciseList.id() + " " + slickUserExerciseList.name()));
-    Set<Integer> listIDs = getListIDs(lists);
-    Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(listIDs);
-    //  logger.info("asking for number of exercises for " + listIDs + "\n\tgot " + numForList);
-
+    Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(getListIDs(lists));
     List<IUserList> names = new ArrayList<>(lists.size());
     Map<Integer, String> idToName = new HashMap<>();
+    Map<Integer, String> idToFullName = new HashMap<>();
     lists.forEach(l -> {
       int id = l.id();
 
@@ -398,21 +464,34 @@ public class UserListManager implements IUserListManager {
 
       int userid1 = l.userid();
       String name = getUserName(userid1, idToName);
-      //  logger.info("list #" + id + " - " + numItems);
-      names.add(
-          new SimpleUserList(
-              id,
-              l.name(),
-              l.projid(),
-              userid1,
-              name,
-              numItems,
-              l.duration(),
-              l.minscore(),
-              l.showaudio(),
-              l.isprivate()));
+      String fullName = getFullName(userid1, idToFullName);
+//   logger.info("list #" + id + " - " + numItems + " "+fullName);
+      names.add(getSimpleUserList(l, numItems, userid1, name, fullName));
     });
     return names;
+  }
+
+  @Override
+  public int getNumOnList(int listid) {
+    Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(Collections.singleton(listid));
+    if (numForList.isEmpty()) return -1;
+    else return numForList.values().iterator().next();
+  }
+
+  @NotNull
+  private SimpleUserList getSimpleUserList(SlickUserExerciseList l, Integer numItems, int userid1, String name, String fullName) {
+    return new SimpleUserList(
+        l.id(),
+        l.name(),
+        l.projid(),
+        userid1,
+        name,
+        fullName,
+        numItems,
+        l.duration(),
+        l.minscore(),
+        l.showaudio(),
+        l.isprivate());
   }
 
   @Nullable
@@ -420,6 +499,15 @@ public class UserListManager implements IUserListManager {
     String name = idToName.get(userid);
     if (name == null) {
       idToName.put(userid, userDAO.getUserChosenID(userid));
+    }
+    return name;
+  }
+
+  @Nullable
+  private String getFullName(int userid, Map<Integer, String> idToName) {
+    String name = idToName.get(userid);
+    if (name == null) {
+      idToName.put(userid, userDAO.getFirstInitialName(userid));
     }
     return name;
   }
@@ -442,6 +530,7 @@ public class UserListManager implements IUserListManager {
       logger.info("getListsWithIdsForUser found " + exidsForList.size() + " list->exids for " + userid + " and " + projid + " took " + (now - then));
     }
     Map<Integer, String> idToName = new HashMap<>();
+    Map<Integer, String> idToFullName = new HashMap<>();
 
     List<IUserListWithIDs> names = new ArrayList<>(lists.size());
     lists.forEach(l -> {
@@ -449,9 +538,10 @@ public class UserListManager implements IUserListManager {
 
       int userid1 = l.userid();
       String name = getUserName(userid1, idToName);
+      String fullName = getFullName(userid1, idToFullName);
 
       Collection<Integer> exids = exidsForList.getOrDefault(id, Collections.emptyList());
-      // logger.info("For " + id + " got " + exids);
+      logger.info("getListsWithIdsForUser For " + id + " got " + exids + " fullName " + fullName);
       names.add(
           new SimpleUserListWithIDs(
               id,
@@ -459,6 +549,7 @@ public class UserListManager implements IUserListManager {
               l.projid(),
               l.userid(),
               name,
+              fullName,
               new ArrayList<>(exids),
               l.duration(),
               l.isprivate())
@@ -631,9 +722,18 @@ public class UserListManager implements IUserListManager {
       addIfNotThere(listsForUser, ids, listsForUser1);
     }
 
-    boolean isAdmin = userDAO.isAdmin(userid);
-    if (isAdmin && includeQuiz) {
+    if (includeQuiz && userDAO.isAdmin(userid)) {
       Collection<UserList<CommonShell>> allQuiz = userListDAO.getAllQuiz(projid);
+
+      List<Integer> listids = new ArrayList<>();
+      allQuiz.forEach(commonShellUserList -> listids.add(commonShellUserList.getID()));
+      Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(listids);
+      allQuiz.forEach(commonShellUserList -> {
+        if (numForList.containsKey(commonShellUserList.getID())) {
+          Integer numItems = numForList.get(commonShellUserList.getID());
+          commonShellUserList.setNumItems(numItems);
+        }
+      });
       addIfNotThere(listsForUser, ids, allQuiz);
     }
 
@@ -697,16 +797,13 @@ public class UserListManager implements IUserListManager {
    *
    * @param userListID
    * @param userExercise notional until now!
-
    * @see mitll.langtest.server.services.ListServiceImpl#newExercise
    * @see mitll.langtest.server.services.ListServiceImpl#addItemsToList
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#afterValidForeignPhrase
    */
   @Override
   public void newExercise(int userListID, CommonExercise userExercise) {
-    int projectID = userExercise.getProjectID();
-
-    Project project = databaseServices.getProject(projectID);
+    Project project = databaseServices.getProject(userExercise.getProjectID());
     List<String> typeOrder = project.getTypeOrder();
 
 //    exercisePhoneInfo = getExercisePhoneInfo(lookup, foreignlanguage, transliteration);
@@ -714,40 +811,46 @@ public class UserListManager implements IUserListManager {
 
     int newExerciseID = userExerciseDAO.add(userExercise, false, typeOrder);
 
-    setNumPhones(userExercise, project, newExerciseID);
+    //  setNumPhones(userExercise, project, newExerciseID);
 
     logger.info("newExercise added exercise " + newExerciseID + " from " + userExercise);
 
     project.getExerciseDAO().addUserExercise(userExercise);
 
-    int contextID = 0;
-    try {
-      contextID = makeContextExercise(userExercise, typeOrder);
+    // int contextID = 0;
+    // try {
+    // contextID =
+    makeContextExercise(userExercise, typeOrder);
 
-      ClientExercise next = userExercise.getDirectlyRelated().iterator().next();
+    ClientExercise next = userExercise.getDirectlyRelated().iterator().next();
+    if (next == null) {
+      logger.error("huh? no context exercise on " + userExercise);
+    } else {
       project.getExerciseDAO().addUserExercise(next.asCommon());
-
-      String foreignLanguage = next.getForeignLanguage();
-
-      if (!foreignLanguage.isEmpty()) {
-        setNumPhones(next.asCommon(), project, contextID);
-      }
-
-    } catch (Exception e) {
-      logger.error("Got " + e, e);
     }
+    //   String foreignLanguage = next.getForeignLanguage();
+//      if (!foreignLanguage.isEmpty()) {
+//        setNumPhones(next.asCommon(), project, contextID);
+//      }
+
+//    } catch (Exception e) {
+//      logger.error("Got " + e, e);
+//    }
 
 //    logger.info("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
 
     addItemToList(userListID, newExerciseID);
   }
 
+/*
   private void setNumPhones(CommonExercise userExercise, Project project, int newExerciseID) {
+
     userExercise.getMutable().setNumPhones(
         databaseServices.getUserExerciseDAO().getAndRememberNumPhones(project,
             newExerciseID, userExercise.getForeignLanguage(), userExercise.getTransliteration()
         ));
   }
+*/
 
   public UserList getUserListNoExercises(int userListID) {
     logger.info("getUserListNoExercises for " + userListID);
@@ -797,7 +900,7 @@ public class UserListManager implements IUserListManager {
     boolean update = userExerciseDAO.update(userExercise, userExercise.isContext(), typeOrder);
     if (update) {
       databaseServices.getProject(userExercise.getProjectID()).getExerciseDAO().addUserExercise(userExercise);
-      setNumPhones(userExercise, databaseServices.getProject(userExercise.getProjectID()), userExercise.getID());
+      //setNumPhones(userExercise, databaseServices.getProject(userExercise.getProjectID()), userExercise.getID());
     } else {
       logger.warn("editItem : did not update item  " + userExercise);
     }
@@ -835,11 +938,34 @@ public class UserListManager implements IUserListManager {
     UserList<CommonShell> where = userListDAO.getWhere(id, true);
 
     if (where != null) {
-      Collection<Integer> exidsForList = userListExerciseJoinDAO.getExidsForList(id);
-      logger.info("getUserListByID found " + exidsForList.size() + " exids for list #" + id);
-      exidsForList.forEach(exid -> where.addExercise(databaseServices.getExercise(where.getProjid(), exid)));
+      getCommonExercisesOnList(where.getProjid(), id).forEach(where::addExercise);
     }
-    return where;//userListDAO.getWithExercises(id);
+    return where;
+  }
+
+  /**
+   * A little weird the join can result in missing exercises...
+   *
+   * @param projid
+   * @param id
+   * @return
+   */
+  @NotNull
+  public List<CommonExercise> getCommonExercisesOnList(int projid, int id) {
+    Collection<Integer> exidsForList = userListExerciseJoinDAO.getExidsForList(id);
+    logger.info("getCommonExercisesOnList found " + exidsForList.size() + " exids for list #" + id);
+
+    List<CommonExercise> exercises = new ArrayList<>(exidsForList.size());
+    exidsForList.forEach(exid -> {
+      CommonExercise exercise = databaseServices.getExercise(projid, exid);
+      if (exercise != null) {
+        exercises.add(exercise);
+      } else {
+        logger.warn("getCommonExercisesOnList can't find exercise " + exid + " in " + projid);
+      }
+    });
+    logger.info("getCommonExercisesOnList found " + exercises.size() + " exercises for list #" + id);
+    return exercises;
   }
 
   @Override
@@ -1035,14 +1161,6 @@ public class UserListManager implements IUserListManager {
     return userListExerciseJoinDAO.remove(listid, exid);
   }
 
-  /**
-   * @return
-   * @seex mitll.langtest.server.services.ExerciseServiceImpl#filterByOnlyAudioAnno
-   */
-/*  @Override
-  public Collection<Integer> getAudioAnnos() {
-    return annotationDAO.getAudioAnnos();
-  }*/
   @Override
   public IAnnotationDAO getAnnotationDAO() {
     return annotationDAO;
@@ -1106,5 +1224,55 @@ public class UserListManager implements IUserListManager {
   @Override
   public boolean updateProject(int oldid, int newid) {
     return userListDAO.updateProject(oldid, newid);
+  }
+
+  /**
+   * @param userID
+   * @param projid
+   * @param isQuiz
+   * @return
+   * @see mitll.langtest.server.ScoreServlet#doGet
+   */
+  public JsonObject getListsJson(int userID, int projid, boolean isQuiz) {
+    Collection<IUserList> allPublicOrMine = getAllPublicOrMine(projid, userID, isQuiz, true);
+    allPublicOrMine.removeIf(iUserList -> iUserList.getNumItems() == 0);
+    return getLists(allPublicOrMine, isQuiz);
+  }
+
+  private JsonObject getLists(Collection<IUserList> lights, boolean isQuiz) {
+    JsonArray lists = new JsonArray();
+    JsonObject container = new JsonObject();
+    for (IUserList light : lights) {
+      JsonObject idAndName = new JsonObject();
+
+      int id = light.getID();
+      idAndName.addProperty("id", id);
+      idAndName.addProperty("name", light.getName());
+      idAndName.addProperty("numItems", light.getNumItems());
+
+      if (isQuiz) {
+        QuizSpec quizInfo = getQuizInfo(id);
+        idAndName.addProperty("quizMinutes", quizInfo.getRoundMinutes());
+        idAndName.addProperty("minScoreToAdvance", quizInfo.getMinScore());
+        idAndName.addProperty("playAudio", quizInfo.isShowAudio());
+        idAndName.addProperty("accessCode", quizInfo.getAccessCode());
+      }
+      lists.add(idAndName);
+    }
+    container.add("lists", lists);
+
+    return container;
+  }
+
+  public QuizSpec getQuizInfo(int userListID) {
+    UserList<?> list = getUserListDAO().getList(userListID);
+    if (list == null) logger.warn("getQuizInfo no quiz with list id " + userListID);
+
+    QuizSpec quizSpec = list != null ?
+        new QuizSpec(list.getRoundTimeMinutes(), list.getMinScore(), list.shouldShowAudio(), list.getListType() != UserList.LIST_TYPE.QUIZ, list.getAccessCode()) :
+        new QuizSpec(10, 35, false, true, "");
+
+    if (DEBUG) logger.info("getQuizInfo returning " + quizSpec + " for " + userListID);
+    return quizSpec;
   }
 }

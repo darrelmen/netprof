@@ -61,14 +61,12 @@ public interface ListService extends RemoteService {
    * @param dliClass
    * @param isPublic
    * @param listType
-   * @param duration
-   * @param minScore
-   * @param showAudio
+   * @param quizSpec
    * @return
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#addUserList
    */
   UserList addUserList(String name, String description, String dliClass, boolean isPublic, UserList.LIST_TYPE listType,
-                       int size, int duration, int minScore, boolean showAudio, Map<String, String> unitChapter) throws DominoSessionException;
+                       int size, QuizSpec quizSpec, Map<String, String> unitChapter) throws DominoSessionException;
 
   void update(UserList userList) throws DominoSessionException;
 
@@ -112,10 +110,11 @@ public interface ListService extends RemoteService {
 
   Collection<IUserList> getSimpleListsForUser(boolean onlyCreated, boolean visited, UserList.LIST_TYPE list_type) throws DominoSessionException;
 
-  Collection<IUserListLight> getLightListsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException;
+  Collection<IUserListLight> getAllQuiz() throws DominoSessionException;
 
   Collection<IUserListWithIDs> getListsWithIDsForUser(boolean onlyCreated, boolean visited) throws DominoSessionException;
 
+  int getNumOnList(int listid);
   /**
    * @param userListID
    * @param exID

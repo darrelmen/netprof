@@ -253,24 +253,29 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     //long startMS = System.currentTimeMillis();
     logger.info("changePasswordWithToken - userId '" + userId + "' key " + userKey + " pass length " + newPassword.length());
     User userByID = getUserByID(userId);
-    String email = userByID != null ? userByID.getEmail() : "";
-    boolean result = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword, getBaseURL(), email);
+    boolean exists = userByID != null;
+    String email = exists ? userByID.getEmail() : "";
+    boolean success = db.getUserDAO().changePasswordForToken(userId, userKey, newPassword, getBaseURL(), email);
 
-    if (result) {
-      if (userByID != null) {
-        boolean newSession = false;
-        HttpSession currentSession = getCurrentSession();
-        if (currentSession == null) {
-          currentSession = createSession();
-          newSession = true;
-        }
-        securityManager.setSessionUser(currentSession, userByID, newSession);
+    if (success) {
+      if (exists) {
+        createNewSession(userByID);
       }
-      return new ChoosePasswordResult(userByID, userByID == null ? NotExists : Success);
+      return new ChoosePasswordResult(userByID, !exists ? NotExists : Success);
     } else {
-      //  log.info(TIMING, "[changePassword, {} ms, for {}", () -> elapsedMS(startMS), () -> result);
-      return new ChoosePasswordResult(null, userByID == null ? NotExists : AlreadySet);
+      //  log.info(TIMING, "[changePassword, {} ms, for {}", () -> elapsedMS(startMS), () -> success);
+      return new ChoosePasswordResult(null, !exists ? NotExists : AlreadySet);
     }
+  }
+
+  private void createNewSession(User userByID) {
+    boolean newSession = false;
+    HttpSession currentSession = getCurrentSession();
+    if (currentSession == null) {
+      currentSession = createSession();
+      newSession = true;
+    }
+    securityManager.setSessionUser(currentSession, userByID, newSession);
   }
 
   /**

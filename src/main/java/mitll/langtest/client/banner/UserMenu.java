@@ -281,7 +281,6 @@ public class UserMenu {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
-
         public void onSuccess() {
           onSuccess.onSuccess();
         }

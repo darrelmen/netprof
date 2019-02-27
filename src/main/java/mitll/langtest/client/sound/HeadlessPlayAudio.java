@@ -4,7 +4,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.banner.IListenView;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
+import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -252,6 +253,9 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   protected void loadAndPlay() {
     if (currentPath == null) {
       logger.warning("loadAndPlay, current path is null?");
+
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("no path?"));
+//      logger.info("logException stack " + exceptionAsString);
     } else {
       loadAndPlayOrPlayAudio(currentPath);
     }
@@ -263,7 +267,9 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    */
   public void rememberAudio(AudioAttribute audioAttribute) {
     this.currentAudioAttr = audioAttribute;
-    rememberAudio(currentAudioAttr.getAudioRef());
+    if (currentAudioAttr != null) {
+      rememberAudio(currentAudioAttr.getAudioRef());
+    }
   }
 
   public AudioAttribute getCurrentAudioAttr() {

@@ -2,8 +2,6 @@
 
 for langlc in `ls /opt/netprof/answers | grep -E 'korean|levantine|msa|russian'`;
 do
-    #lang=${file:12}
-    #langlc="${lang,,}"
     echo $langlc
 
     suffix="Answers.tar.gz"

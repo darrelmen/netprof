@@ -56,10 +56,7 @@ import mitll.langtest.client.analysis.WordContainerAsync;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
-import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
-import mitll.langtest.client.dialog.KeyPressHelper;
-import mitll.langtest.client.dialog.ModalInfoDialog;
+import mitll.langtest.client.dialog.*;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.*;
@@ -67,7 +64,10 @@ import mitll.langtest.client.instrumentation.ButtonFactory;
 import mitll.langtest.client.instrumentation.EventContext;
 import mitll.langtest.client.instrumentation.EventLogger;
 import mitll.langtest.client.project.ProjectEditForm;
-import mitll.langtest.client.recorder.*;
+import mitll.langtest.client.recorder.BrowserRecording;
+import mitll.langtest.client.recorder.MicPermission;
+import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.client.recorder.WebAudioRecorder;
 import mitll.langtest.client.scoring.AnnotationHelper;
 import mitll.langtest.client.scoring.ClientAudioContext;
 import mitll.langtest.client.scoring.CommentAnnotator;
@@ -81,15 +81,14 @@ import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.image.ImageResponse;
-import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.project.SlimProject;
-import mitll.langtest.shared.project.StartupInfo;
+import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.user.User;
 
 import java.util.*;
 import java.util.logging.Logger;
+
+import static mitll.langtest.client.banner.NewContentChooser.MODE;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -580,17 +579,17 @@ public class LangTest implements
     int height = Integer.parseInt(split[3]);
     String exerciseID = split[4];
 
-    getImage(reqid, key, path, type, toUse, height, exerciseID, getLanguage(), client);
+    getImage(reqid, key, path, type, toUse, height, exerciseID, getLanguageInfo(), client);
   }
 
   private void getImage(int reqid, final String key, String path, final String type, int toUse, int height,
                         String exerciseID,
-                        String language,
+                        Language language,
                         final AsyncCallback<ImageResponse> client) {
     //  ImageResponse ifPresent = imageCache.getIfPresent(key);
     ImageResponse ifPresent = imageCache.get(key);
     if (ifPresent != null) {
-    //  logger.info("getImage for key " + key + " found  " + ifPresent);
+      //  logger.info("getImage for key " + key + " found  " + ifPresent);
       ifPresent.req = -1;
       client.onSuccess(ifPresent);
     } else {
@@ -609,9 +608,9 @@ public class LangTest implements
 
             public void onSuccess(ImageResponse result) {
               imageCache.put(key, result);
-            //   logger.info("getImage storing key " + key + " now  " + imageCache.size() + " cached.");
+              //   logger.info("getImage storing key " + key + " now  " + imageCache.size() + " cached.");
               if (client != null) {
-              //  logger.info("getImage client "+ client.getClass());
+                //  logger.info("getImage client "+ client.getClass());
 
                 Scheduler.get().scheduleDeferred(() -> {
                   client.onSuccess(result);
@@ -814,6 +813,10 @@ public class LangTest implements
   public ProjectStartupInfo getProjectStartupInfo() {
     //logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
     return projectStartupInfo;
+  }
+
+  public int getProjectID() {
+    return projectStartupInfo == null ? -1 : projectStartupInfo.getProjectid();
   }
 
   /**
@@ -1182,13 +1185,16 @@ public class LangTest implements
   /**
    * Recording interface
    *
+   * @see PostAudioRecordButton#stopRecording(long, boolean)
    * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    */
   public void stopRecording(boolean useDelay, boolean abort) {
-   logger.info("stopRecording : " +
-       "\n\ttime recording in UI " + (System.currentTimeMillis() - then) + " millis, " +
-       "\n\tabort                " + abort +
-       "\n\tuse delay            " + useDelay);
+    if (DEBUG) {
+      logger.info("stopRecording : " +
+          "\n\ttime recording in UI " + (System.currentTimeMillis() - then) + " millis, " +
+          "\n\tabort                " + abort +
+          "\n\tuse delay            " + useDelay);
+    }
 
     if (useDelay) {
       BrowserRecording.stopRecording(abort);
@@ -1200,7 +1206,7 @@ public class LangTest implements
   /**
    * Recording interface
    *
-   * @see mitll.langtest.client.banner.RehearseViewHelper#RehearseViewHelper
+   * @see RehearseViewHelper#RehearseViewHelper
    */
   public void registerStopDetected(WavEndCallback wavEndCallback) {
     this.wavEndCallback = wavEndCallback;
@@ -1272,6 +1278,21 @@ public class LangTest implements
       storage = new KeyStorage(this);
     }
     return storage;
+  }
+
+  public ProjectMode getMode() {
+    String mode = getStorage().getValue(MODE);
+
+    if (mode == null || mode.isEmpty()) {
+      return ProjectMode.VOCABULARY;
+    } else {
+      try {
+        return ProjectMode.valueOf(mode);
+      } catch (IllegalArgumentException e) {
+        logger.warning("got unknown mode '" + mode + "'");
+        return ProjectMode.VOCABULARY;
+      }
+    }
   }
 
   @Override

@@ -2,15 +2,18 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.banner.IListenView;
-import mitll.langtest.client.banner.ListenViewHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
+import mitll.langtest.client.dialog.IListenView;
+import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.*;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -28,6 +31,8 @@ import java.util.stream.Collectors;
 public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     implements AudioChangeListener, RefAudioGetter, IPlayAudioControl {
   private final Logger logger = Logger.getLogger("DialogExercisePanel");
+
+  private static final String LANGUAGE = "LANGUAGE";
   private static final int WORD_SPACER = 7;
 
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
@@ -40,6 +45,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   final ExerciseController controller;
   DivWidget flClickableRow;
   ClickableWords clickableWords;
+  /**
+   * @see #showAlignment
+   */
+  DivWidget flClickableRowPhones;
 
   /**
    * @see #getFLEntry
@@ -52,7 +61,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   HeadlessPlayAudio playAudio;
 
 
-  private static final boolean DEBUG = false;
+  static final boolean DEBUG = false;
   private static final boolean DEBUG_PLAY_PAUSE = false;
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
@@ -73,11 +82,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param commonExercise for this exercise
    * @param controller
    * @param alignments
-   * @seex mitll.langtest.client.banner.LearnHelper#getFactory
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
-   * @see mitll.langtest.client.banner.ListenViewHelper#getTurnPanel
+   * @see ListenViewHelper#getTurnPanel
    */
   DialogExercisePanel(final T commonExercise,
                       final ExerciseController controller,
@@ -117,16 +125,35 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       makeClickableWords(projectStartupInfo, null);
 
       this.isRTL = projectStartupInfo.getLanguageInfo().isRTL();
+      if (isRTL && isEngAttr()) {
+        isRTL = false;
+      }
 
       {
         DivWidget wrapper = new DivWidget();
         wrapper.add(getFLEntry(exercise));
+        wrapper.add(flClickableRowPhones = clickableWords.getClickableDiv(isRTL));
+        stylePhoneRow(flClickableRowPhones);
+
         styleMe(wrapper);
         add(wrapper);
       }
 
       makePlayAudio(exercise, null);
     }
+  }
+
+  protected void stylePhoneRow(UIObject phoneRow) {
+    if (isRTL) phoneRow.addStyleName("floatRight");
+    phoneRow.addStyleName("topFiveMargin");
+  }
+
+  private boolean isEngAttr() {
+    List<ExerciseAttribute> language =
+        exercise.getAttributes()
+            .stream()
+            .filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(LANGUAGE)).collect(Collectors.toList());
+    return !language.isEmpty() && language.get(0).getValue().equalsIgnoreCase(Language.ENGLISH.toString());
   }
 
   void styleMe(DivWidget widget) {
@@ -153,13 +180,13 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see TwoColumnExercisePanel#makeFirstRow
    */
   void makePlayAudio(T e, DivWidget flContainer) {
-    if (hasAudio(e)) {
-      playAudio = new HeadlessPlayAudio(controller.getSoundManager(), listenView);
-      alignmentFetcher.setPlayAudio(playAudio);
-      rememberAudio(getRegularSpeedIfAvailable(e));
-    } else {
-      logger.warning("makePlayAudio no audio in audio attributes " + e.getAudioAttributes() + " for exercise " + e.getID());
-    }
+    //if (hasAudio(e)) {
+    playAudio = new HeadlessPlayAudio(controller.getSoundManager(), listenView);
+    alignmentFetcher.setPlayAudio(playAudio);
+    rememberAudio(getRegularSpeedIfAvailable(e));
+//    } else {
+//      logger.warning("makePlayAudio no audio in audio attributes " + e.getAudioAttributes() + " for exercise " + e.getID());
+//    }
   }
 
   void rememberAudio(AudioAttribute next) {
@@ -172,7 +199,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param next
    */
   private void maybeShowAlignment(AudioAttribute next) {
-    if (next.getAlignmentOutput() != null) {
+    if (next != null && next.getAlignmentOutput() != null) {
       //   logger.info("maybeShowAlignment audio for " + this + "  " + next);
       showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
     }
@@ -183,10 +210,18 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return candidate == null ? e.getFirst() : candidate;
   }
 
-
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
+    Language languageInfo = projectStartupInfo.getLanguageInfo();
+    if (isEngAttr()) {
+      languageInfo = Language.ENGLISH;
+//      logger.info("lang for " +exercise.getID() + " " +exercise.getEnglish() + " " + exercise.getForeignLanguage() + " " +languageInfo);
+    }
     clickableWords = new ClickableWords(listContainer, exercise.getID(),
-        controller.getLanguage(), projectStartupInfo.getLanguageInfo().getFontSize(), BLUE);
+        languageInfo, languageInfo.getFontSize(), BLUE, shouldAddFloatLeft());
+  }
+
+  protected boolean shouldAddFloatLeft() {
+    return true;
   }
 
   /**
@@ -265,7 +300,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         if (DEBUG) {
           logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
         }
-        return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, new DivWidget());
+
+        return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, flClickableRowPhones);
       } else {
         if (DEBUG) {
           logger.info("showAlignment SKIP for ex " + exercise.getID() + " audio id " + id + " vs " + currentAudioDisplayed);
@@ -287,7 +323,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param playAudio
    * @param clickableRow
    * @param clickablePhones
-   * @see #audioChanged
+   * @see #showAlignment
    * @see #contextAudioChanged
    */
   TreeMap<TranscriptSegment, IHighlightSegment> matchSegmentsToClickables(int id,
@@ -298,6 +334,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                                                                           DivWidget clickableRow,
                                                                           DivWidget clickablePhones) {
     if (DEBUG) logger.info("matchSegmentsToClickables match seg to clicable " + id + " : " + alignmentOutput);
+
     Map<NetPronImageType, TreeMap<TranscriptSegment, IHighlightSegment>> typeToSegmentToWidget =
         matchSegmentToWidgetForAudio(id, duration, alignmentOutput, flclickables, playAudio, clickableRow, clickablePhones);
     setPlayListener(id, duration, typeToSegmentToWidget, playAudio);
@@ -355,8 +392,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     if (alignmentOutput == null) {
       logger.warning("matchSegmentToWidgetForAudio no alignment for " + audioID);
-      segmentToWord.put(new TranscriptSegment(0, (float) durationInMillis, "all", 0, "all", 0),
-          new AllHighlight(flclickables));
+      segmentToWord.put(new TranscriptSegment(0, (float) durationInMillis, "all", 0, "all"),
+          getAllHighlight(flclickables));
     } else {
       if (DEBUG_MATCH)
         logger.info("matchSegmentToWidgetForAudio " + audioID + " got clickables " + flclickables.size());
@@ -364,7 +401,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       List<TranscriptSegment> wordSegments = getWordSegments(alignmentOutput);
 
       if (DEBUG_MATCH) {
-        wordSegments.forEach(transcriptSegment -> logger.info("matchSegmentToWidgetForAudio : ex " + getExID() + " " + transcriptSegment));
+        wordSegments.forEach(transcriptSegment -> logger.info("matchSegmentToWidgetForAudio : (" + wordSegments.size() + ") ex " + getExID() + " " + transcriptSegment));
       }
 
       if (wordSegments == null) {
@@ -379,12 +416,12 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 //        logger.info("phones " +phones.size());
 //        phones.forEach(p->logger.info(p.toString()));
 
-
         int c = getNumClickable(flclickables);
         boolean sameNumSegments = c == wordSegments.size();
+        boolean simpleLayout = !alignmentOutput.isShowPhoneScores();
 
         if (sameNumSegments) {
-          doOneToOneMatch(phones, audioControl, phoneMap, segmentToWord, highlightSegments, wordSegments, clickablePhones);
+          doOneToOneMatch(phones, audioControl, phoneMap, segmentToWord, highlightSegments, wordSegments, clickablePhones, simpleLayout);
         } else {
           if (DEBUG_MATCH) logger.warning("matchSegmentToWidgetForAudio no match for" +
               "\n\tsegments " + wordSegments +
@@ -392,58 +429,19 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
           clickableRow.clear();
 
-/*          if (wordSegments.size() > c) {
-            Iterator<TranscriptSegment> transcriptWords = wordSegments.iterator();
-
-            TranscriptSegment currentWord = transcriptWords.next();
-
-            Iterator<IHighlightSegment> segments = flclickables.iterator();
-
-            IHighlightSegment currentSegment = segments.next();
-
-            String lcSegment   = getLCSegment(currentWord);
-            String lcClickable = getLCClickable(currentSegment);
-
-            List<TranscriptSegment> phonesInWordAll = new ArrayList<>();
-
-            while (!lcClickable.isEmpty()) {
-              boolean isFragmentInSegment = lcClickable.startsWith(lcSegment) || (
-                  isMandarin && lcClickable.length() <= lcSegment.length()
-              );
-              if (isFragmentInSegment) {
-                // logger.info("doOneToManyMatch OK, match for word segment " + lcSegment + " inside " + lcClickable);
-
-                lcClickable = lcClickable.substring(lcSegment.length());
-                phonesInWordAll.addAll(phonesInWord);
-
-                //  logger.info("\t doOneToManyMatch now clickable segment " + lcClickable + " after removing " + lcSegment + " now " + phonesInWordAll.size() + " phones");
-
-                if (!lcClickable.isEmpty()) {
-                  if (transcriptSegmentListIterator.hasNext()) {
-                    wordSegment = transcriptSegmentListIterator.next();
-                    lcSegment = getLCSegment(wordSegment);
-                    phonesInWord = getSegsWithinWordTimeWindow(phones, wordSegment);
-                  }
-                }
-              } else {
-                if (DEBUG_MATCH) logger.warning("doOneToManyMatch no match for align word '" + lcSegment +
-                    "'  vs '" + lcClickable +
-                    "'");
-                break;
-              }
-            }
-
-
-          } else {*/
           doOneToManyMatch(phones, audioControl, phoneMap, segmentToWord, highlightSegments,
-              wordSegments, clickableRow, clickablePhones);
-          //        }
+              wordSegments, clickableRow, clickablePhones, simpleLayout);
         }
       }
     }
     if (DEBUG_MATCH)
       logger.info("matchSegmentToWidgetForAudio typeToTranscriptToHighlight is " + typeToTranscriptToHighlight);
     return typeToTranscriptToHighlight;
+  }
+
+  @NotNull
+  protected AllHighlight getAllHighlight(Collection<IHighlightSegment> flclickables) {
+    return new AllHighlight(flclickables, true);
   }
 
   /**
@@ -455,6 +453,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param wordSegments
    * @param clickableRow
    * @param clickablePhones
+   * @param simpleLayout
    * @see #matchSegmentToWidgetForAudio
    */
   private void doOneToManyMatch(List<TranscriptSegment> phones,
@@ -464,7 +463,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                                 ListIterator<IHighlightSegment> clickablesIterator,
                                 List<TranscriptSegment> wordSegments,
                                 DivWidget clickableRow,
-                                DivWidget clickablePhones) {
+                                DivWidget clickablePhones,
+                                boolean simpleLayout) {
     clickablePhones.clear();
     ListIterator<TranscriptSegment> transcriptSegmentListIterator = wordSegments.listIterator();
     while (transcriptSegmentListIterator.hasNext()) {
@@ -479,7 +479,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         List<IHighlightSegment> unclickable = new ArrayList<>();
         IHighlightSegment highlightSegment =
             matchEventSegmentToClickable(clickablesIterator, wordSegment, phonesInWord, audioControl, phoneMap,
-                clickablePhones, unclickable);
+                clickablePhones, unclickable, simpleLayout);
 
         if (highlightSegment == null) {
           if (DEBUG_MATCH) logger.info("doOneToManyMatch can't find match for wordSegment " + wordSegment);
@@ -542,8 +542,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                 }
 //                String event = wordSegment.getEvent();
 //                phonesInWordAll.forEach(ph -> logger.info(event + " " + ph.toString()));
-                DivWidget phoneDivBelowWord = getPhoneDivBelowWord(combinedTranscriptSegment, phonesInWordAll, audioControl, phoneMap);
-                addSouthClickable(clickablePhones, current, phoneDivBelowWord);
+                showPhones(combinedTranscriptSegment, phonesInWordAll, audioControl, phoneMap, clickablePhones, simpleLayout);
               }
 
               if (DEBUG_MATCH) {
@@ -603,11 +602,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     while (clickablesIterator.hasNext()) {
       IHighlightSegment next = clickablesIterator.next();
       if (DEBUG_MATCH) logger.info("matchSegmentToWidgetForAudio adding left over " + next);
-      Widget w = next.asWidget();
-      if (!isRTL) w.addStyleName("floatLeft");
-      clickableRow.add(w);
+      {
+        Widget w = next.asWidget();
+        if (!isRTL) addFloatLeft(w);
+        clickableRow.add(w);
+      }
     }
   }
+
 
   @NotNull
   private TranscriptSegment getCombinedTranscriptSegment(List<TranscriptSegment> wordSegmentsForClickable) {
@@ -627,7 +629,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
           wordSegmentsForClickable.get(wordSegmentsForClickable.size() - 1).getEnd(),
           combinedEvent,
           totalScore / wordSegmentsForClickable.size(),
-          combinedEvent, 0
+          combinedEvent
       );
     }
   }
@@ -650,8 +652,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return removePunct(current.getContent().toLowerCase());
   }
 
-  private void addFloatLeft(IHighlightSegment current) {
-    current.asWidget().addStyleName("floatLeft");
+  protected void addFloatLeft(IHighlightSegment current) {
+    addFloatLeft(current.asWidget());
+  }
+  protected void addFloatLeft(Widget w) {
+    w.addStyleName("floatLeft");
   }
 
   /**
@@ -664,6 +669,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param highlightSegmentIterator
    * @param wordSegments
    * @param clickablePhones
+   * @param simpleLayout
    * @see #matchSegmentToWidgetForAudio(Integer, long, AlignmentOutput, List, AudioControl, DivWidget, DivWidget)
    */
   private void doOneToOneMatch(List<TranscriptSegment> phones,
@@ -672,7 +678,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                                TreeMap<TranscriptSegment, IHighlightSegment> segmentToWord,
                                Iterator<IHighlightSegment> highlightSegmentIterator,
                                List<TranscriptSegment> wordSegments,
-                               DivWidget clickablePhones) {
+                               DivWidget clickablePhones,
+
+                               boolean simpleLayout) {
     clickablePhones.clear();
     for (TranscriptSegment wordSegment : wordSegments) {
       if (highlightSegmentIterator.hasNext()) {
@@ -683,7 +691,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
         IHighlightSegment highlightSegment =
             matchEventSegmentToClickable(highlightSegmentIterator, wordSegment, phonesInWord, audioControl,
-                phoneMap, clickablePhones, new ArrayList<>());
+                phoneMap, clickablePhones, new ArrayList<>(), simpleLayout);
 
         if (highlightSegment == null) {
           if (DEBUG_MATCH) logger.warning("doOneToOneMatch can't find match for wordSegment " + wordSegment);
@@ -738,8 +746,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param audioControl
    * @param phoneMap
    * @param clickablePhones
+   * @param simpleLayout
    * @return
-   * @see #doOneToManyMatch(List, AudioControl, TreeMap, TreeMap, ListIterator, List, DivWidget, DivWidget)
+   * @see #doOneToManyMatch(List, AudioControl, TreeMap, TreeMap, ListIterator, List, DivWidget, DivWidget, boolean)
    */
   private IHighlightSegment matchEventSegmentToClickable(Iterator<IHighlightSegment> clickables,
                                                          TranscriptSegment wordSegment,
@@ -747,7 +756,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                                                          AudioControl audioControl,
                                                          TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                                          DivWidget clickablePhones,
-                                                         List<IHighlightSegment> unclickable) {
+                                                         List<IHighlightSegment> unclickable,
+                                                         boolean simpleLayout) {
     IHighlightSegment clickable = clickables.next();
     clickable = skipUnclickable(clickables, clickable, unclickable);
 
@@ -769,8 +779,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     if (lcSegment.equalsIgnoreCase(lcClickable)) {  // easy match -
       if (showPhones) {
-        DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
-        addSouthClickable(clickablePhones, clickable, phoneDivBelowWord);
+        showPhones(wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, simpleLayout);
       }
 
       return clickable;
@@ -780,10 +789,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       if (bulk.isEmpty()) {
         return null;
       } else { // all clickables match this segment
-        AllHighlight allHighlight = new AllHighlight(bulk);
+        AllHighlight allHighlight = getAllHighlight(bulk);
         if (showPhones) {
-          DivWidget phoneDivBelowWord = getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap);
-          addSouthClickable(clickablePhones, allHighlight, phoneDivBelowWord);
+          showPhones(wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, simpleLayout);
         }
 
         if (DEBUG || DEBUG_MATCH)
@@ -794,10 +802,17 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     }
   }
 
+  private void showPhones(TranscriptSegment wordSegment,
+                          List<TranscriptSegment> phonesInWord,
+                          AudioControl audioControl,
+                          TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
+                          DivWidget clickablePhones,
+                          boolean simpleLayout) {
+    addSouthClickable(clickablePhones, getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap, simpleLayout));
+  }
 
-  private void addSouthClickable(DivWidget clickablePhones, IHighlightSegment clickable, DivWidget phoneDivBelowWord) {
+  private void addSouthClickable(DivWidget clickablePhones, DivWidget phoneDivBelowWord) {
     clickablePhones.add(phoneDivBelowWord);
-    clickable.setSouth(phoneDivBelowWord);
     phoneDivBelowWord.addStyleName(isRTL ? "leftFiveMargin" : "rightFiveMargin");
   }
 
@@ -806,14 +821,16 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param phonesInWord
    * @param audioControl
    * @param phoneMap
+   * @param simpleLayout
    * @return
+   * @see #doOneToManyMatch
    */
   @NotNull
-  private DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
-                                         List<TranscriptSegment> phonesInWord,
-                                         AudioControl audioControl,
-                                         TreeMap<TranscriptSegment, IHighlightSegment> phoneMap) {
-    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, true, wordSegment);
+  protected DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
+                                           List<TranscriptSegment> phonesInWord,
+                                           AudioControl audioControl,
+                                           TreeMap<TranscriptSegment, IHighlightSegment> phoneMap, boolean simpleLayout) {
+    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, true);
   }
 
   /**
@@ -881,6 +898,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return bulk;
   }
 
+/*
   private boolean transcriptMatchesOneToOne(List<IHighlightSegment> clickables, List<TranscriptSegment> segments) {
 
     int c = getNumClickable(clickables);
@@ -892,6 +910,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     return b;
   }
+*/
 
   private void dumpMatchComparison(List<IHighlightSegment> clickables, List<TranscriptSegment> segments, int c) {
     logger.info("transcriptMatchesOneToOne  clickables " + c + " segments " + segments.size());
@@ -912,11 +931,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   private int getNumClickable(List<IHighlightSegment> clickables) {
     int c = 0;
+    StringBuilder sb = new StringBuilder();
     for (IHighlightSegment clickable : clickables) {
       if (clickable.isClickable()) {
         c++;
+        sb.append(clickable).append(" ");
       }
     }
+    //logger.info("found " + c + " clickables " + sb);
     return c;
   }
 
@@ -990,12 +1012,21 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param e
    * @return
    * @see #addWidgets(boolean, boolean, PhonesChoices)
-   * @see TwoColumnExercisePanel#makeFirstRow(ClientExercise, DivWidget, boolean)
+   * @see TwoColumnExercisePanel#makeFirstRow
    */
   @NotNull
   DivWidget getFLEntry(T e) {
     flclickables = new ArrayList<>();
-    flClickableRow = clickableWords.getClickableWords(getFL(e), FieldType.FL, flclickables, isRTL);
+
+    List<String> tokens = e.getTokens();
+
+    if (false) {
+      if (tokens == null && !e.hasEnglishAttr()) {
+        logger.info("getFLEntry : no tokens for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage());
+      }
+    }
+
+    flClickableRow = clickableWords.getClickableWords(getFL(e), FieldType.FL, flclickables, isRTL, tokens);
     return flClickableRow;
   }
 
@@ -1032,7 +1063,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   @Override
   public boolean doPlayPauseToggle() {
     if (playAudio != null) {
-      if (DEBUG_PLAY_PAUSE) logger.info("doPlayPauseToggle");
+      if (DEBUG_PLAY_PAUSE) logger.info("doPlayPauseToggle on " + getExID());
+//
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("doing play for " +getExID()));
+//      logger.info("logException stack " + exceptionAsString);
+
       return playAudio.doPlayPauseToggle();
     } else {
       logger.warning("doPlayPauseToggle no play audio???");

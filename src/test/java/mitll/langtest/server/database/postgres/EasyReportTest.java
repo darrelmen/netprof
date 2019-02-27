@@ -33,7 +33,9 @@
 package mitll.langtest.server.database.postgres;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -61,8 +63,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.text.CharacterIterator;
+import java.text.StringCharacterIterator;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -80,6 +87,7 @@ public class EasyReportTest extends BaseTest {
 
   public static final String SENTENCES_ONLY = "Sentences Only";
   public static final int PROJECTID = 3;
+  public static final String ANY = "Any";
 
   private final String longer = "대폭강화하기로";
 
@@ -107,8 +115,8 @@ public class EasyReportTest extends BaseTest {
   private void doMatch(String requestURI) {
     //Pattern pattern = Pattern.compile("^.*answers\\/(.+)\\/answers\\/.+");
 //    Pattern pattern = Pattern.compile("^.*answers\\/(.+)\\/.+");
-   // String s = ".*answers\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
-    String s2="answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
+    // String s = ".*answers\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
+    String s2 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
     Pattern pattern = Pattern.compile(s2);
     Matcher matcher = pattern.matcher(requestURI);
     if (matcher.find()) {
@@ -124,6 +132,41 @@ public class EasyReportTest extends BaseTest {
     getDNS("dliflc.com");
     getDNS("gmail.com");
     getDNS("gmaiil.com");
+  }
+
+  @Test
+  public void testPinyin() {
+    ServerProperties serverProperties = new ServerProperties();
+
+    List<String> words = new ArrayList<>(Arrays.asList("yī èr sān sì yǒu wǔ liù qī bā jiǔ".split(" ")));
+    Map<String, String> numberToPron = new HashMap<>();
+    for (int i = 1; i < words.size() + 1; i++) {
+      numberToPron.put("" + i, words.get(i - 1));
+    }
+
+    numberToPron.forEach((k, v) -> System.out.println(toFull(k) + "\t" + serverProperties.toDict(v)));
+    //  serverProperties.toDict();
+  }
+
+
+  private static final char FULL_WIDTH_ZERO = '\uFF10';
+  private static final char ZERO = '0';
+  private static final String P_Z = "\\p{Z}+";
+
+  private String toFull(String s) {
+    StringBuilder builder = new StringBuilder();
+
+    final CharacterIterator it = new StringCharacterIterator(s);
+    for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
+      if (c >= ZERO && c <= '9') {
+        int offset = c - ZERO;
+        int full = FULL_WIDTH_ZERO + offset;
+        builder.append(Character.valueOf((char) full).toString());
+      } else {
+        builder.append(c);
+      }
+    }
+    return builder.toString();
   }
 
   private void getDNS(String host) {
@@ -150,12 +193,160 @@ public class EasyReportTest extends BaseTest {
   }
 
   @Test
+  public void testOverlap() {
+    String toFindFile = "msaFiles2.csv";
+    String goldFile = "msaAnswerAudioSorted.txt";
+
+    String language = "MSA";
+
+
+    compareAudio(toFindFile, goldFile, language, false);
+  }
+
+  @Test
+  public void testOverlap2() {
+//    String toFindFile = "msaFiles2.csv";
+//    String goldFile = "msaAnswerAudioSorted.txt";
+
+
+    //  List<String> langs = Arrays.asList("Egyptian");//, "Korean", "Levantine", "CM", "Pashto", "Russian", "Spanish");
+    List<String> langs = Arrays.asList("Egyptian", "Korean", "Levantine", "CM", "Pashto", "Russian", "Spanish");
+
+    langs.forEach(lang -> {
+
+      String s = lang.toLowerCase();
+
+      if (s.equalsIgnoreCase("cm")) s = "mandarin_simplified";
+
+      String toFind = "for_crowdflower_annotation-all_recs-" + s + ".tsv";
+      String goldFile = "Audio" + lang + ".txt";
+
+      compareAudio(toFind, goldFile, lang, true);
+
+
+    });
+  }
+
+  private void compareAudio(String toFindFile, String goldFile, String language, boolean split) {
+    File toFind = new File("/Users/go22670/Desktop/lists_for_gordon/" +
+        toFindFile
+        // "msaFiles.csv"
+    );
+    File goldList = new File("/Users/go22670/Desktop/lists_for_gordon/" +
+        goldFile
+        //    "msaAnswerFilesSorted.txt"
+    );
+
+    if (!toFind.exists()) {
+      logger.warn("no file " + toFind.getAbsolutePath());
+      return;
+    }
+
+    if (!goldList.exists()) {
+      logger.warn("no file " + goldList.getAbsolutePath());
+      return;
+    }
+
+    Set<String> expectedMP3s = getLines(toFind);
+    Set<String> knownMP3s = getLines(goldList);
+
+    Set<String> found = new TreeSet<>();
+    Set<String> missing = new TreeSet<>();
+
+    logger.info(language + " expectedMP3s " + expectedMP3s.size());
+    logger.info(language + " knownMP3s    " + knownMP3s.size());
+
+    expectedMP3s.forEach(expected ->
+    {
+
+      String search = expected;
+      if (split) {
+        String[] split1 = expected.split("\t");
+        String url = split1[6];
+
+        // https://np.ll.mit.edu/crowdflowerMandarin_simplified
+        //   logger.info(language + " url " + url);
+        String suffix = language;
+        if (language.equalsIgnoreCase("CM")) {
+          suffix = "Mandarin_simplified";
+        }
+        String prefix = "https://np.ll.mit.edu/crowdflower" +
+            suffix +
+            "/";
+        if (!url.startsWith(prefix)) {
+          logger.warn("expecting " + prefix + " on " + url);
+        } else {
+          search = "./" + url.substring(prefix.length());
+        }
+      }
+
+      if (knownMP3s.contains(search)) {
+        found.add(search);
+      } else {
+//        if (missing.size()<10) logger.warn(language + " missing " +search);
+        missing.add(search);
+      }
+    });
+
+    logger.info(language + " found   " + found.size());
+    logger.info(language + " missing " + missing.size());
+
+    if (missing.size() < 400) {
+      missing.forEach(miss -> {
+        if (!miss.startsWith(".//opt/netprof"))
+          logger.info(language + " missing " + miss);
+      });
+    }
+  }
+
+  private Set<String> getLines(File toFind) {
+    try {
+      FileReader fileReader = new FileReader(toFind);
+      BufferedReader reader = new BufferedReader(fileReader);
+
+      /*line =*/
+      reader.readLine(); // skip header
+
+      String line;
+      Set<String> expected = new HashSet<>();
+      while ((line = reader.readLine()) != null) {
+        expected.add(line.trim());
+      }
+      reader.close();
+      return expected;
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return new HashSet<>();
+  }
+
   public void testSectionHelper() {
+
     DatabaseImpl english = getDatabase();
     int projectid = 15;
     Project project = english.getProject(projectid);
-    project.getSectionHelper().report();
+
+    JsonObject listsJson = english.getUserListManager().getListsJson(6, 15, true);
+
+    logger.info("quiz " + listsJson);
+    logger.info("list " + english.getUserListManager().getListsJson(6, 15, false));
   }
+
+  @Test
+  public void testContextJSON() {
+    DatabaseImpl english = getDatabase();
+    int projectid = 3;
+    Project project = english.getProject(projectid);
+
+    JsonExport jsonExport = english.getJSONExport(projectid);
+    JsonArray contentAsJson = jsonExport.getContentAsJson(true, true);
+
+    logger.info("got " + contentAsJson.size());
+    //  contentAsJson.forEach(jsonElement -> logger.info("got " +jsonElement));
+
+    //  project.getSectionHelper().report();
+  }
+
 
   @Test
   public void testLists() {
@@ -902,9 +1093,31 @@ public class EasyReportTest extends BaseTest {
   }
 
   @Test
+  public void testTrainingnAudio() {
+    DatabaseImpl db = getAndPopulate();
+
+    Project project = db.getProject(SPANISH);
+    db.setInstallPath("dude");
+  }
+
+  @Test
+  public void testPhoneJSON() {
+    DatabaseImpl db = getAndPopulate();
+
+    int projectid = SPANISH;//KOREAN;
+    db.getProject(projectid);
+    HashMap<String, Collection<String>> typeToValues = new HashMap<>();
+
+    typeToValues.put("Unit", Collections.singleton("2"));
+    typeToValues.put("Chapter", Collections.singleton("2"));
+//    JsonObject jsonPhoneReport = db.getJsonPhoneReport(new PhoneReportRequest());
+//    logger.info("got \n" + jsonPhoneReport);
+  }
+
+  @Test
   public void testPhoneReport() {
     DatabaseImpl db = getAndPopulate();
-    int projectid = KOREAN;
+    int projectid = SPANISH;//KOREAN;
     Project project = db.getProject(projectid);
     SlickAnalysis slickAnalysis = new SlickAnalysis(
         db.getDatabase(),
@@ -914,22 +1127,27 @@ public class EasyReportTest extends BaseTest {
         project.getLanguageEnum(),
         projectid,
         project.getKind() == ProjectType.POLYGLOT);
+    int demoUser = 6;
 
-    AnalysisRequest analysisRequest = new AnalysisRequest(/*DEMO_USER, -1, -1, 0*/);
+    AnalysisRequest analysisRequest = new AnalysisRequest(/*DEMO_USER, -1, -1, 0*/).setUserid(demoUser);
+
     AnalysisReport performanceReportForUser = slickAnalysis.getPerformanceReportForUser(analysisRequest);
 
     logger.info("Got " + performanceReportForUser);
     logger.info("phone summary " + performanceReportForUser.getPhoneSummary().getPhoneToAvgSorted());
 
-    long maxValue = Long.MAX_VALUE;
+    // long maxValue = Long.MAX_VALUE;
 
     PhoneBigrams phoneBigramsForPeriod = slickAnalysis.getPhoneBigramsForPeriod(analysisRequest);
 
     logger.info("bigrams " + phoneBigramsForPeriod);
 
     Map<String, List<Bigram>> phoneToBigrams = phoneBigramsForPeriod.getPhoneToBigrams();
-    phoneToBigrams.forEach((s, bigrams) -> logger.info(s + " -> " + bigrams.size() + " : " + bigrams));
-
+    if (phoneToBigrams.isEmpty()) {
+      logger.warn("no results for " + analysisRequest);
+    } else {
+      phoneToBigrams.forEach((s, bigrams) -> logger.info(s + " -> " + bigrams.size() + " : " + bigrams));
+    }
     //  WordsAndTotal wordScoresForUser = slickAnalysis.getWordScoresForUser(DEMO_USER, -1, -1, 0, maxValue, 0, 100, "");
 
 
@@ -952,15 +1170,19 @@ public class EasyReportTest extends BaseTest {
 */
 
     phoneToBigrams.forEach((phone, bigrams) -> {
-      logger.info(phone + " -> " + bigrams.size() + " : " + bigrams);
+      logger.info("dump " + phone + " -> " + bigrams.size() + " : " + bigrams);
       bigrams.forEach(bigram -> {
-        logger.info("\t" + phone + " -> " + bigram);
+        logger.info("dump \t" + phone + " -> " + bigram);
         List<WordAndScore> wordAndScoreForPhoneAndBigram = slickAnalysis.getWordAndScoreForPhoneAndBigram(
             new AnalysisRequest()
-                .setUserid(DEMO_USER)
+                .setUserid(demoUser)
                 .setPhone(phone)
                 .setBigram(bigram.getBigram()));
-        logger.info("\t" + phone + " -> " + bigram + " : " + wordAndScoreForPhoneAndBigram.size());
+        if (wordAndScoreForPhoneAndBigram == null) {
+          logger.warn("dump no info for " + phone + " " + bigram);
+        } else {
+          logger.info("dump \t" + phone + " -> " + bigram + " : " + wordAndScoreForPhoneAndBigram.size());
+        }
 
       });
     });
@@ -1150,7 +1372,7 @@ public class EasyReportTest extends BaseTest {
   @Test
   public void testReportWrite() {
     DatabaseImpl andPopulate = getAndPopulate();
-    andPopulate.doReportForYear(-1);
+  //  andPopulate.doReportForYear(-1);
     andPopulate.close();
   }
 
@@ -1169,12 +1391,70 @@ public class EasyReportTest extends BaseTest {
   @Test
   public void testJson() {
     DatabaseImpl andPopulate = getAndPopulate();
-    //   Project project = andPopulate.getProject(3);
-    JsonExport jsonExport = andPopulate.getJSONExport(3);
-    // long now = System.currentTimeMillis();
 
-    JsonArray contentAsJson = jsonExport.getContentAsJson(false);
-    logger.info("Got\n\t" + contentAsJson);
+    andPopulate.getProjects().forEach(project -> {
+      JsonExport jsonExport = andPopulate.getJSONExport(project.getID());
+      // long now = System.currentTimeMillis();
+
+      JsonArray contentAsJson = jsonExport.getContentAsJson(false, false);
+      logger.info("jsonForProject (" + project.getName() +
+          ") : got " + project.getTypeOrder() + " vs " + jsonExport.getMinimalTypeOrder() + "  = " + contentAsJson.size());
+
+      if (!project.getSectionHelper().getTypeOrder().isEmpty() && contentAsJson.size() == 0) {
+        assert false;
+      }
+
+      dumpJSON(contentAsJson);
+    });
+  }
+
+  @Test
+  public void testJsonPrune() {
+    DatabaseImpl andPopulate = getAndPopulate();
+
+    andPopulate.getProjects().forEach(project -> {
+      JsonExport jsonExport = andPopulate.getJSONExport(project.getID());
+      // long now = System.currentTimeMillis();
+
+      JsonArray contentAsJson = jsonExport.getContentAsJson(true, false);
+      logger.info("jsonForProject (" + project.getName() +
+          ") (prune) : got " + project.getTypeOrder() + " vs " + jsonExport.getMinimalTypeOrder() + "  = " + contentAsJson.size());
+
+      if (!project.getSectionHelper().getTypeOrder().isEmpty() && contentAsJson.size() == 0) {
+        logger.warn("\n\n\n" + project.getName() + " no content\n\n\n\n\n");
+      }
+
+      dumpJSON(contentAsJson);
+    });
+  }
+
+  @Test
+  public void testJsonPruneContext() {
+    DatabaseImpl andPopulate = getAndPopulate();
+
+    andPopulate.getProjects().forEach(project -> {
+      JsonExport jsonExport = andPopulate.getJSONExport(project.getID());
+      // long now = System.currentTimeMillis();
+
+      JsonArray contentAsJson = jsonExport.getContentAsJson(true, true);
+      logger.info("jsonForProject (" + project.getName() +
+          ") (context) : got " + project.getTypeOrder() + " vs " + jsonExport.getMinimalTypeOrder() + "  = " + contentAsJson.size());
+
+      if (!project.getSectionHelper().getTypeOrder().isEmpty() && contentAsJson.size() == 0) {
+        logger.warn("\n\n\n" + project.getName() + " no content\n\n\n\n\n");
+      }
+
+      dumpJSON(contentAsJson);
+    });
+  }
+
+  private void dumpJSON(JsonArray contentAsJson) {
+    for (int i = 0; i < Math.min(contentAsJson.size(), 2); i++) {
+      JsonElement jsonElement = contentAsJson.get(i);
+      JsonObject asJsonObject = jsonElement.getAsJsonObject();
+      logger.info("item " + i + " " + asJsonObject.keySet());
+      logger.info("item " + i + " " + asJsonObject.getAsJsonPrimitive("type"));
+    }
   }
 
   @Test
@@ -1183,10 +1463,10 @@ public class EasyReportTest extends BaseTest {
     //   Project project = andPopulate.getProject(3);
     HashMap<String, Collection<String>> typeToValues = new HashMap<>();
     typeToValues.put("Unit", Collections.singleton("21"));
-    JsonObject jsonPhoneReport = andPopulate.getJsonPhoneReport(295, 2, typeToValues);
-    // long now = System.currentTimeMillis();
-
-    logger.info("Got\n\t" + jsonPhoneReport);
+//    JsonObject jsonPhoneReport = andPopulate.getJsonPhoneReport(request);
+//    // long now = System.currentTimeMillis();
+//
+//    logger.info("Got\n\t" + jsonPhoneReport);
   }
 
 
