@@ -9,6 +9,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -122,7 +123,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   public RehearseViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     super(controller, thisView);
     this.sessionStorage = new SessionStorage(controller.getStorage(), "rehearseSession");
-    this.rehearsalPrompt = thisView.isPressAndHold()?HOLD_THE_RED_RECORD_BUTTON:RED_RECORD_BUTTON;
+    this.rehearsalPrompt = thisView.isPressAndHold() ? HOLD_THE_RED_RECORD_BUTTON : RED_RECORD_BUTTON;
   }
 
   @Override
@@ -1142,7 +1143,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     if (percent == 0D) round = HUNDRED;
     double percent1 = num == 0 ? HUNDRED : percent;
     percent1 = Math.max(percent1, 30.0D);
-    scoreProgress.setPercent(percent1);
+    //  scoreProgress.setPercent(percent1);
+    cheesySetPercent(scoreProgress, percent1);
 
     scoreProgress.setVisible(true);
 
@@ -1172,8 +1174,17 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     {
       double percent = total * 100D;
       //   logger.info("setRateProgress percent " + total + " vs " + percent);
-      scoreProgress.setPercent(Math.max(33.0D, percent));
+      //scoreProgress.setPercent(Math.max(33.0D, percent));
+      cheesySetPercent(scoreProgress, Math.max(33.0D, percent));
     }
+  }
+
+
+  @NotNull
+  private Widget cheesySetPercent(ComplexPanel practicedProgress, double percent1) {
+    Widget theBar = practicedProgress.getWidget(0);
+    theBar.getElement().getStyle().setWidth(Double.valueOf(percent1).intValue(), Style.Unit.PCT);
+    return theBar;
   }
 
   private double getTotalScore() {
@@ -1244,8 +1255,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   /**
-   * @see RecordDialogExercisePanel.ContinuousDialogRecordAudioPanel#useInvalidResult(int, boolean)
    * @param exid
+   * @see RecordDialogExercisePanel.ContinuousDialogRecordAudioPanel#useInvalidResult(int, boolean)
    */
   @Override
   public void useInvalidResult(int exid) {

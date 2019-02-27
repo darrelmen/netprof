@@ -39,6 +39,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.UriUtils;
+import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -54,6 +55,7 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.AudioRefExercise;
 import mitll.langtest.shared.exercise.HasID;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.logging.Logger;
@@ -208,7 +210,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
           audioType.equals(AudioType.SLOW) ?
               exercise.getRecordingsBy(user, false) : null;
 
-     // logger.info("getAudioAttribute by " + user + " type " + audioType + " = " + audioAttribute);
+      // logger.info("getAudioAttribute by " + user + " type " + audioType + " = " + audioAttribute);
 
       return audioAttribute;
     }
@@ -305,6 +307,7 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
             public void playStarted() {
               checkAndSetBusy(panel, true);
             }
+
             public void playStopped() {
               checkAndSetBusy(panel, false);
             }
@@ -412,13 +415,22 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
      */
     private void showDynamicRange(double dynamicRange) {
       double percent = dynamicRange / 70D;
-      progressBar.setPercent(100.0D * percent);
+      double percent1 = 100.0D * percent;
+      //   progressBar.setPercent(percent1);
+      cheesySetPercent(progressBar, percent1);
       progressBar.setText("" + roundToTenth(dynamicRange));
       progressBar.setColor(dynamicRange > MIN_GOOD_DYNAMIC_RANGE ?
           ProgressBarBase.Color.SUCCESS : dynamicRange > MIN_VALID_DYNAMIC_RANGE ?
           ProgressBarBase.Color.WARNING :
           ProgressBarBase.Color.DANGER);
       afterPlayWidget.setVisible(true);
+    }
+
+    @NotNull
+    private Widget cheesySetPercent(ComplexPanel practicedProgress, double percent1) {
+      Widget theBar = practicedProgress.getWidget(0);
+      theBar.getElement().getStyle().setWidth(Double.valueOf(percent1).intValue(), Style.Unit.PCT);
+      return theBar;
     }
 
     private float roundToTenth(double totalHours) {

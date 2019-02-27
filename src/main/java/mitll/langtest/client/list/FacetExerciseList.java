@@ -2085,7 +2085,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
   }
 
   @NotNull
-  private Widget cheesySetPercent(ProgressBar practicedProgress, double percent1) {
+  private Widget cheesySetPercent(ComplexPanel practicedProgress, double percent1) {
     Widget theBar = practicedProgress.getWidget(0);
     theBar.getElement().getStyle().setWidth(Double.valueOf(percent1).intValue(), Style.Unit.PCT);
     return theBar;

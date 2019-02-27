@@ -6,6 +6,8 @@ import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.ui.ComplexPanel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import org.jetbrains.annotations.NotNull;
 
@@ -76,6 +78,8 @@ public class ScoreProgressBar {
     setPercent(progressBar, percent, round, getStyleWidget(progressBar));
   }
 
+
+
   @NotNull
   private void setColorGradient(ProgressBar progressBar, String color) {
     getStyleWidget(progressBar).setBackgroundImage("linear-gradient(to bottom," +
@@ -91,6 +95,15 @@ public class ScoreProgressBar {
 
   private void setPercent(ProgressBar progressBar, double percent, double round, Style style) {
     if (percent > 0.4) style.setColor("black");
-    progressBar.setPercent(round);
+   // progressBar.setPercent(round);
+    cheesySetPercent(progressBar, round);
   }
+
+  @NotNull
+  private Widget cheesySetPercent(ComplexPanel practicedProgress, double percent1) {
+    Widget theBar = practicedProgress.getWidget(0);
+    theBar.getElement().getStyle().setWidth(Double.valueOf(percent1).intValue(), Style.Unit.PCT);
+    return theBar;
+  }
+
 }

@@ -836,7 +836,15 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>
     int i = (complete == -1 ? 1 : complete + 1);
     double percent = 100d * ((double) i / (double) exerciseList.getSize());
 
-    progressBar.setPercent(percent);
+    //  progressBar.setPercent(percent);
+    cheesySetPercent(progressBar, percent);
+  }
+
+  @NotNull
+  private Widget cheesySetPercent(ComplexPanel practicedProgress, double percent1) {
+    Widget theBar = practicedProgress.getWidget(0);
+    theBar.getElement().getStyle().setWidth(Double.valueOf(percent1).intValue(), Style.Unit.PCT);
+    return theBar;
   }
 
   /**
