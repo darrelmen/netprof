@@ -96,7 +96,9 @@ public class RecordWordAndPhone {
 
     recordWordAndPhoneInfo(projID, answerID, pretestScore);
     long now = System.currentTimeMillis();
-    logger.info("recordWordAndPhoneInfo answer " + answer + " and result id " + answerID + " took " + (now - then));
+    if (now - then > 20) {
+      logger.info("recordWordAndPhoneInfo answer " + answer + " and result id " + answerID + " took " + (now - then));
+    }
   }
 
   /**

@@ -835,6 +835,7 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>
     int complete = exerciseList.getComplete();
     int i = (complete == -1 ? 1 : complete + 1);
     double percent = 100d * ((double) i / (double) exerciseList.getSize());
+
     progressBar.setPercent(percent);
   }
 

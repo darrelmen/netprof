@@ -34,7 +34,7 @@ public class ScoreProgressBar {
    * @see SimpleRecordAudioPanel#useScoredResult
    */
   public DivWidget showScore(double score, boolean isFullMatch) {
-    double percent = isFullMatch ? score / 100d : 0.41D;
+    double percent = isFullMatch ? score / 100D : 0.41D;
     progressBar.setVisible(true);
     if (isFullMatch) {
       progressBar.getElement().getStyle().clearProperty("width");

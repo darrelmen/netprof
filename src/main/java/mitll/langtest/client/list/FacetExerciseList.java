@@ -2051,14 +2051,14 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
                               String oneHundredPercent,
                               String suffix,
                               boolean useColorGradient) {
-    float fnumer = (float) num;
-    float fdenom = (float) denom;
+    double fnumer = Integer.valueOf(num).doubleValue();
+    double fdenom = Integer.valueOf(denom).doubleValue();
 
     double score = fnumer / fdenom;
-    double percent = 100 * score;
+    double percent = 100.0D * score;
     if (DEBUGSCORE) logger.info("showProgress percent " + percent);
 
-    double percent1 = Math.max(30, num == 0 ? 100 : percent);
+    double percent1 = Math.max(30.0D, num == 0.0D ? 100.0D : percent);
     practicedProgress.setPercent(percent1);
     boolean allDone = num == denom;
 

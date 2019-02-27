@@ -411,8 +411,8 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
      * @see #useResult(AudioAnswer)
      */
     private void showDynamicRange(double dynamicRange) {
-      double percent = dynamicRange / 70;
-      progressBar.setPercent(100 * percent);
+      double percent = dynamicRange / 70D;
+      progressBar.setPercent(100.0D * percent);
       progressBar.setText("" + roundToTenth(dynamicRange));
       progressBar.setColor(dynamicRange > MIN_GOOD_DYNAMIC_RANGE ?
           ProgressBarBase.Color.SUCCESS : dynamicRange > MIN_VALID_DYNAMIC_RANGE ?

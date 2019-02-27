@@ -44,6 +44,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     extends ListenViewHelper<T>
     implements SessionManager, IRehearseView, KeyPressDelegate {
+  public static final double HUNDRED = 100.0D;
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
   private static final String DIALOG_INTRO_SHOWN_REHEARSAL = "dialogIntroShownRehearsal";
@@ -1136,12 +1137,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     total /= (float) num;
     logger.info("showOverallDialogScore total   " + total + " vs " + num);
 
-    double percent = total * 100;
+    double percent = total * HUNDRED;
     double round = percent;// Math.max(percent, 30);
-    if (percent == 0d) round = 100d;
-    double percent1 = num == 0 ? 100 : percent;
-    percent1 = Math.max(percent1, 30);
+    if (percent == 0D) round = HUNDRED;
+    double percent1 = num == 0 ? HUNDRED : percent;
+    percent1 = Math.max(percent1, 30.0D);
     scoreProgress.setPercent(percent1);
+
     scoreProgress.setVisible(true);
 
     scoreProgress.setText("Score " + Math.round(percent) + "%");
@@ -1170,7 +1172,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     {
       double percent = total * 100D;
       //   logger.info("setRateProgress percent " + total + " vs " + percent);
-      scoreProgress.setPercent(Math.max(33, percent));
+      scoreProgress.setPercent(Math.max(33.0D, percent));
     }
   }
 
