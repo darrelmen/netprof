@@ -2059,7 +2059,9 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     if (DEBUGSCORE) logger.info("showProgress percent " + percent);
 
     double percent1 = Math.max(30.0D, num == 0.0D ? 100.0D : percent);
-    practicedProgress.setPercent(percent1);
+   // practicedProgress.setPercent(percent1);
+    Widget theBar = cheesySetPercent(practicedProgress, percent1);
+
     boolean allDone = num == denom;
 
     practicedProgress.setText(getPracticedText(num, denom, zeroPercent, oneHundredPercent, suffix));
@@ -2077,9 +2079,16 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
                       ProgressBarBase.Color.INFO :
                       ProgressBarBase.Color.WARNING);
       // bug #
-      practicedProgress.getWidget(0).getElement().getStyle().setColor("black");
+      theBar.getElement().getStyle().setColor("black");
     }
     practicedProgress.setVisible(true);
+  }
+
+  @NotNull
+  private Widget cheesySetPercent(ProgressBar practicedProgress, double percent1) {
+    Widget theBar = practicedProgress.getWidget(0);
+    theBar.getElement().getStyle().setWidth(Double.valueOf(percent1).intValue(), Style.Unit.PCT);
+    return theBar;
   }
 
   protected String getPracticedText(int num, int denom, String zeroPercent, String oneHundredPercent, String suffix) {
