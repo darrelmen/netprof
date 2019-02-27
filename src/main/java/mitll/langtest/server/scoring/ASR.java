@@ -56,6 +56,15 @@ public interface ASR {
   boolean isDictEmpty();
 
   boolean validLTS(String foreignLanguagePhrase, String transliteration);
+
+  Collection<String> getKaldiOOV(String fl);
+
+  /**
+   * @see AudioFileHelper#checkLTSOnForeignPhrase(String, String)
+   * @param fl
+   * @param transliteration
+   * @return
+   */
   Collection<String> getOOV(String fl, String transliteration);
 
   PhoneInfo getBagOfPhones(String foreignLanguagePhrase);

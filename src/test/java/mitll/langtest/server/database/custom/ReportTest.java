@@ -54,6 +54,33 @@ public class ReportTest {
     Collection<CommonExercise> exercises = database.getExercises();
   }
 
+  @Test
+  public void splitTest(){
+
+
+
+  }
+
+
+  private int getUserFromFile(String requestURI) {
+    int userID = -1;
+    String[] split = requestURI.split("subject-");
+    if (split.length == 2) {
+      String s1 = split[1];
+      String[] split1 = s1.split("\\/");
+      String s = split1[0];
+      try {
+        logger.info("getUserForFile parse '" + s + "' = " + userID + " from " + s1);
+        userID = Integer.parseInt(s);
+      } catch (NumberFormatException e) {
+        logger.warn("getUserFromFile couldn't parse " + s + " in " + s1 + " of " + requestURI);
+      }
+    }
+    return userID;
+  }
+
+
+
 /*  @Test
   public void testExport() {
     new JsonExport(null,null,null).getExercisesAsJson(database.getExercises());

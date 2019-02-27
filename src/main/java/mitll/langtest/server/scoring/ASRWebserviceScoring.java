@@ -34,10 +34,7 @@ package mitll.langtest.server.scoring;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.*;
@@ -107,6 +104,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final String SCORE = "score";
   private static final String STATUS = "status";
   private static final String LOG = "log";
+  public static final String SCORE1 = "score";
+  public static final String OOV = "oov";
+  public static final String NORM = "norm";
+  public static final String NORM_TRANSCRIPT = "norm_transcript";
+  public static final String TRANSCRIPT = "transcript";
+  public static final String IN_VOCAB = "in_vocab";
 
   private final SLFFile slfFile;
 
@@ -282,7 +285,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param useKaldi              true if using the new kaldi protocol!
    * @param port
    * @return score info coming back from alignment/reco
-   * @seex ASR#scoreRepeat
+   * @see #scoreRepeat
    */
   private PretestScore scoreRepeatExercise(String testAudioDir,
                                            String testAudioFileNoSuffix,
@@ -404,7 +407,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         then = System.currentTimeMillis();
 
         if (useKaldi) {
-          cached = runKaldi(getTokensForKaldi(sentence, transliteration), filePath + WAV1, port, transNormDict, sentence);
+          cached = runKaldi(filePath + WAV1, port, transNormDict, sentence);
           if (cached == null || cached.getScores() == null) {
             logger.warn("scoreRepeatExercise kaldi didn't run properly....");
           } else {
@@ -476,20 +479,84 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return useKaldi ? "kaldi" : "hydra";
   }
 
+  @Override
+  public Collection<String> getKaldiOOV(String fl) {
+    int webservicePort = getWebservicePort();
+    return runOOV(runNorm(fl, webservicePort), webservicePort);
+  }
+
+  private List<String> runNorm(String sentence, int port) {
+    List<String> tokens = new ArrayList<>();
+    try {
+      JsonObject parse = new JsonParser().parse(callKaldiNorm(sentence, port)).getAsJsonObject();
+      STATUS_CODES status = getStatus(parse);
+
+      if (status == SUCCESS) {
+        JsonArray asJsonArray = parse.getAsJsonArray(NORM_TRANSCRIPT);
+        asJsonArray.forEach(jsonElement -> tokens.add(jsonElement.getAsString()));
+      } else {
+        String log = parse.has(LOG) ? parse.get(LOG).getAsString() : "";
+        logger.warn("runNorm failed " +
+            "\n\tstatus " + status +
+            "\n\tlog    " + log.trim()
+        );
+      }
+
+    } catch (Exception e) {
+      logger.error("Running norm on " +
+          "\n\tsentence " + sentence +
+          "\n\tGot " + e, e);
+    }
+    return tokens;
+  }
+
+  private List<String> runOOV(final List<String> tokens, int port) {
+    List<Boolean> oov = new ArrayList<>();
+    try {
+      JsonObject parse = new JsonParser().parse(callKaldiOOV(tokens, port)).getAsJsonObject();
+      STATUS_CODES status = getStatus(parse);
+
+      if (status == SUCCESS) {
+        JsonArray asJsonArray = parse.getAsJsonArray(IN_VOCAB);
+        asJsonArray.forEach(jsonElement -> oov.add(jsonElement.getAsBoolean()));
+      } else {
+        String log = parse.has(LOG) ? parse.get(LOG).getAsString() : "";
+        logger.warn("runOOV failed " +
+            "\n\tstatus " + status +
+            "\n\tlog    " + log.trim()
+        );
+      }
+
+    } catch (Exception e) {
+      logger.error("Got " + e, e);
+    }
+
+    if (oov.isEmpty()) {
+      return tokens;
+    } else {
+      List<String> oovTokens = new ArrayList<>(tokens.size());
+      for (int i = 0; i < tokens.size(); i++) {
+        if (oov.get(i)) {
+          oovTokens.add(tokens.get(i));
+        }
+      }
+      return oovTokens;
+    }
+  }
+
   /**
    * http://hydra-dev.llan.ll.mit.edu:5000/score/%7B%22reqid%22:1234,%22request%22:%22decode%22,%22phrase%22:%22%D8%B9%D8%B1%D8%A8%D9%8A%D9%91%22,%22file%22:%22/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav%22%7D
    *
-   * @param sentence
    * @param audioPath
    * @param port
    * @param rawSentence
    * @return
    * @see #scoreRepeatExercise
    */
-  private HydraOutput runKaldi(String sentence, String audioPath, int port, TransNormDict transNormDict, String rawSentence) {
+  private HydraOutput runKaldi(String audioPath, int port, TransNormDict transNormDict, String rawSentence) {
     try {
       long then = System.currentTimeMillis();
-      sentence = rawSentence;
+      String sentence = rawSentence;
       logger.info("replace " + sentence + " with " + rawSentence);
       String json = callKaldi(sentence, audioPath, port);
       long now = System.currentTimeMillis();
@@ -523,8 +590,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         return new HydraOutput(
             new Scores(score, new HashMap<>(), (int) processDur)
                 .setKaldiJsonObject(parse),
-            null,
-            null,
             getWordAndProns(sentence), transNormDict)
             .setStatus(status)
             .setLog(log);
@@ -538,8 +603,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         return new HydraOutput(
             new Scores(-1F, new HashMap<>(), 0)
                 .setKaldiJsonObject(new JsonObject()),
-            null,
-            null,
             null, transNormDict)
             .setStatus(ERROR)
             .setLog(e.getMessage());
@@ -548,7 +611,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     } catch (Exception e) {
       logger.error("Got " + e, e);
       return new HydraOutput(new Scores(-1F, new HashMap<>(), 0)
-          .setKaldiJsonObject(new JsonObject()), null, null, null, transNormDict)
+          .setKaldiJsonObject(new JsonObject()), null, transNormDict)
           .setStatus(ERROR)
           .setMessage(e.getMessage())
           .setLog(e.getMessage());
@@ -573,32 +636,67 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param port
    * @return
    * @throws IOException
+   * @see #runKaldi
    */
   private String callKaldi(String sentence, String audioPath, int port) throws IOException {
-    HTTPClient httpClient = new HTTPClient();
-
     String jsonRequest = getKaldiRequest(sentence, audioPath);
     // String s1 = "{\"reqid\":1234,\"request\":\"decode\",\"phrase\":\"عربيّ\",\"file\":\"/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav\"}";
+//
+//    String prefix = getPrefix(port, SCORE);
+//    String encode = URLEncoder.encode(jsonRequest, StandardCharsets.UTF_8.name());
+//    String url = prefix + encode;
+//    logger.info("runKaldi " +
+//        "\n\tsentence  " + sentence +
+//        "\n\taudioPath " + audioPath +
+//        //"\n\treq       " + encode +
+//        "\n\traw       " + (prefix + jsonRequest) +
+//        "\n\tpost      " + url);
+//
+//    return httpClient.readFromGET(url);
 
-    String prefix = getPrefix(port);
+    return doKaldiGet(sentence, port, jsonRequest, SCORE);
+  }
+
+  private String callKaldiNorm(String sentence, int port) throws IOException {
+    String jsonRequest = getKalidNormRequest(sentence);
+    // String s1 = "{\"reqid\":1234,\"request\":\"decode\",\"phrase\":\"عربيّ\",\"file\":\"/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav\"}";
+    return doKaldiGet(sentence, port, jsonRequest, NORM);
+  }
+
+  private String callKaldiOOV(List<String> tokens, int port) throws IOException {
+    String jsonRequest = getKalidOOVRequest(tokens);
+    // String s1 = "{\"reqid\":1234,\"request\":\"decode\",\"phrase\":\"عربيّ\",\"file\":\"/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav\"}";
+    return doKaldiGet(tokens.toString(), port, jsonRequest, OOV);
+  }
+
+  private String doKaldiGet(String sentence, int port, String jsonRequest, String operation) throws IOException {
+    String prefix = getPrefix(port, operation);
     String encode = URLEncoder.encode(jsonRequest, StandardCharsets.UTF_8.name());
     String url = prefix + encode;
-    logger.info("runKaldi " +
-        "\n\tsentence  " + sentence +
-        "\n\taudioPath " + audioPath +
+    logger.info("runKaldi " + operation +
+        "\n\tcontent  " + sentence +
         //"\n\treq       " + encode +
         "\n\traw       " + (prefix + jsonRequest) +
         "\n\tpost      " + url);
 
-    return httpClient.readFromGET(url);
+    return new HTTPClient().readFromGET(url);
   }
 
   @NotNull
-  private String getPrefix(int port) {
+  private String getPrefix(int port, String operation) {
     String localhost = props.useProxy() ? "hydra-dev" : "localhost";
-    return "http://" + localhost + ":" + port + "/score/";
+
+    return "http://" + localhost + ":" + port + "/" +
+        operation +
+        "/";
   }
 
+  /**
+   * @param sentence
+   * @param audioPath
+   * @return
+   * @see #callKaldi
+   */
   private String getKaldiRequest(String sentence, String audioPath) {
     JsonObject jsonObject = new JsonObject();
 
@@ -609,10 +707,30 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     jsonObject.addProperty("reqid", "1234");
     jsonObject.addProperty("request", "decode");
     jsonObject.addProperty("phrase", sentence.trim());
-    jsonObject.addProperty("transcript", sentence.trim());
+    jsonObject.addProperty(TRANSCRIPT, sentence.trim());
     jsonObject.addProperty("file", audioPath);
     jsonObject.addProperty("waveform", audioPath);
 
+    return jsonObject.toString();
+  }
+
+  /**
+   * norm/{"transcript":"what is your name"}
+   *
+   * @param sentence
+   * @return
+   */
+  private String getKalidNormRequest(String sentence) {
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty(TRANSCRIPT, sentence);
+    return jsonObject.toString();
+  }
+
+  private String getKalidOOVRequest(List<String> tokens) {
+    JsonObject jsonObject = new JsonObject();
+    JsonArray jsonArray = new JsonArray();
+    tokens.forEach(jsonArray::add);
+    jsonObject.add(NORM_TRANSCRIPT, jsonArray);
     return jsonObject.toString();
   }
 
@@ -1038,7 +1156,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         "\n\tscore     " + split[0] /*+
         "\n\traw reply " + resultsStr*/);
 
-  //  for (String r : results) logger.info("getScores hydra : " + r);
+    //  for (String r : results) logger.info("getScores hydra : " + r);
     return scores;
   }
 

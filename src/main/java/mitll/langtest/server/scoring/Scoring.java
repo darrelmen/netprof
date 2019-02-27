@@ -121,7 +121,7 @@ public abstract class Scoring {
     this.languageEnum = project.getLanguageEnum();
     removeAllAccents = languageEnum != Language.FRENCH;
     isAsianLanguage = isAsianLanguage(languageEnum);
- //   phoneToDisplay = props.getPhoneToDisplay(languageEnum);
+    //   phoneToDisplay = props.getPhoneToDisplay(languageEnum);
 
 //    logger.info("isAsian " + isAsianLanguage + " lang " + language);
 //    if (isAsianLanguage) {
@@ -336,6 +336,8 @@ public abstract class Scoring {
       return oovForFL.isEmpty();
     }
   }
+
+
 
   @NotNull
   public Collection<String> getOOV(String fl, String transliteration) {

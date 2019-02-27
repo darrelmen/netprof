@@ -42,6 +42,7 @@ import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.npdata.dao.SlickExercisePhone;
 import mitll.npdata.dao.SlickUpdateDominoPair;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -73,6 +74,12 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
 
   List<CommonExercise> getUserDefinedByProjectExactMatch(String fl, int userIDFromSession);
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
+   * @param safe
+   * @param unsafe
+   * @param dictTimestamp
+   */
   void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp);
 
   /**

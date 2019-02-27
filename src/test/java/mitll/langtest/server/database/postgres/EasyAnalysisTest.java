@@ -35,6 +35,8 @@ package mitll.langtest.server.database.postgres;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
+import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.shared.analysis.*;
 import org.apache.logging.log4j.LogManager;
@@ -47,6 +49,24 @@ import java.util.*;
 public class EasyAnalysisTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(EasyAnalysisTest.class);
   public static final int MAX = 200;
+
+  @Test
+  public void testFile() {
+    DatabaseImpl andPopulate = getAndPopulate();
+    IProjectManagement projectManagement = andPopulate.getProjectManagement();
+    Project project = projectManagement.getProject(3, true);
+
+    int userForFile3 = projectManagement.getUserForFile("7854/1/subject-659/answer_1542410949930.wav");
+    logger.info("user " +userForFile3);
+
+    int userForFile2 = projectManagement.getUserForFile("/answers/spanish/7854/1/subject-659/answer_1542410949930.wav");
+    logger.info("user " +userForFile2);
+
+    int userForFile = projectManagement.getUserForFile("/opt/netprof/answers/spanish/7854/1/subject-659/answer_1542410949930.wav");
+    logger.info("user " +userForFile);
+
+
+  }
 
   @Test
   public void testAnalysis() {

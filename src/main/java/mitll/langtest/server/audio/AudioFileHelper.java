@@ -103,6 +103,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final String COOKIE = "Cookie";
   private static final String SCORE_SERVLET = "scoreServlet";
   private static final String DEFAULT_EXID = "2";
+  public static final boolean DO_KALDI_OOV = false;
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -126,6 +127,9 @@ public class AudioFileHelper implements AlignDecode {
   private final EnsureAudioHelper ensureAudioHelper;
 
   private final boolean removeAccents;
+  /**
+   * @see #makeDict(String)
+   */
   private long dictModified = 0L;
   private HTKDictionary htkDictionary;
 
@@ -216,7 +220,7 @@ public class AudioFileHelper implements AlignDecode {
           logger.info("checkLTSAndCountPhones : " + language + " checking " + exercises.size() + " exercises...");
 
           for (CommonExercise exercise : exercises) {
-            boolean validForeignPhrase = isValidForeignPhrase(safe, unsafe, exercise);
+            boolean validForeignPhrase = isValidForeignPhrase(safe, unsafe, exercise, oov);
             //  logger.info("checkLTSAndCountPhones : " + language + " oov " + oov.size());
 
             if (!validForeignPhrase) {
@@ -237,7 +241,7 @@ public class AudioFileHelper implements AlignDecode {
             // check context sentences
             for (ClientExercise context : exercise.getDirectlyRelated()) {
               CommonExercise commonExercise = context.asCommon();
-              boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, commonExercise);
+              boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, commonExercise, oov);
               if (commonExercise.isSafeToDecode() != validForeignPhrase2) {
                 commonExercise.getMutable().setSafeToDecode(validForeignPhrase2);
               }
@@ -298,28 +302,48 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
+   * Call Kaldi all the time for now.
+   *
+   * TODO : Consider what to do with english sentences inside an interpreter dialog...
+   *
    * @param safe
    * @param unsafe
    * @param exercise
+   * @param oovCumulative
    * @return
    * @see #checkLTSAndCountPhones
    */
-  private boolean isValidForeignPhrase(Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise) {
-    boolean validForeignPhrase = exercise.isSafeToDecode();
-    if (isStale(exercise)) {
-      //  logger.info("isValidForeignPhrase STALE ex " + exercise.getProjectID()  + "  " + exercise.getID() + " " + new Date(exercise.getLastChecked()) + " vs " + new Date(dictModified));
-      // int before = oov.size();
-      validForeignPhrase = isValidForeignPhrase(exercise);
+  private boolean isValidForeignPhrase(Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise, Set<String> oovCumulative) {
+    boolean isKaldi = project.getModelType() == ModelType.KALDI;
+    if (isKaldi) {
+      if (DO_KALDI_OOV) {
+        if (!exercise.hasEnglishAttr()) {
+          Collection<String> kaldiOOV = asrScoring.getKaldiOOV(exercise.getForeignLanguage());
+          oovCumulative.addAll(kaldiOOV);
+          return kaldiOOV.isEmpty();
+        } else {
+          return true;
+        }
+      } else {
+        return true;
+      }
+    } else {
+      boolean validForeignPhrase = exercise.isSafeToDecode();
+      if (isStale(exercise)) {
+        //  logger.info("isValidForeignPhrase STALE ex " + exercise.getProjectID()  + "  " + exercise.getID() + " " + new Date(exercise.getLastChecked()) + " vs " + new Date(dictModified));
+        // int before = oov.size();
+        validForeignPhrase = isValidForeignPhrase(exercise);
 //      if (oov.size() > before) {
 //        logger.info("isValidForeignPhrase " + project.getName() + " oov now " + oov.size());
 //      }
 
-      if (!validForeignPhrase && DEBUG) {
-        logger.info("isValidForeignPhrase valid " + validForeignPhrase + " ex " + exercise.getForeignLanguage());
+        if (!validForeignPhrase && DEBUG) {
+          logger.info("isValidForeignPhrase valid " + validForeignPhrase + " ex " + exercise.getForeignLanguage());
+        }
+        (validForeignPhrase ? safe : unsafe).add(exercise.getID());
       }
-      (validForeignPhrase ? safe : unsafe).add(exercise.getID());
+      return validForeignPhrase;
     }
-    return validForeignPhrase;
   }
 
   public boolean isValidForeignPhrase(ClientExercise exercise) {
@@ -1724,6 +1748,8 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
+   * Check the file modified date to determine if should check for OOV.
+   *
    * @return
    * @see #makeASRScoring
    */

@@ -26,6 +26,10 @@ public class HydraOutput {
   private String message = "";
   private String log;
 
+  HydraOutput(Scores scores, List<WordAndProns> wordAndProns, TransNormDict transNormDict) {
+    this(scores, null, null, wordAndProns, transNormDict);
+  }
+
   /**
    * @param scores
    * @param wordLab
@@ -54,8 +58,8 @@ public class HydraOutput {
   }
 
   /**
-   * @see ASRWebserviceScoring#getPretestScore(String, ImageOptions, String, String, HydraOutput, double, int, boolean, JsonObject, boolean)
    * @return
+   * @see ASRWebserviceScoring#getPretestScore(String, ImageOptions, String, String, HydraOutput, double, int, boolean, JsonObject, boolean)
    */
   String getWordLab() {
     return wordLab;
