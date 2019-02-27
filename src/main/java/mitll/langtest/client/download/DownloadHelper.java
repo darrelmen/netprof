@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.client.download;
@@ -65,6 +62,9 @@ public class DownloadHelper implements IShowStatus {
   public static final String COMMA = "___COMMA___";
 
   private static final String VOCABULARY = "Vocabulary";
+  /**
+   * @see #showDialog(String, FacetExerciseList)
+   */
   private static final String DOWNLOAD_AUDIO_AND_SPREADSHEET = "Download Content Spreadsheet (and Audio)";
   private static final String SPEED = "Speed";
   private static final String CONTENT = "Content";
@@ -424,10 +424,11 @@ public class DownloadHelper implements IShowStatus {
         " = '" + encode +
         "'");*/
 
+    String dialogParam = selectionState.getDialog() > 0 ? "&d=" + selectionState.getDialog() : "";
     return "?" +
         "request=" + DownloadContainer.DOWNLOAD_AUDIO +
         "&unit=" + encode +
-        "&d=" + selectionState.getDialog() +
+        dialogParam +
         "&male=" + isMale +
         "&regular=" + speedChoices.isRegular() +
         "&context=" + isContext +

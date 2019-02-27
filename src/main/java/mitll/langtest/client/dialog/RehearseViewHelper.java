@@ -1,3 +1,32 @@
+/*
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2019. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015-2019 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ */
+
 package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.*;
@@ -9,6 +38,7 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -44,6 +74,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     extends ListenViewHelper<T>
     implements SessionManager, IRehearseView, KeyPressDelegate {
+  public static final double HUNDRED = 100.0D;
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
 
   private static final String DIALOG_INTRO_SHOWN_REHEARSAL = "dialogIntroShownRehearsal";
@@ -121,7 +152,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   public RehearseViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     super(controller, thisView);
     this.sessionStorage = new SessionStorage(controller.getStorage(), "rehearseSession");
-    this.rehearsalPrompt = thisView.isPressAndHold()?HOLD_THE_RED_RECORD_BUTTON:RED_RECORD_BUTTON;
+    this.rehearsalPrompt = thisView.isPressAndHold() ? HOLD_THE_RED_RECORD_BUTTON : RED_RECORD_BUTTON;
   }
 
   @Override
@@ -1136,12 +1167,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     total /= (float) num;
     logger.info("showOverallDialogScore total   " + total + " vs " + num);
 
-    double percent = total * 100;
+    double percent = total * HUNDRED;
     double round = percent;// Math.max(percent, 30);
-    if (percent == 0d) round = 100d;
-    double percent1 = num == 0 ? 100 : percent;
-    percent1 = Math.max(percent1, 30);
-    scoreProgress.setPercent(percent1);
+    if (percent == 0D) round = HUNDRED;
+    double percent1 = num == 0 ? HUNDRED : percent;
+    percent1 = Math.max(percent1, 30.0D);
+    //  scoreProgress.setPercent(percent1);
+    cheesySetPercent(scoreProgress, percent1);
+
     scoreProgress.setVisible(true);
 
     scoreProgress.setText("Score " + Math.round(percent) + "%");
@@ -1170,8 +1203,17 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     {
       double percent = total * 100D;
       //   logger.info("setRateProgress percent " + total + " vs " + percent);
-      scoreProgress.setPercent(Math.max(33, percent));
+      //scoreProgress.setPercent(Math.max(33.0D, percent));
+      cheesySetPercent(scoreProgress, Math.max(33.0D, percent));
     }
+  }
+
+
+  @NotNull
+  private Widget cheesySetPercent(ComplexPanel practicedProgress, double percent1) {
+    Widget theBar = practicedProgress.getWidget(0);
+    theBar.getElement().getStyle().setWidth(Double.valueOf(percent1).intValue(), Style.Unit.PCT);
+    return theBar;
   }
 
   private double getTotalScore() {
@@ -1242,8 +1284,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   /**
-   * @see RecordDialogExercisePanel.ContinuousDialogRecordAudioPanel#useInvalidResult(int, boolean)
    * @param exid
+   * @see RecordDialogExercisePanel.ContinuousDialogRecordAudioPanel#useInvalidResult(int, boolean)
    */
   @Override
   public void useInvalidResult(int exid) {
