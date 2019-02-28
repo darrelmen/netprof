@@ -81,10 +81,10 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return null;
   }
 
-  @Override
+/*  @Override
   public IRefResultDAO getRefResultDAO() {
     return null;
-  }
+  }*/
 
   @Override
   public boolean updateProjectChinese(int old, int newprojid, List<Integer> justTheseIDs) {
@@ -105,10 +105,10 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   public void addBulk(List<SlickExercise> bulk) {
   }
 
-  @Override
-  public int getAndRememberNumPhones(IPronunciationLookup lookup, int exid, String foreignlanguage, String transliteration) {
-    return 0;
-  }
+//  @Override
+//  public int getAndRememberNumPhones(IPronunciationLookup lookup, int exid, String foreignlanguage, String transliteration) {
+//    return 0;
+//  }
 
   @Override
   public int insert(SlickExercise UserExercise) {
@@ -620,12 +620,14 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @return
    * @seex UserListManager#getDefectList
    */
+/*
   @Override
   public Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap) {
     if (exids.isEmpty()) return new ArrayList<>();
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + " in (" + getIds(exids) + ")";
     return getCommonExercises(sql);
   }
+*/
 
   @Override
   public List<SlickExercise> getExercisesByIDs(Collection<Integer> exids) {

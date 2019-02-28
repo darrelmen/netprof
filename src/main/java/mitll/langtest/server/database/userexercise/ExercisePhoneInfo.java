@@ -39,7 +39,7 @@ public class ExercisePhoneInfo {
   private static final Logger logger = LogManager.getLogger(ExercisePhoneInfo.class);
 
   private int numPhones = 0;
-  private int numPhones2 = 0;
+  //private int numPhones2 = 0;
 
   /**
    * Unique set...?
@@ -119,12 +119,14 @@ public class ExercisePhoneInfo {
    * @see SlickUserExerciseDAO#addPhoneInfo
    * @return
    */
+/*
   int getNumPhones2() {
     return numPhones2;
   }
+*/
 
-  void setNumPhones2(int numPhones2) {
-    this.numPhones2 = numPhones2;
-  }
-  public String toString() { return numPhones +  " or " + numPhones2; }
+//  void setNumPhones2(int numPhones2) {
+//    this.numPhones2 = numPhones2;
+//  }
+  public String toString() { return ""+numPhones; /*+  " or " + numPhones2*/ }
 }

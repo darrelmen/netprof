@@ -779,8 +779,8 @@ public class CreateListDialog extends BasicDialog {
     }
 
     QuizSpec quizSpec = new QuizSpec(duration, minScore, playAudio, true, "");
-    if (sentenceChoice.getValue()) quizSpec.setExercisetypes(QuizSpec.EXERCISETYPES.SENTENCES);
-    else if (bothChoice.getValue()) quizSpec.setExercisetypes(QuizSpec.EXERCISETYPES.BOTH);
+    if (sentenceChoice != null && sentenceChoice.getValue()) quizSpec.setExercisetypes(QuizSpec.EXERCISETYPES.SENTENCES);
+    else if (bothChoice != null && bothChoice.getValue()) quizSpec.setExercisetypes(QuizSpec.EXERCISETYPES.BOTH);
 
     controller.getListService().addUserList(
         safeText,

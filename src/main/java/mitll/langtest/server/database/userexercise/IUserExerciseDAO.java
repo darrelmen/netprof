@@ -73,7 +73,9 @@ public interface IUserExerciseDAO extends IDAO {
    * @see DBExerciseDAO#readExercises
    * @return
    */
+/*
   IRefResultDAO getRefResultDAO();
+*/
 
   /**
    * @see mitll.langtest.server.ScoreServlet#getJsonForAudio(HttpServletRequest, ScoreServlet.PostRequest, String, String)
@@ -113,10 +115,10 @@ public interface IUserExerciseDAO extends IDAO {
                         int importUserIfNotSpecified,
                         boolean isContext,
                         Collection<String> typeOrder);
-
+/*
   int getAndRememberNumPhones(IPronunciationLookup lookup,
                               int exid,
-                              String foreignlanguage, String transliteration);
+                              String foreignlanguage, String transliteration);*/
 
   void addBulk(List<SlickExercise> bulk);
 
@@ -209,7 +211,9 @@ public interface IUserExerciseDAO extends IDAO {
 
   Collection<CommonExercise> getOverrides(boolean shouldSwap);
 
+/*
   Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap);
+*/
 
   List<SlickExercise> getExercisesByIDs(Collection<Integer> exids);
 

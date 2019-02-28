@@ -533,7 +533,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @paramx exToPhones
    * @see #addExerciseToSectionHelper
    */
-  @NotNull
+/*  @NotNull
   private ExercisePhoneInfo getExercisePhoneInfo(SlickExercise slick,
                                                  //  Map<Integer, ExercisePhoneInfo> exToPhones,
                                                  IPronunciationLookup lookup,
@@ -543,28 +543,28 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     //  ExercisePhoneInfo exercisePhoneInfo = exToPhones.get(slick.id());
 
     if (exercisePhoneInfo.getNumPhones() < 1) {
-/*      if (exercisePhoneInfo == null) {
+*//*      if (exercisePhoneInfo == null) {
         logger.info("getExercisePhoneInfo : no phone info for " + slick.id() + " in " + exToPhones.size());
       } else {
         logger.info("getExercisePhoneInfo phone info is " + exercisePhoneInfo.getNumPhones() +
             " for  " + slick.id());
-      }*/
+      }*//*
       exercisePhoneInfo = getExercisePhoneInfoFromDict(slick, lookup);
     } else {
 //      logger.info("OK for " + slick.id() + " " + exercisePhoneInfo);
       // exerciseDAO.updatePhones(slick.id(), exercisePhoneInfo.getNumPhones());
       pairs.add(new SlickExercisePhone(slick.id(), exercisePhoneInfo.getNumPhones()));
     }
-/*
+*//*
     else if (exercisePhoneInfo.getNumPhonesFromDictionaryOrLTS() <1) {
       logger.warn("for " + slick.id() + " found no phones?");
     }
-*/
+*//*
     return exercisePhoneInfo;
-  }
+  }*/
 
-  private int updated = 0;
-  private int cantcalc = 0;
+//  private int updated = 0;
+//  private int cantcalc = 0;
 
   /**
    * Writes to table on cache miss.
@@ -576,7 +576,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @return
    * @see #getExercisePhoneInfo
    */
-  @NotNull
+/*  @NotNull
   private ExercisePhoneInfo getExercisePhoneInfoFromDict(SlickExercise slick, IPronunciationLookup lookup) {
     ExercisePhoneInfo exercisePhoneInfo;
 
@@ -615,7 +615,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     }
 
     return exercisePhoneInfo;
-  }
+  }*/
 
   /**
    * @param lookup
@@ -625,7 +625,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @return
    * @see UserListManager#setNumPhones(CommonExercise, Project, int)
    */
-  @Override
+/*  @Override
   public int getAndRememberNumPhones(IPronunciationLookup lookup,
                                      int exid,
                                      String foreignlanguage,
@@ -636,8 +636,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       exerciseDAO.updatePhones(exid, n2);
     }
     return n2;
-  }
+  }*/
 
+/*
   private int getNumPhones(IPronunciationLookup lookup, ExercisePhoneInfo exercisePhoneInfo,
                            String foreignlanguage, String transliteration) {
     int numPhones = exercisePhoneInfo.getNumPhones();
@@ -652,6 +653,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     }
     return n2;
   }
+*/
 
   @NotNull
   private ExercisePhoneInfo getExercisePhoneInfo(IPronunciationLookup lookup, String foreignlanguage, String transliteration) {
@@ -1082,10 +1084,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return getUserExercises(dao.getOverrides(), shouldSwap);
   }
 
+/*
   @Override
   public Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap) {
     return getUserExercises(getExercisesByIDs(exids), shouldSwap);
   }
+*/
 
   @Override
   public List<SlickExercise> getExercisesByIDs(Collection<Integer> exids) {
@@ -1291,10 +1295,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     if (!range.isEmpty()) range = range.subList(0, range.size() - 1);
     logger.info("useExToPhones got range " + range);
   }*/
+/*
   @Override
   public IRefResultDAO getRefResultDAO() {
     return refResultDAO;
   }
+*/
 
   public SlickExercise getUnknownExercise() {
     return unknownExercise;
