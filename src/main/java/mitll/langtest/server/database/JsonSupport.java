@@ -38,7 +38,6 @@ import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.result.IResultDAO;
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.analysis.PhoneReportRequest;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
@@ -56,10 +55,8 @@ import java.util.stream.Collectors;
 public class JsonSupport {
   private static final Logger logger = LogManager.getLogger(JsonSupport.class);
   private static final String SCORE_JSON = "scoreJson";
-  //  public static final String NAME = "name";
-//  public static final String ID = "id";
   private static final String LISTID = "listid";
-  public static final String SCORES = "scores";
+  private static final String SCORES = "scores";
 
   private final ISection<CommonExercise> sectionHelper;
   private final IResultDAO resultDAO;
@@ -93,15 +90,10 @@ public class JsonSupport {
    * @param userid
    * @param typeToSection
    * @param forContext
-   * @param sortByLatestScore
    * @return
    * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  JsonObject getJsonScoreHistory(int userid,
-                                 Map<String, Collection<String>> typeToSection,
-                                 boolean forContext,
-                                 ExerciseSorter sorter,
-                                 boolean sortByLatestScore) {
+  JsonObject getJsonScoreHistory(int userid, Map<String, Collection<String>> typeToSection, boolean forContext) {
     Collection<String> listid = typeToSection.get(LISTID);
     if (listid == null || listid.isEmpty()) {
       Collection<CommonExercise> exercisesForSelectionState = sectionHelper.getExercisesForSelectionState(typeToSection);
@@ -110,8 +102,6 @@ public class JsonSupport {
       }
       return getJsonForExercises(userid, exercisesForSelectionState);
     } else {
-//      int id = getListID(listid);
-      // typeToSection.remove(LISTID);
       return getJsonForExercises(userid,
           userListManager.getCommonExercisesOnList(project.getID(), getListID(listid)));
     }

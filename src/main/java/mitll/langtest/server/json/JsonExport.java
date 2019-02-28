@@ -33,7 +33,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -78,15 +77,13 @@ public class JsonExport {
   private static final boolean DEBUG = false;
 
   /**
-   * @param phoneToCount
    * @param sectionHelper
    * @param preferredVoices
    * @param isEnglish
    * @param audioFileHelper
    * @see mitll.langtest.server.ScoreServlet#getJsonNestedChapters
    */
-  public JsonExport(Map<String, Integer> phoneToCount,
-                    ISection<CommonExercise> sectionHelper,
+  public JsonExport(ISection<CommonExercise> sectionHelper,
                     Collection<Integer> preferredVoices,
                     boolean isEnglish,
                     AudioFileHelper audioFileHelper) {

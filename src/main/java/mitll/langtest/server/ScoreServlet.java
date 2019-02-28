@@ -41,6 +41,7 @@ import mitll.langtest.server.json.ProjectExport;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.scoring.JsonScoring;
 import mitll.langtest.server.sorter.ExerciseSorter;
+import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.shared.analysis.PhoneReportRequest;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.QuizSpec;
@@ -674,7 +675,7 @@ public class ScoreServlet extends DatabaseServlet {
         try {
           boolean sortByLatestScore = hasSortByLatestScore(queryString);
           logger.info("getChapterHistory Sort by latest " + sortByLatestScore);
-          toReturn = db.getJsonScoreHistory(projectid, userID, selection, hasContextArg(queryString), sortByLatestScore, getExerciseSorter(projectid));
+          toReturn = db.getJsonScoreHistory(projectid, userID, selection, hasContextArg(queryString), sortByLatestScore, new SimpleSorter());
         } catch (NumberFormatException e) {
           toReturn.addProperty(ERROR, "User id should be a number");
         }
@@ -692,12 +693,12 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet
    * @see #getChapterHistory
    */
-  private ExerciseSorter getExerciseSorter(int projectid) {
-    Map<String, Integer> stringIntegerHashMap = new HashMap<>();
-    AudioFileHelper audioFileHelper = getAudioFileHelper(projectid);
-    Map<String, Integer> phoneToCount = audioFileHelper == null ? stringIntegerHashMap : audioFileHelper.getPhoneToCount();
-    return new ExerciseSorter(phoneToCount);
-  }
+//  private ExerciseSorter getExerciseSorter(int projectid) {
+//    Map<String, Integer> stringIntegerHashMap = new HashMap<>();
+//    AudioFileHelper audioFileHelper = getAudioFileHelper(projectid);
+//    Map<String, Integer> phoneToCount = audioFileHelper == null ? stringIntegerHashMap : audioFileHelper.getPhoneToCount();
+//    return new ExerciseSorter(phoneToCount);
+//  }
 
   private AudioFileHelper getAudioFileHelper(int projectid) {
     return getProject(projectid).getAudioFileHelper();

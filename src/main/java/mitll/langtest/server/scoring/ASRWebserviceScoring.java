@@ -434,8 +434,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     }
 
     if (cached == null || cached.getStatus() != SUCCESS) {
-      logger.error("scoreRepeatExercise " + hydra +
-          " failed to generate scores : " + cached);
+      logger.warn("scoreRepeatExercise " + hydra + " failed to generate scores : " + cached);
       PretestScore pretestScore = new PretestScore(-1f);
       if (cached != null) {
         pretestScore
@@ -484,7 +483,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         );
       }
 
-    } catch (Exception e) {
+    } catch (IOException e) {
       logger.error("Running norm on " +
           "\n\tsentence " + sentence +
           "\n\tGot " + e, e);

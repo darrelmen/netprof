@@ -39,7 +39,11 @@ import java.util.List;
 public class SimpleSorter<T extends CommonShell> extends ExerciseComparator {
   private final boolean sortByEnglishOnly;
 
-  SimpleSorter(boolean sortByEnglishOnly) {
+  public SimpleSorter() {
+    this(false);
+  }
+
+   SimpleSorter(boolean sortByEnglishOnly) {
     this.sortByEnglishOnly = sortByEnglishOnly;
   }
 

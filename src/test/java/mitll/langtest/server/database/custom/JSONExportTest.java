@@ -56,7 +56,7 @@ public class JSONExportTest extends JsonExport {
    * @see ScoreServlet#getJsonNestedChapters(boolean)
    */
   public JSONExportTest() {
-    super(null, null, null, false, null);
+    super(null, null, false, null);
   }
   //private static String dbName;
 

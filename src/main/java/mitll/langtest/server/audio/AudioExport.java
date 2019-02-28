@@ -35,6 +35,7 @@ import mitll.langtest.server.database.excel.ExcelExport;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.server.sorter.ExerciseSorter;
+import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -120,7 +121,7 @@ public class AudioExport {
                                  boolean isDefectList,
                                  AudioExportOptions options) throws Exception {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
-    new ExerciseSorter().sortByEnglish(copy, "");
+    new SimpleSorter<CommonExercise>().sortByEnglish(copy, "");
     writeToStream(copy, prefix, typeOrder, language1, out,// false,
         isDefectList, options);
   }
@@ -136,7 +137,7 @@ public class AudioExport {
                                                   Collection<CommonExercise> exercisesForSelectionState,
                                                   boolean isEnglish) {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
-    new ExerciseSorter().getSorted(copy, isEnglish, "");
+    new SimpleSorter<CommonExercise>().getSorted(copy, isEnglish, "");
     return copy;
   }
 

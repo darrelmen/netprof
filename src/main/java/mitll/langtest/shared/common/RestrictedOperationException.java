@@ -1,7 +1,7 @@
-/**
+/*
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2016 - 2017. Other request for this document shall
- * be referred to DLIFLC.
+ * and their contractors; 2019. Other request for this document shall be referred
+ * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
  * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
@@ -16,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2016 - 2017 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -28,14 +28,6 @@
  */
 package mitll.langtest.shared.common;
 
-/**
- * RestrictedOperationException
- * <br><br>
- * Copyright &copy; 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author Raymond Budd <a href=mailto:raymond.budd@ll.mit.edu>raymond.budd@ll.mit.edu</a>
- * @since Nov 1, 2013 8:38:45 AM
- */
 public class RestrictedOperationException extends RuntimeException {
 
 	private static final long serialVersionUID = -2905273133511171831L;

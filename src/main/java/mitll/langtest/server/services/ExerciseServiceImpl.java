@@ -38,6 +38,7 @@ import mitll.langtest.server.database.exercise.TripleExercises;
 import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.ExerciseSorter;
+import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.common.DominoSessionException;
@@ -890,7 +891,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private <U extends CommonShell> void sortExercises(List<U> commonExercises,
                                                      boolean sortByFL,
                                                      String searchTerm) {
-    new ExerciseSorter<U>().getSorted(commonExercises, sortByFL, searchTerm);
+    new SimpleSorter<U>().getSorted(commonExercises, sortByFL, searchTerm);
   }
 
 

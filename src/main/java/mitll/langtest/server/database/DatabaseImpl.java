@@ -88,7 +88,7 @@ import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.services.UserServiceImpl;
-import mitll.langtest.server.sorter.ExerciseSorter;
+import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.analysis.PhoneReportRequest;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -855,15 +855,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Project project = getProject(projectid);
     if (project == null) {
       logger.warn("asking for unknown project " + projectid);
-      return new JsonExport(null, null, Collections.emptyList(), false, null);
+      return new JsonExport(null, Collections.emptyList(), false, null);
     } else {
       if (project.getJsonExport() == null) {
         getExercises(projectid, false);
-
-        AudioFileHelper audioFileHelper = project.getAudioFileHelper();
-
         JsonExport jsonExport = new JsonExport(
-            audioFileHelper == null ? Collections.emptyMap() : audioFileHelper.getPhoneToCount(),
             getSectionHelper(projectid),
             serverProps.getPreferredVoices(),
             getLanguageEnum(projectid) == Language.ENGLISH,
@@ -1203,7 +1199,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
                                         int userid,
                                         Map<String, Collection<String>> typeToSection,
                                         boolean forContext,
-                                        boolean sortByLatestScore, ExerciseSorter sorter) {
+                                        boolean sortByLatestScore, SimpleSorter sorter) {
 
     if (projid == -1) {
       projid = projectForUser(userid);
@@ -1213,7 +1209,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     } else {
       JsonSupport jsonSupportForProject = getJsonSupportForProject(projid);
       // TODO :  maybe if the project is retired...?  how to handle this on iOS???
-      return jsonSupportForProject == null ? new JsonObject() : jsonSupportForProject.getJsonScoreHistory(userid, typeToSection, forContext, sorter, sortByLatestScore);
+      return jsonSupportForProject == null ? new JsonObject() : jsonSupportForProject.getJsonScoreHistory(userid, typeToSection, forContext);
     }
   }
 
