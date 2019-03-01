@@ -310,6 +310,8 @@ public class PronunciationLookup implements IPronunciationLookup {
     return new TransNormDict(transcript, norm, dict.toString());
   }
 
+  int spew = 0;
+
   /**
    * @param transcript
    * @param transliteration
@@ -385,6 +387,9 @@ public class PronunciationLookup implements IPronunciationLookup {
         logger.info("getPronunciationsFromDictOrLTS prons length " + process.length +
             "\n\tfor " + word +
             "\n\tin '" + transcript + "'");
+        if (spew++ < 2) {
+          logger.info("OK stack ", new Exception("why?"));
+        }
       }
       int max = MAX_FROM_ANY_TOKEN;
       List<String> prons = new ArrayList<>();
@@ -452,7 +457,7 @@ public class PronunciationLookup implements IPronunciationLookup {
                                          String word,
                                          String[][] translitprocess) {
     List<String> prons = new ArrayList<>();
-    logger.info("addTranslitPhones " + word + " dict " +dict + " num " +translitprocess.length);
+    logger.info("addTranslitPhones " + word + " dict " + dict + " num " + translitprocess.length);
     for (String[] pron : translitprocess) {
       dict.append(getPronStringForWord(word, pron, false));
       prons.add(getPhoneSeq(pron));

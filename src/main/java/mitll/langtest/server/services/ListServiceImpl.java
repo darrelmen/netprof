@@ -297,9 +297,11 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
     return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, "");
   }
 
+/*
   private boolean isValid(Project project, String foreign) {
     return isValidForeignPhrase(project, foreign).isEmpty();
   }
+*/
 
   private Collection<String> isValidForeignPhrase(Project project, String foreign) {
     return project.getAudioFileHelper().checkLTSOnForeignPhrase(foreign, "");

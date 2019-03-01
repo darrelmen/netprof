@@ -121,6 +121,7 @@ class CheckLTS {
     return (foreignTokens.size() == translitTokens.size()) || (foreignTokens.size() == 1);
   }
 
+  int spew =0;
   /**
    * So chinese is special -- it doesn't do lts -- it just uses a dictionary
    *
@@ -218,6 +219,9 @@ class CheckLTS {
             if (!translitOk && !legitLTS) {
               if (!isEmptyLTS) {
                 logger.warn(getDebugInfo(lts, foreignLanguagePhrase, i, token) + " translitOk " + translitOk + " legitLTS " + legitLTS);
+                if (spew++<5) {
+                  logger.info(getDebugInfo(lts, foreignLanguagePhrase, i, token) + " translitOk " + translitOk + " legitLTS " + legitLTS, new Exception("why?"));
+                }
               } else if (DEBUG) {
                 logger.info(getDebugInfo(lts, foreignLanguagePhrase, i, token));
               }

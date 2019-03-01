@@ -82,6 +82,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * so first look in the main id->ex map and then in the context->exercise map
    *
    * back off is to try to refresh the exercise if we can't find it...
+   *
    * @param id
    * @return
    */
@@ -137,9 +138,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       } else {
         logger.warn("getExercise : really couldn't find... " + id);
       }
-    }
-    else {
-      logger.warn("getExercise : no known exercise with id " +id);
+    } else {
+      logger.warn("getExercise : no known exercise with id " + id);
     }
     return commonExercise;
   }
@@ -535,8 +535,14 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
    */
   public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp) {
-    getDao().updateCheckedBulk(safe, true, dictTimestamp);
-    getDao().updateCheckedBulk(unsafe, false, dictTimestamp);
+    int changed = getDao().updateCheckedBulk(safe, true, dictTimestamp);
+    if (changed != safe.size()) {
+      logger.warn("asked to mark " + safe.size() + " but did " + changed);
+    }
+    int i = getDao().updateCheckedBulk(unsafe, false, dictTimestamp);
+    if (i != unsafe.size()) {
+      logger.warn("asked to mark " + unsafe.size() + " but did " + i);
+    }
   }
 
   /**

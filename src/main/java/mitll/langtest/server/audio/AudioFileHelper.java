@@ -243,39 +243,56 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
+  private int spew2 = 0;
+
   private int checkAllExercises(Collection<CommonExercise> exercises, int count, Set<Integer> safe, Set<String> oov, Set<Integer> unsafe) {
-    for (CommonExercise exercise : exercises) {
-      if (isStale(exercise)) {
-        boolean validForeignPhrase = isValidForeignPhrase(safe, unsafe, exercise, oov);
-        //  logger.info("checkLTSAndCountPhones : " + language + " oov " + oov.size());
+    int checked = 0;
+    long then = System.currentTimeMillis();
+    if (dictModified > 0) {
+      for (CommonExercise exercise : exercises) {
+        if (isStale(exercise)) {
+          if (spew2++ < 10 || spew2 % 100 == 0)
+            logger.info("for " + exercise.getForeignLanguage() + " last " + exercise.getLastChecked() + " vs " + dictModified);
+//          return exercise.getLastChecked() != dictModified;
 
-        if (!validForeignPhrase) {
-          if (count < 10 || count % 100 == 0) {
-            logger.warn("checkLTSAndCountPhones : " + language +
-                " (" + count +
-                ") (" + oov.size() +
-                ") not a valid foreign phrase for " +
-                "\n\tex      " + exercise.getID() +
-                "\n\tenglish " + exercise.getEnglish() +
-                "\n\tfl      " + exercise.getForeignLanguage());
+          boolean validForeignPhrase = isValidForeignPhrase(safe, unsafe, exercise, oov);
+          //  logger.info("checkLTSAndCountPhones : " + language + " oov " + oov.size());
+          checked++;
+          if (!validForeignPhrase) {
+            if (count < 10 || count % 100 == 0) {
+              logger.warn("checkLTSAndCountPhones : " + language +
+                  " (" + count +
+                  ") (" + oov.size() +
+                  ") not a valid foreign phrase for " +
+                  "\n\tex      " + exercise.getID() +
+                  "\n\tenglish " + exercise.getEnglish() +
+                  "\n\tfl      " + exercise.getForeignLanguage());
+            }
+            count++;
           }
-          count++;
-        }
-        //else {
-        //countPhones(exercise.getMutable());
-        // }
+          //else {
+          //countPhones(exercise.getMutable());
+          // }
 
-        // check context sentences
-        for (ClientExercise context : exercise.getDirectlyRelated()) {
-          CommonExercise commonExercise = context.asCommon();
-          boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, commonExercise, oov);
-          if (commonExercise.isSafeToDecode() != validForeignPhrase2) {
-            commonExercise.getMutable().setSafeToDecode(validForeignPhrase2);
+          // check context sentences
+          for (ClientExercise context : exercise.getDirectlyRelated()) {
+            CommonExercise commonExercise = context.asCommon();
+            boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, commonExercise, oov);
+            checked++;
+
+            if (commonExercise.isSafeToDecode() != validForeignPhrase2) {
+              commonExercise.getMutable().setSafeToDecode(validForeignPhrase2);
+            }
           }
         }
       }
+      logger.info("checkAllExercises (" + project.getName() +
+          ") checked " + checked + " from " + exercises.size() + " for whether they can be decoded in " + (System.currentTimeMillis() - then) + " millis");
+      return count;
+    } else {
+      logger.info("checkAllExercises skipped checking exercises since no dictionary.");
+      return 0;
     }
-    return count;
   }
 
   private void writeOOV(Set<String> oov, String suffix) {
@@ -365,7 +382,7 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    */
   private boolean isStale(CommonExercise exercise) {
-    return exercise.getLastChecked() != dictModified;
+    return exercise.getLastChecked() < dictModified;
   }
 
   /**
@@ -1745,7 +1762,10 @@ public class AudioFileHelper implements AlignDecode {
       long then = System.currentTimeMillis();
       File file = new File(dictFile);
       this.dictModified = file.lastModified();
-      //  logger.info("makeDict read " + file.getAbsolutePath());
+
+      logger.info("makeDict (" + project.getID() + " " + project.getName() + " " + project.getLanguageEnum().toDisplay() +
+          ") read " + file.getAbsolutePath() + " with mod date " + new Date(dictModified));
+
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();
       int size = htkDictionary.size(); // force read from lazy val
