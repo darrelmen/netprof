@@ -40,6 +40,8 @@ public class FileSaver {
   private static final Logger logger = LogManager.getLogger(ScoreServlet.class);
 
   private static final int BUFFER_SIZE = 4096;
+  // about 30 seconds at 16K and sample rate...
+  private static final int ONE_MG = 1048576;  // 1 M
 
   /**
    * After writing the file, it shouldn't be modified any more.
@@ -54,12 +56,12 @@ public class FileSaver {
    * @see ScoreServlet#getJsonForAudio
    */
   @NotNull
-  public File writeAudioFile(PathHelper pathHelper,
-                             InputStream inputStream,
-                             int realExID,
-                             int userid,
-                             Language language,
-                             boolean makeDir) throws IOException {
+  public FileSaveResponse writeAudioFile(PathHelper pathHelper,
+                                         InputStream inputStream,
+                                         int realExID,
+                                         int userid,
+                                         Language language,
+                                         boolean makeDir) throws IOException {
     File saveFile = new File(
         pathHelper.getAbsoluteToAnswer(
             language,
@@ -70,7 +72,7 @@ public class FileSaver {
       makeFileSaveDir(saveFile);
     }
 
-    writeToFile(inputStream, saveFile);
+    FileSaveResponse fileSaveResponse = writeToFile(inputStream, saveFile);
 
     // logger.info("writeAudioFile : wrote file " + saveFile.getAbsolutePath() + " proj " + project + " exid " + realExID + " by " + userid);
     if (!saveFile.setReadOnly()) {
@@ -79,7 +81,29 @@ public class FileSaver {
 
     setParentPermissions(saveFile);
 
-    return saveFile;
+    return fileSaveResponse;
+  }
+
+  public static class FileSaveResponse {
+    private File file;
+
+    public File getFile() {
+      return file;
+    }
+
+    public STATUS getStatus() {
+      return status;
+    }
+
+    enum STATUS {OK, TOO_BIG}
+
+    private STATUS status;
+
+    FileSaveResponse(File file, STATUS status) {
+      this.file = file;
+      this.status = status;
+    }
+
   }
 
   // opt/netprof/answers/turkish/747329/1/subject-6/answer_1542409059474.wav
@@ -101,6 +125,7 @@ public class FileSaver {
 
   /**
    * So it should be readable in case another process not run as tomcat wants to read the file.
+   *
    * @param saveFile
    */
   // /opt/netprof/answers/turkish/747329/1/subject-6/answer_1542409059474.wav
@@ -137,7 +162,7 @@ public class FileSaver {
   }
 
   private void setPermissions(File parentFile) {
-    boolean b = parentFile.setReadable(true,false);
+    boolean b = parentFile.setReadable(true, false);
     if (!b) logger.warn("makeFileSaveDir couldn't set read only on " + parentFile);
 
     boolean b1 = parentFile.setExecutable(true, false);
@@ -147,15 +172,15 @@ public class FileSaver {
 //    if (!b1) logger.warn("makeFileSaveDir couldn't set write on " + parentFile);
   }
 
-
   /**
    * @param inputStream
    * @param saveFile
    * @throws IOException
    */
-  private void writeToFile(InputStream inputStream, File saveFile) throws IOException {
+  private FileSaveResponse writeToFile(InputStream inputStream, File saveFile) throws IOException {
     // opens an output stream for writing file
-    copyToOutput(inputStream, new FileOutputStream(saveFile));
+    boolean b = copyToOutput(inputStream, new FileOutputStream(saveFile), ONE_MG);
+    return new FileSaveResponse(saveFile, b ? FileSaveResponse.STATUS.TOO_BIG : FileSaveResponse.STATUS.OK);
   }
 
   /**
@@ -163,17 +188,27 @@ public class FileSaver {
    *
    * @param inputStream
    * @param outputStream
+   * @param maxBytes
+   * @return true if file too big
    * @throws IOException
    */
-  private void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
+  private boolean copyToOutput(InputStream inputStream, OutputStream outputStream, int maxBytes) throws IOException {
     byte[] buffer = new byte[BUFFER_SIZE];
     int bytesRead;
-
+    int total = 0;
+    boolean fileTooBig = false;
     while ((bytesRead = inputStream.read(buffer)) != -1) {
       outputStream.write(buffer, 0, bytesRead);
+      total += bytesRead;
+      if (total > maxBytes) {
+        logger.warn("copyToOutput : file too big - stopping!");
+        fileTooBig = true;
+        break;
+      }
     }
 
     outputStream.close();
     inputStream.close();
+    return fileTooBig;
   }
 }

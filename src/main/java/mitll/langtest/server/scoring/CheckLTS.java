@@ -219,9 +219,9 @@ class CheckLTS {
             if (!translitOk && !legitLTS) {
               if (!isEmptyLTS) {
                 logger.warn(getDebugInfo(lts, foreignLanguagePhrase, i, token) + " translitOk " + translitOk + " legitLTS " + legitLTS);
-                if (spew++<5) {
-                  logger.info(getDebugInfo(lts, foreignLanguagePhrase, i, token) + " translitOk " + translitOk + " legitLTS " + legitLTS, new Exception("why?"));
-                }
+//                if (spew++<5) {
+//                  logger.info(getDebugInfo(lts, foreignLanguagePhrase, i, token) + " translitOk " + translitOk + " legitLTS " + legitLTS, new Exception("why?"));
+//                }
               } else if (DEBUG) {
                 logger.info(getDebugInfo(lts, foreignLanguagePhrase, i, token));
               }

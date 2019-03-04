@@ -527,12 +527,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       return jsonObject;
     } else {
       Language language = project.getLanguageEnum();
+
+      // TODO :maybe check the status???
       File saveFile = new FileSaver().writeAudioFile(pathHelper,
           new ByteArrayInputStream(combined.getWavFile()),
           realExID,
           userIDFromSession,
           language,
-          true);
+          true).getFile();
 
       AudioContext audioContext = new AudioContext(
           reqid,

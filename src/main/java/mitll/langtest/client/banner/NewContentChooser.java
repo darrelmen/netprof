@@ -672,7 +672,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    * @param view
    */
   private void storeValue(VIEWS view) {
-    getStorage().storeValue(CURRENT_VIEW, view.name());
+    KeyStorage storage = getStorage();
+    if (storage != null && view != null) {
+      storage.storeValue(CURRENT_VIEW, view.name());
+    }
   }
 
   private void showProgress() {

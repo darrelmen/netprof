@@ -139,7 +139,7 @@ public class DownloadServlet extends DatabaseServlet {
 
         logger.info("doGet :" +
             "\n\tRequest " + request.getQueryString() +
-            "\n\tRequest decode " + URLDecoder.decode(request.getQueryString(), "UTF-8") +
+           // "\n\tRequest decode " + URLDecoder.decode(request.getQueryString(), "UTF-8") +
             "\n\tpath    " + request.getPathInfo() +
             "\n\turi     " + requestURI +
             "\n\turl     " + request.getRequestURL() +

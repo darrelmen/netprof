@@ -88,6 +88,9 @@ public class JsonScoring {
   private static final String BAD_EXERCISE_ID = "bad_exercise_id";
   private static final String DYNAMIC_RANGE = "dynamicRange";
   private static final String PRETEST = "pretest";
+  public static final boolean DEBUG = false;
+  public static final String ISFULLMATCH = "isfullmatch";
+  public static final String RESULT_ID1 = "resultID";
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
   private final int unknownExID;
@@ -216,15 +219,15 @@ public class JsonScoring {
     if (answer != null && answer.isValid()) {
       if (pretestScore != null) {
         jsonForScore = getJsonObject(projid, options.isUsePhoneToDisplay(), fullJSON, doFlashcard, answer, pretestScore);
-        jsonForScore.addProperty("isfullmatch", answer.getPretestScore().isFullMatch());
+        jsonForScore.addProperty(ISFULLMATCH, answer.getPretestScore().isFullMatch());
       }
       if (addStream) {
         addStreamInfo(jsonForScore, answer);
       } else {
-        logger.info("getJsonObject : not adding stream info for req " + projid + " : " + exerciseID);
+        if (DEBUG) logger.info("getJsonObject : not adding stream info for req " + projid + " : " + exerciseID);
       }
 
-      jsonForScore.addProperty("resultID", answer.getResultID());
+      jsonForScore.addProperty(RESULT_ID1, answer.getResultID());
     } else if (answer != null) {
       logger.warn("getJsonObject - validity is " + answer.getValidity() +
           "\n\tduration " + answer.getDurationInMillis() +

@@ -37,6 +37,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public enum Validity implements IsSerializable {
   OK("Audio OK."),
   TOO_SHORT("Press and hold to record, release to stop recording."),
+  TOO_LONG("Please record a shorter file."),
   MIC_DISCONNECTED("Is your mic disconnected?"),
   TOO_QUIET("Audio too quiet. Check your mic settings or speak closer to the mic."),
   SNR_TOO_LOW("You are either speaking too quietly or the room is too noisy.<br/>Speak louder or closer to the mic or go to a quieter room."),

@@ -31,8 +31,6 @@ package mitll.langtest.server;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.report.ReportingServices;
@@ -40,9 +38,9 @@ import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.json.ProjectExport;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.scoring.JsonScoring;
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.shared.analysis.PhoneReportRequest;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.QuizSpec;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -108,10 +106,10 @@ public class ScoreServlet extends DatabaseServlet {
   private static final boolean CONVERT_DECODE_TO_ALIGN = true;
   private static final String MESSAGE = "message";
   private static final String UTF_8 = "UTF-8";
-  //private static final String LIST = "list";
-  public static final String SORT_BY_LATEST_SCORE = "sortByLatestScore";
-  public static final String TRUE = "true";
-  public static final String FALSE = "false";
+
+  private static final String SORT_BY_LATEST_SCORE = "sortByLatestScore";
+  private static final String TRUE = "true";
+  private static final String FALSE = "false";
 
   private static final Set<String> notInteresting = new HashSet<>(Arrays.asList(
       "Accept-Encoding",
@@ -120,9 +118,7 @@ public class ScoreServlet extends DatabaseServlet {
       "connection",
       "password",
       "pass"));
-  public static final String SENTENCES_PARAM = HeaderValue.SENTENCES.name().toLowerCase();
-//  public static final String SESSION = "session";
-
+  private static final String SENTENCES_PARAM = HeaderValue.SENTENCES.name().toLowerCase();
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -684,26 +680,6 @@ public class ScoreServlet extends DatabaseServlet {
     return toReturn;
   }
 
-
-  /**
-   * Don't die if audio file helper is not available.
-   *
-   * @param projectid
-   * @return
-   * @see #doGet
-   * @see #getChapterHistory
-   */
-//  private ExerciseSorter getExerciseSorter(int projectid) {
-//    Map<String, Integer> stringIntegerHashMap = new HashMap<>();
-//    AudioFileHelper audioFileHelper = getAudioFileHelper(projectid);
-//    Map<String, Integer> phoneToCount = audioFileHelper == null ? stringIntegerHashMap : audioFileHelper.getPhoneToCount();
-//    return new ExerciseSorter(phoneToCount);
-//  }
-
-  private AudioFileHelper getAudioFileHelper(int projectid) {
-    return getProject(projectid).getAudioFileHelper();
-  }
-
   /**
    * @param response
    * @param JsonObject
@@ -1170,48 +1146,55 @@ public class ScoreServlet extends DatabaseServlet {
 
 
     then = System.currentTimeMillis();
-    File saveFile = new FileSaver().writeAudioFile(
+    FileSaver.FileSaveResponse response = new FileSaver().writeAudioFile(
         pathHelper, request.getInputStream(), realExID, userid, getProject(projid).getLanguageEnum(), true);
 
+    File saveFile = response.getFile();
     now = System.currentTimeMillis();
     if (now - then > 10) {
       logger.info("getJsonForAudio save file to " + saveFile.getAbsolutePath() + " took " + (now - then) + " millis");
     }
-    then = System.currentTimeMillis();
+  //  then = System.currentTimeMillis();
 
-    new AudioConversion(false, db.getServerProps().getMinDynamicRange())
-        .getValidityAndDur(saveFile, false, db.getServerProps().isQuietAudioOK(), then);
+    if (response.getStatus() == FileSaver.FileSaveResponse.STATUS.OK) {
+//      AudioCheck.ValidityAndDur validityAndDur = new AudioConversion(false, db.getServerProps().getMinDynamicRange())
+//          .getValidityAndDur(saveFile, false, db.getServerProps().isQuietAudioOK(), then);
 
-    now = System.currentTimeMillis();
-    if (now - then > 10) {
-      logger.info("getJsonForAudio audio conversion for " + saveFile.getAbsolutePath() + " took " + (now - then) + " millis");
-    }
+//      now = System.currentTimeMillis();
+//      if (now - then > 10) {
+//        logger.info("getJsonForAudio audio conversion for " + saveFile.getAbsolutePath() + " took " + (now - then) + " millis");
+//      }
 
-    // TODO : put back trim silence? or is it done somewhere else
+      // TODO : put back trim silence? or is it done somewhere else
 //    new AudioConversion(null).trimSilence(saveFile);
 
-    if (requestType == PostRequest.DECODE && CONVERT_DECODE_TO_ALIGN) {
-      logger.info("\tfor now we force decode requests into alignment...");
-      requestType = PostRequest.ALIGN;
+      if (requestType == PostRequest.DECODE && CONVERT_DECODE_TO_ALIGN) {
+       // logger.info("\tfor now we force decode requests into alignment...");
+        requestType = PostRequest.ALIGN;
+      }
+
+      return jsonScoring.getJsonForAudioForUser(
+          reqid,
+          projid,
+          realExID,
+
+          postedWordOrPhrase,
+
+          userid,
+          requestType,
+          saveFile.getAbsolutePath(),
+          saveFile,
+          deviceType,
+          device,
+          new DecoderOptions()
+              .setAllowAlternates(getAllowAlternates(request))
+              .setUsePhoneToDisplay(getUsePhoneToDisplay(request)),
+          fullJSON);
+    } else {
+      JsonObject jsonObject = new JsonObject();
+      new JsonScoring(getDatabase()).addValidity(realExID, jsonObject, Validity.TOO_LONG, "" + reqid);
+      return jsonObject;
     }
-
-    return jsonScoring.getJsonForAudioForUser(
-        reqid,
-        projid,
-        realExID,
-
-        postedWordOrPhrase,
-
-        userid,
-        requestType,
-        saveFile.getAbsolutePath(),
-        saveFile,
-        deviceType,
-        device,
-        new DecoderOptions()
-            .setAllowAlternates(getAllowAlternates(request))
-            .setUsePhoneToDisplay(getUsePhoneToDisplay(request)),
-        fullJSON);
   }
 
   private boolean isFullJSON(HttpServletRequest request) {
