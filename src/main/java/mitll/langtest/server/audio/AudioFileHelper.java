@@ -1738,10 +1738,8 @@ public class AudioFileHelper implements AlignDecode {
 
       pronsOfLength.forEach(pron -> {
         List<WP> wps = pronsToWords.get(pron);
-
-        wps.forEach(wp -> new Wrapper<WP>(wp.getEntry(), wp));
+        wps.forEach(wp -> trie.addEntryToTrie(new Wrapper<WP>(wp.getEntry(), wp)));
 //        WP wp = new WP(word, pron);
-
         // trie.addEntryToTrie(new Wrapper<WP>(wp.getEntry(), wp));
       });
       trie.endMakingNodes();
