@@ -43,11 +43,15 @@ import mitll.langtest.server.database.dialog.IDialogSessionDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.scoring.*;
+import mitll.langtest.server.services.ResultServiceImpl;
+import mitll.langtest.server.trie.TextEntityValue;
+import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ModelType;
+import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -59,13 +63,20 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import scala.Option;
+import scala.collection.Iterable;
+import scala.collection.Iterator;
+
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.sql.Array;
 import java.sql.Timestamp;
 import java.text.Collator;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static mitll.langtest.server.ScoreServlet.GetRequest.HASUSER;
 import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
@@ -103,6 +114,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final String COOKIE = "Cookie";
   private static final String SCORE_SERVLET = "scoreServlet";
   private static final String DEFAULT_EXID = "2";
+  public static final boolean DEBUG_EDIT = false;
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -1690,6 +1702,235 @@ public class AudioFileHelper implements AlignDecode {
           project);
     }
   }
+
+  public void makeOneEditMap() {
+    scala.collection.Set<String> words = htkDictionary.keySet();
+    //Iterable<scala.collection.immutable.List<String[]>> prons = htkDictionary.values();
+    Iterator<String> iterator = words.iterator();
+    java.util.Set<String> wset = new HashSet<>();
+    while (iterator.hasNext()) wset.add(iterator.next());
+
+    Map<List<String>, List<WP>> pronsToWords = new HashMap();
+    wset.forEach(w -> {
+      Option<scala.collection.immutable.List<String[]>> listOption = htkDictionary.get(w);
+      if (listOption.isDefined()) {
+        scala.collection.immutable.List<String[]> list = listOption.get();
+        Iterator<String[]> iterator1 = list.iterator();
+        java.util.List<List<String>> jprons = new ArrayList<>();
+        while (iterator1.hasNext()) jprons.add(Arrays.asList(iterator1.next()));
+        jprons.forEach(jp -> {
+          List<WP> wps = pronsToWords.computeIfAbsent(jp, k -> new ArrayList<>());
+          wps.add(new WP(w, jp));
+        });
+      }
+    });
+    Map<Integer, List<List<String>>> lengthToProns = pronsToWords.keySet().stream().collect(Collectors.groupingBy(List::size));
+
+
+    Set<Integer> inOrder = new TreeSet<>(lengthToProns.keySet());
+    List<Integer> integers = Arrays.asList(3);
+    integers.forEach(len -> {
+      logger.info("len " + len);
+      List<List<String>> pronsOfLength = lengthToProns.get(len);
+
+      Trie<WP> trie = new Trie<>();
+      trie.startMakingNodes();
+
+      pronsOfLength.forEach(pron -> {
+        List<WP> wps = pronsToWords.get(pron);
+
+        wps.forEach(wp -> new Wrapper<WP>(wp.getEntry(), wp));
+//        WP wp = new WP(word, pron);
+
+        // trie.addEntryToTrie(new Wrapper<WP>(wp.getEntry(), wp));
+      });
+      trie.endMakingNodes();
+
+      Trie<WP> rtrie = new Trie<>();
+      rtrie.startMakingNodes();
+
+      pronsOfLength.forEach(pron -> {
+        List<WP> wps = pronsToWords.get(pron);
+        wps.forEach(wp1 -> {
+          List<String> strings = new ArrayList<>(pron);
+          // logger.info("\t" + word + " " + pron);
+          Collections.reverse(strings);
+          WP wp = new WP(wp1.getWord(), strings);
+          rtrie.addEntryToTrie(new Wrapper<WP>(wp.getEntry(), wp));
+        });
+
+
+      });
+      rtrie.endMakingNodes();
+
+
+      if (len > 1) {
+        Map<Integer, List<WP>> posToMatches = new HashMap<>();
+        pronsOfLength.subList(0, 5).forEach(pron -> {
+          List<WP> wps = pronsToWords.get(pron);
+          logger.info("for pron " + pron + " found " + wps.size());
+          wps.forEach(wp3 -> {
+            String word = wp3.getWord();
+            logger.info("\t" + word + " " + pron);
+            for (int i = 1; i < len; i++) {
+              List<String> allButSuffix = pron.subList(0, i);
+              if (DEBUG_EDIT) logger.info(i + " prefix " + allButSuffix);
+
+              List<String> after = pron.subList(i + 1, len);
+              if (!after.isEmpty()) {
+                if (DEBUG_EDIT) logger.info("After " + after);
+              }
+              WP wp = new WP(word, allButSuffix);
+
+              List<WP> collect = matchesNotSelf(trie, word, wp);
+              if (DEBUG_EDIT) logger.info("match (" + i + ") " + wp + " (" + collect.size() + ") " + collect);
+
+              final int fi = i;
+              List<WP> finalList = collect;
+              if (!after.isEmpty()) {
+                finalList = collect.stream().filter(c -> {
+                  List<String> suffix = c.getPron().subList(fi + 1, len);
+                  boolean match = suffix.containsAll(after);
+                  if (DEBUG_EDIT && match) {
+                    logger.info("suffix (" + fi + ") " + suffix + " vs " + after + " = " + match);
+                  }
+                  return match;
+                }).collect(Collectors.toList());
+              }
+
+              if (DEBUG_EDIT)
+                logger.info("for (" + i + ") (" + pron + ") : " + wp + " (" + finalList.size() + ") : " + finalList);
+              List<WP> copy = new ArrayList<>();
+              finalList.forEach(f -> copy.add(new WP(f.getWord(), f.getPron(), fi)));
+              posToMatches.put(fi, finalList);
+            }
+            //logger.info("all for " + word + " " + pron + " : " + posToMatches);
+
+            List<String> prefix = new ArrayList<>(pron.subList(1, pron.size()));
+
+            {
+              Collections.reverse(prefix);
+              WP wp2 = new WP(word, prefix);
+//          Collection<WP> matchesLC1 = rtrie.getMatchesLC(wp2.getEntry());
+//          List<WP> collect2 = matchesLC1.stream().filter(w -> !w.getWord().equals(word)).collect(Collectors.toList());
+
+              // List<WP> collect2 = matchesNotSelf(rtrie, word, wp2);
+              List<WP> back = new ArrayList<>();
+
+              matchesNotSelf(rtrie, word, wp2).forEach(ww -> {
+                List<String> copy = new ArrayList<>(ww.getPron());
+                Collections.reverse(copy);
+                back.add(new WP(ww.getWord(), copy));
+              });
+              if (DEBUG_EDIT) logger.info("r for " + wp2 + " (" + back.size() + ") " + back);
+
+              List<WP> copy = new ArrayList<>();
+              back.forEach(f -> copy.add(new WP(f.getWord(), f.getPron())));
+              posToMatches.put(0, copy);
+            }
+
+            logger.info("for " + word + " " + pron);// + " : " + posToMatches);
+            posToMatches.forEach((k, v) -> logger.info("\t" + k + " (" + v.size() + ") " + v));
+          });
+
+
+        });
+      }
+    });
+
+  }
+
+  @NotNull
+  private List<WP> matchesNotSelf(Trie<WP> trie, String word, WP wp) {
+    String entry = wp.getEntry();
+    Collection<WP> matchesLC = trie.getMatchesLC(entry);
+    List<WP> collect = matchesLC.stream().filter(w -> !w.getWord().equals(word)).collect(Collectors.toList());
+    if (DEBUG_EDIT) logger.info("match for " + entry + " " + collect);
+    return collect;
+  }
+
+  class WP {
+    private String word;
+    private List<String> pron;
+    private int pos = -1;
+
+    WP(String word, List<String> pron) {
+      this.word = word;
+      this.pron = pron;
+    }
+
+    WP(String word, List<String> pron, int pos) {
+      this(word, pron);
+      this.pos = pos;
+    }
+
+    public String getWord() {
+      return word;
+    }
+
+    public List<String> getPron() {
+      return pron;
+    }
+
+    public String getEntry() {
+      StringBuilder builder = new StringBuilder();
+      pron.forEach(p -> builder.append(p).append("-"));
+      return builder.toString();
+    }
+
+    public String toString() {
+      String s = pos == -1 ? "" : " at " + pos;
+
+      return getWord() + " " + getPron() + s;
+    }
+
+    public int getPos() {
+      return pos;
+    }
+
+    public void setPos(int pos) {
+      this.pos = pos;
+    }
+  }
+
+  private static class Wrapper<T extends WP> implements TextEntityValue<T> {
+    private final String value;
+    private final T e;
+
+    Wrapper(String value, T e) {
+      this.value = value;
+      this.e = e;
+    }
+
+    @Override
+    public T getValue() {
+      return e;
+    }
+
+    @Override
+    public String getNormalizedValue() {
+      return value;
+    }
+
+    public String toString() {
+      return "e " + e.getWord() + " : " + value;
+    }
+  }
+
+  @NotNull
+  private Trie<WP> makePronTrie(Collection<WP> results) {
+    Trie<WP> trie = new Trie<>();
+    trie.startMakingNodes();
+
+    for (WP result : results) {
+
+      trie.addEntryToTrie(new Wrapper(result.getEntry(), result));
+
+    }
+    trie.endMakingNodes();
+    return trie;
+  }
+
 
   /**
    * JUST FOR TESTING
