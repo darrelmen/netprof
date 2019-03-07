@@ -68,6 +68,7 @@ public class LoginResult implements IsSerializable {
   private int id;
   private String userID;
   private String token;
+  private String sessionID = "";
   private User loggedInUser;
   private ResultType resultType = ResultType.Unknown;
 
@@ -75,9 +76,9 @@ public class LoginResult implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.database.user.DominoUserDAOImpl#addUser(int, MiniUser.Gender, int, String, String, String, String, String, boolean, Collection, Kind, String, String, String, String, String, String, String)
    * @param id
    * @param token
+   * @see mitll.langtest.server.database.user.DominoUserDAOImpl#addUser(int, MiniUser.Gender, int, String, String, String, String, String, boolean, Collection, Kind, String, String, String, String, String, String, String)
    */
   public LoginResult(int id, String token) {
     this.id = id;
@@ -116,8 +117,8 @@ public class LoginResult implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.database.user.BaseUserDAO#addUser
    * @return
+   * @see mitll.langtest.server.database.user.BaseUserDAO#addUser
    */
   public String getToken() {
     return token;
@@ -129,6 +130,14 @@ public class LoginResult implements IsSerializable {
 
   public ResultType getResultType() {
     return resultType;
+  }
+
+  public String getSessionID() {
+    return sessionID;
+  }
+
+  public void setSessionID(String sessionID) {
+    this.sessionID = sessionID;
   }
 
   public String toString() {

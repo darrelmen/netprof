@@ -72,9 +72,11 @@ public enum Facet implements Comparator<Facet> {
     return alt;
   }
 
+/*
   public int getOrder() {
     return order;
   }
+*/
 
   @Override
   public int compare(Facet o1, Facet o2) {

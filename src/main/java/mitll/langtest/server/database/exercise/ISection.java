@@ -30,6 +30,7 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.exercise.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -43,6 +44,9 @@ public interface ISection<T extends HasID & HasUnitChapter> {
   void clear();
 
   List<String> getTypeOrder();
+
+  @NotNull
+  List<String> getUniq(List<String> types);
 
   /**
    * @return

@@ -114,6 +114,7 @@ public class RestUserManagement {
   private static final String LAST1 = "last";
   /**
    * on iOS:
+   *
    * @see EAFSignUpViewController.useJsonChapterData
    * @see #addUser(HttpServletRequest, String, String, String, JsonObject)
    */
@@ -175,7 +176,7 @@ public class RestUserManagement {
     return false;
   }
 
-  private void resetPassword( String baseURL, JsonObject toReturn, String[] split1) {
+  private void resetPassword(String baseURL, JsonObject toReturn, String[] split1) {
     String user = getFirst(split1[0]);
     String optionalEmail = getArg(split1[1]);
     String token = resetPassword(user, baseURL, optionalEmail);//emailFromDevice, request.getRequestURL().toString());
@@ -281,14 +282,23 @@ public class RestUserManagement {
 
       // so we can tell if we need to collect more info, etc.
       LoginResult loginResult = loginUser(user, freeTextPassword, request, securityManager, strictValidity);
-      toReturn.addProperty(LOGIN_RESULT, loginResult.getResultType().name());
+      LoginResult.ResultType resultType = loginResult.getResultType();
 
-      if (loginResult.getResultType() == Success && projid > 0) {
+      if (resultType == Success && projid > 0) {
         db.rememberUsersCurrentProject(userid, projid);
       }
 
-      toReturn.addProperty(PASSWORD_CORRECT, (loginResult.getResultType() == Success) ? TRUE : FALSE);
+      // darrel wanted this.
+      toReturn.addProperty("token", loginResult.getSessionID());
+      toReturn.addProperty(LOGIN_RESULT, resultType.name());
+      toReturn.addProperty(PASSWORD_CORRECT, (resultType == Success) ? TRUE : FALSE);
     }
+  }
+
+  private LoginResult.ResultType getLoginResultType(HttpServletRequest request, IUserSecurityManager securityManager,
+                                                    String user, String freeTextPassword, boolean strictValidity) {
+    LoginResult loginResult = loginUser(user, freeTextPassword, request, securityManager, strictValidity);
+    return loginResult.getResultType();
   }
 
   /**

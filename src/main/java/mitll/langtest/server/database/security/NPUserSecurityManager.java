@@ -167,6 +167,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
   @NotNull
   private LoginResult getValidLogin(HttpSession session, User loggedInUser, boolean strictValidity) {
     LoginResult loginResult = new LoginResult(loggedInUser);
+    loginResult.setSessionID(session.getId());
     boolean valid = strictValidity ? loggedInUser.isValid() : loggedInUser.isForgivingValid();
     if (valid) {
       setSessionUser(session, loggedInUser, true);

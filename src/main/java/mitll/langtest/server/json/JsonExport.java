@@ -74,7 +74,9 @@ public class JsonExport {
   private final Collection<Integer> preferredVoices;
   private final boolean isEnglish;
   private AudioFileHelper audioFileHelper;
+  
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_JSON = true;
 
   /**
    * @param sectionHelper
@@ -105,7 +107,10 @@ public class JsonExport {
 
     List<String> minimalTypeOrder = getMinimalTypeOrder();
 
+    logger.info("getContentAsJson " + (justContext? " just context":"vocab"));
+
     for (SectionNode node : sectionHelper.getSectionNodesForTypes()) {
+      logger.info("getContentAsJson " + node.easy());
       addToJsonArrayForChildren(typeToValues, removeExercisesWithMissingAudio, justContext, minimalTypeOrder, jsonArray, node);
     }
     return jsonArray;
@@ -178,7 +183,7 @@ public class JsonExport {
         jsonForNode.add(ITEMS, jsonForSelection);
 
         if (jsonForSelection.size() == 0) {
-          if (DEBUG) {
+          if (DEBUG_JSON) {
             logger.info("getJsonForNode no leaf content for " + type + " = " + name);
           }
 
@@ -194,7 +199,7 @@ public class JsonExport {
           addToJsonArrayForChildren(typeToValues, removeExercisesWithMissingAudio, justContext, firstTypes, jsonArray, child);
         }
 
-        if (DEBUG) {
+        if (DEBUG_JSON) {
           if (jsonArray.size() == 0) {
             logger.info("getJsonForNode AFTER  node " + node.getType() + " = " + node.getName() +
                 " with " + children.size() + " children, after " + jsonArray.size());
@@ -205,7 +210,7 @@ public class JsonExport {
       if (!addExerciseItems) {// && jsonForNode != null) {
         jsonForNode.add(CHILDREN, jsonArray);
         if (jsonArray.size() == 0) {
-          if (DEBUG) {
+          if (DEBUG_JSON) {
             logger.info("getJsonForNode no content for " + type + " = " + name);
           }
 
@@ -230,7 +235,7 @@ public class JsonExport {
     if (jsonForNode1 != null) {
       jsonArray.add(jsonForNode1);
     } else {
-      if (DEBUG) {
+      if (DEBUG_JSON) {
         logger.info("addToJsonArrayForChildren : no content (remove = " + removeExercisesWithMissingAudio + ") for " + type1 + " = " + name1);
       }
     }

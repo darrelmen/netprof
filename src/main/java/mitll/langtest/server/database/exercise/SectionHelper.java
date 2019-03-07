@@ -189,10 +189,29 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @see DBExerciseDAO#getTypeOrderFromProject
    */
   public void reorderTypes(List<String> types) {
+    logger.info("reorderTypes before " + types);
+    List<String> uniq = getUniq(types);
+
     for (Facet f : Facet.values()) {
-      putAtEnd(types, f.getName());
+      putAtEnd(uniq, f.getName());
     }
-    //logger.info("reorderTypes " + types);
+    types.clear();
+    types.addAll(uniq);
+    logger.info("reorderTypes after " + types);
+  }
+
+  @Override
+  @NotNull
+  public List<String> getUniq(List<String> types) {
+    Set<String> seen= new HashSet<>();
+    List<String> uniq = new ArrayList<>();
+    types.forEach(type->{
+      if (!seen.contains(type)) {
+        uniq.add(type);
+        seen.add(type);
+      }
+    });
+    return uniq;
   }
 
   private void putAtEnd(List<String> types, String sound) {

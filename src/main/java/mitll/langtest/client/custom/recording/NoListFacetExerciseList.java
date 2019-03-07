@@ -131,7 +131,8 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise>
     markCurrentExercise(next.getID());
     addExerciseWidget(next);
     // logger.info("showOnlyOneExercise result size " + result.size());
-    int num = getIndex(getCurrentExercise().getID());
+    T currentExercise = getCurrentExercise();
+    int num = currentExercise == null ? 0 : getIndex(currentExercise.getID());
     // showNumberPracticed(num, pagingContainer.getSize());
     showProgress(num, pagingContainer.getSize(), practicedProgress,
         getNoneDoneMessage(), getAllDoneMessage(), "", false);

@@ -96,11 +96,11 @@ public class FilterResponseHelper implements IResponseFilter {
         logger.info("\n\n\ngetTypeToValues isExampleRequest " + request);
         return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyExamples(true));
       } else {
-        // logger.info("getTypeToValues normal req " + request);
-        FilterResponse response = sectionHelper.getTypeToValues(request, false);
+        if (DEBUG) logger.info("getTypeToValues normal req " + request);
+        FilterResponse response = sectionHelper.getTypeToValues(request, DEBUG);
         maybeAddUserListFacet(request.getUserListID(), response);
         maybeAddContent(request, response, projid);
-        //  logger.info("getTypeToValues normal response " + response);
+        if (DEBUG) logger.info("getTypeToValues normal response " + response);
 
         return response;
       }

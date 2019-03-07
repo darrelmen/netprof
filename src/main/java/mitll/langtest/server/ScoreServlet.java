@@ -119,6 +119,9 @@ public class ScoreServlet extends DatabaseServlet {
       "password",
       "pass"));
   private static final String SENTENCES_PARAM = HeaderValue.SENTENCES.name().toLowerCase();
+  public static final String PROJID = "projid";
+  public static final String AMPERSAND = "&";
+  public static final String DATE = "Date";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -290,7 +293,7 @@ public class ScoreServlet extends DatabaseServlet {
 
       try {
         if (realRequest == GetRequest.NESTED_CHAPTERS) {
-          String[] split1 = queryString.split("&");
+          String[] split1 = queryString.split(AMPERSAND);
 
           if (hasContextArg(queryString)) {
             toReturn = getJsonNestedChapters(projid, true, true);
@@ -317,7 +320,7 @@ public class ScoreServlet extends DatabaseServlet {
           toReturn = getChapterHistory(queryString, toReturn, projid, userID);
         } else if (realRequest == GetRequest.PHONE_REPORT) {
           queryString = removePrefix(queryString, PHONE_REPORT);
-          String[] split1 = queryString.split("&");
+          String[] split1 = queryString.split(AMPERSAND);
           if (split1.length < 2) {
             toReturn.addProperty(ERROR, "expecting at least two query parameters");
           } else {
@@ -365,7 +368,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private boolean hasArg(String queryString, String context) {
-    return queryString.toLowerCase().contains("&" + context + "=true") || queryString.toLowerCase().contains("&" + context);
+    return queryString.toLowerCase().contains(AMPERSAND + context + "=true") || queryString.toLowerCase().contains(AMPERSAND + context);
   }
 
   private JsonObject getCachedNested(int projid) {
@@ -391,7 +394,7 @@ public class ScoreServlet extends DatabaseServlet {
       nestedChapters = getJsonNestedChapters(projid, shouldRemoveExercisesWithNoAudio, false);
       JsonArray asJsonArray = nestedChapters.getAsJsonArray(CONTENT);
       if (asJsonArray == null || asJsonArray.size() == 0) {
-        logger.error("no content for " + projid);
+        logger.error("getNested no content for " + projid + " : " + asJsonArray);
       } else {
         projectToNestedChapters.put(projid, nestedChapters);
         projectToWhenCached.put(projid, now);
@@ -405,7 +408,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private long getLong(String queryString, String paramToLookFor) {
-    String[] split1 = queryString.split("&");
+    String[] split1 = queryString.split(AMPERSAND);
     long listid = -1;
     for (String arg : split1) {
       String[] split = arg.split("=");
@@ -437,25 +440,25 @@ public class ScoreServlet extends DatabaseServlet {
     int projid = getProjID(request);
 
     if (projid == -1) {
-      String[] split1 = request.getQueryString().split("&");
-      Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke().getSelection();
-      if (selection.get("projid") != null) {
-        String projid1 = selection.get("projid").iterator().next();
+      String[] split1 = request.getQueryString().split(AMPERSAND);
+      Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke(false).getSelection();
+      if (selection.get(PROJID) != null) {
+        String projid1 = selection.get(PROJID).iterator().next();
         try {
           projid = Integer.parseInt(projid1);
         } catch (NumberFormatException e) {
-          logger.warn("couldn't parse '" + projid1 + "'");
+          logger.warn("getTripleProjID : couldn't parse '" + projid1 + "'");
         }
+      } else {
+        logger.info("getTripleProjID no " + PROJID + " in " + selection + " from " + request.getQueryString());
       }
     }
 
     // language overrides user id mapping...
     if (projid == -1) {
-      {
-        String language = getLanguage(request);
-        if (language != null) {
-          projid = getProjectID(language, getIsKaldi(request));
-        }
+      String language = getLanguage(request);
+      if (language != null) {
+        projid = getProjectID(language, getIsKaldi(request));
       }
     }
 
@@ -476,7 +479,7 @@ public class ScoreServlet extends DatabaseServlet {
     long now = System.currentTimeMillis();
     long l = now - then;
     if (l > 10) {
-      logger.info("doGet : (" + language + ") took " + l + " millis");// to do " + request.getQueryString());
+      logger.info("reply : (" + language + ") took " + l + " millis");// to do " + request.getQueryString());
     }
     then = now;
 
@@ -585,7 +588,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    */
   private String getRemoveExercisesParam(String queryString) {
-    String[] split1 = queryString.split("&");
+    String[] split1 = queryString.split(AMPERSAND);
     if (split1.length == 2) {
       return getParamValue(split1[1], REMOVE_EXERCISES_WITH_MISSING_AUDIO);
     } else {
@@ -610,7 +613,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private JsonObject getPhoneReport(JsonObject toReturn, String[] split1, int projid, int userid, long sessionID) {
-    Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke().getSelection();
+    Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke(true).getSelection();
 
     try {
       long then = System.currentTimeMillis();
@@ -661,11 +664,11 @@ public class ScoreServlet extends DatabaseServlet {
     if (projectid == -1) {
       toReturn.addProperty(ERROR, "no project specified for user " + userID);
     } else {
-      String[] split1 = queryString.split("&");
+      String[] split1 = queryString.split(AMPERSAND);
       if (split1.length < 2) {
         toReturn.addProperty(ERROR, "expecting at least two query parameters");
       } else {
-        Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke().getSelection();
+        Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke(true).getSelection();
 
         //logger.debug("chapterHistory " + user + " selection " + selection);
         try {
@@ -1154,7 +1157,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (now - then > 10) {
       logger.info("getJsonForAudio save file to " + saveFile.getAbsolutePath() + " took " + (now - then) + " millis");
     }
-  //  then = System.currentTimeMillis();
+    //  then = System.currentTimeMillis();
 
     if (response.getStatus() == FileSaver.FileSaveResponse.STATUS.OK) {
 //      AudioCheck.ValidityAndDur validityAndDur = new AudioConversion(false, db.getServerProps().getMinDynamicRange())
@@ -1169,7 +1172,7 @@ public class ScoreServlet extends DatabaseServlet {
 //    new AudioConversion(null).trimSilence(saveFile);
 
       if (requestType == PostRequest.DECODE && CONVERT_DECODE_TO_ALIGN) {
-       // logger.info("\tfor now we force decode requests into alignment...");
+        // logger.info("\tfor now we force decode requests into alignment...");
         requestType = PostRequest.ALIGN;
       }
 
@@ -1441,7 +1444,7 @@ public class ScoreServlet extends DatabaseServlet {
   private void addVersion(JsonObject JsonObject, int projid) {
     JsonObject.addProperty(VERSION, VERSION_NOW);
     JsonObject.addProperty(HAS_MODEL, getProject(projid).hasModel());
-    JsonObject.addProperty("Date", new Date().toString());
+    JsonObject.addProperty(DATE, new Date().toString());
   }
 
   private Project getProject(int projid) {
@@ -1463,18 +1466,19 @@ public class ScoreServlet extends DatabaseServlet {
       return selection;
     }
 
-    UserAndSelection invoke() {
-      // user = "";
+    UserAndSelection invoke(boolean ignoreUserAndProject) {
       selection = new TreeMap<>();
       for (String param : split1) {
-        //logger.debug("param '" +param+               "'");
+        logger.info("UserAndSelection param '" + param + "'");
         String[] split = param.split("=");
         if (split.length == 2) {
           String key = split[0];
           String value = split[1];
-          if (key.equals(HeaderValue.USER.toString()) ||
-              key.equalsIgnoreCase(HeaderValue.PROJID.name())) {
-            //user = value;
+          logger.info("\t" + key + " = " + value);
+          if (ignoreUserAndProject &&
+              (key.equals(HeaderValue.USER.toString()) || key.equalsIgnoreCase(HeaderValue.PROJID.name()))) {
+            // skip it
+           logger.info("UserAndSelection Skip " + key);
           } else {
             selection.put(key, Collections.singleton(value));
           }

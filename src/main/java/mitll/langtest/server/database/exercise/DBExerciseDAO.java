@@ -480,15 +480,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       logger.info("setRootTypes roots " + rootTypes);
     }
 
-    Set<String> seen = new HashSet<>();
-    List<String> uniq = new ArrayList<>();
-    typeOrder.forEach(type -> {
-      if (!seen.contains(type)) {
-        seen.add(type);
-        uniq.add(type);
-      }
-    });
-    sectionHelper.setPredefinedTypeOrder(uniq);
+    sectionHelper.setPredefinedTypeOrder(sectionHelper.getUniq(typeOrder));
     if (DEBUG) logger.info("setRootTypes parentToChild " + parentToChild);
   }
 

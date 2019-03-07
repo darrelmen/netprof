@@ -717,12 +717,17 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     Panel choices = new UnorderedList(); // ul
     String selectionForType = typeToSelection.get(type);
 
-    if (DEBUG_CHOICES) logger.info("addChoices " + type + "=" + selectionForType);
+    if (DEBUG_CHOICES) {
+      logger.info("addChoices " + type + " = " + selectionForType +
+          "\n\tin " + typeToSelection);
+    }
 
     if (selectionForType == null) { // no selection made, show all possible values for type
       Set<MatchInfo> keys = typeToValues.get(type);
       if (keys != null) {
-        if (DEBUG_CHOICES) logger.info("addChoices for " + type + "=" + keys.size());
+        if (DEBUG_CHOICES) {
+          logger.info("addChoices for " + type + "=" + keys.size());
+        }
         if (type.equalsIgnoreCase(RECORDED)) {
           keys = new TreeSet<>(keys);
         }
@@ -812,7 +817,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     boolean hasMore = shouldShowMore(keysSize, toShow);
     Boolean showAll = typeToShowAll.getOrDefault(type, false);
-
 
     if (DEBUG_CHOICES) {
       logger.info("addChoicesForType" +
@@ -937,6 +941,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param italic        true if list is not mine - I don't own it
    * @param addTypePrefix
    * @return
+   * @see #addChoicesForType(Map, String, Panel, Set, boolean)
    */
   private Widget getAnchor(String type, MatchInfo key, int newUserListID, boolean italic, boolean addTypePrefix) {
     Panel span = getSpan();
@@ -1082,6 +1087,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param type
    * @param key
    * @return
+   * @see #getAnchor(String, MatchInfo, int, boolean, boolean)
    */
   @NotNull
   private ClickHandler getChoiceHandler(final String type, final String key, int newUserListID) {
@@ -1146,7 +1152,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       final long then = System.currentTimeMillis();
       FilterRequest filterRequest = getFilterRequest(userListID, getPairs(typeToSelection));
       if (DEBUG) {
-        logger.info("req " + filterRequest);
+        logger.info("getTypeToValues req " + filterRequest);
       }
       service.getTypeToValues(filterRequest, getTypeToValuesCallback(typeToSelection, then));
     }
@@ -1203,6 +1209,12 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return reqid++;
   }
 
+  /**
+   * @see #getTypeToValuesCallback(Map, long)
+   * @param response
+   * @param then
+   * @param typeToSelection
+   */
   protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
     long diff = System.currentTimeMillis() - then;
     if (DEBUG || diff > 30) {
