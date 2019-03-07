@@ -107,11 +107,11 @@ public class ProjectEditForm extends UserDialog {
   private static final String HIERARCHY = "Hierarchy";
   private static final String COURSE = "Course";
   private static final String COURSE_OPTIONAL = "Course (optional)";
-  private static final String HYDRA_HOST_PORT = "Hydra Host:Port";
+  private static final String HYDRA_HOST_PORT = "Scoring Host:Port";
   /**
    * @see #getFields
    */
-  private static final String HYDRA_HOST_OPTIONAL = "Hydra Host (optional)";
+  private static final String HYDRA_HOST_OPTIONAL = "Scoring Host (optional)";
 
 
   private static final String PLEASE_ENTER_A_LANGUAGE_MODEL_DIRECTORY = "Please enter a language model directory.";
