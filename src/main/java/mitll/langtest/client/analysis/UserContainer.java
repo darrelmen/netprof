@@ -32,6 +32,7 @@ package mitll.langtest.client.analysis;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
@@ -327,6 +328,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     filterContainer.addStyleName("leftFiveMargin");
 
     filterContainer.add(userTypeahead.getSearch());
+
+//    Button excel = new Button("Excel", IconType.DOWNLOAD);
+//    excel.addStyleName("leftFiveMargin");
+//    filterContainer.add(excel);
 
     addListChoiceBox(filterContainer);
     return filterContainer;

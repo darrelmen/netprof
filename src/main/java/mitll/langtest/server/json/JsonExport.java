@@ -74,7 +74,7 @@ public class JsonExport {
   private final Collection<Integer> preferredVoices;
   private final boolean isEnglish;
   private AudioFileHelper audioFileHelper;
-  
+
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_JSON = true;
 
