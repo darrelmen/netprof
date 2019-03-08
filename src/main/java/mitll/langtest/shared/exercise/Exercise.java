@@ -205,7 +205,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.safeToDecode = candecode;
     safeToDecodeLastChecked = lastChecked;
 
- //   this.numPhones = numPhones;
+    //   this.numPhones = numPhones;
     this.dominoID = dominoID;
     this.shouldSwap = shouldSwap;
   }
@@ -366,6 +366,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   /**
    * Is it marked with the english attribute? so we can check if we have an interpreter exercise sequence
    * with alternating english and fl phrases.
+   *
    * @return
    */
   public boolean hasEnglishAttr() {
@@ -586,11 +587,9 @@ public class Exercise extends AudioExercise implements CommonExercise,
 /*  public void setNumPhones(int numPhones) {
     this.numPhones = numPhones;
   }*/
-
   public void setPredef(boolean isPredef) {
     this.isPredef = isPredef;
   }
-
 
   @Override
   public int getParentExerciseID() {
@@ -603,6 +602,11 @@ public class Exercise extends AudioExercise implements CommonExercise,
   @Override
   public void setParentExerciseID(int parentExerciseID) {
     this.parentExerciseID = parentExerciseID;
+  }
+
+  @Override
+  public void setDominoID(int dominoID) {
+    this.dominoID = dominoID;
   }
 
   /**

@@ -32,6 +32,7 @@ package mitll.langtest.client.exercise;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
@@ -39,13 +40,11 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.dialog.DialogMetadata;
-import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -54,8 +53,9 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class WaveformExercisePanel<L extends CommonShell, T extends ClientExercise> extends ExercisePanel<L, T> {
+public class WaveformExercisePanel<L extends CommonShell, T extends ClientExercise & HasUnitChapter & Details> extends ExercisePanel<L, T> {
   private Logger logger = Logger.getLogger("WaveformExercisePanel");
+  private static final String PARENT_ITEM = "Parent Item";
 
   /**
    *
@@ -73,7 +73,6 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
 
   private static final String LANGUAGE_META_DATA = DialogMetadata.LANGUAGE.name();
   private static final String SPEAKER_META_DATA = DialogMetadata.SPEAKER.name();
-  //private final String instance;
 
   /**
    * @param e
@@ -116,17 +115,56 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
   }
 
   /**
+   * add info about parent item too
    * @see ExercisePanel#ExercisePanel
    */
   protected void addInstructions() {
     if (logger == null) logger = Logger.getLogger("WaveformExercisePanel");
-    UIObject flow = new UnitChapterItemHelper<T>(getTypeOrder()).addUnitChapterItem(exercise, this);
-    if (flow != null) {
-      flow.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
+//    logger.info("addInstructions - " + exercise.getID() + " " + exercise.isContext());
+//    logger.info("addInstructions - parent #" + exercise.asCommon().getParentExerciseID());
+
+    List<String> typeOrder = getTypeOrder();
+    int parentExerciseID = exercise.asCommon().getParentExerciseID();
+
+    if (exercise.isContext()) {
+      typeOrder.add(PARENT_ITEM);
+      exercise.getUnitToValue().put(PARENT_ITEM, "" + parentExerciseID);
     }
+
+    UIObject unitChapterItem = new UnitChapterItemHelper<T>(typeOrder).addUnitChapterItem(exercise, this);
+    if (unitChapterItem != null) {
+      unitChapterItem.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
+    }
+
+    if (exercise.isContext()) {
+      DivWidget container = new DivWidget();
+      add(container);
+      addHeading();
+      ExerciseServiceAsync<T> exerciseService = controller.getExerciseService();
+      exerciseService.getExercise(parentExerciseID, new AsyncCallback<T>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(T result) {
+          HTML maybeRTL = getMaybeRTL(ExerciseFormatter.getArabic(result.getFLToShow(), controller.getLanguageInfo()));
+          maybeRTL.addStyleName("numItemFont");
+          maybeRTL.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
+          container.add(maybeRTL);
+        }
+      });
+    }
+    else {
+      addHeading();
+    }
+  }
+
+  private void addHeading() {
     boolean normalRecord = isNormalRecord();
     List<ExerciseAttribute> dialogAttributes = getDialogAttributes(exercise);
-  //  logger.info("normal " + normalRecord + " attr " + dialogAttributes);
+    //  logger.info("normal " + normalRecord + " attr " + dialogAttributes);
     if (!dialogAttributes.isEmpty()) {
       normalRecord = false;
     }
@@ -183,8 +221,10 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
       logger = Logger.getLogger("WaveformExercisePanel");
     }
     String recordPrompt = getRecordPrompt(e);
-  /*  logger.info("getExerciseContent for " + e.getID() + " context " + e.isContext() + " " + isNormalRecord() +
-        "\n\tprompt " +recordPrompt);*/
+
+//    logger.info("getExerciseContent for " + e.getID() + " context " + e.isContext() + " " + isNormalRecord() +
+//        "\n\tprompt " + recordPrompt);
+
     return ExerciseFormatter.getArabic(recordPrompt, controller.getLanguageInfo());
   }
 

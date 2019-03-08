@@ -125,7 +125,7 @@ public class AnalysisTab extends DivWidget {
   }
 
   private AnalysisPlot analysisPlot = null;
-  private ExerciseLookup<CommonShell> exerciseLookup = null;
+//  private ExerciseLookup<CommonShell> exerciseLookup = null;
   private final ExerciseController controller;
   private TimeWidgets timeWidgets;
   private final Heading exampleHeader = getHeading(WORDS_USING_SOUND);
@@ -229,9 +229,9 @@ public class AnalysisTab extends DivWidget {
 
     AnalysisPlot analysisPlot = showPlot ? addAnalysisPlot(controller, isPolyglot, isTeacherView ? 700 : maxWidth, isTeacherView) : null;
 
-    if (!showPlot) {
-      exerciseLookup = new CommonShellCache<>(controller.getMessageHelper());
-    }
+//    if (!showPlot) {
+//      exerciseLookup = new CommonShellCache<>(controller.getMessageHelper());
+//    }
 
     DivWidget bottom = getBottom(isTeacherView);
 
@@ -309,7 +309,7 @@ public class AnalysisTab extends DivWidget {
         controller.getSoundManager(), playFeedback, controller,
         controller.getMessageHelper(),
         isPolyglot, maxWidth, controller.getListService());
-    exerciseLookup = analysisPlot;
+   // exerciseLookup = analysisPlot;
     {
       Panel timeControls = getTimeControls(playFeedback, isTeacherView);
       analysisPlot.setTimeWidgets(timeWidgets);

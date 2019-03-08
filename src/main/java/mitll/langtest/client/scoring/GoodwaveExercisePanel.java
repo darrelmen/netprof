@@ -101,7 +101,7 @@ public abstract class GoodwaveExercisePanel<T extends ClientExercise>
    * @param clientExercise for this exercise
    * @param controller
    * @param listContainer
-   * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
+   * @see mitll.langtest.client.qc.QCNPFExercise#QCNPFExercise
    */
   protected GoodwaveExercisePanel(final T clientExercise,
                                   final ExerciseController controller,

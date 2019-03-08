@@ -48,7 +48,6 @@ import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.recorder.RecordButton;
-import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
@@ -70,23 +69,26 @@ import java.util.logging.Logger;
 abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> extends BasicDialog {
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
-  public static final int LINE_HEIGHT = 22;
+  private static final int LINE_HEIGHT = 22;
   private static final int LINES = 3;
 
   private static final int MARGIN_BOTTOM = 4;
 
   private static final String CONTEXT_BOX = "ContextBox = ";
+  /**
+   * @see #getDominoEditInfo()
+   */
   private static final String CLICK_HERE_TO_GO_TO_DOMINO = "Click here to go to domino.";
 
-  public static final String CONTEXT = "context";
+  static final String CONTEXT = "context";
   static final String CONTEXT_TRANSLATION = "context translation";
 
   private static final int WIDE_TEXT_FIELD_WIDTH = 750;
   private static final int LABEL_WIDTH = 105;
 
-  private static final String ENGLISH_LABEL = "English";
-  private static final String ENGLISH_LABEL_2 = "Meaning";
-  private static final String TRANSLITERATION_OPTIONAL = "Transliteration";
+//  private static final String ENGLISH_LABEL = "English";
+//  private static final String ENGLISH_LABEL_2 = "Meaning";
+//  private static final String TRANSLITERATION_OPTIONAL = "Transliteration";
 
 //  static final String NORMAL_SPEED_REFERENCE_RECORDING = "Normal speed reference recording";
 //  static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
@@ -275,6 +277,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     contextTrans = addContextTranslation(container, newUserExercise);
   }
 
+  /**
+   * @see #addFields(ListInterface, Panel)
+   * @return
+   */
   @NotNull
   protected DivWidget getDominoEditInfo() {
     DivWidget h = new DivWidget();
@@ -331,10 +337,14 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @param container
    * @see #addFields
    */
-//  @Override
-  protected void addItemsAtTop(Panel container) {
-    new UnitChapterItemHelper<U>(controller.getProjectStartupInfo().getTypeOrder()).addUnitChapterItem(newUserExercise, container);
-  }
+  protected abstract void addItemsAtTop(Panel container);
+  //{
+ //   new UnitChapterItemHelper<U>(controller.getProjectStartupInfo().getTypeOrder()).addUnitChapterItem(newUserExercise, container);
+  //}
+
+//  protected void addItemsAtTop(Panel container) {
+//    new UnitChapterItemHelper<U>(controller.getProjectStartupInfo().getTypeOrder()).addUnitChapterItem(newUserExercise, container);
+//  }
 
   private void gotBlur() {
     //  logger.info("gotBlur");
@@ -363,7 +373,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @return
    * @see #makeAudioRow
    */
-  ControlGroup makeContextAudioPanel(Panel row) {
+  private ControlGroup makeContextAudioPanel(Panel row) {
     List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
 
     U next;
@@ -400,10 +410,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     english = makeBoxAndAnno(row, "", englishAnno);
     markPlaceholder(english.box, isEnglish() ? newUserExercise.getMeaning() : newUserExercise.getEnglish(), "Translation (optional)");
   }
-
-  String getEnglishLabel() {
-    return isEnglish() ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
-  }
+//
+//  String getEnglishLabel() {
+//    return isEnglish() ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
+//  }
 
   /**
    * @param container
@@ -433,7 +443,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     return controller.getLanguageInfo();
   }
 
-  protected void setMarginBottom(FormField foreignLang) {
+  void setMarginBottom(FormField foreignLang) {
     foreignLang.box.getElement().getStyle().setMarginBottom(MARGIN_BOTTOM, Style.Unit.PX);
   }
 
@@ -444,9 +454,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     translit = makeBoxAndAnno(row, subtext, translitAnno);
   }
 
-  String getTransliterationLabel() {
-    return TRANSLITERATION_OPTIONAL;
-  }
+//  String getTransliterationLabel() {
+//    return TRANSLITERATION_OPTIONAL;
+//  }
 
   /**
    * @param container
@@ -553,7 +563,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     }
   }
 
-  protected String getMeaning(U newUserExercise) {
+  String getMeaning(U newUserExercise) {
     return newUserExercise.getMeaning().isEmpty() ? newUserExercise.getEnglish() : newUserExercise.getMeaning();
   }
 
@@ -781,8 +791,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     return controller.getLanguageInfo() == Language.ENGLISH;
   }
 
-  void formInvalid() {
-  }
+//  void formInvalid() {
+//  }
 
   /**
    * Ask the server if the foreign lang text is in our dictionary and can be run through hydec.
@@ -1199,7 +1209,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     } else {
       ClientExercise clientExercise = directlyRelated.get(0);
       if (!clientExercise.getMutableAudio().clearRefAudio()) {
-        logger.info("clearContext Didn't clear context ref audio?");
+      //  logger.info("clearContext Didn't clear context ref audio?");
       } else {
         originalContextAudio = "";
       }

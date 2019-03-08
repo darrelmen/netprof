@@ -244,9 +244,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
   }
 
   public void grabFocus() {
-    Scheduler.get().scheduleDeferred((Command) () -> {
-      quickAddText.setFocus(true);
-    });
+    Scheduler.get().scheduleDeferred((Command) () -> quickAddText.setFocus(true));
   }
 
   private TextBox getEntryTextBox() {

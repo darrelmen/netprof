@@ -76,7 +76,9 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -133,7 +135,7 @@ public class LangTest implements
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
   private final OpenUserServiceAsync openUserService = GWT.create(OpenUserService.class);
-  private final ExerciseServiceAsync exerciseServiceAsync = GWT.create(ExerciseService.class);
+  private final ExerciseServiceAsync<?> exerciseServiceAsync = GWT.create(ExerciseService.class);
   private final DialogServiceAsync dialogServiceAsync = GWT.create(DialogService.class);
   private final ListServiceAsync listServiceAsync = GWT.create(ListService.class);
   private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
@@ -417,6 +419,12 @@ public class LangTest implements
     ));
   }
 
+  @Override
+  public void getImage(int reqid, String path, String type, int toUse, int height, int exerciseID, AsyncCallback<ImageResponse> client) {
+    String key = path + DIVIDER + type + DIVIDER + toUse + DIVIDER + height + DIVIDER + exerciseID;
+    getImage(reqid, key, client);
+  }
+
   /**
    * @param reqid
    * @param path
@@ -427,12 +435,13 @@ public class LangTest implements
    * @param client
    * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
    */
-  @Override
+/*  @Override
   public void getImage(int reqid, final String path, final String type, int toUse, int height, int exerciseID,
                        AsyncCallback<ImageResponse> client) {
     String key = path + DIVIDER + type + DIVIDER + toUse + DIVIDER + height + DIVIDER + exerciseID;
     getImage(reqid, key, client);
-  }
+  }*/
+
 
   private void getImage(int reqid, String key, AsyncCallback<ImageResponse> client) {
     String[] split = key.split("\\|");
@@ -453,7 +462,7 @@ public class LangTest implements
     ImageResponse ifPresent = imageCache.get(key);
     if (ifPresent != null) {
       //  logger.info("getImage for key " + key + " found  " + ifPresent);
-      ifPresent.req = -1;
+      ifPresent.setReq(-1);
       client.onSuccess(ifPresent);
     } else {
       ImageOptions imageOptions = new ImageOptions(toUse, height, useBkgColorForRef(), true);
@@ -1011,7 +1020,7 @@ public class LangTest implements
     return qcServiceAsync;
   }
 
-  public ExerciseServiceAsync getExerciseService() {
+  public ExerciseServiceAsync<?> getExerciseService() {
     return exerciseServiceAsync;
   }
 

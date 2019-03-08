@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 4/5/17.
  */
-public class SearchHighlighter {
+class SearchHighlighter {
   private final Logger logger = Logger.getLogger("SearchHighlighter");
 
   private static final String STRONG = "strong";

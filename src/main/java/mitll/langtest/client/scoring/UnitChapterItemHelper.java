@@ -49,8 +49,9 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public class UnitChapterItemHelper<T extends HasID & Details> {
-  public static final String BLANK = "blank";
   private final Logger logger = Logger.getLogger("UnitChapterItemHelper");
+
+  private static final String BLANK = "blank";
   private static final int MAXLEN = 10;
   /**
    * @see mitll.langtest.client.exercise.WaveformExercisePanel#addInstructions
@@ -60,7 +61,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
   private static final String ID = "ID";
   private static final String TIME = "Time";
   private static final String DOMINO_ID = "Domino ID";
-  private static final String NP_ID = "NP ID";
+  private static final String NP_ID = "NP Import ID";
 
   private final Collection<String> typeOrder;
 

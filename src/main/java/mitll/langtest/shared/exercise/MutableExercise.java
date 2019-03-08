@@ -73,5 +73,7 @@ public interface MutableExercise extends CommonShell, MutableShell {
 
   void setParentExerciseID(int parentExerciseID);
 
+  void setDominoID(int dominoID);
+
 //  void setNumPhones(int numPhones);
 }

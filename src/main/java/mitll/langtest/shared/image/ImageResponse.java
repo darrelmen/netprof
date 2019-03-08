@@ -32,10 +32,11 @@ package mitll.langtest.shared.image;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ImageResponse implements IsSerializable {
-  public int req;
-  public String imageURL;
-  public double durationInSeconds;
-  public boolean successful = false;
+  private int req;
+  private String imageURL;
+  private double durationInSeconds;
+  private boolean successful = false;
+
   public ImageResponse() {}
 
   /**
@@ -51,9 +52,29 @@ public class ImageResponse implements IsSerializable {
     this.durationInSeconds = durationInSeconds;
   }
 
+  public int getReq() {
+    return req;
+  }
+
+  public String getImageURL() {
+    return imageURL;
+  }
+
+  public double getDurationInSeconds() {
+    return durationInSeconds;
+  }
+
+  public boolean isSuccessful() {
+    return successful;
+  }
+
   public String toString() {
     return successful ?
         "req id#" + req + " : " + imageURL + " dur " + durationInSeconds + " seconds" :
         "error for req " + req;
+  }
+
+  public void setReq(int req) {
+    this.req = req;
   }
 }

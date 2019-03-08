@@ -155,7 +155,7 @@ public abstract class PostAudioRecordButton extends RecordButton
     controller.stopRecording(USE_DELAY, abort);
 
     if (duration > MIN_DURATION) {
-      if (DEBUG)  logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
+      if (DEBUG) logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
       return true;
     } else {
       hideWaveform();
@@ -352,7 +352,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    */
   public void useInvalidResult(int exid, Validity validity, double dynamicRange) {
     controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + validity);
-   // logger.info("useInvalidResult platform is " + getPlatform() + " validity " + validity);
+    // logger.info("useInvalidResult platform is " + getPlatform() + " validity " + validity);
     if (!checkAndShowTooLoud(validity)) {
       showPopup(validity.getPrompt());
     }
@@ -399,7 +399,6 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @see #startRecording
    */
   abstract protected AudioType getAudioType();
-
   abstract protected int getDialogSessionID();
 
   private void logRoundtripTime(long durationInMillis, long roundtrip) {
@@ -433,16 +432,15 @@ public abstract class PostAudioRecordButton extends RecordButton
   }
 
   private void showPopupLater(String toShow) {
-  //  logger.info("showPopup " + toShow + " on " + getExerciseID());
+    //  logger.info("showPopup " + toShow + " on " + getExerciseID());
     new PopupHelper().showPopup(toShow, getPopupTargetWidget(), 5000);
   }
 
   /**
-   *
    * @return
    */
   Widget getPopupTargetWidget() {
-    logger.info("getPopupTargetWidget target is " + this.getElement().getId());
+    //logger.info("getPopupTargetWidget target is " + this.getElement().getId());
     return this;
   }
 }

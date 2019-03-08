@@ -37,19 +37,20 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
 
-abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends VerticalPanel implements
+abstract class ExercisePanel<L extends HasID, T extends CommonShell & HasUnitChapter> extends VerticalPanel implements
     BusyPanel, PostAnswerProvider, ProvidesResize, RequiresResize {
-  protected final boolean doNormalRecording;
   private final Logger logger = Logger.getLogger("ExercisePanel");
+  final boolean doNormalRecording;
 
   private static final int CONTENT_SCROLL_HEIGHT = 220;
-  private static final String PROMPT = "Read the following text and answer the question or questions below.";
+ // private static final String PROMPT = "Read the following text and answer the question or questions below.";
   /**
    * @see #addAnswerWidget(int, Widget)
    */
@@ -172,14 +173,9 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
    */
   protected Widget getQuestionContent(T e) {
     String content = getExerciseContent(e);
-
     HTML maybeRTLContent = getMaybeRTLContent(content);
-    maybeRTLContent.addStyleName("rightTenMargin");
-    maybeRTLContent.addStyleName("topMargin");
-
     return (content.length() > 200) ? getContentScroller(maybeRTLContent) : maybeRTLContent;
   }
-
 
   protected abstract String getExerciseContent(T e);
 
@@ -196,16 +192,24 @@ abstract class ExercisePanel<L extends HasID, T extends CommonShell> extends Ver
    * @see #getQuestionContent
    */
   protected HTML getMaybeRTLContent(String content) {
+    HTML html = getMaybeRTL(content);
+
+    html.addStyleName("topMargin");
+    stylePrompt(html);
+
+    return html;
+  }
+
+  @NotNull
+  protected HTML getMaybeRTL(String content) {
     boolean rightAlignContent = controller.isRightAlignContent();
     HasDirection.Direction direction = rightAlignContent ? HasDirection.Direction.RTL : getDirection(content);
 
     HTML html = new HTML(content, direction);
-//    html.setWidth("100%");
     if (rightAlignContent) {
       html.addStyleName("rightAlign");
     }
-
-    stylePrompt(html);
+    html.addStyleName("rightTenMargin");
     return html;
   }
 

@@ -40,6 +40,7 @@ public class SimpleUserListWithIDs extends SimpleUserList implements IUserListWi
   /**
    * @param id
    * @param name
+   * @param description
    * @param projid
    * @param userid
    * @param userChosenID
@@ -47,9 +48,9 @@ public class SimpleUserListWithIDs extends SimpleUserList implements IUserListWi
    * @param ids
    * @param duration
    */
-  public SimpleUserListWithIDs(int id, String name, int projid, int userid, String userChosenID,
+  public SimpleUserListWithIDs(int id, String name, String description, int projid, int userid, String userChosenID,
                                String firstInitialName, Collection<Integer> ids, int duration, boolean isPrivate) {
-    super(id, name, projid, userid, userChosenID, firstInitialName, ids.size(), duration, 30, false, isPrivate);
+    super(id, name, description, projid, userid, userChosenID, firstInitialName, ids.size(), duration, 30, false, isPrivate);
     this.ids = ids;
   }
 

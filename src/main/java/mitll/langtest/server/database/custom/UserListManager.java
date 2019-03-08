@@ -471,6 +471,7 @@ public class UserListManager implements IUserListManager {
     return new SimpleUserList(
         l.id(),
         l.name(),
+        l.description(),
         l.projid(),
         userid1,
         name,
@@ -534,6 +535,7 @@ public class UserListManager implements IUserListManager {
           new SimpleUserListWithIDs(
               id,
               l.name(),
+              l.description(),
               l.projid(),
               l.userid(),
               name,

@@ -35,6 +35,7 @@ import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.langtest.shared.exercise.MutableExercise;
 import mitll.npdata.dao.*;
 import mitll.npdata.dao.userexercise.ExerciseDAOWrapper;
 import org.apache.logging.log4j.LogManager;
@@ -162,7 +163,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         .forEach(parent -> parent.getDirectlyRelated()
             .forEach(commonExercise -> {
               idToContextExercise.put(commonExercise.getID(), commonExercise.asCommon());
-              commonExercise.asCommon().getMutable().setParentExerciseID(parent.getID());
+              MutableExercise mutable = commonExercise.asCommon().getMutable();
+              mutable.setParentExerciseID(parent.getID());
+              mutable.setDominoID(parent.getDominoID());
             }));
   }
 
