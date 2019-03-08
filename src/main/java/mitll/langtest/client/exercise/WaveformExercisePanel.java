@@ -47,6 +47,7 @@ import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.SlimProject;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -56,8 +57,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class WaveformExercisePanel<L extends CommonShell, T extends ClientExercise & HasUnitChapter & Details> extends ExercisePanel<L, T> {
+  public static final String DOMINO_PROJECT = "Domino Project #";
   private Logger logger = Logger.getLogger("WaveformExercisePanel");
-  private static final String PARENT_ITEM = "Parent Item";
+  public static final String PARENT_ITEM = "Parent Item";
 
   /**
    *
@@ -129,10 +131,8 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     List<String> typeOrder = getTypeOrder();
     int parentExerciseID = exercise.asCommon().getParentExerciseID();
 
-    if (exercise.isContext()) {
-      typeOrder.add(PARENT_ITEM);
-      exercise.getUnitToValue().put(PARENT_ITEM, "" + parentExerciseID);
-    }
+    addParentItem(typeOrder, parentExerciseID);
+    addDominoProject(typeOrder);
 
     DivWidget container2 = new DivWidget();
 
@@ -143,21 +143,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
       unitChapterItem.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     }
 
-    DominoLinkNotice dominoLinkNotice = new DominoLinkNotice();
-    Anchor anchor = dominoLinkNotice.getAnchor(controller);
-    container2.add(anchor);
-    HTML hint = dominoLinkNotice.getHint();
-    anchor.addMouseOverHandler(event -> hint.getElement().getStyle().setColor("#999999"));
-    anchor.addMouseOutHandler(event -> hint.getElement().getStyle().setColor("white"));
-    DivWidget cont = new DivWidget();
-
-    cont.add(hint);
-    
-    Style style = hint.getElement().getStyle();
-    style.setColor("white");
-    style.setMarginTop(-5, Style.Unit.PX);
-
-    add(cont);
+    add(addDominoHint(container2));
     if (exercise.isContext()) {
       DivWidget container = new DivWidget();
       add(container);
@@ -180,6 +166,45 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     } else {
       addHeading();
     }
+  }
+
+  private void addParentItem(List<String> typeOrder, int parentExerciseID) {
+    if (exercise.isContext()) {
+      typeOrder.add(PARENT_ITEM);
+      exercise.getUnitToValue().put(PARENT_ITEM, "" + parentExerciseID);
+    }
+  }
+
+  private void addDominoProject(List<String> typeOrder) {
+    List<SlimProject> allProjects = controller.getAllProjects();
+    int projectID = controller.getProjectID();
+    List<SlimProject> collect = allProjects.stream().filter(s -> s.getID() == projectID).collect(Collectors.toList());
+    if (!collect.isEmpty()) {
+      SlimProject slimProject = collect.get(0);
+      int dominoID = slimProject.getDominoID();
+      if (dominoID > -1) {
+        typeOrder.add(DOMINO_PROJECT);
+        exercise.getUnitToValue().put(DOMINO_PROJECT, "" + dominoID);
+      }
+    }
+  }
+
+  @NotNull
+  private DivWidget addDominoHint(DivWidget container2) {
+    DominoLinkNotice dominoLinkNotice = new DominoLinkNotice();
+    Anchor anchor = dominoLinkNotice.getAnchor(controller);
+    container2.add(anchor);
+    HTML hint = dominoLinkNotice.getHint();
+    anchor.addMouseOverHandler(event -> hint.getElement().getStyle().setColor("#999999"));
+    anchor.addMouseOutHandler(event -> hint.getElement().getStyle().setColor("white"));
+    DivWidget cont = new DivWidget();
+
+    cont.add(hint);
+
+    Style style = hint.getElement().getStyle();
+    style.setColor("white");
+    style.setMarginTop(-5, Style.Unit.PX);
+    return cont;
   }
 
   private void addHeading() {

@@ -55,11 +55,15 @@ import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.MiniUser;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
+import static mitll.langtest.client.exercise.WaveformExercisePanel.DOMINO_PROJECT;
+import static mitll.langtest.client.exercise.WaveformExercisePanel.PARENT_ITEM;
 import static mitll.langtest.shared.answer.AudioType.*;
 
 public class ReviewEditableExercise<T extends CommonShell, U extends ClientExercise> extends EditableExerciseDialog<T, U> {
@@ -137,9 +141,31 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
 
   @Override
   protected void addItemsAtTop(Panel container) {
-    new UnitChapterItemHelper<U>(controller.getProjectStartupInfo().getTypeOrder()).addUnitChapterItem(newUserExercise, container);
+    List<String> typeOrder = new ArrayList<>(controller.getProjectStartupInfo().getTypeOrder());
+    addDominoProject(typeOrder);
+    new UnitChapterItemHelper<U>(typeOrder).addUnitChapterItem(newUserExercise, container);
   }
 
+  private void addParentItem(List<String> typeOrder, int parentExerciseID) {
+    if (newUserExercise.isContext()) {
+      typeOrder.add(PARENT_ITEM);
+      newUserExercise.getUnitToValue().put(PARENT_ITEM, "" + parentExerciseID);
+    }
+  }
+
+  private void addDominoProject(List<String> typeOrder) {
+    List<SlimProject> allProjects = controller.getAllProjects();
+    int projectID = controller.getProjectID();
+    List<SlimProject> collect = allProjects.stream().filter(s -> s.getID() == projectID).collect(Collectors.toList());
+    if (!collect.isEmpty()) {
+      SlimProject slimProject = collect.get(0);
+      int dominoID = slimProject.getDominoID();
+      if (dominoID > -1) {
+        typeOrder.add(DOMINO_PROJECT);
+        newUserExercise.getUnitToValue().put(DOMINO_PROJECT, "" + dominoID);
+      }
+    }
+  }
 
   private int currentTab = 0;
 

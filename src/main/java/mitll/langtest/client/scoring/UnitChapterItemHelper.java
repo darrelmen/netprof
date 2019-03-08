@@ -40,6 +40,7 @@ import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.exercise.WaveformExercisePanel;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.exercise.Details;
 import mitll.langtest.shared.exercise.HasID;
@@ -60,7 +61,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
   private static final String ITEM = "Item";
   private static final String ID = "ID";
   private static final String TIME = "Time";
-  private static final String DOMINO_ID = "Domino ID";
+  private static final String DOMINO_ID = "Doc Id";
   private static final String NP_ID = "NP Import ID";
 
   private final Collection<String> typeOrder;
@@ -137,18 +138,12 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
 
     for (String type : typeOrder) {
       String subtext = exercise.getUnitToValue().get(type);
-   //   logger.info("getUnitLessonForExercise type " + type + " = " + subtext);
-
+      //   logger.info("getUnitLessonForExercise type " + type + " = " + subtext);
       if (subtext != null && !subtext.isEmpty() && !subtext.equalsIgnoreCase(BLANK)) {
-//        Heading child = new Heading(HEADING_FOR_UNIT_LESSON, type, subtext);
-//        child.addStyleName("rightFiveMargin");
-
-        //  flow.add(child);
-
-        addProminentLabel(flow, type, subtext, false);
+        boolean markProminent = type.equalsIgnoreCase(WaveformExercisePanel.DOMINO_PROJECT);
+        addProminentLabel(flow, type, subtext, markProminent);
       }
     }
-
 
     int dominoID = exercise.getDominoID();
     String oldID = exercise.getOldID();
@@ -168,12 +163,10 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
 
   private void addProminentLabel(Panel flow, String npId, String oldID, boolean markProminent) {
     Heading child = new Heading(HEADING_FOR_UNIT_LESSON, npId);
-    //HTML child = new HTML(npId);
     child.getElement().getStyle().setColor("gray");
     child.getElement().getStyle().setFontWeight(Style.FontWeight.NORMAL);
 
     child.addStyleName("rightFiveMargin");
-    //child.getElement().getStyle().setMarginTop(11, Style.Unit.PX);
 
     flow.add(child);
 
@@ -237,7 +230,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
     StringBuilder builder = new StringBuilder();
     for (String type : typeOrder) {
       String subtext = unitToValue.get(type);
-     // logger.info("type " + type + " = " + subtext);
+      // logger.info("type " + type + " = " + subtext);
       if (subtext != null && !subtext.isEmpty()) {
         builder.append(getTypeAndValue(type, subtext));
       }

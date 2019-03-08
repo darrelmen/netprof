@@ -98,7 +98,7 @@ public class Project implements IPronunciationLookup, IProject {
   public static final String MANDARIN = "Mandarin";
 
   private static final boolean REPORT_ON_DIALOG_TYPES = false;
-  public static final boolean DEBUG_FILE_LOOKUP = false;
+  private static final boolean DEBUG_FILE_LOOKUP = false;
 
   /**
    * @see #getWebservicePort
