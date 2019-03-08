@@ -289,7 +289,7 @@ public class RestUserManagement {
       }
 
       // darrel wanted this.
-      toReturn.addProperty("token", loginResult.getSessionID());
+      toReturn.addProperty("session", loginResult.getSessionID());
       toReturn.addProperty(LOGIN_RESULT, resultType.name());
       toReturn.addProperty(PASSWORD_CORRECT, (resultType == Success) ? TRUE : FALSE);
     }
