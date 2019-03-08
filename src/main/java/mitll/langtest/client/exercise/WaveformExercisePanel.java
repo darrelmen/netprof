@@ -57,9 +57,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class WaveformExercisePanel<L extends CommonShell, T extends ClientExercise & HasUnitChapter & Details> extends ExercisePanel<L, T> {
-  public static final String DOMINO_PROJECT = "Domino Project #";
   private Logger logger = Logger.getLogger("WaveformExercisePanel");
-  public static final String PARENT_ITEM = "Parent Item";
+  public static final String DOMINO_PROJECT = "Domino Project";
+  public static final String PARENT_ITEM = "Parent";
 
   /**
    *
@@ -131,13 +131,14 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     List<String> typeOrder = getTypeOrder();
     int parentExerciseID = exercise.asCommon().getParentExerciseID();
 
-    addParentItem(typeOrder, parentExerciseID);
     addDominoProject(typeOrder);
+    addParentItem(typeOrder, parentExerciseID);
 
     DivWidget container2 = new DivWidget();
 
     add(container2);
 
+    logger.info("typeOrder " + typeOrder);
     UIObject unitChapterItem = new UnitChapterItemHelper<T>(typeOrder).addUnitChapterItem(exercise, container2);
     if (unitChapterItem != null) {
       unitChapterItem.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);

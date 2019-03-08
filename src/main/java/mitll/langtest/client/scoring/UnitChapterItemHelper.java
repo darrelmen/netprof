@@ -49,6 +49,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.exercise.WaveformExercisePanel.PARENT_ITEM;
+
 public class UnitChapterItemHelper<T extends HasID & Details> {
   private final Logger logger = Logger.getLogger("UnitChapterItemHelper");
 
@@ -136,12 +138,18 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
     flow.addStyleName("leftFiveMargin");
     // logger.info("getUnitLessonForExercise " + exercise + " unit value " +exercise.getUnitToValue());
 
+    boolean found = false;
     for (String type : typeOrder) {
       String subtext = exercise.getUnitToValue().get(type);
       //   logger.info("getUnitLessonForExercise type " + type + " = " + subtext);
       if (subtext != null && !subtext.isEmpty() && !subtext.equalsIgnoreCase(BLANK)) {
         boolean markProminent = type.equalsIgnoreCase(WaveformExercisePanel.DOMINO_PROJECT);
-        addProminentLabel(flow, type, subtext, markProminent);
+
+        if (type.equalsIgnoreCase(PARENT_ITEM)) {
+          found = true;
+        } else {
+          addProminentLabel(flow, type, subtext, markProminent);
+        }
       }
     }
 
@@ -151,6 +159,11 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
     boolean showDomino = dominoID > 0;
     if (showDomino) {
       addProminentLabel(flow, DOMINO_ID, "" + dominoID, true);
+    }
+
+    if (found) {
+      String subtext = exercise.getUnitToValue().get(PARENT_ITEM);
+      addProminentLabel(flow, PARENT_ITEM, subtext, false);
     }
 
     if (!showDomino && !oldID.isEmpty()) {

@@ -146,13 +146,6 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     new UnitChapterItemHelper<U>(typeOrder).addUnitChapterItem(newUserExercise, container);
   }
 
-  private void addParentItem(List<String> typeOrder, int parentExerciseID) {
-    if (newUserExercise.isContext()) {
-      typeOrder.add(PARENT_ITEM);
-      newUserExercise.getUnitToValue().put(PARENT_ITEM, "" + parentExerciseID);
-    }
-  }
-
   private void addDominoProject(List<String> typeOrder) {
     List<SlimProject> allProjects = controller.getAllProjects();
     int projectID = controller.getProjectID();
