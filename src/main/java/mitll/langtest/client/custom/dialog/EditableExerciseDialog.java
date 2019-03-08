@@ -80,8 +80,6 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
     slowAnno.addStyleName("editComment");
   }
 
-
-
   boolean shouldDisableNext() {
     return true;
   }

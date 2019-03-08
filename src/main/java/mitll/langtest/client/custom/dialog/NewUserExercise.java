@@ -75,11 +75,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   private static final int MARGIN_BOTTOM = 4;
 
   private static final String CONTEXT_BOX = "ContextBox = ";
-  /**
-   * @see #getDominoEditInfo()
-   */
-  private static final String CLICK_HERE_TO_GO_TO_DOMINO = "Click here to go to domino.";
-
   static final String CONTEXT = "context";
   static final String CONTEXT_TRANSLATION = "context translation";
 
@@ -283,18 +278,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   @NotNull
   protected DivWidget getDominoEditInfo() {
-    DivWidget h = new DivWidget();
-    h.addStyleName("leftFiveMargin");
-    h.addStyleName("bottomFiveMargin");
-    h.addStyleName("inlineFlex");
-    HTML child1 = new HTML("To edit text, go into domino, edit the item, and then re-import.");
-    h.add(child1);
-    Anchor child = new Anchor(CLICK_HERE_TO_GO_TO_DOMINO);
-    child.addStyleName("leftFiveMargin");
-    child.setTarget("_blank");
-    child.setHref(controller.getProps().getDominoURL());
-    h.add(child);
-    return h;
+    return new DominoLinkNotice().getDominoEditInfo(controller);
   }
 
   /**

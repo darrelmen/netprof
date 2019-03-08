@@ -32,11 +32,13 @@ package mitll.langtest.client.exercise;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.custom.dialog.DominoLinkNotice;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
@@ -116,6 +118,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
 
   /**
    * add info about parent item too
+   *
    * @see ExercisePanel#ExercisePanel
    */
   protected void addInstructions() {
@@ -131,11 +134,30 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
       exercise.getUnitToValue().put(PARENT_ITEM, "" + parentExerciseID);
     }
 
-    UIObject unitChapterItem = new UnitChapterItemHelper<T>(typeOrder).addUnitChapterItem(exercise, this);
+    DivWidget container2 = new DivWidget();
+
+    add(container2);
+
+    UIObject unitChapterItem = new UnitChapterItemHelper<T>(typeOrder).addUnitChapterItem(exercise, container2);
     if (unitChapterItem != null) {
       unitChapterItem.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
     }
 
+    DominoLinkNotice dominoLinkNotice = new DominoLinkNotice();
+    Anchor anchor = dominoLinkNotice.getAnchor(controller);
+    container2.add(anchor);
+    HTML hint = dominoLinkNotice.getHint();
+    anchor.addMouseOverHandler(event -> hint.getElement().getStyle().setColor("#999999"));
+    anchor.addMouseOutHandler(event -> hint.getElement().getStyle().setColor("white"));
+    DivWidget cont = new DivWidget();
+
+    cont.add(hint);
+    
+    Style style = hint.getElement().getStyle();
+    style.setColor("white");
+    style.setMarginTop(-5, Style.Unit.PX);
+
+    add(cont);
     if (exercise.isContext()) {
       DivWidget container = new DivWidget();
       add(container);
@@ -155,8 +177,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
           container.add(maybeRTL);
         }
       });
-    }
-    else {
+    } else {
       addHeading();
     }
   }
