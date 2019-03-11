@@ -481,6 +481,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   void gotEmptyExerciseList() {
   }
 
+  /**
+   * @see #setShuffle
+   * @param exercises
+   */
   private void rememberAndLoadFirst(List<T> exercises) {
     rememberAndLoadFirst(exercises, "All", "", -1);
   }
@@ -1010,6 +1014,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   @Override
   public void setShuffle(boolean doShuffle) {
     simpleSetShuffle(doShuffle);
+    logger.info("setShuffle - " + doShuffle);
     Scheduler.get().scheduleDeferred(() -> rememberAndLoadFirst(getInOrder()));
     // rememberAndLoadFirst(getInOrder());
   }
