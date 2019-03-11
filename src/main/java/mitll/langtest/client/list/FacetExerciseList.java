@@ -1790,14 +1790,14 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     if (isCurrentReq(reqID)) {
       reallyShowExercises(result, reqID);
       if (isCurrentReq(reqID)) {
-        //logger.info("showExercises for progress current " + reqID);
+        if (DEBUG_STALE) logger.info("showExercisesForCurrentReq for progress current " + reqID);
         setProgressBarScore(getInOrder(), reqID);
       } else {
-        if (DEBUG_STALE) logger.info("showExercises for progress stale " + reqID);
+        if (DEBUG_STALE) logger.info("showExercisesForCurrentReq for progress stale " + reqID);
       }
     } else {
       if (DEBUG_STALE)
-        logger.info("showExercises (2) skip stale req " + reqID + " vs current " + getCurrentExerciseReq());
+        logger.info("showExercisesForCurrentReq (2) skip stale req " + reqID + " vs current " + getCurrentExerciseReq());
 
     }
   }
@@ -2138,11 +2138,11 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
 
   /**
    * @param toRemember
-   * @see #rememberExercises
+   * @see PagingExerciseList#rememberExercises
    */
   protected List<T> resort(List<T> toRemember) {
     List<T> commonShells = new ArrayList<>(toRemember);
-    listSorting.sortLater(commonShells, sortBoxReally);
+    listSorting.sortNow(commonShells, sortBoxReally);
     return commonShells;
   }
 
