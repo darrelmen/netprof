@@ -1728,7 +1728,7 @@ public class AudioFileHelper implements AlignDecode {
 
 
     Set<Integer> inOrder = new TreeSet<>(lengthToProns.keySet());
-    List<Integer> integers = Arrays.asList(3);
+    List<Integer> integers = Arrays.asList(2, 3, 4);
     integers.forEach(len -> {
       logger.info("len " + len);
       List<List<String>> pronsOfLength = lengthToProns.get(len);
@@ -1764,12 +1764,13 @@ public class AudioFileHelper implements AlignDecode {
 
       if (len > 1) {
         Map<Integer, List<WP>> posToMatches = new HashMap<>();
-        pronsOfLength.subList(0, 5).forEach(pron -> {
+        // List<List<String>> lists = pronsOfLength.subList(0, 5);
+        pronsOfLength.forEach(pron -> {
           List<WP> wps = pronsToWords.get(pron);
-          logger.info("for pron " + pron + " found " + wps.size());
-          wps.forEach(wp3 -> {
-            String word = wp3.getWord();
-            logger.info("\t" + word + " " + pron);
+          logger.info("for pron (" + len + ") " + pron + " found " + wps.size());
+          wps.forEach(toFind -> {
+            String word = toFind.getWord();
+//            logger.info("\t" + word + " " + pron);
             for (int i = 1; i < len; i++) {
               List<String> allButSuffix = pron.subList(0, i);
               if (DEBUG_EDIT) logger.info(i + " prefix " + allButSuffix);
@@ -1780,7 +1781,7 @@ public class AudioFileHelper implements AlignDecode {
               }
               WP wp = new WP(word, allButSuffix);
 
-              List<WP> collect = matchesNotSelf(trie, word, wp);
+              List<WP> collect = matchesNotSelf(trie, wp, toFind.getPron());
               if (DEBUG_EDIT) logger.info("match (" + i + ") " + wp + " (" + collect.size() + ") " + collect);
 
               final int fi = i;
@@ -1809,13 +1810,10 @@ public class AudioFileHelper implements AlignDecode {
             {
               Collections.reverse(prefix);
               WP wp2 = new WP(word, prefix);
-//          Collection<WP> matchesLC1 = rtrie.getMatchesLC(wp2.getEntry());
-//          List<WP> collect2 = matchesLC1.stream().filter(w -> !w.getWord().equals(word)).collect(Collectors.toList());
-
-              // List<WP> collect2 = matchesNotSelf(rtrie, word, wp2);
               List<WP> back = new ArrayList<>();
 
-              matchesNotSelf(rtrie, word, wp2).forEach(ww -> {
+              List<String> pron1 = wp2.getPron(); //??? todo : correct???
+              matchesNotSelf(rtrie, wp2, pron1).forEach(ww -> {
                 List<String> copy = new ArrayList<>(ww.getPron());
                 Collections.reverse(copy);
                 back.add(new WP(ww.getWord(), copy));
@@ -1839,11 +1837,23 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   @NotNull
-  private List<WP> matchesNotSelf(Trie<WP> trie, String word, WP wp) {
+  private List<WP> matchesNotSelf(Trie<WP> trie, WP wp, List<String> overallPron) {
     String entry = wp.getEntry();
     Collection<WP> matchesLC = trie.getMatchesLC(entry);
-    List<WP> collect = matchesLC.stream().filter(w -> !w.getWord().equals(word)).collect(Collectors.toList());
-    if (DEBUG_EDIT) logger.info("match for " + entry + " " + collect);
+  //  List<String> pron = wp.getPron();
+    String word = wp.getWord();
+    boolean debug = (word.equalsIgnoreCase("niveau"));
+    if (DEBUG_EDIT || debug) logger.info("match " + word + " " + wp);
+    List<WP> collect = matchesLC.stream()
+        .filter(w ->
+        {
+          boolean diffWord = !w.getWord().equals(word);
+          boolean diffPron = !w.getPron().equals(overallPron);
+          return diffWord &&
+              diffPron;
+        })
+        .collect(Collectors.toList());
+    if (DEBUG_EDIT || debug) logger.info("match for " + entry + " " + collect);
     return collect;
   }
 
