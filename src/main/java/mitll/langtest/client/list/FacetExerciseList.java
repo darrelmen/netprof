@@ -152,7 +152,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #setProgressVisible
    */
   protected ProgressBar practicedProgress, scoreProgress;
+  /**
+   * @see #setPagerRowVisible
+   */
   private final DivWidget pagerAndSortRow;
+  private DivWidget showAndDownload;
 
   private List<String> typeOrder;
   private final Panel sectionPanel;
@@ -295,17 +299,19 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     {
       // better name for primary and alternate choices
-      DivWidget widgets = new DivWidget();
-      widgets.addStyleName("topFiveMargin");
+      DivWidget showAndDownload = new DivWidget();
+      showAndDownload.addStyleName("topFiveMargin");
 
       {
         ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
         boolean isMandarin = projectStartupInfo != null && projectStartupInfo.getLanguageInfo() == Language.MANDARIN;
         boolean shouldSwap = projectStartupInfo != null && projectStartupInfo.isShouldSwap();
-        widgets.add(new DisplayMenu(controller.getStorage(), this, isMandarin, shouldSwap).getRealViewMenu());
+        showAndDownload.add(new DisplayMenu(controller.getStorage(), this, isMandarin, shouldSwap).getRealViewMenu());
       }
 
-      pagerAndSort.add(widgets);
+      pagerAndSort.add(showAndDownload);
+
+      this.showAndDownload = showAndDownload;
     }
 
     addPageSize(pagerAndSort);
@@ -1210,19 +1216,19 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   /**
-   * @see #getTypeToValuesCallback(Map, long)
    * @param response
    * @param then
    * @param typeToSelection
+   * @see #getTypeToValuesCallback(Map, long)
    */
   protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
     long diff = System.currentTimeMillis() - then;
     if (DEBUG || diff > 30) {
       logger.info("getTypeToValues took " + diff + " to get" +
-          "\n\ttype to selection " + typeToSelection +
-          "\n\ttype to include   " + response.getTypesToInclude() +
-          "\n\t#type to values   " + response.getTypeToValues().size()
-         // +          "\n\ttype to values    " + response.getTypeToValues()
+              "\n\ttype to selection " + typeToSelection +
+              "\n\ttype to include   " + response.getTypesToInclude() +
+              "\n\t#type to values   " + response.getTypeToValues().size()
+          // +          "\n\ttype to values    " + response.getTypeToValues()
       );
     }
 
@@ -1541,15 +1547,34 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   protected void hidePrevNextWidgets() {
     pageSizeContainer.setVisible(false);
-    sortBox.setVisible(false);
-    pagerAndSortRow.setVisible(false);
+    setSortBoxVisible(false);
+    setPagerRowVisible(false);
+  }
+
+  protected void showOnlySortBox() {
+    pageSizeContainer.setVisible(false);
+    setSortBoxVisible(true);
+    setDownloadVisible(false);
+    setPagerRowVisible(true);
   }
 
   private void showPrevNext() {
     pageSizeContainer.setVisible(true);
-    sortBox.setVisible(true);
+    setSortBoxVisible(true);
     setProgressVisible(true);
-    pagerAndSortRow.setVisible(true);
+    setPagerRowVisible(true);
+  }
+
+  protected void setPagerRowVisible(boolean b) {
+    pagerAndSortRow.setVisible(b);
+  }
+
+  protected void setSortBoxVisible(boolean b) {
+    sortBox.setVisible(b);
+  }
+
+  protected void setDownloadVisible(boolean b) {
+    showAndDownload.setVisible(b);
   }
 
   /**
@@ -2068,7 +2093,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     if (DEBUGSCORE) logger.info("showProgress percent " + percent);
 
     double percent1 = Math.max(30.0D, num == 0.0D ? 100.0D : percent);
-   // practicedProgress.setPercent(percent1);
+    // practicedProgress.setPercent(percent1);
     Widget theBar = cheesySetPercent(practicedProgress, percent1);
 
     boolean allDone = num == denom;

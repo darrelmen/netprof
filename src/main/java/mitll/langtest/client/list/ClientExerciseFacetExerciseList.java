@@ -216,7 +216,7 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
     return addPairForTypeSelection(typeToSelection, pairs, languageMetaData);
   }
 
- protected boolean addPairForTypeSelection(Map<String, String> typeToSelection, List<Pair> pairs, String dynamicFacet) {
+  boolean addPairForTypeSelection(Map<String, String> typeToSelection, List<Pair> pairs, String dynamicFacet) {
     if (typeToSelection.containsKey(dynamicFacet)) {
       pairs.add(new Pair(dynamicFacet, typeToSelection.get(dynamicFacet)));
       return true;
