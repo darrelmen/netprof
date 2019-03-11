@@ -747,6 +747,10 @@ public class Project implements IPronunciationLookup, IProject {
 
     if (hostName.startsWith(HYDRA_2)) {
       myProject = webserviceHost.equalsIgnoreCase(H_2);
+    } else if (hostName.startsWith("score1")) {
+      myProject = webserviceHost.equalsIgnoreCase("s1");
+    } else if (hostName.startsWith("score2")) {
+      myProject = webserviceHost.equalsIgnoreCase("s2");
     } else if (hostName.startsWith(HYDRA)) {
       myProject = webserviceHost.equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT);
     }

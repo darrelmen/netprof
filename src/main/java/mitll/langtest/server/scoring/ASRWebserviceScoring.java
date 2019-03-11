@@ -86,7 +86,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final String SCORE = "score";
   private static final String STATUS = "status";
   private static final String LOG = "log";
-  //public static final String SCORE1 = "score";
+
+  /**
+   * @see #callKaldiOOV
+   */
   private static final String OOV = "oov";
   private static final String NORM = "norm";
   private static final String NORM_TRANSCRIPT = "norm_transcript";
@@ -492,6 +495,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return tokens;
   }
 
+  /**
+   * @see #getKaldiOOV
+   * @param tokens
+   * @param port
+   * @return
+   */
   private List<String> runOOV(final List<String> tokens, int port) {
     List<Boolean> oov = new ArrayList<>();
     try {
