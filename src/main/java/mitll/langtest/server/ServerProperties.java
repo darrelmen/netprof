@@ -39,6 +39,7 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.langtest.shared.user.Affiliation;
@@ -68,7 +69,7 @@ public class ServerProperties {
    * TODO : good idea????
    * ON THIS BRANCH!
    */
-  private static final String APP_NAME_DEFAULT = "netprof";//dialog";
+  private static final String APP_NAME_DEFAULT = "netprof";
 
   /**
    * As of 8/2/17 we have these languages on the hydra2 server:
@@ -90,6 +91,7 @@ public class ServerProperties {
 
   /**
    * Languages on the hydra2 server.
+   * @see #getHydra2Languages
    */
   private static final String HYDRA_2_LANGUAGES = "hydra2Languages";
   private static final String HYDRA_2_LANGUAGES_DEFAULT = "korean,levantine,msa,russian";
@@ -1072,6 +1074,10 @@ public class ServerProperties {
     return getPropertyMap(uiprops);
   }
 
+  /**
+   * @see mitll.langtest.server.services.ProjectServiceImpl#create
+   * @return
+   */
   public Set<Language> getHydra2Languages() {
     String property = props.getProperty(HYDRA_2_LANGUAGES, HYDRA_2_LANGUAGES_DEFAULT).toUpperCase();
     Set<String> strings = new HashSet<>(Arrays.asList(property.split(",")));

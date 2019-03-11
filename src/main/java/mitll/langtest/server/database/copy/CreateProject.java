@@ -57,6 +57,10 @@ public class CreateProject {
   public static final String TRUE = Boolean.TRUE.toString();
   private static final String MANDARIN_TRAD = "mandarinTrad";
   private static final String DEFAULT_MODEL_TYPE = ModelType.HYDRA.toString();
+  public static final String H_2 = "h2";
+  /**
+   *
+   */
   private final Set<Language> h2Languages;
 
   public CreateProject(Set<Language> h2Languages) {
@@ -171,7 +175,7 @@ public class CreateProject {
     if (swapPrimaryAndAlt) {
       addDefinedProperty(projectDAO, projectID, SWAP_PRIMARY_AND_ALT, TRUE);
     }
-    addDefaultHostProperty(language, projectDAO, projectID);
+    addDefaultHostProperty(language1, projectDAO, projectID);
     logger.info("createProject : created project " + projectID);
     return projectID;
   }
@@ -235,7 +239,7 @@ public class CreateProject {
 
       String host = info.getHost();
       if (host.isEmpty()) {
-        host = h2Languages.contains(language) ? "h2" : WEBSERVICE_HOST_DEFAULT;
+        host = h2Languages.contains(language) ? H_2 : WEBSERVICE_HOST_DEFAULT;
         logger.info("createProject choosing host for " + language + " = " + host);
       } else {
         logger.info("createProject host=" + host);
@@ -275,8 +279,8 @@ public class CreateProject {
     projectDAO.addProperty(projectID, defProp, v, PROPERTY, "");
   }
 
-  private void addDefaultHostProperty(String language, IProjectDAO projectDAO, int projectID) {
-    if (h2Languages.contains(language.toLowerCase())) {
+  private void addDefaultHostProperty(Language language, IProjectDAO projectDAO, int projectID) {
+    if (h2Languages.contains(language)) {
       logger.info("createProject: setting hydra host to " + H2_HOST);
       addModelProp(projectDAO, projectID, WEBSERVICE_HOST, H2_HOST);
     }
