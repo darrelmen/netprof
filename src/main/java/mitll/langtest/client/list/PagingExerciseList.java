@@ -33,6 +33,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -56,6 +57,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
   protected final WaitCursorHelper waitCursorHelper;
 
   protected ClickablePagingContainer<T> pagingContainer;
+  /**
+   * @see #getInOrder
+   */
   private List<T> inOrderResult;
 
   /**
@@ -324,10 +328,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
   }
 
   public void clear() {
+   // logger.info(getInstance() + " : clear");
     pagingContainer.clear();
   }
 
   private void flush() {
+   // logger.info(getInstance() + " : flush");
     pagingContainer.flush();
     onResize();
   }
@@ -337,8 +343,14 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    */
   @Override
   public void flushWith(Comparator<T> comparator) {
-    pagingContainer.setComparator(comparator);
+    //logger.info(getInstance() + " : flushWith " + comparator);
+    setComparator(comparator);
     flush();
+  }
+
+  public void setComparator(Comparator<T> comparator) {
+    pagingContainer.setComparator(comparator);
+
   }
 
   /**
@@ -351,7 +363,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
   @Override
   public List<T> rememberExercises(List<T> toRemember) {
     inOrderResult = toRemember;
-   // logger.info(getInstance() + " : rememberExercises " + toRemember.size() + " items");
+
+//    logger.info(getInstance() + " : rememberExercises " + toRemember.size() + " items");
+
     if (doShuffle) {
       // logger.info(getInstance() + " : rememberExercises - shuffling " + toRemember.size() + " items");
       ArrayList<T> ts = new ArrayList<>(toRemember);
@@ -389,7 +403,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
 
   @Override
   protected T getFirst() {
-    return pagingContainer.getFirst();
+    T first = pagingContainer.getFirst();
+    return first;
   }
 
   @Override

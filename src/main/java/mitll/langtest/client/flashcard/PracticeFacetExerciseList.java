@@ -35,6 +35,7 @@ import mitll.langtest.client.banner.PracticeHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListFacetExerciseList;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -74,7 +75,11 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
     this.practiceHelper = practiceHelper;
   }
 
-  public void setControlState(ControlState state) {
+  /**
+   * @see StatsFlashcardFactory#StatsFlashcardFactory
+   * @param state
+   */
+  void setControlState(ControlState state) {
     this.controlState = state;
   }
 
@@ -188,7 +193,18 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
 
   @Override
   protected void showExercises(final Collection<ClientExercise> result, final int reqID) {
-    hidePrevNextWidgets();
+//    hidePrevNextWidgets();
+//
+//    setSortBoxVisible(true);
+//    setDownloadVisible(false);
+//    setPagerRowVisible(true);
+
+    showOnlySortBox();
+
+    showOnlyOne(result);
+  }
+
+  protected void showOnlyOne(Collection<ClientExercise> result) {
     showOnlyOneExercise(result);
     goGetNextPage();
     setProgressVisible(false);

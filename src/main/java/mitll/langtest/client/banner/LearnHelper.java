@@ -66,15 +66,12 @@ public class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleC
    */
   protected LearnHelper(ExerciseController controller) {
     super(controller);
-
     this.sessionStorage = new SessionStorage(controller.getStorage(), "learnSession");
-
     sessionManager = () -> "" + sessionStorage.getSession();
   }
 
   @Override
   protected FlexListLayout<T, ClientExercise> getMyListLayout(SimpleChapterNPFHelper<T, ClientExercise> outer) {
-
     return new MyFlexListLayout<T, ClientExercise>(controller, outer) {
       /**
        * @see FlexListLayout#makeNPFExerciseList

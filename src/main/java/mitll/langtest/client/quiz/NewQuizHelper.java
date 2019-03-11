@@ -53,6 +53,7 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE.POLYGLOT;
@@ -160,6 +161,12 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise> extends Pract
           new ListOptions().setInstance(INavigation.VIEWS.QUIZ).setShowPager(false),
           listHeader, INavigation.VIEWS.QUIZ, NewQuizHelper.this
       );
+    }
+
+    @Override
+    protected void showExercises(final Collection<ClientExercise> result, final int reqID) {
+      hidePrevNextWidgets();
+      showOnlyOne(result);
     }
 
     @Override

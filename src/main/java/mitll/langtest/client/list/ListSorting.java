@@ -89,7 +89,7 @@ class ListSorting<T extends CommonShell & Scored, U extends HasID> {
     this.exerciseList = exerciseList;
     keyForSorting = LIST_BOX_SETTING + "_" + view.toString();
 
-  //  logger.info("ListSorting: key " + keyForSorting);
+    //  logger.info("ListSorting: key " + keyForSorting);
     ProjectStartupInfo projectStartupInfo = exerciseList.controller.getProjectStartupInfo();
     if (projectStartupInfo != null) {
       languageInfo = exerciseList.controller.getLanguageInfo();
@@ -144,7 +144,7 @@ class ListSorting<T extends CommonShell & Scored, U extends HasID> {
       //   logger.info("makeDropDownReflectStoredValue norm value is " + value);
       w1.setSelectedValue(value);
       if (!w1.getSelectedValue().equalsIgnoreCase(value)) logger.warning("didn't set " + value);
-      //  sortLater(w1, langASC, langDSC, value);
+      //  sortNow(w1, langASC, langDSC, value);
     }
   }
 
@@ -153,15 +153,17 @@ class ListSorting<T extends CommonShell & Scored, U extends HasID> {
    * @param w1
    * @see FacetExerciseList#resort
    */
-  void sortLater(List<T> toSort, ListBox w1) {
+  void sortNow(List<T> toSort, ListBox w1) {
     if (w1.getSelectedIndex() != 0 && (toSort.size() > 1)) {
       String langASC = getLangASC(language, ASCENDING);
       String langDSC = getLangASC(language, DESCENDING);
       String selectedValue = w1.getSelectedValue();  // not sure how this can be null but saw it in an exception
 
       final String fvalue = selectedValue == null ? langASC : getNormValue(selectedValue, langASC, langDSC);
-      // logger.info("sortLater sort with" + w1.getSelectedValue() + " norm " + fvalue);
+      if (DEBUG) logger.info("sortNow sort with" + w1.getSelectedValue() + " norm " + fvalue);
       sortByValue(toSort, fvalue, langASC, langDSC);
+    } else {
+      if (DEBUG) logger.info("sortNow not sorting " + w1.getSelectedIndex() + " size " + toSort.size());
     }
 //      Scheduler.get().scheduleDeferred((Command) () -> sortByValue(fvalue, langASC, langDSC));
   }
@@ -197,7 +199,7 @@ class ListSorting<T extends CommonShell & Scored, U extends HasID> {
   }
 
   private void storeValue(String toStore) {
-    if (DEBUG)  logger.info("store " + keyForSorting + " = " + toStore);
+    if (DEBUG) logger.info("store " + keyForSorting + " = " + toStore);
     getStorage().storeValue(keyForSorting, toStore);
   }
 
@@ -216,7 +218,7 @@ class ListSorting<T extends CommonShell & Scored, U extends HasID> {
    * @param selectedValue
    * @param langASC
    * @param langDSC
-   * @see #sortLater(List, ListBox)
+   * @see #sortNow(List, ListBox)
    */
   private void sortByValue(List<T> toSort, String selectedValue, String langASC, String langDSC) {
     if (DEBUG) logger.info("START Sort by " + selectedValue + " to sort is null " + (toSort == null));
@@ -278,7 +280,7 @@ class ListSorting<T extends CommonShell & Scored, U extends HasID> {
       return 0;
     } else {
 //    if (rawScore == -1 && rawScore2 -)
-   //  logger.info("compareScores o1 " +o1.getID() + " " + rawScore1 + " vs " + o2.getID() + " " + rawScore2);
+      //  logger.info("compareScores o1 " +o1.getID() + " " + rawScore1 + " vs " + o2.getID() + " " + rawScore2);
 
       if (rawScore1 == -1 && rawScore2 == 0) return +1;
       else if (rawScore1 == 0 && rawScore2 == -1) return -1;
@@ -293,10 +295,11 @@ class ListSorting<T extends CommonShell & Scored, U extends HasID> {
    */
   private void sortBy(List<T> toSort, Comparator<T> comp) {
     if (toSort == null) {
-    //  logger.info("1 using comp = " + comp);
+      if (DEBUG) logger.info("sortBy : 1 using comp = " + comp);
       exerciseList.flushWith(comp);
     } else {
-   //   logger.info("2 using comp = " + comp);
+      if (DEBUG) logger.info("sortBy 2 using comp = " + comp);
+      exerciseList.setComparator(comp);
       toSort.sort(comp);
     }
   }
@@ -312,6 +315,7 @@ class ListSorting<T extends CommonShell & Scored, U extends HasID> {
 //    if (o2.getNumPhones() == 0) logger.info("2 no phones for " + o2.getID());
     return Integer.compare(o1.getForeignLanguage().length(), o2.getForeignLanguage().length());
   }
+
   private int compareShells(CommonShell o1, CommonShell o2, int i) {
     if (i == 0) i = compForeign(o1, o2);
     if (i == 0) i = compEnglish(o1, o2);
