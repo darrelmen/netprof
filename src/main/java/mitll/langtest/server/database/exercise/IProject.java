@@ -31,9 +31,27 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
+import mitll.npdata.dao.SlickProject;
+
+import java.util.List;
 
 public interface IProject {
+  /**
+   * Initially the choices should be hydra and hydra2 (or maybe hydra-dev and hydra2-dev)
+   *
+   * @see #getWebserviceHost
+   */
+  String WEBSERVICE_HOST_DEFAULT = "127.0.0.1";
+
   Language getLanguageEnum();
+
+  SlickProject getProject();
+
+  List<String> getTypeOrder();
+
+  List<CommonExercise> getRawExercises();
+
+  ISection<CommonExercise> getSectionHelper();
 
   CommonExercise getExerciseByID(int id);
 }

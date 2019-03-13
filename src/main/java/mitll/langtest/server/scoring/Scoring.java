@@ -320,8 +320,6 @@ public abstract class Scoring {
     }
   }
 
-
-
   @NotNull
   public Collection<String> getOOV(String fl, String transliteration) {
     Set<String> oovForFL = checkLTSHelper.checkLTS(fl, transliteration);

@@ -38,6 +38,7 @@ import mitll.langtest.server.audio.*;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
+import mitll.langtest.server.database.exercise.IProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
@@ -63,7 +64,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.ERROR;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.SUCCESS;
@@ -170,7 +170,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    */
   private String getWebserviceIP() {
-    return WEBSERVICE_HOST_DEFAULT;
+    return IProject.WEBSERVICE_HOST_DEFAULT;
   }
 
   @Override

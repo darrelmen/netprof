@@ -32,6 +32,7 @@ package mitll.langtest.server.database.copy;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.exercise.IProject;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.shared.project.*;
@@ -43,7 +44,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 import static mitll.langtest.server.ServerProperties.H2_HOST;
-import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
 import static mitll.langtest.shared.project.ProjectProperty.*;
 
 /**
@@ -239,7 +239,7 @@ public class CreateProject {
 
       String host = info.getHost();
       if (host.isEmpty()) {
-        host = h2Languages.contains(language) ? H_2 : WEBSERVICE_HOST_DEFAULT;
+        host = h2Languages.contains(language) ? H_2 : IProject.WEBSERVICE_HOST_DEFAULT;
         logger.info("createProject choosing host for " + language + " = " + host);
       } else {
         logger.info("createProject host=" + host);

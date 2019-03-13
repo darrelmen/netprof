@@ -41,6 +41,7 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.common.MessageHelper;
+import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.Services;
 import mitll.langtest.client.initial.LifecycleSupport;
@@ -99,6 +100,9 @@ public class ProjectEditForm extends UserDialog {
    *
    */
   private static final String ALIGN_REF_AUDIO = "Align ref audio";
+  /**
+   * @see #getCheckAudio(ProjectInfo)
+   */
   private static final String CHECK_AUDIO = "Check Audio";
 
   private static final String ID = "ID";
@@ -475,6 +479,9 @@ public class ProjectEditForm extends UserDialog {
       if (isSuperUser) {
         fieldset.add(getRecalcRefAudio(info));
       }
+
+      fieldset.add(getCheckOOV(info));
+
     }
 
     {
@@ -824,6 +831,11 @@ public class ProjectEditForm extends UserDialog {
     return userField;
   }
 
+  /**
+   * @param info
+   * @return
+   * @see #getFields(ProjectInfo, boolean)
+   */
   private Button getCheckAudio(final ProjectInfo info) {
     Button w = new Button(CHECK_AUDIO, IconType.STETHOSCOPE);
     w.addClickHandler(event -> clickCheckAudio(info, w));
@@ -831,10 +843,18 @@ public class ProjectEditForm extends UserDialog {
     return w;
   }
 
+  private Button getCheckOOV(final ProjectInfo info) {
+    Button w = new Button("Check OOV", IconType.CHECK);
+    w.addClickHandler(event -> clickCheckAudio(info, w));
+    w.addStyleName("leftFiveMargin");
+    addBottomMargin(w);
+    return w;
+  }
+
   private void clickCheckAudio(ProjectInfo info, Button w) {
     w.setEnabled(false);
     feedback.setText(PLEASE_WAIT);
-    checkAudio(info, w);
+    clickCheckOOV(info, w);
   }
 
   private void checkAudio(ProjectInfo info, Button w) {
@@ -853,6 +873,27 @@ public class ProjectEditForm extends UserDialog {
             feedback.setText(CHECKING_AUDIO);
           }
         });
+  }
+
+  private void clickCheckOOV(ProjectInfo info, Button w) {
+    w.setEnabled(false);
+    feedback.setText("Please wait, checking items...");
+    showCheckOOV(info, w);
+  }
+
+  private void showCheckOOV(ProjectInfo info, Button w) {
+    projectServiceAsync.checkOOV(info.getID(), new AsyncCallback<OOVInfo>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        messageHelper.handleNonFatalError("Checking OOV...", caught);
+      }
+
+      @Override
+      public void onSuccess(OOVInfo result) {
+        w.setEnabled(true);
+        feedback.setText("Checked " + result.getChecked() + " items, found " + result.getOovWords() + " OOV words.");
+      }
+    });
   }
 
   /**

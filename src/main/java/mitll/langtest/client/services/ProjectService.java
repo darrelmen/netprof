@@ -35,10 +35,7 @@ import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
-import mitll.langtest.shared.project.DominoProject;
-import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.project.ProjectInfo;
-import mitll.langtest.shared.project.ProjectProperty;
+import mitll.langtest.shared.project.*;
 
 import java.util.List;
 
@@ -73,19 +70,13 @@ public interface ProjectService extends RemoteService {
 
   boolean delete(int id) throws DominoSessionException, RestrictedOperationException;
 
+  OOVInfo checkOOV(int id) throws DominoSessionException;
+
   DominoUpdateResponse addPending(int id, boolean doChange) throws DominoSessionException, RestrictedOperationException;
 
   List<DominoProject> getDominoForLanguage(Language lang) throws DominoSessionException;
 
-/*
-  String getProperty(int projid, ProjectProperty key) throws DominoSessionException, RestrictedOperationException;
-*/
-
   List<String> getListProperty(int projid, ProjectProperty key) throws DominoSessionException, RestrictedOperationException;
-
-/*
-  boolean setProperty(int projid, ProjectProperty key, String newValue) throws DominoSessionException, RestrictedOperationException;
-*/
 
   boolean setListProperty(int projid, ProjectProperty key, List<String> newValue) throws DominoSessionException, RestrictedOperationException;
 }

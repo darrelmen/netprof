@@ -45,7 +45,6 @@ import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickPhone;
 import mitll.npdata.dao.SlickPhoneReport;
 import mitll.npdata.dao.phone.PhoneDAOWrapper;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -386,13 +385,13 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
                                      int userid,
                                      Project project) {
     Map<String, List<PhoneAndScore>> phoneToScores = new HashMap<>();
-    String language = project.getLanguage();
+   //String language = project.getLanguage();
 
     int projectID = project.getID();
     if (DEBUG || true) {
       logger.info("getPhoneReport" +
           "\n\tuser    " + userid +
-          "\n\tlang    " + language +
+          "\n\tlang    " + project.getLanguage() +
           "\n\tproject " + projectID +
           "\n\tadd transcript      " + addTranscript +
           "\n\tphoneReportByResult " + phoneReportByResult.size());
@@ -508,7 +507,7 @@ public class SlickPhoneDAO extends BasePhoneDAO implements IPhoneDAO<Phone> {
           report.pseq(),
           prevScore,
           phoneScore,
-          language);
+          project.getLanguage());
       wordAndScore.setIsContext(isContextEx.contains(exid));
 
       List<WordAndScore> wordAndScores = phoneToExamples.computeIfAbsent(phone, k -> new ArrayList<>());

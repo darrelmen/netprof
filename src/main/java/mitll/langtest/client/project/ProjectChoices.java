@@ -84,6 +84,10 @@ public class ProjectChoices extends ThumbnailChoices {
   private static final String GVIDAVER = "gvidaver";
 
   public static final String PLEASE_WAIT = "Please wait...";
+
+  /**
+   * @see #getImportButton
+   */
   private static final String SYNCHRONIZE_CONTENT_WITH_DOMINO = "Synchronize content with domino.";
   private static final String START_TO_DELETE_THIS_PROJECT = "Start to delete this project.";
   private static final String DELETE_PROJECT = "delete project";
@@ -93,7 +97,7 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private static final boolean ALLOW_SYNC_WITH_DOMINO = true;
 
-  private static final int DIALOG_HEIGHT = 595;
+  private static final int DIALOG_HEIGHT = 598;
   private static final String COURSE1 = " course";
   /**
    * @see #getLabel
@@ -418,10 +422,10 @@ public class ProjectChoices extends ThumbnailChoices {
   }
 
   /**
-   * @see #getHeader
    * @param result
    * @param nest
    * @return
+   * @see #getHeader
    */
   @NotNull
   private String getPromptText(List<SlimProject> result, int nest) {
@@ -775,6 +779,12 @@ public class ProjectChoices extends ThumbnailChoices {
     }
   }
 
+  /**
+   * @param projectForLang
+   * @param label
+   * @return
+   * @see #getContainerWithButtons
+   */
   private DivWidget getQCButtons(SlimProject projectForLang, Heading label) {
     DivWidget horiz2 = new DivWidget();
     horiz2.addStyleName("inlineFlex");
@@ -785,8 +795,13 @@ public class ProjectChoices extends ThumbnailChoices {
       importButtonContainer.addStyleName("leftFiveMargin");
       horiz2.add(importButtonContainer);
       importButtonContainer.setVisible(projectForLang.getDominoID() > 0);
-
     }
+
+//    {
+//      Button button = getCheckOOVButton(projectForLang, label);
+//      button.addStyleName("leftFiveMargin");
+//      horiz2.add(getButtonContainer(button));
+//    }
 
     {
       if (isAllowedToDelete(projectForLang)) {
@@ -818,6 +833,11 @@ public class ProjectChoices extends ThumbnailChoices {
     return getButtonContainer(getEditButton(projectForLang, label));
   }
 
+  /**
+   * @param projectForLang
+   * @return
+   * @see #getQCButtons
+   */
   @NotNull
   private DivWidget getImportButtonContainer(SlimProject projectForLang) {
     return getButtonContainer(getImportButton(projectForLang));
@@ -855,6 +875,7 @@ public class ProjectChoices extends ThumbnailChoices {
    *
    * @param projectForLang
    * @return
+   * @see #getImportButtonContainer
    */
   @NotNull
   private com.github.gwtbootstrap.client.ui.Button getImportButton(SlimProject projectForLang) {
@@ -881,6 +902,17 @@ public class ProjectChoices extends ThumbnailChoices {
 
     return w;
   }
+
+//  @NotNull
+//  private com.github.gwtbootstrap.client.ui.Button getCheckOOVButton(SlimProject projectForLang, Heading label) {
+//    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
+//    w.setIcon(IconType.CHECK);
+//    w.setType(ButtonType.SUCCESS);
+//    addTooltip(w, "Check Out-of-vocabulary.");
+//    w.addClickHandler(event -> showCheckOOV(projectForLang, label));
+//
+//    return w;
+//  }
 
   private void addTooltip(Widget w, String tip) {
     new TooltipHelper().createAddTooltip(w, tip, Placement.TOP);
@@ -1047,6 +1079,7 @@ public class ProjectChoices extends ThumbnailChoices {
         listener,
         DIALOG_HEIGHT, -1);
   }
+
 
   private boolean isQC() {
     UserState userState = controller.getUserState();

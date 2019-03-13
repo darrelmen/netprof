@@ -48,10 +48,7 @@ import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.exercise.DBExerciseDAO;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
-import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.IDominoImport;
@@ -562,7 +559,7 @@ public class ProjectManagement implements IProjectManagement {
       }
 
       if (userID == -1) {
-        logger.info("getUserForFile couldn't find recorder of (" +oldUser+ ") " + requestURI);
+        logger.info("getUserForFile couldn't find recorder of (" + oldUser + ") " + requestURI);
       }
       if (oldUser != -1 && userID != -1) {
         logger.info("getUserForFile remember " + oldUser + "->" + userID);
@@ -925,6 +922,11 @@ public class ProjectManagement implements IProjectManagement {
         .stream()
         .filter(project -> project.getLanguageEnum() == name)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public IProject getIProject(int projectid, boolean onlyOne) {
+    return getProject(projectid, onlyOne);
   }
 
   /**
@@ -1455,5 +1457,11 @@ public class ProjectManagement implements IProjectManagement {
 
   public Map<String, Integer> getNpToDomino(int dominoProjectID) {
     return dominoImport == null ? Collections.emptyMap() : dominoImport.getNPIDToDominoID(dominoProjectID);
+  }
+
+  @Override
+  public OOVInfo checkOOV(int id) {
+    Project project = getProject(id, false);
+    return project.getAudioFileHelper().checkOOV(project.getRawExercises(), true);
   }
 }

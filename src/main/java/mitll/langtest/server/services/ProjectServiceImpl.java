@@ -199,6 +199,18 @@ public class ProjectServiceImpl extends MyRemoteServiceServlet implements Projec
     }
   }
 
+
+  @Override
+  public OOVInfo checkOOV(int id) throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasAdminOrCDPerm(userIDFromSessionOrDB)) {
+      return db.getProjectManagement().checkOOV(id);
+    } else {
+      throw getRestricted("Check OOV on a project.");
+    }
+
+  }
+
   /**
    * Adding exercises to a project!
    * Copies any existing audio for the language (from a production project) that has matching transcripts.
