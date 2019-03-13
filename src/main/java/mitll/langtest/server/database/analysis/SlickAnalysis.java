@@ -722,9 +722,9 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
           database.getWebPageAudioRef(language.getLanguage(), path),
           nativeAudio,
           sessionTime, sessionSize);
-      if (e.getSessionStart()> 0 && userid == 6) {
-        logger.info("getUserToResults id " + id + " = " + e.getSessionStart());
-      }
+//      if (e.getSessionStart()> 0 && userid == 6) {
+//        logger.info("getUserToResults id " + id + " = " + e.getSessionStart());
+//      }
 
       results.add(e);
     }
@@ -785,7 +785,9 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       int exid = perf.exid();
 
       if (exid == UNKNOWN_EXERCISE) {
-        logger.info("getNativeAudio skipping " + perf.id() + " for unknown exercise by " + perf.userid() + " : " + perf.answer());
+        if (skipped.size() < 5 || skipped.size() % 100 == 0) {
+          logger.info("getNativeAudio skipping " + perf.id() + " for unknown exercise by " + perf.userid() + " : " + perf.answer() + " " + skipped.size());
+        }
         skipped.add(perf.id());
       } else {
         CommonExercise customOrPredefExercise = database.getCustomOrPredefExercise(projid, exid);

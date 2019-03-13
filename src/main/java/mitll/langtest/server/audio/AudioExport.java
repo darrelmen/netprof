@@ -208,6 +208,7 @@ public class AudioExport {
     ZipOutputStream zOut = new ZipOutputStream(out);
 
     String baseName = baseName(language1, name).replaceAll(",", "_");
+
     String overallName = baseName + options.getInfo();
 
     logger.info("writeToStream overall name " + overallName);

@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -170,19 +171,19 @@ public class DownloadServlet extends DatabaseServlet {
               e.printStackTrace();
             }
             Collection<String> sessionid = invoke.getSelection().get("sessionid");
-            logger.info("writeStudentAudioZip " + requestURI);
+//            logger.info("writeStudentAudioZip " + requestURI);
             writeStudentAudioZip(response, db, user, sessionid == null || sessionid.isEmpty() ? "-1" : sessionid.iterator().next(), projid);
           } else if (queryString.startsWith(REQUEST)) {
-            logger.info("writeAudioZip " + requestURI);
+            //          logger.info("writeAudioZip " + requestURI);
             writeAudioZip(response, db, queryString, projid);
           } else if (queryString.contains(DIALOG_ARG)) {
-            logger.info("downloadDialogContent " + requestURI);
+            //        logger.info("downloadDialogContent " + requestURI);
             downloadDialogContent(response, db, projid, queryString);
           } else {
             logger.warn("huh? did nothing with " + requestURI);
           }
         } else {
-          logger.info("file download request " + requestURI);
+          //    logger.info("file download request " + requestURI);
           returnSpreadsheet(response, db, requestURI, projid, language);
         }
       } catch (Exception e) {
@@ -327,14 +328,10 @@ public class DownloadServlet extends DatabaseServlet {
     // logger.debug("writeAudioZip : request " + projid + " " + language + " query " + queryString);
     Project project = db.getProject(projid);
 
-    AudioExportOptions audioExportOptions =
-        new AudioExportOptions();
+    AudioExportOptions audioExportOptions = new AudioExportOptions();
 
     String userID = db.getUserDAO().getMiniUser(userid).getUserID();
     audioExportOptions.setInfo("student_" + userID);
-
-    logger.info("Download " + userID);
-    //audioExportOptions.setSkip(typeToSection.isEmpty());// && !audioExportOptions.isAllContext());
 
     {
       String zipFileName = getZipFileName(db, new HashMap<>(), projid, project.getLanguageEnum().toDisplay(), audioExportOptions.getInfo());
@@ -394,21 +391,27 @@ public class DownloadServlet extends DatabaseServlet {
           "\n\tuser  " + userID +
           "\n\tsess  " + sessionID +
           "\n\tfound " + resultsBySession.size());
-      //
-//      AnalysisReport performanceReportForUser = db.getProject(projectid).getAnalysis().getPerformanceReportForUser(new AnalysisRequest().setUserid(userID));
-//      List<PhoneSession> phoneSessions = performanceReportForUser.getUserPerformance().getGranularityToSessions().get(PhoneAnalysis.SESSION);
-//      int size = phoneSessions.size();
-//      logger.info("found " + size);
-//
-//      List<PhoneSession> collect = phoneSessions.stream().filter(phoneSession -> phoneSession.getStart() == sessionID).collect(Collectors.toList());
-//      getDatabase().writeZip(response.getOutputStream(), typeToSection, projectid, options, ensureAudioHelper);
-
       Project project = db.getProject(projectid);
+
+      long start = -1;
+      try {
+        start = Long.parseLong(sessionID);
+      } catch (NumberFormatException e) {
+        e.printStackTrace();
+      }
+      SimpleDateFormat format = new SimpleDateFormat("MMM d yyyy h mm a");
+
+      String suffix = start == -1 ? "" : "_" + format.format(new Date(start));
+      String base = db.getUserDAO().getUserWhere(userID).getFirstInitialName() + suffix;
+      String baseName = base
+          .replaceAll("\\s++", "_")
+          .replaceAll("\\.", "_");
+
       new AudioExport(db.getServerProps())
           .writeResultsToStream(
               project,
               resultsBySession,
-              db.getUserDAO().getUserWhere(userID).getFirstInitialName(),
+              baseName,
               project.getTypeOrder(),
               project.getLanguage(),
               response.getOutputStream(),
@@ -437,8 +440,6 @@ public class DownloadServlet extends DatabaseServlet {
                              String info) {
     String name = typeToSection.isEmpty() ? AUDIO : db.getPrefix(typeToSection, projectid);
     name = name.replaceAll(",", "_");
-
-    //String info = audioExportOptions.getInfo();
     name += info;
     name = language + "_" + name;
     return name;
