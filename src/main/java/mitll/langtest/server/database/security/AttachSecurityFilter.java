@@ -91,7 +91,7 @@ public class AttachSecurityFilter implements Filter {
     webappName = pathElements.get(pathElements.size() - 1);
    // log.info("webappName " + webappName);
 
-    if (!webappName.equalsIgnoreCase(DIALOG) || !webappName.equalsIgnoreCase(NETPROF)) {
+    if (!webappName.equalsIgnoreCase(DIALOG) || !webappName.equalsIgnoreCase(NETPROF) || !webappName.equalsIgnoreCase("www")) {
       log.warn("huh? unexpected : app name is " + webappName);
     }
 

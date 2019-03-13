@@ -391,14 +391,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
       {
         int defaultUser = getUserDAO().getDefaultUser();
         imageDAO.ensureDefault(projectDAO.getDefault());
-//        logger.info("finalSetup : default user " + defaultUser);
+       logger.info("finalSetup : default user " + defaultUser);
         dialogDAO.ensureDefault(defaultUser);
       }
     }, "ensureDefaultUser").start();
 
     afterDAOSetup(slickAudioDAO);
 
-    //   logger.info("finalSetup : tables = " + getTables());
+  logger.info("finalSetup : tables = " + getTables());
   }
 
   /**
@@ -1630,7 +1630,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
 
     if (!options.getSearch().isEmpty()) {
-      TripleExercises<CommonExercise> exercisesForSearch = new Search<CommonExercise>(this)
+      TripleExercises<CommonExercise> exercisesForSearch = new Search<>(this)
           .getExercisesForSearch(
               options.getSearch(),
               exercisesForSelectionState, !options.isUserList() && typeToSection.isEmpty(), projectid, true);

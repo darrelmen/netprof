@@ -107,7 +107,12 @@ public class ResultDAOToExcel {
 
       for (String type : typeOrder) {
         cell = row.createCell(j++);
-        cell.setCellValue(result.getUnitToValue().get(type));
+        Map<String, String> unitToValue = result.getUnitToValue();
+        if (unitToValue == null || unitToValue.get(type) == null) {
+          cell.setCellValue("");
+        } else {
+          cell.setCellValue(unitToValue.get(type));
+        }
       }
 
       cell = row.createCell(j++);

@@ -43,7 +43,7 @@ import org.moxieapps.gwt.highcharts.client.plotOptions.SeriesPlotOptions;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot
+public abstract class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot
     implements ExerciseLookup<T> {
   private final Logger logger = Logger.getLogger("BasicTimeSeriesPlot");
 
@@ -66,10 +66,9 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot
   private static final int Y_OFFSET_FOR_LEGEND = 25;
 
   private final Map<Long, Integer> timeToId = new TreeMap<>();
-  //private Map<Integer, T> idToEx = new TreeMap<>();
 
   final ExceptionSupport exceptionSupport;
-  protected final ICommonShellCache<T> commonShellCache;
+  final ICommonShellCache<T> commonShellCache;
 
   private static final boolean WARN_ABOUT_MISSING_EXERCISE_ID = false;
 
@@ -140,8 +139,7 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot
     return true;
   }
 
-  protected void gotClickOnExercise(int exid, long nearestXAsLong) {
-  }
+  abstract protected void gotClickOnExercise(int exid, long nearestXAsLong);
 
   /**
    * @return
@@ -280,23 +278,11 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot
     return toShowExercise.contains(seriesName);
   }
 
-  /**
-   * @return
-   * @seex #getShell
-   */
-/*
-  Map<Integer, T> getIdToEx() {
-    return idToEx;
-  }
-*/
-
   public void setIdToEx(Map<Integer, T> idToEx) {
-   // this.idToEx = idToEx;
     commonShellCache.setIdToEx(idToEx);
   }
 
   public boolean isKnown(int exid) {
-    //return idToEx.containsKey(exid);
     return commonShellCache.isKnown(exid);
   }
 
@@ -308,16 +294,7 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot
     timeToId.put(time, id);
   }
 
-  /**
-   * @paramx commonShell
-   * @seex AnalysisPlot#populateExerciseMap
-   */
-/*  void rememberExercise(T commonShell) {
-//    idToEx.put(commonShell.getID(), commonShell);
-    commonShellCache.rememberExercise(commonShell);
-  }*/
-
   public T getShell(int id) {
-    return commonShellCache.getShell(id);//getIdToEx().get(id);
+    return commonShellCache.getShell(id);
   }
 }

@@ -48,11 +48,10 @@ public class PhoneAnalysis {
   private static final long DAY = 24 * HOUR;
   private static final long WEEK = 7 * DAY;
   private static final long MONTH = 4 * WEEK;
-  private static final long SESSION = -1L;
+  public static final long SESSION = -1L;
 
   private static final List<Long> GRANULARITIES = Arrays.asList(
       SESSION,
-//      MINUTE,
       HOUR,
       DAY,
       WEEK,

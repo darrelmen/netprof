@@ -89,7 +89,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    * @see #getScoreText(SortedSet, int)
    */
   private static final String PREFIX = "Sess. #";//"Sess. #";
-  private static final String SCORE = "";
+  // private static final String SCORE = "";
 
   private final Map<Long, Series> granToAverage = new HashMap<>();
   private final int userid;
@@ -209,6 +209,14 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     //  logger.info("populateGranToLabel timezone offset " + timezoneOffset);
   }
 
+  List<Long> sessionIDs = new ArrayList<>();
+
+  Long getSessionStart() {
+    Long aLong = sessionIDs.get(index);
+    logger.info("index  " + index + " = " + aLong);
+    return aLong;
+  }
+
   /**
    * @param userPerformance
    * @param userChosenID
@@ -226,7 +234,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
       {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(-1L);
+
+        for (PhoneSession phoneSession : phoneSessions) {
+          sessionIDs.add(phoneSession.getSessionStart());
+       //   logger.info("sess " + phoneSession);
+        }
         sessionStarts.addAll(getEasyPeriods(phoneSessions));
+//        logger.info("after  " + sessionStarts);
         //sessionEnds.addAll(getEasyPeriodsEnds(phoneSessions));
       }
       {
@@ -1066,19 +1080,19 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   /**
    * @see AnalysisTab#getPrevButton
    */
-  void gotPrevClick() {
+  long gotPrevClick() {
     index--;
 
     timeWidgets.getPrevButton().setEnabled(index > 0);
     timeWidgets.getNextButton().setEnabled(true);
 
-    showTimePeriod(getOffsetPerSession(), getPeriods());
+    return showTimePeriod(getOffsetPerSession(), getPeriods());
   }
 
   /**
    * @see AnalysisTab#getNextButton
    */
-  void gotNextClick() {
+  long gotNextClick() {
     List<Long> periods = getPeriods();
 
     index++;
@@ -1086,13 +1100,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     timeWidgets.getPrevButton().setEnabled(true);
     timeWidgets.getNextButton().setEnabled(index < periods.size() - 1);
 
-    showTimePeriod(getOffsetPerSession(), periods);
+    return showTimePeriod(getOffsetPerSession(), periods);
   }
 
   private long getOffsetPerSession() {
     long offset;
     if (timeHorizon == SESSION) {
-      Long thisPeriodStart = getPeriods().get(index);
+      Long thisPeriodStart = getPeriodStart();
       List<PhoneSession> phoneSessions = granularityToSessions.get(SESSION.getDuration());
       PhoneSession currentSession = phoneSessions.get(index);
       offset = currentSession.getEnd() + 1 - thisPeriodStart;
@@ -1141,13 +1155,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    * @see #gotNextClick
    * @see #gotPrevClick
    */
-  private void showTimePeriod(long offset, List<Long> periods) {
-    Long periodStart = periods.get(index);
+  private long showTimePeriod(long offset, List<Long> periods) {
+    Long periodStart = getPeriodStart(periods);
     long end = periodStart + offset;
 
-    if (DEBUG) {
-      logger.info("showTimePeriod (" + index + "/" + periods.size() + ") From      " + format.format(new Date(periodStart)));
-      logger.info("showTimePeriod to        " + format.format(new Date(end)));
+    if (DEBUG || true) {
+      logger.info("showTimePeriod (" + index + "/" + periods.size() + ") From      " + format.format(new Date(periodStart)) + " " + periodStart);
+      logger.info("showTimePeriod to        " + format.format(new Date(end)) + " " + end);
       logger.info("showTimePeriod" +
           // "\n\tdur     " + offset +
           "\n\t offset " + offset);
@@ -1155,6 +1169,15 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
     chart.getXAxis().setExtremes(periodStart, end); // triggers a time changed event to go to listeners
     setTitleScore(periodStart, end, index);
+    return periodStart;
+  }
+
+  public Long getPeriodStart() {
+    return getPeriodStart(getPeriods());
+  }
+
+  private Long getPeriodStart(List<Long> periods) {
+    return periods.get(index);
   }
 
   private boolean shouldShowHour(long offset) {
@@ -1234,7 +1257,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
       return "";
     } else {
       int denom = simpleTimeAndScores.iterator().next().getSessionSize();
-     // logger.info("getScoreText session size = " + denom + " n " + n + " fround " + fround1);
+      // logger.info("getScoreText session size = " + denom + " n " + n + " fround " + fround1);
 
       if (numOnList > 0) {
         denom = numOnList;

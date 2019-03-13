@@ -38,12 +38,14 @@ import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.dialog.ExceptionHandlerDialog;
+import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.PolyglotPracticePanel;
 import mitll.langtest.client.list.SelectionState;
@@ -57,9 +59,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.logging.Logger;
 
 public class AnalysisTab extends DivWidget {
+  private final Logger logger = Logger.getLogger("AnalysisTab");
+
   private static final String TIME_SCALE = "timeScale";
   private static final String TIME_SCALE1 = "Time Scale : ";
-  private final Logger logger = Logger.getLogger("AnalysisTab");
 
   private static final int MIN_HEIGHT = 325;
   private static final int MAX_WIDTH = 1050;
@@ -125,7 +128,6 @@ public class AnalysisTab extends DivWidget {
   }
 
   private AnalysisPlot analysisPlot = null;
-  private ExerciseLookup<CommonShell> exerciseLookup = null;
   private final ExerciseController controller;
   private TimeWidgets timeWidgets;
   private final Heading exampleHeader = getHeading(WORDS_USING_SOUND);
@@ -133,6 +135,9 @@ public class AnalysisTab extends DivWidget {
 
   private final boolean isPolyglot;
   private Button allChoice, dayChoice, weekChoice, sessionChoice, monthChoice;
+  /**
+   *
+   */
   private ListBox timeScale;
   private final INavigation.VIEWS jumpView;
   private int itemColumnWidth = -1;
@@ -164,7 +169,6 @@ public class AnalysisTab extends DivWidget {
   }
 
   /**
-   * @see UserContainer#getAnalysisTab(UserInfo)
    * @param controller
    * @param minRecordings
    * @param overallBottom
@@ -175,6 +179,7 @@ public class AnalysisTab extends DivWidget {
    * @param req
    * @param reqCounter
    * @param jumpView
+   * @see UserContainer#getAnalysisTab(UserInfo)
    */
   public AnalysisTab(final ExerciseController controller,
                      int minRecordings,
@@ -229,9 +234,9 @@ public class AnalysisTab extends DivWidget {
 
     AnalysisPlot analysisPlot = showPlot ? addAnalysisPlot(controller, isPolyglot, isTeacherView ? 700 : maxWidth, isTeacherView) : null;
 
-    if (!showPlot) {
-      exerciseLookup = new CommonShellCache<>(controller.getMessageHelper());
-    }
+//    if (!showPlot) {
+//      exerciseLookup = new CommonShellCache<>(controller.getMessageHelper());
+//    }
 
     DivWidget bottom = getBottom(isTeacherView);
 
@@ -309,7 +314,7 @@ public class AnalysisTab extends DivWidget {
         controller.getSoundManager(), playFeedback, controller,
         controller.getMessageHelper(),
         isPolyglot, maxWidth, controller.getListService());
-    exerciseLookup = analysisPlot;
+    // exerciseLookup = analysisPlot;
     {
       Panel timeControls = getTimeControls(playFeedback, isTeacherView);
       analysisPlot.setTimeWidgets(timeWidgets);
@@ -479,6 +484,7 @@ public class AnalysisTab extends DivWidget {
   /**
    * @param playFeedback
    * @return
+   * @see #addAnalysisPlot
    */
   @NotNull
   private Panel getTimeControls(Widget playFeedback, boolean isTeacherView) {
@@ -486,6 +492,19 @@ public class AnalysisTab extends DivWidget {
     timeControls.add(isTeacherView ? makeTimeScaleBox() : getTimeGroup());
     timeControls.add(getTimeWindowStepper());
     timeControls.add(playFeedback);
+    Button child = new Button("", IconType.DOWNLOAD);
+    child.addStyleName("leftFiveMargin");
+    child.addStyleName("topFiveMargin");
+    child.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        Long periodStart = analysisPlot.getSessionStart();
+        logger.info("getTimeControls start " + periodStart);
+        long l = timeScale.getSelectedIndex() == 0 ? periodStart : -1;
+        new DownloadHelper(userid, l).doStudentAudioDownload(controller.getHost());
+      }
+    });
+    timeControls.add(child);
     return timeControls;
   }
 
@@ -549,6 +568,7 @@ public class AnalysisTab extends DivWidget {
     return currentDate;
   }
 
+  // long sessionID = -1;
   private Button getPrevButton() {
     final Button left = new Button();
     controller.register(left, "prevTimeWindow");
@@ -584,12 +604,7 @@ public class AnalysisTab extends DivWidget {
 
     TIME_HORIZON stored = TIME_HORIZON.values()[getTimeHorizonFromStorage()];
 
-
     buttonGroup.add(sessionChoice = getButtonChoice(TIME_HORIZON.SESSION, stored));
-//    if (isPolyglot) {
-//      sessionChoice.setActive(true);
-//    }
-
     buttonGroup.add(dayChoice = getButtonChoice(TIME_HORIZON.DAY, stored));
     buttonGroup.add(weekChoice = getButtonChoice(TIME_HORIZON.WEEK, stored));
     buttonGroup.add(monthChoice = getButtonChoice(TIME_HORIZON.MONTH, stored));
@@ -598,6 +613,10 @@ public class AnalysisTab extends DivWidget {
     return buttonGroup;
   }
 
+  /**
+   * @return
+   * @see #getTimeControls(Widget, boolean)
+   */
   private ListBox makeTimeScaleBox() {
     timeScale = new ListBox();
     timeScale.setWidth(160 + "px");
@@ -610,17 +629,11 @@ public class AnalysisTab extends DivWidget {
     }
 
     Scheduler.get().scheduleDeferred(() -> {
-
-
       //  int timeHorizonFromStorage = getTimeHorizonFromStorage();
       timeScale.setSelectedIndex(getTimeHorizonFromStorage());
-
 //        TIME_HORIZON value = TIME_HORIZON.values()[timeHorizonFromStorage];
-
 //        logger.info("Set time horizon " + value);
 //        analysisPlot.setTimeHorizon(value);
-
-
     });
 
     return timeScale;

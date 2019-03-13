@@ -276,11 +276,17 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
+  public List<MonitorResult> getResultsBySession(int userid, String sessionID) {
+    Collection<SlickResult> slickPerfResults = getDao().resultsBySession(userid, sessionID);
+    return getMonitorResults(slickPerfResults);
+  }
+
+  @Override
   public List<MonitorResult> getMonitorResultsKnownExercises(int projid) {
     return getMonitorResults(dao.getAllByProjectKnownExercises(projid));
   }
 
-  private List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {
+  public List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {
     List<MonitorResult> copy = new ArrayList<>(all.size());
     for (SlickResult result : all) copy.add(fromSlickToMonitorResult(result));
     return copy;
@@ -721,5 +727,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   public int getDefaultResult() {
     return defaultResult.id();
+  }
+
+  public ResultDAOWrapper getDao() {
+    return dao;
   }
 }

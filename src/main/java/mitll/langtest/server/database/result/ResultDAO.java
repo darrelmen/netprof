@@ -40,6 +40,7 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.npdata.dao.SlickPerfResult;
+import mitll.npdata.dao.result.ResultDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -1018,6 +1019,16 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
 
   @Override
   public Map<Integer, String> getResultIDToJSON(int projid) {
+    return null;
+  }
+
+  @Override
+  public List<MonitorResult> getResultsBySession(int userid, String sessionID) {
+    return null;
+  }
+
+  @Override
+  public ResultDAOWrapper getDao() {
     return null;
   }
 }
