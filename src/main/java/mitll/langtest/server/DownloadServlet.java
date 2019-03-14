@@ -96,6 +96,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final int BUFFER_SIZE = 4096;
   public static final String STUDENT_AUDIO = "studentAudio";
   public static final String USERID = "userid";
+  public static final String CONTENT_DISPOSITION = "Content-Disposition";
 
   /**
    * This is getting complicated.
@@ -344,7 +345,7 @@ public class DownloadServlet extends DatabaseServlet {
 
   /**
    * TODO : uh... don't assume unit
-   *
+   * @see #writeAudioZip(HttpServletResponse, DatabaseImpl, String, int)
    * @param split1
    * @return
    */
@@ -402,7 +403,8 @@ public class DownloadServlet extends DatabaseServlet {
       SimpleDateFormat format = new SimpleDateFormat("MMM d yyyy h mm a");
 
       String suffix = start == -1 ? "" : "_" + format.format(new Date(start));
-      String base = db.getUserDAO().getUserWhere(userID).getFirstInitialName() + suffix;
+      User userWhere = db.getUserDAO().getUserWhere(userID);
+      String base = userWhere.getFirstInitialName() + suffix;
       String baseName = base
           .replaceAll("\\s++", "_")
           .replaceAll("\\.", "_");
@@ -416,7 +418,8 @@ public class DownloadServlet extends DatabaseServlet {
               project.getLanguage(),
               response.getOutputStream(),
               options.setIncludeAudio(true),
-              project.isEnglish());
+              project.isEnglish(),
+              userWhere);
 
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
@@ -481,7 +484,7 @@ public class DownloadServlet extends DatabaseServlet {
       logger.debug("returnAudioFile query is " + queryString + " exercise " + exercise +
           " user " + useridString + " so name is " + underscores);
 
-      setResponse(response, underscores);
+      setResponseForAudio(response, underscores);
     }
 
     File fileRef = pathHelper.getAbsoluteAudioFile(file);
@@ -498,10 +501,15 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
-  private void setResponse(HttpServletResponse response, String underscores) {
+  /**
+   * try to prevent browser from complaining that it's getting an expected MIME type.
+   * @param response
+   * @param underscores
+   */
+  private void setResponseForAudio(HttpServletResponse response, String underscores) {
     response.setContentType("audio/mpeg");
     // response.setCharacterEncoding(UTF_8);
-    response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + underscores);
+    response.setHeader(CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + underscores);
 //    response.setHeader("Content-Disposition", "filename='" + underscores +"'");
   }
 
@@ -594,12 +602,17 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
+  /**
+   * @see #setHeader(HttpServletResponse, String)
+   * @param response
+   * @param fileName
+   */
   private void setResponseHeader(HttpServletResponse response, String fileName) {
     setFilenameHeader(response, fileName);
   }
 
   private void setFilenameHeader(HttpServletResponse response, String filename) {
-    response.setHeader("Content-Disposition", "attachment; filename=" + filename);
+    response.setHeader(CONTENT_DISPOSITION, "attachment; filename=" + filename);
   }
 
   /**

@@ -203,7 +203,8 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
                                       String path,
                                       AudioType audioType,
                                       Language language,
-                                      Map<Integer, User> idToUser, boolean waitToFinish) {
+                                      Map<Integer, User> idToUser,
+                                      boolean waitToFinish) {
     if (checkedExists.contains(path)) {
       return path;
     }
@@ -233,7 +234,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     }
 
     String language1 = language.getLanguage();
-    String filePath = ensureMP3(path, new TrackInfo(title, userID, comment, language1), language1, waitToFinish);
+    String filePath = ensureMP3(path, new TrackInfo(title, userID, comment, language1, commonShell == null?Collections.emptyMap(): commonShell.getUnitToValue()), language1, waitToFinish);
 
     {
       boolean isMissing = filePath.equals(FILE_MISSING);

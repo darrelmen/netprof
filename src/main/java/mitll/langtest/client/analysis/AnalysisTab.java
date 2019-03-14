@@ -44,7 +44,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.PolyglotPracticePanel;
@@ -57,6 +57,8 @@ import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
+
+import static com.google.gwt.dom.client.Style.Unit.PX;
 
 public class AnalysisTab extends DivWidget {
   private final Logger logger = Logger.getLogger("AnalysisTab");
@@ -472,7 +474,7 @@ public class AnalysisTab extends DivWidget {
     setMaxWidth(bottom, MAX_WIDTH);
 
     if (!isTeacherView) {
-      bottom.getElement().getStyle().setMarginLeft(9, Style.Unit.PX);
+      bottom.getElement().getStyle().setMarginLeft(9, PX);
     }
     return bottom;
   }
@@ -492,20 +494,29 @@ public class AnalysisTab extends DivWidget {
     timeControls.add(isTeacherView ? makeTimeScaleBox() : getTimeGroup());
     timeControls.add(getTimeWindowStepper());
     timeControls.add(playFeedback);
-    Button child = new Button("", IconType.DOWNLOAD);
-    child.addStyleName("leftFiveMargin");
-    child.addStyleName("topFiveMargin");
-    child.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        Long periodStart = analysisPlot.getSessionStart();
-        logger.info("getTimeControls start " + periodStart);
-        long l = timeScale.getSelectedIndex() == 0 ? periodStart : -1;
-        new DownloadHelper(userid, l).doStudentAudioDownload(controller.getHost());
-      }
-    });
-    timeControls.add(child);
+
+
     return timeControls;
+  }
+
+  @NotNull
+  private Button getDownloadButton() {
+    Button child = new Button("", IconType.DOWNLOAD);
+    new TooltipHelper().addTooltip(child, "Download audio and spreadsheet.");
+    child.addStyleName("leftFiveMargin");
+//    child.getElement().getStyle().setMarginTop(10, PX);
+
+    child.addClickHandler(event -> gotDownloadClick());
+    return child;
+  }
+
+  private void gotDownloadClick() {
+    Long periodStart = analysisPlot.getSessionStart();
+    logger.info("getTimeControls start " + periodStart);
+    TIME_HORIZON timeHorizon = analysisPlot.getTimeHorizon();
+
+    long l = timeHorizon == TIME_HORIZON.SESSION ? periodStart : -1;
+    new DownloadHelper(userid, l).doStudentAudioDownload(controller.getHost());
   }
 
   /**
@@ -523,6 +534,8 @@ public class AnalysisTab extends DivWidget {
 
     Button nextButton = getNextButton();
     stepper.add(nextButton);
+
+    stepper.add(getDownloadButton());
 
     Heading scoreHeader = getScoreHeader();
     stepper.add(scoreHeader);
@@ -544,8 +557,8 @@ public class AnalysisTab extends DivWidget {
     Heading scoreHeader = new Heading(3);
     scoreHeader.getElement().setId("scoreHeader");
     scoreHeader.addStyleName("leftFiveMargin");
-    scoreHeader.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
-    scoreHeader.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    scoreHeader.getElement().getStyle().setMarginTop(-5, PX);
+    scoreHeader.getElement().getStyle().setMarginBottom(0, PX);
     return scoreHeader;
   }
 
@@ -621,7 +634,7 @@ public class AnalysisTab extends DivWidget {
     timeScale = new ListBox();
     timeScale.setWidth(160 + "px");
     timeScale.addStyleName("leftTenMargin");
-    timeScale.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
+    timeScale.getElement().getStyle().setMarginTop(10, PX);
     timeScale.addChangeHandler(event -> gotTimeScaleChange());
 
     for (TIME_HORIZON horizon : TIME_HORIZON.values()) {
@@ -690,10 +703,10 @@ public class AnalysisTab extends DivWidget {
     return onButton;
   }
 
-  private ClickHandler getClickHandler(final TIME_HORIZON month) {
+  private ClickHandler getClickHandler(final TIME_HORIZON horizon) {
     return event -> {
-      analysisPlot.setTimeHorizon(month);
-      controller.getStorage().storeValue(TIME_SCALE, month.name());
+      analysisPlot.setTimeHorizon(horizon);
+      controller.getStorage().storeValue(TIME_SCALE, horizon.name());
     };
   }
 
@@ -748,8 +761,8 @@ public class AnalysisTab extends DivWidget {
   @NotNull
   private Heading getHeading(String words) {
     Heading wordsTitle = new Heading(3, words);
-    wordsTitle.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
-    wordsTitle.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+    wordsTitle.getElement().getStyle().setMarginTop(0, PX);
+    wordsTitle.getElement().getStyle().setMarginBottom(5, PX);
     return wordsTitle;
   }
 
@@ -785,7 +798,7 @@ public class AnalysisTab extends DivWidget {
   private DivWidget getSoundsDiv(boolean addLeftRightMargin) {
     DivWidget soundsDiv = new DivWidget();
     soundsDiv.getElement().setId("soundsDiv");
-    soundsDiv.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, Style.Unit.PX);
+    soundsDiv.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, PX);
     soundsDiv.addStyleName("cardBorderShadow");
  /*   if (addLeftRightMargin) {
       soundsDiv.addStyleName("leftFiveMargin");
@@ -877,8 +890,8 @@ public class AnalysisTab extends DivWidget {
 
   private DivWidget getWordExamples(Panel examples) {
     DivWidget wordExamples = getWordContainerDiv(examples, WORD_EXAMPLES, exampleHeader, true);
-    wordExamples.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
-    wordExamples.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, Style.Unit.PX);
+    wordExamples.getElement().getStyle().setMarginLeft(5, PX);
+    wordExamples.getElement().getStyle().setProperty("minHeight", MIN_HEIGHT, PX);
     return wordExamples;
   }
 }

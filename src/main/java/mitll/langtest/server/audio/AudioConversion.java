@@ -41,6 +41,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class AudioConversion extends AudioBase {
@@ -311,9 +312,9 @@ public class AudioConversion extends AudioBase {
 
   /**
    * @param pathToAudioFile
+   * @return temp file that is at 16K
    * @throws IOException
    * @see #convertTo16Khz
-   * @return temp file that is at 16K
    */
   private String convertTo16KHZ(String pathToAudioFile) throws IOException {
     return sampleAt16KHZ(pathToAudioFile, makeTempFile("convertTo16KHZ"));
@@ -683,11 +684,22 @@ public class AudioConversion extends AudioBase {
       title = title.substring(0, 30);
     }
     if (title == null) title = "";
-    ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File,
+    String s = "langtest/images/NewProF1_48x48.png";
+    if (!new File(s).exists()) {
+      logger.warn("can't find " + new File(s).getAbsolutePath());
+    }
+    List<String> args = new ArrayList<>(Arrays.asList(lamePath, pathToAudioFile, mp3File,
         "--tt", title,
         "--ta", trackInfo.getArtist(),
         "--tc", trackInfo.getComment(),
-        "--tl", trackInfo.getAlbum());
+        "--tl", trackInfo.getAlbum(),
+        "--ti", s,
+        "--add-id3v2"));
+    trackInfo.getUnitToValue().forEach((k, v) -> {
+      args.add("--tv");
+      args.add(k + "=" + v);
+    });
+    ProcessBuilder lameProc = new ProcessBuilder(args);
     try {
       if (DEBUG_DETAIL) logger.info("running lame" + lameProc.command());
       new ProcessRunner().runProcess(lameProc);
@@ -713,9 +725,8 @@ public class AudioConversion extends AudioBase {
           }
         } catch (IOException e) {
           logger.error("convertToMP3FileAndCheck for " + lameProc + " got " + e, e);
-          logger.warn("consider on mac : brew install lame");
+          logger.warn("consider on mac :\n\n\nbrew install lame");
         }
-
       }
       return false;
     }

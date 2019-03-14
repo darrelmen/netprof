@@ -845,7 +845,7 @@ public class ProjectEditForm extends UserDialog {
 
   private Button getCheckOOV(final ProjectInfo info) {
     Button w = new Button("Check OOV", IconType.CHECK);
-    w.addClickHandler(event -> clickCheckAudio(info, w));
+    w.addClickHandler(event -> clickCheckOOV(info, w));
     w.addStyleName("leftFiveMargin");
     addBottomMargin(w);
     return w;
@@ -854,7 +854,7 @@ public class ProjectEditForm extends UserDialog {
   private void clickCheckAudio(ProjectInfo info, Button w) {
     w.setEnabled(false);
     feedback.setText(PLEASE_WAIT);
-    clickCheckOOV(info, w);
+    checkAudio(info, w);
   }
 
   private void checkAudio(ProjectInfo info, Button w) {

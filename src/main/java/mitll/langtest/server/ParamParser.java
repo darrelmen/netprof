@@ -57,7 +57,7 @@ class ParamParser {
   ParamParser invoke(boolean ignoreUserAndProject) {
     selection = new TreeMap<>();
     for (String param : split1) {
-      logger.info("UserAndSelection param '" + param + "'");
+    //  logger.info("UserAndSelection param '" + param + "'");
       String[] split = param.split("=");
       if (split.length == 2) {
         String key = split[0];

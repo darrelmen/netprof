@@ -1260,6 +1260,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     String context = noExistingExercise ? "" : isContext ? getEnglish(exercise1) : exercise1.getEnglish();
 
     if (!absoluteFile.exists()) logger.error("addToAudioTable huh? no file at " + absoluteFile.getAbsolutePath());
+    Map<String, String> unitToValue = exercise1 == null ? Collections.emptyMap() : exercise1.getUnitToValue();
     String permanentAudioPath = pathWriter.
         getPermanentAudioPath(
             absoluteFile,
@@ -1268,7 +1269,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             language,
             idToUse,
             serverProps,
-            new TrackInfo(audioTranscript, getArtist(user), context, language.getLanguage()));
+            new TrackInfo(audioTranscript, getArtist(user), context, language.getLanguage(), unitToValue));
 
     AudioAttribute audioAttribute = null;
     try {

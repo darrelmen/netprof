@@ -674,6 +674,8 @@ public class AudioFileHelper implements AlignDecode {
     boolean hasScore = pretestScore != null;
     int processDur = hasScore ? pretestScore.getProcessDur() : 0;
 
+    if (processDur == 0) logger.warn("recordInResults proces dur = 0 for " + pretestScore);
+
     AnswerInfo info = new AnswerInfo(
         new AnswerInfo(
             context,

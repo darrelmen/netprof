@@ -885,6 +885,8 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     goToLast(this.timeHorizon = timeHorizon);
   }
 
+  TIME_HORIZON getTimeHorizon() { return this.timeHorizon; }
+
   private void setMinHeight(UIObject horiz1, int normalMinHeight) {
     horiz1.getElement().getStyle().setProperty("minHeight", normalMinHeight + "px"); // so they wrap nicely
   }
@@ -1229,14 +1231,15 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     SortedSet<TimeAndScore> timeAndScoresInRange = getTimeAndScoresInRange(from, to);
     if (timeAndScoresInRange.isEmpty()) {
       logger.warning("setTitleScore no samples between " + new Date(from) + " and " + new Date(to));
-    } else {
+    }
+    //else {
 //      if (DEBUG)
 //        logger.info("setTitleScore found " + timeAndScoresInRange.size() + " samples between " + new Date(from) + " and " + new Date(to));
-    }
-    String scoreText = getScoreText(timeAndScoresInRange, index);
+   // }
+    //String scoreText = getScoreText(timeAndScoresInRange, index);
 //    logger.info("setTitleScore " + from + " : " + to + " " + index + " : (" + scoreText.length() + ") " + scoreText);
     /* boolean didIt =*/
-    timeWidgets.setScore("<div style='white-space: nowrap;'><span>" + scoreText + "</span>");
+    timeWidgets.setScore("<div style='white-space: nowrap;'><span>" + getScoreText(timeAndScoresInRange, index) + "</span>");
     //  if (!didIt) logger.warning("setTitleScore : didn't set the score header???");
     setYAxisTitle(chart, getChartSubtitle(getPercentScore(timeAndScoresInRange), timeAndScoresInRange.size()));
   }

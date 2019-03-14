@@ -30,6 +30,7 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.audio.AudioCheck;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AudioContext;
 
@@ -189,6 +190,12 @@ public class AnswerInfo {
  //   this.model = model;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
+   * @param other
+   * @param scoreInfo
+   * @param model
+   */
   public AnswerInfo(AnswerInfo other, ScoreInfo scoreInfo, String model) {
     this(other, scoreInfo.correct, scoreInfo.pronScore, scoreInfo.scoreJson, scoreInfo.processDur);
    // this.model = model;

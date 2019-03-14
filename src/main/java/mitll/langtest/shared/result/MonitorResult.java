@@ -371,7 +371,7 @@ public class MonitorResult implements IsSerializable, UserAndTime {
     return device;
   }
 
-  public boolean isWithFlash() {
+  private boolean isWithFlash() {
     return withFlash;
   }
 
