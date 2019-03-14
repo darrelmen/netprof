@@ -77,25 +77,6 @@ public class Trie<T> {
   }
 
   /**
-   * @param toMatch
-   * @return
-   * @see #getMatches(String)
-   */
-  private List<EmitValue<T>> getEmits(String toMatch) {
-    TrieNode<T> start = root;
-
-    for (String c : getChars(toMatch)) {
-//      logger.info("char " + toMatch+ " = '" +c +"'");
-      //TrieNode<T> nextState = start.getNextState(c);
-      //    logger.info(" explain "+ start.explain(c));
-      start = start.getNextState(c);
-      if (start == null) break;
-    }
-
-    return (start == null) ? Collections.emptyList() : start.getEmitsBelow();
-  }
-
-  /**
    * Start building
    *
    * @see ExerciseTrie#ExerciseTrie(Collection, String, SmallVocabDecoder, boolean, boolean)
@@ -114,6 +95,25 @@ public class Trie<T> {
 
   public void addEntryToTrie(TextEntityValue<T> textEntityDescription) {
     addEntryToTrie(textEntityDescription, tempCache);
+  }
+
+  /**
+   * @param toMatch
+   * @return
+   * @see #getMatches(String)
+   */
+  private List<EmitValue<T>> getEmits(String toMatch) {
+    TrieNode<T> start = root;
+
+    for (String c : getChars(toMatch)) {
+//      logger.info("char " + toMatch+ " = '" +c +"'");
+      //TrieNode<T> nextState = start.getNextState(c);
+      //    logger.info(" explain "+ start.explain(c));
+      start = start.getNextState(c);
+      if (start == null) break;
+    }
+
+    return (start == null) ? Collections.emptyList() : start.getEmitsBelow();
   }
 
   /**
