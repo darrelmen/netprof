@@ -397,7 +397,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (contains) {
       return true;
     } else {
-      InetAddress byName = null;
+      InetAddress byName;
       try {
         byName = InetAddress.getByName(host);
       } catch (Exception e) {

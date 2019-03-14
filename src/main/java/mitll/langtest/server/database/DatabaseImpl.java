@@ -36,7 +36,6 @@ import mitll.langtest.server.*;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.server.audio.AudioExportOptions;
-import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
@@ -392,14 +391,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
       {
         int defaultUser = getUserDAO().getDefaultUser();
         imageDAO.ensureDefault(projectDAO.getDefault());
-//        logger.info("finalSetup : default user " + defaultUser);
+       logger.info("finalSetup : default user " + defaultUser);
         dialogDAO.ensureDefault(defaultUser);
       }
     }, "ensureDefaultUser").start();
 
     afterDAOSetup(slickAudioDAO);
 
-    //   logger.info("finalSetup : tables = " + getTables());
+  logger.info("finalSetup : tables = " + getTables());
   }
 
   /**
@@ -461,8 +460,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param onDay     optionally filter on a day
    */
   public void updateRecordings(int oldID, int newprojid, Date onDay) {
-    Project fromProject = getProject(oldID);
-    Project toProject = getProject(newprojid);
+    IProject fromProject = getIProject(oldID);
+    IProject toProject = getIProject(newprojid);
 
     Map<Integer, String> idToOldIDFrom = new HashMap<>();
     Map<String, Integer> oldToIDTo = new HashMap<>();
@@ -565,7 +564,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       Map<Integer, Integer> tradToSimpl = new HashMap<>();
 
       {
-        Project traditional = getProject(oldID);
+        IProject traditional = getIProject(oldID);
         traditional.getRawExercises().forEach(commonExercise -> tradOldToID.put(commonExercise.getOldID(), commonExercise.getID()));
         logger.info("traditional " + traditional);
         logger.info("trad " + tradOldToID.size());
@@ -1631,7 +1630,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
 
     if (!options.getSearch().isEmpty()) {
-      TripleExercises<CommonExercise> exercisesForSearch = new Search<CommonExercise>(this)
+      TripleExercises<CommonExercise> exercisesForSearch = new Search<>(this)
           .getExercisesForSearch(
               options.getSearch(),
               exercisesForSelectionState, !options.isUserList() && typeToSection.isEmpty(), projectid, true);

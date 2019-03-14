@@ -1,0 +1,14 @@
+[Unit]
+Description=dcodr spanish service
+After=network.target
+
+[Service]
+User=tomcat
+WorkingDirectory=/opt/dcodr/spanish
+ExecStart=/opt/dcodr/spanish/spanish.sh
+Type=simple
+PIDFile=/opt/dcodr/pid/spanish.pid
+Restart=on-failure
+
+[Install]
+WantedBy=default.target

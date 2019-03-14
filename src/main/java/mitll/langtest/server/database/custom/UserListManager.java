@@ -35,6 +35,7 @@ import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
+import mitll.langtest.server.database.exercise.IProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -237,7 +238,7 @@ public class UserListManager implements IUserListManager {
           "\n\tfor size      " + reqSize +
           "\n\texercisetypes " + exercisetypes
       );
-      List<CommonExercise> items = getRandomItems(reqSize, databaseServices.getProject(projid), unitChapter,
+      List<CommonExercise> items = getRandomItems(reqSize, databaseServices.getIProject(projid), unitChapter,
           exercisetypes);
 
       List<CommonShell> shells = getShells(items);
@@ -253,8 +254,8 @@ public class UserListManager implements IUserListManager {
     }
   }
 
-  private List<CommonExercise> getRandomItems(int reqSize, Project project, Map<String, String> unitChapter, QuizSpec.EXERCISETYPES exercisetypes) {
-    List<CommonExercise> items = new ArrayList<>();
+  private List<CommonExercise> getRandomItems(int reqSize, IProject project, Map<String, String> unitChapter, QuizSpec.EXERCISETYPES exercisetypes) {
+    List<CommonExercise> items;
     Map<String, Collection<String>> typeToSelection = new HashMap<>();
     unitChapter.forEach((k, v) -> {
       if (!v.equalsIgnoreCase(ALL)) {

@@ -73,7 +73,7 @@ public class DynamicRange {
     return null;
   }
 
-  public RMSInfo getRmsInfo(String fileInfo, AudioInputStream ais) throws IOException {
+  RMSInfo getRmsInfo(String fileInfo, AudioInputStream ais) throws IOException {
     AudioFormat format = ais.getFormat();
     //    logger.info("file " + file.getName() + " sample rate " + format.getSampleRate());
 
@@ -245,6 +245,9 @@ public class DynamicRange {
     final double maxRMS;
     final DecimalFormat decimalFormat = new DecimalFormat("##.##");
 
+    /**
+     * @see AudioCheck#getDynamicRange
+     */
     RMSInfo() {
       this(0, 0, 0, 0, 0, 0);
     }

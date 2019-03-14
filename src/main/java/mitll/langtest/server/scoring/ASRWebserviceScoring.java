@@ -38,6 +38,7 @@ import mitll.langtest.server.audio.*;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
+import mitll.langtest.server.database.exercise.IProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
@@ -63,7 +64,6 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.ERROR;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.SUCCESS;
@@ -86,12 +86,16 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final String SCORE = "score";
   private static final String STATUS = "status";
   private static final String LOG = "log";
-  public static final String SCORE1 = "score";
-  public static final String OOV = "oov";
-  public static final String NORM = "norm";
-  public static final String NORM_TRANSCRIPT = "norm_transcript";
-  public static final String TRANSCRIPT = "transcript";
-  public static final String IN_VOCAB = "in_vocab";
+
+  /**
+   * @see #callKaldiOOV
+   */
+  private static final String OOV = "oov";
+  private static final String NORM = "norm";
+  private static final String NORM_TRANSCRIPT = "norm_transcript";
+  private static final String TRANSCRIPT = "transcript";
+  private static final String IN_VOCAB = "in_vocab";
+  private static final String HTTPS = "http"; //""https";
 
   private final SLFFile slfFile;
 
@@ -166,7 +170,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return
    */
   private String getWebserviceIP() {
-    return WEBSERVICE_HOST_DEFAULT;
+    return IProject.WEBSERVICE_HOST_DEFAULT;
   }
 
   @Override
@@ -290,7 +294,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + WAV;
 
-    boolean b = validLTS(sentence, transliteration);
+    //validLTS(sentence, transliteration);
     // audio conversion stuff
     File wavFile = new File(pathname);
     boolean mustPrepend = false;
@@ -491,6 +495,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return tokens;
   }
 
+  /**
+   * @see #getKaldiOOV
+   * @param tokens
+   * @param port
+   * @return
+   */
   private List<String> runOOV(final List<String> tokens, int port) {
     List<Boolean> oov = new ArrayList<>();
     try {
@@ -537,9 +547,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private HydraOutput runKaldi(String audioPath, int port, TransNormDict transNormDict, String rawSentence) {
     try {
       long then = System.currentTimeMillis();
-      String sentence = rawSentence;
-      logger.info("replace " + sentence + " with " + rawSentence);
-      String json = callKaldi(sentence, audioPath, port);
+      //logger.info("runKaldi replace " + rawSentence + " with " + rawSentence);
+      String json = callKaldi(rawSentence, audioPath, port);
       long now = System.currentTimeMillis();
       long processDur = now - then;
 
@@ -556,7 +565,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           score = parse.get(SCORE).getAsFloat();
           logger.info("runKaldi " +
               "\n\ttook      " + processDur +
-              "\n\tdecoding '" + sentence + "'" +
+              "\n\tdecoding '" + rawSentence + "'" +
               "\n\tfile      " + audioPath +
               //"\n\tstatus    " + status +
               "\n\tscore " + score);
@@ -571,7 +580,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         return new HydraOutput(
             new Scores(score, new HashMap<>(), (int) processDur)
                 .setKaldiJsonObject(parse),
-            getWordAndProns(sentence), transNormDict)
+            getWordAndProns(rawSentence), transNormDict)
             .setStatus(status)
             .setLog(log);
       } catch (JsonSyntaxException e) {
@@ -651,7 +660,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   private String doKaldiGet(String sentence, int port, String jsonRequest, String operation) throws IOException {
-    String prefix = getPrefix(port, operation);
+    String prefix = getPrefix(operation);
     String encode = URLEncoder.encode(jsonRequest, StandardCharsets.UTF_8.name());
     String url = prefix + encode;
     logger.info("runKaldi " + operation +
@@ -663,13 +672,25 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     return new HTTPClient().readFromGET(url);
   }
 
+  /**
+   * TODO : longer term might want different versions of service on same language
+   *
+   * Calls look like:
+   *
+   * http://172.25.252.196/en/oov/{“transcript”:”what”}
+   * https://172.25.252.196/en/score/{“file”:”/opt/...blah.wav”, “transcript”:”what”}
+   * http://172.25.252.196/en/norm/{“transcript”:”WhAt”}
+   *
+   *
+   * @param operation
+   * @return
+   */
   @NotNull
-  private String getPrefix(int port, String operation) {
+  private String getPrefix(String operation) {
     String localhost = props.useProxy() ? "hydra-dev" : "localhost";
-
-    return "http://" + localhost + ":" + port + "/" +
-        operation +
-        "/";
+//    return "http://" + localhost + ":" + port + "/" + operation + "/";
+    return HTTPS +
+        "://" + localhost + "/" + project.getLanguageEnum().getCC() + "/" + operation + "/";
   }
 
   /**
@@ -685,11 +706,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 //        "\n\tsentence  " + sentence +
 //        "\n\taudioPath " + audioPath
 //    );
-    jsonObject.addProperty("reqid", "1234");
-    jsonObject.addProperty("request", "decode");
-    jsonObject.addProperty("phrase", sentence.trim());
+    //   jsonObject.addProperty("reqid", "1234");
+//    jsonObject.addProperty("request", "decode");
+//    jsonObject.addProperty("phrase", sentence.trim());
     jsonObject.addProperty(TRANSCRIPT, sentence.trim());
-    jsonObject.addProperty("file", audioPath);
+//    jsonObject.addProperty("file", audioPath);
     jsonObject.addProperty("waveform", audioPath);
 
     return jsonObject.toString();
@@ -1005,26 +1026,26 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param transliteration
    * @return
    */
-  private String getTokensForKaldi(String transcript, String transliteration) {
-    String wordsFromPossibleProns = getTokensFromTranscript(transcript, transliteration);
-    return (languageEnum == Language.ENGLISH) ? wordsFromPossibleProns.toUpperCase() : wordsFromPossibleProns;
-  }
+//  private String getTokensForKaldi(String transcript, String transliteration) {
+//    String wordsFromPossibleProns = getTokensFromTranscript(transcript, transliteration);
+//    return (languageEnum == Language.ENGLISH) ? wordsFromPossibleProns.toUpperCase() : wordsFromPossibleProns;
+//  }
 
-  @NotNull
-  private String getTokensFromTranscript(String transcript, String transliteration) {
-    List<WordAndProns> possibleProns = new ArrayList<>();
+//  @NotNull
+//  private String getTokensFromTranscript(String transcript, String transliteration) {
+//    List<WordAndProns> possibleProns = new ArrayList<>();
+//
+//    // generate dictionary
+//    getHydraDict(getTranscriptToPost(transcript, false), transliteration, possibleProns);
+//    return getWordsFromPossibleProns(possibleProns);
+//  }
 
-    // generate dictionary
-    getHydraDict(getTranscriptToPost(transcript, false), transliteration, possibleProns);
-    return getWordsFromPossibleProns(possibleProns);
-  }
-
-  @NotNull
-  private String getWordsFromPossibleProns(List<WordAndProns> possibleProns) {
-    StringBuilder builder = new StringBuilder();
-    possibleProns.forEach(wordAndProns -> builder.append(wordAndProns.getWord()).append(" "));
-    return builder.toString().trim();
-  }
+//  @NotNull
+//  private String getWordsFromPossibleProns(List<WordAndProns> possibleProns) {
+//    StringBuilder builder = new StringBuilder();
+//    possibleProns.forEach(wordAndProns -> builder.append(wordAndProns.getWord()).append(" "));
+//    return builder.toString().trim();
+//  }
 
   /**
    * @param audioPath

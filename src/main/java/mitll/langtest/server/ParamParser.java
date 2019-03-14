@@ -27,29 +27,51 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.client.services;
+package mitll.langtest.server;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.exercise.DominoUpdateResponse;
-import mitll.langtest.shared.project.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
 
-public interface ProjectServiceAsync {
-  void update(ProjectInfo info, AsyncCallback<Boolean> async);
+/**
+ * Do something better here with figuring out which values to use in type->selection
+ */
+class ParamParser {
+  private static final Logger logger = LogManager.getLogger(ParamParser.class);
 
-  void create(ProjectInfo newProject, AsyncCallback<Integer> async);
+  private final String[] split1;
+  private Map<String, Collection<String>> selection;
 
-  void existsByName(String languageChoice, String name, AsyncCallback<Boolean> async);
+  ParamParser(String... split1) {
+    this.split1 = split1;
+  }
 
-  void delete(int id, AsyncCallback<Boolean> async);
-  void checkOOV(int id, AsyncCallback<OOVInfo> async);
+  Map<String, Collection<String>> getSelection() {
+    return selection;
+  }
 
-  void addPending(int id, boolean doChange, AsyncCallback<DominoUpdateResponse> async);
-
-  void getDominoForLanguage(Language lang, AsyncCallback<List<DominoProject>> async);
-
-  void getListProperty(int projid, ProjectProperty key, AsyncCallback<List<String>> async);
-
-  void setListProperty(int projid, ProjectProperty key, List<String> newValue, AsyncCallback<Boolean> async);
+  ParamParser invoke(boolean ignoreUserAndProject) {
+    selection = new TreeMap<>();
+    for (String param : split1) {
+    //  logger.info("UserAndSelection param '" + param + "'");
+      String[] split = param.split("=");
+      if (split.length == 2) {
+        String key = split[0];
+        String value = split[1];
+        logger.info("\t" + key + " = " + value);
+        if (ignoreUserAndProject &&
+            (key.equals(ScoreServlet.HeaderValue.USER.toString()) || key.equalsIgnoreCase(ScoreServlet.HeaderValue.PROJID.name()))) {
+          // skip it
+          logger.info("UserAndSelection Skip " + key);
+        } else {
+          selection.put(key, Collections.singleton(value));
+        }
+      }
+    }
+    return this;
+  }
 }

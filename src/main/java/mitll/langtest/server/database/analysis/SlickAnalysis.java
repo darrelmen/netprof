@@ -692,13 +692,12 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
         //logger.warn("getUserToResults : Got empty json " + json + " for " + exid + " : " + id);
         emptyCount++;
       }
-      String device = perf.devicetype();
       Long sessionTime = getSessionTime(sessionToLong, perf.device());
       // ?? can't really get the session size here ...?
       Integer sessionSize = getNumInSession(sessionNumToInteger, perf.devicetype());
       String path = perf.answer();
 
-      boolean isiPad = device != null && device.startsWith("i");
+      boolean isiPad = isIOS(perf);
       if (isiPad) iPad++;
       boolean isFlashcard = !isiPad && (type.startsWith("avp") || type.startsWith("flashcard"));
       if (!isiPad) {
@@ -723,8 +722,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
           database.getWebPageAudioRef(language.getLanguage(), path),
           nativeAudio,
           sessionTime, sessionSize);
-//      if (e.getSessionStart()> 0) {
-//        logger.info("id " + id + " = " + e.getSessionStart());
+//      if (e.getSessionStart()> 0 && userid == 6) {
+//        logger.info("getUserToResults id " + id + " = " + e.getSessionStart());
 //      }
 
       results.add(e);
@@ -745,6 +744,11 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     }
 
     return userToBest;
+  }
+
+  private boolean isIOS(SlickPerfResult perf) {
+    String device = perf.devicetype();
+    return device != null && device.startsWith("i");
   }
 
   private Integer getNumInSession(Map<String, Integer> sessionToLong, String deviceType) {
@@ -781,7 +785,9 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
       int exid = perf.exid();
 
       if (exid == UNKNOWN_EXERCISE) {
-        logger.info("getNativeAudio skipping " + perf.id() + " for unknown exercise by " + perf.userid() + " : " + perf.answer());
+        if (skipped.size() < 5 || skipped.size() % 100 == 0) {
+          logger.info("getNativeAudio skipping " + perf.id() + " for unknown exercise by " + perf.userid() + " : " + perf.answer() + " " + skipped.size());
+        }
         skipped.add(perf.id());
       } else {
         CommonExercise customOrPredefExercise = database.getCustomOrPredefExercise(projid, exid);

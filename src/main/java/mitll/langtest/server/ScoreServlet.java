@@ -441,7 +441,7 @@ public class ScoreServlet extends DatabaseServlet {
 
     if (projid == -1) {
       String[] split1 = request.getQueryString().split(AMPERSAND);
-      Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke(false).getSelection();
+      Map<String, Collection<String>> selection = new ParamParser(split1).invoke(false).getSelection();
       if (selection.get(PROJID) != null) {
         String projid1 = selection.get(PROJID).iterator().next();
         try {
@@ -613,7 +613,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private JsonObject getPhoneReport(JsonObject toReturn, String[] split1, int projid, int userid, long sessionID) {
-    Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke(true).getSelection();
+    Map<String, Collection<String>> selection = new ParamParser(split1).invoke(true).getSelection();
 
     try {
       long then = System.currentTimeMillis();
@@ -668,7 +668,7 @@ public class ScoreServlet extends DatabaseServlet {
       if (split1.length < 2) {
         toReturn.addProperty(ERROR, "expecting at least two query parameters");
       } else {
-        Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke(true).getSelection();
+        Map<String, Collection<String>> selection = new ParamParser(split1).invoke(true).getSelection();
 
         //logger.debug("chapterHistory " + user + " selection " + selection);
         try {
@@ -1451,40 +1451,4 @@ public class ScoreServlet extends DatabaseServlet {
     return db.getProject(projid);
   }
 
-  /**
-   * Do something better here with figuring out which values to use in type->selection
-   */
-  private static class UserAndSelection {
-    private final String[] split1;
-    private Map<String, Collection<String>> selection;
-
-    UserAndSelection(String... split1) {
-      this.split1 = split1;
-    }
-
-    Map<String, Collection<String>> getSelection() {
-      return selection;
-    }
-
-    UserAndSelection invoke(boolean ignoreUserAndProject) {
-      selection = new TreeMap<>();
-      for (String param : split1) {
-        logger.info("UserAndSelection param '" + param + "'");
-        String[] split = param.split("=");
-        if (split.length == 2) {
-          String key = split[0];
-          String value = split[1];
-          logger.info("\t" + key + " = " + value);
-          if (ignoreUserAndProject &&
-              (key.equals(HeaderValue.USER.toString()) || key.equalsIgnoreCase(HeaderValue.PROJID.name()))) {
-            // skip it
-           logger.info("UserAndSelection Skip " + key);
-          } else {
-            selection.put(key, Collections.singleton(value));
-          }
-        }
-      }
-      return this;
-    }
-  }
 }

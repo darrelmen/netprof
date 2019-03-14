@@ -37,7 +37,6 @@ import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.exercise.TripleExercises;
 import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
 import mitll.langtest.shared.answer.ActivityType;
@@ -1265,13 +1264,26 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     int projectIDFromUser = getProjectIDFromUser(userID);
 
-    CorrectAndScore closest = null;
-    long closestTimeDiff = Long.MAX_VALUE;
     List<CorrectAndScore> correctAndScoresForEx = getCorrectAndScoresForEx(userID, projectIDFromUser, exid);
 
     logger.info("getLatestScoreAudioPath user " + userID + " project " + projectIDFromUser +
         " at " + new Date(nearTime) + " found " + correctAndScoresForEx.size());
 
+    CorrectAndScore closest = getCorrectAndScoreClosestToTime(correctAndScoresForEx, nearTime);
+
+    Pair pair = new Pair(
+        getRefAudio(userID, projectIDFromUser, exid),
+        closest == null ? null : closest.getPath());
+
+    logger.info("getLatestScoreAudioPath returning " + pair);
+
+    return pair;
+  }
+
+  @Nullable
+  private CorrectAndScore getCorrectAndScoreClosestToTime(List<CorrectAndScore> correctAndScoresForEx, long nearTime) {
+    CorrectAndScore closest = null;
+    long closestTimeDiff = Long.MAX_VALUE;
     for (CorrectAndScore correctAndScore : correctAndScoresForEx) {
       long timeDiff = Math.abs(correctAndScore.getTimestamp() - nearTime);
       if (closest == null || timeDiff < closestTimeDiff) {
@@ -1282,13 +1294,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     if (closestTimeDiff > 10000) {
       logger.warn("huh? returning " + closest + " despite req for " + new Date(nearTime));
     }
-
-    String refAudio = getRefAudio(userID, projectIDFromUser, exid);
-    Pair pair = new Pair(
-        refAudio,
-        closest == null ? null : closest.getPath());
-    logger.info("getLatestScoreAudioPath returning " + pair);
-    return pair;
+    return closest;
   }
 
   /**

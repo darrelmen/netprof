@@ -388,7 +388,7 @@ public class PronunciationLookup implements IPronunciationLookup {
             "\n\tfor " + word +
             "\n\tin '" + transcript + "'");
         if (spew++ < 2) {
-          logger.info("OK stack ", new Exception("why?"));
+          logger.info("OK stack ");//, new Exception("why?"));
         }
       }
       int max = MAX_FROM_ANY_TOKEN;

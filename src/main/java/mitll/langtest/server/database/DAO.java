@@ -356,6 +356,7 @@ public abstract class DAO {
   }
 
   /**
+   * HACK - put session id in device column!
    * @param sessionToLong
    * @param device
    * @return

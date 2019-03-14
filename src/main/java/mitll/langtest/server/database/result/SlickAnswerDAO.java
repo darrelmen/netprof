@@ -65,6 +65,9 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
     boolean isAudioAnswer = answerInfo.getAnswer() == null || answerInfo.getAnswer().length() == 0;
     String answerInserted = isAudioAnswer ? answerInfo.getAudioFile() : answerInfo.getAnswer();
 
+    if (answerInfo.getProcessDur() == 0) {
+      logger.warn("process dur is zero for " +answerInfo);
+    }
 //    String model = answerInfo.getModel() == null ? "" : answerInfo.getModel();
     String device = answerInfo.getDevice();
     if (device == null) device = "";

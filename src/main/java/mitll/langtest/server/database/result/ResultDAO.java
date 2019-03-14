@@ -1020,4 +1020,15 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   public Map<Integer, String> getResultIDToJSON(int projid) {
     return null;
   }
+
+  @Override
+  public List<MonitorResult> getResultsBySession(int userid, String sessionID) {
+    return null;
+  }
+
+
+  @Override
+  public List<MonitorResult> getResultsInTimeRange(int userid, int projectid, Timestamp from, Timestamp to) {
+    return null;
+  }
 }

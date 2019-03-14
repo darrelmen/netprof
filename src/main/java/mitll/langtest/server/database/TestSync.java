@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.database;
 
+import mitll.langtest.server.database.exercise.IProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
@@ -42,12 +43,12 @@ import java.util.*;
 
 import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.*;
 
-public class TestSync {
+class TestSync {
   private static final Logger logger = LogManager.getLogger(TestSync.class);
 
   final DatabaseImpl db;
 
-  public TestSync(DatabaseImpl db) {
+   TestSync(DatabaseImpl db) {
     this.db = db;
     try {
       syncTests();
@@ -78,7 +79,7 @@ public class TestSync {
 
     // logger.info("Got " + dominoUpdateResponse);
 
-    Project project = getProject(projectid);
+    IProject project = getProject(projectid);
     Iterator<String> iterator = project.getTypeOrder().iterator();
     String unit = iterator.next();
     String chapter = iterator.next();

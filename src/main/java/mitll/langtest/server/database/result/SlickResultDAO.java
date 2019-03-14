@@ -47,7 +47,6 @@ import mitll.npdata.dao.SlickPerfResult;
 import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.result.ResultDAOWrapper;
 import mitll.npdata.dao.result.SlickCorrectAndScore;
-import mitll.npdata.dao.result.SlickExerciseScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -276,11 +275,21 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
+  public List<MonitorResult> getResultsBySession(int userid, String sessionID) {
+    return getMonitorResults(getDao().resultsBySession(userid, sessionID));
+  }
+
+  @Override
+  public List<MonitorResult> getResultsInTimeRange(int userid, int projectid, Timestamp from, Timestamp to) {
+    return getMonitorResults(getDao().resultsInTimeRange(userid, projectid,  from, to));
+  }
+
+  @Override
   public List<MonitorResult> getMonitorResultsKnownExercises(int projid) {
     return getMonitorResults(dao.getAllByProjectKnownExercises(projid));
   }
 
-  private List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {
+  public List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {
     List<MonitorResult> copy = new ArrayList<>(all.size());
     for (SlickResult result : all) copy.add(fromSlickToMonitorResult(result));
     return copy;
@@ -721,5 +730,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   public int getDefaultResult() {
     return defaultResult.id();
+  }
+
+  private ResultDAOWrapper getDao() {
+    return dao;
   }
 }

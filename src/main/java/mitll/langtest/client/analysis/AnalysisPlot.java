@@ -89,7 +89,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    * @see #getScoreText(SortedSet, int)
    */
   private static final String PREFIX = "Sess. #";//"Sess. #";
-  private static final String SCORE = "";
 
   private final Map<Long, Series> granToAverage = new HashMap<>();
   private final int userid;
@@ -101,10 +100,10 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
   private static final String NO_RECORDINGS_YET = "No recordings yet to analyze. Please record yourself.";
   private static final String NO_RECORDINGS_YET_FOR_STUDENT = "No recordings yet made by student to analyze.";
-  private static final String LIST = "quiz";
-  public static final String LISTS = LIST + "zes";
-  private static final String NO_RECORDINGS_YET_ON_LIST = "No recordings yet for this " + LIST + ". Choose another " + LIST + " or don't filter on " + LISTS + ".";
-  private static final String NO_RECORDINGS_YET_FOR_STUDENT_ON_LIST = "No recordings yet for this " + LIST + " by this student. Choose another " + LIST + " or student or don't filter on " + LISTS + ".";
+  private static final String QUIZ = "quiz";
+  private static final String QUIZZES = QUIZ + "zes";
+  private static final String NO_RECORDINGS_YET_ON_LIST = "No recordings yet for this " + QUIZ + ". Choose another " + QUIZ + " or don't filter on " + QUIZZES + ".";
+  private static final String NO_RECORDINGS_YET_FOR_STUDENT_ON_LIST = "No recordings yet for this " + QUIZ + " by this student. Choose another " + QUIZ + " or student or don't filter on " + QUIZZES + ".";
 
   private static final int SHORT_THRESHOLD = 822;
 
@@ -126,12 +125,15 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    */
   private long firstTime;
   private long lastTime;
+  /**
+   * @see #setTitleScore(long, long, int)
+   */
+  private long from = -1, to = -1;
 
   /**
    *
    */
   private final List<Long> sessionStarts = new ArrayList<>();
-  // private final List<Long> sessionEnds = new ArrayList<>();
 
   /**
    *
@@ -209,6 +211,15 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     //  logger.info("populateGranToLabel timezone offset " + timezoneOffset);
   }
 
+  private final List<Long> sessionIDs = new ArrayList<>();
+
+  Long getSessionStart() {
+    //logger.info("getSessionStart index  " + index + " in " + sessionIDs.size());
+    Long aLong = sessionIDs.isEmpty() ? new Long(-1) : sessionIDs.get(index);
+  //  logger.info("index  " + index + " = " + aLong);
+    return aLong;
+  }
+
   /**
    * @param userPerformance
    * @param userChosenID
@@ -226,7 +237,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
       {
         List<PhoneSession> phoneSessions = userPerformance.getGranularityToSessions().get(-1L);
+
+        for (PhoneSession phoneSession : phoneSessions) {
+          sessionIDs.add(phoneSession.getSessionStart());
+          //   logger.info("sess " + phoneSession);
+        }
         sessionStarts.addAll(getEasyPeriods(phoneSessions));
+//        logger.info("after  " + sessionStarts);
         //sessionEnds.addAll(getEasyPeriodsEnds(phoneSessions));
       }
       {
@@ -390,11 +407,11 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     return months2;
   }
 
-  private SortedSet<Long> getEasyPeriodsEnds(List<PhoneSession> sessions) {
-    SortedSet<Long> months2 = new TreeSet<>();
-    sessions.forEach(phoneSession -> months2.add(phoneSession.getEnd()));
-    return months2;
-  }
+//  private SortedSet<Long> getEasyPeriodsEnds(List<PhoneSession> sessions) {
+//    SortedSet<Long> months2 = new TreeSet<>();
+//    sessions.forEach(phoneSession -> months2.add(phoneSession.getEnd()));
+//    return months2;
+//  }
 
   /**
    * @param userPerformance
@@ -458,11 +475,10 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   }
 
   /**
-   *
+   * later...
    */
   private void showSeriesByVisible() {
     Scheduler.get().scheduleDeferred(this::showSeries);
-    //  showSeries();
   }
 
   private void showSeries() {
@@ -861,6 +877,14 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     if (DEBUG) logger.info("setTimeRange " + new Date(firstTime) + " - " + new Date(lastTime));
   }
 
+  public long getStart() {
+    return (from == -1) ? firstTime : from;
+  }
+
+  public long getEnd() {
+    return (to == -1) ? lastTime : to;
+  }
+
   /**
    * @param timeHorizon
    * @return
@@ -869,6 +893,10 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   void setTimeHorizon(AnalysisTab.TIME_HORIZON timeHorizon) {
     // logger.info("setTimeHorizon " + timeHorizon);
     goToLast(this.timeHorizon = timeHorizon);
+  }
+
+  TIME_HORIZON getTimeHorizon() {
+    return this.timeHorizon;
   }
 
   private void setMinHeight(UIObject horiz1, int normalMinHeight) {
@@ -958,20 +986,20 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   }
 
   private static class TimeRange {
-    private long start;
-    private long end;
+    private final long start;
+    private final long end;
 
-    public TimeRange(long start, long end) {
+    TimeRange(long start, long end) {
       this.start = start;
       this.end = end;
 
     }
 
-    public long getStart() {
+    long getStart() {
       return start;
     }
 
-    public long getEnd() {
+    long getEnd() {
       return end;
     }
   }
@@ -1066,19 +1094,19 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   /**
    * @see AnalysisTab#getPrevButton
    */
-  void gotPrevClick() {
+  long gotPrevClick() {
     index--;
 
     timeWidgets.getPrevButton().setEnabled(index > 0);
     timeWidgets.getNextButton().setEnabled(true);
 
-    showTimePeriod(getOffsetPerSession(), getPeriods());
+    return showTimePeriod(getOffsetPerSession(), getPeriods());
   }
 
   /**
    * @see AnalysisTab#getNextButton
    */
-  void gotNextClick() {
+  long gotNextClick() {
     List<Long> periods = getPeriods();
 
     index++;
@@ -1086,13 +1114,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     timeWidgets.getPrevButton().setEnabled(true);
     timeWidgets.getNextButton().setEnabled(index < periods.size() - 1);
 
-    showTimePeriod(getOffsetPerSession(), periods);
+    return showTimePeriod(getOffsetPerSession(), periods);
   }
 
   private long getOffsetPerSession() {
     long offset;
     if (timeHorizon == SESSION) {
-      Long thisPeriodStart = getPeriods().get(index);
+      Long thisPeriodStart = getPeriodStart();
       List<PhoneSession> phoneSessions = granularityToSessions.get(SESSION.getDuration());
       PhoneSession currentSession = phoneSessions.get(index);
       offset = currentSession.getEnd() + 1 - thisPeriodStart;
@@ -1141,13 +1169,13 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
    * @see #gotNextClick
    * @see #gotPrevClick
    */
-  private void showTimePeriod(long offset, List<Long> periods) {
-    Long periodStart = periods.get(index);
+  private long showTimePeriod(long offset, List<Long> periods) {
+    Long periodStart = getPeriodStart(periods);
     long end = periodStart + offset;
 
-    if (DEBUG) {
-      logger.info("showTimePeriod (" + index + "/" + periods.size() + ") From      " + format.format(new Date(periodStart)));
-      logger.info("showTimePeriod to        " + format.format(new Date(end)));
+    if (DEBUG || true) {
+      logger.info("showTimePeriod (" + index + "/" + periods.size() + ") From      " + format.format(new Date(periodStart)) + " " + periodStart);
+      logger.info("showTimePeriod to        " + format.format(new Date(end)) + " " + end);
       logger.info("showTimePeriod" +
           // "\n\tdur     " + offset +
           "\n\t offset " + offset);
@@ -1155,6 +1183,15 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
     chart.getXAxis().setExtremes(periodStart, end); // triggers a time changed event to go to listeners
     setTitleScore(periodStart, end, index);
+    return periodStart;
+  }
+
+  private Long getPeriodStart() {
+    return getPeriodStart(getPeriods());
+  }
+
+  private Long getPeriodStart(List<Long> periods) {
+    return periods.get(index);
   }
 
   private boolean shouldShowHour(long offset) {
@@ -1202,18 +1239,26 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
     return debugShortFormat.format(new Date(first));
   }
 
+  /**
+   * @param from
+   * @param to
+   * @param index
+   */
   private void setTitleScore(long from, long to, int index) {
+    this.from = from;
+    this.to = to;
     SortedSet<TimeAndScore> timeAndScoresInRange = getTimeAndScoresInRange(from, to);
     if (timeAndScoresInRange.isEmpty()) {
       logger.warning("setTitleScore no samples between " + new Date(from) + " and " + new Date(to));
-    } else {
+    }
+    //else {
 //      if (DEBUG)
 //        logger.info("setTitleScore found " + timeAndScoresInRange.size() + " samples between " + new Date(from) + " and " + new Date(to));
-    }
-    String scoreText = getScoreText(timeAndScoresInRange, index);
+    // }
+    //String scoreText = getScoreText(timeAndScoresInRange, index);
 //    logger.info("setTitleScore " + from + " : " + to + " " + index + " : (" + scoreText.length() + ") " + scoreText);
     /* boolean didIt =*/
-    timeWidgets.setScore("<div style='white-space: nowrap;'><span>" + scoreText + "</span>");
+    timeWidgets.setScore("<div style='white-space: nowrap;'><span>" + getScoreText(timeAndScoresInRange, index) + "</span>");
     //  if (!didIt) logger.warning("setTitleScore : didn't set the score header???");
     setYAxisTitle(chart, getChartSubtitle(getPercentScore(timeAndScoresInRange), timeAndScoresInRange.size()));
   }
@@ -1234,7 +1279,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
       return "";
     } else {
       int denom = simpleTimeAndScores.iterator().next().getSessionSize();
-     // logger.info("getScoreText session size = " + denom + " n " + n + " fround " + fround1);
+      // logger.info("getScoreText session size = " + denom + " n " + n + " fround " + fround1);
 
       if (numOnList > 0) {
         denom = numOnList;

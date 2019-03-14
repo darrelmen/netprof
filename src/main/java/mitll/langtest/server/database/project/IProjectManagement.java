@@ -32,6 +32,7 @@ package mitll.langtest.server.database.project;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.exercise.IProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
@@ -39,6 +40,7 @@ import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.OOVInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
@@ -85,6 +87,7 @@ public interface IProjectManagement {
   List<CommonExercise> getExercises(int projectid, boolean onlyOne);
 
   Project getProject(int projectid, boolean onlyOne);
+  IProject getIProject(int projectid, boolean onlyOne);
   Project getProjectByName(String name);
   List<Project> getProjectByLangauge(Language name);
   Project getProductionByLanguage(Language language);
@@ -145,4 +148,6 @@ public interface IProjectManagement {
   List<ImportProjectInfo> getVocabProjects();
 
   Map<String,Integer> getNpToDomino(int dominoProjectID);
+
+  OOVInfo checkOOV(int id);
 }

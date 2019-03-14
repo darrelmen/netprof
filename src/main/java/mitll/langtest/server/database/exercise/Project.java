@@ -60,7 +60,6 @@ import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -88,17 +87,11 @@ public class Project implements IPronunciationLookup, IProject {
    * @see ProjectDAO#update
    * @see ProjectManagement#getProjectInfo
    */
-  /**
-   * Initially the choices should be hydra and hydra2 (or maybe hydra-dev and hydra2-dev)
-   *
-   * @see #getWebserviceHost
-   */
-  public static final String WEBSERVICE_HOST_DEFAULT = "127.0.0.1";
   public static final String TRUE = Boolean.TRUE.toString();
   public static final String MANDARIN = "Mandarin";
 
   private static final boolean REPORT_ON_DIALOG_TYPES = false;
-  public static final boolean DEBUG_FILE_LOOKUP = false;
+  private static final boolean DEBUG_FILE_LOOKUP = false;
 
   /**
    * @see #getWebservicePort
@@ -213,6 +206,7 @@ public class Project implements IPronunciationLookup, IProject {
     return getModelsDir() == null || getModelsDir().isEmpty();
   }
 
+  @Override
   public SlickProject getProject() {
     return project;
   }
@@ -230,10 +224,11 @@ public class Project implements IPronunciationLookup, IProject {
    *
    * @return
    */
+  @Override
   public List<String> getTypeOrder() {
     ISection<CommonExercise> sectionHelper = getSectionHelper();
 
-    List<String> types = sectionHelper == null ? Collections.EMPTY_LIST : sectionHelper.getTypeOrder();
+    List<String> types = sectionHelper == null ? Collections.emptyList() : sectionHelper.getTypeOrder();
     if (project != null && (types == null || types.isEmpty())) {
       types = new ArrayList<>();
       String first = project.first();
@@ -285,10 +280,12 @@ public class Project implements IPronunciationLookup, IProject {
     return exerciseDAO;
   }
 
+  @Override
   public List<CommonExercise> getRawExercises() {
     return exerciseDAO.getRawExercises();
   }
 
+  @Override
   public ISection<CommonExercise> getSectionHelper() {
     return exerciseDAO == null ? null : exerciseDAO.getSectionHelper();
   }
@@ -405,7 +402,7 @@ public class Project implements IPronunciationLookup, IProject {
   public String getWebserviceHost() {
     String prop = getProp(WEBSERVICE_HOST);
     if (prop == null || prop.isEmpty()) {
-      prop = WEBSERVICE_HOST_DEFAULT;
+      prop = IProject.WEBSERVICE_HOST_DEFAULT;
     }
     return prop;
   }
@@ -747,8 +744,12 @@ public class Project implements IPronunciationLookup, IProject {
 
     if (hostName.startsWith(HYDRA_2)) {
       myProject = webserviceHost.equalsIgnoreCase(H_2);
+    } else if (hostName.startsWith("score1")) {
+      myProject = webserviceHost.equalsIgnoreCase("s1");
+    } else if (hostName.startsWith("score2")) {
+      myProject = webserviceHost.equalsIgnoreCase("s2");
     } else if (hostName.startsWith(HYDRA)) {
-      myProject = webserviceHost.equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT);
+      myProject = webserviceHost.equalsIgnoreCase(IProject.WEBSERVICE_HOST_DEFAULT);
     }
     if (myProject) {
       logger.info("isMyProject project " + project.id() + " on " + hostName + " will check lts and count phones.");

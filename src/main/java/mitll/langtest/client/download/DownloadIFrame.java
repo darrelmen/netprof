@@ -46,12 +46,16 @@ public class DownloadIFrame extends Frame {
 	 * @see InitialUI
 	 */
 	public static final String DOWNLOAD_AREA_ID = "netProfDownloadArea";
-	
+
+	/**
+	 * HTML5 download tag doesn't do anything.
+	 * @param url
+	 */
 	DownloadIFrame(String url) {
 		addStyleName("hidden-download-frame");
 		removeOldFrames();
 		setUrl(url);
-		
+	//	getElement().setAttribute("download","");
 		RootPanel.get(DOWNLOAD_AREA_ID).add(this);
 	}
 	

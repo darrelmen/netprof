@@ -284,7 +284,8 @@ public class AudioCheck {
                                            String fileInfo,
                                            boolean allowMoreClipping,
                                            boolean quietAudioOK,
-                                           AudioInputStream ais, boolean shortOK) throws IOException {
+                                           AudioInputStream ais,
+                                           boolean shortOK) throws IOException {
     AudioFormat format = ais.getFormat();
 
     if (DEBUG) {
@@ -303,6 +304,9 @@ public class AudioCheck {
     boolean bigEndian = format.isBigEndian();
     if (bigEndian) {
       logger.warn("checkWavFileWithClipThreshold huh? wavFile " + fileInfo + " is in big endian format?");
+      logger.warn("checkWavFileWithClipThreshold " +
+          "\n\tformat     " + format +
+          "\n\tframe size " + format.getFrameSize() + " # channels " + format.getChannels());
     }
 
     int fsize = format.getFrameSize();
@@ -496,7 +500,7 @@ public class AudioCheck {
     }
 
     public String toString() {
-      return "valid " + getValidity() + " dur " + durationInMillis + " max min " + maxMinRange;
+      return "valid " + getValidity() + " dur " + durationInMillis + " dnr " + maxMinRange;
     }
   }
 }

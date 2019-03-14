@@ -42,8 +42,11 @@ import com.google.gwt.http.client.URL;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.FacetExerciseList;
+import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.SelectionState;
 import org.jetbrains.annotations.NotNull;
 
@@ -52,7 +55,7 @@ import java.util.*;
 import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
 
 /**
- *
+ * Also download recorded audio for a student, for a quiz, for a session
  */
 public class DownloadHelper implements IShowStatus {
   // private final Logger logger = Logger.getLogger("DownloadHelper");
@@ -79,13 +82,42 @@ public class DownloadHelper implements IShowStatus {
   private static final String CANCEL = "Cancel";
   private static final int TOP_TO_USE = 10;
 
+  private static final String M = "M";
+  private static final String F = "F";
+
+  private boolean isMale = false;
+  private boolean isContext = false;
+
+  private boolean isContextSet = false;
+  private boolean isMaleSet = false;
+
   private SelectionState selectionState = null;
   private Collection<String> typeOrder;
   private final SpeedChoices speedChoices;
   private boolean includeAudio = false;
 
+  private int userID;
+  private long sessionID, from, to;
+
+  private final Heading status1 = new Heading(4, "");
+  private final Heading status2 = new Heading(4, "");
+  private final Heading status3 = new Heading(4, "");
+  private DivWidget outer;
+  private FacetExerciseList<?, ?> facetExerciseList;
+
+  /**
+   * @see FacetExerciseList#FacetExerciseList(Panel, Panel, ExerciseController, ListOptions, DivWidget, INavigation.VIEWS)
+   */
   public DownloadHelper() {
     this.speedChoices = new SpeedChoices(this, false);
+  }
+
+  public DownloadHelper(int userid, long sessionID, long from, long to) {
+    this();
+    this.userID = userid;
+    this.sessionID = sessionID;
+    this.from = from;
+    this.to = to;
   }
 
   /**
@@ -96,13 +128,6 @@ public class DownloadHelper implements IShowStatus {
     this.selectionState = selectionState;
     this.typeOrder = typeOrder;
   }
-
-
-  private final Heading status1 = new Heading(4, "");
-  private final Heading status2 = new Heading(4, "");
-  private final Heading status3 = new Heading(4, "");
-  private DivWidget outer;
-  private FacetExerciseList<?, ?> facetExerciseList;
 
   /**
    * @param host
@@ -146,7 +171,7 @@ public class DownloadHelper implements IShowStatus {
         new DialogHelper.CloseListener() {
           @Override
           public boolean gotYes() {
-            new DownloadIFrame(toDominoUrl(getDownloadAudio(host)) + getURL());
+            doDownloadFrom(host, getURL());
             return true;
           }
 
@@ -163,6 +188,19 @@ public class DownloadHelper implements IShowStatus {
 
     closeButton.setType(ButtonType.SUCCESS);
     closeButton.setEnabled(!includeAudio);
+  }
+
+  public void doStudentAudioDownload(String host) {
+    new DownloadIFrame(getURLPrefix(host) + getURL2());
+  }
+
+  private void doDownloadFrom(String host, String url) {
+    new DownloadIFrame(getURLPrefix(host) + url);
+  }
+
+  @NotNull
+  private String getURLPrefix(String host) {
+    return toDominoUrl(getDownloadAudio(host));
   }
 
   @NotNull
@@ -337,14 +375,6 @@ public class DownloadHelper implements IShowStatus {
     return onButton;
   }
 
-  private static final String M = "M";
-  private static final String F = "F";
-
-  private boolean isMale = false;
-  private boolean isContext = false;
-
-  private boolean isContextSet = false;
-  private boolean isMaleSet = false;
 
   private DivWidget getGenderChoices() {
     ButtonGroup buttonGroup = new ButtonGroup();
@@ -435,6 +465,16 @@ public class DownloadHelper implements IShowStatus {
         "&audio=" + includeAudio +
         "&search=" + URL.encodeQueryString(search);
   }
+
+  private String getURL2() {
+    return "?" +
+        "request=" + "studentAudio" +
+        "&userid=" + userID +
+        "&from=" + from +
+        "&to=" + to +
+        "&sessionid=" + sessionID;
+  }
+
 
   @NotNull
   private Map<String, Collection<String>> getSelectionMap(Map<String, Collection<String>> typeToSection) {

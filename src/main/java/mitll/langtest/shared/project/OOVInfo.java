@@ -27,29 +27,37 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.client.services;
+package mitll.langtest.shared.project;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.exercise.DominoUpdateResponse;
-import mitll.langtest.shared.project.*;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-import java.util.List;
+/**
+ * @see mitll.langtest.client.project.ProjectEditForm#addDominoProject
+ */
+public class OOVInfo implements IsSerializable {
+  private int checked;
+  private int oovWords;
 
-public interface ProjectServiceAsync {
-  void update(ProjectInfo info, AsyncCallback<Boolean> async);
+  public OOVInfo() {
+  }
 
-  void create(ProjectInfo newProject, AsyncCallback<Integer> async);
+  /**
+   * @param dominoID
+   * @param name
+   * @param first
+   * @param secondType
+   * @see mitll.langtest.server.domino.ProjectSync#getDominoProject
+   */
+  public OOVInfo(int checked, int oovWords) {
+    this.checked = checked;
+    this.oovWords = oovWords;
+  }
 
-  void existsByName(String languageChoice, String name, AsyncCallback<Boolean> async);
+  public int getChecked() {
+    return checked;
+  }
 
-  void delete(int id, AsyncCallback<Boolean> async);
-  void checkOOV(int id, AsyncCallback<OOVInfo> async);
-
-  void addPending(int id, boolean doChange, AsyncCallback<DominoUpdateResponse> async);
-
-  void getDominoForLanguage(Language lang, AsyncCallback<List<DominoProject>> async);
-
-  void getListProperty(int projid, ProjectProperty key, AsyncCallback<List<String>> async);
-
-  void setListProperty(int projid, ProjectProperty key, List<String> newValue, AsyncCallback<Boolean> async);
+  public int getOovWords() {
+    return oovWords;
+  }
 }

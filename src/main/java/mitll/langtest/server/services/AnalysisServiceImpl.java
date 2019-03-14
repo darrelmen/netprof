@@ -86,7 +86,6 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     long then = System.currentTimeMillis();
     boolean hasTeacherPerm = hasTeacherPerm();
     if (!hasTeacherPerm) {
-
       User userFromSession = getUserFromSession();
       if (userFromSession != null) {
         logger.info("getUsersWithRecordings for  : " + userFromSession.getID() + " " + userFromSession.getUserID() + " " + userFromSession.getUserKind() + " = " + hasTeacherPerm);

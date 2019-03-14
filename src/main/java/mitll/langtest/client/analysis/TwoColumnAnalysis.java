@@ -57,7 +57,6 @@ import static mitll.langtest.client.project.ProjectChoices.PLEASE_WAIT;
 public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
   private final Logger logger = Logger.getLogger("TwoColumnAnalysis");
 
-
   private static final int DELAY_MILLIS = 2000;
   final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
   private Object waitToken = null;
@@ -114,13 +113,12 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
    * @param bottom
    * @return
    */
-  protected DivWidget addTop(Collection<T> users, ExerciseController controller, DivWidget bottom) {
+  private void addTop(Collection<T> users, ExerciseController controller, DivWidget bottom) {
     DivWidget rightSide = getRightSide();
     DivWidget leftSide = getTable(users, controller, bottom, rightSide, getNoDataYetMessage());
     leftSide.addStyleName("cardBorderShadow");
     leftSide.addStyleName("bottomFiveMargin");
     add(getTop(leftSide, rightSide));
-    return rightSide;
   }
 
   @NotNull
@@ -132,22 +130,22 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
   protected abstract MemoryItemContainer<T> getItemContainer(ExerciseController controller, DivWidget bottom, DivWidget rightSide);
 
   @NotNull
-  DivWidget getRightSide() {
+  private DivWidget getRightSide() {
     DivWidget rightSide = new DivWidget();
     rightSide.getElement().setId("rightSideForPlot");
     rightSide.setWidth("100%");
     return rightSide;
   }
 
-  protected void addBottom(DivWidget bottom) {
+  private void addBottom(DivWidget bottom) {
     add(bottom);
   }
 
-  protected DivWidget getTable(Collection<T> users,
-                               ExerciseController controller,
-                               DivWidget bottom,
-                               DivWidget rightSide,
-                               String noDataMessage) {
+  private DivWidget getTable(Collection<T> users,
+                             ExerciseController controller,
+                             DivWidget bottom,
+                             DivWidget rightSide,
+                             String noDataMessage) {
     if (users.isEmpty()) {
       return showNoData(noDataMessage);
     } else {
@@ -157,9 +155,9 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
 
   protected DivWidget getContainerDiv(DivWidget table) {
     String headerLabel = getHeaderLabel();
-    if (headerLabel == null) {
-      logger.info("header label is null for " + this.getClass());
-    }
+//    if (headerLabel == null) {
+//      logger.info("header label is null for " + this.getClass());
+//    }
     return getContainerDiv(table, headerLabel == null ? null : getHeading(headerLabel));
   }
 
@@ -190,7 +188,7 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
    * @return
    * @see #addTop(Collection, ExerciseController, DivWidget)
    */
-  DivWidget getTop(DivWidget leftSide, DivWidget rightSide) {
+  private DivWidget getTop(DivWidget leftSide, DivWidget rightSide) {
     DivWidget top = new DivWidget();
     top.addStyleName("inlineFlex");
     top.setWidth("100%");
@@ -228,7 +226,7 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
     return appTitle + ":" + controller.getUser() + ":";
   }
 
-  protected DivWidget getContainerDiv(Panel tableWithPager, Heading heading) {
+  private DivWidget getContainerDiv(Panel tableWithPager, Heading heading) {
     DivWidget wordsContainer = new DivWidget();
     if (heading != null) {
       wordsContainer.add(heading);
@@ -238,7 +236,7 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
   }
 
   @NotNull
-  protected Heading getHeading(String words) {
+  private Heading getHeading(String words) {
     Heading wordsTitle = new Heading(3, words);
     wordsTitle.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
     wordsTitle.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);

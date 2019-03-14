@@ -57,7 +57,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.Date;
 
 import static mitll.langtest.shared.answer.Validity.OK;
 
@@ -458,7 +457,7 @@ public class JsonScoring {
             wavPath, file, deviceType, device, score,
             options, pretestScore);
 
-    ensureMP3Later(answer.getPath(), user, foreignLanguage, exercise.getEnglish(), language.getLanguage());
+    ensureMP3Later(answer.getPath(), user, foreignLanguage, exercise.getEnglish(), language.getLanguage(), exercise);
 
     return answer;
   }
@@ -469,12 +468,13 @@ public class JsonScoring {
    * @param foreignLanguage
    * @param english
    * @param language
+   * @param exercise
    * @see #getAnswer
    */
-  private void ensureMP3Later(final String path, final int user, final String foreignLanguage, String english, String language) {
+  private void ensureMP3Later(final String path, final int user, final String foreignLanguage, String english, String language, ClientExercise exercise) {
     new Thread(() -> {
       //long then = System.currentTimeMillis();
-      writeCompressedVersions(path, new TrackInfo(foreignLanguage, getUserID(user), english, language));
+      writeCompressedVersions(path, new TrackInfo(foreignLanguage, getUserID(user), english, language, exercise.getUnitToValue()));
       // long now = System.currentTimeMillis();
       //       logger.debug("Took " + (now-then) + " millis to write mp3 version");
     }, "ensureMP3Later").start();
