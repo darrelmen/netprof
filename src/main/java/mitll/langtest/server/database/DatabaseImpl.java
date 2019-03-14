@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.server.database;
@@ -91,7 +88,7 @@ import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.services.UserServiceImpl;
-import mitll.langtest.server.sorter.ExerciseSorter;
+import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.analysis.PhoneReportRequest;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -125,22 +122,6 @@ import static java.lang.Thread.sleep;
 import static mitll.langtest.server.PathHelper.ANSWERS;
 import static mitll.langtest.server.database.custom.IUserListManager.COMMENT_MAGIC_ID;
 
-/**
- * Note with H2 that :  <br></br>
- * * you can corrupt the database if you try to copy a file that's in use by another process. <br></br>
- * * one process can lock the database and make it inaccessible to a second one, seemingly this can happen
- * more easily when H2 lives inside a servlet container (e.g. tomcat). <br></br>
- * * it's not a good idea to close connections, especially in the context of a servlet inside a container, since
- * H2 will return "new" connections that have already been closed.   <br></br>
- * * it's not a good idea to reuse one connection...?  <br></br>
- * <p>
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 5/14/12
- * Time: 11:44 PM
- * To change this template use File | Settings | File Templates.
- */
 public class DatabaseImpl implements Database, DatabaseServices {
   private static final Logger logger = LogManager.getLogger(DatabaseImpl.class);
   private static final String UNKNOWN = "unknown";
@@ -874,15 +855,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Project project = getProject(projectid);
     if (project == null) {
       logger.warn("asking for unknown project " + projectid);
-      return new JsonExport(null, null, Collections.emptyList(), false, null);
+      return new JsonExport(null, Collections.emptyList(), false, null);
     } else {
       if (project.getJsonExport() == null) {
         getExercises(projectid, false);
-
-        AudioFileHelper audioFileHelper = project.getAudioFileHelper();
-
         JsonExport jsonExport = new JsonExport(
-            audioFileHelper == null ? Collections.emptyMap() : audioFileHelper.getPhoneToCount(),
             getSectionHelper(projectid),
             serverProps.getPreferredVoices(),
             getLanguageEnum(projectid) == Language.ENGLISH,
@@ -1222,7 +1199,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
                                         int userid,
                                         Map<String, Collection<String>> typeToSection,
                                         boolean forContext,
-                                        boolean sortByLatestScore, ExerciseSorter sorter) {
+                                        boolean sortByLatestScore, SimpleSorter sorter) {
 
     if (projid == -1) {
       projid = projectForUser(userid);
@@ -1232,7 +1209,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     } else {
       JsonSupport jsonSupportForProject = getJsonSupportForProject(projid);
       // TODO :  maybe if the project is retired...?  how to handle this on iOS???
-      return jsonSupportForProject == null ? new JsonObject() : jsonSupportForProject.getJsonScoreHistory(userid, typeToSection, forContext, sorter, sortByLatestScore);
+      return jsonSupportForProject == null ? new JsonObject() : jsonSupportForProject.getJsonScoreHistory(userid, typeToSection, forContext);
     }
   }
 

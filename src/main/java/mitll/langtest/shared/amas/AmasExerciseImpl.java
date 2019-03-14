@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.shared.amas;
@@ -38,19 +35,6 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import java.io.InputStream;
 import java.util.*;
 
-/**
- * Representation of a individual item of work the user sees.  Could be a pronunciation exercise or a question(s)
- * based on a prompt.
- * <p>
- * TODO : consider subclass for pronunciation exercises?
- * <p>
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 5/8/12
- * Time: 1:03 PM
- * To change this template use File | Settings | File Templates.
- */
 public class AmasExerciseImpl implements CommonShell, HasUnitChapter {
   public static final String EN = "en";
   public static final String FL = "fl";

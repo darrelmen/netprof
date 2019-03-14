@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.server.rest;
@@ -57,13 +54,6 @@ import static mitll.langtest.server.services.MyRemoteServiceServlet.USER_AGENT;
 import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
 import static mitll.langtest.shared.user.LoginResult.ResultType.Success;
 
-/**
- * REST user management functions - add user, reset password, etc.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 10/21/15.
- */
 public class RestUserManagement {
   private static final Logger logger = LogManager.getLogger(RestUserManagement.class);
 
@@ -124,6 +114,7 @@ public class RestUserManagement {
   private static final String LAST1 = "last";
   /**
    * on iOS:
+   *
    * @see EAFSignUpViewController.useJsonChapterData
    * @see #addUser(HttpServletRequest, String, String, String, JsonObject)
    */
@@ -185,7 +176,7 @@ public class RestUserManagement {
     return false;
   }
 
-  private void resetPassword( String baseURL, JsonObject toReturn, String[] split1) {
+  private void resetPassword(String baseURL, JsonObject toReturn, String[] split1) {
     String user = getFirst(split1[0]);
     String optionalEmail = getArg(split1[1]);
     String token = resetPassword(user, baseURL, optionalEmail);//emailFromDevice, request.getRequestURL().toString());
@@ -291,14 +282,23 @@ public class RestUserManagement {
 
       // so we can tell if we need to collect more info, etc.
       LoginResult loginResult = loginUser(user, freeTextPassword, request, securityManager, strictValidity);
-      toReturn.addProperty(LOGIN_RESULT, loginResult.getResultType().name());
+      LoginResult.ResultType resultType = loginResult.getResultType();
 
-      if (loginResult.getResultType() == Success && projid > 0) {
+      if (resultType == Success && projid > 0) {
         db.rememberUsersCurrentProject(userid, projid);
       }
 
-      toReturn.addProperty(PASSWORD_CORRECT, (loginResult.getResultType() == Success) ? TRUE : FALSE);
+      // darrel wanted this.
+      toReturn.addProperty("session", loginResult.getSessionID());
+      toReturn.addProperty(LOGIN_RESULT, resultType.name());
+      toReturn.addProperty(PASSWORD_CORRECT, (resultType == Success) ? TRUE : FALSE);
     }
+  }
+
+  private LoginResult.ResultType getLoginResultType(HttpServletRequest request, IUserSecurityManager securityManager,
+                                                    String user, String freeTextPassword, boolean strictValidity) {
+    LoginResult loginResult = loginUser(user, freeTextPassword, request, securityManager, strictValidity);
+    return loginResult.getResultType();
   }
 
   /**

@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.server.database.userexercise;
@@ -76,7 +73,9 @@ public interface IUserExerciseDAO extends IDAO {
    * @see DBExerciseDAO#readExercises
    * @return
    */
+/*
   IRefResultDAO getRefResultDAO();
+*/
 
   /**
    * @see mitll.langtest.server.ScoreServlet#getJsonForAudio(HttpServletRequest, ScoreServlet.PostRequest, String, String)
@@ -116,10 +115,10 @@ public interface IUserExerciseDAO extends IDAO {
                         int importUserIfNotSpecified,
                         boolean isContext,
                         Collection<String> typeOrder);
-
+/*
   int getAndRememberNumPhones(IPronunciationLookup lookup,
                               int exid,
-                              String foreignlanguage, String transliteration);
+                              String foreignlanguage, String transliteration);*/
 
   void addBulk(List<SlickExercise> bulk);
 
@@ -212,7 +211,9 @@ public interface IUserExerciseDAO extends IDAO {
 
   Collection<CommonExercise> getOverrides(boolean shouldSwap);
 
+/*
   Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap);
+*/
 
   List<SlickExercise> getExercisesByIDs(Collection<Integer> exids);
 

@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.server.audio.image;
@@ -39,28 +36,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.regex.Pattern;
 
-/**
- * Creates transcript events from a MLF file.
- *
- * @see <a href="http://www.icsi.berkeley.edu/speech/docs/HTKBook/node99_ct.html">MLF file format examples</a>
- *      <p>
- *      <p>
- *      And specifically we can handle files that look like the following,
- *      skipping phonemes, unless <code>showPhones</code> is true.
- *      <p>
- *      <pre>
- *           "'star'/sll-in_10_2.lab" - label reference
- *           1800000 3400000 THE  - word with start/end offset
- *           1800000 2400000 [dh] - phoneme with start/end offset
- *           ... more lines ...
- *           .                    - end of segment marker
- *           </pre>
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 6/24/11
- *      Time: 6:35 PM
- */
 public class TranscriptReader {
 //  private static Logger logger = LogManager.getLogger(TranscriptReader.class);
 

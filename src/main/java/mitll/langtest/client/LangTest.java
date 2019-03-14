@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.client;
@@ -90,140 +87,6 @@ import java.util.logging.Logger;
 
 import static mitll.langtest.client.banner.NewContentChooser.MODE;
 
-/**
- * Entry point classes define <code>onModuleLoad()</code>.
- * <p>
- * Release Versions:
- * <p>
- * 1.1
- * - final state of analysis feature - off by default, on with ?analysis
- * 1.1.1
- * - fix for custom english entries
- * 1.1.2
- * - Fix for highlight of mixed case context
- * - Added code for trimming silence
- * 1.1.3
- * - Trims silence from beginning and end of recordings with sox
- * 1.1.4
- * - Trims silence from all ref audio
- * 1.1.5
- * - German support - fixes for trie lookup of lowercase characters
- * 1.1.6
- * - ScoreServlet report changes - export user table, add option to filter for items with or without audio
- * 1.1.7
- * - Duplicate exercise id bug with russian - see https://gh.ll.mit.edu/DLI-LTEA/Development/issues/504 and small change to json rate(sec) output
- * 1.1.8
- * - Fix leaving around lots of temp directories
- * 1.2.0
- * - Refactor to add in Amas website support, and steps toward supporting getting content from json
- * 1.2.1
- * - bug fix for display of ref audio in analysis
- * 1.2.2
- * - support for AMAS
- * 1.2.3
- * - integrate with domino to get content for AMAS
- * 1.2.4
- * - support for domino NetProF integration
- * 1.2.5
- * - fix for issue with collapsing words with commas in them, added removeRefResult to scoreServlet, partial support for import to lists
- * 1.2.6
- * - fix for old bug where clicking on a word or phrase did a playback with a ~50 millisecond offset
- * 1.2.7
- * - allows you to filter out Default (no gender mark) audio in mark defects, and associated fixes
- * 1.2.8
- * - Added About NetProF dialog that shows model info, etc. and small tweaks to audio trimming, etc.
- * 1.2.9
- * - Updated reporting to show all years, fill in month/week gaps with zeros
- * 1.2.10
- * - More small report changes
- * 1.2.11
- * - Fixed bugs with browser history forwards/backwards and clicking on characters
- * - Better support for keeping track of transcripts on audio files and noticing when they're out of sync with current content
- * 1.2.12
- * - Fix for lookup for ref audio, fix for sending meaning back in nested chapters score servlet call
- * 1.2.13
- * - fix for highlight on context sentence where now does max coverage, remove email cc to ltea,
- * looks at content to determine whether RTL language, bug where exercise lists wouldn't come up,
- * bug where didn't use cached alignment from refresult table, fix for sending meaning for english in nestedChapters
- * 1.3.0
- * - fixes for history stack
- * 1.3.1
- * - fix for bug where couldn't jump from word in analysis
- * 1.3.2
- * - report updates
- * 1.3.3
- * - fixes for generated keys bug on result table
- * 1.3.4
- * - student analysis tab visible, html5 audio preferred
- * 1.3.5
- * - bug fix for issue where prev next buttons on empty list would throw exception, event dialog wouldn't come up on big tables
- * 1.3.6
- * - admin test on userid was case sensitive
- * 1.4.0
- * - fix for user password reset issue where people have trouble resetting their password - allow user@host.edu as login for user
- * 1.4.1
- * - fixes for AVP - doesn't return scores at end of practice, english doesn't show meaning, english doesn't show hide options, english doesn't highlight right text box when click to play audio
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- * 1.4.2
- * - fix for bug where column header for "context" got skipped for egyptian
- * 1.4.3
- * - Added Japanese, allows you to click on characters in transliteration (hiragana)
- * 1.4.4
- * - Added some minor fixes for exceptions seen in analysis plot
- * 1.4.5
- * - Adds audio table references for really old audio like in Pashto 1,2,3
- * 1.4.6
- * - Fixes for bugs #649,#650,#651, partial fix to #652, flip card in avp with arrow keys
- * 1.4.7
- * - Fixes for bugs #646 - download link replaced with dialog
- * 1.4.8
- * - Fixed bug with detecting RTL text and showing it in the exercise list
- * 1.4.9
- * - Fixed bug with downloading audio for custom item.
- * 1.4.10 (9/9/16)
- * - Fixes for QC -
- * 1.4.11 (9-26-16)
- * - Added auto advance button to avp
- * 1.5.0 (10-07-16)
- * - Clean up download dialog as per Michael Grimmer request
- * 1.5.1 (10-11-16)
- * - Added shouldRecalcStudentAudio option to recalc student audio with the current model
- * 1.5.2 (10-19-16)
- * - Fixed bug in reporting where was throwing away valid recordings and added separate new teacher section to reporting
- * 1.5.3 (10-19-16)
- * - Don't attach reference audio that doesn't pass dnr minimum (mainly for old audio). Mark audio rows with DNR.
- * 1.5.4 (10-21-16)
- * - Increase delay after correct avp response.
- * 1.5.5 (10-23-16)
- * - Fixed bug where couldn't add defect comments to context sentences, better handling of sentence length user exercise entries.
- * 1.5.6 (10-31-16)
- * - Fixed bug where urdu was getting slow to return exercises - we hadn't created indexes on columns b/c there was another one with the same name on another table
- * 1.5.7 (11-01-16)
- * - Fixed bug where could get into a bad state if clicked the record button too quickly.
- * 1.5.8 (11-01-16)
- * - Fixes to support Sorani
- * 1.5.9 (11-02-16)
- * - Fixes to support updating Turkish and preserving audio.
- * 1.5.10
- * - Turn off transcript matching for audio for now, remove ref audio that doesn't meet the dnr threshold
- * 1.5.11
- * - Support for Hindi - added comment on text for recording audio.
- * 1.5.12
- * - Fix for filtering bug where would not filter out recordings made by a user in the same day
- * 1.5.13
- * - Fix for Bug #739 - recording summary total doesn't reflect transcript mismatch
- * 1.5.14
- * - Fixes for audio recording, commenting on audio
- * 1.5.15
- * - Fixes for indicating which audio in fix defects is actually presented, fix for bug #751
- * 2.0.0
- * - development to master
- * 2.0.2
- * 2.0.3
- * 2.0.4
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- */
 public class LangTest implements
     EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport, UserState {
   private final Logger logger = Logger.getLogger("LangTest");

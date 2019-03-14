@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.shared.grade;
@@ -35,35 +32,6 @@ package mitll.langtest.shared.grade;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.result.Result;
 
-/**
- * Represents a grade of a {@link Result} by a grader.
- * <br></br>
- * So it has a reference to a result id, a grade, the name of the grader, and the grade type.
- * <br></br>
- * The type allows us to differentiate between "english-only" grades and "arabic" grades.
- * <br></br>
- * For instance, we don't want to show arabic grades to the english only people and vice-versa.
- *
- * Grader logs in, registering initially.
- *
- * On the left, questions sorted (not random), each shows how many have been graded (n graders, # complete) and
- * how many responses were collected for the item (which could be a multi part question).
- *
- * E.g. if 2 graders, each could be part way done with responses and so 0 complete.
- *
- * Need a Grade object which will be for each entry in the results table.
- *
- * Either 1-5 scale or that + a Correct? Yes/No scale.  Maybe this is an option in the nature of the exercise?
- *
- * Show question, with table of responses. Note which have been graded so far.
- *
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 5/18/12
- * Time: 5:45 PM
- * To change this template use File | Settings | File Templates.
- */
 public class Grade implements IsSerializable {
   private static final int UNASSIGNED = -1;
   public int id;

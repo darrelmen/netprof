@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.server.sorter;
@@ -38,16 +35,10 @@ import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 4/30/2014.
- */
+@Deprecated
 public class ExerciseSorter<T extends CommonShell> extends SimpleSorter<T> {
   private static final Logger logger = LogManager.getLogger(ExerciseSorter.class);
 
@@ -76,11 +67,10 @@ public class ExerciseSorter<T extends CommonShell> extends SimpleSorter<T> {
    * @param phoneToCount
    * @see mitll.langtest.server.json.JsonExport#getJsonForSelection
    */
-  public void sortedByPronLengthThenPhone(List<? extends CommonExercise> toSort, final Map<String, Integer> phoneToCount) {
-    // items in same chapter alphabetical by tooltip
-
-    toSort.sort((Comparator<CommonExercise>) (o1, o2) -> phoneCompFirst(o1, o2, phoneToCount));
-  }
+//  private void sortedByPronLengthThenPhone(List<? extends CommonExercise> toSort, final Map<String, Integer> phoneToCount) {
+//    // items in same chapter alphabetical by tooltip
+//    toSort.sort((Comparator<CommonExercise>) (o1, o2) -> phoneCompFirst(o1, o2, phoneToCount));
+//  }
 
   /**
    * @param o1
@@ -88,9 +78,9 @@ public class ExerciseSorter<T extends CommonShell> extends SimpleSorter<T> {
    * @return
    * @see mitll.langtest.server.database.result.BaseResultDAO#compareUsingPhones(ExerciseCorrectAndScore, ExerciseCorrectAndScore, CommonExercise, CommonExercise, ExerciseSorter)
    */
-  public int phoneCompByFirst(CommonExercise o1, CommonExercise o2) {
-    return phoneCompFirst(o1, o2, phoneToCount);
-  }
+//  public int phoneCompByFirst(CommonExercise o1, CommonExercise o2) {
+//    return phoneCompFirst(o1, o2, phoneToCount);
+//  }
 
   /**
    * TODO : why so complicated?
@@ -107,7 +97,7 @@ public class ExerciseSorter<T extends CommonShell> extends SimpleSorter<T> {
    * @see #phoneCompByFirst(CommonExercise, CommonExercise)
    * @see #sortedByPronLengthThenPhone(List, Map)
    */
-  private int phoneCompFirst(CommonExercise o1, CommonExercise o2, final Map<String, Integer> phoneToCount) {
+/*  private int phoneCompFirst(CommonExercise o1, CommonExercise o2, final Map<String, Integer> phoneToCount) {
     List<String> pron1 = o1.getFirstPron();
     List<String> pron2 = o2.getFirstPron();
 
@@ -154,6 +144,6 @@ public class ExerciseSorter<T extends CommonShell> extends SimpleSorter<T> {
       }
       return 0;
     }
-  }
+  }*/
 
 }

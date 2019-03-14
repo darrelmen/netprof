@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.client.list;
@@ -36,6 +33,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -50,17 +48,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
-/**
- * Show exercises with a cell table that can handle thousands of rows.
- * Does tooltips using tooltip field on...?
- * <p/>
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 11/27/12
- * Time: 5:35 PM
- * To change this template use File | Settings | File Templates.
- */
 public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
     extends ExerciseList<T, U>
     implements ContainerList<T> {
@@ -70,6 +57,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
   protected final WaitCursorHelper waitCursorHelper;
 
   protected ClickablePagingContainer<T> pagingContainer;
+  /**
+   * @see #getInOrder
+   */
   private List<T> inOrderResult;
 
   /**
@@ -338,10 +328,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
   }
 
   public void clear() {
+   // logger.info(getInstance() + " : clear");
     pagingContainer.clear();
   }
 
   private void flush() {
+   // logger.info(getInstance() + " : flush");
     pagingContainer.flush();
     onResize();
   }
@@ -351,8 +343,14 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    */
   @Override
   public void flushWith(Comparator<T> comparator) {
-    pagingContainer.setComparator(comparator);
+    //logger.info(getInstance() + " : flushWith " + comparator);
+    setComparator(comparator);
     flush();
+  }
+
+  public void setComparator(Comparator<T> comparator) {
+    pagingContainer.setComparator(comparator);
+
   }
 
   /**
@@ -365,7 +363,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
   @Override
   public List<T> rememberExercises(List<T> toRemember) {
     inOrderResult = toRemember;
-   // logger.info(getInstance() + " : rememberExercises " + toRemember.size() + " items");
+
+//    logger.info(getInstance() + " : rememberExercises " + toRemember.size() + " items");
+
     if (doShuffle) {
       // logger.info(getInstance() + " : rememberExercises - shuffling " + toRemember.size() + " items");
       ArrayList<T> ts = new ArrayList<>(toRemember);
@@ -403,7 +403,8 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
 
   @Override
   protected T getFirst() {
-    return pagingContainer.getFirst();
+    T first = pagingContainer.getFirst();
+    return first;
   }
 
   @Override

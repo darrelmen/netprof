@@ -1,3 +1,32 @@
+/*
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2019. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015-2019 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ */
+
 package mitll.langtest.server.database.custom;
 
 import com.google.gson.JsonObject;
@@ -21,12 +50,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-/**
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 1/30/14.
- */
 public class ReportTest {
   //private static final String CHANGED = "changed";
   private static final String ENGLISH = "english";
@@ -53,6 +76,33 @@ public class ReportTest {
     database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan());
     Collection<CommonExercise> exercises = database.getExercises();
   }
+
+  @Test
+  public void splitTest(){
+
+
+
+  }
+
+
+  private int getUserFromFile(String requestURI) {
+    int userID = -1;
+    String[] split = requestURI.split("subject-");
+    if (split.length == 2) {
+      String s1 = split[1];
+      String[] split1 = s1.split("\\/");
+      String s = split1[0];
+      try {
+        logger.info("getUserForFile parse '" + s + "' = " + userID + " from " + s1);
+        userID = Integer.parseInt(s);
+      } catch (NumberFormatException e) {
+        logger.warn("getUserFromFile couldn't parse " + s + " in " + s1 + " of " + requestURI);
+      }
+    }
+    return userID;
+  }
+
+
 
 /*  @Test
   public void testExport() {

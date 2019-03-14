@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.server.database.exercise;
@@ -85,6 +82,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * so first look in the main id->ex map and then in the context->exercise map
    *
    * back off is to try to refresh the exercise if we can't find it...
+   *
    * @param id
    * @return
    */
@@ -140,9 +138,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       } else {
         logger.warn("getExercise : really couldn't find... " + id);
       }
-    }
-    else {
-      logger.warn("getExercise : no known exercise with id " +id);
+    } else {
+      logger.warn("getExercise : no known exercise with id " + id);
     }
     return commonExercise;
   }
@@ -483,15 +480,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       logger.info("setRootTypes roots " + rootTypes);
     }
 
-    Set<String> seen = new HashSet<>();
-    List<String> uniq = new ArrayList<>();
-    typeOrder.forEach(type -> {
-      if (!seen.contains(type)) {
-        seen.add(type);
-        uniq.add(type);
-      }
-    });
-    sectionHelper.setPredefinedTypeOrder(uniq);
+    sectionHelper.setPredefinedTypeOrder(sectionHelper.getUniq(typeOrder));
     if (DEBUG) logger.info("setRootTypes parentToChild " + parentToChild);
   }
 
@@ -538,8 +527,14 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
    */
   public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp) {
-    getDao().updateCheckedBulk(safe, true, dictTimestamp);
-    getDao().updateCheckedBulk(unsafe, false, dictTimestamp);
+    int changed = getDao().updateCheckedBulk(safe, true, dictTimestamp);
+    if (changed != safe.size()) {
+      logger.warn("asked to mark " + safe.size() + " but did " + changed);
+    }
+    int i = getDao().updateCheckedBulk(unsafe, false, dictTimestamp);
+    if (i != unsafe.size()) {
+      logger.warn("asked to mark " + unsafe.size() + " but did " + i);
+    }
   }
 
   /**

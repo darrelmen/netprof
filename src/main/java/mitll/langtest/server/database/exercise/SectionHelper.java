@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.server.database.exercise;
@@ -47,15 +44,6 @@ import java.util.*;
 import static mitll.langtest.server.database.exercise.Facet.SEMESTER;
 import static mitll.langtest.server.database.exercise.Facet.SUB_TOPIC;
 
-/**
- * Created with IntelliJ IDEA.
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 3/29/13
- * Time: 4:34 PM
- * To change this template use File | Settings | File Templates.
- */
 public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection<T>, ITestSection<T> {
   private static final Logger logger = LogManager.getLogger(SectionHelper.class);
 
@@ -201,10 +189,29 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @see DBExerciseDAO#getTypeOrderFromProject
    */
   public void reorderTypes(List<String> types) {
+    logger.info("reorderTypes before " + types);
+    List<String> uniq = getUniq(types);
+
     for (Facet f : Facet.values()) {
-      putAtEnd(types, f.getName());
+      putAtEnd(uniq, f.getName());
     }
-    //logger.info("reorderTypes " + types);
+    types.clear();
+    types.addAll(uniq);
+    logger.info("reorderTypes after " + types);
+  }
+
+  @Override
+  @NotNull
+  public List<String> getUniq(List<String> types) {
+    Set<String> seen= new HashSet<>();
+    List<String> uniq = new ArrayList<>();
+    types.forEach(type->{
+      if (!seen.contains(type)) {
+        uniq.add(type);
+        seen.add(type);
+      }
+    });
+    return uniq;
   }
 
   private void putAtEnd(List<String> types, String sound) {

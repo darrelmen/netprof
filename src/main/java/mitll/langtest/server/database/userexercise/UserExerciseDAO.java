@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.server.database.userexercise;
@@ -84,10 +81,10 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return null;
   }
 
-  @Override
+/*  @Override
   public IRefResultDAO getRefResultDAO() {
     return null;
-  }
+  }*/
 
   @Override
   public boolean updateProjectChinese(int old, int newprojid, List<Integer> justTheseIDs) {
@@ -108,10 +105,10 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   public void addBulk(List<SlickExercise> bulk) {
   }
 
-  @Override
-  public int getAndRememberNumPhones(IPronunciationLookup lookup, int exid, String foreignlanguage, String transliteration) {
-    return 0;
-  }
+//  @Override
+//  public int getAndRememberNumPhones(IPronunciationLookup lookup, int exid, String foreignlanguage, String transliteration) {
+//    return 0;
+//  }
 
   @Override
   public int insert(SlickExercise UserExercise) {
@@ -623,12 +620,14 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @return
    * @seex UserListManager#getDefectList
    */
+/*
   @Override
   public Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap) {
     if (exids.isEmpty()) return new ArrayList<>();
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + " in (" + getIds(exids) + ")";
     return getCommonExercises(sql);
   }
+*/
 
   @Override
   public List<SlickExercise> getExercisesByIDs(Collection<Integer> exids) {

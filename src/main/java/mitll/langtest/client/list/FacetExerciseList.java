@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.client.list;
@@ -155,7 +152,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #setProgressVisible
    */
   protected ProgressBar practicedProgress, scoreProgress;
+  /**
+   * @see #setPagerRowVisible
+   */
   private final DivWidget pagerAndSortRow;
+  private DivWidget showAndDownload;
 
   private List<String> typeOrder;
   private final Panel sectionPanel;
@@ -298,17 +299,19 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     {
       // better name for primary and alternate choices
-      DivWidget widgets = new DivWidget();
-      widgets.addStyleName("topFiveMargin");
+      DivWidget showAndDownload = new DivWidget();
+      showAndDownload.addStyleName("topFiveMargin");
 
       {
         ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
         boolean isMandarin = projectStartupInfo != null && projectStartupInfo.getLanguageInfo() == Language.MANDARIN;
         boolean shouldSwap = projectStartupInfo != null && projectStartupInfo.isShouldSwap();
-        widgets.add(new DisplayMenu(controller.getStorage(), this, isMandarin, shouldSwap).getRealViewMenu());
+        showAndDownload.add(new DisplayMenu(controller.getStorage(), this, isMandarin, shouldSwap).getRealViewMenu());
       }
 
-      pagerAndSort.add(widgets);
+      pagerAndSort.add(showAndDownload);
+
+      this.showAndDownload = showAndDownload;
     }
 
     addPageSize(pagerAndSort);
@@ -720,12 +723,17 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     Panel choices = new UnorderedList(); // ul
     String selectionForType = typeToSelection.get(type);
 
-    if (DEBUG_CHOICES) logger.info("addChoices " + type + "=" + selectionForType);
+    if (DEBUG_CHOICES) {
+      logger.info("addChoices " + type + " = " + selectionForType +
+          "\n\tin " + typeToSelection);
+    }
 
     if (selectionForType == null) { // no selection made, show all possible values for type
       Set<MatchInfo> keys = typeToValues.get(type);
       if (keys != null) {
-        if (DEBUG_CHOICES) logger.info("addChoices for " + type + "=" + keys.size());
+        if (DEBUG_CHOICES) {
+          logger.info("addChoices for " + type + "=" + keys.size());
+        }
         if (type.equalsIgnoreCase(RECORDED)) {
           keys = new TreeSet<>(keys);
         }
@@ -815,7 +823,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
     boolean hasMore = shouldShowMore(keysSize, toShow);
     Boolean showAll = typeToShowAll.getOrDefault(type, false);
-
 
     if (DEBUG_CHOICES) {
       logger.info("addChoicesForType" +
@@ -940,6 +947,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param italic        true if list is not mine - I don't own it
    * @param addTypePrefix
    * @return
+   * @see #addChoicesForType(Map, String, Panel, Set, boolean)
    */
   private Widget getAnchor(String type, MatchInfo key, int newUserListID, boolean italic, boolean addTypePrefix) {
     Panel span = getSpan();
@@ -1085,6 +1093,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param type
    * @param key
    * @return
+   * @see #getAnchor(String, MatchInfo, int, boolean, boolean)
    */
   @NotNull
   private ClickHandler getChoiceHandler(final String type, final String key, int newUserListID) {
@@ -1149,7 +1158,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       final long then = System.currentTimeMillis();
       FilterRequest filterRequest = getFilterRequest(userListID, getPairs(typeToSelection));
       if (DEBUG) {
-        logger.info("req " + filterRequest);
+        logger.info("getTypeToValues req " + filterRequest);
       }
       service.getTypeToValues(filterRequest, getTypeToValuesCallback(typeToSelection, then));
     }
@@ -1206,14 +1215,20 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return reqid++;
   }
 
+  /**
+   * @param response
+   * @param then
+   * @param typeToSelection
+   * @see #getTypeToValuesCallback(Map, long)
+   */
   protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
     long diff = System.currentTimeMillis() - then;
     if (DEBUG || diff > 30) {
       logger.info("getTypeToValues took " + diff + " to get" +
-          "\n\ttype to selection " + typeToSelection +
-          "\n\ttype to include   " + response.getTypesToInclude() +
-          "\n\t#type to values   " + response.getTypeToValues().size()
-         // +          "\n\ttype to values    " + response.getTypeToValues()
+              "\n\ttype to selection " + typeToSelection +
+              "\n\ttype to include   " + response.getTypesToInclude() +
+              "\n\t#type to values   " + response.getTypeToValues().size()
+          // +          "\n\ttype to values    " + response.getTypeToValues()
       );
     }
 
@@ -1532,15 +1547,34 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   protected void hidePrevNextWidgets() {
     pageSizeContainer.setVisible(false);
-    sortBox.setVisible(false);
-    pagerAndSortRow.setVisible(false);
+    setSortBoxVisible(false);
+    setPagerRowVisible(false);
+  }
+
+  protected void showOnlySortBox() {
+    pageSizeContainer.setVisible(false);
+    setSortBoxVisible(true);
+    setDownloadVisible(false);
+    setPagerRowVisible(true);
   }
 
   private void showPrevNext() {
     pageSizeContainer.setVisible(true);
-    sortBox.setVisible(true);
+    setSortBoxVisible(true);
     setProgressVisible(true);
-    pagerAndSortRow.setVisible(true);
+    setPagerRowVisible(true);
+  }
+
+  protected void setPagerRowVisible(boolean b) {
+    pagerAndSortRow.setVisible(b);
+  }
+
+  protected void setSortBoxVisible(boolean b) {
+    sortBox.setVisible(b);
+  }
+
+  protected void setDownloadVisible(boolean b) {
+    showAndDownload.setVisible(b);
   }
 
   /**
@@ -1756,14 +1790,14 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     if (isCurrentReq(reqID)) {
       reallyShowExercises(result, reqID);
       if (isCurrentReq(reqID)) {
-        //logger.info("showExercises for progress current " + reqID);
+        if (DEBUG_STALE) logger.info("showExercisesForCurrentReq for progress current " + reqID);
         setProgressBarScore(getInOrder(), reqID);
       } else {
-        if (DEBUG_STALE) logger.info("showExercises for progress stale " + reqID);
+        if (DEBUG_STALE) logger.info("showExercisesForCurrentReq for progress stale " + reqID);
       }
     } else {
       if (DEBUG_STALE)
-        logger.info("showExercises (2) skip stale req " + reqID + " vs current " + getCurrentExerciseReq());
+        logger.info("showExercisesForCurrentReq (2) skip stale req " + reqID + " vs current " + getCurrentExerciseReq());
 
     }
   }
@@ -2051,15 +2085,17 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
                               String oneHundredPercent,
                               String suffix,
                               boolean useColorGradient) {
-    float fnumer = (float) num;
-    float fdenom = (float) denom;
+    double fnumer = Integer.valueOf(num).doubleValue();
+    double fdenom = Integer.valueOf(denom).doubleValue();
 
     double score = fnumer / fdenom;
-    double percent = 100 * score;
+    double percent = 100.0D * score;
     if (DEBUGSCORE) logger.info("showProgress percent " + percent);
 
-    double percent1 = Math.max(30, num == 0 ? 100 : percent);
-    practicedProgress.setPercent(percent1);
+    double percent1 = Math.max(30.0D, num == 0.0D ? 100.0D : percent);
+    // practicedProgress.setPercent(percent1);
+    Widget theBar = cheesySetPercent(practicedProgress, percent1);
+
     boolean allDone = num == denom;
 
     practicedProgress.setText(getPracticedText(num, denom, zeroPercent, oneHundredPercent, suffix));
@@ -2077,9 +2113,16 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
                       ProgressBarBase.Color.INFO :
                       ProgressBarBase.Color.WARNING);
       // bug #
-      practicedProgress.getWidget(0).getElement().getStyle().setColor("black");
+      theBar.getElement().getStyle().setColor("black");
     }
     practicedProgress.setVisible(true);
+  }
+
+  @NotNull
+  private Widget cheesySetPercent(ComplexPanel practicedProgress, double percent1) {
+    Widget theBar = practicedProgress.getWidget(0);
+    theBar.getElement().getStyle().setWidth(Double.valueOf(percent1).intValue(), Style.Unit.PCT);
+    return theBar;
   }
 
   protected String getPracticedText(int num, int denom, String zeroPercent, String oneHundredPercent, String suffix) {
@@ -2095,11 +2138,11 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
 
   /**
    * @param toRemember
-   * @see #rememberExercises
+   * @see PagingExerciseList#rememberExercises
    */
   protected List<T> resort(List<T> toRemember) {
     List<T> commonShells = new ArrayList<>(toRemember);
-    listSorting.sortLater(commonShells, sortBoxReally);
+    listSorting.sortNow(commonShells, sortBoxReally);
     return commonShells;
   }
 

@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.server.audio;
@@ -42,57 +39,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DecimalFormat;
 
-/**
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 10/30/15.
- * <p>
- * function minmax(audio_name)
- * [audio_data, fs] = audioread(audio_name);
- * % determine how many samples are in a 50ms window
- * seconds_per_sample = 1/fs;
- * window = floor(.05/seconds_per_sample);
- * slide = floor(window/10);   % number of samples to slide the window
- * a = 1;
- * o = a + window;
- * minrms = 1;
- * maxrms = 0;
- * datasize = size(audio_data);
- * while o < datasize(1)
- * res = rms(audio_data(a:a+slide));
- * if res < .000032    % less than -89.9 dB
- * a = a + slide;
- * o = o + slide;
- * continue;
- * end
- * res = rms(audio_data(o-slide:o));
- * if res < .000032    % less than -89.9 dB
- * a = a + slide;
- * o = o + slide;
- * continue;
- * end
- * res = rms(audio_data(a:o));
- * if res > maxrms
- * maxrms = res;
- * elseif res < minrms
- * minrms = res;
- * end
- * a = a + slide;
- * o = o + slide;
- * end
- * name_size = size(audio_name);
- * stat_name = audio_name(1:name_size(2)-4);
- * stat_name = strcat(stat_name, '-stats.txt');
- * STATID = fopen(stat_name, 'w');
- * <p>
- * fprintf(STATID,'Max-Min Range:\t%.2fdB\n', 20*log10(maxrms)-20*log10(minrms));
- * fprintf(STATID,'Maximum Sample Value:\t%d\n', max(audio_data)*32768);
- * fprintf(STATID,'Minimum Sample Value:\t%d\n', min(audio_data)*32768);
- * fprintf(STATID,'Total RMS Value:\t%.2fdBFS\n', 20*log10(rms(audio_data)));
- * fprintf(STATID,'Minimum RMS Value:\t%.2fdBFS\n', 20*log10(minrms));
- * fprintf(STATID,'Maximum RMS Value:\t%.2fdBFS\n', 20*log10(maxrms));
- */
 public class DynamicRange {
   private static final Logger logger = LogManager.getLogger(DynamicRange.class);
   private static final double MAX_VALUE = 32768.0f;

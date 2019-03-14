@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.server.json;
@@ -36,7 +33,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,12 +43,6 @@ import java.util.function.Function;
 
 import static mitll.langtest.server.database.exercise.Facet.SUB_TOPIC;
 
-/**
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 2/5/16.
- */
 public class JsonExport {
   private static final Logger logger = LogManager.getLogger(JsonExport.class);
 
@@ -84,18 +74,18 @@ public class JsonExport {
   private final Collection<Integer> preferredVoices;
   private final boolean isEnglish;
   private AudioFileHelper audioFileHelper;
+
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_JSON = true;
 
   /**
-   * @param phoneToCount
    * @param sectionHelper
    * @param preferredVoices
    * @param isEnglish
    * @param audioFileHelper
    * @see mitll.langtest.server.ScoreServlet#getJsonNestedChapters
    */
-  public JsonExport(Map<String, Integer> phoneToCount,
-                    ISection<CommonExercise> sectionHelper,
+  public JsonExport(ISection<CommonExercise> sectionHelper,
                     Collection<Integer> preferredVoices,
                     boolean isEnglish,
                     AudioFileHelper audioFileHelper) {
@@ -117,7 +107,10 @@ public class JsonExport {
 
     List<String> minimalTypeOrder = getMinimalTypeOrder();
 
+    logger.info("getContentAsJson " + (justContext? " just context":"vocab"));
+
     for (SectionNode node : sectionHelper.getSectionNodesForTypes()) {
+      logger.info("getContentAsJson " + node.easy());
       addToJsonArrayForChildren(typeToValues, removeExercisesWithMissingAudio, justContext, minimalTypeOrder, jsonArray, node);
     }
     return jsonArray;
@@ -190,7 +183,7 @@ public class JsonExport {
         jsonForNode.add(ITEMS, jsonForSelection);
 
         if (jsonForSelection.size() == 0) {
-          if (DEBUG) {
+          if (DEBUG_JSON) {
             logger.info("getJsonForNode no leaf content for " + type + " = " + name);
           }
 
@@ -206,7 +199,7 @@ public class JsonExport {
           addToJsonArrayForChildren(typeToValues, removeExercisesWithMissingAudio, justContext, firstTypes, jsonArray, child);
         }
 
-        if (DEBUG) {
+        if (DEBUG_JSON) {
           if (jsonArray.size() == 0) {
             logger.info("getJsonForNode AFTER  node " + node.getType() + " = " + node.getName() +
                 " with " + children.size() + " children, after " + jsonArray.size());
@@ -217,7 +210,7 @@ public class JsonExport {
       if (!addExerciseItems) {// && jsonForNode != null) {
         jsonForNode.add(CHILDREN, jsonArray);
         if (jsonArray.size() == 0) {
-          if (DEBUG) {
+          if (DEBUG_JSON) {
             logger.info("getJsonForNode no content for " + type + " = " + name);
           }
 
@@ -242,7 +235,7 @@ public class JsonExport {
     if (jsonForNode1 != null) {
       jsonArray.add(jsonForNode1);
     } else {
-      if (DEBUG) {
+      if (DEBUG_JSON) {
         logger.info("addToJsonArrayForChildren : no content (remove = " + removeExercisesWithMissingAudio + ") for " + type1 + " = " + name1);
       }
     }

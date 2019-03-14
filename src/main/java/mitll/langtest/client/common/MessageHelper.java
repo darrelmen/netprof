@@ -1,8 +1,8 @@
-/**
+/*
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2016 - 2017. Other request for this document shall
- * be referred to DLIFLC.
- * <p>
+ * and their contractors; 2019. Other request for this document shall be referred
+ * to DLIFLC.
+ *
  * WARNING: This document may contain technical data whose export is restricted
  * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
  * Transfer of this data by any means to a non-US person who is not eligible to
@@ -10,16 +10,16 @@
  * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
  * unclassified, limited distribution documents, destroy by any method that will
  * prevent disclosure of the contents or reconstruction of the document.
- * <p>
+ *
  * This material is based upon work supported under Air Force Contract No.
  * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
- * <p>
- * © 2016 - 2017 Massachusetts Institute of Technology.
- * <p>
+ *
+ * © 2015-2019 Massachusetts Institute of Technology.
+ *
  * The software/firmware is provided to you on an As-Is basis
- * <p>
+ *
  * Delivered to the US Government with Unlimited Rights, as defined in DFARS
  * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
@@ -56,15 +56,6 @@ import java.util.logging.Logger;
 
 import static mitll.langtest.client.LangTest.LANGTEST_IMAGES;
 
-/**
- * MessageHelper: a helper to create dialogs, popups, etc. and do server
- * logging as necessary.
- * <br><br>
- * Copyright &copy; 2011-2015 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author Raymond Budd <a href=mailto:raymond.budd@ll.mit.edu>raymond.budd@ll.mit.edu</a>
- * @since Nov 22, 2013 9:44:19 AM
- */
 public class MessageHelper {
   private static final Logger log = Logger.getLogger(MessageHelper.class.getName());
   private static final String DOMINO_ERROR = "NetProF Error!";

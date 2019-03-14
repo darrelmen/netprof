@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,16 +25,12 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.server;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.report.ReportingServices;
@@ -43,8 +38,9 @@ import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.json.ProjectExport;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.scoring.JsonScoring;
-import mitll.langtest.server.sorter.ExerciseSorter;
+import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.shared.analysis.PhoneReportRequest;
+import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.QuizSpec;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -67,13 +63,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-/**
- * All in support of tethered iOS app.
- * <p>
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- */
 @SuppressWarnings("serial")
 public class ScoreServlet extends DatabaseServlet {
   private static final Logger logger = LogManager.getLogger(ScoreServlet.class);
@@ -117,10 +106,10 @@ public class ScoreServlet extends DatabaseServlet {
   private static final boolean CONVERT_DECODE_TO_ALIGN = true;
   private static final String MESSAGE = "message";
   private static final String UTF_8 = "UTF-8";
-  //private static final String LIST = "list";
-  public static final String SORT_BY_LATEST_SCORE = "sortByLatestScore";
-  public static final String TRUE = "true";
-  public static final String FALSE = "false";
+
+  private static final String SORT_BY_LATEST_SCORE = "sortByLatestScore";
+  private static final String TRUE = "true";
+  private static final String FALSE = "false";
 
   private static final Set<String> notInteresting = new HashSet<>(Arrays.asList(
       "Accept-Encoding",
@@ -129,9 +118,10 @@ public class ScoreServlet extends DatabaseServlet {
       "connection",
       "password",
       "pass"));
-  public static final String SENTENCES_PARAM = HeaderValue.SENTENCES.name().toLowerCase();
-//  public static final String SESSION = "session";
-
+  private static final String SENTENCES_PARAM = HeaderValue.SENTENCES.name().toLowerCase();
+  public static final String PROJID = "projid";
+  public static final String AMPERSAND = "&";
+  public static final String DATE = "Date";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -303,7 +293,7 @@ public class ScoreServlet extends DatabaseServlet {
 
       try {
         if (realRequest == GetRequest.NESTED_CHAPTERS) {
-          String[] split1 = queryString.split("&");
+          String[] split1 = queryString.split(AMPERSAND);
 
           if (hasContextArg(queryString)) {
             toReturn = getJsonNestedChapters(projid, true, true);
@@ -330,7 +320,7 @@ public class ScoreServlet extends DatabaseServlet {
           toReturn = getChapterHistory(queryString, toReturn, projid, userID);
         } else if (realRequest == GetRequest.PHONE_REPORT) {
           queryString = removePrefix(queryString, PHONE_REPORT);
-          String[] split1 = queryString.split("&");
+          String[] split1 = queryString.split(AMPERSAND);
           if (split1.length < 2) {
             toReturn.addProperty(ERROR, "expecting at least two query parameters");
           } else {
@@ -378,7 +368,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private boolean hasArg(String queryString, String context) {
-    return queryString.toLowerCase().contains("&" + context + "=true") || queryString.toLowerCase().contains("&" + context);
+    return queryString.toLowerCase().contains(AMPERSAND + context + "=true") || queryString.toLowerCase().contains(AMPERSAND + context);
   }
 
   private JsonObject getCachedNested(int projid) {
@@ -404,7 +394,7 @@ public class ScoreServlet extends DatabaseServlet {
       nestedChapters = getJsonNestedChapters(projid, shouldRemoveExercisesWithNoAudio, false);
       JsonArray asJsonArray = nestedChapters.getAsJsonArray(CONTENT);
       if (asJsonArray == null || asJsonArray.size() == 0) {
-        logger.error("no content for " + projid);
+        logger.error("getNested no content for " + projid + " : " + asJsonArray);
       } else {
         projectToNestedChapters.put(projid, nestedChapters);
         projectToWhenCached.put(projid, now);
@@ -418,7 +408,7 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private long getLong(String queryString, String paramToLookFor) {
-    String[] split1 = queryString.split("&");
+    String[] split1 = queryString.split(AMPERSAND);
     long listid = -1;
     for (String arg : split1) {
       String[] split = arg.split("=");
@@ -450,25 +440,25 @@ public class ScoreServlet extends DatabaseServlet {
     int projid = getProjID(request);
 
     if (projid == -1) {
-      String[] split1 = request.getQueryString().split("&");
-      Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke().getSelection();
-      if (selection.get("projid") != null) {
-        String projid1 = selection.get("projid").iterator().next();
+      String[] split1 = request.getQueryString().split(AMPERSAND);
+      Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke(false).getSelection();
+      if (selection.get(PROJID) != null) {
+        String projid1 = selection.get(PROJID).iterator().next();
         try {
           projid = Integer.parseInt(projid1);
         } catch (NumberFormatException e) {
-          logger.warn("couldn't parse '" + projid1 + "'");
+          logger.warn("getTripleProjID : couldn't parse '" + projid1 + "'");
         }
+      } else {
+        logger.info("getTripleProjID no " + PROJID + " in " + selection + " from " + request.getQueryString());
       }
     }
 
     // language overrides user id mapping...
     if (projid == -1) {
-      {
-        String language = getLanguage(request);
-        if (language != null) {
-          projid = getProjectID(language, getIsKaldi(request));
-        }
+      String language = getLanguage(request);
+      if (language != null) {
+        projid = getProjectID(language, getIsKaldi(request));
       }
     }
 
@@ -489,7 +479,7 @@ public class ScoreServlet extends DatabaseServlet {
     long now = System.currentTimeMillis();
     long l = now - then;
     if (l > 10) {
-      logger.info("doGet : (" + language + ") took " + l + " millis");// to do " + request.getQueryString());
+      logger.info("reply : (" + language + ") took " + l + " millis");// to do " + request.getQueryString());
     }
     then = now;
 
@@ -598,7 +588,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @return
    */
   private String getRemoveExercisesParam(String queryString) {
-    String[] split1 = queryString.split("&");
+    String[] split1 = queryString.split(AMPERSAND);
     if (split1.length == 2) {
       return getParamValue(split1[1], REMOVE_EXERCISES_WITH_MISSING_AUDIO);
     } else {
@@ -623,7 +613,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private JsonObject getPhoneReport(JsonObject toReturn, String[] split1, int projid, int userid, long sessionID) {
-    Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke().getSelection();
+    Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke(true).getSelection();
 
     try {
       long then = System.currentTimeMillis();
@@ -674,43 +664,23 @@ public class ScoreServlet extends DatabaseServlet {
     if (projectid == -1) {
       toReturn.addProperty(ERROR, "no project specified for user " + userID);
     } else {
-      String[] split1 = queryString.split("&");
+      String[] split1 = queryString.split(AMPERSAND);
       if (split1.length < 2) {
         toReturn.addProperty(ERROR, "expecting at least two query parameters");
       } else {
-        Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke().getSelection();
+        Map<String, Collection<String>> selection = new UserAndSelection(split1).invoke(true).getSelection();
 
         //logger.debug("chapterHistory " + user + " selection " + selection);
         try {
           boolean sortByLatestScore = hasSortByLatestScore(queryString);
           logger.info("getChapterHistory Sort by latest " + sortByLatestScore);
-          toReturn = db.getJsonScoreHistory(projectid, userID, selection, hasContextArg(queryString), sortByLatestScore, getExerciseSorter(projectid));
+          toReturn = db.getJsonScoreHistory(projectid, userID, selection, hasContextArg(queryString), sortByLatestScore, new SimpleSorter());
         } catch (NumberFormatException e) {
           toReturn.addProperty(ERROR, "User id should be a number");
         }
       }
     }
     return toReturn;
-  }
-
-
-  /**
-   * Don't die if audio file helper is not available.
-   *
-   * @param projectid
-   * @return
-   * @see #doGet
-   * @see #getChapterHistory
-   */
-  private ExerciseSorter getExerciseSorter(int projectid) {
-    Map<String, Integer> stringIntegerHashMap = new HashMap<>();
-    AudioFileHelper audioFileHelper = getAudioFileHelper(projectid);
-    Map<String, Integer> phoneToCount = audioFileHelper == null ? stringIntegerHashMap : audioFileHelper.getPhoneToCount();
-    return new ExerciseSorter(phoneToCount);
-  }
-
-  private AudioFileHelper getAudioFileHelper(int projectid) {
-    return getProject(projectid).getAudioFileHelper();
   }
 
   /**
@@ -1179,48 +1149,55 @@ public class ScoreServlet extends DatabaseServlet {
 
 
     then = System.currentTimeMillis();
-    File saveFile = new FileSaver().writeAudioFile(
+    FileSaver.FileSaveResponse response = new FileSaver().writeAudioFile(
         pathHelper, request.getInputStream(), realExID, userid, getProject(projid).getLanguageEnum(), true);
 
+    File saveFile = response.getFile();
     now = System.currentTimeMillis();
     if (now - then > 10) {
       logger.info("getJsonForAudio save file to " + saveFile.getAbsolutePath() + " took " + (now - then) + " millis");
     }
-    then = System.currentTimeMillis();
+    //  then = System.currentTimeMillis();
 
-    new AudioConversion(false, db.getServerProps().getMinDynamicRange())
-        .getValidityAndDur(saveFile, false, db.getServerProps().isQuietAudioOK(), then);
+    if (response.getStatus() == FileSaver.FileSaveResponse.STATUS.OK) {
+//      AudioCheck.ValidityAndDur validityAndDur = new AudioConversion(false, db.getServerProps().getMinDynamicRange())
+//          .getValidityAndDur(saveFile, false, db.getServerProps().isQuietAudioOK(), then);
 
-    now = System.currentTimeMillis();
-    if (now - then > 10) {
-      logger.info("getJsonForAudio audio conversion for " + saveFile.getAbsolutePath() + " took " + (now - then) + " millis");
-    }
+//      now = System.currentTimeMillis();
+//      if (now - then > 10) {
+//        logger.info("getJsonForAudio audio conversion for " + saveFile.getAbsolutePath() + " took " + (now - then) + " millis");
+//      }
 
-    // TODO : put back trim silence? or is it done somewhere else
+      // TODO : put back trim silence? or is it done somewhere else
 //    new AudioConversion(null).trimSilence(saveFile);
 
-    if (requestType == PostRequest.DECODE && CONVERT_DECODE_TO_ALIGN) {
-      logger.info("\tfor now we force decode requests into alignment...");
-      requestType = PostRequest.ALIGN;
+      if (requestType == PostRequest.DECODE && CONVERT_DECODE_TO_ALIGN) {
+        // logger.info("\tfor now we force decode requests into alignment...");
+        requestType = PostRequest.ALIGN;
+      }
+
+      return jsonScoring.getJsonForAudioForUser(
+          reqid,
+          projid,
+          realExID,
+
+          postedWordOrPhrase,
+
+          userid,
+          requestType,
+          saveFile.getAbsolutePath(),
+          saveFile,
+          deviceType,
+          device,
+          new DecoderOptions()
+              .setAllowAlternates(getAllowAlternates(request))
+              .setUsePhoneToDisplay(getUsePhoneToDisplay(request)),
+          fullJSON);
+    } else {
+      JsonObject jsonObject = new JsonObject();
+      new JsonScoring(getDatabase()).addValidity(realExID, jsonObject, Validity.TOO_LONG, "" + reqid);
+      return jsonObject;
     }
-
-    return jsonScoring.getJsonForAudioForUser(
-        reqid,
-        projid,
-        realExID,
-
-        postedWordOrPhrase,
-
-        userid,
-        requestType,
-        saveFile.getAbsolutePath(),
-        saveFile,
-        deviceType,
-        device,
-        new DecoderOptions()
-            .setAllowAlternates(getAllowAlternates(request))
-            .setUsePhoneToDisplay(getUsePhoneToDisplay(request)),
-        fullJSON);
   }
 
   private boolean isFullJSON(HttpServletRequest request) {
@@ -1467,7 +1444,7 @@ public class ScoreServlet extends DatabaseServlet {
   private void addVersion(JsonObject JsonObject, int projid) {
     JsonObject.addProperty(VERSION, VERSION_NOW);
     JsonObject.addProperty(HAS_MODEL, getProject(projid).hasModel());
-    JsonObject.addProperty("Date", new Date().toString());
+    JsonObject.addProperty(DATE, new Date().toString());
   }
 
   private Project getProject(int projid) {
@@ -1489,18 +1466,19 @@ public class ScoreServlet extends DatabaseServlet {
       return selection;
     }
 
-    UserAndSelection invoke() {
-      // user = "";
+    UserAndSelection invoke(boolean ignoreUserAndProject) {
       selection = new TreeMap<>();
       for (String param : split1) {
-        //logger.debug("param '" +param+               "'");
+        logger.info("UserAndSelection param '" + param + "'");
         String[] split = param.split("=");
         if (split.length == 2) {
           String key = split[0];
           String value = split[1];
-          if (key.equals(HeaderValue.USER.toString()) ||
-              key.equalsIgnoreCase(HeaderValue.PROJID.name())) {
-            //user = value;
+          logger.info("\t" + key + " = " + value);
+          if (ignoreUserAndProject &&
+              (key.equals(HeaderValue.USER.toString()) || key.equalsIgnoreCase(HeaderValue.PROJID.name()))) {
+            // skip it
+           logger.info("UserAndSelection Skip " + key);
           } else {
             selection.put(key, Collections.singleton(value));
           }

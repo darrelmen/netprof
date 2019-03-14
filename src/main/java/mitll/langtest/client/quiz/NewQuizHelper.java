@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.client.quiz;
@@ -56,16 +53,11 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE.POLYGLOT;
 
-/**
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 2/4/16.
- */
 public class NewQuizHelper<T extends CommonShell & ScoredExercise> extends PracticeHelper<T> {
   private final Logger logger = Logger.getLogger("NewQuizHelper");
 
@@ -169,6 +161,12 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise> extends Pract
           new ListOptions().setInstance(INavigation.VIEWS.QUIZ).setShowPager(false),
           listHeader, INavigation.VIEWS.QUIZ, NewQuizHelper.this
       );
+    }
+
+    @Override
+    protected void showExercises(final Collection<ClientExercise> result, final int reqID) {
+      hidePrevNextWidgets();
+      showOnlyOne(result);
     }
 
     @Override

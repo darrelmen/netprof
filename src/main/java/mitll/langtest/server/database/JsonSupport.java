@@ -1,7 +1,6 @@
 /*
- *
  * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
- * and their contractors; 2015. Other request for this document shall be referred
+ * and their contractors; 2019. Other request for this document shall be referred
  * to DLIFLC.
  *
  * WARNING: This document may contain technical data whose export is restricted
@@ -17,7 +16,7 @@
  * or recommendations expressed in this material are those of the author(s) and
  * do not necessarily reflect the views of the U.S. Air Force.
  *
- * © 2015 Massachusetts Institute of Technology.
+ * © 2015-2019 Massachusetts Institute of Technology.
  *
  * The software/firmware is provided to you on an As-Is basis
  *
@@ -26,8 +25,6 @@
  * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
  * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
- *
- *
  */
 
 package mitll.langtest.server.database;
@@ -41,7 +38,6 @@ import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.result.IResultDAO;
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.analysis.PhoneReportRequest;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
@@ -56,19 +52,11 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
- *
- * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
- * @since 4/7/15.
- */
 public class JsonSupport {
   private static final Logger logger = LogManager.getLogger(JsonSupport.class);
   private static final String SCORE_JSON = "scoreJson";
-  //  public static final String NAME = "name";
-//  public static final String ID = "id";
   private static final String LISTID = "listid";
-  public static final String SCORES = "scores";
+  private static final String SCORES = "scores";
 
   private final ISection<CommonExercise> sectionHelper;
   private final IResultDAO resultDAO;
@@ -102,15 +90,10 @@ public class JsonSupport {
    * @param userid
    * @param typeToSection
    * @param forContext
-   * @param sortByLatestScore
    * @return
    * @see mitll.langtest.server.ScoreServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  JsonObject getJsonScoreHistory(int userid,
-                                 Map<String, Collection<String>> typeToSection,
-                                 boolean forContext,
-                                 ExerciseSorter sorter,
-                                 boolean sortByLatestScore) {
+  JsonObject getJsonScoreHistory(int userid, Map<String, Collection<String>> typeToSection, boolean forContext) {
     Collection<String> listid = typeToSection.get(LISTID);
     if (listid == null || listid.isEmpty()) {
       Collection<CommonExercise> exercisesForSelectionState = sectionHelper.getExercisesForSelectionState(typeToSection);
@@ -119,8 +102,6 @@ public class JsonSupport {
       }
       return getJsonForExercises(userid, exercisesForSelectionState);
     } else {
-//      int id = getListID(listid);
-      // typeToSection.remove(LISTID);
       return getJsonForExercises(userid,
           userListManager.getCommonExercisesOnList(project.getID(), getListID(listid)));
     }
