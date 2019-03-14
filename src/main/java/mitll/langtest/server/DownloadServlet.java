@@ -54,6 +54,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -160,20 +161,7 @@ public class DownloadServlet extends DatabaseServlet {
             logger.info("returnAudioFile " + requestURI);
             returnAudioFile(response, db, queryString, language, projid);
           } else if (queryString.startsWith(REQUEST + "=" + STUDENT_AUDIO)) {
-            ParamParser invoke = new ParamParser(request.getQueryString().split("&")).invoke(false);
-
-            logger.info("Got " + invoke.getSelection());
-            Collection<String> userid = invoke.getSelection().get(USERID);
-
-            int user = -1;
-            try {
-              user = userid == null || userid.isEmpty() ? -1 : Integer.parseInt(userid.iterator().next());
-            } catch (NumberFormatException e) {
-              e.printStackTrace();
-            }
-            Collection<String> sessionid = invoke.getSelection().get("sessionid");
-//            logger.info("writeStudentAudioZip " + requestURI);
-            writeStudentAudioZip(response, db, user, sessionid == null || sessionid.isEmpty() ? "-1" : sessionid.iterator().next(), projid);
+            writeStudentAudio(request, response, db, projid);
           } else if (queryString.startsWith(REQUEST)) {
             //          logger.info("writeAudioZip " + requestURI);
             writeAudioZip(response, db, queryString, projid);
@@ -195,6 +183,46 @@ public class DownloadServlet extends DatabaseServlet {
     }
 
     closeOutputStream(response);
+  }
+
+  private void writeStudentAudio(HttpServletRequest request, HttpServletResponse response, DatabaseImpl db, int projid) {
+    ParamParser invoke = new ParamParser(request.getQueryString().split("&")).invoke(false);
+
+    logger.info("Got " + invoke.getSelection());
+    Collection<String> userid = invoke.getSelection().get(USERID);
+
+    int user = getInt(userid);
+
+    Collection<String> sessionid = invoke.getSelection().get("sessionid");
+//            logger.info("writeStudentAudioZip " + requestURI);
+    String session = sessionid == null || sessionid.isEmpty() ? "-1" : sessionid.iterator().next();
+    Collection<String> from = invoke.getSelection().get("from");
+    long fromTime = getLong(from);
+    Collection<String> to = invoke.getSelection().get("to");
+    long toTime = getLong(to);
+    logger.info("from " + new Date(fromTime));
+    logger.info("to   " + new Date(toTime));
+    writeStudentAudioZip(response, db, user, session, projid, fromTime, toTime);
+  }
+
+  private int getInt(Collection<String> userid) {
+    int user = -1;
+    try {
+      user = userid == null || userid.isEmpty() ? -1 : Integer.parseInt(userid.iterator().next());
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+    }
+    return user;
+  }
+
+  private long getLong(Collection<String> userid) {
+    long user = -1;
+    try {
+      user = userid == null || userid.isEmpty() ? -1 : Long.parseLong(userid.iterator().next());
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+    }
+    return user;
   }
 
   private void handleNoProject(HttpServletResponse response) throws IOException {
@@ -325,7 +353,9 @@ public class DownloadServlet extends DatabaseServlet {
                                     DatabaseImpl db,
                                     int userid,
                                     String session,
-                                    int projid) {
+                                    int projid,
+                                    long from,
+                                    long to) {
     // logger.debug("writeAudioZip : request " + projid + " " + language + " query " + queryString);
     Project project = db.getProject(projid);
 
@@ -340,14 +370,15 @@ public class DownloadServlet extends DatabaseServlet {
       setHeader(response, zipFileName);
     }
 
-    writeStudentZip(response, projid, userid, session, audioExportOptions);
+    writeStudentZip(response, projid, userid, session, audioExportOptions, from, to);
   }
 
   /**
    * TODO : uh... don't assume unit
-   * @see #writeAudioZip(HttpServletResponse, DatabaseImpl, String, int)
+   *
    * @param split1
    * @return
+   * @see #writeAudioZip(HttpServletResponse, DatabaseImpl, String, int)
    */
   private String getUnitAndChapter(String[] split1) {
     String unitChapter = "";
@@ -384,25 +415,21 @@ public class DownloadServlet extends DatabaseServlet {
                                int projectid,
                                int userID,
                                String sessionID,
-                               AudioExportOptions options) {
+                               AudioExportOptions options, long from, long to) {
     try {
-      List<MonitorResult> resultsBySession = db.getResultDAO().getResultsBySession(userID, sessionID);
+      Timestamp from1 = new Timestamp(from);
+      List<MonitorResult> resultsBySession = sessionID.equalsIgnoreCase("-1") ?
+          db.getResultDAO().getResultsInTimeRange(userID, projectid, from1, new Timestamp(to)):
+          db.getResultDAO().getResultsBySession(userID, sessionID);
 
       logger.info("writeStudentZip for " +
           "\n\tuser  " + userID +
           "\n\tsess  " + sessionID +
           "\n\tfound " + resultsBySession.size());
+
       Project project = db.getProject(projectid);
 
-      long start = -1;
-      try {
-        start = Long.parseLong(sessionID);
-      } catch (NumberFormatException e) {
-        e.printStackTrace();
-      }
-      SimpleDateFormat format = new SimpleDateFormat("MMM d yyyy h mm a");
-
-      String suffix = start == -1 ? "" : "_" + format.format(new Date(start));
+      String suffix = getTimestamp(sessionID, from1);
       User userWhere = db.getUserDAO().getUserWhere(userID);
       String base = userWhere.getFirstInitialName() + suffix;
       String baseName = base
@@ -424,6 +451,24 @@ public class DownloadServlet extends DatabaseServlet {
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
+  }
+
+  @NotNull
+  private String getTimestamp(String sessionID, Timestamp from1) {
+    long start = getSession(sessionID);
+    SimpleDateFormat format = new SimpleDateFormat("MMM d yyyy h mm a");
+
+    return start == -1 ? "_"+  format.format(from1) : "_" + format.format(new Date(start));
+  }
+
+  private long getSession(String sessionID) {
+    long start = -1;
+    try {
+      start = Long.parseLong(sessionID);
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+    }
+    return start;
   }
 
   private String getZipFileName(DatabaseImpl db,
@@ -503,6 +548,7 @@ public class DownloadServlet extends DatabaseServlet {
 
   /**
    * try to prevent browser from complaining that it's getting an expected MIME type.
+   *
    * @param response
    * @param underscores
    */
@@ -603,9 +649,9 @@ public class DownloadServlet extends DatabaseServlet {
   }
 
   /**
-   * @see #setHeader(HttpServletResponse, String)
    * @param response
    * @param fileName
+   * @see #setHeader(HttpServletResponse, String)
    */
   private void setResponseHeader(HttpServletResponse response, String fileName) {
     setFilenameHeader(response, fileName);

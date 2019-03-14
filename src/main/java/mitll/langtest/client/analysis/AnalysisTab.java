@@ -56,6 +56,7 @@ import mitll.langtest.shared.custom.TimeRange;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Date;
 import java.util.logging.Logger;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
@@ -511,12 +512,18 @@ public class AnalysisTab extends DivWidget {
   }
 
   private void gotDownloadClick() {
-    Long periodStart = analysisPlot.getSessionStart();
-    logger.info("getTimeControls start " + periodStart);
+//    Long periodStart = analysisPlot.getSessionStart();
+//    logger.info("getTimeControls start " + periodStart);
     TIME_HORIZON timeHorizon = analysisPlot.getTimeHorizon();
 
-    long l = timeHorizon == TIME_HORIZON.SESSION ? periodStart : -1;
-    new DownloadHelper(userid, l).doStudentAudioDownload(controller.getHost());
+    long l = timeHorizon == TIME_HORIZON.SESSION ? analysisPlot.getSessionStart() : -1;
+    long start = analysisPlot.getStart();
+    long end = analysisPlot.getEnd();
+
+//    logger.info("from " + new Date(start));
+//    logger.info("to   " + new Date(end));
+    new DownloadHelper(userid, l, start, end)
+        .doStudentAudioDownload(controller.getHost());
   }
 
   /**

@@ -97,7 +97,7 @@ public class DownloadHelper implements IShowStatus {
   private boolean includeAudio = false;
 
   private int userID;
-  private long sessionID;
+  private long sessionID, from, to;
 
   private final Heading status1 = new Heading(4, "");
   private final Heading status2 = new Heading(4, "");
@@ -112,10 +112,12 @@ public class DownloadHelper implements IShowStatus {
     this.speedChoices = new SpeedChoices(this, false);
   }
 
-  public DownloadHelper(int userid, long sessionID) {
+  public DownloadHelper(int userid, long sessionID, long from, long to) {
     this();
     this.userID = userid;
     this.sessionID = sessionID;
+    this.from = from;
+    this.to = to;
   }
 
   /**
@@ -468,6 +470,8 @@ public class DownloadHelper implements IShowStatus {
     return "?" +
         "request=" + "studentAudio" +
         "&userid=" + userID +
+        "&from=" + from +
+        "&to=" + to +
         "&sessionid=" + sessionID;
   }
 

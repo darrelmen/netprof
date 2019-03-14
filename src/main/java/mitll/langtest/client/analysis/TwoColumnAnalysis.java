@@ -155,9 +155,9 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
 
   protected DivWidget getContainerDiv(DivWidget table) {
     String headerLabel = getHeaderLabel();
-    if (headerLabel == null) {
-      logger.info("header label is null for " + this.getClass());
-    }
+//    if (headerLabel == null) {
+//      logger.info("header label is null for " + this.getClass());
+//    }
     return getContainerDiv(table, headerLabel == null ? null : getHeading(headerLabel));
   }
 

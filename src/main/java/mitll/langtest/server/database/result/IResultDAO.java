@@ -31,7 +31,6 @@ package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.ReportStats;
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -39,8 +38,8 @@ import mitll.langtest.shared.flashcard.ExerciseCorrectAndScore;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.npdata.dao.SlickPerfResult;
-import mitll.npdata.dao.result.ResultDAOWrapper;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +81,7 @@ public interface IResultDAO extends IDAO {
   List<MonitorResult> getMonitorResults(int projid);
 
   List<MonitorResult> getResultsBySession(int userid, String sessionID);
+  List<MonitorResult> getResultsInTimeRange(int userid, int projectid, Timestamp from, Timestamp to);
 
   List<MonitorResult> getMonitorResultsKnownExercises(int projid);
 
@@ -128,6 +128,6 @@ public interface IResultDAO extends IDAO {
 
   List<SlickPerfResult> getLatestResultsForDialogSession(int dialogSessionID);
 
-  ResultDAOWrapper getDao();
+  //ResultDAOWrapper getDao();
   Map<Integer,String> getResultIDToJSON(int projid);
 }
