@@ -35,6 +35,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.OOVInfo;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
@@ -106,4 +107,7 @@ public interface AudioServiceAsync {
   void refreshExercises(int projid, Set<Integer> exids, AsyncCallback<Void> async);
 
   void getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript, AsyncCallback<AudioAttribute> async);
+
+  void checkOOV(int id, AsyncCallback<OOVInfo> async);
+
 }

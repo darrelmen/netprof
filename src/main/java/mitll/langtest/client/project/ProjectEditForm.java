@@ -45,6 +45,7 @@ import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.Services;
 import mitll.langtest.client.initial.LifecycleSupport;
+import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.user.FormField;
@@ -146,6 +147,7 @@ public class ProjectEditForm extends UserDialog {
   private ListBox statusBox, typeBox;
   private ProjectInfo info;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
+  private final ExerciseController controller;
 
   private HTML feedback;
   /**
@@ -176,8 +178,12 @@ public class ProjectEditForm extends UserDialog {
     this.lifecycleSupport = lifecycleSupport;
     services = controller;
     messageHelper = controller.getMessageHelper();
-    String userID = controller.getUserManager().getUserID();
-    if (userID != null) isSuperUser = userID.equalsIgnoreCase(GVIDAVER);
+
+    this.controller=controller;
+    {
+      String userID = controller.getUserManager().getUserID();
+      if (userID != null) isSuperUser = userID.equalsIgnoreCase(GVIDAVER);
+    }
   }
 
   /**
@@ -481,7 +487,6 @@ public class ProjectEditForm extends UserDialog {
       }
 
       fieldset.add(getCheckOOV(info));
-
     }
 
     {
@@ -882,7 +887,7 @@ public class ProjectEditForm extends UserDialog {
   }
 
   private void showCheckOOV(ProjectInfo info, Button w) {
-    projectServiceAsync.checkOOV(info.getID(), new AsyncCallback<OOVInfo>() {
+    controller.getAudioServiceAsyncForHost(info.getHost()).checkOOV(info.getID(), new AsyncCallback<OOVInfo>() {
       @Override
       public void onFailure(Throwable caught) {
         messageHelper.handleNonFatalError("Checking OOV...", caught);

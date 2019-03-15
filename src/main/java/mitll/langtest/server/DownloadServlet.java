@@ -436,7 +436,7 @@ public class DownloadServlet extends DatabaseServlet {
           .replaceAll("\\s++", "_")
           .replaceAll("\\.", "_");
 
-      new AudioExport(db.getServerProps())
+      new AudioExport(db.getServerProps(), project.getPathHelper().getContext())
           .writeResultsToStream(
               project,
               resultsBySession,
@@ -800,7 +800,7 @@ public class DownloadServlet extends DatabaseServlet {
   @Override
   public void init() throws ServletException {
     super.init();
-    setPaths();
+    setPaths(getServletContext());
   }
 
   /**

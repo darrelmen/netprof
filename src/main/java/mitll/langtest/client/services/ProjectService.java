@@ -39,6 +39,9 @@ import mitll.langtest.shared.project.*;
 
 import java.util.List;
 
+/**
+ * Will only run on netprof instance --
+ */
 @RemoteServiceRelativePath("project-manager")
 public interface ProjectService extends RemoteService {
   /**
@@ -70,7 +73,6 @@ public interface ProjectService extends RemoteService {
 
   boolean delete(int id) throws DominoSessionException, RestrictedOperationException;
 
-  OOVInfo checkOOV(int id) throws DominoSessionException;
 
   DominoUpdateResponse addPending(int id, boolean doChange) throws DominoSessionException, RestrictedOperationException;
 

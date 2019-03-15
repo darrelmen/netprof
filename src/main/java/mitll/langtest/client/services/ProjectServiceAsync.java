@@ -43,7 +43,6 @@ public interface ProjectServiceAsync {
   void existsByName(String languageChoice, String name, AsyncCallback<Boolean> async);
 
   void delete(int id, AsyncCallback<Boolean> async);
-  void checkOOV(int id, AsyncCallback<OOVInfo> async);
 
   void addPending(int id, boolean doChange, AsyncCallback<DominoUpdateResponse> async);
 

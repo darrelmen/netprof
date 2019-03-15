@@ -1419,7 +1419,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (userManagement == null) {
       db = getDatabase();
       if (db != null) {
-        setPaths();
+        setPaths(getServletContext());
         ServerProperties serverProps = db.getServerProps();
         this.userManagement = new RestUserManagement(db, serverProps);
         removeExercisesWithMissingAudioDefault = serverProps.removeExercisesWithMissingAudio();

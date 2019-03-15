@@ -47,12 +47,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
+import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import static mitll.langtest.server.audio.AudioConversion.LANGTEST_IMAGES_NEW_PRO_F_1_PNG;
 
 public class AudioExport {
   private static final Logger logger = LogManager.getLogger(AudioExport.class);
@@ -66,12 +69,15 @@ public class AudioExport {
   private Collection<String> typeOrder;
   private final ServerProperties props;
 
+  private final ServletContext servletContext;
+
   /**
    * @param props
    * @see DatabaseImpl#writeZip(OutputStream, Map, int, AudioExportOptions, mitll.langtest.server.database.audio.IEnsureAudioHelper)
    */
-  public AudioExport(ServerProperties props) {
+  public AudioExport(ServerProperties props, ServletContext servletContext) {
     this.props = props;
+    this.servletContext = servletContext;
   }
 
   /**
@@ -351,7 +357,7 @@ public class AudioExport {
 //    MiniUser prefMale   = getMaxUser(maleToCount);
 //    MiniUser prefFemale = getMaxUser(femaleToCount);
 
-    AudioConversion audioConversion = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange());
+    AudioConversion audioConversion = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange(), servletContext.getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG));
 
     int numMissing = 0;
     Set<String> names = new HashSet<>();
@@ -447,7 +453,7 @@ public class AudioExport {
                                           String language, MiniUser user) throws Exception {
     long then = System.currentTimeMillis();
 
-    AudioConversion audioConversion = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange());
+    AudioConversion audioConversion = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange(), servletContext.getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG));
 
     Set<String> names = new HashSet<>();
 
@@ -755,8 +761,8 @@ public class AudioExport {
       boolean add = names.add(name);
       if (!add) {
 //        logger.info("copyAudioAtPath already made " + name);
-        name += "_"+resultID;
-  //      logger.info("copyAudioAtPath try          " + name);
+        name += "_" + resultID;
+        //      logger.info("copyAudioAtPath try          " + name);
         add = names.add(name);
       }
 

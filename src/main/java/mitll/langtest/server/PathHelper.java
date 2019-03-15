@@ -259,4 +259,8 @@ public class PathHelper {
   public void setProperties(ServerProperties properties) {
     this.properties = properties;
   }
+
+  public ServletContext getContext() {
+    return context;
+  }
 }

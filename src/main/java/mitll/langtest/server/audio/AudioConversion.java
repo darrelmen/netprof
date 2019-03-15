@@ -63,6 +63,7 @@ public class AudioConversion extends AudioBase {
   private static final boolean SPEW = true;
   private static final String MP3 = ".mp3";
   private static final String WAV = ".wav";
+  public static final String LANGTEST_IMAGES_NEW_PRO_F_1_PNG = "langtest/images/NewProF1.png";
   private final AudioCheck audioCheck;
   private static final int MIN_WARN_DUR = 50;
 
@@ -74,14 +75,18 @@ public class AudioConversion extends AudioBase {
   private static final boolean DEBUG_DETAIL = false;
   private final boolean trimAudio;
   private static final boolean WARN_MISSING_FILE = false;
+  private String realPath = "";
 
   /**
    * @paramx props
    * @seex mitll.langtest.server.DatabaseServlet#ensureMP3
    */
+  public AudioConversion(boolean trimAudio, int minDynamicRange, String realPath) {
+    this(trimAudio,minDynamicRange);
+    this.realPath = realPath;
+  }
+
   public AudioConversion(boolean trimAudio, int minDynamicRange) {
-//    trimMillisBefore = props.getTrimBefore();
-//    trimMillisAfter = props.getTrimAfter();
     this.trimAudio = trimAudio;
     soxPath = getSox();
     audioCheck = new AudioCheck(trimAudio, minDynamicRange);
@@ -106,7 +111,7 @@ public class AudioConversion extends AudioBase {
                                                       boolean quietAudioOK) {
     long then = System.currentTimeMillis();
     File parentFile = file.getParentFile();
-    parentFile.mkdirs();
+    boolean didIt = parentFile.mkdirs();
 
     setPermissions(parentFile);
     setPermissions(parentFile.getParentFile());
@@ -684,17 +689,28 @@ public class AudioConversion extends AudioBase {
       title = title.substring(0, 30);
     }
     if (title == null) title = "";
-    String s = "langtest/images/NewProF1_48x48.png";
-    if (!new File(s).exists()) {
-      logger.warn("can't find " + new File(s).getAbsolutePath());
+
+
+    List<String> args;
+    if (new File(realPath).exists()) {
+      args = new ArrayList<>(Arrays.asList(lamePath, pathToAudioFile, mp3File,
+          "--tt", title,
+          "--ta", trackInfo.getArtist(),
+          "--tc", trackInfo.getComment(),
+          "--tl", trackInfo.getAlbum(),
+          "--ti", realPath,
+          "--add-id3v2"));
+    } else {
+      logger.warn("can't find " + new File(realPath).getAbsolutePath());
+      args = new ArrayList<>(Arrays.asList(lamePath, pathToAudioFile, mp3File,
+          "--tt", title,
+          "--ta", trackInfo.getArtist(),
+          "--tc", trackInfo.getComment(),
+          "--tl", trackInfo.getAlbum(),
+
+          "--add-id3v2"));
     }
-    List<String> args = new ArrayList<>(Arrays.asList(lamePath, pathToAudioFile, mp3File,
-        "--tt", title,
-        "--ta", trackInfo.getArtist(),
-        "--tc", trackInfo.getComment(),
-        "--tl", trackInfo.getAlbum(),
-        "--ti", s,
-        "--add-id3v2"));
+
     trackInfo.getUnitToValue().forEach((k, v) -> {
       args.add("--tv");
       args.add(k + "=" + v);

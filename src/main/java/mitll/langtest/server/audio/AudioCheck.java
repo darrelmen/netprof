@@ -77,7 +77,6 @@ public class AudioCheck {
     this.MIN_DYNAMIC_RANGE = minDynamicRange;
   }
 
-
   /**
    * @param file
    * @return
@@ -86,10 +85,6 @@ public class AudioCheck {
   public double getDurationInSeconds(String file) {
     return getDurationInSeconds(new File(file));
   }
-
-/*  public long getDurationInMillis(String file) {
-    return (long) (1000D * getDurationInSeconds(file));
-  }*/
 
   /**
    * @param file

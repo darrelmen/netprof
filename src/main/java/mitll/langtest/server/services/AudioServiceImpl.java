@@ -57,9 +57,11 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.OOVInfo;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
@@ -72,7 +74,6 @@ import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.xpath.operations.Bool;
 import org.jetbrains.annotations.NotNull;
 
 import javax.servlet.ServletException;
@@ -168,7 +169,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   @Override
   public void init() {
     super.init();
-    pathWriter = new PathWriter(serverProps);
+    pathWriter = new PathWriter(serverProps, getServletContext());
     ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
     audioCheck = new AudioCheck(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange());
     pathWriter.doSanityCheckOnDir(new File(serverProps.getAnswerDir()), " answers dir ");
@@ -1183,6 +1184,17 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private MiniUser.Gender getGender(int user) {
     User byID = db.getUserDAO().getByID(user);
     return byID == null ? MiniUser.Gender.Unspecified : byID.getRealGender();
+  }
+
+
+  @Override
+  public OOVInfo checkOOV(int id) throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasAdminOrCDPerm(userIDFromSessionOrDB)) {
+      return db.getProjectManagement().checkOOV(id);
+    } else {
+      throw getRestricted("Check OOV on a project.");
+    }
   }
 
   /**
