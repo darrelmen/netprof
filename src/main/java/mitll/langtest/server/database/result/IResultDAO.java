@@ -80,7 +80,7 @@ public interface IResultDAO extends IDAO {
    */
   List<MonitorResult> getMonitorResults(int projid);
 
-  List<MonitorResult> getResultsBySession(int userid, String sessionID);
+  List<MonitorResult> getResultsBySession(int userid, int projid, String sessionID);
   List<MonitorResult> getResultsInTimeRange(int userid, int projectid, Timestamp from, Timestamp to);
 
   List<MonitorResult> getMonitorResultsKnownExercises(int projid);

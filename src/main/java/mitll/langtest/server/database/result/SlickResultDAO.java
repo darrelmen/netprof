@@ -275,8 +275,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
-  public List<MonitorResult> getResultsBySession(int userid, String sessionID) {
-    return getMonitorResults(getDao().resultsBySession(userid, sessionID));
+  public List<MonitorResult> getResultsBySession(int userid, int projid, String sessionID) {
+    return getMonitorResults(getDao().resultsBySession(userid, projid, sessionID));
   }
 
   @Override

@@ -1022,7 +1022,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
-  public List<MonitorResult> getResultsBySession(int userid, String sessionID) {
+  public List<MonitorResult> getResultsBySession(int userid, int projid, String sessionID) {
     return null;
   }
 

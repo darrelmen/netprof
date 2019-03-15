@@ -420,7 +420,7 @@ public class DownloadServlet extends DatabaseServlet {
       Timestamp from1 = new Timestamp(from);
       List<MonitorResult> resultsBySession = sessionID.equalsIgnoreCase("-1") ?
           db.getResultDAO().getResultsInTimeRange(userID, projectid, from1, new Timestamp(to)):
-          db.getResultDAO().getResultsBySession(userID, sessionID);
+          db.getResultDAO().getResultsBySession(userID, projectid, sessionID);
 
       logger.info("writeStudentZip for " +
           "\n\tuser  " + userID +
