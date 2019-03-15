@@ -1653,7 +1653,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, languageEnum);
     }
 
-    new AudioExport(getServerProps())
+    new AudioExport(getServerProps(),pathHelper.getContext())
         .writeZip(out,
             typeToSection,
             getSectionHelper(projectid),
@@ -1797,7 +1797,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
     long now = System.currentTimeMillis();
     logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
-    new AudioExport(getServerProps()).writeUserListAudio(
+    new AudioExport(getServerProps(),pathHelper.getContext()).writeUserListAudio(
         out,
         name,
         getSectionHelper(projectid),
@@ -1901,7 +1901,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see DownloadServlet#getBaseName
    */
   public String getPrefix(Map<String, Collection<String>> typeToSection, int projectid) {
-    return new AudioExport(getServerProps()).getPrefix(getSectionHelper(projectid), typeToSection);
+    return new AudioExport(getServerProps(),pathHelper.getContext()).getPrefix(getSectionHelper(projectid), typeToSection);
   }
 
   /**
@@ -2233,5 +2233,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   public String toString() {
     return "Database : " + this.getClass().toString();
+  }
+
+  public PathHelper getPathHelper() {
+    return pathHelper;
   }
 }

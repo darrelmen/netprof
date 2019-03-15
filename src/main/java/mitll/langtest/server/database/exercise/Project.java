@@ -900,4 +900,8 @@ public class Project implements IPronunciationLookup, IProject {
   public String toString() {
     return "Project\n\t(" + getTypeOrder() + ") : project " + project;// + "\n\ttypes " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
+
+  public PathHelper getPathHelper() {
+    return pathHelper;
+  }
 }

@@ -68,6 +68,7 @@ import java.util.*;
 
 import static mitll.langtest.server.ScoreServlet.GetRequest.HASUSER;
 import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
+import static mitll.langtest.server.audio.AudioConversion.LANGTEST_IMAGES_NEW_PRO_F_1_PNG;
 
 public class AudioFileHelper implements AlignDecode {
   private static final Logger logger = LogManager.getLogger(AudioFileHelper.class);
@@ -144,7 +145,7 @@ public class AudioFileHelper implements AlignDecode {
     this.logAndNotify = langTestDatabase;
 
     this.mp3Support = new MP3Support(pathHelper);
-    audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProperties.getMinDynamicRange());
+    audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProperties.getMinDynamicRange(), pathHelper.getContext().getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG));
 
     this.language = project.getLanguageEnum();
     removeAccents = language != Language.FRENCH;

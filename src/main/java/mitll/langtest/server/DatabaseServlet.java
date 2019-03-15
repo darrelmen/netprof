@@ -38,6 +38,7 @@ import mitll.langtest.server.services.MyRemoteServiceServlet;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 
@@ -50,9 +51,11 @@ public class DatabaseServlet extends HttpServlet {
 
   /**
    * @see DownloadServlet#init
+   * @param servletContext
    */
-  void setPaths() {
+  void setPaths(ServletContext servletContext) {
     pathHelper = getPathHelper();
+
     ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
   }
 

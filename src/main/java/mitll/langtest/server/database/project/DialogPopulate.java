@@ -87,7 +87,7 @@ public class DialogPopulate {
 
   public DialogPopulate(DatabaseImpl db, PathHelper pathHelper) {
     this.db = db;
-    pathWriter = new PathWriter(db.getServerProps());
+    pathWriter = new PathWriter(db.getServerProps(), pathHelper.getContext());
     this.pathHelper = pathHelper;
   }
 

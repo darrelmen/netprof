@@ -64,6 +64,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.server.audio.AudioConversion.LANGTEST_IMAGES_NEW_PRO_F_1_PNG;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.ERROR;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.SUCCESS;
@@ -316,7 +317,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           testAudioDir = audioDir;
         }
       }
-      testAudioFileNoSuffix = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange())
+      testAudioFileNoSuffix = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange(), project.getPathHelper().getContext().getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG))
           .convertTo16Khz(audioDir, testAudioFileNoSuffix, uniqueTimestamp);
     } catch (UnsupportedAudioFileException e) {
       logger.error("Got " + e, e);
@@ -679,6 +680,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    *
    * http://172.25.252.196/en/oov/{“transcript”:”what”}
    * https://172.25.252.196/en/score/{“file”:”/opt/...blah.wav”, “transcript”:”what”}
+   * http://172.25.252.196/en/score/{“waveform”:”/opt/blah.wav”, “transcript”:”what”}
    * http://172.25.252.196/en/norm/{“transcript”:”WhAt”}
    *
    *
@@ -689,8 +691,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private String getPrefix(String operation) {
     String localhost = props.useProxy() ? "hydra-dev" : "localhost";
 //    return "http://" + localhost + ":" + port + "/" + operation + "/";
-    return HTTPS +
-        "://" + localhost + "/" + project.getLanguageEnum().getCC() + "/" + operation + "/";
+    String languageCode = project.getLanguageEnum().getLocale();
+    return HTTPS +"://" + localhost + "/" + languageCode + "/" + operation + "/";
   }
 
   /**
@@ -709,9 +711,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     //   jsonObject.addProperty("reqid", "1234");
 //    jsonObject.addProperty("request", "decode");
 //    jsonObject.addProperty("phrase", sentence.trim());
+    jsonObject.addProperty("waveform", audioPath);
     jsonObject.addProperty(TRANSCRIPT, sentence.trim());
 //    jsonObject.addProperty("file", audioPath);
-    jsonObject.addProperty("waveform", audioPath);
 
     return jsonObject.toString();
   }

@@ -40,6 +40,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.OOVInfo;
 import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
@@ -110,5 +111,7 @@ public interface AudioService extends RemoteService {
   void editItem(ClientExercise userExercise, boolean keepAudio) throws DominoSessionException, RestrictedOperationException;
 
   void refreshExercises(int projid, Set<Integer> exids) throws DominoSessionException;
+
+  OOVInfo checkOOV(int id) throws DominoSessionException;
 
 }

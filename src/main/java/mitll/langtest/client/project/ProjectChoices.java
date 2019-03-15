@@ -573,6 +573,7 @@ public class ProjectChoices extends ThumbnailChoices {
    * Do some validity checking...
    */
   private void showNewProjectDialog() {
+
     ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
 
     new DialogHelper(true)

@@ -58,6 +58,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 
+import static mitll.langtest.server.audio.AudioConversion.LANGTEST_IMAGES_NEW_PRO_F_1_PNG;
 import static mitll.langtest.shared.answer.Validity.OK;
 
 /**
@@ -491,7 +492,7 @@ public class JsonScoring {
       logger.error("no file at " + absolutePathToWav);
     }
 
-    new AudioConversion(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange())
+    new AudioConversion(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange(), db.getPathHelper().getContext().getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG))
         .writeCompressedVersions(absolutePathToWav, false, trackInfo, true);
   }
 
