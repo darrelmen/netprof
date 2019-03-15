@@ -439,8 +439,10 @@ public class ScoreServlet extends DatabaseServlet {
   private int getTripleProjID(HttpServletRequest request) {
     int projid = getProjID(request);
 
-    if (projid == -1) {
-      String[] split1 = request.getQueryString().split(AMPERSAND);
+    String queryString = request.getQueryString();
+
+    if (projid == -1 && queryString != null) {
+      String[] split1 = queryString.split(AMPERSAND);
       Map<String, Collection<String>> selection = new ParamParser(split1).invoke(false).getSelection();
       if (selection.get(PROJID) != null) {
         String projid1 = selection.get(PROJID).iterator().next();
@@ -450,7 +452,7 @@ public class ScoreServlet extends DatabaseServlet {
           logger.warn("getTripleProjID : couldn't parse '" + projid1 + "'");
         }
       } else {
-        logger.info("getTripleProjID no " + PROJID + " in " + selection + " from " + request.getQueryString());
+        logger.info("getTripleProjID no " + PROJID + " in " + selection + " from " + queryString);
       }
     }
 
