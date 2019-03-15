@@ -771,10 +771,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (projectid == -1) {
       return null;
     } else {
-      if (isAmas()) {
-        return new SectionHelper<>();
-      }
-
       getExercises(projectid, false);
       return getSectionHelperForProject(projectid);
     }
@@ -811,20 +807,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
   }
 
-  private boolean isAmas() {
-    return serverProps.isAMAS();
-  }
-
   public Collection<String> getTypeOrder(int projectid) {
-    ISection sectionHelper = (isAmas()) ? getAMASSectionHelper() : getSectionHelper(projectid);
+    ISection<CommonExercise> sectionHelper =  getSectionHelper(projectid);
     if (sectionHelper == null) {
       logger.warn("getTypeOrder no section helper for " + this + " and " + projectid);
     }
     Collection<String> types = (sectionHelper == null) ? Collections.emptyList() : sectionHelper.getTypeOrder();
 
-    if (types.isEmpty()) {
-      logger.error("getTypeOrder empty type order : " + projectid + " = " + types);
-    }
+//    if (types.isEmpty()) {
+//      logger.error("getTypeOrder empty type order : " + projectid + " = " + types);
+//    }
     return types;
   }
 

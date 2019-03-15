@@ -344,10 +344,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private Map<String, String> getUnitToValue(SlickExercise slick, Collection<String> typeOrder) {
     Map<String, String> unitToValue = new HashMap<>();
 
-    if (typeOrder == null || typeOrder.isEmpty()) {
+/*    if (typeOrder == null || typeOrder.isEmpty()) {
       boolean isDefault = slick.projid() == DEFAULT_PROJECT;
       logger.warn("getUnitToValue no types for exercise " + (isDefault ? " DEFAULT PROJECT " : "") + slick);
-    }
+    }*/
 
     Iterator<String> iterator = typeOrder != null ? typeOrder.iterator() : null;
     String first = iterator != null && iterator.hasNext() ? iterator.next() : "";
