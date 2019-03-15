@@ -82,7 +82,7 @@ public class AudioCheck {
    * @return
    * @see mitll.langtest.server.services.AudioServiceImpl#getImageForAudioFile
    */
-  public double getDurationInSeconds(String file) {
+  public double getDurationInSeconds(String file) throws UnsupportedAudioFileException {
     return getDurationInSeconds(new File(file));
   }
 
@@ -91,13 +91,15 @@ public class AudioCheck {
    * @return
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise
    */
-  public double getDurationInSeconds(File file) {
+  public double getDurationInSeconds(File file) throws UnsupportedAudioFileException {
     AudioInputStream audioInputStream = null;
     try {
       audioInputStream = getAudioInputStream(file);
       double dur = getDurationInSeconds(audioInputStream);
       audioInputStream.close();
       return dur;
+    } catch (UnsupportedAudioFileException un) {
+      throw un;
     } catch (Exception e) {
       try {
         if (audioInputStream != null) audioInputStream.close();
@@ -196,9 +198,8 @@ public class AudioCheck {
         validityAndDur.validity = Validity.SNR_TOO_LOW;
       }
       validityAndDur.setMaxMinRange(dynamicRange.maxMin);
-    }
-    else {
-     // logger.info("file " +fileInfo + " not valid so not doing DNR");
+    } else {
+      // logger.info("file " +fileInfo + " not valid so not doing DNR");
     }
   }
 
@@ -252,9 +253,9 @@ public class AudioCheck {
    * @param allowMoreClipping
    * @param quietAudioOK
    * @return true if well formed
-   * @see AudioConversion#isValid(File, boolean, boolean)
    * @seex #checkWavFile
    * @seex #checkWavFileRejectAnyTooLoud
+   * @see AudioConversion#isValid(File, boolean, boolean)
    */
   private ValidityAndDur checkWavFileWithClipThreshold(File wavFile, boolean allowMoreClipping, boolean quietAudioOK) {
     AudioInputStream ais = null;

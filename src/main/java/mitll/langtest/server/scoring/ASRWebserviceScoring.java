@@ -97,6 +97,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final String TRANSCRIPT = "transcript";
   private static final String IN_VOCAB = "in_vocab";
   private static final String HTTPS = "http"; //""https";
+  public static final String WAVEFORM = "waveform";
+  public static final String LOCALHOST = "localhost";
 
   private final SLFFile slfFile;
 
@@ -336,7 +338,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     if (cached != null) {
       logger.info("scoreRepeatExercise : using cached score for " + filePath);
     }
-    Double cachedDuration = getFileDuration(wavFile, filePath);
+    Double cachedDuration = null;
+    try {
+      cachedDuration = getFileDuration(wavFile, filePath);
+    } catch (UnsupportedAudioFileException e) {
+      logger.warn("not a wav file? " + wavFile, e);
+      return new PretestScore(-1f);
+    }
 
     // actually run the scoring
     JsonObject jsonObject = null;
@@ -480,6 +488,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       if (status == SUCCESS) {
         JsonArray asJsonArray = parse.getAsJsonArray(NORM_TRANSCRIPT);
         asJsonArray.forEach(jsonElement -> tokens.add(jsonElement.getAsString()));
+        logger.info("runNorm : kaldi tokens were " +tokens);
       } else {
         String log = parse.has(LOG) ? parse.get(LOG).getAsString() : "";
         logger.warn("runNorm failed " +
@@ -497,10 +506,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   /**
-   * @see #getKaldiOOV
    * @param tokens
    * @param port
    * @return
+   * @see #getKaldiOOV
    */
   private List<String> runOOV(final List<String> tokens, int port) {
     List<Boolean> oov = new ArrayList<>();
@@ -662,15 +671,18 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   private String doKaldiGet(String sentence, int port, String jsonRequest, String operation) throws IOException {
     String prefix = getPrefix(operation);
-    String encode = URLEncoder.encode(jsonRequest, StandardCharsets.UTF_8.name());
-    String url = prefix + encode;
+    // String encode = URLEncoder.encode(jsonRequest, StandardCharsets.UTF_8.name());
+    String url = prefix;// + encode;
     logger.info("runKaldi " + operation +
         "\n\tcontent  " + sentence +
         //"\n\treq       " + encode +
         "\n\traw       " + (prefix + jsonRequest) +
         "\n\tpost      " + url);
 
-    return new HTTPClient().readFromGET(url);
+    //return new HTTPClient().readFromGET(url);
+
+    return new HTTPClient(url).sendAndReceiveAndClose(jsonRequest);
+
   }
 
   /**
@@ -683,16 +695,14 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * http://172.25.252.196/en/score/{“waveform”:”/opt/blah.wav”, “transcript”:”what”}
    * http://172.25.252.196/en/norm/{“transcript”:”WhAt”}
    *
-   *
    * @param operation
    * @return
    */
   @NotNull
   private String getPrefix(String operation) {
-    String localhost = props.useProxy() ? "hydra-dev" : "localhost";
-//    return "http://" + localhost + ":" + port + "/" + operation + "/";
+    String localhost = props.useProxy() ? "hydra-dev" : LOCALHOST;
     String languageCode = project.getLanguageEnum().getLocale();
-    return HTTPS +"://" + localhost + "/" + languageCode + "/" + operation + "/";
+    return HTTPS + "://" + localhost + "/" + languageCode + "/" + operation + "/";
   }
 
   /**
@@ -703,17 +713,12 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    */
   private String getKaldiRequest(String sentence, String audioPath) {
     JsonObject jsonObject = new JsonObject();
-
 //    logger.info("KALDI " +
 //        "\n\tsentence  " + sentence +
 //        "\n\taudioPath " + audioPath
 //    );
-    //   jsonObject.addProperty("reqid", "1234");
-//    jsonObject.addProperty("request", "decode");
-//    jsonObject.addProperty("phrase", sentence.trim());
-    jsonObject.addProperty("waveform", audioPath);
+    jsonObject.addProperty(WAVEFORM, audioPath);
     jsonObject.addProperty(TRANSCRIPT, sentence.trim());
-//    jsonObject.addProperty("file", audioPath);
 
     return jsonObject.toString();
   }
@@ -752,7 +757,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see #scoreRepeatExercise
    */
   @NotNull
-  private Double getFileDuration(File wavFile, String filePath) {
+  private Double getFileDuration(File wavFile, String filePath) throws UnsupportedAudioFileException {
     Double cachedDuration = fileToDuration.getIfPresent(filePath);
     if (cachedDuration == null) {
       cachedDuration = new AudioCheck(props.shouldTrimAudio(), props.getMinDynamicRange()).getDurationInSeconds(wavFile);

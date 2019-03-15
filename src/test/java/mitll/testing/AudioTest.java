@@ -114,7 +114,7 @@ public class AudioTest {
     }
   }
 
-  public File copyAndTrim(AudioCheck audioCheck, File replacement) throws IOException {
+  private File copyAndTrim(AudioCheck audioCheck, File replacement) throws Exception {
     File destFile = new File(replacement.getParent(),"trim_"+replacement.getName());
 
     FileUtils.copyFile(replacement, destFile);

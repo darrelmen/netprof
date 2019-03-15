@@ -52,6 +52,7 @@ public class HTTPClient {
   private static final String GET = "GET";
   private static final String POST = "POST";
   public static final String UTF_8 = "UTF8";
+  public static final String SENDING = "sending";
 
   private HttpURLConnection httpConn;
 
@@ -146,6 +147,12 @@ public class HTTPClient {
     return httpConn;
   }
 
+  /**
+   * @see #HTTPClient(String)
+   * @param url
+   * @return
+   * @throws IOException
+   */
   private HttpURLConnection setupPostHttpConn(String url) throws IOException {
     HttpURLConnection httpConn = getHttpURLConnection(url);
     httpConn.setRequestMethod(POST);
@@ -249,8 +256,7 @@ public class HTTPClient {
       send(input);
       //logger.info("sending END   " + input.length());
     } catch (ConnectException ce) {
-      String sending = "sending";
-      logError(input, ce, sending);
+      logError(input, ce, SENDING);
       return "";
     } catch (IOException e) {
       logger.error("sendAndReceive sending " + input + " got " + e, e);
@@ -277,8 +283,7 @@ public class HTTPClient {
       send(input);
       //logger.info("sending END   " + input.length());
     } catch (ConnectException ce) {
-      String sending = "sending";
-      logError(input, ce, sending);
+      logError(input, ce, SENDING);
       return "";
     } catch (IOException e) {
       logger.error("sendAndReceive sending " + input + " got " + e, e);

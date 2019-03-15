@@ -1466,7 +1466,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       relativeImagePath = relativeImagePath.substring(1);
     }
     String imageURL = relativeImagePath;
-    double duration = new AudioCheck(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange()).getDurationInSeconds(wavAudioFile);
+    double duration = 0;
+    try {
+      duration = new AudioCheck(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange()).getDurationInSeconds(wavAudioFile);
+    } catch (UnsupportedAudioFileException e) {
+      logger.warn("not a wav file " + wavAudioFile, e);
+      return new ImageResponse();
+    }
     if (duration == 0) {
       logger.error("huh? " + wavAudioFile + " has zero duration???");
     }
