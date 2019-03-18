@@ -113,6 +113,7 @@ public class ProjectManagement implements IProjectManagement {
   //public static final String ANSWERS1 = "^.*answers\\/(.+)\\/.+";
   private static final String ANSWERS1 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
   private static final Pattern pattern = Pattern.compile(ANSWERS1);
+  public static final boolean DEBUG_USER_FOR_FILE = false;
 
   /**
    * JUST FOR TESTING
@@ -562,7 +563,9 @@ public class ProjectManagement implements IProjectManagement {
         logger.info("getUserForFile couldn't find recorder of (" + oldUser + ") " + requestURI);
       }
       if (oldUser != -1 && userID != -1) {
-        logger.info("getUserForFile remember " + oldUser + "->" + userID);
+        if (oldUser != userID) {
+          logger.info("getUserForFile remember " + oldUser + "->" + userID);
+        }
         oldToNew.put(oldUser, userID);
       }
       return userID;
@@ -620,7 +623,9 @@ public class ProjectManagement implements IProjectManagement {
         if (project != null) {
           Integer userID = project.getUserForFile(requestURI);
           if (userID != null) {
-            logger.info("getUserForFile : user in project #" + project.getID() + " for " + requestURI + " is " + userID);
+            if (DEBUG_USER_FOR_FILE) {
+              logger.info("getUserForFile : user in project #" + project.getID() + " for " + requestURI + " is " + userID);
+            }
             return userID;
           }
         }

@@ -88,7 +88,7 @@ public class PathHelper {
 //    logger.info("getAbsoluteFile " + installPath + "/" +filePath);
     File absolute = getAbsolute(installPath, filePath);
     if (!absolute.exists()) {
-      logger.warn("\t getAbsoluteFile doesn't exist: " + absolute.getAbsolutePath());
+      logger.info("\t getAbsoluteFile doesn't exist: " + absolute.getAbsolutePath());
     }
     return absolute;
   }

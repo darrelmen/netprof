@@ -536,7 +536,8 @@ public class AudioExport {
                                     MiniUser user,
                                     int exid,
                                     int resultID, String english,
-                                    String fl, boolean isCallerAdmin) throws IOException {
+                                    String fl,
+                                    boolean isCallerAdmin) throws IOException {
     String name = overallName + File.separator + getUniqueName(english, fl, !isEnglish);
     String absFilePath = getAbsFilePath(audioConversion, audioRef, language);
 
@@ -546,6 +547,7 @@ public class AudioExport {
 
     // copy the wav as is
     if (isCallerAdmin) {
+      logger.info("copyAudioForExercise caller is admin so writing " + audioRef);
       copyAudioAtPath(zOut, names, audioRef, speed, null, exid, resultID, absFilePath, false);
     }
   }

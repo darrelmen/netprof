@@ -639,34 +639,17 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see #runKaldi
    */
   private String callKaldi(String sentence, String audioPath, int port) throws IOException {
-    String jsonRequest = getKaldiRequest(sentence, audioPath);
-    // String s1 = "{\"reqid\":1234,\"request\":\"decode\",\"phrase\":\"عربيّ\",\"file\":\"/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav\"}";
-//
-//    String prefix = getPrefix(port, SCORE);
-//    String encode = URLEncoder.encode(jsonRequest, StandardCharsets.UTF_8.name());
-//    String url = prefix + encode;
-//    logger.info("runKaldi " +
-//        "\n\tsentence  " + sentence +
-//        "\n\taudioPath " + audioPath +
-//        //"\n\treq       " + encode +
-//        "\n\traw       " + (prefix + jsonRequest) +
-//        "\n\tpost      " + url);
-//
-//    return httpClient.readFromGET(url);
-
-    return doKaldiGet(sentence, port, jsonRequest, SCORE);
+    return doKaldiGet(sentence, port, getKaldiRequest(sentence, audioPath), SCORE);
   }
 
   private String callKaldiNorm(String sentence, int port) throws IOException {
-    String jsonRequest = getKalidNormRequest(sentence);
     // String s1 = "{\"reqid\":1234,\"request\":\"decode\",\"phrase\":\"عربيّ\",\"file\":\"/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav\"}";
-    return doKaldiGet(sentence, port, jsonRequest, NORM);
+    return doKaldiGet(sentence, port, getKalidNormRequest(sentence), NORM);
   }
 
   private String callKaldiOOV(List<String> tokens, int port) throws IOException {
-    String jsonRequest = getKalidOOVRequest(tokens);
     // String s1 = "{\"reqid\":1234,\"request\":\"decode\",\"phrase\":\"عربيّ\",\"file\":\"/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav\"}";
-    return doKaldiGet(tokens.toString(), port, jsonRequest, OOV);
+    return doKaldiGet(tokens.toString(), port, getKalidOOVRequest(tokens), OOV);
   }
 
   private String doKaldiGet(String sentence, int port, String jsonRequest, String operation) throws IOException {
@@ -676,13 +659,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     logger.info("runKaldi " + operation +
         "\n\tcontent  " + sentence +
         //"\n\treq       " + encode +
-        "\n\traw       " + (prefix + jsonRequest) +
+      //  "\n\traw       " + (prefix + jsonRequest) +
         "\n\tpost      " + url);
 
-    //return new HTTPClient().readFromGET(url);
-
     return new HTTPClient(url).sendAndReceiveAndClose(jsonRequest);
-
   }
 
   /**

@@ -436,6 +436,9 @@ public class DownloadServlet extends DatabaseServlet {
       User userWhere = db.getUserDAO().getUserWhere(userID);
       User caller = db.getUserDAO().getUserWhere(callingUser);
 
+      logger.info("for user " +userWhere);
+      logger.info("Caller   " +caller + " is admin " +caller.isAdmin());
+
       String base = userWhere.getFirstInitialName() + suffix;
       String baseName = base
           .replaceAll("\\s++", "_")
