@@ -94,10 +94,10 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String UNIT = "unit";
   private static final String SEARCH = "search";
   private static final String AUDIO1 = "audio";
-  private static final int BUFFER_SIZE = 4096;
-  public static final String STUDENT_AUDIO = "studentAudio";
-  public static final String USERID = "userid";
-  public static final String CONTENT_DISPOSITION = "Content-Disposition";
+  //private static final int BUFFER_SIZE = 4096;
+  private static final String STUDENT_AUDIO = "studentAudio";
+  private static final String USERID = "userid";
+  private static final String CONTENT_DISPOSITION = "Content-Disposition";
 
   /**
    * This is getting complicated.
@@ -139,7 +139,7 @@ public class DownloadServlet extends DatabaseServlet {
         }
         //       logger.info("doGet : current session found projid " + project1);
         Project project = getDatabase().getProject(projid);
-        boolean hasProjectSpecificAudio = project.hasProjectSpecificAudio();
+        //boolean hasProjectSpecificAudio = project.hasProjectSpecificAudio();
         String language = project.getLanguageEnum().toDisplay();
 
         String requestURI = request.getRequestURI();
@@ -185,7 +185,7 @@ public class DownloadServlet extends DatabaseServlet {
     closeOutputStream(response);
   }
 
-  private void writeStudentAudio(HttpServletRequest request, HttpServletResponse response, DatabaseImpl db, int projid) {
+  private void writeStudentAudio(HttpServletRequest request, HttpServletResponse response, DatabaseImpl db, int projid) throws DominoSessionException {
     ParamParser invoke = new ParamParser(request.getQueryString().split("&")).invoke(false);
 
     logger.info("Got " + invoke.getSelection());
@@ -202,7 +202,8 @@ public class DownloadServlet extends DatabaseServlet {
     long toTime = getLong(to);
     logger.info("from " + new Date(fromTime));
     logger.info("to   " + new Date(toTime));
-    writeStudentAudioZip(response, db, user, session, projid, fromTime, toTime);
+    writeStudentAudioZip(response, db, user, session, projid, fromTime, toTime,
+        db.getUserSecurityManager().getUserIDFromSessionLight(request));
   }
 
   private int getInt(Collection<String> userid) {
@@ -355,7 +356,8 @@ public class DownloadServlet extends DatabaseServlet {
                                     String session,
                                     int projid,
                                     long from,
-                                    long to) {
+                                    long to,
+                                    int callingUser) {
     // logger.debug("writeAudioZip : request " + projid + " " + language + " query " + queryString);
     Project project = db.getProject(projid);
 
@@ -370,7 +372,7 @@ public class DownloadServlet extends DatabaseServlet {
       setHeader(response, zipFileName);
     }
 
-    writeStudentZip(response, projid, userid, session, audioExportOptions, from, to);
+    writeStudentZip(response, projid, userid, session, audioExportOptions, from, to, callingUser);
   }
 
   /**
@@ -415,11 +417,12 @@ public class DownloadServlet extends DatabaseServlet {
                                int projectid,
                                int userID,
                                String sessionID,
-                               AudioExportOptions options, long from, long to) {
+                               AudioExportOptions options,
+                               long from, long to, int callingUser) {
     try {
       Timestamp from1 = new Timestamp(from);
       List<MonitorResult> resultsBySession = sessionID.equalsIgnoreCase("-1") ?
-          db.getResultDAO().getResultsInTimeRange(userID, projectid, from1, new Timestamp(to)):
+          db.getResultDAO().getResultsInTimeRange(userID, projectid, from1, new Timestamp(to)) :
           db.getResultDAO().getResultsBySession(userID, projectid, sessionID);
 
       logger.info("writeStudentZip for " +
@@ -431,6 +434,8 @@ public class DownloadServlet extends DatabaseServlet {
 
       String suffix = getTimestamp(sessionID, from1);
       User userWhere = db.getUserDAO().getUserWhere(userID);
+      User caller = db.getUserDAO().getUserWhere(callingUser);
+
       String base = userWhere.getFirstInitialName() + suffix;
       String baseName = base
           .replaceAll("\\s++", "_")
@@ -446,7 +451,7 @@ public class DownloadServlet extends DatabaseServlet {
               response.getOutputStream(),
               options.setIncludeAudio(true),
               project.isEnglish(),
-              userWhere);
+              userWhere, caller.isAdmin());
 
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
@@ -458,7 +463,7 @@ public class DownloadServlet extends DatabaseServlet {
     long start = getSession(sessionID);
     SimpleDateFormat format = new SimpleDateFormat("MMM d yyyy h mm a");
 
-    return start == -1 ? "_"+  format.format(from1) : "_" + format.format(new Date(start));
+    return start == -1 ? "_" + format.format(from1) : "_" + format.format(new Date(start));
   }
 
   private long getSession(String sessionID) {
@@ -808,10 +813,10 @@ public class DownloadServlet extends DatabaseServlet {
    * @param saveFile
    * @throws IOException
    */
-  void writeToFile(InputStream inputStream, File saveFile) throws IOException {
+/*  void writeToFile(InputStream inputStream, File saveFile) throws IOException {
     // opens an output stream for writing file
     copyToOutput(inputStream, new FileOutputStream(saveFile));
-  }
+  }*/
 
   /**
    * TODO replace with commons call
@@ -820,7 +825,7 @@ public class DownloadServlet extends DatabaseServlet {
    * @param outputStream
    * @throws IOException
    */
-  private void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
+/*  private void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
     byte[] buffer = new byte[BUFFER_SIZE];
     int bytesRead;
 
@@ -830,5 +835,5 @@ public class DownloadServlet extends DatabaseServlet {
 
     outputStream.close();
     inputStream.close();
-  }
+  }*/
 }

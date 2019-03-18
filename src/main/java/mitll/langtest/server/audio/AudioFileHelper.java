@@ -41,19 +41,17 @@ import mitll.langtest.server.database.exercise.IProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.scoring.*;
-import mitll.langtest.server.services.ResultServiceImpl;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ModelType;
-
-import mitll.langtest.shared.result.MonitorResult;
-
 import mitll.langtest.shared.project.OOVInfo;
-
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -66,19 +64,15 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import scala.Option;
-import scala.collection.Iterable;
 import scala.collection.Iterator;
-
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.Array;
 import java.sql.Timestamp;
 import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static mitll.langtest.server.ScoreServlet.GetRequest.HASUSER;
 import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
@@ -108,8 +102,8 @@ public class AudioFileHelper implements AlignDecode {
   private static final String SCORE_SERVLET = "scoreServlet";
   private static final String DEFAULT_EXID = "2";
 
-  public static final boolean DEBUG_EDIT = false;
-  private static final boolean DO_KALDI_OOV = false;
+  private static final boolean DEBUG_EDIT = false;
+  //private static final boolean DO_KALDI_OOV = false;
   private static final String PERCENT_SYMBOL = "%";
 
   private final PathHelper pathHelper;
@@ -268,26 +262,6 @@ public class AudioFileHelper implements AlignDecode {
       logger.info("checkLTSAndCountPhones out of " + exercises.size() + " dict and LTS fails on " + checkInfo.getOovWords());
     }
     return checkInfo;
-  }
-
-  private int spew2 = 0;
-
-  private static class CheckInfo {
-    private int checked;
-    private int oov;
-
-    CheckInfo(int checked, int oov) {
-      this.checked = checked;
-      this.oov = oov;
-    }
-
-    public int getChecked() {
-      return checked;
-    }
-
-    public int getOov() {
-      return oov;
-    }
   }
 
   /**
@@ -1749,9 +1723,9 @@ public class AudioFileHelper implements AlignDecode {
    * @see AudioFileHelper#countPhones(CommonShell)
    * @see mitll.langtest.server.database.DatabaseImpl#getJSONExport(int)
    */
-  public Map<String, Integer> getPhoneToCount() {
-    return phoneToCount;
-  }
+//  public Map<String, Integer> getPhoneToCount() {
+//    return phoneToCount;
+//  }
 
   /**
    * @return
@@ -1808,7 +1782,7 @@ public class AudioFileHelper implements AlignDecode {
     Map<Integer, List<List<String>>> lengthToProns = pronsToWords.keySet().stream().collect(Collectors.groupingBy(List::size));
 
 
-    Set<Integer> inOrder = new TreeSet<>(lengthToProns.keySet());
+//    Set<Integer> inOrder = new TreeSet<>(lengthToProns.keySet());
     List<Integer> integers = Arrays.asList(2, 3, 4);
     integers.forEach(len -> {
       logger.info("len " + len);
@@ -1939,8 +1913,8 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   class WP {
-    private String word;
-    private List<String> pron;
+    private final String word;
+    private final List<String> pron;
     private int pos = -1;
 
     WP(String word, List<String> pron) {
@@ -1953,15 +1927,15 @@ public class AudioFileHelper implements AlignDecode {
       this.pos = pos;
     }
 
-    public String getWord() {
+    String getWord() {
       return word;
     }
 
-    public List<String> getPron() {
+    List<String> getPron() {
       return pron;
     }
 
-    public String getEntry() {
+    String getEntry() {
       StringBuilder builder = new StringBuilder();
       pron.forEach(p -> builder.append(p).append("-"));
       return builder.toString();
@@ -1973,13 +1947,13 @@ public class AudioFileHelper implements AlignDecode {
       return getWord() + " " + getPron() + s;
     }
 
-    public int getPos() {
-      return pos;
-    }
-
-    public void setPos(int pos) {
-      this.pos = pos;
-    }
+//    public int getPos() {
+//      return pos;
+//    }
+//
+//    public void setPos(int pos) {
+//      this.pos = pos;
+//    }
   }
 
   private static class Wrapper<T extends WP> implements TextEntityValue<T> {
@@ -2006,20 +1980,19 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
+/*
   @NotNull
   private Trie<WP> makePronTrie(Collection<WP> results) {
     Trie<WP> trie = new Trie<>();
     trie.startMakingNodes();
 
     for (WP result : results) {
-
       trie.addEntryToTrie(new Wrapper(result.getEntry(), result));
-
     }
     trie.endMakingNodes();
     return trie;
   }
-
+*/
 
   /**
    * JUST FOR TESTING
