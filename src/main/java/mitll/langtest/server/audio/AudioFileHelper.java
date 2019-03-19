@@ -1281,7 +1281,7 @@ public class AudioFileHelper implements AlignDecode {
       String json = httpClient.sendAndReceiveAndClose(theFile);
       long now = System.currentTimeMillis();
       logger.info("getProxyScore took " + (now - then) + " to get " +
-          "\n\tresponse " + json);
+          "\n\tresponse " + json.trim());
 
       return json.equals(MESSAGE_NO_SESSION) ? new PrecalcScores(serverProps, language) : new PrecalcScores(serverProps, json, language);
     } catch (IOException e) {
@@ -1540,10 +1540,12 @@ public class AudioFileHelper implements AlignDecode {
 
       now = System.currentTimeMillis();
 
-      logger.info("getASRScoreForAudio : for " +
-          "\n\ttook    " + (now - then) +
-          "\n\tpretest " + pretestScore +
-          "\n\tjson    " + json);
+      if (now-then>60) {
+        logger.info("getASRScoreForAudio : for " +
+            "\n\ttook    " + (now - then) +
+            "\n\tpretest " + pretestScore +
+            "\n\tjson    " + json);
+      }
 
       pretestScore.setJson(json);
     }

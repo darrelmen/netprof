@@ -33,6 +33,8 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.project.Language;
 
+import static mitll.langtest.shared.answer.AudioType.LEARN;
+
 public class AudioContext implements IsSerializable {
   /**
    * request id from the client, so it can potentially throw away out of order responses
@@ -126,7 +128,6 @@ public class AudioContext implements IsSerializable {
   }
 
   /**
-   *
    * @return
    */
   public int getDialogSessionID() {
@@ -134,9 +135,9 @@ public class AudioContext implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.server.services.AudioServiceImpl#getJsonObject
    * @param dialogSessionID
    * @return
+   * @see mitll.langtest.server.services.AudioServiceImpl#getJsonObject
    */
   public AudioContext setDialogSessionID(int dialogSessionID) {
     this.dialogSessionID = dialogSessionID;
@@ -144,14 +145,17 @@ public class AudioContext implements IsSerializable {
   }
 
   public String toString() {
+    String reqs = reqid == 0 ? "" : "\n\treq            " + reqid;
+    String ds = dialogSessionID == -1 ? "" : "\n\tdialog session " + dialogSessionID;
+    String ts = audioType == LEARN ? "" : "\n\ttype           " + audioType;
     return
         "AudioContext" +
             "\n\tuser           " + userid +
             "\n\tlanguage       " + language +
             "\n\tprojid         " + projid +
             "\n\texid           " + exid +
-            "\n\treq            " + reqid +
-            "\n\tdialog session " + dialogSessionID +
-            "\n\ttype           " + audioType;
+            reqs +
+            ds +
+            ts;
   }
 }

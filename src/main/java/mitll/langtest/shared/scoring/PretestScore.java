@@ -97,8 +97,8 @@ public class PretestScore extends AlignmentAndScore {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, int, String, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    * @return
+   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, int, String, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
    */
   public Map<String, Float> getPhoneScores() {
     return phoneScores;
@@ -117,8 +117,8 @@ public class PretestScore extends AlignmentAndScore {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.ClickableTranscript#getClickedOnSegment
    * @return
+   * @see mitll.langtest.client.scoring.ClickableTranscript#getClickedOnSegment
    */
   public float getWavFileLengthInSeconds() {
     return wavFileLengthSeconds;
@@ -162,7 +162,6 @@ public class PretestScore extends AlignmentAndScore {
   }
 
   /**
-   *
    * @param status
    * @return
    */
@@ -180,15 +179,20 @@ public class PretestScore extends AlignmentAndScore {
   }
 
   public String toString() {
+    String ss = status.isEmpty() ? "" : "\n\tstatus         " + status;
+    String ms = message.isEmpty() ? "" : "\n\tmessage        " + message;
+    String ts = getsTypeToImage().isEmpty() ? "" : "\n\ttype->image    " + getsTypeToImage();
+    String fm = isFullMatch() ? "" : "\n\tfull match     " + isFullMatch();
+
     return "score" +
-        "\n\tstatus         " + status +
-        "\n\tmessage        " + message +
+        ss +
+        ms +
         "\n\tscore          " + getHydecScore() +
         "\n\tphones         " + getPhoneScores() +
-        "\n\ttype->image    " + getsTypeToImage() +
+        ts +
         "\n\ttype->endtimes " + getTypeToSegments() +
         "\n\ttook           " + processDur + " millis" +
-        "\n\tfull match     " + isFullMatch()
+        fm
         ;
   }
 }

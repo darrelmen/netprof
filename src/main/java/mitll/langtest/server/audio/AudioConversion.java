@@ -79,8 +79,6 @@ public class AudioConversion extends AudioBase {
    * @seex mitll.langtest.server.DatabaseServlet#ensureMP3
    */
   public AudioConversion(boolean trimAudio, int minDynamicRange) {
-//    trimMillisBefore = props.getTrimBefore();
-//    trimMillisAfter = props.getTrimAfter();
     this.trimAudio = trimAudio;
     soxPath = getSox();
     audioCheck = new AudioCheck(trimAudio, minDynamicRange);

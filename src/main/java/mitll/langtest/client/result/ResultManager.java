@@ -421,13 +421,19 @@ public class ResultManager extends PagerTable {
     Column<MonitorResult, SafeHtml> audioFile = new Column<MonitorResult, SafeHtml>(progressCell) {
       @Override
       public SafeHtml getValue(MonitorResult answer) {
-        String answer1 = answer.getAnswer();
-        if (answer1.endsWith(".wav")) {
-          return audioTag.getAudioTag(answer1);
-          //  return PlayAudioWidget.getAudioTagHTML(answer1,"answer_to_"+answer.getID() + "_by_"+answer.getUserid()+"_"+answer.getRealID());
+        if (answer != null && answer.getAnswer() != null) {
+          String answer1 = answer.getAnswer();
+          if (answer1.endsWith(".wav")) {
+            return audioTag.getAudioTag(answer1);
+            //  return PlayAudioWidget.getAudioTagHTML(answer1,"answer_to_"+answer.getID() + "_by_"+answer.getUserid()+"_"+answer.getRealID());
+          } else {
+            SafeHtmlBuilder sb = new SafeHtmlBuilder();
+            sb.appendHtmlConstant(answer1);
+            return sb.toSafeHtml();
+          }
         } else {
           SafeHtmlBuilder sb = new SafeHtmlBuilder();
-          sb.appendHtmlConstant(answer1);
+          sb.appendHtmlConstant("");
           return sb.toSafeHtml();
         }
       }

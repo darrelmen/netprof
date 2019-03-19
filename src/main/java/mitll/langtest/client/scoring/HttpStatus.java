@@ -34,10 +34,17 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONString;
 import com.google.gwt.json.client.JSONValue;
 
+import java.util.HashMap;
+import java.util.Map;
+
 class HttpStatus {
   private int code;
   private String statusText;
+  private Map<String, String> kv = new HashMap<>();
 
+  /**
+   * @param jsonObject
+   */
   HttpStatus(JSONObject jsonObject) {
     JSONValue code1 = jsonObject.get("code");
     if (code1 != null) {
@@ -46,6 +53,7 @@ class HttpStatus {
       JSONString statusText = jsonObject.get("statusText").isString();
       this.statusText = statusText == null ? "Unknown" : statusText.stringValue();
     }
+    jsonObject.keySet().forEach(k -> kv.put(k, jsonObject.get(k).toString()));
   }
 
   boolean isWellFormed() {
@@ -58,6 +66,10 @@ class HttpStatus {
 
   String getStatusText() {
     return statusText;
+  }
+
+  public Map<String, String> getKv() {
+    return kv;
   }
 
   public String toString() {
