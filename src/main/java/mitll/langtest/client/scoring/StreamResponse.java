@@ -63,7 +63,7 @@ class StreamResponse {
     return streamTimestamp;
   }
 
-  public boolean isStreamStop() {
+  boolean isStreamStop() {
     return streamStop;
   }
 
