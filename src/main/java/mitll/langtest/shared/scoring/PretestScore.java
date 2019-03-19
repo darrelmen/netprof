@@ -179,20 +179,20 @@ public class PretestScore extends AlignmentAndScore {
   }
 
   public String toString() {
-    String st = status.isEmpty() ? "" : "\n\tstatus         " + status;
-    String m1 = message.isEmpty() ? "" : "\n\tmessage        " + message;
-    String ti = getsTypeToImage().isEmpty() ? "" : "\n\ttype->image    " + getsTypeToImage();
-
+    String ss = status.isEmpty() ? "" : "\n\tstatus         " + status;
+    String ms = message.isEmpty() ? "" : "\n\tmessage        " + message;
+    String ts = getsTypeToImage().isEmpty() ? "" : "\n\ttype->image    " + getsTypeToImage();
     String fm = isFullMatch() ? "" : "\n\tfull match     " + isFullMatch();
-    return //"score" +
-        st +
-            m1 +
-            "\n\tscore          " + getHydecScore() +
-            "\n\tphones         " + getPhoneScores() +
-            ti +
-            "\n\ttype->endtimes " + getTypeToSegments() +
-            "\n\ttook           " + processDur + " millis" +
-            fm
+
+    return "score" +
+        ss +
+        ms +
+        "\n\tscore          " + getHydecScore() +
+        "\n\tphones         " + getPhoneScores() +
+        ts +
+        "\n\ttype->endtimes " + getTypeToSegments() +
+        "\n\ttook           " + processDur + " millis" +
+        fm
         ;
   }
 }

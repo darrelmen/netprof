@@ -106,11 +106,13 @@ public class AnswerInfo {
     }
 
     public String toString() {
+      String ns = getNormtranscript().isEmpty() ? "" : "\n\tnorm       " + getNormtranscript();
+      String as = answer.isEmpty() ? "" : "\n\tanswer     " + answer;
       return "RecordingInfo " +
-          "\n\tanswer    " + answer +
-          "\n\taudioFile " + audioFile + " device " + deviceType + "/" + device +
+          as +
+          "\n\taudioFile  " + audioFile + " device " + deviceType + "/" + device +
           "\n\ttranscript " + getTranscript() +
-          "\n\tnorm       " + getNormtranscript();
+          ns;
     }
   }
 
@@ -187,7 +189,7 @@ public class AnswerInfo {
     this.validity = validity.getValidity().name();
     this.roundTripDur = 0;
     this.snr = validity.getDynamicRange();
- //   this.model = model;
+    //   this.model = model;
   }
 
   /**
@@ -198,7 +200,7 @@ public class AnswerInfo {
    */
   public AnswerInfo(AnswerInfo other, ScoreInfo scoreInfo, String model) {
     this(other, scoreInfo.correct, scoreInfo.pronScore, scoreInfo.scoreJson, scoreInfo.processDur);
-   // this.model = model;
+    // this.model = model;
   }
 
   private AnswerInfo(AnswerInfo other,
@@ -344,11 +346,12 @@ public class AnswerInfo {
   }
 
   public String toString() {
+    String s = answer.isEmpty() ? "" : " answer " + answer;
     return "answer for exid #" + id +
         " correct " + correct +
         " score " + pronScore +
         " audio type " + audioType +
-        " answer " + answer +
+        s +
         " process " + processDur +
         " validity " + validity +
         " snr " + snr +

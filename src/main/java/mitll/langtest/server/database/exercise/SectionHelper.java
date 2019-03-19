@@ -189,7 +189,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @see DBExerciseDAO#getTypeOrderFromProject
    */
   public void reorderTypes(List<String> types) {
-    logger.info("reorderTypes before " + types);
+   // logger.info("reorderTypes before " + types);
     List<String> uniq = getUniq(types);
 
     for (Facet f : Facet.values()) {
@@ -197,7 +197,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     }
     types.clear();
     types.addAll(uniq);
-    logger.info("reorderTypes after " + types);
+   // logger.info("reorderTypes after " + types);
   }
 
   @Override

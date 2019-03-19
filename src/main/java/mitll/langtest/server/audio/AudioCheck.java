@@ -62,7 +62,8 @@ public class AudioCheck {
   private static final ValidityAndDur INVALID_AUDIO = new ValidityAndDur();
   private static final boolean DEBUG = false;
   private static final int WAV_HEADER_LENGTH = 44;
-  private final int MIN_DYNAMIC_RANGE;
+  public static final boolean DUMP_POWER_INFO = true;
+  private final int minDynamicRange;
 
   // TODO :make a server prop
   private static final float FORGIVING_MIN_DNR = 18F;
@@ -74,7 +75,7 @@ public class AudioCheck {
    */
   public AudioCheck(boolean trimAudio, int minDynamicRange) {
     this.trimAudio = trimAudio;
-    this.MIN_DYNAMIC_RANGE = minDynamicRange;
+    this.minDynamicRange = minDynamicRange;
   }
 
   /**
@@ -178,8 +179,7 @@ public class AudioCheck {
                                                  boolean allowMoreClipping,
                                                  boolean quietAudioOK) {
     try {
-      ValidityAndDur validityAndDur = getValidityAndDur(name, fileInfo, allowMoreClipping, quietAudioOK, stream, true);
-      return validityAndDur;
+      return getValidityAndDur(name, fileInfo, allowMoreClipping, quietAudioOK, stream, true);
     } catch (IOException e) {
       logger.error("got " + e, e);
       return INVALID_AUDIO;
@@ -190,27 +190,28 @@ public class AudioCheck {
     if (validityAndDur.isValid()) {
       DynamicRange.RMSInfo dynamicRange = new DynamicRange().getRmsInfo(fileInfo, stream);
 
-      if (dynamicRange.maxMin < MIN_DYNAMIC_RANGE) {
+      if (dynamicRange.dnr < minDynamicRange) {
         if (DEBUG) {
-          logger.info("maybeAddDNR file " + fileInfo + " doesn't meet dynamic range threshold (" + MIN_DYNAMIC_RANGE +
-              "): " + dynamicRange.maxMin);
+          logger.info("maybeAddDNR file " + fileInfo + " doesn't meet dynamic range threshold (" + minDynamicRange +
+              "): " + dynamicRange.dnr);
         }
         validityAndDur.validity = Validity.SNR_TOO_LOW;
       }
-      validityAndDur.setMaxMinRange(dynamicRange.maxMin);
-    } else {
-      // logger.info("file " +fileInfo + " not valid so not doing DNR");
+      validityAndDur.setMaxMinRange(dynamicRange.dnr);
     }
+    //else {
+    // logger.info("file " +fileInfo + " not valid so not doing DNR");
+    //}
   }
 
   private void addDynamicRange(File file, ValidityAndDur validityAndDur) {
     DynamicRange.RMSInfo dynamicRange = getDynamicRange(file);
-    if (dynamicRange.maxMin < MIN_DYNAMIC_RANGE) {
-      logger.warn("file " + file.getName() + " doesn't meet dynamic range threshold (" + MIN_DYNAMIC_RANGE +
+    if (dynamicRange.dnr < minDynamicRange) {
+      logger.warn("addDynamicRange file " + file.getName() + " doesn't meet dynamic range threshold (" + minDynamicRange +
           "):\n" + dynamicRange);
       validityAndDur.validity = Validity.SNR_TOO_LOW;
     }
-    validityAndDur.setMaxMinRange(dynamicRange.maxMin);
+    validityAndDur.setMaxMinRange(dynamicRange.dnr);
   }
 
   /**
@@ -221,7 +222,7 @@ public class AudioCheck {
    */
   private DynamicRange.RMSInfo getDynamicRange(File file) {
     String highPassFilterFile =
-        new AudioConversion(trimAudio, MIN_DYNAMIC_RANGE)
+        new AudioConversion(trimAudio, minDynamicRange)
             .getHighPassFilterFile(file.getAbsolutePath());
 
     if (highPassFilterFile == null) return new DynamicRange.RMSInfo();
@@ -284,6 +285,7 @@ public class AudioCheck {
                                            boolean shortOK) throws IOException {
     AudioFormat format = ais.getFormat();
 
+
     if (DEBUG) {
       // AudioFileFormat format2 = AudioSystem.getAudioFileFormat(wavFile);
       logger.info("checkWavFileWithClipThreshold " +
@@ -295,6 +297,12 @@ public class AudioCheck {
           //"\n\tformat 2     " + format2 +
           //"\n\tformat 2 class     " + format2.getClass()
       );
+    }
+
+    long frameLength = ais.getFrameLength();
+
+    if (frameLength == 0) {
+      return new ValidityAndDur(Validity.TOO_SHORT, 0D, false);
     }
 
     boolean bigEndian = format.isBigEndian();
@@ -310,7 +318,6 @@ public class AudioCheck {
     assert (format.getChannels() == 1);
     double dur = getDurationInSeconds(ais);
 
-    long frameLength = ais.getFrameLength();
     if (frameLength < MinRecordLength && !shortOK) {
       logger.warn("checkWavFileWithClipThreshold: audio recording too short" +
           "\n\t(Length:   " + frameLength + ") < min (" + MinRecordLength + ") " +
@@ -380,7 +387,7 @@ public class AudioCheck {
     double std = Math.sqrt(var);
     final boolean validAudio = mean > PowerThreshold || std > VarianceThreshold;
 
-    if (DEBUG && (wasClipped || !validAudio)) {
+    if (DUMP_POWER_INFO && (wasClipped || !validAudio)) {
       logger.info("checkWavFile: audio recording (Length: " + frameLength + " frames) " +
           "\n\tmean power " + mean + " (dB) vs " + PowerThreshold +
           "\n\tstd        " + std + " vs " + VarianceThreshold +
@@ -401,6 +408,10 @@ public class AudioCheck {
         micDisconnected ?
             Validity.MIC_DISCONNECTED :
             Validity.TOO_QUIET;
+
+    if (validity == Validity.TOO_QUIET) {
+      validity = Validity.OK;
+    }
 
     ValidityAndDur validityAndDur = new ValidityAndDur(validity, dur, quietAudioOK);
 
@@ -431,7 +442,7 @@ public class AudioCheck {
 
   public float getDNR(File test) {
     DynamicRange.RMSInfo dynamicRange = getDynamicRange(test);
-    return dynamicRange == null ? 0f : (float) dynamicRange.maxMin;
+    return dynamicRange == null ? 0f : (float) dynamicRange.dnr;
   }
 
   public static class ValidityAndDur {

@@ -52,6 +52,7 @@ import static mitll.langtest.shared.answer.Validity.OK;
 
 public abstract class PostAudioRecordButton extends RecordButton
     implements RecordButton.RecordingListener {
+  public static final String MESSAGE = "MESSAGE";
   private final Logger logger = Logger.getLogger("PostAudioRecordButton");
 
   // TODO : enum
@@ -155,7 +156,7 @@ public abstract class PostAudioRecordButton extends RecordButton
     controller.stopRecording(USE_DELAY, abort);
 
     if (duration > MIN_DURATION) {
-      if (DEBUG)  logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
+      if (DEBUG) logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
       return true;
     } else {
       hideWaveform();
@@ -203,9 +204,14 @@ public abstract class PostAudioRecordButton extends RecordButton
   }
 
   private String getMessage(JSONObject digestJsonResponse) {
-    return jsonAnswerParser.getField(digestJsonResponse, "MESSAGE".toLowerCase());
+    return jsonAnswerParser.getField(digestJsonResponse, MESSAGE.toLowerCase());
   }
 
+  /**
+   * @param then
+   * @param digestJsonResponse
+   * @see #gotPacketResponse
+   */
   private void handlePostError(long then, JSONObject digestJsonResponse) {
     HttpStatus status = new HttpStatus(digestJsonResponse);
     if (status.isWellFormed() && status.getCode() != 200) {
@@ -218,11 +224,23 @@ public abstract class PostAudioRecordButton extends RecordButton
       stopRecordingFirstStep();
     }
 
-    onPostFailure(
-        then,
-        getUser(),
-        "error (" + status.getCode() + " : " + status.getStatusText() +
-            ") posting audio for exercise " + getExerciseID());
+    if (status.getCode() == 0) {
+      long now = System.currentTimeMillis();
+      long l = now - then;
+      logMessage("failed to post audio for " +
+              "\n\tuser      " + getUser() +
+              "\n\tduration  " + l +
+              "\n\texercise  " + getExerciseID() +
+              "\n\texception " + status +
+              "\n\tfields    " + status.getKv()
+          , true);
+    } else {
+      onPostFailure(
+          then,
+          getUser(),
+          "error (" + status + ") posting audio for exercise " + getExerciseID(),
+          status);
+    }
   }
 
   /**
@@ -262,14 +280,21 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @param user
    * @param exception
    */
-  private void onPostFailure(long then, int user, String exception) {
+  private void onPostFailure(long then, int user, String exception, HttpStatus status) {
     onPostFailure();
 
     long now = System.currentTimeMillis();
-    logger.info("PostAudioRecordButton : (failure) posting audio took " + (now - then) + " millis :\n" + exception);
+    long l = now - then;
+    logger.info("PostAudioRecordButton : (failure) posting audio took " + l + " millis :\n" + exception);
     showWarning(Validity.INVALID.getPrompt() + "\n" + exception);
 
-    logMessage("failed to post audio for " + user + " exercise " + getExerciseID(), true);
+    logMessage("failed to post audio for " +
+            "\n\tuser      " + user +
+            "\n\tduration  " + l +
+            "\n\texercise  " + getExerciseID() +
+            "\n\texception " + exception +
+            "\n\tfields    " + status.getKv()
+        , true);
   }
 
   /**
@@ -352,7 +377,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    */
   public void useInvalidResult(int exid, Validity validity, double dynamicRange) {
     controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + validity);
-   // logger.info("useInvalidResult platform is " + getPlatform() + " validity " + validity);
+    // logger.info("useInvalidResult platform is " + getPlatform() + " validity " + validity);
     if (!checkAndShowTooLoud(validity)) {
       showPopup(validity.getPrompt());
     }
@@ -433,12 +458,11 @@ public abstract class PostAudioRecordButton extends RecordButton
   }
 
   private void showPopupLater(String toShow) {
-  //  logger.info("showPopup " + toShow + " on " + getExerciseID());
+    //  logger.info("showPopup " + toShow + " on " + getExerciseID());
     new PopupHelper().showPopup(toShow, getPopupTargetWidget(), 5000);
   }
 
   /**
-   *
    * @return
    */
   Widget getPopupTargetWidget() {

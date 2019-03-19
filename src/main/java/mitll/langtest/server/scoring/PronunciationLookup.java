@@ -387,9 +387,9 @@ public class PronunciationLookup implements IPronunciationLookup {
         logger.info("getPronunciationsFromDictOrLTS prons length " + process.length +
             "\n\tfor " + word +
             "\n\tin '" + transcript + "'");
-        if (spew++ < 2) {
-          logger.info("OK stack ");//, new Exception("why?"));
-        }
+//        if (spew++ < 2) {
+//          logger.info("OK stack ", new Exception("why?"));
+//        }
       }
       int max = MAX_FROM_ANY_TOKEN;
       List<String> prons = new ArrayList<>();

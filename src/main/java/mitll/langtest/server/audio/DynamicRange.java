@@ -237,7 +237,7 @@ public class DynamicRange {
   }
 
   public static class RMSInfo {
-    final double maxMin;
+    final double dnr;
     final int max;
     final int min;
     final double totalRMS;
@@ -253,7 +253,7 @@ public class DynamicRange {
     }
 
     RMSInfo(double maxMin, int max, int min, double totalRMS, double minRMS, double maxRMS) {
-      this.maxMin = maxMin;
+      this.dnr = maxMin;
       this.max = max;
       this.min = min;
       this.totalRMS = totalRMS;
@@ -272,7 +272,7 @@ public class DynamicRange {
     }
 
     String getRange() {
-      return format(maxMin) + "dB";
+      return format(dnr) + "dB";
     }
 
     private String format(double maxMin) {

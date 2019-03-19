@@ -74,7 +74,7 @@ public class FileSaver {
 
     FileSaveResponse fileSaveResponse = writeToFile(inputStream, saveFile);
 
-    // logger.info("writeAudioFile : wrote file " + saveFile.getAbsolutePath() + " proj " + project + " exid " + realExID + " by " + userid);
+    logger.info("writeAudioFile : wrote file " + saveFile.getAbsolutePath() + " exid " + realExID + " by " + userid);
     if (!saveFile.setReadOnly()) {
       logger.warn("writeAudioFile huh? can't mark file read only?");
     }
@@ -87,21 +87,21 @@ public class FileSaver {
   public static class FileSaveResponse {
     private File file;
 
-    public File getFile() {
-      return file;
-    }
-
-    public STATUS getStatus() {
-      return status;
-    }
-
-    enum STATUS {OK, TOO_BIG}
+    enum STATUS {OK, TOO_BIG;}
 
     private STATUS status;
 
     FileSaveResponse(File file, STATUS status) {
       this.file = file;
       this.status = status;
+    }
+
+    public File getFile() {
+      return file;
+    }
+
+    public STATUS getStatus() {
+      return status;
     }
 
   }

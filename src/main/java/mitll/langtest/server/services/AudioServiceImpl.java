@@ -260,7 +260,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private JsonObject getJSONForStream(HttpServletRequest request,
                                       ScoreServlet.PostRequest requestType,
                                       String deviceType,
-                                      String device) throws IOException, DominoSessionException, ExecutionException {
+                                      String device) throws IOException, ExecutionException {
     int userIDFromSession;
     try {
       userIDFromSession = checkSession(request);
@@ -368,6 +368,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
         if (completeSet) {
           long then2 = System.currentTimeMillis();
+         // if (true) throw new IllegalArgumentException("dude!");
           jsonObject = getJsonObject(deviceType, device, userIDFromSession, realExID, reqid, projid, dialogSessionID,
               isRef, audioType,
               jsonObject,
@@ -802,7 +803,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     private final int packet;
     private boolean combined;
     private final byte[] wavFile;
-    // private boolean isValid = true;
 
     private AudioCheck.ValidityAndDur validityAndDur;
 
@@ -912,9 +912,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
 
     public String toString() {
-      return "#" + packet + " : " + isValid() +
-          (combined ? " combined " : "") +
-          " len " + wavFile.length + " " + validityAndDur;
+      return "#" + packet + " valid " + isValid() +
+          (combined ? " combined" : "") +
+          " len " + wavFile.length + " validity " + validityAndDur;
     }
 
     AudioCheck.ValidityAndDur getValidityAndDur() {
