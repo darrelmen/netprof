@@ -1,0 +1,124 @@
+/*
+ * DISTRIBUTION STATEMENT C. Distribution authorized to U.S. Government Agencies
+ * and their contractors; 2019. Other request for this document shall be referred
+ * to DLIFLC.
+ *
+ * WARNING: This document may contain technical data whose export is restricted
+ * by the Arms Export Control Act (AECA) or the Export Administration Act (EAA).
+ * Transfer of this data by any means to a non-US person who is not eligible to
+ * obtain export-controlled data is prohibited. By accepting this data, the consignee
+ * agrees to honor the requirements of the AECA and EAA. DESTRUCTION NOTICE: For
+ * unclassified, limited distribution documents, destroy by any method that will
+ * prevent disclosure of the contents or reconstruction of the document.
+ *
+ * This material is based upon work supported under Air Force Contract No.
+ * FA8721-05-C-0002 and/or FA8702-15-D-0001. Any opinions, findings, conclusions
+ * or recommendations expressed in this material are those of the author(s) and
+ * do not necessarily reflect the views of the U.S. Air Force.
+ *
+ * © 2015-2019 Massachusetts Institute of Technology.
+ *
+ * The software/firmware is provided to you on an As-Is basis
+ *
+ * Delivered to the US Government with Unlimited Rights, as defined in DFARS
+ * Part 252.227-7013 or 7014 (Feb 2014). Notwithstanding any copyright notice,
+ * U.S. Government rights in this work are defined by DFARS 252.227-7013 or
+ * DFARS 252.227-7014 as detailed above. Use of this work other than as specifically
+ * authorized by the U.S. Government may violate any copyrights that exist in this work.
+ */
+
+package mitll.langtest.server.database.excel;
+
+import mitll.langtest.shared.analysis.UserInfo;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.*;
+
+public class UserPerfToExcel {
+  private static final Logger logger = LogManager.getLogger(UserPerfToExcel.class);
+
+  /**
+   * @param typeOrder
+   * @param out
+   * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
+   */
+  public void writeExcelToStream(Collection<UserInfo> userInfos, OutputStream out) {
+    writeToStream(out, writeExcel(userInfos));
+  }
+
+  private SXSSFWorkbook writeExcel(Collection<UserInfo> userInfos) {
+    long now;
+    long then = System.currentTimeMillis();
+
+    SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
+    Sheet sheet = wb.createSheet("Users");
+    int rownum = 0;
+    CellStyle cellStyle = wb.createCellStyle();
+    DataFormat dataFormat = wb.createDataFormat();
+
+    cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss 'yy"));
+    //DateTimeFormat format = DateTimeFormat.getFormat("MMM dd h:mm:ss a z ''yy");
+    Row headerRow = sheet.createRow(rownum++);
+
+    List<String> columns = new ArrayList<String>(Arrays.asList("Student", "Name", "Start", "lifetime #", "Lifetime Avg.",
+        "# in session",
+        "# Session Completed", "Session Avg."));
+
+
+    for (int i = 0; i < columns.size(); i++) {
+      Cell headerCell = headerRow.createCell(i);
+      headerCell.setCellValue(columns.get(i));
+    }
+
+    for (UserInfo result : userInfos) {
+      Row row = sheet.createRow(rownum++);
+      int j = 0;
+      Cell cell = row.createCell(j++);
+      cell.setCellValue(result.getUserID());
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getName());
+      cell = row.createCell(j++);
+      cell.setCellValue(new Date(result.getTimestampMillis()));
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getNum());
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getCurrent());
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getLastSessionSize());
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getLastSessionNum());
+
+      cell = row.createCell(j++);
+      cell.setCellValue(result.getLastSessionScore());
+    }
+    now = System.currentTimeMillis();
+    if (now - then > 100) {
+      logger.warn("toXLSX : took " + (now - then) + " millis to add " + rownum + " rows to sheet, or " + (now - then) / rownum + " millis/row");
+    }
+    return wb;
+  }
+
+  private void writeToStream(OutputStream out, SXSSFWorkbook wb) {
+    long then = System.currentTimeMillis();
+    try {
+      wb.write(out);
+      long now2 = System.currentTimeMillis();
+      if (now2 - then > 100) {
+        logger.warn("toXLSX : took " + (now2 - then) + " millis to write excel to output stream ");
+      }
+      out.close();
+      wb.dispose();
+    } catch (IOException e) {
+      logger.error("got " + e, e);
+    }
+  }
+}

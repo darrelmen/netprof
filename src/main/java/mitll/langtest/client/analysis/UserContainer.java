@@ -43,6 +43,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.server.services.AnalysisServiceImpl;
@@ -208,6 +210,28 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     ((Panel) tableWithPager.getParent()).add(getButtons());
   }
 
+
+  @NotNull
+  private Button getDownloadButton() {
+    Button child = new Button("", IconType.DOWNLOAD);
+    new TooltipHelper().addTooltip(child, "Download audio and spreadsheet.");
+    child.addStyleName("leftFiveMargin");
+//    child.getElement().getStyle().setMarginTop(10, PX);
+
+    child.addClickHandler(event -> gotDownloadClick());
+    return child;
+  }
+
+  private void gotDownloadClick() {
+//    Long periodStart = analysisPlot.getSessionStart();
+//    logger.info("getTimeControls start " + periodStart);
+
+//    logger.info("from " + new Date(start));
+//    logger.info("to   " + new Date(end));
+    new DownloadHelper()
+        .doUserPerfDownload();
+  }
+
   private boolean showOnlyMine() {
     return SHOW_MY_STUDENTS && controller.getStorage().isTrue("mineOnly");
   }
@@ -328,6 +352,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     filterContainer.addStyleName("leftFiveMargin");
 
     filterContainer.add(userTypeahead.getSearch());
+
+    filterContainer.add(getDownloadButton());
+
 
 //    Button excel = new Button("Excel", IconType.DOWNLOAD);
 //    excel.addStyleName("leftFiveMargin");

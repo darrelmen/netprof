@@ -34,7 +34,9 @@ import mitll.langtest.server.audio.AudioExportOptions;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
+import mitll.langtest.server.database.excel.UserPerfToExcel;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -91,6 +93,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String SEARCH = "search";
   private static final String AUDIO1 = "audio";
   private static final int BUFFER_SIZE = 4096;
+  public static final String USER_PERF = "userPerf";
 
   /**
    * This is getting complicated.
@@ -139,7 +142,7 @@ public class DownloadServlet extends DatabaseServlet {
 
         logger.info("doGet :" +
             "\n\tRequest " + request.getQueryString() +
-           // "\n\tRequest decode " + URLDecoder.decode(request.getQueryString(), "UTF-8") +
+            // "\n\tRequest decode " + URLDecoder.decode(request.getQueryString(), "UTF-8") +
             "\n\tpath    " + request.getPathInfo() +
             "\n\turi     " + requestURI +
             "\n\turl     " + request.getRequestURL() +
@@ -157,8 +160,14 @@ public class DownloadServlet extends DatabaseServlet {
             writeAudioZip(response, db, queryString, projid, language);
           }
         } else {
+
+          // http://127.0.0.1:8888/downloadResults
+//          if (requestURI.toLowerCase().contains("request=downloadUserPerf")) {
+//
+//          } else {
 //          logger.debug("file download request " + requestURI);
-          returnSpreadsheet(response, db, requestURI, projid, language);
+            returnSpreadsheet(response, db, requestURI, projid, language);
+//          }
         }
       } catch (Exception e) {
         logger.error("doGet Got " + e, e);
@@ -497,6 +506,14 @@ public class DownloadServlet extends DatabaseServlet {
     } else if (encodedFileName.toLowerCase().contains(EVENTS)) {
       setFilenameHeader(response, prefix + EVENTS_XLSX);
       new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(projectid), outputStream);
+    } else if (encodedFileName.toLowerCase().contains(USER_PERF)) {
+      setFilenameHeader(response, prefix + "userPerf.xlsx");
+     // int projectIDFromUser = getProjectIDFromUser();
+      logger.info("getUsersWithRecordings for project # " + projectid);
+      List<UserInfo> userInfo = db
+          .getAnalysis(projectid)
+          .getUserInfo(db.getUserDAO(), 0);
+      new UserPerfToExcel().writeExcelToStream(userInfo, outputStream);
     } else {
       logger.error("returnSpreadsheet huh? can't handle request " + encodedFileName);
     }

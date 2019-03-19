@@ -450,4 +450,13 @@ public class DownloadHelper implements IShowStatus {
     });
     return ts;
   }
+
+//  @NotNull
+//  private String getURLPrefix(String host) {
+//    return toDominoUrl("");
+//  }
+
+  public void doUserPerfDownload() {
+    new DownloadIFrame(toDominoUrl("")+ "?downloadUserPerf");
+  }
 }

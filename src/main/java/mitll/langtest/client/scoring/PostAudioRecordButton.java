@@ -178,6 +178,8 @@ public abstract class PostAudioRecordButton extends RecordButton
    * So if we get something other than a 200 http response, stop recording and show a big failure warning.
    * which is different than a "hey, please speak in response to the prompt" or "check your mic"
    *
+   * Need to make sure this response is for me!
+   *
    * @param json
    * @see #startRecording
    */

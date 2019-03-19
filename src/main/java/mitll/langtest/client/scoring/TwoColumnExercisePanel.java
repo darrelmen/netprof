@@ -113,7 +113,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private final ItemMenu itemMenu;
   private final boolean addPlayer;
   private final boolean isContext;
-  SessionManager sessionManager;
+  private final SessionManager sessionManager;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
