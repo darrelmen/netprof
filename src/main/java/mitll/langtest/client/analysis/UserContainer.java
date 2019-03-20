@@ -225,7 +225,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   }
 
   private void gotDownloadClick() {
-    new DownloadHelper().doUserPerfDownload(controller.getHost());
+    new DownloadHelper().doUserPerfDownload(controller.getHost(), userTypeahead.getText(), listid);
   }
 
   private boolean showOnlyMine() {

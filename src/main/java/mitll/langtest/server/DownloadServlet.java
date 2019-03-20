@@ -38,6 +38,7 @@ import mitll.langtest.server.database.excel.UserPerfToExcel;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -93,7 +94,10 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String SEARCH = "search";
   private static final String AUDIO1 = "audio";
   private static final int BUFFER_SIZE = 4096;
+
   public static final String USER_PERF = "userPerf";
+  public static final String LISTID = "listid";
+  public static final String USER = "user";
 
   /**
    * This is getting complicated.
@@ -166,7 +170,7 @@ public class DownloadServlet extends DatabaseServlet {
 //
 //          } else {
 //          logger.debug("file download request " + requestURI);
-          returnSpreadsheet(response, db, requestURI, projid, language,getQuery(request));
+          returnSpreadsheet(response, db, requestURI, projid, language, getQuery(request));
 //          }
         }
       } catch (Exception e) {
@@ -490,7 +494,8 @@ public class DownloadServlet extends DatabaseServlet {
                                  DatabaseImpl db,
                                  String encodedFileName,
                                  int projectid,
-                                 String language, String query) throws IOException {
+                                 String language,
+                                 String query) throws IOException {
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     ServletOutputStream outputStream = response.getOutputStream();
     String projectName = getProjectName(projectid);
@@ -503,16 +508,24 @@ public class DownloadServlet extends DatabaseServlet {
     } else
       */
 
-    logger.info("returnSpreadsheet : (" + projectName + ") req " + encodedFileName);
-    logger.info("returnSpreadsheet : (" + projectName + ") query " + query);
+    logger.info("returnSpreadsheet : (" + projectName + ") req " + encodedFileName + " query " + query);
 
     if (query.toLowerCase().contains(USER_PERF.toLowerCase())) {
-      setFilenameHeader(response, prefix + "userPerf.xlsx");
       logger.info("getUsersWithRecordings for project # " + projectid);
+
+      URLParamParser invoke = new URLParamParser(query.split("&")).invoke(false);
+
+      int listID = getListID(invoke);
+      UserList userListNoExercises = listID == -1 ? null : db.getUserListManager().getUserListNoExercisesWithCount(listID);
+      String filename = getFilename(prefix, userListNoExercises);
+      setFilenameHeader(response, filename);
       List<UserInfo> userInfo = db
           .getAnalysis(projectid)
-          .getUserInfo(db.getUserDAO(), 0);
-      new UserPerfToExcel().writeExcelToStream(userInfo, outputStream);
+          .getUserInfo(db.getUserDAO(), 1, listID);
+
+      userInfo = filterByUser(invoke, userInfo);
+
+      new UserPerfToExcel().writeExcelToStream(userInfo, userListNoExercises, outputStream);
     } else if (encodedFileName.toLowerCase().contains(RESULTS)) {
       setFilenameHeader(response, prefix + RESULTS_XLSX);
       new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid), db.getTypeOrder(projectid), outputStream);
@@ -522,6 +535,40 @@ public class DownloadServlet extends DatabaseServlet {
     } else {
       logger.error("returnSpreadsheet huh? can't handle request " + encodedFileName);
     }
+  }
+
+  @NotNull
+  private String getFilename(String prefix, UserList userListNoExercises) {
+    String listPart = userListNoExercises == null ? "" : userListNoExercises.getName() + "_";
+    return prefix + listPart + "userPerf.xlsx";
+  }
+
+  private List<UserInfo> filterByUser(URLParamParser invoke, List<UserInfo> userInfo) {
+    Collection<String> user = invoke.getSelection().get(USER);
+    if (user != null && user.size() == 1) {
+      String searchReq = user.iterator().next().toLowerCase();
+      userInfo = userInfo
+          .stream()
+          .filter(userInfo1 ->
+              userInfo1.getUserID().toLowerCase().startsWith(searchReq) ||
+                  userInfo1.getName().toLowerCase().contains(searchReq)
+          ).collect(Collectors.toList());
+    }
+    return userInfo;
+  }
+
+  private int getListID(URLParamParser invoke) {
+    Collection<String> listid = invoke.getSelection().get(LISTID);
+    int list = -1;
+    if (listid != null && listid.size() == 1) {
+      String next = listid.iterator().next();
+      try {
+        list = Integer.parseInt(next);
+      } catch (NumberFormatException e) {
+        logger.warn("got (for " + next + ")" + e, e);
+      }
+    }
+    return list;
   }
 
   private void setResponseHeader(HttpServletResponse response, String fileName) {

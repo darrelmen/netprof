@@ -108,15 +108,27 @@ public class UserInfo extends SimpleUser {
   }
 
   public int getRounded(List<BestScore> bestScores1) {
+    return toRound(getTotal(bestScores1), bestScores1.size());
+  }
+
+  public float getRoundedHundred(List<BestScore> bestScores1) {
+    return toRoundHundred(getTotal(bestScores1), bestScores1.size())/100F;
+  }
+
+  private float getTotal(List<BestScore> bestScores1) {
     float total = 0F;
     for (BestScore bs : bestScores1) {
       total += bs.getScore();
     }
-    return toRound(total, bestScores1.size());
+    return total;
   }
 
   private static int toRound(float total, float size) {
     return Math.round(1000f * total / size);
+  }
+
+  private static int toRoundHundred(float total, float size) {
+    return Math.round(10000f * total / size);
   }
 
   private static int toPercent(float total, float size) {

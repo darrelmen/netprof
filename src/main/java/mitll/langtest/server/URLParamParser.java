@@ -27,30 +27,54 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.server.database.analysis;
+package mitll.langtest.server;
 
-import mitll.langtest.server.database.user.IUserDAO;
-import mitll.langtest.shared.WordsAndTotal;
-import mitll.langtest.shared.analysis.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
 
-public interface IAnalysis {
-  AnalysisReport getPerformanceReportForUser(AnalysisRequest analysisRequest);
+import static mitll.langtest.server.ScoreServlet.HeaderValue.PROJID;
+import static mitll.langtest.server.ScoreServlet.HeaderValue.USER;
 
-  WordsAndTotal getWordScoresForUser(AnalysisRequest analysisRequest, int rangeStart, int rangeEnd, String sort);
+/**
+ * Do something better here with figuring out which values to use in type->selection
+ */
+class URLParamParser {
+  private static final Logger logger = LogManager.getLogger(URLParamParser.class);
 
-  List<WordAndScore> getWordAndScoreForPhoneAndBigram(AnalysisRequest analysisRequest);
-  List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings, int listid);
+  private final String[] split1;
+  private Map<String, Collection<String>> selection;
 
-  /**
-   * @see mitll.langtest.server.services.AnalysisServiceImpl#getUsersWithRecordingsForDialog
-   * @param userDAO
-   * @param dialogID
-   * @return
-   */
-  List<UserInfo> getUserInfoForDialog(IUserDAO userDAO, int dialogID);
+  URLParamParser(String... split1) {
+    this.split1 = split1;
+  }
 
-  PhoneSummary getPhoneSummaryForPeriod(AnalysisRequest analysisRequest);
-  PhoneBigrams getPhoneBigramsForPeriod(AnalysisRequest analysisRequest);
+  Map<String, Collection<String>> getSelection() {
+    return selection;
+  }
+
+  URLParamParser invoke(boolean ignoreUserAndProject) {
+    selection = new TreeMap<>();
+    for (String param : split1) {
+     // logger.info("URLParamParser param '" + param + "'");
+      String[] split = param.split("=");
+      if (split.length == 2) {
+        String key = split[0];
+        String value = split[1];
+       // logger.info("\t" + key + " = " + value);
+        if (ignoreUserAndProject &&
+            (key.equals(USER.toString()) || key.equalsIgnoreCase(PROJID.name()))) {
+          // skip it
+         logger.info("URLParamParser Skip " + key);
+        } else {
+          selection.put(key, Collections.singleton(value));
+        }
+      }
+    }
+    return this;
+  }
 }

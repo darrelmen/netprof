@@ -49,6 +49,10 @@ public class AnalysisRequest implements Serializable {
 
   public AnalysisRequest() {}
 
+  /**
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getSlickPerfResultsForDialog
+   * @return
+   */
   public int getListid() {
     return listid;
   }

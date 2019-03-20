@@ -71,6 +71,10 @@ class UserTypeahead {
     this.box = box;
   }
 
+  public String getText() {
+    return box.getText();
+  }
+
 /*  public void setChoices(Collection<UserInfo> choices) {
     this.choices = choices;
   }*/

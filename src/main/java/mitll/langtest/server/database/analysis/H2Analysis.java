@@ -115,10 +115,11 @@ class H2Analysis extends Analysis implements IAnalysis {
   /**
    * @param userDAO
    * @param minRecordings
+   * @param listid
    * @return
    * @seex LangTestDatabaseImpl#getUsersWithRecordings
    */
-  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings) {
+  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings, int listid) {
     String sql = getPerfSQL();
     try {
       Map<Integer, UserInfo> best = getBest(sql, minRecordings);

@@ -31,10 +31,12 @@ package mitll.langtest.server.database.excel;
 
 import mitll.langtest.shared.analysis.BestScore;
 import mitll.langtest.shared.analysis.UserInfo;
+import mitll.langtest.shared.custom.UserList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.streaming.SXSSFWorkbook;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -45,40 +47,34 @@ public class UserPerfToExcel {
 
   /**
    * @param typeOrder
+   * @param userListNoExercises
    * @param out
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public void writeExcelToStream(Collection<UserInfo> userInfos, OutputStream out) {
-    writeToStream(out, writeExcel(userInfos));
+  public void writeExcelToStream(Collection<UserInfo> userInfos, UserList userListNoExercises, OutputStream out) {
+    writeToStream(out, writeExcel(userInfos, userListNoExercises));
   }
 
-  private SXSSFWorkbook writeExcel(Collection<UserInfo> userInfos) {
-    long now;
+  private SXSSFWorkbook writeExcel(Collection<UserInfo> userInfos, UserList userListNoExercises) {
     long then = System.currentTimeMillis();
 
     SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
-    Sheet sheet = wb.createSheet("Users");
+    Sheet sheet = wb.createSheet("UserPerformance");
     int rownum = 0;
-    CellStyle dateStyle = wb.createCellStyle();
-    DataFormat dataFormat = wb.createDataFormat();
-
-    dateStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss 'yy"));
-    //DateTimeFormat format = DateTimeFormat.getFormat("MMM dd h:mm:ss a z ''yy");
+    CellStyle dateStyle = getDateStyle(wb);
     Row headerRow = sheet.createRow(rownum++);
 
     List<String> columns = new ArrayList<String>(Arrays.asList("Student", "Name", "Start", "lifetime #", "Lifetime Avg.",
         "# in session",
-        "# Session Completed", "Session Avg."));
+        "# Recorded", "Session Avg.",
+        "Session #1 Date", "Session #1 # Recorded", "Session #1 Score",
+        "Session #2 Date", "Session #2 # Recorded", "Session #2 Score..."
+        ));
 
     for (int i = 0; i < columns.size(); i++) {
       Cell headerCell = headerRow.createCell(i);
       headerCell.setCellValue(columns.get(i));
     }
-
-//    CellStyle dcellStyle = wb.createCellStyle();
-//    CreationHelper createHelper = wb.getCreationHelper();
-//    dcellStyle.setDataFormat(
-//        createHelper.createDataFormat().getFormat("m/d/yy h:mm"));
 
     for (UserInfo result : userInfos) {
       Row row = sheet.createRow(rownum++);
@@ -97,7 +93,8 @@ public class UserPerfToExcel {
       cell.setCellValue(result.getCurrent());
 
       cell = row.createCell(j++);
-      cell.setCellValue(result.getLastSessionSize());
+      int lastSessionSize = userListNoExercises == null ? result.getLastSessionSize() : userListNoExercises.getNumItems();
+      cell.setCellValue(lastSessionSize);
 
       cell = row.createCell(j++);
       cell.setCellValue(result.getLastSessionNum());
@@ -115,16 +112,23 @@ public class UserPerfToExcel {
         cell = row.createCell(j++);
         cell.setCellValue(bestScores.size());
         cell = row.createCell(j++);
-        float rounded = (float)result.getRounded(bestScores);
-        cell.setCellValue((int)(rounded/10F));
+        cell.setCellValue(result.getRoundedHundred(bestScores));
       }
-
     }
-    now = System.currentTimeMillis();
+
+    long now = System.currentTimeMillis();
     if (now - then > 100) {
       logger.warn("toXLSX : took " + (now - then) + " millis to add " + rownum + " rows to sheet, or " + (now - then) / rownum + " millis/row");
     }
     return wb;
+  }
+
+  @NotNull
+  private CellStyle getDateStyle(SXSSFWorkbook wb) {
+    CellStyle dateStyle = wb.createCellStyle();
+    DataFormat dataFormat = wb.createDataFormat();
+    dateStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss 'yy"));
+    return dateStyle;
   }
 
   private void writeToStream(OutputStream out, SXSSFWorkbook wb) {

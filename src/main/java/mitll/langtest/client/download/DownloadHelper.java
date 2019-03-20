@@ -56,6 +56,9 @@ import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
  *
  */
 public class DownloadHelper implements IShowStatus {
+  public static final String USER = "user";
+  public static final String USER_PERF = USER + "Perf";
+  public static final String LISTID = "listid";
   private final Logger logger = Logger.getLogger("DownloadHelper");
 
   private static final String INCLUDE_AUDIO = "Include Audio?";
@@ -459,8 +462,17 @@ public class DownloadHelper implements IShowStatus {
 //    return toDominoUrl("");
 //  }
 
-  public void doUserPerfDownload(String host) {
-    String url = toDominoUrl(host) + "downloadResults?request=userPerf";
+  /**
+   * @see mitll.langtest.server.DownloadServlet#USER
+   * @see mitll.langtest.server.DownloadServlet#LISTID
+   * @see mitll.langtest.server.DownloadServlet#USER_PERF
+   * @param host
+   * @param search
+   * @param listid
+   */
+  public void doUserPerfDownload(String host, String search, int listid) {
+    String s = URL.encodeQueryString(USER + "=" + search + "&" + LISTID + "=" + listid);
+    String url = toDominoUrl(host) + "downloadResults?request=" + USER_PERF + "&" + s;
     logger.info("url " + url);
     new DownloadIFrame(url);
   }

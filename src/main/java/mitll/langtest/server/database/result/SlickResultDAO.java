@@ -607,8 +607,19 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
     return prefix.substring(netProfDurLength) + File.separator;
   }*/
+
+  /**
+   *
+   * @param projid
+   * @param minScore
+   * @return
+   */
   public Collection<SlickPerfResult> getPerf(int projid, float minScore) {
     return dao.perf(projid, minScore);
+  }
+
+  public Collection<SlickPerfResult> getPerfOnList(int listid, float minScore) {
+    return dao.perfOnList(listid, minScore);
   }
 
   public int getStudentForPath(int projid, String path) {
