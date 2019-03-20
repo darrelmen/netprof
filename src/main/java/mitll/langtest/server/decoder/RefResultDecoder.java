@@ -98,7 +98,7 @@ public class RefResultDecoder {
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
     this.audioFileHelper = audioFileHelper;
-    this.audioConversion = new AudioConversion(serverProperties.shouldTrimAudio(), serverProperties.getMinDynamicRange(), pathHelper.getContext().getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG));
+    this.audioConversion = new AudioConversion(serverProperties.shouldTrimAudio(), serverProperties.getMinDynamicRange(), pathHelper.getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG));
     audioCheck = new AudioCheck(serverProperties.shouldTrimAudio(), serverProperties.getMinDynamicRange());
     defaultUser = db.getUserDAO().getDefaultUser();
 

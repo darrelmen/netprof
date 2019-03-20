@@ -66,6 +66,7 @@ import org.jetbrains.annotations.Nullable;
 import scala.Option;
 import scala.collection.Iterator;
 
+import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -155,7 +156,9 @@ public class AudioFileHelper implements AlignDecode {
     this.logAndNotify = langTestDatabase;
 
     this.mp3Support = new MP3Support(pathHelper);
-    audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProperties.getMinDynamicRange(), pathHelper.getContext().getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG));
+    ServletContext context = pathHelper.getContext();
+    String realPath = context == null ? LANGTEST_IMAGES_NEW_PRO_F_1_PNG : context.getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG);
+    audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProperties.getMinDynamicRange(), realPath);
 
     this.language = project.getLanguageEnum();
     removeAccents = language != Language.FRENCH;
@@ -363,7 +366,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * Call Kaldi all the time for now.
-   *
+   * <p>
    * TODO : Consider what to do with english sentences inside an interpreter dialog...
    *
    * @param safe
@@ -1583,7 +1586,7 @@ public class AudioFileHelper implements AlignDecode {
 
       now = System.currentTimeMillis();
 
-      if (now-then>60) {
+      if (now - then > 60) {
         logger.info("getASRScoreForAudio : for " +
             "\n\ttook    " + (now - then) +
             "\n\tpretest " + pretestScore +
@@ -1897,7 +1900,7 @@ public class AudioFileHelper implements AlignDecode {
   private List<WP> matchesNotSelf(Trie<WP> trie, WP wp, List<String> overallPron) {
     String entry = wp.getEntry();
     Collection<WP> matchesLC = trie.getMatchesLC(entry);
-  //  List<String> pron = wp.getPron();
+    //  List<String> pron = wp.getPron();
     String word = wp.getWord();
     boolean debug = (word.equalsIgnoreCase("niveau"));
     if (DEBUG_EDIT || debug) logger.info("match " + word + " " + wp);

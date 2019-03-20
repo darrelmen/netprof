@@ -56,6 +56,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private final SlickProject project;
   private final Project fullProject;
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_ROOT_TYPE = true;
   private static final boolean DEBUG_USER_CREATED = false;
   private final Map<Integer, CommonExercise> idToContextExercise = new HashMap<>();
   private final Map<Integer, CommonExercise> idToUserExercise = new HashMap<>();
@@ -203,6 +204,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   List<CommonExercise> readExercises() {
     try {
       List<String> typeOrder = getTypeOrderFromProject();
+
+      logger.info("readExercises vfor  " +project + " " + typeOrder);
       setRootTypes(typeOrder);
 
       int projid = project.id();
@@ -447,14 +450,14 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    */
   private void setRootTypes(List<String> typeOrder) {
     Collection<String> attributeTypes = getAttributeTypes();
-    if (DEBUG) logger.info("setRootTypes attributeTypes " + attributeTypes);
+    if (DEBUG_ROOT_TYPE) logger.info("setRootTypes attributeTypes " + attributeTypes);
 
     Set<String> allTypesExceptSubTopic = removeSubtopic(attributeTypes);
 
     String firstProjectType = project.first();
     Set<String> rootTypes = new HashSet<>(Collections.singletonList(firstProjectType));
     rootTypes.addAll(allTypesExceptSubTopic);
-    if (DEBUG) logger.info("setRootTypes roots " + rootTypes);
+    if (DEBUG_ROOT_TYPE) logger.info("setRootTypes roots " + rootTypes);
 
     ISection<CommonExercise> sectionHelper = getSectionHelper();
     sectionHelper.setRootTypes(rootTypes);
@@ -476,12 +479,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
 
     sectionHelper.setParentToChildTypes(parentToChild);
-    if (DEBUG) {
+    if (DEBUG_ROOT_TYPE) {
       logger.info("setRootTypes roots " + rootTypes);
     }
 
     sectionHelper.setPredefinedTypeOrder(sectionHelper.getUniq(typeOrder));
-    if (DEBUG) logger.info("setRootTypes parentToChild " + parentToChild);
+    if (DEBUG_ROOT_TYPE) logger.info("setRootTypes parentToChild " + parentToChild);
   }
 
   private void setParentChild(Collection<String> rootTypes, Map<String, String> parentToChild, String lowerTopic) {

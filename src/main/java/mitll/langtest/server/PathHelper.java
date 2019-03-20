@@ -71,6 +71,10 @@ public class PathHelper {
     this.realContextPathTest = realContextPathTest;
   }
 
+  public String getRealPath(String path) {
+    return getContext() == null ? path : getContext().getRealPath(path);
+  }
+
   public String ensureForwardSlashes(String wavPath) {
     return wavPath.replaceAll("\\\\", "/");
   }
@@ -178,7 +182,6 @@ public class PathHelper {
   }
 
   /**
-   *
    * @param language
    * @param exercise
    * @param question - vestigial

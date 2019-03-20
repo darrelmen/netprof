@@ -134,7 +134,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final int MAX_PHONES = 7;
   private static final boolean TEST_SYNC = false;
   private static final int WARN_THRESH = 10;
-  public static final String CRASH = "crash";
+  private static final String CRASH = "crash";
 
   private IUserDAO userDAO;
   private IUserSessionDAO userSessionDAO;
