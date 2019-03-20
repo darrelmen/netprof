@@ -48,6 +48,7 @@ import mitll.langtest.client.list.SelectionState;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
 
@@ -55,7 +56,7 @@ import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
  *
  */
 public class DownloadHelper implements IShowStatus {
-  // private final Logger logger = Logger.getLogger("DownloadHelper");
+  private final Logger logger = Logger.getLogger("DownloadHelper");
 
   private static final String INCLUDE_AUDIO = "Include Audio?";
   public static final String AMPERSAND = "___AMPERSAND___";
@@ -146,7 +147,9 @@ public class DownloadHelper implements IShowStatus {
         new DialogHelper.CloseListener() {
           @Override
           public boolean gotYes() {
-            new DownloadIFrame(toDominoUrl(getDownloadAudio(host)) + getURL());
+            String url = toDominoUrl(getDownloadAudio(host)) + getURL();
+            logger.info("gotYes url " + url);
+            new DownloadIFrame(url);
             return true;
           }
 
@@ -456,7 +459,9 @@ public class DownloadHelper implements IShowStatus {
 //    return toDominoUrl("");
 //  }
 
-  public void doUserPerfDownload() {
-    new DownloadIFrame(toDominoUrl("")+ "?downloadUserPerf");
+  public void doUserPerfDownload(String host) {
+    String url = toDominoUrl(host) + "downloadResults?request=userPerf";
+    logger.info("url " + url);
+    new DownloadIFrame(url);
   }
 }

@@ -225,6 +225,8 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
     seeScores.setVisible(false);
     setPrevNextVisible(false);
 
+    setListHeaderVisible(false);
+
     sticky.resetStorage();
     if (exercise == null) {
       logger.warning("StatsPracticePanel.onSetComplete. : err : no exercise?");
@@ -234,6 +236,13 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
 
     //  logger.info("onSetComplete - show charts!");
     showFeedbackCharts();
+  }
+
+  private void setListHeaderVisible(boolean sortBoxVisible) {
+    if (exerciseList instanceof PracticeFacetExerciseList) {
+      ((PracticeFacetExerciseList) exerciseList).setSortBoxVisible(sortBoxVisible);
+      ((PracticeFacetExerciseList) exerciseList).setListHeaderVisible(sortBoxVisible);
+    }
   }
 
   @Override
@@ -321,6 +330,8 @@ class StatsPracticePanel<L extends CommonShell, T extends ClientExercise> extend
   }
 
   void gotTryAgain() {
+    setListHeaderVisible(true);
+
     doIncorrectFirst();
   }
 

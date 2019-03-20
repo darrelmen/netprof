@@ -69,7 +69,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String COMPRESSED_SUFFIX = "mp3";
   private static final String RESULTS = "results";
   /**
-   * @see #returnSpreadsheet(HttpServletResponse, DatabaseImpl, String, int, String)
+   * @see #returnSpreadsheet(HttpServletResponse, DatabaseImpl, String, int, String, String)
    */
   private static final String EVENTS = "events";
   private static final String REQUEST = "request";
@@ -149,7 +149,7 @@ public class DownloadServlet extends DatabaseServlet {
             "\n\tpath    " + request.getServletPath());
 
         if (requestURI.toLowerCase().contains(AUDIO)) {
-          String queryString = URLDecoder.decode(request.getQueryString(), "UTF-8");
+          String queryString = getQuery(request);
           if (queryString.contains(DIALOG_ARG)) {
             downloadDialogContent(response, db, projid, hasProjectSpecificAudio, queryString);
           } else if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
@@ -166,7 +166,7 @@ public class DownloadServlet extends DatabaseServlet {
 //
 //          } else {
 //          logger.debug("file download request " + requestURI);
-            returnSpreadsheet(response, db, requestURI, projid, language);
+          returnSpreadsheet(response, db, requestURI, projid, language,getQuery(request));
 //          }
         }
       } catch (Exception e) {
@@ -179,8 +179,12 @@ public class DownloadServlet extends DatabaseServlet {
     closeOutputStream(response);
   }
 
+  private String getQuery(HttpServletRequest request) throws UnsupportedEncodingException {
+    return URLDecoder.decode(request.getQueryString(), "UTF-8");
+  }
+
   private void handleNoProject(HttpServletResponse response) throws IOException {
-    logger.warn("doGet no current project for request ");
+    logger.warn("handleNoProject no current project for request ");
     response.setContentType("text/html");
     response.getOutputStream().write("no project for request".getBytes());
     closeOutputStream(response);
@@ -226,14 +230,14 @@ public class DownloadServlet extends DatabaseServlet {
    * @throws DominoSessionException
    */
   private int getProjectIDFromUser(HttpServletRequest request) throws DominoSessionException {
-    logger.info("doGet no project id on session, let's try the security manager");
+    logger.info("getProjectIDFromUser no project id on session, let's try the security manager");
     int loggedInUser = securityManager.getLoggedInUserID(request);
     int projid = -1;
     if (loggedInUser != -1) {
-      logger.debug("doGet found session user " + loggedInUser);
+      logger.debug("getProjectIDFromUser found session user " + loggedInUser);
       projid = getMostRecentProjectByUser(loggedInUser);
     } else {
-      logger.warn("doGet couldn't find user via request...");
+      logger.warn("getProjectIDFromUser couldn't find user via request...");
     }
     return projid;
   }
@@ -478,6 +482,7 @@ public class DownloadServlet extends DatabaseServlet {
    * @param db
    * @param encodedFileName
    * @param language
+   * @param query
    * @throws IOException
    * @see #doGet
    */
@@ -485,7 +490,7 @@ public class DownloadServlet extends DatabaseServlet {
                                  DatabaseImpl db,
                                  String encodedFileName,
                                  int projectid,
-                                 String language) throws IOException {
+                                 String language, String query) throws IOException {
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     ServletOutputStream outputStream = response.getOutputStream();
     String projectName = getProjectName(projectid);
@@ -499,21 +504,21 @@ public class DownloadServlet extends DatabaseServlet {
       */
 
     logger.info("returnSpreadsheet : (" + projectName + ") req " + encodedFileName);
+    logger.info("returnSpreadsheet : (" + projectName + ") query " + query);
 
-    if (encodedFileName.toLowerCase().contains(RESULTS)) {
-      setFilenameHeader(response, prefix + RESULTS_XLSX);
-      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid), db.getTypeOrder(projectid), outputStream);
-    } else if (encodedFileName.toLowerCase().contains(EVENTS)) {
-      setFilenameHeader(response, prefix + EVENTS_XLSX);
-      new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(projectid), outputStream);
-    } else if (encodedFileName.toLowerCase().contains(USER_PERF)) {
+    if (query.toLowerCase().contains(USER_PERF.toLowerCase())) {
       setFilenameHeader(response, prefix + "userPerf.xlsx");
-     // int projectIDFromUser = getProjectIDFromUser();
       logger.info("getUsersWithRecordings for project # " + projectid);
       List<UserInfo> userInfo = db
           .getAnalysis(projectid)
           .getUserInfo(db.getUserDAO(), 0);
       new UserPerfToExcel().writeExcelToStream(userInfo, outputStream);
+    } else if (encodedFileName.toLowerCase().contains(RESULTS)) {
+      setFilenameHeader(response, prefix + RESULTS_XLSX);
+      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid), db.getTypeOrder(projectid), outputStream);
+    } else if (encodedFileName.toLowerCase().contains(EVENTS)) {
+      setFilenameHeader(response, prefix + EVENTS_XLSX);
+      new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(projectid), outputStream);
     } else {
       logger.error("returnSpreadsheet huh? can't handle request " + encodedFileName);
     }

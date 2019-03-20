@@ -69,7 +69,7 @@ public class AnalysisTab extends DivWidget {
   private static final String WORD_EXAMPLES = "WordExamples";
 
   private static final String REPORT_FOR_USER = "getting performance report for user";
-  private static final int TIME_WINDOW_WIDTH = 92;
+  private static final int TIME_WINDOW_WIDTH = 101;//92;
 
   /**
    * Got be the width to fit on a laptop screen for progress view - otherwise the phone plot
@@ -125,7 +125,7 @@ public class AnalysisTab extends DivWidget {
   }
 
   private AnalysisPlot analysisPlot = null;
-  private ExerciseLookup<CommonShell> exerciseLookup = null;
+ // private ExerciseLookup<CommonShell> exerciseLookup = null;
   private final ExerciseController controller;
   private TimeWidgets timeWidgets;
   private final Heading exampleHeader = getHeading(WORDS_USING_SOUND);
@@ -228,10 +228,10 @@ public class AnalysisTab extends DivWidget {
     boolean isTeacherView = overallBottom != null;
 
     AnalysisPlot analysisPlot = showPlot ? addAnalysisPlot(controller, isPolyglot, isTeacherView ? 700 : maxWidth, isTeacherView) : null;
-
-    if (!showPlot) {
-      exerciseLookup = new CommonShellCache<>(controller.getMessageHelper());
-    }
+//
+//    if (!showPlot) {
+//      exerciseLookup = new CommonShellCache<>(controller.getMessageHelper());
+//    }
 
     DivWidget bottom = getBottom(isTeacherView);
 
@@ -309,7 +309,7 @@ public class AnalysisTab extends DivWidget {
         controller.getSoundManager(), playFeedback, controller,
         controller.getMessageHelper(),
         isPolyglot, maxWidth, controller.getListService());
-    exerciseLookup = analysisPlot;
+    //exerciseLookup = analysisPlot;
     {
       Panel timeControls = getTimeControls(playFeedback, isTeacherView);
       analysisPlot.setTimeWidgets(timeWidgets);

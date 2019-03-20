@@ -82,7 +82,7 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 public abstract class FacetExerciseList<T extends CommonShell & Scored, U extends HasID & CommonShell>
     extends HistoryExerciseList<T, U>
     implements ShowEventListener, ChoicesContainer {
-  private Logger logger = Logger.getLogger("FacetExerciseList");
+  private final Logger logger = Logger.getLogger("FacetExerciseList");
 
   private static final String RECORDED = "Recorded";
 
@@ -175,6 +175,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private int freqid = 0;
   private DivWidget sortBox;
   private DivWidget pageSizeContainer;
+  private DivWidget listHeader;
   private Panel typeOrderContainer;
 
   /**
@@ -222,6 +223,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       listHeader.add(breadRow);
       listHeader.add(pagerAndSortRow = getPagerAndSort(controller));
       listHeader.setWidth("100%");
+      this.listHeader = listHeader;
     }
     // addPrevNextPage(footer);
     finished = true;
@@ -1221,7 +1223,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param typeToSelection
    * @see #getTypeToValuesCallback(Map, long)
    */
-  protected void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
+  private void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
     long diff = System.currentTimeMillis() - then;
     if (DEBUG || diff > 30) {
       logger.info("getTypeToValues took " + diff + " to get" +
@@ -1565,15 +1567,19 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     setPagerRowVisible(true);
   }
 
-  protected void setPagerRowVisible(boolean b) {
+  private void setPagerRowVisible(boolean b) {
     pagerAndSortRow.setVisible(b);
   }
 
-  protected void setSortBoxVisible(boolean b) {
+  public void setSortBoxVisible(boolean b) {
     sortBox.setVisible(b);
   }
 
-  protected void setDownloadVisible(boolean b) {
+  public void setListHeaderVisible(boolean b) {
+    listHeader.setVisible(b);
+  }
+
+  private void setDownloadVisible(boolean b) {
     showAndDownload.setVisible(b);
   }
 

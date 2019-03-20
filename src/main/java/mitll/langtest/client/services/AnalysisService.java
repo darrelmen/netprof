@@ -72,7 +72,6 @@ public interface AnalysisService extends RemoteService {
    */
   AnalysisReport getPerformanceReportForUser(AnalysisRequest analysisRequest) throws DominoSessionException, RestrictedOperationException;
 
-
   /**
    * @param analysisRequest
    * @param rangeStart
@@ -83,15 +82,6 @@ public interface AnalysisService extends RemoteService {
    * @see mitll.langtest.client.analysis.WordContainerAsync#createProvider(int, CellTable)
    */
   WordsAndTotal getWordScoresForUser(AnalysisRequest analysisRequest, int rangeStart, int rangeEnd, String sort) throws DominoSessionException;
-
-  /**
-   *
-   * @param analysisRequest
-   * @return
-   * @throws DominoSessionException
-   * @throws RestrictedOperationException
-   */
-  // List<Bigram> getPerformanceReportForUserForPhoneBigrams(AnalysisRequest analysisRequest) throws DominoSessionException, RestrictedOperationException;
 
   /**
    * @param analysisRequest

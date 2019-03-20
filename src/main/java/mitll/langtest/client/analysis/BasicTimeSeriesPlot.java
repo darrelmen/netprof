@@ -69,7 +69,7 @@ public class BasicTimeSeriesPlot<T extends CommonShell> extends TimeSeriesPlot
   //private Map<Integer, T> idToEx = new TreeMap<>();
 
   final ExceptionSupport exceptionSupport;
-  protected final ICommonShellCache<T> commonShellCache;
+  final ICommonShellCache<T> commonShellCache;
 
   private static final boolean WARN_ABOUT_MISSING_EXERCISE_ID = false;
 

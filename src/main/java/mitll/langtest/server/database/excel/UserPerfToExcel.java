@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.database.excel;
 
+import mitll.langtest.shared.analysis.BestScore;
 import mitll.langtest.shared.analysis.UserInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,10 +59,10 @@ public class UserPerfToExcel {
     SXSSFWorkbook wb = new SXSSFWorkbook(1000); // keep 100 rows in memory, exceeding rows will be flushed to disk
     Sheet sheet = wb.createSheet("Users");
     int rownum = 0;
-    CellStyle cellStyle = wb.createCellStyle();
+    CellStyle dateStyle = wb.createCellStyle();
     DataFormat dataFormat = wb.createDataFormat();
 
-    cellStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss 'yy"));
+    dateStyle.setDataFormat(dataFormat.getFormat("MMM dd HH:mm:ss 'yy"));
     //DateTimeFormat format = DateTimeFormat.getFormat("MMM dd h:mm:ss a z ''yy");
     Row headerRow = sheet.createRow(rownum++);
 
@@ -69,11 +70,15 @@ public class UserPerfToExcel {
         "# in session",
         "# Session Completed", "Session Avg."));
 
-
     for (int i = 0; i < columns.size(); i++) {
       Cell headerCell = headerRow.createCell(i);
       headerCell.setCellValue(columns.get(i));
     }
+
+//    CellStyle dcellStyle = wb.createCellStyle();
+//    CreationHelper createHelper = wb.getCreationHelper();
+//    dcellStyle.setDataFormat(
+//        createHelper.createDataFormat().getFormat("m/d/yy h:mm"));
 
     for (UserInfo result : userInfos) {
       Row row = sheet.createRow(rownum++);
@@ -84,7 +89,7 @@ public class UserPerfToExcel {
       cell.setCellValue(result.getName());
       cell = row.createCell(j++);
       cell.setCellValue(new Date(result.getTimestampMillis()));
-
+      cell.setCellStyle(dateStyle);
       cell = row.createCell(j++);
       cell.setCellValue(result.getNum());
 
@@ -98,7 +103,22 @@ public class UserPerfToExcel {
       cell.setCellValue(result.getLastSessionNum());
 
       cell = row.createCell(j++);
-      cell.setCellValue(result.getLastSessionScore());
+      cell.setCellValue(result.getAdjustedScore());
+
+      Map<Long, List<BestScore>> sessions = result.getSessions();
+      TreeSet<Long> sorted = new TreeSet<>(sessions.keySet());
+      for (Long session : sorted) {
+        List<BestScore> bestScores = sessions.get(session);
+        cell = row.createCell(j++);
+        cell.setCellValue(new Date(bestScores.get(0).getTimestamp()));
+        cell.setCellStyle(dateStyle);
+        cell = row.createCell(j++);
+        cell.setCellValue(bestScores.size());
+        cell = row.createCell(j++);
+        float rounded = (float)result.getRounded(bestScores);
+        cell.setCellValue((int)(rounded/10F));
+      }
+
     }
     now = System.currentTimeMillis();
     if (now - then > 100) {
