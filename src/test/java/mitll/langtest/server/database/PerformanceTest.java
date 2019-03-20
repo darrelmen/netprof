@@ -463,7 +463,7 @@ public class PerformanceTest extends BaseTest {
     DatabaseImpl database = getDatabase(urdu);
     IAnalysis analysis = database.getAnalysis(-1);
 
-    List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5);
+    List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5, -1);
     for (UserInfo userInfo1 : userInfo) logger.warn("Got " + userInfo1);
   }
 //
@@ -514,7 +514,7 @@ public class PerformanceTest extends BaseTest {
 //    int id = 71;
     DatabaseImpl database = getSpanishDatabase();
 
-    List<UserInfo> userInfo = database.getAnalysis(-1).getUserInfo(database.getUserDAO(), 5);
+    List<UserInfo> userInfo = database.getAnalysis(-1).getUserInfo(database.getUserDAO(), 5, -1);
     // PhoneReport phoneReport = (PhoneReport) userInfo;
 
     // Map<String, List<WordAndScore>> phonesForUser = phoneReport.getPhoneToWordAndScoreSorted();

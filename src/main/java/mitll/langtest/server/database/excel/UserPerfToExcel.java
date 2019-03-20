@@ -69,7 +69,7 @@ public class UserPerfToExcel {
         "# Recorded", "Session Avg.",
         "Session #1 Date", "Session #1 # Recorded", "Session #1 Score",
         "Session #2 Date", "Session #2 # Recorded", "Session #2 Score..."
-        ));
+    ));
 
     for (int i = 0; i < columns.size(); i++) {
       Cell headerCell = headerRow.createCell(i);
@@ -112,7 +112,10 @@ public class UserPerfToExcel {
         cell = row.createCell(j++);
         cell.setCellValue(bestScores.size());
         cell = row.createCell(j++);
-        cell.setCellValue(result.getRoundedHundred(bestScores));
+        float roundedHundred = result.getRoundedHundred(bestScores);
+        int round = Math.round(roundedHundred * 100F);
+        float fround = Integer.valueOf(round).floatValue() / 100F;
+        cell.setCellValue(fround);
       }
     }
 

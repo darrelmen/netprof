@@ -116,6 +116,7 @@ public class ProjectManagement implements IProjectManagement {
   //public static final String ANSWERS1 = "^.*answers\\/(.+)\\/.+";
   private static final String ANSWERS1 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
   private static final Pattern pattern = Pattern.compile(ANSWERS1);
+  public static final boolean DEBUG_USER_FOR_FILE = false;
 
   /**
    * JUST FOR TESTING
@@ -424,7 +425,7 @@ public class ProjectManagement implements IProjectManagement {
 
     List<CommonExercise> rawExercises = project.getRawExercises();
     if (!rawExercises.isEmpty()) {
-      logger.debug("configureProject (" + project.getLanguage() + ") first exercise is " + rawExercises.iterator().next());
+      logger.info("configureProject (" + project.getLanguage() + ") first exercise is " + rawExercises.iterator().next());
     } else {
       if (isProduction(project)) {
         logger.error("configureProject no exercises in project? " + project);
@@ -565,7 +566,9 @@ public class ProjectManagement implements IProjectManagement {
         logger.info("getUserForFile couldn't find recorder of (" +oldUser+ ") " + requestURI);
       }
       if (oldUser != -1 && userID != -1) {
+        if (oldUser != userID) {
         logger.info("getUserForFile remember " + oldUser + "->" + userID);
+        }
         oldToNew.put(oldUser, userID);
       }
       return userID;
@@ -623,7 +626,9 @@ public class ProjectManagement implements IProjectManagement {
         if (project != null) {
           Integer userID = project.getUserForFile(requestURI);
           if (userID != null) {
+            if (DEBUG_USER_FOR_FILE) {
             logger.info("getUserForFile : user in project #" + project.getID() + " for " + requestURI + " is " + userID);
+            }
             return userID;
           }
         }
@@ -872,10 +877,12 @@ public class ProjectManagement implements IProjectManagement {
     }*/
 
     List<CommonExercise> rawExercises = project.getRawExercises();
-    if (rawExercises.isEmpty()) {
+
+    /*    if (rawExercises.isEmpty()) {
       logger.warn("getExercises for project id " + projectid +
           " no exercises in '" + serverProps.getLessonPlan() + "' = " + rawExercises.size());
-    }
+    }*/
+
     return rawExercises;
   }
 

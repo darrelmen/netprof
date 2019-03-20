@@ -73,6 +73,8 @@ public class UserMenu {
   private static final String BROWSER_RECORDING = "Browser recording";
   private static final String RECORDING_TYPE = "Recording type";
   private static final String DOMINO_URL = "domino.url";
+  public static final String NEED_HELP = "Need Help?";
+  public static final String HELP_EMAIL = "Help Email";
 
   private final Logger logger = Logger.getLogger("UserMenu");
 
@@ -410,8 +412,8 @@ public class UserMenu {
                     FlexTable flexTable = super.addContent(messages, values, modal, bigger);
 
                     int rowCount = flexTable.getRowCount();
-                    flexTable.setHTML(rowCount + 1, 0, "Need Help?");
-                    flexTable.setHTML(rowCount + 1, 1, " <a href='" + getMailTo() + "'>Help Email</a>");
+                    flexTable.setHTML(rowCount + 1, 0, NEED_HELP);
+                    flexTable.setHTML(rowCount + 1, 1, " <a href='" + getMailTo() + "'>" + HELP_EMAIL + "</a>");
                     return flexTable;
                   }
                 };
@@ -422,16 +424,18 @@ public class UserMenu {
     return about;
   }
 
-
   @NotNull
   private List<String> getPropKeys(Map<String, String> props, int server) {
     List<String> strings = new ArrayList<>();
     try {
-      if (server == 1) {
-        props.put(RECORDING_TYPE, BROWSER_RECORDING);
+      props.remove("Built-By");
+      props.remove(DOMINO_URL);
+      props.remove("Specification-Title");
+
+      if (!controller.getUserManager().isAdmin()) {
+        props.remove("Specification-Version");
       }
 
-      props.remove(DOMINO_URL);
       Optional<String> max = props.keySet().stream().max(Comparator.comparingInt(String::length));
       if (max.isPresent()) {
         int maxl = max.get().length();

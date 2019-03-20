@@ -463,16 +463,20 @@ public class DownloadHelper implements IShowStatus {
 //  }
 
   /**
-   * @see mitll.langtest.server.DownloadServlet#USER
-   * @see mitll.langtest.server.DownloadServlet#LISTID
-   * @see mitll.langtest.server.DownloadServlet#USER_PERF
    * @param host
    * @param search
    * @param listid
+   * @see mitll.langtest.server.DownloadServlet#USER
+   * @see mitll.langtest.server.DownloadServlet#LISTID
+   * @see mitll.langtest.server.DownloadServlet#USER_PERF
    */
   public void doUserPerfDownload(String host, String search, int listid) {
     String s = URL.encodeQueryString(USER + "=" + search + "&" + LISTID + "=" + listid);
-    String url = toDominoUrl(host) + "downloadResults?request=" + USER_PERF + "&" + s;
+    String s1 = toDominoUrl(host);
+    if (!s1.endsWith("\\/")) {
+      s1 += "/";
+    }
+    String url = s1 + "downloadResults?request=" + USER_PERF + "&" + s;
     logger.info("url " + url);
     new DownloadIFrame(url);
   }

@@ -222,7 +222,7 @@ public class ServerProperties {
   //private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
 
   // turn down 3 db per Tamas - 03/19/19
-  private static final int MIN_DYNAMIC_RANGE_DEFAULT = 21;//24;      // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
+  private static final int MIN_DYNAMIC_RANGE_DEFAULT = 18;//21;//24;      // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final int SLEEP_BETWEEN_DECODES_DEFAULT = 100; // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
   private static final String MIN_DYNAMIC_RANGE = "minDynamicRange";
   private static final String CHECK_AUDIO_ON_STARTUP = "checkAudioOnStartup";
@@ -878,6 +878,10 @@ public class ServerProperties {
     return emailList.getReportEmails();
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioConversion#AudioConversion(boolean, int)
+   * @return
+   */
   public int getMinDynamicRange() {
     return getIntPropertyDef(MIN_DYNAMIC_RANGE, MIN_DYNAMIC_RANGE_DEFAULT);
   }

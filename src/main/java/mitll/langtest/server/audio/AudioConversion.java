@@ -66,8 +66,6 @@ public class AudioConversion extends AudioBase {
   private static final int MIN_WARN_DUR = 50;
 
   private final String soxPath;
-//  private final long trimMillisBefore;
-//  private final long trimMillisAfter;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_DETAIL = false;
