@@ -100,7 +100,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
       logger.info("getUsersWithRecordings for project # " + projectIDFromUser);
       List<UserInfo> userInfo = db
           .getAnalysis(projectIDFromUser)
-          .getUserInfo(db.getUserDAO(), MIN_RECORDINGS);
+          .getUserInfo(db.getUserDAO(), MIN_RECORDINGS, -1);
       long now = System.currentTimeMillis();
       if (now - then > 100) {
         logger.info("took " + (now - then) + " millis to get " + userInfo.size() + " user infos.");

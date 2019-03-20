@@ -43,6 +43,8 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.server.services.AnalysisServiceImpl;
@@ -134,8 +136,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private Button add;
   private Button remove;
   private Button mineOnly;
-  private final UserTypeahead userTypeahead = new UserTypeahead(this);
   //private List<UserInfo> remembered;
+
+  private final UserTypeahead userTypeahead = new UserTypeahead(this);
+
   private Collection<UserInfo> orig;
 
   private List<Integer> rememberedLists;
@@ -206,6 +210,22 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     Panel tableWithPager = getTableWithPager(filtered);
     leftSide.add(tableWithPager);
     ((Panel) tableWithPager.getParent()).add(getButtons());
+  }
+
+
+  @NotNull
+  private Button getDownloadButton() {
+    Button child = new Button("", IconType.DOWNLOAD);
+    new TooltipHelper().addTooltip(child, "Download spreadsheet.");
+    child.addStyleName("leftFiveMargin");
+//    child.getElement().getStyle().setMarginTop(10, PX);
+
+    child.addClickHandler(event -> gotDownloadClick());
+    return child;
+  }
+
+  private void gotDownloadClick() {
+    new DownloadHelper().doUserPerfDownload(controller.getHost(), userTypeahead.getText(), listid);
   }
 
   private boolean showOnlyMine() {
@@ -328,6 +348,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     filterContainer.addStyleName("leftFiveMargin");
 
     filterContainer.add(userTypeahead.getSearch());
+
+    filterContainer.add(getDownloadButton());
+
 
 //    Button excel = new Button("Excel", IconType.DOWNLOAD);
 //    excel.addStyleName("leftFiveMargin");
@@ -539,7 +562,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     addColumn(current, new TextHeader(OVERALL_SCORE));
     table.setColumnWidth(current, SESSION_AVG_WIDTH + "px");
     table.addColumnSortHandler(getOverallSorter(current, list));
-   // return current;
+    // return current;
   }
 
 /*  private void addMine(List<UserInfo> list) {
@@ -619,8 +642,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
           if (o1 != null) {
             if (o2 == null) return 1;
             else {
-              int p1 = getPercent(o1);
-              int p2 = getPercent(o2);
+              int p1 = o1.getPercent();
+              int p2 = o2.getPercent();
               int compare = Integer.compare(p1, p2);
               if (compare == 0) {
                 compare = Integer.compare(o1.getLastSessionNum(), o2.getLastSessionNum());
@@ -634,12 +657,12 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     return columnSortHandler;
   }
 
-  private int getPercent(UserInfo o1) {
-    int lastSessionNum1 = o1.getLastSessionNum();
-    int lastSessionSize1 = o1.getLastSessionSize();
-    if (lastSessionSize1 == -1) lastSessionSize1 = lastSessionNum1;
-    return getPercent(lastSessionNum1, lastSessionSize1);
-  }
+//  private int getPercent(UserInfo o1) {
+//    int lastSessionNum1 = o1.getLastSessionNum();
+//    int lastSessionSize1 = o1.getLastSessionSize();
+//    if (lastSessionSize1 == -1) lastSessionSize1 = lastSessionNum1;
+//    return getPercent(lastSessionNum1, lastSessionSize1);
+//  }
 
   private ColumnSortEvent.ListHandler<UserInfo> getCurrentSorter(Column<UserInfo, SafeHtml> englishCol,
                                                                  List<UserInfo> dataList) {
@@ -696,8 +719,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
           if (o1 != null) {
             if (o2 == null) return 1;
             else {
-              float s1 = getAdjustedScore(o1);
-              float s2 = getAdjustedScore(o2);
+              float s1 = o1.getAdjustedScore();
+              float s2 = o2.getAdjustedScore();
               return Float.compare(s1, s2);
             }
           }
@@ -784,34 +807,34 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
   @NotNull
   private String getOverallScore(UserInfo shell) {
-    String columnText = "" + getAdjustedScore(shell);
+    String columnText = "" + shell.getAdjustedScore();
     if (!columnText.contains(".")) columnText += ".0";
     return columnText;
   }
 
-  private float getAdjustedScore(UserInfo shell) {
-    int percent = getPercent(shell);
-    //int lastSessionScore = shell.getLastSessionScore();
-    //int lastSessionScore = shell.getLastSessionScore()/10;
-    float v = Integer.valueOf(shell.getLastSessionScore()).floatValue();
-    // return getSafeHtml("" + Integer.valueOf(lastSessionScore).floatValue()/10F);
-    // return getSafeHtml("" + lastSessionScore);
-
-//    logger.info("getAdjustedScore shell " +shell);
-    float lastf = v;//(float) lastSessionScore;
-    if (percent < 50) {
-      logger.info("getAdjustedScore 1 adjusting given " + percent + " from "+ lastf);
-      lastf *= 0.8f;
-    } else if (percent < 60) {
-      logger.info("getAdjustedScore 2 adjusting given " + percent + " from "+ lastf);
-      lastf *= 0.9f;
-    }
-  //  else {
-  //    logger.info("getAdjustedScore lastf "+ lastf);
-  //  }
-
-    return Integer.valueOf(Math.round(lastf)).floatValue() / 10F;
-  }
+//  private float getAdjustedScore(UserInfo shell) {
+//    int percent = getPercent(shell);
+//    //int lastSessionScore = shell.getLastSessionScore();
+//    //int lastSessionScore = shell.getLastSessionScore()/10;
+//    float v = Integer.valueOf(shell.getLastSessionScore()).floatValue();
+//    // return getSafeHtml("" + Integer.valueOf(lastSessionScore).floatValue()/10F);
+//    // return getSafeHtml("" + lastSessionScore);
+//
+////    logger.info("getAdjustedScore shell " +shell);
+//    float lastf = v;//(float) lastSessionScore;
+//    if (percent < 50) {
+//      logger.info("getAdjustedScore 1 adjusting given " + percent + " from " + lastf);
+//      lastf *= 0.8f;
+//    } else if (percent < 60) {
+//      logger.info("getAdjustedScore 2 adjusting given " + percent + " from " + lastf);
+//      lastf *= 0.9f;
+//    }
+//    //  else {
+//    //    logger.info("getAdjustedScore lastf "+ lastf);
+//    //  }
+//
+//    return Integer.valueOf(Math.round(lastf)).floatValue() / 10F;
+//  }
 
 /*
   private Column<UserInfo, SafeHtml> getMineCol() {
@@ -840,25 +863,16 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
 
   @NotNull
   private String getPolyNumValue(UserInfo shell) {
-    int lastSessionNum = shell.getLastSessionNum();
-    int lastSessionSize = shell.getLastSessionSize();
-    if (lastSessionSize == -1) lastSessionSize = lastSessionNum;
-    boolean same = lastSessionNum == lastSessionSize;
-    return same ?
-        ("" + lastSessionNum) :
-        "" + lastSessionNum + "/" + lastSessionSize + " (" + getPercent(lastSessionNum, lastSessionSize) +
-            "%)";
+    return shell.getPolyNumValue();
   }
 
-
-  private int getPercent(float totalScore, float denom) {
-    float v = totalScore / denom;
-    // logger.info("ratio " + v);
-    float fround = Math.round(v * 100);
-    // logger.info("fround " + fround);
-
-    return (int) (fround);
-  }
+//  private int getPercent(float totalScore, float denom) {
+//    float v = totalScore / denom;
+//    // logger.info("ratio " + v);
+//    float fround = Math.round(v * 100);
+//    // logger.info("fround " + fround);
+//    return (int) (fround);
+//  }
 
   private int req = 0;
 
@@ -870,9 +884,9 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   private UserInfo lastSelected = null;
 
   /**
+   * @param selectedUser
    * @see #selectAndClick
    * @see #checkGotClick
-   * @param selectedUser
    */
   public void gotClickOnItem(final UserInfo selectedUser) {
     if (lastSelected != selectedUser) {

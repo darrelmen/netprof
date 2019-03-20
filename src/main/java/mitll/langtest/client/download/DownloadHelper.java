@@ -51,6 +51,7 @@ import mitll.langtest.client.list.SelectionState;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
 
@@ -58,7 +59,10 @@ import static mitll.langtest.client.download.DownloadContainer.getDownloadAudio;
  * Also download recorded audio for a student, for a quiz, for a session
  */
 public class DownloadHelper implements IShowStatus {
-  // private final Logger logger = Logger.getLogger("DownloadHelper");
+  public static final String USER = "user";
+  public static final String USER_PERF = USER + "Perf";
+  public static final String LISTID = "listid";
+  private final Logger logger = Logger.getLogger("DownloadHelper");
 
   private static final String INCLUDE_AUDIO = "Include Audio?";
   public static final String AMPERSAND = "___AMPERSAND___";
@@ -489,5 +493,29 @@ public class DownloadHelper implements IShowStatus {
       ts.put(k, newV);
     });
     return ts;
+  }
+
+//  @NotNull
+//  private String getURLPrefix(String host) {
+//    return toDominoUrl("");
+//  }
+
+  /**
+   * @param host
+   * @param search
+   * @param listid
+   * @see mitll.langtest.server.DownloadServlet#USER
+   * @see mitll.langtest.server.DownloadServlet#LISTID
+   * @see mitll.langtest.server.DownloadServlet#USER_PERF
+   */
+  public void doUserPerfDownload(String host, String search, int listid) {
+    String s = URL.encodeQueryString(USER + "=" + search + "&" + LISTID + "=" + listid);
+    String s1 = toDominoUrl(host);
+    if (!s1.endsWith("\\/")) {
+      s1 += "/";
+    }
+    String url = s1 + "downloadResults?request=" + USER_PERF + "&" + s;
+    logger.info("url " + url);
+    new DownloadIFrame(url);
   }
 }

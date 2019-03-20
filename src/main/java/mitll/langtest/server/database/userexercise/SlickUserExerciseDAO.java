@@ -76,6 +76,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private static final int MAX_LENGTH = 250;
   private static final String UNKNOWN1 = "unknown";
   private static final String MITLL = "MITLL";
+  public static final boolean WARN_ABOUT_NO_TYPES = false;
   /**
    * If we don't have a value for a facet, it's value is "Blank" as opposed to "Any"
    *
@@ -344,10 +345,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private Map<String, String> getUnitToValue(SlickExercise slick, Collection<String> typeOrder) {
     Map<String, String> unitToValue = new HashMap<>();
 
-/*    if (typeOrder == null || typeOrder.isEmpty()) {
-      boolean isDefault = slick.projid() == DEFAULT_PROJECT;
-      logger.warn("getUnitToValue no types for exercise " + (isDefault ? " DEFAULT PROJECT " : "") + slick);
-    }*/
+    if (WARN_ABOUT_NO_TYPES) {
+      if (typeOrder == null || typeOrder.isEmpty()) {
+        boolean isDefault = slick.projid() == DEFAULT_PROJECT;
+        logger.warn("getUnitToValue no types for exercise " + (isDefault ? " DEFAULT PROJECT " : "") + slick);
+      }
+    }
 
     Iterator<String> iterator = typeOrder != null ? typeOrder.iterator() : null;
     String first = iterator != null && iterator.hasNext() ? iterator.next() : "";
@@ -654,7 +657,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return n2;
   }
 */
-
   @NotNull
   private ExercisePhoneInfo getExercisePhoneInfo(IPronunciationLookup lookup, String foreignlanguage, String transliteration) {
     ExercisePhoneInfo exercisePhoneInfo;
@@ -1301,7 +1303,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return refResultDAO;
   }
 */
-
   public SlickExercise getUnknownExercise() {
     return unknownExercise;
   }

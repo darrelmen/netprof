@@ -44,7 +44,7 @@ public class CommonShellCache<T extends CommonShell> implements ICommonShellCach
   private Map<Integer, T> idToEx = new TreeMap<>();
   private final MessageHelper messageHelper;
 
-  public CommonShellCache(MessageHelper messageHelper) {
+   CommonShellCache(MessageHelper messageHelper) {
     this.messageHelper = messageHelper;
   }
 

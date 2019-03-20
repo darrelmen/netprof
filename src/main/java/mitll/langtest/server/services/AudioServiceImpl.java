@@ -110,6 +110,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   // TODO : make these enums...
   public static final String START = "START";
   private static final String STREAM = "STREAM";
+  private static final String END = "END";
+
   private static final String APPLICATION_WAV = "application/wav";
 
   enum STEAMSTATES {START, STREAM, END, ABORT}
@@ -238,14 +240,17 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
-   * TODO : consider how to handle out of order packets
+   * consider how to handle out of order packets
    * <p>
-   * TODO : wait if saw END but packets out of order...?
+   * wait if saw END but packets out of order...?
    * <p>
    * TODO : add an option to just do decoding and return the result when the server decides the final silence has
    * been reached...
    * TODO : add a parameter for expected VAD duration
    * TODO : add a parameter specifying duration of final silence segment
+   *
+   *
+   * The client is reading the responses generated here at gotPacketResponse
    *
    * @param request
    * @param requestType
@@ -255,6 +260,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @throws IOException
    * @throws DominoSessionException
    * @throws ExecutionException
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#gotPacketResponse
    * @see #service(HttpServletRequest, HttpServletResponse)
    */
   private JsonObject getJSONForStream(HttpServletRequest request,
@@ -345,16 +351,19 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     JsonObject jsonObject = new JsonObject();
     new JsonScoring(getDatabase()).addValidity(realExID, jsonObject, validity, "" + reqid);
 
+    boolean completeSet = false;
+    boolean isStream = state.equalsIgnoreCase(STREAM);
     {
       if (state.equalsIgnoreCase(START)) {
         sessionInfo.setSawStart();
-      } else if (state.equalsIgnoreCase(STREAM)) {
+      } else if (isStream) {
       } else {  // STOP
         sessionInfo.setSawEnd();
       }
 
+      // we've seen the END packet, but we might be waiting on earlier ones
+
       if (sessionInfo.sawStartAndEnd()) {  // if we've seen both start and end, check to see if we have all the packets
-        boolean completeSet;
         AudioChunk combined = null;
 
         synchronized (audioChunks) {
@@ -368,7 +377,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
         if (completeSet) {
           long then2 = System.currentTimeMillis();
-         // if (true) throw new IllegalArgumentException("dude!");
+
           jsonObject = getJsonObject(deviceType, device, userIDFromSession, realExID, reqid, projid, dialogSessionID,
               isRef, audioType,
               jsonObject,
@@ -377,13 +386,20 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           long now2 = System.currentTimeMillis();
           logger.info("getJSONForStream END chunk took " + (now2 - then2) + " for ex " + realExID + " req " + reqid + " # chunks " + audioChunks.size());
         } else {
-          logger.info("audio chunks not complete, so waiting for others to arrive for " + session);
+          logger.info("getJSONForStream audio chunks not complete, so waiting for others to arrive for " + session);
         }
       }
     }
 
-    // so we get a packet - if it's the next one in the sequence, combine it with the current one and replace it
-    // otherwise, we'll have to make a list and combine them...
+    // so if the last packet is an END but we don't have all the audio packets, we have to not confuse the UI by saying we're done
+
+    if (state.equalsIgnoreCase(END) && !completeSet) {
+      state = STREAM;
+      logger.info("getJSONForStream (" + realExID + ") saw " + END + " but not complete! so changing state to " + state);
+    } else if (isStream && completeSet) {
+      state = END;
+      logger.info("getJSONForStream (" + realExID + ") saw " + STREAM + " but *now* complete so changing state to " + state);
+    }
 
     jsonObject.addProperty(MESSAGE, state);
     jsonObject.addProperty(STREAMTIMESTAMP.toString(), timestamp);
@@ -595,6 +611,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
+   * so we get a packet - if it's the next one in the sequence, combine it with the current one and replace it
+   * otherwise, we'll have to make a list and combine them...
+   *
    * deals with gaps
    * <p>
    * Wait for arrival?

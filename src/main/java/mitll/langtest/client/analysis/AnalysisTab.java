@@ -75,7 +75,7 @@ public class AnalysisTab extends DivWidget {
   private static final String WORD_EXAMPLES = "WordExamples";
 
   private static final String REPORT_FOR_USER = "getting performance report for user";
-  private static final int TIME_WINDOW_WIDTH = 92;
+  private static final int TIME_WINDOW_WIDTH = 101;//92;
 
   /**
    * Got be the width to fit on a laptop screen for progress view - otherwise the phone plot

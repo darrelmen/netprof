@@ -97,17 +97,40 @@ public class UserInfo extends SimpleUser {
     this.lastSessionSize = lastSessionSize;
   }
 
-  private int getRounded(List<BestScore> bestScores1) {
-    float total = 0;
+  public Map<Long, List<BestScore>> getSessions() {
+    Map<Long, List<BestScore>> sessionToScores = new HashMap<>();
+
+    for (BestScore bestScore : bestScores) {
+      List<BestScore> bestScores1 = sessionToScores.computeIfAbsent(bestScore.getSessionStart(), k -> new ArrayList<>());
+      bestScores1.add(bestScore);
+    }
+    return sessionToScores;
+  }
+
+  public int getRounded(List<BestScore> bestScores1) {
+    return toRound(getTotal(bestScores1), bestScores1.size());
+  }
+
+  public float getRoundedHundred(List<BestScore> bestScores1) {
+    return toRoundHundred(getTotal(bestScores1), bestScores1.size())/100F;
+  }
+
+  private float getTotal(List<BestScore> bestScores1) {
+    float total = 0F;
     for (BestScore bs : bestScores1) {
       total += bs.getScore();
     }
-    return toRound(total, bestScores1.size());
+    return total;
   }
 
   private static int toRound(float total, float size) {
     return Math.round(1000f * total / size);
   }
+
+  private static int toRoundHundred(float total, float size) {
+    return Math.round(10000f * total / size);
+  }
+
   private static int toPercent(float total, float size) {
     return Math.round(100f * total / size);
   }
@@ -182,8 +205,66 @@ public class UserInfo extends SimpleUser {
   public int getLastSessionNum() {
     return lastSessionNum;
   }
+
   public int getLastSessionSize() {
     return lastSessionSize;
+  }
+
+  @NotNull
+  public String getPolyNumValue() {
+    int lastSessionNum = getLastSessionNum();
+    int lastSessionSize = getLastSessionSize();
+    if (lastSessionSize == -1) lastSessionSize = lastSessionNum;
+    boolean same = lastSessionNum == lastSessionSize;
+    return same ?
+        ("" + lastSessionNum) :
+        "" + lastSessionNum + "/" + lastSessionSize + " (" + getPercent(lastSessionNum, lastSessionSize) +
+            "%)";
+  }
+
+  public float getAdjustedScore() {
+    int percent = getPercent();
+    //int lastSessionScore = shell.getLastSessionScore();
+    //int lastSessionScore = shell.getLastSessionScore()/10;
+    float v = Integer.valueOf(getLastSessionScore()).floatValue();
+    // return getSafeHtml("" + Integer.valueOf(lastSessionScore).floatValue()/10F);
+    // return getSafeHtml("" + lastSessionScore);
+
+//    logger.info("getAdjustedScore shell " +shell);
+    float lastf = v;//(float) lastSessionScore;
+    if (percent < 50) {
+      lastf *= 0.8f;
+    } else if (percent < 60) {
+      lastf *= 0.9f;
+    }
+    //  else {
+    //    logger.info("getAdjustedScore lastf "+ lastf);
+    //  }
+
+    return getScore(lastf);
+  }
+
+  public float getScore(float lastf) {
+    return Integer.valueOf(Math.round(lastf)).floatValue() / 10F;
+  }
+
+  public int getPercent() {
+    int lastSessionNum1 = getLastSessionNum();
+    int lastSessionSize1 = getLastSessionSize();
+    return getSafePercent(lastSessionNum1, lastSessionSize1);
+  }
+
+  public int getSafePercent(int lastSessionNum1, int lastSessionSize1) {
+    if (lastSessionSize1 == -1) lastSessionSize1 = lastSessionNum1;
+    return getPercent(lastSessionNum1, lastSessionSize1);
+  }
+
+  private int getPercent(float totalScore, float denom) {
+    float v = totalScore / denom;
+    // logger.info("ratio " + v);
+    float fround = Math.round(v * 100);
+    // logger.info("fround " + fround);
+    return (int) (fround);
   }
 
   public String toString() {

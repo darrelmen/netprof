@@ -119,9 +119,9 @@ public class ScoreServlet extends DatabaseServlet {
       "password",
       "pass"));
   private static final String SENTENCES_PARAM = HeaderValue.SENTENCES.name().toLowerCase();
-  public static final String PROJID = "projid";
-  public static final String AMPERSAND = "&";
-  public static final String DATE = "Date";
+  private static final String PROJID = "projid";
+  private static final String AMPERSAND = "&";
+  private static final String DATE = "Date";
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 

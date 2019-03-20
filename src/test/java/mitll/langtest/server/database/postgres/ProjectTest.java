@@ -679,7 +679,7 @@ public class ProjectTest extends BaseTest {
     DatabaseImpl database = getAndPopulate();
     int projectid = 3;
     IAnalysis analysis = database.getAnalysis(projectid);
-    List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5);
+    List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5, -1);
 //
 //    List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(6, 5, -1);
 //

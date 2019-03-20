@@ -100,10 +100,7 @@ public abstract class PagerTable {
 
   protected SafeHtml getAnchorHTML(String href, String label) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<a href='" +
-        href +
-        "'" +
-        ">");
+    sb.appendHtmlConstant("<a href='" +        href +        "'" +        ">");
     sb.appendEscaped(label);
     sb.appendHtmlConstant("</a>");
     return sb.toSafeHtml();

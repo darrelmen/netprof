@@ -27,47 +27,54 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.client.scoring;
+package mitll.langtest.server;
 
-import mitll.langtest.shared.answer.Validity;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Map;
+import java.util.TreeMap;
+
+import static mitll.langtest.server.ScoreServlet.HeaderValue.PROJID;
+import static mitll.langtest.server.ScoreServlet.HeaderValue.USER;
 
 /**
- *
+ * Do something better here with figuring out which values to use in type->selection
  */
-class StreamResponse {
-  private final Validity validity;
-  private final long streamTimestamp;
-  private final boolean streamStop;
+class URLParamParser {
+  private static final Logger logger = LogManager.getLogger(URLParamParser.class);
 
-  /**
-   * @param validity
-   * @param streamTimestamp
-   * @param streamStop
-   * @see JSONAnswerParser#getResponse
-   */
-  StreamResponse(Validity validity, long streamTimestamp, boolean streamStop) {
-    this.validity = validity;
-    this.streamTimestamp = streamTimestamp;
-    this.streamStop = streamStop;
+  private final String[] split1;
+  private Map<String, Collection<String>> selection;
+
+  URLParamParser(String... split1) {
+    this.split1 = split1;
   }
 
-  /**
-   * @see RecordDialogExercisePanel#addWidgets
-   * @return
-   */
-  public Validity getValidity() {
-    return validity;
+  Map<String, Collection<String>> getSelection() {
+    return selection;
   }
 
-  long getStreamTimestamp() {
-    return streamTimestamp;
-  }
-
-  boolean isStreamStop() {
-    return streamStop;
-  }
-
-  public String toString() {
-    return "Resp = " + validity + " at " + streamTimestamp + (streamStop ? " STOP" : "");
+  URLParamParser invoke(boolean ignoreUserAndProject) {
+    selection = new TreeMap<>();
+    for (String param : split1) {
+     // logger.info("URLParamParser param '" + param + "'");
+      String[] split = param.split("=");
+      if (split.length == 2) {
+        String key = split[0];
+        String value = split[1];
+       // logger.info("\t" + key + " = " + value);
+        if (ignoreUserAndProject &&
+            (key.equals(USER.toString()) || key.equalsIgnoreCase(PROJID.name()))) {
+          // skip it
+         logger.info("URLParamParser Skip " + key);
+        } else {
+          selection.put(key, Collections.singleton(value));
+        }
+      }
+    }
+    return this;
   }
 }

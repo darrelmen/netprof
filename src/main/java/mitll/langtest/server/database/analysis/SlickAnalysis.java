@@ -579,14 +579,19 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    *
    * @param userDAO
    * @param minRecordings
+   * @param listid
    * @return
    * @see AnalysisServiceImpl#getUsersWithRecordings
    * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis
    */
   @Override
-  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings) {
+  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings, int listid) {
     long then = System.currentTimeMillis();
-    Collection<SlickPerfResult> perfForUser = resultDAO.getPerf(projid, database.getServerProps().getMinAnalysisScore());
+    float minAnalysisScore = database.getServerProps().getMinAnalysisScore();
+    Collection<SlickPerfResult> perfForUser = listid == -1 ?
+        resultDAO.getPerf(projid, minAnalysisScore) :
+        resultDAO.getPerfOnList(listid, minAnalysisScore);
+
     long now = System.currentTimeMillis();
     if (now - then > 100)
       logger.info("getUserInfo took " + (now - then) + " to get " + perfForUser.size() + " perf infos for project #" + projid);

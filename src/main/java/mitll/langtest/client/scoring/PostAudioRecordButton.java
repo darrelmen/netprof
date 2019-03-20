@@ -167,10 +167,18 @@ public abstract class PostAudioRecordButton extends RecordButton
   }
 
   /**
-   * We can get back START, STREAM, END or nothing - in which case we got a 500 or 503 or something...
+   * We can get back
+   *  START - starting a recording... but just like a STREAM packet
+   *  STREAM - a mid point packet of audio
+   *  ABORT - we cancelled it!
+   *  END - got the final packet, let's look at the ASR result
+   *
+   *  or nothing - in which case we got a 500 or 503 or something...
    * <p>
    * So if we get something other than a 200 http response, stop recording and show a big failure warning.
    * which is different than a "hey, please speak in response to the prompt" or "check your mic"
+   *
+   * Need to make sure this response is for me!
    *
    * @param json
    * @see #startRecording
@@ -179,8 +187,9 @@ public abstract class PostAudioRecordButton extends RecordButton
     if (DEBUG_PACKET) logger.info("gotPacketResponse " + json);
     JSONObject digestJsonResponse = jsonAnswerParser.digestJsonResponse(json);
     if (DEBUG_PACKET) logger.info("gotPacketResponse digestJsonResponse " + digestJsonResponse);
+
     String message = getMessage(digestJsonResponse);
-    if (message.isEmpty()) {
+    if (message.isEmpty()) {  // should be a message on every valid packet...?
       if (DEBUG_PACKET) logger.info("gotPacketResponse message empty!");
       handlePostError(System.currentTimeMillis(), digestJsonResponse);
     } else if (message.equalsIgnoreCase(ABORT)) {
@@ -314,6 +323,8 @@ public abstract class PostAudioRecordButton extends RecordButton
   }
 
   /**
+   * This could be valid or invalid.
+   *
    * TODO : fix reqid...
    *
    * @param result

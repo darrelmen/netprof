@@ -56,7 +56,6 @@ import java.util.Map;
 public class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleChapterNPFHelper<T, ClientExercise>
     implements IListenView {
   //  private final Logger logger = Logger.getLogger("LearnHelper");
-
   private SessionManager sessionManager;
   private final SessionStorage sessionStorage;
 
@@ -111,7 +110,8 @@ public class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleC
             alignments,
             false,
             LearnHelper.this,
-            e.isContext(), sessionManager);
+            e.isContext(),
+            sessionManager);
       }
     };
   }

@@ -63,9 +63,10 @@ import java.util.logging.Logger;
 import static mitll.langtest.client.result.TableSortHelper.TIMESTAMP;
 
 public class ResultManager extends PagerTable {
+  private final Logger logger = Logger.getLogger("ResultManager");
+
   private static final String DYNAMIC_RANGE = "Dynamic Range";
   private static final String VALIDITY = "Validity";
-  private final Logger logger = Logger.getLogger("ResultManager");
 
 
   private static final int TOP = 56;

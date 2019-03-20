@@ -27,47 +27,15 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.client.scoring;
+package mitll.langtest.client.recorder;
 
-import mitll.langtest.shared.answer.Validity;
+import mitll.langtest.shared.answer.AudioAnswer;
 
 /**
- *
+ * TODO make the facet exercise list listen for this so we can route the answer to the right
+ * widget.
  */
-class StreamResponse {
-  private final Validity validity;
-  private final long streamTimestamp;
-  private final boolean streamStop;
-
-  /**
-   * @param validity
-   * @param streamTimestamp
-   * @param streamStop
-   * @see JSONAnswerParser#getResponse
-   */
-  StreamResponse(Validity validity, long streamTimestamp, boolean streamStop) {
-    this.validity = validity;
-    this.streamTimestamp = streamTimestamp;
-    this.streamStop = streamStop;
-  }
-
-  /**
-   * @see RecordDialogExercisePanel#addWidgets
-   * @return
-   */
-  public Validity getValidity() {
-    return validity;
-  }
-
-  long getStreamTimestamp() {
-    return streamTimestamp;
-  }
-
-  boolean isStreamStop() {
-    return streamStop;
-  }
-
-  public String toString() {
-    return "Resp = " + validity + " at " + streamTimestamp + (streamStop ? " STOP" : "");
-  }
+public interface ASRReceivedListener {
+  void onAbort(int exid);
+  void onPostSuccess(AudioAnswer audioAnswer);
 }

@@ -35,8 +35,11 @@ import mitll.langtest.server.audio.AudioExportOptions;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
+import mitll.langtest.server.database.excel.UserPerfToExcel;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -71,7 +74,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String COMPRESSED_SUFFIX = "mp3";
   private static final String RESULTS = "results";
   /**
-   * @see #returnSpreadsheet(HttpServletResponse, DatabaseImpl, String, int, String)
+   * @see #returnSpreadsheet(HttpServletResponse, DatabaseImpl, String, int, String, String)
    */
   private static final String EVENTS = "events";
   private static final String REQUEST = "request";
@@ -98,6 +101,10 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String STUDENT_AUDIO = "studentAudio";
   private static final String USERID = "userid";
   private static final String CONTENT_DISPOSITION = "Content-Disposition";
+
+  public static final String USER_PERF = "userPerf";
+  public static final String LISTID = "listid";
+  public static final String USER = "user";
 
   /**
    * This is getting complicated.
@@ -153,7 +160,7 @@ public class DownloadServlet extends DatabaseServlet {
             "\n\tpath    " + request.getServletPath());
 
         if (requestURI.toLowerCase().contains(AUDIO)) {
-          String queryString = URLDecoder.decode(request.getQueryString(), "UTF-8");
+          String queryString = getQuery(request);
           if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
             logger.info("downloadAList " + requestURI);
             downloadAList(response, db, projid, queryString);
@@ -172,8 +179,13 @@ public class DownloadServlet extends DatabaseServlet {
             logger.warn("huh? did nothing with " + requestURI);
           }
         } else {
-          //    logger.info("file download request " + requestURI);
-          returnSpreadsheet(response, db, requestURI, projid, language);
+          // http://127.0.0.1:8888/downloadResults
+//          if (requestURI.toLowerCase().contains("request=downloadUserPerf")) {
+//
+//          } else {
+//          logger.debug("file download request " + requestURI);
+          returnSpreadsheet(response, db, requestURI, projid, language, getQuery(request));
+//          }
         }
       } catch (Exception e) {
         logger.error("doGet Got " + e, e);
@@ -226,8 +238,12 @@ public class DownloadServlet extends DatabaseServlet {
     return user;
   }
 
+  private String getQuery(HttpServletRequest request) throws UnsupportedEncodingException {
+    return URLDecoder.decode(request.getQueryString(), "UTF-8");
+  }
+
   private void handleNoProject(HttpServletResponse response) throws IOException {
-    logger.warn("doGet no current project for request ");
+    logger.warn("handleNoProject no current project for request ");
     response.setContentType("text/html");
     response.getOutputStream().write("no project for request".getBytes());
     closeOutputStream(response);
@@ -273,14 +289,14 @@ public class DownloadServlet extends DatabaseServlet {
    * @throws DominoSessionException
    */
   private int getProjectIDFromUser(HttpServletRequest request) throws DominoSessionException {
-    logger.info("doGet no project id on session, let's try the security manager");
+    logger.info("getProjectIDFromUser no project id on session, let's try the security manager");
     int loggedInUser = securityManager.getLoggedInUserID(request);
     int projid = -1;
     if (loggedInUser != -1) {
-      logger.debug("doGet found session user " + loggedInUser);
+      logger.debug("getProjectIDFromUser found session user " + loggedInUser);
       projid = getMostRecentProjectByUser(loggedInUser);
     } else {
-      logger.warn("doGet couldn't find user via request...");
+      logger.warn("getProjectIDFromUser couldn't find user via request...");
     }
     return projid;
   }
@@ -436,8 +452,8 @@ public class DownloadServlet extends DatabaseServlet {
       User userWhere = db.getUserDAO().getUserWhere(userID);
       User caller = db.getUserDAO().getUserWhere(callingUser);
 
-      logger.info("for user " +userWhere);
-      logger.info("Caller   " +caller + " is admin " +caller.isAdmin());
+      logger.info("for user " + userWhere);
+      logger.info("Caller   " + caller + " is admin " + caller.isAdmin());
 
       String base = userWhere.getFirstInitialName() + suffix;
       String baseName = base
@@ -623,6 +639,7 @@ public class DownloadServlet extends DatabaseServlet {
    * @param db
    * @param encodedFileName
    * @param language
+   * @param query
    * @throws IOException
    * @see #doGet
    */
@@ -630,7 +647,8 @@ public class DownloadServlet extends DatabaseServlet {
                                  DatabaseImpl db,
                                  String encodedFileName,
                                  int projectid,
-                                 String language) throws IOException {
+                                 String language,
+                                 String query) throws IOException {
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
     ServletOutputStream outputStream = response.getOutputStream();
     String projectName = getProjectName(projectid);
@@ -643,9 +661,25 @@ public class DownloadServlet extends DatabaseServlet {
     } else
       */
 
-    logger.info("returnSpreadsheet : (" + projectName + ") req " + encodedFileName);
+    logger.info("returnSpreadsheet : (" + projectName + ") req " + encodedFileName + " query " + query);
 
-    if (encodedFileName.toLowerCase().contains(RESULTS)) {
+    if (query.toLowerCase().contains(USER_PERF.toLowerCase())) {
+      logger.info("getUsersWithRecordings for project # " + projectid);
+
+      URLParamParser invoke = new URLParamParser(query.split("&")).invoke(false);
+
+      int listID = getListID(invoke);
+      UserList userListNoExercises = listID == -1 ? null : db.getUserListManager().getUserListNoExercisesWithCount(listID);
+      String filename = getFilename(prefix, userListNoExercises);
+      setFilenameHeader(response, filename);
+      List<UserInfo> userInfo = db
+          .getAnalysis(projectid)
+          .getUserInfo(db.getUserDAO(), 1, listID);
+
+      userInfo = filterByUser(invoke, userInfo);
+
+      new UserPerfToExcel().writeExcelToStream(userInfo, userListNoExercises, outputStream);
+    } else if (encodedFileName.toLowerCase().contains(RESULTS)) {
       setFilenameHeader(response, prefix + RESULTS_XLSX);
       new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid), db.getTypeOrder(projectid), outputStream);
     } else if (encodedFileName.toLowerCase().contains(EVENTS)) {
@@ -661,6 +695,41 @@ public class DownloadServlet extends DatabaseServlet {
    * @param fileName
    * @see #setHeader(HttpServletResponse, String)
    */
+  @NotNull
+  private String getFilename(String prefix, UserList userListNoExercises) {
+    String listPart = userListNoExercises == null ? "" : userListNoExercises.getName() + "_";
+    return prefix + listPart + "userPerf.xlsx";
+  }
+
+  private List<UserInfo> filterByUser(URLParamParser invoke, List<UserInfo> userInfo) {
+    Collection<String> user = invoke.getSelection().get(USER);
+    if (user != null && user.size() == 1) {
+      String searchReq = user.iterator().next().toLowerCase();
+      userInfo = userInfo
+          .stream()
+          .filter(userInfo1 ->
+              userInfo1.getUserID().toLowerCase().startsWith(searchReq) ||
+                  userInfo1.getName().toLowerCase().contains(searchReq)
+          ).collect(Collectors.toList());
+    }
+    return userInfo;
+  }
+
+  private int getListID(URLParamParser invoke) {
+    Collection<String> listid = invoke.getSelection().get(LISTID);
+    int list = -1;
+    if (listid != null && listid.size() == 1) {
+      String next = listid.iterator().next();
+      try {
+        list = Integer.parseInt(next);
+      } catch (NumberFormatException e) {
+        logger.warn("got (for " + next + ")" + e, e);
+      }
+    }
+    return list;
+  }
+
+
   private void setResponseHeader(HttpServletResponse response, String fileName) {
     setFilenameHeader(response, fileName);
   }

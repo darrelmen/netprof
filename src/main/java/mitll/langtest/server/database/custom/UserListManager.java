@@ -273,9 +273,9 @@ public class UserListManager implements IUserListManager {
 
     if (exercisetypes == QuizSpec.EXERCISETYPES.BOTH) {
       items = getRandomItems(reqSize / 2, rawExercises);
-     // logger.info("first was " + items.size());
+      // logger.info("first was " + items.size());
       items.addAll(getRandomItems(reqSize - items.size(), getContextSentences(rawExercises)));
-     // logger.info("second was " + items.size());
+      // logger.info("second was " + items.size());
     } else if (exercisetypes == QuizSpec.EXERCISETYPES.SENTENCES) {
       items = getRandomItems(reqSize, getContextSentences(rawExercises));
     } else {
@@ -713,16 +713,7 @@ public class UserListManager implements IUserListManager {
 
     if (includeQuiz && userDAO.isAdmin(userid)) {
       Collection<UserList<CommonShell>> allQuiz = userListDAO.getAllQuiz(projid);
-
-      List<Integer> listids = new ArrayList<>();
-      allQuiz.forEach(commonShellUserList -> listids.add(commonShellUserList.getID()));
-      Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(listids);
-      allQuiz.forEach(commonShellUserList -> {
-        if (numForList.containsKey(commonShellUserList.getID())) {
-          Integer numItems = numForList.get(commonShellUserList.getID());
-          commonShellUserList.setNumItems(numItems);
-        }
-      });
+      setNumItemsOnLists(allQuiz);
       addIfNotThere(listsForUser, ids, allQuiz);
     }
 
@@ -749,6 +740,17 @@ public class UserListManager implements IUserListManager {
     }*/
 
     return listsForUser;
+  }
+
+  private void setNumItemsOnLists(Collection<UserList<CommonShell>> allQuiz) {
+    List<Integer> listids = new ArrayList<>();
+    allQuiz.forEach(commonShellUserList -> listids.add(commonShellUserList.getID()));
+    Map<Integer, Integer> numForList = userListExerciseJoinDAO.getNumExidsForList(listids);
+    allQuiz.forEach(commonShellUserList -> {
+      if (numForList.containsKey(commonShellUserList.getID())) {
+        commonShellUserList.setNumItems(numForList.get(commonShellUserList.getID()));
+      }
+    });
   }
 
   private void addIfNotThere(List<UserList<CommonShell>> listsForUser, Set<Integer> ids, Collection<UserList<CommonShell>> listsForUser1) {
@@ -844,6 +846,14 @@ public class UserListManager implements IUserListManager {
   public UserList getUserListNoExercises(int userListID) {
     logger.info("getUserListNoExercises for " + userListID);
     return userListDAO.getWhere(userListID, true);
+  }
+
+  @Override
+  public UserList getUserListNoExercisesWithCount(int userListID) {
+    logger.info("getUserListNoExercises for " + userListID);
+    UserList<CommonShell> where = userListDAO.getWhere(userListID, true);
+    setNumItemsOnLists(Collections.singletonList(where));
+    return where;
   }
 
   /**

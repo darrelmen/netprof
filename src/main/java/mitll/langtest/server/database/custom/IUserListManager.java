@@ -99,6 +99,8 @@ public interface IUserListManager {
    */
   void newExercise(int userListID, CommonExercise userExercise);
 
+  UserList getUserListNoExercisesWithCount(int userListID);
+
   void addItemToList(int userListID, int exid);
 
   void editItem(CommonExercise userExercise, Collection<String> typeOrder);
