@@ -695,6 +695,7 @@ Where should this font live? under src?
     white-space: normal;
     font-family: 'MyUrduWebFont', sans-serif;
     line-height: 100%;
+    direction: rtl;
 }
 
 .urdu h4 td {

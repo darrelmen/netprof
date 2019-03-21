@@ -63,7 +63,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private static final String ALL = "all";
   private static final String LISTS = "Lists";
   private static final String RECORDED = "Recorded";
-  public static final String CONTENT = "Content";
+  private static final String CONTENT = "Content";
   private static final int WARN_THRESH = 10;
   private List<String> predefinedTypeOrder = new ArrayList<>();
   public static final String UNIT = "Unit";
@@ -143,7 +143,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
       // TODO : I feel like I did this before...?
       // put sound at end...
-      reorderTypes(types);
+   //   reorderTypes(types, );
       // }
       //if (DEBUG)
 //        logger.warn("getTypeOrder types " + types);
@@ -189,15 +189,21 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * @see DBExerciseDAO#getTypeOrderFromProject
    */
   public void reorderTypes(List<String> types) {
-   // logger.info("reorderTypes before " + types);
+    if (DEBUG_TYPE_ORDER) logger.info("reorderTypes before " + types);
     List<String> uniq = getUniq(types);
+    if (DEBUG_TYPE_ORDER) logger.info("reorderTypes uniq   " + uniq);
 
-    for (Facet f : Facet.values()) {
-      putAtEnd(uniq, f.getName());
-    }
+    // cheesy thing to put exercise facets after project type hierarchy - be careful if the name overlap like in German
+    // and Pashto!
+
+//    for (Facet f : Facet.values()) {
+//      if (!f.isAlsoProjectType()) {
+//        putAtEnd(uniq, f.getName());
+//      }
+//    }
     types.clear();
     types.addAll(uniq);
-   // logger.info("reorderTypes after " + types);
+    if (DEBUG_TYPE_ORDER) logger.info("reorderTypes after " + types);
   }
 
   @Override
@@ -214,18 +220,18 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     return uniq;
   }
 
-  private void putAtEnd(List<String> types, String sound) {
-    if (types.contains(sound)) {
-      types.remove(sound);
-      types.add(sound);
-    } else {
-      String o = sound.toLowerCase();
-      if (types.contains(o)) {
-        types.remove(o);
-        types.add(o);
-      }
-    }
-  }
+//  private void putAtEnd(List<String> types, String sound) {
+//    if (types.contains(sound)) {
+//      types.remove(sound);
+//      types.add(sound);
+//    } else {
+//      String o = sound.toLowerCase();
+//      if (types.contains(o)) {
+//        types.remove(o);
+//        types.add(o);
+//      }
+//    }
+//  }
 
   /**
    * @return
@@ -266,6 +272,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     if (!parent.isLeaf() && parent.getChildType().equals(type)) {
       return getMatch(parent.getChildren(), name);
     } else {
+      logger.info("getNode parent " + parent.isLeaf() + " child type " + parent.getChildType() + " vs " + type);
       return null;
     }
   }
@@ -770,13 +777,13 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private int spew;
 
   /**
-   * @see FilterResponseHelper#getPairs
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addPhoneInfo
    * @param t
    * @param exercise
    * @param attrTypes
    * @param pairs
    * @param onlyIncludeFacetAttributes
+   * @see FilterResponseHelper#getPairs
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addPhoneInfo
    */
   public void addPairs(T t,
                        CommonExercise exercise,
@@ -796,6 +803,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
   /**
    * SectionHelper gets confused if we don't have a complete tree - same number of nodes on path to root
+   *
    *  @param exercise
    * @param attrTypes
    * @param pairs

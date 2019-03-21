@@ -56,6 +56,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private final SlickProject project;
   private final Project fullProject;
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_ROOT_TYPE = true;
   private static final boolean DEBUG_USER_CREATED = false;
   private final Map<Integer, CommonExercise> idToContextExercise = new HashMap<>();
   private final Map<Integer, CommonExercise> idToUserExercise = new HashMap<>();
@@ -406,7 +407,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @NotNull
   private List<String> getTypeOrderFromProject() {
     List<String> typeOrder = getBaseTypeOrder();
+
+    logger.info("getTypeOrderFromProject typeOrder " + typeOrder);
+
     Collection<String> attributeTypes = getAttributeTypes();
+
+    logger.info("getTypeOrderFromProject attributeTypes " + attributeTypes);
 
     if (attributeTypes.contains(SEMESTER.toString())) {
       //  logger.info("found semester ");
@@ -419,13 +425,35 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
     final List<String> ftypeOrder = new ArrayList<>(typeOrder);
     List<String> withAttr = new ArrayList<>(typeOrder);
-    attributeTypes.forEach(type -> {
+
+    List<String> sortedTypes = new ArrayList<>(attributeTypes);
+    logger.info("getTypeOrderFromProject sortedTypes " + sortedTypes);
+
+    Map<String, Facet> nameToFacet = new HashMap<>();
+
+
+    for (Facet f : Facet.values()) {
+      nameToFacet.put(f.getName(), f);
+    }
+
+    sortedTypes.sort((o1, o2) -> {
+      Facet facet = nameToFacet.get(o1);
+      Facet facet1 = nameToFacet.get(o2);
+
+      return facet == null && facet1 == null ? 0 :
+          facet != null && facet1 == null ? -1 :
+              facet == null ? 1 :
+                  facet.compareTo(facet1);
+    });
+
+    sortedTypes.forEach(type -> {
       if (!ftypeOrder.contains(type)) {
         withAttr.add(type);
       }
     });
+    logger.info("getTypeOrderFromProject withAttr " + withAttr);
 
-    withAttr.addAll(attributeTypes);
+    //withAttr.addAll(attributeTypes);
     getSectionHelper().reorderTypes(withAttr);
     return withAttr;
   }
@@ -447,14 +475,14 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    */
   private void setRootTypes(List<String> typeOrder) {
     Collection<String> attributeTypes = getAttributeTypes();
-    if (DEBUG) logger.info("setRootTypes attributeTypes " + attributeTypes);
+    if (DEBUG_ROOT_TYPE) logger.info("setRootTypes attributeTypes " + attributeTypes);
 
     Set<String> allTypesExceptSubTopic = removeSubtopic(attributeTypes);
 
     String firstProjectType = project.first();
     Set<String> rootTypes = new HashSet<>(Collections.singletonList(firstProjectType));
     rootTypes.addAll(allTypesExceptSubTopic);
-    if (DEBUG) logger.info("setRootTypes roots " + rootTypes);
+    if (DEBUG_ROOT_TYPE) logger.info("setRootTypes roots " + rootTypes);
 
     ISection<CommonExercise> sectionHelper = getSectionHelper();
     sectionHelper.setRootTypes(rootTypes);
@@ -476,12 +504,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
 
     sectionHelper.setParentToChildTypes(parentToChild);
-    if (DEBUG) {
+    if (DEBUG_ROOT_TYPE) {
       logger.info("setRootTypes roots " + rootTypes);
     }
 
     sectionHelper.setPredefinedTypeOrder(sectionHelper.getUniq(typeOrder));
-    if (DEBUG) logger.info("setRootTypes parentToChild " + parentToChild);
+    if (DEBUG_ROOT_TYPE) logger.info("setRootTypes parentToChild " + parentToChild);
   }
 
   private void setParentChild(Collection<String> rootTypes, Map<String, String> parentToChild, String lowerTopic) {
