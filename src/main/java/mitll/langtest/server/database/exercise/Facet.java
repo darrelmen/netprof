@@ -35,10 +35,10 @@ import java.util.Comparator;
  * These are fixed!
  *
  * @see DBExerciseDAO#setRootTypes
- * @see SectionHelper#reorderTypes
+ * @see ISection#reorderTypes
  */
 public enum Facet implements Comparator<Facet> {
-  SEMESTER("Semester", 0),
+  SEMESTER("Semester", 0, true),
   TOPIC("Topic", 1),
   SUB_TOPIC("Sub-topic", "subtopic", 2),
   GRAMMAR("Grammar", 3),
@@ -48,10 +48,17 @@ public enum Facet implements Comparator<Facet> {
   private final String name;
   private String alt;
   private final int order;
+  private boolean alsoProjectType = false;
 
   Facet(String name, int order) {
     this.name = name;
     this.order = order;
+  }
+
+  Facet(String name, int order, boolean alsoProjectType) {
+    this.name = name;
+    this.order = order;
+    this.alsoProjectType = alsoProjectType;
   }
 
   Facet(String name, String alt, int order) {
@@ -82,4 +89,7 @@ public enum Facet implements Comparator<Facet> {
   public int compare(Facet o1, Facet o2) {
     return Integer.compare(o1.order, o2.order);
   }
-}
+
+  public boolean isAlsoProjectType() {
+    return alsoProjectType;
+  }}

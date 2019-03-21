@@ -429,7 +429,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     });
 
     withAttr.addAll(attributeTypes);
-    getSectionHelper().reorderTypes(withAttr);
+    getSectionHelper().reorderTypes(withAttr, typeOrder);
     return withAttr;
   }
 

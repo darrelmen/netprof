@@ -89,7 +89,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private Map<String, String> parentToChildTypes = new HashMap<>();
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_TYPE_ORDER = false;
+  private static final boolean DEBUG_TYPE_ORDER = true;
   private static final boolean DEBUG_OR_MERGE = false;
 
   public SectionHelper() {
@@ -143,7 +143,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
       // TODO : I feel like I did this before...?
       // put sound at end...
-      reorderTypes(types);
+      reorderTypes(types, );
       // }
       //if (DEBUG)
 //        logger.warn("getTypeOrder types " + types);
@@ -186,26 +186,33 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * TODO : maybe let user configure this somehow.
    *
    * @param types
+   * @param projectTypeOrder
    * @see DBExerciseDAO#getTypeOrderFromProject
    */
-  public void reorderTypes(List<String> types) {
-   // logger.info("reorderTypes before " + types);
+  public void reorderTypes(List<String> types, List<String> projectTypeOrder) {
+    if (DEBUG_TYPE_ORDER) logger.info("reorderTypes before " + types);
     List<String> uniq = getUniq(types);
+    if (DEBUG_TYPE_ORDER) logger.info("reorderTypes uniq   " + uniq);
+
+    // cheesy thing to put exercise facets after project type hierarchy - be careful if the name overlap like in German
+    // and Pashto!
 
     for (Facet f : Facet.values()) {
-      putAtEnd(uniq, f.getName());
+      if (!f.isAlsoProjectType()) {
+        putAtEnd(uniq, f.getName());
+      }
     }
     types.clear();
     types.addAll(uniq);
-   // logger.info("reorderTypes after " + types);
+    if (DEBUG_TYPE_ORDER) logger.info("reorderTypes after " + types);
   }
 
   @Override
   @NotNull
   public List<String> getUniq(List<String> types) {
-    Set<String> seen= new HashSet<>();
+    Set<String> seen = new HashSet<>();
     List<String> uniq = new ArrayList<>();
-    types.forEach(type->{
+    types.forEach(type -> {
       if (!seen.contains(type)) {
         uniq.add(type);
         seen.add(type);
@@ -266,6 +273,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     if (!parent.isLeaf() && parent.getChildType().equals(type)) {
       return getMatch(parent.getChildren(), name);
     } else {
+      logger.info("getNode parent " + parent.isLeaf() + " child type " + parent.getChildType() + " vs " + type);
       return null;
     }
   }
@@ -770,13 +778,13 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private int spew;
 
   /**
-   * @see FilterResponseHelper#getPairs
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addPhoneInfo
    * @param t
    * @param exercise
    * @param attrTypes
    * @param pairs
    * @param onlyIncludeFacetAttributes
+   * @see FilterResponseHelper#getPairs
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addPhoneInfo
    */
   public void addPairs(T t,
                        CommonExercise exercise,
@@ -796,7 +804,8 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
   /**
    * SectionHelper gets confused if we don't have a complete tree - same number of nodes on path to root
-   *  @param exercise
+   *
+   * @param exercise
    * @param attrTypes
    * @param pairs
    * @param onlyIncludeFacetAttributes

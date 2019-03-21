@@ -391,14 +391,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
       {
         int defaultUser = getUserDAO().getDefaultUser();
         imageDAO.ensureDefault(projectDAO.getDefault());
-       logger.info("finalSetup : default user " + defaultUser);
+        logger.info("finalSetup : default user " + defaultUser);
         dialogDAO.ensureDefault(defaultUser);
       }
     }, "ensureDefaultUser").start();
 
     afterDAOSetup(slickAudioDAO);
 
-  logger.info("finalSetup : tables = " + getTables());
+    logger.info("finalSetup : tables = " + getTables());
   }
 
   /**
@@ -735,6 +735,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return setInstallPath(lessonPlanFileOnlyForImport, null, true);
   }
 
+  public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, boolean loadAll) {
+    return setInstallPath(lessonPlanFileOnlyForImport, null, loadAll);
+  }
+
   /**
    * @param lessonPlanFileOnlyForImport
    * @param servletContext
@@ -808,7 +812,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   public Collection<String> getTypeOrder(int projectid) {
-    ISection<CommonExercise> sectionHelper =  getSectionHelper(projectid);
+    ISection<CommonExercise> sectionHelper = getSectionHelper(projectid);
     if (sectionHelper == null) {
       logger.warn("getTypeOrder no section helper for " + this + " and " + projectid);
     }
@@ -1645,7 +1649,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, languageEnum);
     }
 
-    new AudioExport(getServerProps(),pathHelper.getContext())
+    new AudioExport(getServerProps(), pathHelper.getContext())
         .writeZip(out,
             typeToSection,
             getSectionHelper(projectid),
@@ -1789,7 +1793,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
     long now = System.currentTimeMillis();
     logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
-    new AudioExport(getServerProps(),pathHelper.getContext()).writeUserListAudio(
+    new AudioExport(getServerProps(), pathHelper.getContext()).writeUserListAudio(
         out,
         name,
         getSectionHelper(projectid),
@@ -1893,7 +1897,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see DownloadServlet#getBaseName
    */
   public String getPrefix(Map<String, Collection<String>> typeToSection, int projectid) {
-    return new AudioExport(getServerProps(),pathHelper.getContext()).getPrefix(getSectionHelper(projectid), typeToSection);
+    return new AudioExport(getServerProps(), pathHelper.getContext()).getPrefix(getSectionHelper(projectid), typeToSection);
   }
 
   /**
