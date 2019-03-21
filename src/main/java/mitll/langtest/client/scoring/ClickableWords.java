@@ -297,7 +297,8 @@ public class ClickableWords {
                                               List<IHighlightSegment> clickables,
                                               boolean addClickableProps,
                                               List<String> contextTokensOpt,
-                                              List<String> highlightTokensOpt) {
+                                              List<String> highlightTokensOpt,
+                                              boolean isRTL) {
     DivWidget horizontal = new DivWidget();
 
     horizontal.getElement().setId("clickableWordsHighlightRow");
@@ -326,7 +327,7 @@ public class ClickableWords {
     if (DEBUG)
       logger.info("getClickableWordsHighlight highlight start " + highlightStartIndex + " find " + highlightToFind);
 
-    HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(contextSentence);
+    HasDirection.Direction dir = isRTL ? HasDirection.Direction.RTL : HasDirection.Direction.LTR;
 
     if (DEBUG) {
       logger.info("getClickableWordsHighlight exercise " + exercise + " dir " + dir +

@@ -227,7 +227,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     String english = isEnglish() && isMeaningValid(e) ? e.getMeaning() : e.getEnglish();
 
-  //  logger.info("For "  +e.getID() + " meaning " + e.getMeaning() + " " + e.getEnglish() + " " + english);
+    //  logger.info("For "  +e.getID() + " meaning " + e.getMeaning() + " " + e.getEnglish() + " " + english);
     SimpleRecordAudioPanel<T> recordPanel =
         new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer, listenView, sessionManager);
 
@@ -521,7 +521,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private Widget getAltContext(String flToHighlight, String altFL, AnnotationHelper annotationHelper, int exid,
                                List<String> contextTokens, List<String> highlightTokens) {
     Panel contentWidget = clickableWords.getClickableWordsHighlight(altFL, flToHighlight,
-        FieldType.FL, new ArrayList<>(), true, contextTokens, highlightTokens);
+        FieldType.FL, new ArrayList<>(), true, contextTokens, highlightTokens, controller.getLanguageInfo().isRTL());
 
     CommentBox commentBox = getCommentBox(annotationHelper, exid);
     return commentBox
@@ -666,7 +666,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       DivWidget contentWidget = clickableWords.getClickableWordsHighlight(context, itemText,
           FieldType.FL, contextClickables = new ArrayList<>(), true,
           contextExercise.getTokens(),
-          highlightTokens);
+          highlightTokens, controller.getLanguageInfo().isRTL());
 
       contextClickableRow = contentWidget;
       contextClickableRowPhones = clickableWords.getClickableDiv(isRTL);
