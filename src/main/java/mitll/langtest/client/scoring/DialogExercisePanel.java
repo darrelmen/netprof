@@ -250,7 +250,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   protected boolean shouldAddFloatLeft() {
-    return true;
+    return !controller.getLanguageInfo().isRTL();
   }
 
   /**

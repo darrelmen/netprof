@@ -88,8 +88,8 @@ public class ClickableWords {
   /**
    * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
    */
-  public ClickableWords() {
-  }
+//  public ClickableWords() {
+//  }
 
   /**
    * @param listContainer
