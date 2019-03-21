@@ -389,7 +389,7 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     int projectID = project.getID();
-    logger.info("configure START " + projectID + "/" + getProjects().size() + " : " + project.getLanguage(), new Exception("dude"));
+    logger.info("configure START " + projectID + "/" + getProjects().size() + " : " + project.getLanguage());
 
     project.clearPropCache();
 

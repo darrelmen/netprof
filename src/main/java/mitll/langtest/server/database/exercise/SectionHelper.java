@@ -143,7 +143,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
       // TODO : I feel like I did this before...?
       // put sound at end...
-      reorderTypes(types, );
+   //   reorderTypes(types, );
       // }
       //if (DEBUG)
 //        logger.warn("getTypeOrder types " + types);
