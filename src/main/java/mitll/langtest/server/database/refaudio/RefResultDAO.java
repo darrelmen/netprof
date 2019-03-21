@@ -40,6 +40,7 @@ import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.shared.answer.AudioType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.util.*;
@@ -692,5 +693,16 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
   @Override
   public int getNumPhonesForEx(int exid) {
     return 0;
+  }
+
+  @Override
+  public Map<Integer, ISlimResult> getAudioIDMap(int projid, Set<Integer> audioIDs) {
+    return null;
+  }
+
+  @NotNull
+  @Override
+  public Map<Integer, ISlimResult> getAudioIDMap(int id) {
+    return null;
   }
 }

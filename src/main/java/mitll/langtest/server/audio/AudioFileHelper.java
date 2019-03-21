@@ -121,7 +121,7 @@ public class AudioFileHelper implements AlignDecode {
   /**
    * TODO : why would we want this?
    */
-  private Map<String, Integer> phoneToCount;
+//  private Map<String, Integer> phoneToCount;
 
   private final AudioConversion audioConversion;
   private final Language language;
@@ -227,7 +227,7 @@ public class AudioFileHelper implements AlignDecode {
     // int count = 0;
 
     long now = System.currentTimeMillis();
-    phoneToCount = new HashMap<>();
+    //phoneToCount = new HashMap<>();
     Set<Integer> safe = new HashSet<>();
     Set<String> oov = new HashSet<>();
     Set<Integer> unsafe = new HashSet<>();
@@ -379,11 +379,15 @@ public class AudioFileHelper implements AlignDecode {
    */
   private boolean isValidForeignPhrase(Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise, Set<String> oovCumulative, boolean includeKaldi) {
     boolean isKaldi = project.getModelType() == ModelType.KALDI;
+    String foreignLanguage = exercise.getForeignLanguage();
     if (isKaldi) {
       if (includeKaldi) {
         if (!exercise.hasEnglishAttr()) {
-          Collection<String> kaldiOOV = getASRScoring().getKaldiOOV(exercise.getForeignLanguage());
+          Collection<String> kaldiOOV = getASRScoring().getKaldiOOV(foreignLanguage);
           oovCumulative.addAll(kaldiOOV);
+          if (!kaldiOOV.isEmpty()) {
+            logger.warn("isValidForeignPhrase found " + kaldiOOV.size() + " oov tokens " +kaldiOOV + " in " + foreignLanguage);
+          }
           return kaldiOOV.isEmpty();
         } else {
           return true;
@@ -396,8 +400,8 @@ public class AudioFileHelper implements AlignDecode {
       // if (isStale(exercise)) {
       //  logger.info("isValidForeignPhrase STALE ex " + exercise.getProjectID()  + "  " + exercise.getID() + " " + new Date(exercise.getLastChecked()) + " vs " + new Date(dictModified));
       // int before = oov.size();
-      if (!exercise.getForeignLanguage().isEmpty()) {
-        Collection<String> oov = getASRScoring().getOOV(exercise.getForeignLanguage(), exercise.getTransliteration());
+      if (!foreignLanguage.isEmpty()) {
+        Collection<String> oov = getASRScoring().getOOV(foreignLanguage, exercise.getTransliteration());
         oovCumulative.addAll(oov);
         validForeignPhrase = oov.isEmpty();
       }
@@ -407,12 +411,21 @@ public class AudioFileHelper implements AlignDecode {
 //      }
 
       if (!validForeignPhrase && DEBUG) {
-        logger.info("isValidForeignPhrase valid " + validForeignPhrase + " ex " + exercise.getForeignLanguage());
+        logger.info("isValidForeignPhrase valid " + validForeignPhrase + " ex " + foreignLanguage);
       }
       (validForeignPhrase ? safe : unsafe).add(exercise.getID());
       //  }
       return validForeignPhrase;
     }
+  }
+
+  String getOOVReplaced(String orig) {
+    if (project.getLanguageEnum()== Language.ENGLISH) {
+      if (orig.contains("1")) {
+        orig = orig.replaceAll("1","one");
+      }
+    }
+    return orig;
   }
 
   public boolean isValidForeignPhrase(ClientExercise exercise) {
@@ -702,6 +715,59 @@ public class AudioFileHelper implements AlignDecode {
       logger.warn("decodeOneAttribute skipping " + exercise.getID() + " since can't do decode/align b/c of LTS errors ");
     }
   }
+
+
+  public PretestScore recalcRefAudioWithHelper(int projid,
+                                               Integer audioID,
+                                               AudioFileHelper audioFileHelper,
+                                               int userIDFromSession) {
+    AudioAttribute byID = db.getAudioDAO().getByID(audioID, db.getProject(projid).hasProjectSpecificAudio());
+    if (byID != null) {
+      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projid, byID.getExid());
+      //boolean contextAudio = byID.isContextAudio();
+/*
+      if (customOrPredefExercise != null) {
+        logger.info("getAlignmentsFromDB decoding " + audioID +
+            (contextAudio ? " RECORD_CONTEXT" : "") +
+            " for exercise " + byID.getExid() + " : '" +
+            customOrPredefExercise.getEnglish() + "' = '" + customOrPredefExercise.getForeignLanguage() + "'");
+      }
+      */
+
+      // cover for import bug...
+      if (byID.isContextAudio() &&
+          customOrPredefExercise != null &&
+          customOrPredefExercise.getDirectlyRelated() != null &&
+          !customOrPredefExercise.getDirectlyRelated().isEmpty()) {
+        customOrPredefExercise = customOrPredefExercise.getDirectlyRelated().iterator().next().asCommon();
+        //logger.info("getAlignmentsFromDB using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
+      }
+
+      logger.info("recalcRefAudioWithHelper decoding audio #" + audioID + " '" + byID.getTranscript() + "' for exercise #" + byID.getExid() + "...");
+
+      audioFileHelper = getExerciseDependentAudioFileHelper(audioFileHelper, customOrPredefExercise);
+
+      return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession, null, db.getProject(projid).getLanguageEnum());
+    } else {
+      logger.info("recalcRefAudioWithHelper can't find audio id " + audioID);
+      return null;
+    }
+  }
+
+  private AudioFileHelper getExerciseDependentAudioFileHelper(AudioFileHelper audioFileHelper, CommonExercise customOrPredefExercise) {
+    if (customOrPredefExercise != null && customOrPredefExercise.hasEnglishAttr()) {
+      List<Project> matchingProjects = db.getProjectManagement().getMatchingProjects(Language.ENGLISH, false);
+      if (matchingProjects.isEmpty()) {
+        logger.info("no english projects?");
+      } else {
+        Project project = matchingProjects.get(0);
+        audioFileHelper = project.getAudioFileHelper();
+        // logger.info("using english project audio file helper " +project.getID() + " " +project.getName());
+      }
+    }
+    return audioFileHelper;
+  }
+
 
   /**
    * @param exercise

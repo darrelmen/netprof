@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.services;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -62,6 +63,7 @@ import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVInfo;
+import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
@@ -1506,8 +1508,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return new ImageResponse(reqid, imageURL, duration);
   }
 
-  public RecalcRefResponse recalcRefAudio(int projid) {
-    return db.getProject(projid).recalcRefAudio();
+  /**
+   * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
+   * @param projid
+   * @return
+   */
+  public RecalcRefResponse recalcRefAudio(int projid) throws DominoSessionException {
+
+    return db.getProject(projid).recalcRefAudio(getUserIDFromSessionOrDB());
   }
 
   /**

@@ -35,6 +35,7 @@ import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -85,6 +86,11 @@ public interface IRefResultDAO extends IDAO {
 
   Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid);
   int getNumPhonesForEx(int exid);
+
+  Map<Integer, ISlimResult> getAudioIDMap(int projid, Set<Integer> audioIDs);
+
+  @NotNull
+  Map<Integer, ISlimResult> getAudioIDMap(int id);
 
   /**
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore

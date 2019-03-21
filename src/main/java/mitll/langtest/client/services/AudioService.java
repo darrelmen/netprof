@@ -29,6 +29,7 @@
 
 package mitll.langtest.client.services;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
@@ -93,6 +94,13 @@ public interface AudioService extends RemoteService {
    */
   void checkAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
 
+  /**
+   * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
+   * @param projectid
+   * @return
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   */
   RecalcRefResponse recalcRefAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
 
   void logMessage(String subject, String message, boolean sendEmail);
