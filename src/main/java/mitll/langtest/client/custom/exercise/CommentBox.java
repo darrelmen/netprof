@@ -264,26 +264,26 @@ public class CommentBox extends PopupContainerFactory {
     row.getElement().setId("comment_and_clear_container_for_" + field);
     if (content != null) {
       row.add(content);
-      if (isRTL) {
-        content.addStyleName("floatRight");
-      } else {
-        content.addStyleName("floatLeft");
-      }
+      setFloatOn(content, isRTL);
     }
-    if (isRTL) {
-      row.addStyleName("floatRight");
-    } else {
-      row.addStyleName("floatLeft");
-    }
+    setFloatOn(row, isRTL);
 
     DivWidget buttons=new DivWidget();
     row.add(buttons);
-    row.addStyleName("floatLeft");
+   // row.addStyleName("floatLeft");
 
     buttons.add(commentButton);
     buttons.add(clearButton);
 
     return row;
+  }
+
+  private void setFloatOn(Widget content, boolean isRTL) {
+    if (isRTL) {
+      content.addStyleName("floatRight");
+    } else {
+      content.addStyleName("floatLeft");
+    }
   }
 
   private HidePopupTextBox getCommentBox(String field) {

@@ -239,7 +239,7 @@ public class DownloadServlet extends DatabaseServlet {
   }
 
   private String getQuery(HttpServletRequest request) throws UnsupportedEncodingException {
-    return URLDecoder.decode(request.getQueryString(), "UTF-8");
+    return request.getQueryString() == null ? "" : URLDecoder.decode(request.getQueryString(), "UTF-8");
   }
 
   private void handleNoProject(HttpServletResponse response) throws IOException {
@@ -663,7 +663,7 @@ public class DownloadServlet extends DatabaseServlet {
 
     logger.info("returnSpreadsheet : (" + projectName + ") req " + encodedFileName + " query " + query);
 
-    if (query.toLowerCase().contains(USER_PERF.toLowerCase())) {
+    if (query != null && query.toLowerCase().contains(USER_PERF.toLowerCase())) {
       logger.info("getUsersWithRecordings for project # " + projectid);
 
       URLParamParser invoke = new URLParamParser(query.split("&")).invoke(false);

@@ -484,26 +484,28 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   private void showSeries() {
     if (chart != null) {
       //logger.info("showSeriesByVisible : doing deferred ---------- ");
-      seriesToVisible.forEach((series, shouldShow) -> {
-        if (shouldShow) {
-          if (DEBUG) {
-            logger.info("showSeriesByVisible defer : series " //+ name + "/"
-                + series + " : " + series.isVisible());
-          }
-          if (chart.getSeries(series.getId()) == null) {
-            chart.addSeries(series);
+      if (seriesToVisible != null) {
+        seriesToVisible.forEach((series, shouldShow) -> {
+          if (shouldShow) {
+            if (DEBUG) {
+              logger.info("showSeriesByVisible defer : series " //+ name + "/"
+                  + series + " : " + series.isVisible());
+            }
+            if (chart.getSeries(series.getId()) == null) {
+              chart.addSeries(series);
+              if (!series.isVisible()) {
+                series.setVisible(true);
+              }
+              // logger.info("\tshowSeriesByVisible defer : series " + name + "/" + series + " : " + series.isVisible());
+            }
+          } else {
+            chart.removeSeries(series);
             if (!series.isVisible()) {
               series.setVisible(true);
             }
-            // logger.info("\tshowSeriesByVisible defer : series " + name + "/" + series + " : " + series.isVisible());
           }
-        } else {
-          chart.removeSeries(series);
-          if (!series.isVisible()) {
-            series.setVisible(true);
-          }
-        }
-      });
+        });
+      }
     }
   }
 
