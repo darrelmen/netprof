@@ -184,7 +184,7 @@ public class DownloadServlet extends DatabaseServlet {
   }
 
   private String getQuery(HttpServletRequest request) throws UnsupportedEncodingException {
-    return URLDecoder.decode(request.getQueryString(), "UTF-8");
+    return request.getQueryString() == null ? "" : URLDecoder.decode(request.getQueryString(), "UTF-8");
   }
 
   private void handleNoProject(HttpServletResponse response) throws IOException {
@@ -510,7 +510,7 @@ public class DownloadServlet extends DatabaseServlet {
 
     logger.info("returnSpreadsheet : (" + projectName + ") req " + encodedFileName + " query " + query);
 
-    if (query.toLowerCase().contains(USER_PERF.toLowerCase())) {
+    if (query != null && query.toLowerCase().contains(USER_PERF.toLowerCase())) {
       logger.info("getUsersWithRecordings for project # " + projectid);
 
       URLParamParser invoke = new URLParamParser(query.split("&")).invoke(false);
@@ -537,6 +537,11 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
+  /**
+   * @param response
+   * @param fileName
+   * @see #setHeader(HttpServletResponse, String)
+   */
   @NotNull
   private String getFilename(String prefix, UserList userListNoExercises) {
     String listPart = userListNoExercises == null ? "" : userListNoExercises.getName() + "_";
@@ -570,6 +575,7 @@ public class DownloadServlet extends DatabaseServlet {
     }
     return list;
   }
+
 
   private void setResponseHeader(HttpServletResponse response, String fileName) {
     setFilenameHeader(response, fileName);

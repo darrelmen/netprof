@@ -457,11 +457,6 @@ public class DownloadHelper implements IShowStatus {
     return ts;
   }
 
-//  @NotNull
-//  private String getURLPrefix(String host) {
-//    return toDominoUrl("");
-//  }
-
   /**
    * @param host
    * @param search
@@ -473,11 +468,12 @@ public class DownloadHelper implements IShowStatus {
   public void doUserPerfDownload(String host, String search, int listid) {
     String s = URL.encodeQueryString(USER + "=" + search + "&" + LISTID + "=" + listid);
     String s1 = toDominoUrl(host);
-    if (!s1.endsWith("\\/")) {
+
+    if (!s1.endsWith("/")) {
       s1 += "/";
     }
     String url = s1 + "downloadResults?request=" + USER_PERF + "&" + s;
-    logger.info("url " + url);
+ //   logger.info("url " + url);
     new DownloadIFrame(url);
   }
 }
