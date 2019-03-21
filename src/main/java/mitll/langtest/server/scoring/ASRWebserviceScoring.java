@@ -55,9 +55,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
-import java.net.URLEncoder;
 import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
@@ -96,9 +94,11 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   private static final String NORM_TRANSCRIPT = "norm_transcript";
   private static final String TRANSCRIPT = "transcript";
   private static final String IN_VOCAB = "in_vocab";
-  private static final String HTTPS = "http"; //""https";
-  public static final String WAVEFORM = "waveform";
-  public static final String LOCALHOST = "localhost";
+
+  private static final String HTTPS = "https"; //""https";
+
+  private static final String WAVEFORM = "waveform";
+ // private static final String LOCALHOST = "localhost";
 
   private final SLFFile slfFile;
 
@@ -639,20 +639,20 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see #runKaldi
    */
   private String callKaldi(String sentence, String audioPath, int port) throws IOException {
-    return doKaldiGet(sentence, port, getKaldiRequest(sentence, audioPath), SCORE);
+    return doKaldiGet(sentence, getKaldiRequest(sentence, audioPath), SCORE);
   }
 
   private String callKaldiNorm(String sentence, int port) throws IOException {
     // String s1 = "{\"reqid\":1234,\"request\":\"decode\",\"phrase\":\"عربيّ\",\"file\":\"/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav\"}";
-    return doKaldiGet(sentence, port, getKalidNormRequest(sentence), NORM);
+    return doKaldiGet(sentence, getKalidNormRequest(sentence), NORM);
   }
 
   private String callKaldiOOV(List<String> tokens, int port) throws IOException {
     // String s1 = "{\"reqid\":1234,\"request\":\"decode\",\"phrase\":\"عربيّ\",\"file\":\"/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav\"}";
-    return doKaldiGet(tokens.toString(), port, getKalidOOVRequest(tokens), OOV);
+    return doKaldiGet(tokens.toString(), getKalidOOVRequest(tokens), OOV);
   }
 
-  private String doKaldiGet(String sentence, int port, String jsonRequest, String operation) throws IOException {
+  private String doKaldiGet(String sentence, String jsonRequest, String operation) throws IOException {
     String prefix = getPrefix(operation);
     // String encode = URLEncoder.encode(jsonRequest, StandardCharsets.UTF_8.name());
     String url = prefix;// + encode;
@@ -680,7 +680,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    */
   @NotNull
   private String getPrefix(String operation) {
-    String localhost = props.useProxy() ? "hydra-dev" : LOCALHOST;
+    String localhost = props.useProxy() ? "hydra-dev" : props.getKaldiHost();
+    logger.info("getPrefix using host " +localhost + " for " +operation);
     String languageCode = project.getLanguageEnum().getLocale();
     return HTTPS + "://" + localhost + "/" + languageCode + "/" + operation + "/";
   }
@@ -693,7 +694,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    */
   private String getKaldiRequest(String sentence, String audioPath) {
     JsonObject jsonObject = new JsonObject();
-//    logger.info("KALDI " +
+
+    //    logger.info("KALDI " +
 //        "\n\tsentence  " + sentence +
 //        "\n\taudioPath " + audioPath
 //    );

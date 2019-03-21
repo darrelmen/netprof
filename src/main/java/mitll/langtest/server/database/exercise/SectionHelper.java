@@ -89,7 +89,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private Map<String, String> parentToChildTypes = new HashMap<>();
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_TYPE_ORDER = true;
+  private static final boolean DEBUG_TYPE_ORDER = false;
   private static final boolean DEBUG_OR_MERGE = false;
 
   public SectionHelper() {
@@ -186,10 +186,9 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
    * TODO : maybe let user configure this somehow.
    *
    * @param types
-   * @param projectTypeOrder
    * @see DBExerciseDAO#getTypeOrderFromProject
    */
-  public void reorderTypes(List<String> types, List<String> projectTypeOrder) {
+  public void reorderTypes(List<String> types) {
     if (DEBUG_TYPE_ORDER) logger.info("reorderTypes before " + types);
     List<String> uniq = getUniq(types);
     if (DEBUG_TYPE_ORDER) logger.info("reorderTypes uniq   " + uniq);
@@ -197,11 +196,11 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     // cheesy thing to put exercise facets after project type hierarchy - be careful if the name overlap like in German
     // and Pashto!
 
-    for (Facet f : Facet.values()) {
-      if (!f.isAlsoProjectType()) {
-        putAtEnd(uniq, f.getName());
-      }
-    }
+//    for (Facet f : Facet.values()) {
+//      if (!f.isAlsoProjectType()) {
+//        putAtEnd(uniq, f.getName());
+//      }
+//    }
     types.clear();
     types.addAll(uniq);
     if (DEBUG_TYPE_ORDER) logger.info("reorderTypes after " + types);
@@ -221,18 +220,18 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     return uniq;
   }
 
-  private void putAtEnd(List<String> types, String sound) {
-    if (types.contains(sound)) {
-      types.remove(sound);
-      types.add(sound);
-    } else {
-      String o = sound.toLowerCase();
-      if (types.contains(o)) {
-        types.remove(o);
-        types.add(o);
-      }
-    }
-  }
+//  private void putAtEnd(List<String> types, String sound) {
+//    if (types.contains(sound)) {
+//      types.remove(sound);
+//      types.add(sound);
+//    } else {
+//      String o = sound.toLowerCase();
+//      if (types.contains(o)) {
+//        types.remove(o);
+//        types.add(o);
+//      }
+//    }
+//  }
 
   /**
    * @return

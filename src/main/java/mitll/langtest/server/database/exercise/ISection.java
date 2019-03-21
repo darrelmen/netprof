@@ -114,10 +114,9 @@ public interface ISection<T extends HasID & HasUnitChapter> {
 
   /**
    * @param types
-   * @param projectTypeOrder
    * @see DBExerciseDAO#getTypeOrderFromProject
    */
-  void reorderTypes(List<String> types, List<String> projectTypeOrder);
+  void reorderTypes(List<String> types);
 
   /**
    * @return

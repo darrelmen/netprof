@@ -38,7 +38,7 @@ import java.util.Comparator;
  * @see ISection#reorderTypes
  */
 public enum Facet implements Comparator<Facet> {
-  SEMESTER("Semester", 0, true),
+  SEMESTER("Semester", 0),//, true),
   TOPIC("Topic", 1),
   SUB_TOPIC("Sub-topic", "subtopic", 2),
   GRAMMAR("Grammar", 3),
@@ -55,11 +55,11 @@ public enum Facet implements Comparator<Facet> {
     this.order = order;
   }
 
-  Facet(String name, int order, boolean alsoProjectType) {
-    this.name = name;
-    this.order = order;
-    this.alsoProjectType = alsoProjectType;
-  }
+//  Facet(String name, int order, boolean alsoProjectType) {
+//    this.name = name;
+//    this.order = order;
+//    this.alsoProjectType = alsoProjectType;
+//  }
 
   Facet(String name, String alt, int order) {
     this.name = name;
@@ -90,6 +90,7 @@ public enum Facet implements Comparator<Facet> {
     return Integer.compare(o1.order, o2.order);
   }
 
-  public boolean isAlsoProjectType() {
-    return alsoProjectType;
-  }}
+//  public boolean isAlsoProjectType() {
+//    return alsoProjectType;
+//  }
+}

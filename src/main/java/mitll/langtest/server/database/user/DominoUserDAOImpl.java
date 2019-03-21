@@ -1184,7 +1184,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       DBUser dbUser = idToDBUser.get(id);
       if (dbUser == null) {
         logger.warn("lookupUser can't find user by id " +id);
-        dbUser = idToDBUser.get(defaultUser);
+   //     dbUser = idToDBUser.get(defaultUser);
       }
       return dbUser;
     } catch (ExecutionException e) {
