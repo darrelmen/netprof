@@ -20,28 +20,30 @@ public class SemesterTest extends BaseTest {
 
   @Test
   public void testGerman() {
-    DatabaseImpl andPopulate = getAndPopulate();
+    DatabaseImpl andPopulate = getDatabase().setInstallPath("", false);
     IProjectManagement projectManagement = andPopulate.getProjectManagement();
-    Project project = projectManagement.getProject(7, true);
+    Project project = projectManagement.getProject(10, true);
 
-    // project.getSectionHelper().report();
+//    project.getSectionHelper().report();
 
     ISection<CommonExercise> sectionHelper = project.getSectionHelper();
     List<String> typeOrder = sectionHelper.getTypeOrder();
-    typeOrder.forEach(type -> logger.info("Got " + type));
-
+    typeOrder.forEach(type -> logger.info("Got type " + type));
 
     logger.info("sections " + sectionHelper.getSectionNodesForTypes());
     // SectionNode unit = sectionHelper.getFirstNode("1");
     ITestSection<CommonExercise> tsectionHelper = (ITestSection<CommonExercise>) project.getSectionHelper();
 
-    SectionNode unit = tsectionHelper.getNode(tsectionHelper.getRoot(), "Semester", "1");
+    SectionNode root = tsectionHelper.getRoot();
+
+    logger.info("Root is " + root.getType() + " " + root.getName() + " " + root);
+    SectionNode unit = tsectionHelper.getNode(root, "Semester", "1");
     logger.info("got " + unit);
 
-    unit = tsectionHelper.getNode(tsectionHelper.getRoot(), "Semester", "2");
+    unit = tsectionHelper.getNode(root, "Semester", "2");
     logger.info("got " + unit);
 
-    unit = tsectionHelper.getNode(tsectionHelper.getRoot(), "Semester", "3");
+    unit = tsectionHelper.getNode(root, "Semester", "3");
     logger.info("got " + unit);
 
     Collection<CommonExercise> semester = tsectionHelper.getExercisesForSelectionState("Semester", "1");
