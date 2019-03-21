@@ -498,8 +498,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           logger.info("runNorm : kaldi tokens were " + tokens + " for " + sentence);
         }
       } else if (status == TEXT_NORM_FAILED) {
-       // JsonArray asJsonArray = parse.getAsJsonArray(INVALID_CHAR_INDS);
-       // List<IPair> pairs = getInvalidCharRanges(parse);
+        // JsonArray asJsonArray = parse.getAsJsonArray(INVALID_CHAR_INDS);
+        // List<IPair> pairs = getInvalidCharRanges(parse);
         getInvalidCharRanges(parse)
             .forEach(pair -> tokens.add(sentence.substring(pair.getFrom(), pair.getTo())));
       } else {
@@ -573,10 +573,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         parse
             .getAsJsonArray(IN_VOCAB)
             .forEach(jsonElement -> oov.add(jsonElement.getAsBoolean()));
+      } else if (status == OOV_IN_TRANS) {
+        parse
+            .getAsJsonArray(IN_VOCAB)
+            .forEach(jsonElement -> oov.add(jsonElement.getAsBoolean()));
       } else {
         String log = parse.has(LOG) ? parse.get(LOG).getAsString() : "";
         logger.warn("runOOV failed " +
             "\n\tstatus " + status +
+            "\n\ttokens " + tokens +
             "\n\tjson   " + json +
             "\n\tlog    " + log.trim()
         );
