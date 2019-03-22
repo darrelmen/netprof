@@ -129,7 +129,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     isMandarin = projectStartupInfo != null && projectStartupInfo.getLanguageInfo() == Language.MANDARIN;
     this.isRTL = !isEngAttr() && projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
-  //  logger.info("isRTL " + isRTL);
+    //  logger.info("isRTL " + isRTL);
 
     this.alignmentFetcher = new AlignmentFetcher(exercise.getID(),
         controller, listContainer,
@@ -246,10 +246,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
     Language languageInfo = isEngAttr() ? Language.ENGLISH : projectStartupInfo.getLanguageInfo();
-  //  boolean addFloatLeft = shouldAddFloatLeft();
-
-   // logger.info("makeClickableWords " + exercise.getID() + " " + exercise.getFLToShow() + " add float left " + addFloatLeft);
-
+    // logger.info("makeClickableWords " + exercise.getID() + " " + exercise.getFLToShow() + " add float left " + addFloatLeft);
     clickableWords = new ClickableWords(listContainer, exercise.getID(),
         languageInfo, languageInfo.getFontSize(), BLUE, shouldAddFloatLeft());
   }
@@ -266,8 +263,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   public void getRefAudio(RefAudioListener listener) {
     alignmentFetcher.getRefAudio(listener);
   }
-
-
 
   Set<Integer> getReqAudio() {
     return alignmentFetcher.getReqAudio();
@@ -689,7 +684,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   protected void addFloatLeft(Widget w) {
     if (!isRTL) {
-      logger.info("addFloatLeft to (" + isRTL + ") elem '" + w.getElement().getId() + "'");
+      //    logger.info("addFloatLeft to (" + isRTL + ") elem '" + w.getElement().getId() + "'");
       w.addStyleName(FLOAT_LEFT);
     }
   }

@@ -146,7 +146,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     this.listContainer = listContainer;
     this.isContext = isContext;
     this.addPlayer = addPlayer;
-    // logger.info("Adding isContext " +isContext + " ex " +commonExercise.getID()+ " " + commonExercise.getEnglish() + " " +commonExercise.getForeignLanguage());
+
+    //  logger.info("Adding isContext " + isContext + " ex " + commonExercise.getID() + " " + commonExercise.getEnglish() + " " + commonExercise.getForeignLanguage());
 
     addStyleName("twoColumnStyle");
     annotationHelper = controller.getCommentAnnotator();
@@ -313,6 +314,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     { // #1 : add record button
       flContainer.add(getRecordButtonContainer(recordPanel));
 
+      recordPanel.getPostAudioRecordButton().setEnabled(exercise.isSafeToDecode());
+
       //long now = System.currentTimeMillis();
       //  logger.info("makeFirstRow for " + e.getID() + " took " + (now - then) + " to add rec");
 
@@ -392,7 +395,10 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private DivWidget getRecordButtonContainer(SimpleRecordAudioPanel<?> recordPanel) {
     DivWidget recordButtonContainer = new DivWidget();
     recordButtonContainer.addStyleName("recordingRowStyle");
-    recordButtonContainer.add(recordPanel.getPostAudioRecordButton());
+    PostAudioRecordButton postAudioRecordButton = recordPanel.getPostAudioRecordButton();
+    recordButtonContainer.add(postAudioRecordButton);
+
+
     return recordButtonContainer;
   }
 
@@ -467,7 +473,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
         card.add(getScoringRow(recordPanel));
       }
       //else {
-        // logger.warning("can't add record panel?");
+      // logger.warning("can't add record panel?");
       //}
     }
   }
@@ -490,6 +496,9 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
         new SimpleRecordAudioPanel<>(controller, contextEx, listContainer, addPlayer, listenView, sessionManager);
     Panel context = getContext(contextEx, foreignLanguage, altFL, annotationHelper, getRecordButtonContainer(recordPanel),
         exercise.getTokens());
+
+    recordPanel.getPostAudioRecordButton().setEnabled(contextEx.isSafeToDecode());
+
     if (context != null) {
       rowWidget.add(context);
       context.setWidth("100%");
