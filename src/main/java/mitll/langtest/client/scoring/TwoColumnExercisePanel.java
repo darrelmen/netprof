@@ -433,7 +433,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
         annotationHelper, isRTL, contentWidget, e.getID());
 
     if (isRTL) {
-      clickableWords.setDirection(flEntry);
+      clickableWords.setDirectionToRTL(flEntry);
     } else {
       addFloatLeft(flEntry);
     }
@@ -466,9 +466,10 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       SimpleRecordAudioPanel<ClientExercise> recordPanel = addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
       if (recordPanel != null) {
         card.add(getScoringRow(recordPanel));
-      } else {
-        // logger.warning("can't add record panel?");
       }
+      //else {
+        // logger.warning("can't add record panel?");
+      //}
     }
   }
 
@@ -523,8 +524,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     Panel contentWidget = clickableWords.getClickableWordsHighlight(altFL, flToHighlight,
         FieldType.FL, new ArrayList<>(), true, contextTokens, highlightTokens, controller.getLanguageInfo().isRTL());
 
-    CommentBox commentBox = getCommentBox(annotationHelper, exid);
-    return commentBox
+    return getCommentBox(annotationHelper, exid)
         .getEntry(QCNPFExercise.ALTCONTEXT, contentWidget,
             exercise.getAnnotation(QCNPFExercise.ALTCONTEXT), showInitially, isRTL);
   }
@@ -607,10 +607,10 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       if (addTopMargin) {
         contentWidget.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
       }
-      if (!isRTL) {
-        addFloatLeft(flEntry);
+      if (isRTL) {
+        clickableWords.setDirectionToRTL(flEntry);
       } else {
-        clickableWords.setDirection(flEntry);
+        addFloatLeft(flEntry);
       }
       flEntry.setWidth("100%");
       return flEntry;
