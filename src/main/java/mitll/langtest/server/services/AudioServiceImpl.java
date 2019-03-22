@@ -88,7 +88,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
-import static mitll.langtest.shared.answer.Validity.INVALID;
 import static mitll.langtest.shared.answer.Validity.OK;
 
 /**
@@ -99,9 +98,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private static final Logger logger = LogManager.getLogger(AudioServiceImpl.class);
 
   private static final boolean DEBUG = false;
-
-  private static final AudioCheck.ValidityAndDur INVALID_AUDIO = new AudioCheck.ValidityAndDur();
-  private static final int WAV_HEADER_LEN = 44;
 
   private static final int WARN_THRESH = 10;
   public static final String UNKNOWN = "unknown";
@@ -656,13 +652,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           logger.warn("\n\n\ngetCombinedAudioChunk : hmm current packet " + packet + " vs next " + nextPacketID);
         }
       }
-
-      // so if a chunk can't be read, just skip over it
-      if (next.getValidity() == INVALID) {
-        logger.warn("\n\n\ngetCombinedAudioChunk : skip chunk " + next.getPacket() + " since validity " + next.getValidityAndDur());
-      } else {
-        combined = combined.concat(next);
-      }
+      combined = combined.concat(next);
       //      logger.info("\tStop - 2 combine " + combined);
 
     }
@@ -854,12 +844,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
 
     /**
-     * can't return a null chunk - that would stop the combining pipeline
      * @param other
-     * @return this chunk if we can't read the one where supposed to combine it with - this really should never happen
-     * @see #getCombinedAudioChunk
+     * @return
+     * @see #getCombinedAudioChunk(List)
      */
-    @NotNull
     AudioChunk concat(AudioChunk other) {
       try {
         AudioInputStream clip1 = getAudioInputStream();
@@ -878,7 +866,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       } catch (Exception e) {
         logger.error("got " + e, e);
       }
-      return this;
+      return null;
     }
 
     private AudioInputStream getAudioInputStream() throws UnsupportedAudioFileException, IOException {
@@ -904,7 +892,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
 
     /**
-     * Do if for whatever reason the packet is truncated, don't even try to read it.
      * @param audioCheck
      * @param useSensitiveTooLoudCheck
      * @param quietAudioOK
@@ -912,31 +899,25 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
      */
     Validity calcValid(AudioCheck audioCheck, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
       try {
-
-        int length = wavFile.length;
-        if (length < WAV_HEADER_LEN) {
-          validityAndDur = INVALID_AUDIO;
-        } else {
-          validityAndDur = audioCheck.isValid(
-              "" + packet,
-              "",
-              length,
-              getAudioInputStream(),
-              useSensitiveTooLoudCheck,
-              quietAudioOK
-          );
+        validityAndDur = audioCheck.isValid(
+            "" + packet,
+            "",
+            wavFile.length,
+            getAudioInputStream(),
+            useSensitiveTooLoudCheck,
+            quietAudioOK
+        );
 
 //        long then = System.currentTimeMillis();
-          if (validityAndDur.isValid()) {
-            audioCheck.maybeAddDNR("" + packet, getAudioInputStream(), validityAndDur);
-          }
+        if (validityAndDur.isValid()) {
+          audioCheck.maybeAddDNR("" + packet, getAudioInputStream(), validityAndDur);
         }
 
         //      long now = System.currentTimeMillis();
         //    logger.info("dnr took " + (now - then) + " millis");
       } catch (Exception e) {
         logger.error("got " + e, e);
-        validityAndDur = INVALID_AUDIO;
+        validityAndDur = new AudioCheck.ValidityAndDur();
       }
 
       return validityAndDur.getValidity();
