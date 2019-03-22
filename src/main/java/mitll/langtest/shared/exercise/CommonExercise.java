@@ -51,12 +51,6 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
 
 
   /**
-   * SERVER Only
-   * @return
-   */
-  boolean isSafeToDecode();
-
-  /**
    * SERVER
    * @return
    * @seex mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem
