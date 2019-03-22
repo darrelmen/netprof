@@ -62,6 +62,7 @@ import static mitll.langtest.client.scoring.PhonesChoices.SHOW;
 public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExercisePanel<T> {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
+  private static final String FLOAT_LEFT = "floatLeft";
   private static final String N_A = "N/A";
 
   private static final String LEFT_WIDTH = "60%";
@@ -108,7 +109,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private PhonesChoices phonesChoices;
 
   private static final boolean DEBUG = false;
-  private boolean isRTL = false;
 
   private final ItemMenu itemMenu;
   private final boolean addPlayer;
@@ -170,7 +170,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     if (projectStartupInfo != null) {
       makeClickableWords(projectStartupInfo, listContainer);
-      this.isRTL = projectStartupInfo.getLanguageInfo().isRTL();
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
       add(getItemContent(exercise));
     } else {
@@ -561,7 +560,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
         showInitially, new ArrayList<>(), true, annotationHelper, false);
     englishWidget.addStyleName("rightsidecolor");
     englishWidget.getElement().setId("englishWidget");
-    englishWidget.addStyleName("floatLeft");
+    englishWidget.addStyleName(FLOAT_LEFT);
     return englishWidget;
   }
 
@@ -619,7 +618,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   }
 
   private void addFloatLeft(DivWidget flEntry) {
-    flEntry.addStyleName("floatLeft");
+    flEntry.addStyleName(FLOAT_LEFT);
   }
 
   private Widget addTransliteration(T e) {
