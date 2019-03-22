@@ -103,10 +103,6 @@ public class LangTest implements
    */
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
 
-/*
-  public static final String VERSION_INFO = "3.0.3";
-*/
-
   private static final String UNKNOWN = "unknown";
   public static final String LANGTEST_IMAGES = "langtest/images/";
 
