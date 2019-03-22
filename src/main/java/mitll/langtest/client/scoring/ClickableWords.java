@@ -80,9 +80,10 @@ public class ClickableWords {
   private final WordBoundsFactory factory = new WordBoundsFactory();
   private final int fontSize;
 
-  private static final boolean DEBUG = true;
   private final String highlightColor;
   private final boolean addFloatLeft;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param listContainer
@@ -108,7 +109,7 @@ public class ClickableWords {
     this.fontSize = fontSize;
     this.addFloatLeft = addFloatLeft;
 
-    logger.info("addFloatLeft ex " + exercise + " = " + addFloatLeft);
+ //   logger.info("addFloatLeft ex " + exercise + " = " + addFloatLeft);
   }
 
   /**
