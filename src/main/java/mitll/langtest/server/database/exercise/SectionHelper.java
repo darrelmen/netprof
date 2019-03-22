@@ -63,7 +63,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private static final String ALL = "all";
   private static final String LISTS = "Lists";
   private static final String RECORDED = "Recorded";
-  public static final String CONTENT = "Content";
+  private static final String CONTENT = "Content";
   private static final int WARN_THRESH = 10;
   private List<String> predefinedTypeOrder = new ArrayList<>();
   public static final String UNIT = "Unit";

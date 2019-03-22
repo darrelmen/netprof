@@ -240,17 +240,17 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
-    Language languageInfo = projectStartupInfo.getLanguageInfo();
-    if (isEngAttr()) {
-      languageInfo = Language.ENGLISH;
-//      logger.info("lang for " +exercise.getID() + " " +exercise.getEnglish() + " " + exercise.getForeignLanguage() + " " +languageInfo);
-    }
+    Language languageInfo = isEngAttr() ? Language.ENGLISH: projectStartupInfo.getLanguageInfo();
+    boolean addFloatLeft = shouldAddFloatLeft();
+
+    logger.info("makeClickableWords " + exercise.getID() + " " + exercise.getFLToShow() + " add float left "+ addFloatLeft);
+
     clickableWords = new ClickableWords(listContainer, exercise.getID(),
-        languageInfo, languageInfo.getFontSize(), BLUE, shouldAddFloatLeft());
+        languageInfo, languageInfo.getFontSize(), BLUE, addFloatLeft);
   }
 
   protected boolean shouldAddFloatLeft() {
-    return true;
+    return !controller.getLanguageInfo().isRTL();
   }
 
   /**
@@ -470,7 +470,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   @NotNull
   protected AllHighlight getAllHighlight(Collection<IHighlightSegment> flclickables) {
-    return new AllHighlight(flclickables, true);
+    return new AllHighlight(flclickables, shouldAddFloatLeft());
   }
 
   /**
@@ -589,9 +589,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
               // add spacer - also required if we want to select text and copy it somewhere.
               //    clickableRow.add(new InlineHTML(" "));
 
-              if (!isRTL) {
-                addFloatLeft(current);
-              }
+              addFloatLeft(current);
 
               clickablesIterator.next(); // OK, we've done this clickable
             }
@@ -604,16 +602,12 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
           boolean hasSpace = false;
           for (IHighlightSegment iHighlightSegment : unclickable) {
             if (!iHighlightSegment.getContent().trim().isEmpty()) {
-              if (!isRTL) {
-                addFloatLeft(iHighlightSegment);
-              }
+              addFloatLeft(iHighlightSegment);
               clickableRow.add(iHighlightSegment.asWidget());
             } else hasSpace = true;
           }
 
-          if (!isRTL) {
-            addFloatLeft(highlightSegment);
-          }
+          addFloatLeft(highlightSegment);
           if (hasSpace) {
             addSpacerStyle(highlightSegment);
           }
@@ -681,11 +675,15 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return removePunct(current.getContent().toLowerCase());
   }
 
-  protected void addFloatLeft(IHighlightSegment current) {
+  private void addFloatLeft(IHighlightSegment current) {
     addFloatLeft(current.asWidget());
   }
+
   protected void addFloatLeft(Widget w) {
-    w.addStyleName("floatLeft");
+    if (!isRTL) {
+      logger.info("addFloatLeft to elem " + w.getElement().getId());
+      w.addStyleName("floatLeft");
+    }
   }
 
   /**

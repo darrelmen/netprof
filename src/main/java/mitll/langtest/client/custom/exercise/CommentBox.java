@@ -53,6 +53,8 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class CommentBox extends PopupContainerFactory {
+  public static final String FLOAT_RIGHT = "floatRight";
+  public static final String FLOAT_LEFT = "floatLeft";
   private final Logger logger = Logger.getLogger("CommentBox");
 
 
@@ -268,9 +270,8 @@ public class CommentBox extends PopupContainerFactory {
     }
     setFloatOn(row, isRTL);
 
-    DivWidget buttons=new DivWidget();
+    DivWidget buttons = new DivWidget();
     row.add(buttons);
-   // row.addStyleName("floatLeft");
 
     buttons.add(commentButton);
     buttons.add(clearButton);
@@ -279,11 +280,7 @@ public class CommentBox extends PopupContainerFactory {
   }
 
   private void setFloatOn(Widget content, boolean isRTL) {
-    if (isRTL) {
-      content.addStyleName("floatRight");
-    } else {
-      content.addStyleName("floatLeft");
-    }
+    content.addStyleName(isRTL ? FLOAT_RIGHT : FLOAT_LEFT);
   }
 
   private HidePopupTextBox getCommentBox(String field) {
@@ -481,11 +478,11 @@ public class CommentBox extends PopupContainerFactory {
   }
 
   /**
-   * @see #commentComplete(ValueBoxBase, String, Widget, Widget)
    * @param field
    * @param commentButton
    * @param clearButton
    * @param comment
+   * @see #commentComplete(ValueBoxBase, String, Widget, Widget)
    */
   private void commentComplete(String field, Widget commentButton, Widget clearButton, String comment) {
     String previous = fieldToComment.get(field);

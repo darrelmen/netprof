@@ -48,6 +48,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 4/25/17.
  */
 public class HighlightSegment extends DivWidget implements IHighlightSegment {
+  public static final String FLOAT_RIGHT = "floatRight";
   protected final Logger logger = Logger.getLogger("HighlightSegment");
 
   public static final String RGB_51_51_51 = "rgb(51, 51, 51)";
@@ -95,10 +96,10 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     getElement().getStyle().setDisplay(Style.Display.INLINE_BLOCK);
 
     this.span = new HTML(html, dir);
-    span.getElement().setId("highlight_" + id + "_" + html);
 
     this.content = html;
     boolean isLTR = dir == HasDirection.Direction.LTR;
+    span.getElement().setId("highlight_" + id + "_" + html +"_dir_"+dir);
 
     configureNorth(id, north, isLTR, span, addFloatLeft);
     this.north = north;
@@ -171,9 +172,8 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     north.add(span);
     north.getElement().setId("Highlight_North_" + id);
 
-    String floatDir = isLTR ? FLOAT_LEFT : "floatRight";
     if (isLTR && addFloatLeft) {
-      north.addStyleName(floatDir);
+      north.addStyleName(FLOAT_LEFT);
     } else {
       north.addStyleName(INLINE_BLOCK_STYLE_ONLY);
     }
