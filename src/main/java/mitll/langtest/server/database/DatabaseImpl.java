@@ -175,6 +175,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private IRelatedResultDAO relatedResultDAO;
   private IImageDAO imageDAO;
   private IPendingUserDAO pendingUserDAO;
+  private IOOVDAO oovDAO;
 
   public DatabaseImpl() {
   }
@@ -371,6 +372,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     dliClassDAO = new DLIClassDAO(dbConnection);
     dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);
     pendingUserDAO = new PendingUserDAO(dbConnection);
+    oovDAO = new OOVDAO(dbConnection);
     finalSetup(slickAudioDAO);
   }
 
@@ -1356,6 +1358,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
           relatedResultDAO,
           imageDAO,
           pendingUserDAO,
+          oovDAO,
           trainingAudioDAO
       ).forEach(idao -> {
         if (createIfNotThere(idao, known)) {
@@ -2170,6 +2173,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public IPendingUserDAO getPendingUserDAO() {
     return pendingUserDAO;
+  }
+
+
+  @Override
+  public IOOVDAO getOOVDAO() {
+    return oovDAO;
   }
 
   @Override

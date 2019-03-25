@@ -45,10 +45,7 @@ import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ModelType;
 import mitll.langtest.shared.project.OOVInfo;
@@ -340,8 +337,9 @@ public class AudioFileHelper implements AlignDecode {
         File file = new File("/tmp/" + fileName);
         logger.info("writeOOV writing " + oov.size() + " oov items to " + file.getAbsolutePath());
         FileWriter oovTokens = new FileWriter(file);
-        ArrayList<String> strings = new ArrayList<>(oov);
+        List<String> strings = new ArrayList<>(oov);
         strings.sort(Comparator.naturalOrder());
+
         for (String token : strings) {
           try {
             oovTokens.write(token + "\n");
@@ -350,6 +348,8 @@ public class AudioFileHelper implements AlignDecode {
           }
         }
         oovTokens.close();
+
+        addOOVToOOVTable(oov);
       } catch (IOException e) {
         logger.error("writeOOV got " + e);
       }
@@ -358,11 +358,35 @@ public class AudioFileHelper implements AlignDecode {
 
       Set<String> oov1 = getPronunciationLookup().getOOV();
       if (!oov1.isEmpty()) {
+        addOOVToOOVTable(oov);
         writeOOV(oov1, suffix);
       }
     }
   }
 
+  /**
+   * Don't add known oov entries.
+   *
+   * @param oov
+   */
+  private void addOOVToOOVTable(Set<String> oov) {
+    Map<String, List<OOV>> oovToEquivalents = db.getOOVDAO().getOOVToEquivalents(project.getLanguageEnum());
+
+    logger.info("addOOV to add - " + oov.size() + " known " + oovToEquivalents.size());
+    long now = System.currentTimeMillis();
+    // Timestamp timestamp = new Timestamp(now);
+    List<OOV> toAdd = new ArrayList<>();
+    int defaultUser = db.getUserDAO().getDefaultUser();
+    oov.forEach(oovEntry -> {
+      if (!oovToEquivalents.containsKey(oovEntry)) {
+        toAdd.add(new OOV(-1, defaultUser, now, oovEntry, ""));
+      }
+    });
+
+    logger.info("addOOV adding " + toAdd.size());
+
+    db.getOOVDAO().insertBulk(toAdd, defaultUser, project.getLanguageEnum());
+  }
 
   /**
    * Call Kaldi all the time for now.
@@ -386,7 +410,7 @@ public class AudioFileHelper implements AlignDecode {
           Collection<String> kaldiOOV = getASRScoring().getKaldiOOV(foreignLanguage);
           oovCumulative.addAll(kaldiOOV);
           if (!kaldiOOV.isEmpty()) {
-            logger.warn("isValidForeignPhrase found " + kaldiOOV.size() + " oov tokens " +kaldiOOV + " in " + foreignLanguage);
+            logger.warn("isValidForeignPhrase found " + kaldiOOV.size() + " oov tokens " + kaldiOOV + " in " + foreignLanguage);
           }
           return kaldiOOV.isEmpty();
         } else {
@@ -420,9 +444,9 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   String getOOVReplaced(String orig) {
-    if (project.getLanguageEnum()== Language.ENGLISH) {
+    if (project.getLanguageEnum() == Language.ENGLISH) {
       if (orig.contains("1")) {
-        orig = orig.replaceAll("1","one");
+        orig = orig.replaceAll("1", "one");
       }
     }
     return orig;
