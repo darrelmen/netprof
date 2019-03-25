@@ -322,7 +322,9 @@ public class AudioFileHelper implements AlignDecode {
         }
       }
       logger.info("checkAllExercises (" + project.getName() +
-          ") checked " + checked + " from " + exercises.size() + " for whether they can be decoded in " + (System.currentTimeMillis() - then) + " millis");
+          ") checked " + checked +
+          " from " + exercises.size() +
+          " for whether they can be decoded in " + (System.currentTimeMillis() - then) + " millis");
       return new OOVInfo(checked, oov.size());
     } else {
       logger.info("checkAllExercises skipped checking exercises since no dictionary.");

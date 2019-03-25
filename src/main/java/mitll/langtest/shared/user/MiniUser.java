@@ -141,6 +141,11 @@ public class MiniUser extends FirstLastUser {
     return "";
   }
 
+  /**
+   * Can't depend on this anymore!
+   * @return
+   */
+  @Deprecated
   public boolean isMale() {
     return isMale;
   }
@@ -151,10 +156,6 @@ public class MiniUser extends FirstLastUser {
 
   public void setAge(int age) {
     this.age = age;
-  }
-
-  public int getGender() {
-    return isMale ? 0 : 1;
   }
 
   public Gender getRealGender() {

@@ -171,6 +171,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final boolean SWITCH_USER_PROJECT = false;
   private static final String ACTIVE = "active";
   private static final String EMAIL = "email";
+  public static final String UNKNOWN = "Unknown";
+  public static final String MALE = "Male";
+  public static final String FEMALE = "Female";
 
   /**
    * If false, don't use email to set the initial user password via email.
@@ -200,6 +203,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private mitll.hlt.domino.shared.model.user.User dominoImportUser;
   private DBUser dominoAdminUser = null;
 
+  private DBUser defaultDBUser = null;
+
   private Ignite ignite = null;
 
   private JSONSerializer serializer = null;
@@ -222,7 +227,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             public DBUser load(Integer key) {
               if (DEBUG_USER_CACHE) logger.info("idToDBUser Load " + key);
               DBUser dbUser = delegate.lookupDBUser(key);
-              if (dbUser == null) dbUser = delegate.lookupDBUser(getDefaultUser());
+              if (dbUser == null) {
+//                dbUser = delegate.lookupDBUser(getDefaultUser());
+                logger.info("idToDBUser : can't find user #" + key + " so returing default user.");
+                dbUser = defaultDBUser;
+              }
               return dbUser;
             }
           });
@@ -509,10 +518,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
       if (adminUser.getPrimaryGroup() == null) {
         logger.warn("\n\n\nensureDefaultUsers no group for " + adminUser);
-        //  adminUser.setPrimaryGroup(makePrimaryGroup(PRIMARY));
       }
 
       dominoImportUser = delegate.getUser(IMPORT_USER);
+      defaultDBUser = delegate.lookupDBUser(defaultUser);
     }
   }
 
@@ -528,8 +537,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", Kind.STUDENT);
     this.importUser = getOrAdd(IMPORT_USER, "Import", USER, Kind.CONTENT_DEVELOPER);
     this.defaultUser = getOrAdd(DEFAULT_USER1, DEFAULT, USER, Kind.AUDIO_RECORDER);
-    this.defaultMale = getOrAdd(DEFAULT_MALE_USER, DEFAULT, "Male", Kind.AUDIO_RECORDER);
-    this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, DEFAULT, "Female", Kind.AUDIO_RECORDER);
+    this.defaultMale = getOrAdd(DEFAULT_MALE_USER, DEFAULT, MALE, Kind.AUDIO_RECORDER);
+    this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, DEFAULT, FEMALE, Kind.AUDIO_RECORDER);
     //  logger.info("ensureDefaultUsersLocal defaultUser " + defaultUser);
 
     this.defaultUsers = new HashSet<>(Arrays.asList(DEFECT_DETECTOR, BEFORE_LOGIN_USER, IMPORT_USER, DEFAULT_USER1, DEFAULT_FEMALE_USER, DEFAULT_MALE_USER, "beforeLoginUser"));
@@ -1253,25 +1262,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
     if (first == null) first = userID;
     String last = user.getLast();
-    if (last == null) last = "Unknown";
+    if (last == null) last = UNKNOWN;
     String email = user.getEmail();
-//    if (email == null || email.isEmpty()) {
-//      email = user.getEmailHash();
-//    }
 
     Kind userKind = user.getUserKind();
 
     Set<String> roleAbbreviations = Collections.singleton(userKind.getRole());
     // logger.info("toClientUserDetail " + user.getUserID() + " role is " + roleAbbreviations + " email " +email);
 
-    boolean copyGender = user.getPermissions().contains(User.Permission.RECORD_AUDIO) ||
-        user.getPermissions().contains(User.Permission.DEVELOP_CONTENT) ||
-        userID.equalsIgnoreCase("FernandoM01");
-
-    mitll.hlt.domino.shared.model.user.User.Gender gender =
-        userKind ==
-            STUDENT && !copyGender ? UNSPECIFIED :
-            user.isMale() ? DMALE : DFEMALE;
+    mitll.hlt.domino.shared.model.user.User.Gender gender = getGender(user, userID, userKind);
 
     if (gender == UNSPECIFIED) {
       logger.info("toClientUserDetail for " + user.getID() + " '" + userID + "' " + user.getUserKind() + " gender is unspecified.");
@@ -1306,6 +1305,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     //logger.info("toClientUserDetail " + " groups for\n\t" + clientUserDetail + " : \n\t" + clientUserDetail.getSecondaryGroups());
 
     return clientUserDetail;
+  }
+
+  private mitll.hlt.domino.shared.model.user.User.Gender getGender(User user, String userID, Kind userKind) {
+    boolean copyGender = user.getPermissions().contains(User.Permission.RECORD_AUDIO) ||
+        user.getPermissions().contains(User.Permission.DEVELOP_CONTENT) ||
+        userID.equalsIgnoreCase("FernandoM01");
+
+    return userKind ==
+        STUDENT && !copyGender ? UNSPECIFIED :
+        user.isMale() ? DMALE : DFEMALE;
   }
 
   /**

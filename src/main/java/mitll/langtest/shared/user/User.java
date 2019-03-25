@@ -30,7 +30,6 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
@@ -111,6 +110,10 @@ public class User extends MiniUser implements ReportUser {
    */
   public boolean isHasAppPermission() {
     return hasAppPermission;
+  }
+
+  public int getGender() {
+    return isMale() ? 0 : 1;
   }
 
 

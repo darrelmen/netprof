@@ -39,6 +39,7 @@ import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.audio.imagewriter.TranscriptWriter;
 import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.npdata.dao.lts.EmptyLTS;
@@ -303,7 +304,6 @@ public abstract class Scoring {
     return pathname;
   }
 
-
   /**
    * @param fl
    * @param transliteration
@@ -320,11 +320,19 @@ public abstract class Scoring {
     }
   }
 
+  /**
+   * @see AudioFileHelper#isValidForeignPhrase(Set, Set, CommonExercise, Set, boolean)
+   * @see AudioFileHelper#checkLTSOnForeignPhrase(String, String)
+   *
+   * @param fl
+   * @param transliteration
+   * @return
+   */
   @NotNull
   public Collection<String> getOOV(String fl, String transliteration) {
     Set<String> oovForFL = checkLTSHelper.checkLTS(fl, transliteration);
 
-    List<String> inOrder = new ArrayList<>(oovForFL);
+ /*   List<String> inOrder = new ArrayList<>(oovForFL);
 
     //if (oov.addAll(oovForFL)) {
     // logger.info("validLTS : For " + fl + " got " + oovForFL + " now " + oov.size() + " set = " + oov.hashCode());
@@ -340,8 +348,8 @@ public abstract class Scoring {
       } catch (NumberFormatException e) {
         // ok not an int
       }
-    }
-    return inOrder;
+    }*/
+    return oovForFL;
   }
 
   /**

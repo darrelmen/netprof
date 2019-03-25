@@ -30,6 +30,7 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.hlt.documentservice.mongo.MADMLog;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -189,7 +190,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   public boolean isMale() {
-    return user != null && user.isMale();
+    return realGender == null || realGender == MiniUser.Gender.Male;
   }
 
   public String getSpeed() {

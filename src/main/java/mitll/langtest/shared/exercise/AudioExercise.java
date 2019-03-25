@@ -556,10 +556,12 @@ public class AudioExercise extends ExerciseShell {
   private List<AudioAttribute> simpleByGender(boolean isMale) {
     List<AudioAttribute> males = new ArrayList<>();
     for (AudioAttribute audioAttribute : audioAttributes.values()) {
-      MiniUser user = audioAttribute.getUser();
-      if (user == null) {
-        //logger.error ("getByGender : huh? there's no user attached to " + audioAttribute);
-      } else if (isMale && user.isMale() || (!isMale && !user.isMale())) {
+      //  MiniUser user = audioAttribute.getUser();
+      // if (user == null) {
+      //logger.error ("getByGender : huh? there's no user attached to " + audioAttribute);
+      // } else
+
+      if (isMale && audioAttribute.isMale() || (!isMale && !audioAttribute.isMale())) {
         males.add(audioAttribute);
       }
     }

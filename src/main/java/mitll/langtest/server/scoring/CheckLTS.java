@@ -46,7 +46,6 @@ class CheckLTS {
   private static final int WARN_LTS_COUNT = 1;
 
   private final LTS letterToSoundClass;
-  // private final String language;
 
   private final HTKDictionary htkDictionary;
   private final SmallVocabDecoder smallVocabDecoder;
@@ -55,7 +54,7 @@ class CheckLTS {
   private final Language languageInfo;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_OOV = false;
+  private static final boolean DEBUG_OOV = true;
   private static final String POUND = "#";
 
   /**
