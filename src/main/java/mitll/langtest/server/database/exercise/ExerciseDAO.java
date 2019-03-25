@@ -36,11 +36,13 @@ import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
+import mitll.npdata.dao.SlickExerciseNorm;
 import mitll.npdata.dao.SlickExercisePhone;
 import mitll.npdata.dao.SlickUpdateDominoPair;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends SimpleExerciseDAO<T> {
@@ -66,6 +68,7 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
    */
   void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp);
 
+
   /**
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict
    * @param id
@@ -78,6 +81,7 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
    * @param pairs
    */
   void updatePhonesBulk(List<SlickExercisePhone> pairs);
+  void updateNormBulk(List<SlickExerciseNorm> pairs);
 
   int updateDominoBulk(List<SlickUpdateDominoPair> pairs);
 
@@ -86,6 +90,4 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   int getParentFor(int exid);
 
   boolean refresh(int exid);
-
- // void bulkImport();
 }

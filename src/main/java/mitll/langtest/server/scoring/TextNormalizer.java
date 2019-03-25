@@ -168,6 +168,22 @@ public class TextNormalizer {
     return builder.toString();
   }
 
+  public String fromFull(String s) {
+    StringBuilder builder = new StringBuilder();
+
+    final CharacterIterator it = new StringCharacterIterator(s);
+    for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
+      if (c >= FULL_WIDTH_ZERO && c <= FULL_WIDTH_ZERO + 9) {
+        int offset = c - FULL_WIDTH_ZERO;
+        int normal = ZERO + offset;
+        builder.append(Character.valueOf((char) normal).toString());
+      } else {
+        builder.append(c);
+      }
+    }
+    return builder.toString();
+  }
+
   private String getTrimmedSent(String sentence, boolean removeAllAccents) {
     return removeAllAccents ?
         getTrimmed(sentence) :
@@ -221,7 +237,7 @@ public class TextNormalizer {
   private void convertFile(String infile, String outfile) {
     try {
       File fileDir = new File(infile);
-      if (!fileDir.exists()) System.err.println("can't find " + infile + " at "+ fileDir.getAbsolutePath());
+      if (!fileDir.exists()) System.err.println("can't find " + infile + " at " + fileDir.getAbsolutePath());
       else {
         // TextNormalizer textNormalizer = new TextNormalizer(lang.toUpperCase());
         BufferedReader in = new BufferedReader(

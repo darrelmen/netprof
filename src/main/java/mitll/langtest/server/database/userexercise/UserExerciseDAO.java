@@ -575,10 +575,10 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   /**
+   * @param shouldSwap
    * @return
    * @seex #setAudioDAO(AudioDAO)
    * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
-   * @param shouldSwap
    */
   @Override
   public Collection<CommonExercise> getOverrides(boolean shouldSwap) {
@@ -628,7 +628,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return getCommonExercises(sql);
   }
 */
-
   @Override
   public List<SlickExercise> getExercisesByIDs(Collection<Integer> exids) {
     return null;
@@ -699,7 +698,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         rs.getInt("creatorid"),
         rs.getString("english"),
         foreignLanguage,
-        foreignLanguage, "",
+        foreignLanguage,
+        "",
         "",
         rs.getString(TRANSLITERATION),
         rs.getBoolean(OVERRIDE),
@@ -710,7 +710,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         System.currentTimeMillis(),
         false,
         -1,
-        -1, false);
+        false);
   }
 
   //  private Map<String, List<AudioAttribute>> exToAudio;

@@ -37,6 +37,7 @@ import mitll.npdata.dao.SlickOOV;
 import mitll.npdata.dao.userexercise.OOVDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -106,7 +107,11 @@ public class OOVDAO implements IOOVDAO {
 
   @Override
   public List<OOV> forLanguage(Language language) {
-    List<SlickOOV> slickOOVS = dao.forLanguage(language.getLanguage());
+    return fromSlick(dao.forLanguage(language.getLanguage()));
+  }
+
+  @NotNull
+  private List<OOV> fromSlick(List<SlickOOV> slickOOVS) {
     List<OOV> oovs = new ArrayList<>(slickOOVS.size());
     slickOOVS.forEach(slickOOV -> oovs.add(new OOV(slickOOV.id(), slickOOV.userid(), slickOOV.modified().getTime(), slickOOV.oov(), slickOOV.equivalent())));
     return oovs;
@@ -114,6 +119,15 @@ public class OOVDAO implements IOOVDAO {
 
   @Override
   public Map<String, List<OOV>> getOOVToEquivalents(Language language) {
-    return forLanguage(language).stream().collect(Collectors.groupingBy(OOV::getOOV));
+    List<SlickOOV> slickOOVS = dao.forLanguageWithEquivalent(language.getLanguage());
+    //Map<String, List<SlickOOV>> collect = slickOOVS.stream().collect(Collectors.groupingBy(SlickOOV::oov);
+    return fromSlick(slickOOVS).stream().collect(Collectors.groupingBy(OOV::getOOV));
+  }
+
+  @Override
+  public Map<String, List<OOV>> getOOV(Language language) {
+    List<SlickOOV> slickOOVS = dao.forLanguage(language.getLanguage());
+    //Map<String, List<SlickOOV>> collect = slickOOVS.stream().collect(Collectors.groupingBy(SlickOOV::oov);
+    return fromSlick(slickOOVS).stream().collect(Collectors.groupingBy(OOV::getOOV));
   }
 }

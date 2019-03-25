@@ -40,6 +40,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.Pair;
+import mitll.npdata.dao.SlickExerciseNorm;
 import mitll.npdata.dao.SlickExercisePhone;
 import mitll.npdata.dao.SlickUpdateDominoPair;
 import org.apache.commons.lang3.StringUtils;
@@ -905,7 +906,10 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
 
   @Override
   public void updatePhonesBulk(List<SlickExercisePhone> pairs) {
+  }
 
+  @Override
+  public void updateNormBulk(List<SlickExerciseNorm> pairs) {
   }
 
   @Override

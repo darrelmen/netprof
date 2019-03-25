@@ -54,4 +54,6 @@ public interface IOOVDAO extends IDAO {
   List<OOV> forLanguage(Language language);
 
   Map<String, List<OOV>> getOOVToEquivalents(Language language);
+
+  Map<String, List<OOV>> getOOV(Language language);
 }

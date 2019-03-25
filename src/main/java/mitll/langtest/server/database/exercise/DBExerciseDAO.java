@@ -567,6 +567,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
   }
 
+
+
   /**
    * @param id
    * @param count
@@ -580,6 +582,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @Override
   public void updatePhonesBulk(List<SlickExercisePhone> pairs) {
     getDao().updatePhonesBulk(pairs);
+  }
+
+  @Override
+  public void updateNormBulk(List<SlickExerciseNorm> pairs) {
+    getDao().updateNormBulk(pairs);
   }
 
   /**
