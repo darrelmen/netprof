@@ -638,7 +638,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
 
     AudioChunk combined = audioChunks.get(0);
-    logger.info("getCombinedAudioChunk Stop - combine " + combined);
+    logger.info("getCombinedAudioChunk Stop - combine " + combined + " with " + (audioChunks.size()-1) + " others");
 
     if (combined.getPacket() != 0) {
       logger.warn("\n\n\n\n\n\n getCombinedAudioChunk huh? first packet is " + combined);

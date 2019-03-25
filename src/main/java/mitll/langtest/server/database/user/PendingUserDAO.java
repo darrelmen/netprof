@@ -52,16 +52,14 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class PendingUserDAO  implements IPendingUserDAO {
   private static final Logger logger = LogManager.getLogger(PendingUserDAO.class);
-  private final PendingUserDAOWrapper dao;
 
+  private final PendingUserDAOWrapper dao;
 
   /**
    * @param dbConnection
    * @see DatabaseImpl#initializeDAOs
    */
   public PendingUserDAO(DBConnection dbConnection) {
-
-
     dao = new PendingUserDAOWrapper(dbConnection);
   }
 
@@ -74,12 +72,10 @@ public class PendingUserDAO  implements IPendingUserDAO {
     dao.createTable();
   }
 
-
   @Override
   public String getName() {
     return dao.dao().name();
   }
-
 
   @Override
   public void insert(int userid, int projid) {

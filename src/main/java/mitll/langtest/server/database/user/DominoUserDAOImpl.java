@@ -112,7 +112,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final String LOCALHOST = "127.0.0.1";
   private static final boolean USE_DOMINO_IGNITE = true;
   private static final boolean USE_DOMINO_CACHE = false;
+
   private static final String TCHR = "TCHR";
+
   private static final int CACHE_TIMEOUT = 1;
   private static final String UNSET = "UNSET";
 
@@ -120,7 +122,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final boolean DEBUG_TEACHERS = false;
   private static final String F_LAST = "F. Last";
 
-  private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
   private static final List<String> DOMAINS =
       Arrays.asList(
@@ -242,6 +243,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             }
           });
 
+  private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
+
 
   private final LoadingCache<Integer, FirstLastUser> idToFirstLastUser = CacheBuilder.newBuilder()
       .maximumSize(10000)
@@ -342,7 +345,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     props.setProperty(EVT_URL_BASE_MAP_PROP, "a,b");
     pool = Mongo.createPool(new DBProperties(props));
     serializer = Mongo.makeSerializer();
-    logger.info("connectToMongo : OK made serializer " + serializer);
+    logger.info("noServletContextSetup connectToMongo : OK made serializer " + serializer);
     Mailer mailer = new Mailer(new MailerProperties(props));
     ServerProperties dominoProps = getDominoProps(database, props);
     //String appName = dominoProps.getAppName();
@@ -363,10 +366,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
     makeUserService(database, props);
 
-    logger.debug("made" +
+    logger.info("noServletContextSetup made" +
         "\ndelegate " + delegate.getClass() +
-        "\nignite = " + ignite +
-        "\nisCacheEnabled = " + dominoProps.isCacheEnabled());
+        "\nignite   " + ignite +
+        "\nisCacheEnabled " + dominoProps.isCacheEnabled());
   }
 
   @NotNull
@@ -419,7 +422,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public void close() {
     if (!usedDominoResources) {
 //      logger.info("closing connection to " + pool, new Exception());
-     if (pool != null) pool.closeConnection();
+      if (pool != null) pool.closeConnection();
     }
     if (!usedDominoResources && ignite != null) {
       ignite.close();
@@ -1183,8 +1186,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     try {
       DBUser dbUser = idToDBUser.get(id);
       if (dbUser == null) {
-        logger.warn("lookupUser can't find user by id " +id);
-   //     dbUser = idToDBUser.get(defaultUser);
+        logger.warn("lookupUser can't find user by id " + id);
+        //     dbUser = idToDBUser.get(defaultUser);
       }
       return dbUser;
     } catch (ExecutionException e) {
@@ -1696,12 +1699,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     if (delegate == null) {
       logger.warn("getAll delegate is null?");
+      return users;
+    } else {
+      users = delegate.getUsers(-1, opts);
+      long now = System.currentTimeMillis();
+      if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
+      return users;
     }
-
-    users = delegate.getUsers(-1, opts);
-    long now = System.currentTimeMillis();
-    if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
-    return users;
   }
 
   @NotNull
@@ -1887,7 +1891,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public boolean shouldUseUsualDominoEmail(String email) {
     boolean b = hasBlessedEmail(email);
 
-   // logger.info("shouldUseUsualDominoEmail (addUserViaEmail = " + addUserViaEmail + ") '" + email + "' - " + b);
+    // logger.info("shouldUseUsualDominoEmail (addUserViaEmail = " + addUserViaEmail + ") '" + email + "' - " + b);
 
     return addUserViaEmail && !b;
   }
@@ -1940,6 +1944,76 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
   }
 
+  @Override
+  public boolean addTeacherRole(int userid) {
+    DBUser dbUser = lookupUser(userid);
+
+    if (dbUser != null) {
+      Set<String> roleAbbreviations = dbUser.getRoleAbbreviations();
+      boolean hasTeacher = roleAbbreviations.contains(TCHR);
+      if (hasTeacher) {
+        logger.info("user " + dbUser + " already has teacher role.");
+        return false;
+      } else {
+        roleAbbreviations.add(TCHR);
+        boolean b = doUpdate(dbUser);
+        if (b) {
+          refresh(userid);
+        }
+        return b;
+      }
+
+    } else {
+      logger.error("addTeacherRole huh? couldn't find user to update " + userid);
+      return false;
+    }
+  }
+
+  private void refresh(int userid) {
+    idToDBUser.refresh(userid);
+    idToUser.refresh(userid);
+    idToFirstLastUser.refresh(userid);
+    refreshUserCache(Collections.singleton(userid));
+  }
+
+  @Override
+  public boolean removeTeacherRole(int userid) {
+    DBUser dbUser = lookupUser(userid);
+
+    if (dbUser != null) {
+      Set<String> roleAbbreviations = dbUser.getRoleAbbreviations();
+      boolean hasTeacher = roleAbbreviations.contains(TCHR);
+      if (hasTeacher) {
+//        logger.info("user " + dbUser + " already has teacher role.");
+        roleAbbreviations.remove(TCHR);
+
+        boolean b = doUpdate(dbUser);
+        if (b) {
+          refresh(userid);
+        }
+
+        return b;
+      } else {
+        logger.warn("user " + dbUser + " doesn't have teacher role.");
+        return false;
+      }
+    } else {
+      logger.error("addTeacherRole huh? couldn't find user to update " + userid);
+      return false;
+    }
+  }
+
+  private boolean doUpdate(DBUser dbUser) {
+    SResult<ClientUserDetail> clientUserDetailSResult = updateUser(dbUser);
+
+    if (clientUserDetailSResult.isSuccess()) {
+      return true;
+    } else {
+      logger.warn("doUpdate error " + clientUserDetailSResult);
+      return false;
+    }
+  }
+
   private void setGender(User toUpdate, DBUser dbUser) {
     MiniUser.Gender realGender = toUpdate.getRealGender();
 
@@ -1967,12 +2041,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (updateUser.getEmail().isEmpty()) logger.error("updateUser empty email for " + updateUser);
     if (updateUser.getPrimaryGroup() == null) logger.error("no primary group for " + updateUser);
     if (updateUser.getAffiliation() == null) logger.warn("updateUser no affiliation for " + updateUser);
-    else if (updateUser.getAffiliation().isEmpty()) {
-      //logger.warn("updateUser empty affiliation for " + updateUser);
-    }
+
+//    else if (updateUser.getAffiliation().isEmpty()) {
+//      //logger.warn("updateUser empty affiliation for " + updateUser);
+//    }
 
     return delegate.updateUser(adminUser, getClientUserDetail(updateUser));
   }
+
 
   public boolean isValidAsEmail(String text) {
     return text.trim().toUpperCase().matches(VALID_EMAIL);

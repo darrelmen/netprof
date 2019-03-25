@@ -70,11 +70,15 @@ import java.util.logging.Logger;
  */
 public class UserMenu {
   private static final String ARE_YOU_AN_INSTRUCTOR = "Are you an instructor?";
-  private static final String BROWSER_RECORDING = "Browser recording";
-  private static final String RECORDING_TYPE = "Recording type";
+  //  private static final String BROWSER_RECORDING = "Browser recording";
+//  private static final String RECORDING_TYPE = "Recording type";
   private static final String DOMINO_URL = "domino.url";
-  public static final String NEED_HELP = "Need Help?";
-  public static final String HELP_EMAIL = "Help Email";
+  private static final String NEED_HELP = "Need Help?";
+  private static final String HELP_EMAIL = "Help Email";
+  private static final String GETTING_ALL_TEACHERS = "getting all teachers";
+  private static final String GETTING_ACTIVE_USERS = "getting active users";
+  private static final String ALL_TEACHERS = "All Teachers";
+  private static final String PENDING_TEACHER_REQUESTS = "Pending Teacher Requests";
 
   private final Logger logger = Logger.getLogger("UserMenu");
 
@@ -84,7 +88,8 @@ public class UserMenu {
       "Instructors get to make quizzes and view additional analysis information.",
       "(It may take some time for your request to be confirmed.)");
 
-  private static final String ACTIVE_USERS = "Active Users";
+  private static final String ACTIVE_USERS1 = "Active Users";
+  private static final String ACTIVE_USERS = ACTIVE_USERS1;
   private static final String ACTIVE_USERS_WEEK = ACTIVE_USERS + " Week";
   private static final String TEST_EXCEPTION = "Test Exception";
   private static final String TEST_EXCEPTION_MSG = "Test Exception - this tests to see that email error reporting is configured properly. Thanks!";
@@ -143,7 +148,8 @@ public class UserMenu {
     choices.add(new LinkAndTitle(ACTIVE_USERS, new SuccessClickHandler(() -> showActiveUsers(24))));
     choices.add(new LinkAndTitle(ACTIVE_USERS_WEEK, new SuccessClickHandler(() -> showActiveUsers(7 * 24))));
     choices.add(new LinkAndTitle("Active Teachers", new SuccessClickHandler(this::showActiveTeachers)));
-    choices.add(new LinkAndTitle("All Teachers", new SuccessClickHandler(this::showAllTeachers)));
+    choices.add(new LinkAndTitle(ALL_TEACHERS, new SuccessClickHandler(this::showAllTeachers)));
+    choices.add(new LinkAndTitle(PENDING_TEACHER_REQUESTS, new SuccessClickHandler(this::showPendingTeachers)));
 
     //choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
     addSendReport(choices);
@@ -281,8 +287,7 @@ public class UserMenu {
                   }, "OK", "Cancel")));
       choices.add(e);
       return e;
-    }
-    else return null;
+    } else return null;
 
 
   }
@@ -312,6 +317,7 @@ public class UserMenu {
         public void onFailure(Throwable caught) {
           downloadFailedAlert();
         }
+
         public void onSuccess() {
           onSuccess.onSuccess();
         }
@@ -328,7 +334,7 @@ public class UserMenu {
   }
 
   private void showActiveUsers(int hours) {
-    new ActiveUsersManager(controller).show("Active Users", hours);
+    new ActiveUsersManager(controller).show(ACTIVE_USERS1, hours);
   }
 
   private void showActiveTeachers() {
@@ -337,7 +343,7 @@ public class UserMenu {
         controller.getUserService().getActiveTeachers(new AsyncCallback<List<ActiveUser>>() {
           @Override
           public void onFailure(Throwable caught) {
-            controller.getMessageHelper().handleNonFatalError("getting active users", caught);
+            handleFailure(caught, GETTING_ACTIVE_USERS);
           }
 
           @Override
@@ -355,7 +361,7 @@ public class UserMenu {
         controller.getUserService().getTeachers(new AsyncCallback<List<ActiveUser>>() {
           @Override
           public void onFailure(Throwable caught) {
-            controller.getMessageHelper().handleNonFatalError("getting active users", caught);
+            handleFailure(caught, GETTING_ALL_TEACHERS);
           }
 
           @Override
@@ -364,7 +370,29 @@ public class UserMenu {
           }
         });
       }
-    }.show("All Teachers", 0);
+    }.show(ALL_TEACHERS, 0);
+  }
+
+  private void showPendingTeachers() {
+    new ActiveUsersManager(controller) {
+      protected void getUsers(int hours, DialogBox dialogBox, Panel dialogVPanel) {
+        controller.getUserService().getPendingUsers(controller.getProjectID(), new AsyncCallback<List<ActiveUser>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            handleFailure(caught, "getting pending teacher requests");
+          }
+
+          @Override
+          public void onSuccess(List<ActiveUser> result) {
+            gotUsers(result, dialogVPanel, dialogBox);
+          }
+        });
+      }
+    }.show(PENDING_TEACHER_REQUESTS, 0);
+  }
+
+  private void handleFailure(Throwable caught, String msg) {
+    controller.getMessageHelper().handleNonFatalError(msg, caught);
   }
 
   private void downloadFailedAlert() {
