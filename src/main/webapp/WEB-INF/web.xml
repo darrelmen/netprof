@@ -279,6 +279,11 @@
 
     <servlet-mapping>
         <servlet-name>downloadServlet</servlet-name>
+        <url-pattern>/downloadResults/h2/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>downloadServlet</servlet-name>
         <url-pattern>/downloadEvents/*</url-pattern>
     </servlet-mapping>
 

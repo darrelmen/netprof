@@ -458,13 +458,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   private void gotClickOnChoice(String instanceName, NavLink learn, boolean fromClick) {
     //  logger.info("gotClickOn " + instanceName + " " + learn + " from click " + fromClick);
-    showSectionAfterClick(instanceName, fromClick);
+//    showSectionAfterClick(instanceName, fromClick);
+    navigation.showView(getViews(instanceName), false, fromClick);
     showActive(learn);  // how can this be null?
   }
 
-  private void showSectionAfterClick(String instance1, boolean fromClick) {
-    navigation.showView(getViews(instance1), false, fromClick);
-  }
+//  private void showSectionAfterClick(String instance1, boolean fromClick) {
+//    navigation.showView(getViews(instance1), false, fromClick);
+//  }
 
   @NotNull
   private VIEWS getViews(String instance1) {

@@ -248,7 +248,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
     // get the number of items on the list so we can show the header with a percentage completion.
     if (listid == -1) {
-      logger.info("showUserPerformance no listid");
+   //   logger.info("showUserPerformance no listid");
       addChart(userPerformance, userChosenID, false, isTeacherView, 0);
     } else {
       listServiceAsync.getNumOnList(listid, new AsyncCallback<Integer>() {

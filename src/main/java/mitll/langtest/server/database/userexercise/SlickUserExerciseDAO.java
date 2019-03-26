@@ -214,6 +214,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         shared.getEnglish(),
         shared.getMeaning(),
         shared.getForeignLanguage(),
+        "",
         shared.getAltFL(),
         shared.getTransliteration(),
         shared.isOverride(),
@@ -302,6 +303,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         english,
         shared.getMeaning(),
         getFL(shared),
+        "",
         shared.getAltFL(),
         shared.getTransliteration(),
         false,
@@ -889,7 +891,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         now,
         "",
         "",
-        "",
+        "", "",
         "", "", false, "", "", projID, true, false,
         false, -1, false, now, 0);
 
