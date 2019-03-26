@@ -526,6 +526,12 @@ public class AudioFileHelper implements AlignDecode {
       if (equivalents != null && !equivalents.isEmpty()) {
         OOV oov1 = equivalents.get(0);
         String equivalent = oov1.getEquivalent();
+        if (!foreignLanguage.contains(oovToUse)) {
+          logger.info("replaceOOVs couldn't find the token " + oovToUse);
+
+          oovToUse = getSmallVocabDecoder().fromFull(oov);
+          logger.info("replaceOOVs now " + oovToUse + " : " + foreignLanguage.contains(oovToUse));
+        }
         String foreignLanguage1 = foreignLanguage.replaceAll(oovToUse, equivalent);
 
         logger.info("replaceOOVs " +
@@ -1834,18 +1840,20 @@ public class AudioFileHelper implements AlignDecode {
 
     Language language = b ? Language.ENGLISH : this.language;
     //logger.info("getAudioAnswer Ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " language " + language);
+    String phraseToDecode = getPhraseToDecode(exercise, language);
+
     if (decoderOptions.shouldDoAlignment()) {
       PrecalcScores precalcScores =
           checkForWebservice(
               exercise.getID(),
               exercise.getEnglish(),
-              exercise.getForeignLanguage(),
+              phraseToDecode,
               project.getID(),
               userID,
               file,
               language);
 
-      String phraseToDecode = getChecker().getPhraseToDecode(exercise.getForeignLanguage(), language);
+
 
       AudioFileHelper toUse = language == Language.ENGLISH ? getEnglishAudioFileHelper(language) : this;
 
@@ -1870,7 +1878,7 @@ public class AudioFileHelper implements AlignDecode {
           checkForWebservice(
               exercise.getID(),
               exercise.getEnglish(),
-              exercise.getForeignLanguage(),
+              phraseToDecode,
               project.getID(),
               userID,
               file,
@@ -1891,6 +1899,17 @@ public class AudioFileHelper implements AlignDecode {
     }
 
     return audioAnswer;
+  }
+
+  private String getPhraseToDecode(ClientExercise exercise, Language language) {
+    String foreignLanguage = exercise.getForeignLanguage();
+    String phraseToDecode;
+    if (exercise.getNormalizedFL().equalsIgnoreCase(foreignLanguage)) {
+      phraseToDecode = getChecker().getPhraseToDecode(foreignLanguage, language);
+    } else {
+      phraseToDecode = getChecker().getPhraseToDecode(exercise.getNormalizedFL(), language);
+    }
+    return phraseToDecode;
   }
 
   private AudioFileHelper getEnglishAudioFileHelper(Language language) {
