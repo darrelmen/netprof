@@ -36,7 +36,6 @@ public class BaseExercise implements IsSerializable, Shell {
   protected int id = -1;
 
   private STATE state = STATE.UNSET;
- // private STATE secondState = STATE.UNSET;
 
   protected BaseExercise() {
   }
@@ -60,20 +59,6 @@ public class BaseExercise implements IsSerializable, Shell {
 
   @Override
   public void setState(STATE state) { this.state = state;  }
-
-  /**
-   * @seex PagingContainer#getEnglishColumn
-   * @return
-   */
-//  @Override
-//  public STATE getSecondState() {
-//    return secondState;
-//  }
-
-//  @Override
-//  public void setSecondState(STATE state) {
-//    this.secondState = state;
-//  }
 
   @Override
   public int compareTo(HasID o) {

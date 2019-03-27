@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class AudioExercise extends ExerciseShell {
-  private final transient Logger logger = Logger.getLogger("AudioExercise");
+  //private final transient Logger logger = Logger.getLogger("AudioExercise");
 
   private static final String SPEED = "speed";
   private static final String REGULAR = "regular";
@@ -480,7 +480,7 @@ public class AudioExercise extends ExerciseShell {
 
       for (AudioAttribute audioAttribute : userToAudioForUser.getValue()) {
         if (!audioAttribute.isValid()) {
-          logger.warning("getMostRecentAudioEasy skip invalid audio " + audioAttribute);
+         // logger.warning("getMostRecentAudioEasy skip invalid audio " + audioAttribute);
           continue;
         }
 
@@ -595,7 +595,7 @@ public class AudioExercise extends ExerciseShell {
       for (AudioAttribute audioAttribute : pair.getValue()) {
 
         if (!audioAttribute.isValid()) {
-          logger.warning("skip invalid audio " + audioAttribute);
+        //  logger.warning("skip invalid audio " + audioAttribute);
           continue;
         }
 
@@ -622,7 +622,7 @@ public class AudioExercise extends ExerciseShell {
             }
           }
         } else {
-          logger.info("\t\tgetMostRecentAudio found default user " + user);
+         // logger.info("\t\tgetMostRecentAudio found default user " + user);
         }
       }
     }
