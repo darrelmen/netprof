@@ -44,16 +44,15 @@ public class TableAndPager {
   private static final int HEADING_SIZE = 3;
 
   @NotNull
-  protected Panel getTableWithPager(DivWidget top, MemoryItemContainer<?> listContainer, String visited, String doubleClickToLearnTheList) {
+  protected Panel getTableWithPager(DivWidget top, MemoryItemContainer<?> listContainer, String visited, String doubleClickToLearnTheList, Placement placement) {
     Panel tableWithPager = listContainer.getTableWithPager(Collections.emptyList());
     addPagerAndHeader(tableWithPager, visited, top);
     tableWithPager.addStyleName("rightFiveMargin");
-
-    new TooltipHelper().createAddTooltip(tableWithPager, doubleClickToLearnTheList, Placement.LEFT);
+    new TooltipHelper().createAddTooltip(tableWithPager, doubleClickToLearnTheList, placement);
     return tableWithPager;
   }
 
-  protected void addPagerAndHeader(Panel tableWithPager, String visited, DivWidget top) {
+   void addPagerAndHeader(Panel tableWithPager, String visited, DivWidget top) {
     Heading w = new Heading(HEADING_SIZE, visited);
     w.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
     w.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);

@@ -147,7 +147,7 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
   private static final String EDIT = EDIT1;
 
   /**
-   *
+   * @see #editList()
    */
   private static final String ADD_EDIT_ITEMS = "Add/Edit Items";
 
@@ -237,7 +237,7 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
           }
         };
 
-    Panel tableWithPager = getTableWithPager(top, listContainer, VISITED, DOUBLE_CLICK_TO_LEARN_THE_LIST);
+    Panel tableWithPager = getTableWithPager(top, listContainer, VISITED, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.LEFT);
 
     tableWithPager.setHeight(VISITED_HEIGHT + "px");
 
@@ -474,12 +474,12 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
   }
 
   private void editList() {
-    UserList<CommonShell> currentSelectionFromMyLists = getCurrentSelectionFromMyLists();
+    //UserList<CommonShell> currentSelectionFromMyLists = getCurrentSelectionFromMyLists();
     EditItem editItem = new EditItem(controller);
     new DialogHelper(true).show(
         ADD_EDIT_ITEMS + " : " + getListName(),
         Collections.emptyList(),
-        editItem.editItem(currentSelectionFromMyLists),
+        editItem.editItem(getCurrentSelectionFromMyLists()),
         "Done",
         null,
         new MyShownCloseListener(editItem), MAX_HEIGHT, -1, true);

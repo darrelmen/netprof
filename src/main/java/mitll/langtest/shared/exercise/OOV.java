@@ -80,4 +80,8 @@ public class OOV implements HasID {
   public String getEquivalent() {
     return equivalent;
   }
+
+  public void setEquivalent(String text) {
+    this.equivalent = text;
+  }
 }

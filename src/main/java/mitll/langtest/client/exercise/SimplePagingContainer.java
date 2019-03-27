@@ -483,6 +483,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     return sb.toSafeHtml();
   }
 
+  public CellTable<?> getCellTable() {
+    return table;
+  }
+
 /*  private static class NoFunnyPagingSimplePager extends SimplePager {
     public NoFunnyPagingSimplePager() {
       super(TextLocation.CENTER, true, true);

@@ -278,13 +278,6 @@ public class SearchTypeahead {
     return currentExercise;
   }
 
-  /**
-   * TODO REMOVE
-   */
-  void grabFocus() {
-    //getTypeahead()
-  }
-
   private static class ExerciseSuggestion extends MultiWordSuggestOracle.MultiWordSuggestion {
     private CommonShell shell;
 

@@ -29,8 +29,19 @@
 
 package mitll.langtest.client.banner;
 
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.MemoryItemContainer;
 import mitll.langtest.client.custom.ContentView;
@@ -40,12 +51,17 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.shared.exercise.OOV;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class OOVViewHelper extends TableAndPager implements ContentView {
-  ExerciseController controller;
+  private final Logger logger = Logger.getLogger("OOVViewHelper");
+  public static final String EQUIVALENT = "Equivalent";
 
-  public OOVViewHelper(ExerciseController controller, INavigation.VIEWS oovEditor) {
+  private final ExerciseController controller;
+
+  OOVViewHelper(ExerciseController controller, INavigation.VIEWS oovEditor) {
     this.controller = controller;
   }
 
@@ -53,14 +69,33 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
   public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
     listContent.clear();
 
-    DivWidget outer = new DivWidget();
+    DivWidget outer = new DivWidget() {
+      @Override
+      protected void onLoad() {
+        super.onLoad();
+        grabFocus();
+      }
+
+      @Override
+      protected void onUnload() {
+        super.onUnload();
+
+        logger.info("Got unload!!!");
+        logger.info("Got unload!!!");
+        logger.info("Got unload!!!");
+      }
+    };
+
     listContent.add(outer);
     addVisited(outer);
+//    grabFocus();
 //    listContent.add(new MemoryItemContainer());
   }
 
+  private MemoryItemContainer<OOV> listContainer;
+
   private void addVisited(DivWidget top) {
-    MemoryItemContainer<OOV> listContainer = addVisitedTable(top);
+    listContainer = addVisitedTable(top);
 
     controller.getScoringService().getOOVs(controller.getProjectID(), new AsyncCallback<List<OOV>>() {
       @Override
@@ -71,57 +106,192 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
       @Override
       public void onSuccess(List<OOV> result) {
         listContainer.populateTable(result);
+        if (!result.isEmpty()) {
+          listContainer.gotClickOnItem(result.get(0));
+        }
       }
     });
   }
 
+  private HTML oov;
+  private TextBox equivalent;
+
   private MemoryItemContainer<OOV> addVisitedTable(DivWidget top) {
-
-    MemoryItemContainer<OOV> oovMemoryItemContainer = new MemoryItemContainer<OOV>(controller,
-        "oov", "OOV", 10, 10) {
-
-      /**
-       * @see SimplePagingContainer#configureTable(boolean)
-       */
-      @Override
-      protected void addColumnsToTable() {
-        List<OOV> list = getList();
-        addItemID(list, getMaxLengthId());
-      }
-
-      @Override
-      protected int getIDCompare(OOV o1, OOV o2) {
-        return Integer.compare(o1.getID(), o2.getID());
-      }
-
-      @Override
-      protected int getDateCompare(OOV o1, OOV o2) {
-        return Long.compare(o1.getModified(), o2.getModified());
-      }
-
-      @Override
-      protected String getItemLabel(OOV shell) {
-        return shell.getOOV();
-      }
-
-      @Override
-      protected Long getItemDate(OOV shell) {
-        return shell.getModified();
-      }
-    };
-
-    Panel tableWithPager = getTableWithPager(top, oovMemoryItemContainer, "OOV", "Select and enter equivalent.");
-
+    MemoryItemContainer<OOV> oovMemoryItemContainer = new OOVMemoryItemContainer();
+    Panel tableWithPager =
+        getTableWithPager(top, oovMemoryItemContainer, "OOV", "Select and enter equivalent.",
+            Placement.TOP);
 
 //    tableWithPager.setHeight(VISITED_HEIGHT + "px");
 
     DivWidget ldButtons = new DivWidget();
     {
+      ldButtons.addStyleName("inlineFlex");
       ldButtons.addStyleName("topFiveMargin");
+      oov = new HTML();
+      oov.setWidth("100px");
+      ldButtons.add(oov);
+      equivalent = new TextBox();
+      equivalent.addBlurHandler(event -> gotBlur(currentOOV));
+      equivalent.setVisibleLength(100);
+      equivalent.addStyleName("leftFiveMargin");
+      ldButtons.add(equivalent);
+
+      equivalent.addKeyUpHandler(event -> {
+        //  logger.info("getTypeahead got key up "+ quickAddText.getText());
+        checkForKeyUpDown(event, oovMemoryItemContainer);
+      });
 //      ldButtons.add(getRemoveVisitorButton(listContainer));
 //      addDrillAndLearn(ldButtons, listContainer);
     }
+
+
+    oovMemoryItemContainer.getCellTable().addDomHandler(event -> checkForKeyUpDown(event, oovMemoryItemContainer), KeyUpEvent.getType());
+
+
     top.add(ldButtons);
     return oovMemoryItemContainer;
+  }
+
+  private void gotBlur(OOV currentOOV) {
+    final String text = equivalent.getText();
+    logger.info("got " + text);
+    controller.getScoringService().isValidForeignPhrase(controller.getProjectID(),
+        text, "", new AsyncCallback<Collection<String>>() {
+          @Override
+          public void onFailure(Throwable caught) {
+
+          }
+
+          @Override
+          public void onSuccess(Collection<String> result) {
+            if (result.isEmpty()) {
+              currentOOV.setEquivalent(text);
+              listContainer.redraw();
+            }
+          }
+        });
+  }
+
+  public void grabFocus() {
+    Scheduler.get().scheduleDeferred((Command) () -> equivalent.setFocus(true));
+  }
+
+  private void checkForKeyUpDown(KeyUpEvent event, MemoryItemContainer<OOV> oovMemoryItemContainer) {
+    // arrow up down Paul suggestion.
+    int keyCode = event.getNativeEvent().getKeyCode();
+
+    int index = oovMemoryItemContainer.getIndex(oovMemoryItemContainer.getCurrentSelection());
+    if (keyCode == 40) {  // down
+      gotBlur(currentOOV);
+      goToNext(oovMemoryItemContainer, index);
+    } else if (keyCode == 38) {
+      gotBlur(currentOOV);
+      OOV at;
+      if (index == 0) {
+        at = oovMemoryItemContainer.getAt(oovMemoryItemContainer.getSize() - 1);
+      } else {
+        at = oovMemoryItemContainer.getAt(--index);
+      }
+      oovMemoryItemContainer.markCurrentExercise(at.getID());
+      oovMemoryItemContainer.gotClickOnItem(at);
+    } else if (keyCode == 13) {
+    //  logger.info("got return " + keyCode);
+      gotBlur(currentOOV);
+      goToNext(oovMemoryItemContainer, index);
+    }
+    else {
+      //logger.info("got keyCode " + keyCode);
+    }
+  }
+
+  private void goToNext(MemoryItemContainer<OOV> oovMemoryItemContainer, int index) {
+    OOV at;
+    if (index == oovMemoryItemContainer.getSize() - 1) {
+      at = oovMemoryItemContainer.getAt(0);
+    } else {
+      at = oovMemoryItemContainer.getAt(++index);
+    }
+    oovMemoryItemContainer.markCurrentExercise(at.getID());
+    oovMemoryItemContainer.gotClickOnItem(at);
+  }
+
+  private OOV currentOOV;
+
+  private class OOVMemoryItemContainer extends MemoryItemContainer<OOV> {
+
+
+    OOVMemoryItemContainer() {
+      super(OOVViewHelper.this.controller, "oov", "OOV", 10, 10);
+    }
+
+    @Override
+    public void gotClickOnItem(OOV user) {
+      super.gotClickOnItem(user);
+      oov.setText(user.getOOV());
+      equivalent.setText(user.getEquivalent());
+      currentOOV = user;
+    }
+
+    /**
+     * @see SimplePagingContainer#configureTable(boolean)
+     */
+    @Override
+    protected void addColumnsToTable() {
+      List<OOV> list = getList();
+      addItemID(list, getMaxLengthId());
+      addEquivalent(list, 100);
+    }
+
+    /**
+     * @param list
+     * @param maxLength
+     */
+    private void addEquivalent(List<OOV> list, int maxLength) {
+      Column<OOV, SafeHtml> userCol = getEquivColumn(maxLength);
+      table.setColumnWidth(userCol, getIdWidth() + "px");
+      addColumn(userCol, new TextHeader(EQUIVALENT));
+      table.addColumnSortHandler(getSorter(userCol, list));
+    }
+
+    private Column<OOV, SafeHtml> getEquivColumn(int maxLength) {
+      return getTruncatedCol(maxLength, this::getEquivValue);
+    }
+
+    private ColumnSortEvent.ListHandler<OOV> getSorter(Column<OOV, SafeHtml> englishCol,
+                                                       List<OOV> dataList) {
+      ColumnSortEvent.ListHandler<OOV> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+      columnSortHandler.setComparator(englishCol, this::getEquivCompare);
+      return columnSortHandler;
+    }
+
+    private int getEquivCompare(OOV o1, OOV o2) {
+      int i = o1.getEquivalent().compareTo(o2.getEquivalent());
+      return i == 0 ? o1.getOOV().compareTo(o2.getOOV()) : i;
+    }
+
+    private String getEquivValue(OOV thing) {
+      return thing.getEquivalent();
+    }
+
+    @Override
+    protected int getIDCompare(OOV o1, OOV o2) {
+      return Integer.compare(o1.getID(), o2.getID());
+    }
+
+    @Override
+    protected int getDateCompare(OOV o1, OOV o2) {
+      return Long.compare(o1.getModified(), o2.getModified());
+    }
+
+    @Override
+    protected String getItemLabel(OOV shell) {
+      return shell.getOOV();
+    }
+
+    @Override
+    protected Long getItemDate(OOV shell) {
+      return shell.getModified();
+    }
   }
 }
