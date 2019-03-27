@@ -100,6 +100,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private HandlerRegistration handlerRegistration;
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PUSH_ITEM = false;
   private static final boolean DEBUG_VIEW = false;
 
   /**
@@ -722,7 +723,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @NotNull
   public ShowTab getShowTab(VIEWS views) {
     return (exid) -> {
-      banner.show(views);
+      banner.show(views, false);
       pushItem(
           getInstanceParam(views) +
               maybeAddDialogParam(new SelectionState().getDialog()) +
@@ -771,9 +772,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    * @param url
    */
   private void pushItem(String url) {
-    if (DEBUG) logger.info("pushItem - " + url);
-    //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
-//     logger.info("logException stack " + exceptionAsString);
+    if (DEBUG_PUSH_ITEM) logger.info("pushItem - " + url);
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
+//    logger.info("logException stack " + exceptionAsString);
+
     History.newItem(url);
   }
 

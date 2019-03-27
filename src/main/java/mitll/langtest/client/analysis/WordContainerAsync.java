@@ -242,7 +242,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
 
 
         if (result.getReq() < req - 1) {
-          logger.warning("ignore request " + result.getReq() + " vs " + req);
+          logger.info("createProvider : ignore request " + result.getReq() + " vs " + req);
         } else {
           final int numTotal = result.getNumTotal();  // not the results size - we asked for a page range
           cellTable.setRowCount(numTotal, true);

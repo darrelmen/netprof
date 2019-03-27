@@ -32,10 +32,12 @@ package mitll.langtest.shared.exercise;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class ExerciseAnnotation implements IsSerializable {
+  public static final String CORRECT = "correct";
+
   private String status = "";
   private String comment = "";
 
-  public enum TYPICAL {
+  public enum TYPICAL implements IsSerializable {
     CORRECT, INCORRECT;
 
     public String toString() {
@@ -52,7 +54,7 @@ public class ExerciseAnnotation implements IsSerializable {
   }
 
   public boolean isCorrect() {
-    return getStatus().equals("correct");
+    return getStatus().equals(CORRECT);
   }
 
   public boolean isDefect() {
@@ -67,19 +69,7 @@ public class ExerciseAnnotation implements IsSerializable {
     return comment;
   }
 
-/*
-  public void setComment(String comment) {
-    this.comment = comment;
-  }
-*/
-
   public String toString() {
     return "[" + getStatus() + " : '" + getComment() + "']";
   }
-
-/*
-  public void setStatus(String status) {
-    this.status = status;
-  }
-*/
 }

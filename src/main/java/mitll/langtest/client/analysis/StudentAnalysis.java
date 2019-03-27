@@ -51,7 +51,7 @@ public class StudentAnalysis extends TwoColumnAnalysis<UserInfo> {
    */
   public StudentAnalysis(final ExerciseController controller) {
     Timer pleaseWaitTimer = getPleaseWaitTimer(controller);
-    analysisServiceAsync.getUsersWithRecordings(new AsyncCallback<Collection<UserInfo>>() {
+    analysisServiceAsync.getUsersWithRecordings(controller.getProjectID(), new AsyncCallback<Collection<UserInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {
         finishPleaseWait(pleaseWaitTimer, controller.getMessageHelper());
@@ -67,7 +67,8 @@ public class StudentAnalysis extends TwoColumnAnalysis<UserInfo> {
     });
   }
 
-  @Override protected String getStorageKey() {
+  @Override
+  protected String getStorageKey() {
     return SELECTED_USER;
   }
 

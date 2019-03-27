@@ -78,11 +78,12 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
   }
 
   /**
+   * @param projid - maybe they log out of another window while they do this request
    * @return
    * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis
    */
   @Override
-  public Collection<UserInfo> getUsersWithRecordings() throws DominoSessionException, RestrictedOperationException {
+  public Collection<UserInfo> getUsersWithRecordings(int projid) throws DominoSessionException, RestrictedOperationException {
     long then = System.currentTimeMillis();
     boolean hasTeacherPerm = hasTeacherPerm();
     if (!hasTeacherPerm) {
@@ -96,10 +97,10 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     }
 
     if (hasTeacherPerm) {
-      int projectIDFromUser = getProjectIDFromUser();
-      logger.info("getUsersWithRecordings for project # " + projectIDFromUser);
+    //  int projid = getProjectIDFromUser();
+      logger.info("getUsersWithRecordings for project # " + projid);
       List<UserInfo> userInfo = db
-          .getAnalysis(projectIDFromUser)
+          .getAnalysis(projid)
           .getUserInfo(db.getUserDAO(), MIN_RECORDINGS, -1);
       long now = System.currentTimeMillis();
       if (now - then > 100) {

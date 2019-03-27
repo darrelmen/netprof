@@ -38,7 +38,6 @@ public enum AudioType implements IsSerializable {
   SLOW("slow", "", "slow"),
   @Deprecated FAST_AND_SLOW("fastAndSlow"),  // really old legacy thing
   PRACTICE("practice"),  // or avp or flashcard
-  // FLASHCARD("flashcard"),
   LEARN("learn"),
 
   @Deprecated REVIEW("review"),      // maybe only see this in legacy data
@@ -79,12 +78,6 @@ public enum AudioType implements IsSerializable {
   public boolean isRegularSpeed() {
     return speed.equals(Constants.REGULAR1);
   }
-
-/*
-  public boolean isSlowSpeed() {
-    return speed.equals("slow");
-  }
-*/
 
   public boolean isRef() {
     return this == REGULAR || this == SLOW || isContext();
