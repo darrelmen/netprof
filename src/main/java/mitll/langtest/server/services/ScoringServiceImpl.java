@@ -30,6 +30,7 @@
 package mitll.langtest.server.services;
 
 import com.google.gson.JsonObject;
+import mitll.langtest.client.exercise.Services;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.services.ScoringService;
 import mitll.langtest.server.audio.AudioConversion;
@@ -780,7 +781,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param projID should be a projid from project table...
    * @throws DominoSessionException
    * @throws RestrictedOperationException
-   * @see mitll.langtest.client.LangTest#tellHydraServerToRefreshProject
+   * @see Services#tellOtherServerToRefreshProject
    */
   @Override
   public void configureAndRefresh(int projID) throws DominoSessionException, RestrictedOperationException {

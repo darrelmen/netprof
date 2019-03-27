@@ -174,7 +174,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
 
 
   @Override
-  protected void addColumnsToTable(boolean sortEnglish) {
+  protected void addColumnsToTable() {
     {
       Column<WordAndScore, SafeHtml> itemCol = getItemColumn();
       itemCol.setSortable(true);
@@ -206,7 +206,7 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
 
   /**
    * @return
-   * @see #addColumnsToTable
+   * @see SimplePagingContainer#addColumnsToTable
    */
   private Column<WordAndScore, SafeHtml> getItemColumn() {
     return new Column<WordAndScore, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {

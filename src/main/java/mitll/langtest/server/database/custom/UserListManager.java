@@ -796,21 +796,12 @@ public class UserListManager implements IUserListManager {
   public void newExercise(int userListID, CommonExercise userExercise) {
     Project project = databaseServices.getProject(userExercise.getProjectID());
     List<String> typeOrder = project.getTypeOrder();
-
-//    exercisePhoneInfo = getExercisePhoneInfo(lookup, foreignlanguage, transliteration);
-//    int n2 = getNumPhones(lookup, exercisePhoneInfo, foreignlanguage, transliteration);
-
     int newExerciseID = userExerciseDAO.add(userExercise, false, typeOrder);
-
-    //  setNumPhones(userExercise, project, newExerciseID);
 
     logger.info("newExercise added exercise " + newExerciseID + " from " + userExercise);
 
     project.getExerciseDAO().addUserExercise(userExercise);
 
-    // int contextID = 0;
-    // try {
-    // contextID =
     makeContextExercise(userExercise, typeOrder);
 
     ClientExercise next = userExercise.getDirectlyRelated().iterator().next();
@@ -819,29 +810,9 @@ public class UserListManager implements IUserListManager {
     } else {
       project.getExerciseDAO().addUserExercise(next.asCommon());
     }
-    //   String foreignLanguage = next.getForeignLanguage();
-//      if (!foreignLanguage.isEmpty()) {
-//        setNumPhones(next.asCommon(), project, contextID);
-//      }
-
-//    } catch (Exception e) {
-//      logger.error("Got " + e, e);
-//    }
-
-//    logger.info("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
 
     addItemToList(userListID, newExerciseID);
   }
-
-/*
-  private void setNumPhones(CommonExercise userExercise, Project project, int newExerciseID) {
-
-    userExercise.getMutable().setNumPhones(
-        databaseServices.getUserExerciseDAO().getAndRememberNumPhones(project,
-            newExerciseID, userExercise.getForeignLanguage(), userExercise.getTransliteration()
-        ));
-  }
-*/
 
   public UserList getUserListNoExercises(int userListID) {
     logger.info("getUserListNoExercises for " + userListID);

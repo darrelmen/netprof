@@ -89,7 +89,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   private static final int WIDE_DATE_WIDTH = 160;
 
   /**
-   * @see #addColumnsToTable
+   * @see SimplePagingContainer#addColumnsToTable
    */
   private static final String DATE = "Date";
 
@@ -312,7 +312,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   }
 
   @Override
-  protected void addColumnsToTable(boolean sortEnglish) {
+  protected void addColumnsToTable() {
     addReview();
 
     {

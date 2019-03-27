@@ -53,7 +53,7 @@ public interface Services extends EventRegistration {
 
   Collection<AudioServiceAsync> getAllAudioServices();
 
-  void tellHydraServerToRefreshProject(int projID);
+  void tellOtherServerToRefreshProject(int projID);
 
   /**
    *
@@ -61,6 +61,7 @@ public interface Services extends EventRegistration {
    */
   ScoringServiceAsync getScoringService();
 
+  ScoringServiceAsync getScoringServiceAsync(int projectid);
 
   LangTestDatabaseAsync getService();
 

@@ -29,7 +29,6 @@
 
 package mitll.langtest.client.analysis;
 
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
@@ -71,7 +70,7 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
    * @see SimplePagingContainer#configureTable
    */
   @Override
-  protected void addColumnsToTable(boolean sortEnglish) {
+  protected void addColumnsToTable() {
     List<T> list = getList();
     addItemID(list, 20);
 

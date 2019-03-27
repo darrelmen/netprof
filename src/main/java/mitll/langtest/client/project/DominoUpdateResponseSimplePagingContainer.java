@@ -58,7 +58,7 @@ class DominoUpdateResponseSimplePagingContainer extends MemoryItemContainer<Domi
   }
 
   @Override
-  protected void addColumnsToTable(boolean sortEnglish) {
+  protected void addColumnsToTable() {
     List<DominoUpdateItem> list = getList();
     addItemID(list, 15);
     addNP(list, 15);

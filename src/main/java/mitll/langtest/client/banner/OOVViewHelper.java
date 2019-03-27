@@ -37,6 +37,7 @@ import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.userlist.TableAndPager;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.shared.exercise.OOV;
 
 import java.util.List;
@@ -78,6 +79,16 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
 
     MemoryItemContainer<OOV> oovMemoryItemContainer = new MemoryItemContainer<OOV>(controller,
         "oov", "OOV", 10, 10) {
+
+      /**
+       * @see SimplePagingContainer#configureTable(boolean)
+       */
+      @Override
+      protected void addColumnsToTable() {
+        List<OOV> list = getList();
+        addItemID(list, getMaxLengthId());
+      }
+
       @Override
       protected int getIDCompare(OOV o1, OOV o2) {
         return Integer.compare(o1.getID(), o2.getID());

@@ -462,7 +462,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
           }
 
           @Override
-          protected void addColumnsToTable(boolean sortEnglish) {
+          protected void addColumnsToTable() {
           }
 
           /**

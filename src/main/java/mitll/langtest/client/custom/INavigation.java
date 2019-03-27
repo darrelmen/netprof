@@ -31,6 +31,7 @@ package mitll.langtest.client.custom;
 
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ShowTab;
+import mitll.langtest.client.banner.NewBanner;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.user.User;
 
@@ -80,7 +81,9 @@ public interface INavigation extends IViewContaner {
      */
     SCORES("Scores", ProjectMode.DIALOG),
 
-
+    /**
+     * @see NewBanner#getRecNav
+     */
     RECORD_ENTRIES("Record Entries", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
     RECORD_SENTENCES("Record Sentences", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
 

@@ -493,7 +493,7 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
    * @see SimplePagingContainer#configureTable
    */
   @Override
-  protected void addColumnsToTable(boolean sortEnglish) {
+  protected void addColumnsToTable() {
     List<UserInfo> list = getList();
     addItemID(list, 20);
     addName(list);

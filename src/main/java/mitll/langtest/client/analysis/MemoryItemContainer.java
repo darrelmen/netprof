@@ -172,9 +172,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   /**
+   * @see SimplePagingContainer#configureTable(boolean)
    */
   @Override
-  protected void addColumnsToTable(boolean sortEnglish) {
+  protected void addColumnsToTable() {
     List<T> list = getList();
     addItemID(list, getMaxLengthId());
     addDateCol(list);

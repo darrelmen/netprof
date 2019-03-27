@@ -253,6 +253,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Dropdown nav = new Dropdown(RECORD);
     rememberViewAndLink(nav, RECORD_ENTRIES);
     rememberViewAndLink(nav, RECORD_SENTENCES);
+    rememberViewAndLink(nav, OOV_EDITOR);
 
     recnav.add(nav);
     return recnav;

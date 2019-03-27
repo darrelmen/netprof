@@ -102,7 +102,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final String DEFAULT_EXID = "2";
 
   private static final boolean DEBUG_EDIT = false;
-  //private static final boolean DO_KALDI_OOV = false;
+
   private static final String PERCENT_SYMBOL = "%";
 
   private final PathHelper pathHelper;
@@ -115,11 +115,6 @@ public class AudioFileHelper implements AlignDecode {
   private final DatabaseServices db;
   private final LogAndNotify logAndNotify;
   private boolean checkedLTS = false;
-
-  /**
-   * TODO : why would we want this?
-   */
-//  private Map<String, Integer> phoneToCount;
 
   private final AudioConversion audioConversion;
   private final Language language;
@@ -1477,7 +1472,7 @@ public class AudioFileHelper implements AlignDecode {
                                       String hydraHost,
                                       Language language) {
     if (session == null || session.isEmpty()) {
-      session = getSession(hydraHost, project.getID());
+      session = getSession(hydraHost);
     }
     HTTPClient httpClient = getHttpClientForNetprofServer(english, foreignLanguage, userid, hydraHost, ScoreServlet.PostRequest.ALIGN, language);
 
@@ -1553,7 +1548,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   *
+   * @see #getProxyScore(String, String, int, File, String, Language)
    */
   private String session = null;
 
@@ -1564,26 +1559,27 @@ public class AudioFileHelper implements AlignDecode {
    * We just need some session.
    *
    * @param hydraHost
-   * @param projID
    * @return
    * @see #getProxyScore
    */
-  private String getSession(String hydraHost, int projID) {
+  private String getSession(String hydraHost) {
     try {
-      logger.info("getSession " +
-          "\n\thost   " + hydraHost +
-          "\n\tprojID " + projID +
-          "\n\tuser   " + TEST_USER +
-          "\n\tpass   " + TEST_PASSWORD
-      );
-
       HTTPClient httpClient = getHttpClient(hydraHost, "");
       httpClient.addRequestProperty(REQUEST.toString(), HASUSER.toString());
       httpClient.addRequestProperty(USERID.toString(), TEST_USER);
       httpClient.addRequestProperty(PASS.toString(), TEST_PASSWORD);
 
       String json = httpClient.sendAndReceiveCookie("");
-//      logger.info("getSession response " + json);
+
+      logger.info("getSession " +
+          "\n\thost     " + hydraHost +
+        //  "\n\tprojID   " + projID +
+          "\n\tuser     " + TEST_USER +
+          "\n\tpass     " + TEST_PASSWORD +
+          "\n\tresponse " + json
+      );
+
+      //logger.info("getSession response " + json);
       return json;
     } catch (IOException e) {
       logger.warn("getSession Got " + e, e);
@@ -1852,7 +1848,6 @@ public class AudioFileHelper implements AlignDecode {
               userID,
               file,
               language);
-
 
 
       AudioFileHelper toUse = language == Language.ENGLISH ? getEnglishAudioFileHelper(language) : this;

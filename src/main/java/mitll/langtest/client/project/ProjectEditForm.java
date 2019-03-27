@@ -41,11 +41,9 @@ import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.common.MessageHelper;
-import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.Services;
 import mitll.langtest.client.initial.LifecycleSupport;
-import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.user.FormField;
@@ -179,7 +177,7 @@ public class ProjectEditForm extends UserDialog {
     services = controller;
     messageHelper = controller.getMessageHelper();
 
-    this.controller=controller;
+    this.controller = controller;
     {
       String userID = controller.getUserManager().getUserID();
       if (userID != null) isSuperUser = userID.equalsIgnoreCase(GVIDAVER);
@@ -275,8 +273,12 @@ public class ProjectEditForm extends UserDialog {
 
       @Override
       public void onSuccess(Boolean result) {
+        if (!result) logger.info("didn't change the project?");
+
+        int projID = info.getID();
+        lifecycleSupport.updateServicesForProject(projID, info.getHost());
+        services.tellOtherServerToRefreshProject(projID);
         lifecycleSupport.refreshStartupInfo(true);
-        services.tellHydraServerToRefreshProject(info.getID());
       }
     });
   }
@@ -395,8 +397,8 @@ public class ProjectEditForm extends UserDialog {
           logger.warning("coudn't create project?");
           Window.alert("Sorry, couldn't create a new project.");
         } else {
-          lifecycleSupport.refreshStartupInfo(true);
-          services.tellHydraServerToRefreshProject(projID);
+          lifecycleSupport.refreshStartupInfoAnTell(true,projID);
+//          services.tellOtherServerToRefreshProject(projID);
         }
       }
     });

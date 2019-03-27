@@ -46,6 +46,10 @@ public interface LifecycleSupport extends EventRegistration {
 
   void refreshStartupInfo(boolean reloadWindow);
 
+  void refreshStartupInfoAnTell(boolean reloadWindow, int projID);
+
+  void updateServicesForProject(int projID, String host);
+
   ProjectStartupInfo getProjectStartupInfo();
 
   StartupInfo getStartupInfo();

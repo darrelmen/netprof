@@ -1122,14 +1122,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public void editItem(ClientExercise clientExercise, boolean keepAudio) {
     CommonExercise userExercise = clientExercise.asCommon();
     int id = userExercise.getID();
-    logger.debug("editItem exercise #" + id +
+    logger.info("editItem exercise #" + id +
         " keep audio " + keepAudio +
         " mediaDir : " + getServerProps().getMediaDir() +
         " audio " + userExercise.getAudioAttributes());
 
     int projectID = userExercise.getProjectID();
     if (projectID < 0) {
-      logger.warn("huh? no project id on user exer " + userExercise);
+      logger.warn("editItem huh? no project id on user exer " + userExercise);
     }
     // create if doesn't exist
     getUserListManager().editItem(userExercise, getTypeOrder(projectID));

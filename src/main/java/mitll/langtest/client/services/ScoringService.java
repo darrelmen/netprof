@@ -31,6 +31,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.client.exercise.Services;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
@@ -102,7 +103,7 @@ public interface ScoringService extends RemoteService {
   void recalcAlignments(int projid) throws DominoSessionException, RestrictedOperationException;
 
   /**
-   * @see mitll.langtest.client.LangTest#tellHydraServerToRefreshProject
+   * @see Services#tellOtherServerToRefreshProject
    * @param projID
    * @throws DominoSessionException
    * @throws RestrictedOperationException

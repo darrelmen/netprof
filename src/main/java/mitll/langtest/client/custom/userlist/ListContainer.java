@@ -123,11 +123,10 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   }
 
   /**
-   * @param sortEnglish
    * @see #configureTable
    */
   @Override
-  protected void addColumnsToTable(boolean sortEnglish) {
+  protected void addColumnsToTable() {
     List<UserList<CommonShell>> list = getList();
     addItemID(list, getMaxLengthId());
     addNum();

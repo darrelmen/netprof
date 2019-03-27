@@ -904,17 +904,6 @@ public class ProjectChoices extends ThumbnailChoices {
     return w;
   }
 
-//  @NotNull
-//  private com.github.gwtbootstrap.client.ui.Button getCheckOOVButton(SlimProject projectForLang, Heading label) {
-//    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
-//    w.setIcon(IconType.CHECK);
-//    w.setType(ButtonType.SUCCESS);
-//    addTooltip(w, "Check Out-of-vocabulary.");
-//    w.addClickHandler(event -> showCheckOOV(projectForLang, label));
-//
-//    return w;
-//  }
-
   private void addTooltip(Widget w, String tip) {
     new TooltipHelper().createAddTooltip(w, tip, Placement.TOP);
   }
@@ -954,8 +943,8 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private void showImportDialog(SlimProject projectForLang, Button button, boolean doChange) {
     //  logger.info("showImport " + doChange);
-    String s = getProps(projectForLang).get(NUM_ITEMS);
-    logger.info("showImportDialog # items = " + s);
+ //   String s = getProps(projectForLang).get(NUM_ITEMS);
+ //   logger.info("showImportDialog # items = " + s);
     final Object waitToken = messageHelper.startWaiting(PLEASE_WAIT);
 
     int id = projectForLang.getID();
@@ -986,7 +975,7 @@ public class ProjectChoices extends ThumbnailChoices {
           /**
            * Make sure the other servers internally know that the project has changed and should go look at the database again.
            */
-          controller.tellHydraServerToRefreshProject(id);
+          controller.tellOtherServerToRefreshProject(id);
         }
       }
     });

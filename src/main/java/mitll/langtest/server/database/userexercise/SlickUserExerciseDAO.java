@@ -265,11 +265,13 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
                                boolean isContext,
                                Collection<String> typeOrder) {
     Map<String, String> unitToValue = shared.getUnitToValue();
+
     if (typeOrder.isEmpty()) {
       if (spew++ < 100 || spew % 100 == 0)
-        logger.error("toSlick type order is empty? (" + spew + " )");
-      return null;
+        logger.warn("toSlick (project " + projectID + ") type order is empty? (" + spew + " )");
+      //  return null;
     }
+
     Iterator<String> iterator = typeOrder.iterator();
     String first = iterator.hasNext() ? iterator.next() : "";
     String second = iterator.hasNext() ? iterator.next() : "";
@@ -296,14 +298,18 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       logger.warn("toSlick " + shared.getID() + " truncate english " + english);
     }
 
+    String fl = getFL(shared);
+    String foreignLanguageNorm1 = shared.getForeignLanguageNorm();
+    String foreignLanguageNorm = foreignLanguageNorm1 == null ? fl : foreignLanguageNorm1;
+
     return new SlickExercise(shared.getID() > 0 ? shared.getID() : -1,
         creator,
         shared.getOldID(),
         new Timestamp(updateTime),
         english,
         shared.getMeaning(),
-        getFL(shared),
-        getCleaned(shared.getForeignLanguageNorm()),
+        fl,
+        getCleaned(foreignLanguageNorm),
         shared.getAltFL(),
         shared.getTransliteration(),
         false,
@@ -314,7 +320,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         isContext,
         false,
         shared.getDominoID(),
-        false,
+        shared.isSafeToDecode(),
         never,
         0);//shared.getNumPhones());
   }

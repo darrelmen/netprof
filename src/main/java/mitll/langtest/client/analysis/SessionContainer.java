@@ -139,7 +139,7 @@ public class SessionContainer<T extends IDialogSession>
    * @see SimplePagingContainer#configureTable
    */
   @Override
-  protected void addColumnsToTable(boolean sortEnglish) {
+  protected void addColumnsToTable() {
     List<T> list = getList();
     addItemID(list, 20);
     addCurrent(list);

@@ -152,7 +152,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   /**
    * @see #configureTable
    */
-  abstract protected void addColumnsToTable(boolean sortEnglish);
+  abstract protected void addColumnsToTable();
 
   protected void setMaxWidth() {
     table.getElement().getStyle().setProperty("maxWidth", MAX_WIDTH + "px");
@@ -222,7 +222,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     addSelectionModel();
     // we don't want to listen for changes in the selection model, since that happens on load too -- we just want clicks
 
-    addColumnsToTable(sortEnglish);
+    addColumnsToTable();
 
     table.addRangeChangeHandler(event -> gotRangeChanged(event.getNewRange()));
   }
