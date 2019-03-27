@@ -129,9 +129,7 @@ public class SearchTypeahead {
       return selectedSuggestion.getReplacementString();
     });
 
-    textBox.addKeyUpHandler(keyUpEvent -> {
-      add.setEnabled(hasText(textBox));
-    });
+    textBox.addKeyUpHandler(keyUpEvent -> add.setEnabled(hasText(textBox)));
 
 //    textBox.getElement().setId("TextBox_exercise");
     typeahead.setWidget(textBox);

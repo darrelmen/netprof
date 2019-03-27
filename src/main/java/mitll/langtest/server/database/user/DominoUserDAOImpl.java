@@ -221,10 +221,31 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             public DBUser load(Integer key) {
               if (DEBUG_USER_CACHE) logger.info("idToDBUser Load " + key);
               DBUser dbUser = delegate.lookupDBUser(key);
-              if (dbUser == null) dbUser = delegate.lookupDBUser(getDefaultUser());
+              if (dbUser == null) {
+                logger.warn("idToDBUser no db user with id " + key);
+                dbUser = getStandIn(key);
+                //dbUser = delegate.lookupDBUser(getDefaultUser());
+              }
               return dbUser;
             }
           });
+
+  @NotNull
+  private DBUser getStandIn(Integer key) {
+    return new DBUser(key,
+        "User_" + key,
+        "Unknown",
+        "Unknown",
+        "",
+        "",
+        UNSPECIFIED,
+        new HashSet<>(),
+
+        new Group(),
+        new HashSet<Group>(),
+        null,
+        new HashSet<>());
+  }
 
   /**
    * @see #getByID
@@ -419,7 +440,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public void close() {
     if (!usedDominoResources) {
 //      logger.info("closing connection to " + pool, new Exception());
-     if (pool != null) pool.closeConnection();
+      if (pool != null) pool.closeConnection();
     }
     if (!usedDominoResources && ignite != null) {
       ignite.close();
@@ -1882,7 +1903,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public boolean shouldUseUsualDominoEmail(String email) {
     boolean b = hasBlessedEmail(email);
 
-   // logger.info("shouldUseUsualDominoEmail (addUserViaEmail = " + addUserViaEmail + ") '" + email + "' - " + b);
+    // logger.info("shouldUseUsualDominoEmail (addUserViaEmail = " + addUserViaEmail + ") '" + email + "' - " + b);
 
     return addUserViaEmail && !b;
   }

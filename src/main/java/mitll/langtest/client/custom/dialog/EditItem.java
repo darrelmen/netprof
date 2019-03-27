@@ -51,7 +51,6 @@ import java.util.Map;
 
 public class EditItem {
 //  private final Logger logger = Logger.getLogger("EditItem");
-
   public static final String DONE = "OK";
   private final ExerciseController controller;
   private PagingExerciseList<CommonShell, ClientExercise> exerciseList;
@@ -118,7 +117,6 @@ public class EditItem {
   public void grabFocus() {
     ((EditableExerciseList) exerciseList).grabFocus();
   }
-
   public void removeHistoryListener() {
     ((EditableExerciseList) exerciseList).removeHistoryListener();
   }
@@ -190,6 +188,10 @@ public class EditItem {
   private class ListEditableDialog extends EditableExerciseDialog<CommonShell, ClientExercise> {
     ListEditableDialog(ExerciseController controller, ClientExercise exercise) {
       super(controller, exercise, EditItem.this.userListID, INavigation.VIEWS.LISTS);
+    }
+
+    @Override protected void addItemsAtTop(Panel container) {
+    //  logger.info("not adding items at top?");
     }
 
     @NotNull

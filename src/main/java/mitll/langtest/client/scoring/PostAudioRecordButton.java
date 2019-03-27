@@ -435,7 +435,6 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @see #startRecording
    */
   abstract protected AudioType getAudioType();
-
   abstract protected int getDialogSessionID();
 
   private void logRoundtripTime(long durationInMillis, long roundtrip) {
@@ -477,7 +476,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @return
    */
   Widget getPopupTargetWidget() {
-    logger.info("getPopupTargetWidget target is " + this.getElement().getId());
+    //logger.info("getPopupTargetWidget target is " + this.getElement().getId());
     return this;
   }
 }

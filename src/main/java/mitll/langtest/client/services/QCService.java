@@ -69,7 +69,9 @@ public interface QCService extends RemoteService {
    * @param isMale
    * @see mitll.langtest.client.qc.QCNPFExercise#markGender(MiniUser, Button, AudioAttribute, RememberTabAndContent, List, Button, boolean)
    */
+/*
   void markGender(AudioAttribute attr, boolean isMale) throws DominoSessionException, RestrictedOperationException;
+*/
 
   /**
    * @param exid

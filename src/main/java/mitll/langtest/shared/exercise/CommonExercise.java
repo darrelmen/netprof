@@ -49,7 +49,6 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
    */
   List<String> getFirstPron();
 
-
   /**
    * SERVER
    * @return

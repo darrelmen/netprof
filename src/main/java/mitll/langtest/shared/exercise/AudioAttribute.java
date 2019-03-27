@@ -202,7 +202,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   public boolean isMale() {
-    return user != null && user.isMale();
+    return realGender == null || realGender == MiniUser.Gender.Male;
   }
 
   public String getSpeed() {

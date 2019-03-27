@@ -27,34 +27,50 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.shared.custom;
+package mitll.langtest.client.custom.dialog;
 
-import java.util.Collection;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.user.client.ui.Anchor;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.ListInterface;
+import org.jetbrains.annotations.NotNull;
 
-public class SimpleUserListWithIDs extends SimpleUserList implements IUserListWithIDs {
-  private Collection<Integer> ids;
+public class DominoLinkNotice {
 
-  public SimpleUserListWithIDs() {
-  }
+  private static final String CLICK_HERE_TO_GO_TO_DOMINO = "Need to edit the text? Click here.";
 
   /**
-   * @param id
-   * @param name
-   * @param description
-   * @param projid
-   * @param userid
-   * @param userChosenID
-   * @param firstInitialName
-   * @param ids
-   * @param duration
+   * @return
+   * @see #addFields(ListInterface, Panel)
    */
-  public SimpleUserListWithIDs(int id, String name, String description, int projid, int userid, String userChosenID,
-                               String firstInitialName, Collection<Integer> ids, int duration, boolean isPrivate) {
-    super(id, name, description, projid, userid, userChosenID, firstInitialName, ids.size(), duration, 30, false, isPrivate);
-    this.ids = ids;
+  @NotNull
+  public DivWidget getDominoEditInfo(ExerciseController controller) {
+    DivWidget h = new DivWidget();
+    h.addStyleName("leftFiveMargin");
+    h.addStyleName("bottomFiveMargin");
+    h.addStyleName("inlineFlex");
+
+    HTML child1 = getHint();
+
+    h.add(child1);
+
+    h.add(getAnchor(controller));
+    return h;
   }
 
-  public boolean containsByID(int id) {
-    return ids.contains(id);
+  @NotNull
+  public HTML getHint() {
+    return new HTML("To edit the item text : copy the domino id, go into domino, find and edit the item, and then sync.");
+  }
+
+  @NotNull
+  public Anchor getAnchor(ExerciseController controller) {
+    Anchor child = new Anchor(CLICK_HERE_TO_GO_TO_DOMINO);
+    child.addStyleName("leftFiveMargin");
+    child.setTarget("_blank");
+    child.setHref(controller.getProps().getDominoURL());
+    return child;
   }
 }

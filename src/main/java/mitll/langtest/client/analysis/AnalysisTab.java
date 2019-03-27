@@ -228,7 +228,6 @@ public class AnalysisTab extends DivWidget {
     boolean isTeacherView = overallBottom != null;
 
     AnalysisPlot analysisPlot = showPlot ? addAnalysisPlot(controller, isPolyglot, isTeacherView ? 700 : maxWidth, isTeacherView) : null;
-//
 //    if (!showPlot) {
 //      exerciseLookup = new CommonShellCache<>(controller.getMessageHelper());
 //    }
@@ -309,7 +308,6 @@ public class AnalysisTab extends DivWidget {
         controller.getSoundManager(), playFeedback, controller,
         controller.getMessageHelper(),
         isPolyglot, maxWidth, controller.getListService());
-    //exerciseLookup = analysisPlot;
     {
       Panel timeControls = getTimeControls(playFeedback, isTeacherView);
       analysisPlot.setTimeWidgets(timeWidgets);

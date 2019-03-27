@@ -50,9 +50,10 @@ public class QuizIntro extends DivWidget {
    * @see #QuizIntro
    */
   private static final String START = "Start!";
-  private static final String DRY_RUN = "Dry Run";
   private static final String FLASHCARDS = "quiz";
   private static final String WELCOME_USER_ = "Welcome ";
+  private static final String PLEASE_CHOOSE_A_QUIZ = "Please choose a quiz : ";
+  private static final String NO_CHOICE_YET = "-- no choice yet --";
 
   public enum MODE_CHOICE {NOT_YET, DRY_RUN, POLYGLOT}
 
@@ -137,7 +138,7 @@ public class QuizIntro extends DivWidget {
     row.add(new Heading(HSIZE, "Click on a dot in the graph below to repeat to an item."));
     //  row.add(new Heading(HSIZE, YOU_ARE_NOT_REQUIRED));//, but your final score rewards completion."));
 
-    container.add(new Heading(HSIZE, "Please choose a quiz : "));
+    container.add(new Heading(HSIZE, PLEASE_CHOOSE_A_QUIZ));
 
     {
       Heading modeDep = getUserNotice();
@@ -164,15 +165,14 @@ public class QuizIntro extends DivWidget {
   private int listID = -1;
   private final List<IUserList> choicesAdded = new ArrayList<>();
 
-  private Widget addModeChoices(Heading modeDep,
-                                Heading modeDep2, Map<Integer, IUserList> idToList) {
+  private Widget addModeChoices(Heading modeDep, Heading modeDep2, Map<Integer, IUserList> idToList) {
     DivWidget choiceDiv = new DivWidget();
     choiceDiv.setWidth("100%");
 
     choicesAdded.clear();
     ListBox choices = new ListBox();
 
-    choices.addItem("-- no choice yet --");
+    choices.addItem(NO_CHOICE_YET);
     choiceDiv.add(choices);
     choices.addChangeHandler(event -> {
       if (choices.getSelectedIndex() == 0) {
@@ -184,28 +184,25 @@ public class QuizIntro extends DivWidget {
         onQuizChoice(modeDep, modeDep2, iUserList.getID(), iUserList);
       }
     });
-    idToList.forEach((k, v) -> {
-      if (isDry(v)) {
-        maybeAddChoice(choices, v);
-      }
-    });
 
-    idToList.forEach((k, v) -> {
-      if (!isDry(v)) {
-        maybeAddChoice(choices, v);
-      }
-    });
-
+    idToList.forEach((k, v) -> maybeAddChoice(choices, v));
     return choiceDiv;
   }
 
-  private boolean isDry(IUserList v) {
-    return v.getName().startsWith(DRY_RUN);
-  }
-
+  /**
+   * Show description in the name...
+   *
+   * @param choices
+   * @param v
+   */
   private void maybeAddChoice(ListBox choices, IUserList v) {
     if (v.getNumItems() > 0) {
-      choices.addItem(v.getName());
+      String name = v.getName();
+      String description = v.getDescription();
+      if (!description.isEmpty()) {
+        name += " (" + description + ")";
+      }
+      choices.addItem(name);
       choicesAdded.add(v);
     }
   }
