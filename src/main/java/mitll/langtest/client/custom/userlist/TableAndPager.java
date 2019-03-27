@@ -27,57 +27,39 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.shared.exercise;
+package mitll.langtest.client.custom.userlist;
 
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.analysis.MemoryItemContainer;
+import mitll.langtest.client.custom.TooltipHelper;
 import org.jetbrains.annotations.NotNull;
 
-public class OOV implements HasID {
-  private int id;
-  private int userid;
-  private long modified;
-  private String oov;
-  private String equivalent;
+import java.util.Collections;
 
-  public OOV() {
+public class TableAndPager {
+  private static final int HEADING_SIZE = 3;
+
+  @NotNull
+  protected Panel getTableWithPager(DivWidget top, MemoryItemContainer<?> listContainer, String visited, String doubleClickToLearnTheList) {
+    Panel tableWithPager = listContainer.getTableWithPager(Collections.emptyList());
+    addPagerAndHeader(tableWithPager, visited, top);
+    tableWithPager.addStyleName("rightFiveMargin");
+
+    new TooltipHelper().createAddTooltip(tableWithPager, doubleClickToLearnTheList, Placement.LEFT);
+    return tableWithPager;
   }
 
-  public OOV(int id, int userid, long modified, String oov, String equivalent) {
-    this.id = id;
-    this.userid = userid;
-    this.modified = modified;
-    this.oov = oov;
-    this.equivalent = equivalent;
-  }
-
-  @Override
-  public int compareTo(@NotNull HasID o) {
-    if (o instanceof OOV) {
-      OOV o1 = (OOV) o;
-      int i = getOOV().compareTo(o1.getOOV());
-      return i == 0 ? getEquivalent().compareTo(o1.getEquivalent()) : i;
-    } else {
-      return Integer.compare(getID(), o.getID());
-    }
-  }
-
-  @Override
-  public int getID() {
-    return id;
-  }
-
-  public int getUserid() {
-    return userid;
-  }
-
-  public long getModified() {
-    return modified;
-  }
-
-  public String getOOV() {
-    return oov;
-  }
-
-  public String getEquivalent() {
-    return equivalent;
+  protected void addPagerAndHeader(Panel tableWithPager, String visited, DivWidget top) {
+    Heading w = new Heading(HEADING_SIZE, visited);
+    w.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    w.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    top.add(w);
+    top.add(tableWithPager);
+    tableWithPager.getElement().getStyle().setClear(Style.Clear.BOTH);
+    tableWithPager.setWidth("100%");
   }
 }

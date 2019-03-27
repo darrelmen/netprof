@@ -46,10 +46,7 @@ import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.TranscriptSegmentGenerator;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
@@ -823,5 +820,12 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       ensureAudioHelper.ensureCompressedAudio(result.getUserid(), commonExercise, path, result.getAudioType(), language, idToUser, true);
 //    logger.info("ensureAudioForAnswers initial path " + path + " compressed actual " + actualPath);
     }
+  }
+
+  @Override
+  public List<OOV> getOOVs(int projid) {
+    Project project = db.getProject(projid);
+
+    return db.getOOVDAO().forLanguage(project.getLanguageEnum());
   }
 }

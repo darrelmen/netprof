@@ -49,10 +49,10 @@ import java.util.logging.Logger;
 
 public class SessionContainer<T extends IDialogSession>
     extends MemoryItemContainer<T> implements ReqCounter {
- private final Logger logger = Logger.getLogger("SessionContainer");
+  private final Logger logger = Logger.getLogger("SessionContainer");
 
-  public static final String SCORE = "Score";
-  public static final int ITEM_COLUMN_WIDTH = 450;
+  private static final String SCORE = "Score";
+  private static final int ITEM_COLUMN_WIDTH = 450;
 
   private final DivWidget rightSide;
   private final DivWidget overallBottom;

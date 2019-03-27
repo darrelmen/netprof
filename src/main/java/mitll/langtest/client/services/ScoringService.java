@@ -34,11 +34,13 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -108,4 +110,6 @@ public interface ScoringService extends RemoteService {
   void configureAndRefresh(int projID) throws DominoSessionException, RestrictedOperationException;
 
   void ensureAudio(int resultID) throws DominoSessionException;
+
+  List<OOV> getOOVs(int projid);
 }

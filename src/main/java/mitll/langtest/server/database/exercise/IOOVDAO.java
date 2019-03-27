@@ -39,7 +39,6 @@ import java.util.List;
 import java.util.Map;
 
 public interface IOOVDAO extends IDAO {
-  // void insertBulk(Collection<OOV> oovs);
   void insertBulk(Collection<OOV> oovs, int userid, Language language);
 
   boolean insert(int userid, String oov, Language language);
