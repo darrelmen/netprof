@@ -175,6 +175,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private IRelatedResultDAO relatedResultDAO;
   private IImageDAO imageDAO;
   private IPendingUserDAO pendingUserDAO;
+  private IOOVDAO oovDAO;
 
   public DatabaseImpl() {
   }
@@ -371,6 +372,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     dliClassDAO = new DLIClassDAO(dbConnection);
     dliClassJoinDAO = new DLIClassJoinDAO(dbConnection);
     pendingUserDAO = new PendingUserDAO(dbConnection);
+    oovDAO = new OOVDAO(dbConnection);
     finalSetup(slickAudioDAO);
   }
 
@@ -391,14 +393,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
       {
         int defaultUser = getUserDAO().getDefaultUser();
         imageDAO.ensureDefault(projectDAO.getDefault());
-       logger.info("finalSetup : default user " + defaultUser);
+        logger.info("finalSetup : default user " + defaultUser);
         dialogDAO.ensureDefault(defaultUser);
       }
     }, "ensureDefaultUser").start();
 
     afterDAOSetup(slickAudioDAO);
 
-  logger.info("finalSetup : tables = " + getTables());
+    logger.info("finalSetup : tables = " + getTables());
   }
 
   /**
@@ -735,6 +737,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return setInstallPath(lessonPlanFileOnlyForImport, null, true);
   }
 
+  public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, boolean loadAll) {
+    return setInstallPath(lessonPlanFileOnlyForImport, null, loadAll);
+  }
+
   /**
    * @param lessonPlanFileOnlyForImport
    * @param servletContext
@@ -808,7 +814,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   public Collection<String> getTypeOrder(int projectid) {
-    ISection<CommonExercise> sectionHelper =  getSectionHelper(projectid);
+    ISection<CommonExercise> sectionHelper = getSectionHelper(projectid);
     if (sectionHelper == null) {
       logger.warn("getTypeOrder no section helper for " + this + " and " + projectid);
     }
@@ -1116,14 +1122,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public void editItem(ClientExercise clientExercise, boolean keepAudio) {
     CommonExercise userExercise = clientExercise.asCommon();
     int id = userExercise.getID();
-    logger.debug("editItem exercise #" + id +
+    logger.info("editItem exercise #" + id +
         " keep audio " + keepAudio +
         " mediaDir : " + getServerProps().getMediaDir() +
         " audio " + userExercise.getAudioAttributes());
 
     int projectID = userExercise.getProjectID();
     if (projectID < 0) {
-      logger.warn("huh? no project id on user exer " + userExercise);
+      logger.warn("editItem huh? no project id on user exer " + userExercise);
     }
     // create if doesn't exist
     getUserListManager().editItem(userExercise, getTypeOrder(projectID));
@@ -1352,6 +1358,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
           relatedResultDAO,
           imageDAO,
           pendingUserDAO,
+          oovDAO,
           trainingAudioDAO
       ).forEach(idao -> {
         if (createIfNotThere(idao, known)) {
@@ -1645,7 +1652,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, languageEnum);
     }
 
-    new AudioExport(getServerProps(),pathHelper.getContext())
+    new AudioExport(getServerProps(), pathHelper.getContext())
         .writeZip(out,
             typeToSection,
             getSectionHelper(projectid),
@@ -1789,7 +1796,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     }
     long now = System.currentTimeMillis();
     logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
-    new AudioExport(getServerProps(),pathHelper.getContext()).writeUserListAudio(
+    new AudioExport(getServerProps(), pathHelper.getContext()).writeUserListAudio(
         out,
         name,
         getSectionHelper(projectid),
@@ -1893,7 +1900,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see DownloadServlet#getBaseName
    */
   public String getPrefix(Map<String, Collection<String>> typeToSection, int projectid) {
-    return new AudioExport(getServerProps(),pathHelper.getContext()).getPrefix(getSectionHelper(projectid), typeToSection);
+    return new AudioExport(getServerProps(), pathHelper.getContext()).getPrefix(getSectionHelper(projectid), typeToSection);
   }
 
   /**
@@ -2166,6 +2173,12 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public IPendingUserDAO getPendingUserDAO() {
     return pendingUserDAO;
+  }
+
+
+  @Override
+  public IOOVDAO getOOVDAO() {
+    return oovDAO;
   }
 
   @Override

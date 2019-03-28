@@ -60,13 +60,6 @@ public interface CommonShell extends HasID {
    */
   MutableShell getMutableShell();
 
-
-  /**
-   * @see mitll.langtest.client.list.ListSorting#compPhones
-   * @return
-   */
- // int getNumPhones();
-
   boolean isContext();
 
   int getNumContext();

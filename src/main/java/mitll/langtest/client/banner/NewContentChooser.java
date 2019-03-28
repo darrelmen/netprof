@@ -89,6 +89,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private final ListenViewHelper rehearseHelper, coreRehearseHelper;
   private final ListenViewHelper performPressAndHoldHelper, performHelper;
 
+  private final ContentView oovHelper;
+
   private final PracticeHelper practiceHelper;
   private final QuizChoiceHelper quizHelper;
   private final ExerciseController controller;
@@ -98,6 +100,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private HandlerRegistration handlerRegistration;
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PUSH_ITEM = false;
   private static final boolean DEBUG_VIEW = false;
 
   /**
@@ -117,7 +120,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     coreRehearseHelper = new CoreRehearseViewHelper(controller, CORE_REHEARSE);
     performPressAndHoldHelper = new PerformViewHelper(controller, PERFORM_PRESS_AND_HOLD);
     performHelper = new PerformViewHelper(controller, PERFORM);
-
+    oovHelper = new OOVViewHelper(controller, OOV_EDITOR);
     this.controller = controller;
     this.banner = banner;
 
@@ -317,6 +320,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           setInstanceHistory(FIX_SENTENCES, true, false);
           new FixNPFHelper(controller, true, FIX_SENTENCES).showNPF(divWidget, FIX_SENTENCES);
           break;
+
+        case OOV_EDITOR:
+          clearPushAndShow(oovHelper, OOV_EDITOR);
+          break;
         case NONE:
           logger.warning("showView skipping choice '" + view + "'");
           break;
@@ -328,10 +335,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
   }
 
-  private void clearPushAndShow(ContentView performHelper, VIEWS perform) {
+  private void clearPushAndShow(ContentView contentView, VIEWS perform) {
     clearAndPushKeep(perform);
     //   logger.info("show perform " + PERFORM);
-    performHelper.showContent(divWidget, perform);
+    contentView.showContent(divWidget, perform);
   }
 
   private boolean shouldKeepList(String currentStoredView) {
@@ -716,7 +723,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @NotNull
   public ShowTab getShowTab(VIEWS views) {
     return (exid) -> {
-      banner.show(views);
+      banner.show(views, false);
       pushItem(
           getInstanceParam(views) +
               maybeAddDialogParam(new SelectionState().getDialog()) +
@@ -765,9 +772,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    * @param url
    */
   private void pushItem(String url) {
-    if (DEBUG) logger.info("pushItem - " + url);
-    //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
-//     logger.info("logException stack " + exceptionAsString);
+    if (DEBUG_PUSH_ITEM) logger.info("pushItem - " + url);
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
+//    logger.info("logException stack " + exceptionAsString);
+
     History.newItem(url);
   }
 

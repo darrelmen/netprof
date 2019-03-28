@@ -37,7 +37,6 @@ import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.dialog.WordBounds;
 import mitll.langtest.client.custom.dialog.WordBoundsFactory;
 import mitll.langtest.client.list.ListInterface;
@@ -56,8 +55,8 @@ import java.util.logging.Logger;
 public class ClickableWords {
   private final Logger logger = Logger.getLogger("ClickableWords");
 
-  public static final boolean DEBUG_CHINESE = false;
-  public static final boolean DEBUG_CHINESE2 = false;
+  private static final boolean DEBUG_CHINESE = false;
+  private static final boolean DEBUG_CHINESE2 = false;
   private static final String SEARCHMATCH = "searchmatch";
 
   private static final String CLICKABLE_ROW = "clickableRow";
@@ -73,23 +72,18 @@ public class ClickableWords {
   private boolean isJapanese = false;
   private boolean isUrdu = false;
 
-  private int exercise;
+  private final int exercise;
 
   private boolean hasClickableAsian = false;
 
-  private ListInterface listContainer;
+  private final ListInterface listContainer;
   private final WordBoundsFactory factory = new WordBoundsFactory();
-  private int fontSize;
+  private final int fontSize;
+
+  private final String highlightColor;
+  private final boolean addFloatLeft;
 
   private static final boolean DEBUG = false;
-  private String highlightColor;
-  private boolean addFloatLeft = true;
-
-  /**
-   * @see mitll.langtest.client.flashcard.BootstrapExercisePanel#showRecoOutput
-   */
-  public ClickableWords() {
-  }
 
   /**
    * @param listContainer
@@ -114,6 +108,8 @@ public class ClickableWords {
             isJapanese;
     this.fontSize = fontSize;
     this.addFloatLeft = addFloatLeft;
+
+ //   logger.info("addFloatLeft ex " + exercise + " = " + addFloatLeft);
   }
 
   /**
@@ -273,7 +269,7 @@ public class ClickableWords {
     DivWidget horizontal = new DivWidget();
     horizontal.addStyleName("leftFiveMargin");
     if (isRTL) {
-      setDirection(horizontal);
+      setDirectionToRTL(horizontal);
     }
     return horizontal;
   }
@@ -297,7 +293,8 @@ public class ClickableWords {
                                               List<IHighlightSegment> clickables,
                                               boolean addClickableProps,
                                               List<String> contextTokensOpt,
-                                              List<String> highlightTokensOpt) {
+                                              List<String> highlightTokensOpt,
+                                              boolean isRTL) {
     DivWidget horizontal = new DivWidget();
 
     horizontal.getElement().setId("clickableWordsHighlightRow");
@@ -326,7 +323,7 @@ public class ClickableWords {
     if (DEBUG)
       logger.info("getClickableWordsHighlight highlight start " + highlightStartIndex + " find " + highlightToFind);
 
-    HasDirection.Direction dir = WordCountDirectionEstimator.get().estimateDirection(contextSentence);
+    HasDirection.Direction dir = isRTL ? HasDirection.Direction.RTL : HasDirection.Direction.LTR;
 
     if (DEBUG) {
       logger.info("getClickableWordsHighlight exercise " + exercise + " dir " + dir +
@@ -334,7 +331,7 @@ public class ClickableWords {
     }
     if ((dir == HasDirection.Direction.RTL) && isFL) {
       if (DEBUG) logger.info("\texercise " + exercise + " is RTL ");
-      setDirection(horizontal);
+      setDirectionToRTL(horizontal);
     }
     int id = 0;
 
@@ -366,8 +363,7 @@ public class ClickableWords {
           id++,
           fieldType, addClickableProps);
       clickables.add(clickable);
-      Widget w = clickable.asWidget();
-      horizontal.add(w);
+      horizontal.add(clickable.asWidget());
 
       if (isHighlightMatch) {
         if (DEBUG) logger.info("getClickableWordsHighlight *highlight* '" + highlightToFind + "' = '" + token + "'");
@@ -393,7 +389,7 @@ public class ClickableWords {
     return horizontal;
   }
 
-  public void setDirection(DivWidget horizontal) {
+  void setDirectionToRTL(DivWidget horizontal) {
     horizontal.getElement().getStyle().setProperty("direction", "rtl");
   }
 
@@ -472,7 +468,7 @@ public class ClickableWords {
     }
   }
 
-  boolean isSearchMatch(String first, String toSearchFor) {
+  private boolean isSearchMatch(String first, String toSearchFor) {
     if (toSearchFor == null || toSearchFor.isEmpty()) {
       return false;
     } else {
@@ -482,11 +478,12 @@ public class ClickableWords {
     }
   }
 
-  boolean isExactMatch(String first, String toSearchFor) {
-    String context = removePunct(first.toLowerCase());
-    String lcSearch = removePunct(toSearchFor.toLowerCase());
-    return (context.equalsIgnoreCase(lcSearch));
-  }
+//
+//  boolean isExactMatch(String first, String toSearchFor) {
+//    String context = removePunct(first.toLowerCase());
+//    String lcSearch = removePunct(toSearchFor.toLowerCase());
+//    return (context.equalsIgnoreCase(lcSearch));
+//  }
 
   /**
    * @param value
@@ -651,6 +648,10 @@ public class ClickableWords {
       int id,
       FieldType fieldType,
       boolean addClickableProps) {
+    if (DEBUG) {
+      logger.info("makeClickableText " + html + " token " + searchToken + " dir " + dir + " add float left " + addFloatLeft);
+
+    }
     final IHighlightSegment highlightSegmentDiv = new HighlightSegment(id, html, dir,
         false,
         false,

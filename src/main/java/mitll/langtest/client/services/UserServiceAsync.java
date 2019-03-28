@@ -63,8 +63,13 @@ public interface UserServiceAsync {
   void logout(AsyncCallback<Void> async);
 
   void getUsersSince(long when, AsyncCallback<List<ActiveUser>> async);
+
   void getActiveTeachers(AsyncCallback<List<ActiveUser>> async);
+
   void getTeachers(AsyncCallback<List<ActiveUser>> async);
 
   void sendTeacherRequest(AsyncCallback<Void> async);
+
+
+  void getPendingUsers(int projid, AsyncCallback<List<ActiveUser>> async);
 }

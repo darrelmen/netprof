@@ -136,15 +136,6 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   }
 
   /**
-   * @return
-   * @see mitll.langtest.client.list.ListSorting#compPhones
-   */
-/*  @Override
-  public int getNumPhones() {
-    return numPhones;
-  }*/
-
-  /**
    * @param score
    * @see ExerciseList#setScore
    * @see mitll.langtest.client.list.FacetExerciseList#setScores

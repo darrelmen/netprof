@@ -54,6 +54,7 @@ import scala.Tuple2;
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.shared.user.MiniUser.Gender.Male;
 
@@ -89,6 +90,21 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       logger.info("no media dir at " + mediaDir + " - this is OK on netprof host.");
     }
   }
+
+  @Override
+  @NotNull
+  public List<Integer> getAllAudioIDs(int projectID, boolean hasProjectSpecificAudio) {
+    // boolean hasProjectSpecificAudio = db.getProject(projectID).hasProjectSpecificAudio();
+    Map<Integer, List<AudioAttribute>> exToAudio =  getExToAudio(projectID, hasProjectSpecificAudio);
+    List<Integer> audioIDs = new ArrayList<>(exToAudio.size());
+    exToAudio.values().forEach(audioAttributes -> audioIDs.addAll(audioAttributes
+        .stream()
+        .map(AudioAttribute::getUniqueID)
+        .collect(Collectors.toList())));
+
+    return audioIDs;
+  }
+
 
   public boolean updateProject(int old, int newprojid) {
     return dao.updateProject(old, newprojid) > 0;

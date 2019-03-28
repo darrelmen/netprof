@@ -42,9 +42,7 @@ import java.util.List;
 
 @RemoteServiceRelativePath("user-manager")
 public interface UserService extends RemoteService {
-
   /**
-   *
    * @return
    * @see UserManager#getPermissionsAndSetUser
    */
@@ -53,7 +51,10 @@ public interface UserService extends RemoteService {
   List<ActiveUser> getUsersSince(long when) throws DominoSessionException, RestrictedOperationException;
 
   List<ActiveUser> getActiveTeachers() throws DominoSessionException, RestrictedOperationException;
+
   List<ActiveUser> getTeachers() throws DominoSessionException, RestrictedOperationException;
+
+  List<ActiveUser> getPendingUsers(int projid) throws DominoSessionException;
 
   void logout() throws DominoSessionException;
 

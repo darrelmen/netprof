@@ -27,39 +27,61 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.shared.user;
+package mitll.langtest.shared.exercise;
 
-/**
- * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos
- */
-public class FirstLastUser extends SimpleUser {
-  protected String affiliation = "";
+import org.jetbrains.annotations.NotNull;
 
-  public FirstLastUser() {
+public class OOV implements HasID {
+  private int id;
+  private int userid;
+  private long modified;
+  private String oov;
+  private String equivalent;
+
+  public OOV() {
   }
 
-  FirstLastUser(int id) {
-    super(id);
+  public OOV(int id, int userid, long modified, String oov, String equivalent) {
+    this.id = id;
+    this.userid = userid;
+    this.modified = modified;
+    this.oov = oov;
+    this.equivalent = equivalent;
   }
 
-  /**
-   * @param id
-   * @param userid
-   * @param first
-   * @param last
-   * @param lastChecked
-   * @param affiliation
-   * @see mitll.langtest.server.database.user.DominoUserDAOImpl#refreshUserCache
-   */
-  public FirstLastUser(int id, String userid, String first, String last, long lastChecked, String affiliation) {
-    super(id, userid, first, last, lastChecked);
-    this.affiliation = affiliation;
+  @Override
+  public int compareTo(@NotNull HasID o) {
+    if (o instanceof OOV) {
+      OOV o1 = (OOV) o;
+      int i = getOOV().compareTo(o1.getOOV());
+      return i == 0 ? getEquivalent().compareTo(o1.getEquivalent()) : i;
+    } else {
+      return Integer.compare(getID(), o.getID());
+    }
   }
 
-  public String getAffiliation() {
-    return this.affiliation;
+  @Override
+  public int getID() {
+    return id;
   }
-  public void setAffiliation(String affilation) {
-    this.affiliation = affilation;
+
+  public int getUserid() {
+    return userid;
+  }
+
+  public long getModified() {
+    return modified;
+  }
+
+  public String getOOV() {
+    return oov;
+  }
+
+  public String getEquivalent() {
+    return equivalent;
+  }
+
+  public void setEquivalent(String text) {
+    this.equivalent = text;
   }
 }

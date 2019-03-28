@@ -40,6 +40,7 @@ import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickAudio;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -147,6 +148,9 @@ public interface IAudioDAO extends IDAO {
    */
   String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise,
                         Language language, Map<Integer, MiniUser> idToMini, SmallVocabDecoder smallVocabDecoder);
+
+  @NotNull
+  List<Integer> getAllAudioIDs(int projectID, boolean hasProjectSpecificAudio);
 
   Map<String, Integer> getPairs(int projid);
 

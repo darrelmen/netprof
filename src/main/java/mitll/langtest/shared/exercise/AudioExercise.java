@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class AudioExercise extends ExerciseShell {
-  private final transient Logger logger = Logger.getLogger("AudioExercise");
+  //private final transient Logger logger = Logger.getLogger("AudioExercise");
 
   private static final String SPEED = "speed";
   private static final String REGULAR = "regular";
@@ -480,7 +480,7 @@ public class AudioExercise extends ExerciseShell {
 
       for (AudioAttribute audioAttribute : userToAudioForUser.getValue()) {
         if (!audioAttribute.isValid()) {
-          logger.warning("getMostRecentAudioEasy skip invalid audio " + audioAttribute);
+         // logger.warning("getMostRecentAudioEasy skip invalid audio " + audioAttribute);
           continue;
         }
 
@@ -556,10 +556,12 @@ public class AudioExercise extends ExerciseShell {
   private List<AudioAttribute> simpleByGender(boolean isMale) {
     List<AudioAttribute> males = new ArrayList<>();
     for (AudioAttribute audioAttribute : audioAttributes.values()) {
-      MiniUser user = audioAttribute.getUser();
-      if (user == null) {
-        //logger.error ("getByGender : huh? there's no user attached to " + audioAttribute);
-      } else if (isMale && user.isMale() || (!isMale && !user.isMale())) {
+      //  MiniUser user = audioAttribute.getUser();
+      // if (user == null) {
+      //logger.error ("getByGender : huh? there's no user attached to " + audioAttribute);
+      // } else
+
+      if (isMale && audioAttribute.isMale() || (!isMale && !audioAttribute.isMale())) {
         males.add(audioAttribute);
       }
     }
@@ -595,7 +597,7 @@ public class AudioExercise extends ExerciseShell {
       for (AudioAttribute audioAttribute : pair.getValue()) {
 
         if (!audioAttribute.isValid()) {
-          logger.warning("skip invalid audio " + audioAttribute);
+        //  logger.warning("skip invalid audio " + audioAttribute);
           continue;
         }
 
@@ -622,7 +624,7 @@ public class AudioExercise extends ExerciseShell {
             }
           }
         } else {
-          logger.info("\t\tgetMostRecentAudio found default user " + user);
+         // logger.info("\t\tgetMostRecentAudio found default user " + user);
         }
       }
     }

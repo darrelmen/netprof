@@ -36,10 +36,12 @@ import mitll.langtest.client.services.UserService;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.user.ActiveUser;
+import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -139,5 +141,26 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   private String getBaseURL() {
     return ServletUtil.get().getBaseURL(getThreadLocalRequest());
+  }
+
+  public List<ActiveUser> getPendingUsers(int projid) throws DominoSessionException {
+    int userIDFromSession = getUserIDFromSessionOrDB();
+    List<ActiveUser> pending = new ArrayList<>();
+
+    db
+        .getPendingUserDAO()
+        .pendingOnProject(projid)
+        .forEach(p -> {
+          User userWhere = db.getUserDAO().getUserWhere(p.userid());
+          pending.add(new ActiveUser(new FirstLastUser(
+              p.userid(),
+              userWhere.getUserID(),
+              userWhere.getFirst(),
+              userWhere.getLast(),
+              p.changed().getTime(),
+              userWhere.getAffiliation()),
+              p.changed().getTime()));
+        });
+    return pending;
   }
 }

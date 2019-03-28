@@ -31,6 +31,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.image.ImageResponse;
@@ -91,7 +92,7 @@ public interface AudioServiceAsync {
    * @param asyncCallback
    * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
    */
-  void recalcRefAudio(int id, AsyncCallback<RecalcRefResponse> asyncCallback);
+  void recalcRefAudio(int id, AsyncCallback<RecalcRefResponse> asyncCallback) ;
 
   void logMessage(String subject, String message, boolean sendEmail, AsyncCallback<Void> async);
 

@@ -210,6 +210,10 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    */
   boolean changePasswordForToken(String userId, String userKey, String newPassword, String url, String email);
 
+  boolean addTeacherRole(int userid);
+
+  boolean removeTeacherRole(int userid);
+
   SResult<ClientUserDetail> updateUser(DBUser dbUser);
 
   boolean forgotPassword(String user, String url, String optionalEmail);

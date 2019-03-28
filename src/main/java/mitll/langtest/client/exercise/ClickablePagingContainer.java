@@ -127,25 +127,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   public Collection<Integer> getVisibleIDs() {
-    // Range visibleRange = getVisibleRange();
-//    logger.info("getVisibleIDs : visible range " + visibleRange);
-/*
-    if (visibleRange.getLength() == 1) {
-      if (isEmpty()) {
-        // logger.info("ClickablePagingContainer.getVisibleIDs : no data yet...");
-        return Collections.emptyList();
-      } else {
-        T currentSelection = getCurrentSelection();
-        int id = currentSelection == null ? getFirst().getID() : currentSelection.getID();
-        //      logger.info("ClickablePagingContainer.getVisibleIDs : get current " + id);
-        //    logger.info("ClickablePagingContainer.getVisibleIDs : not getting " + getIdsForRange(visibleRange));
-        List<Integer> visible = new ArrayList<>();
-        visible.add(id);
-        return visible;
-      }
-    } else {*/
     return getIdsForRange(getVisibleRange());
-    //  }
   }
 
   /**
@@ -173,16 +155,6 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   public T getCurrentSelection() {
     return selectionModel.getSelectedObject();
   }
-
-/*  public T getNext() {
-    T currentSelection = getCurrentSelection();
-    if (currentSelection != null) {
-      int index = getIndex(currentSelection);
-      return getAt((index == getSize() - 1) ? 0 : index + 1);
-    } else {
-      return null;
-    }
-  }*/
 
   @Override
   protected void addSelectionModel() {

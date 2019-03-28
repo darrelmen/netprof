@@ -64,6 +64,7 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.jetbrains.annotations.NotNull;
@@ -211,13 +212,16 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     if (projectStartupInfo != null) {
       int fontSize = projectStartupInfo.getLanguageInfo().getFontSize();
 
+      Language languageInfo = controller.getLanguageInfo();
+      languageInfo.isRTL();
       ClickableWords commonExerciseClickableWords =
-          new ClickableWords(null, exercise.getID(), controller.getLanguageInfo(), fontSize, BLUE, true);
+          new ClickableWords(null, exercise.getID(), languageInfo, fontSize, BLUE, true);
 
       String flToShow = contextSentence.getFLToShow();
       String toHighlight = exercise.getFLToShow();
       DivWidget contentWidget = commonExerciseClickableWords.getClickableWordsHighlight(flToShow, toHighlight,
-          FieldType.FL, new ArrayList<>(), false, contextSentence.getTokens(), exercise.getTokens());
+          FieldType.FL, new ArrayList<>(), false, contextSentence.getTokens(), exercise.getTokens(),
+          languageInfo.isRTL());
 
       Panel contextSentenceWhileWaiting = getCenteredRow(contentWidget);
 

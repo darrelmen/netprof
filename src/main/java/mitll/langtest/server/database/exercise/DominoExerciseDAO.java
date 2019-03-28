@@ -426,7 +426,6 @@ public class DominoExerciseDAO {
         false,
         0,
         isContext,
-        0,
         dominoID, shouldSwap);
 
 

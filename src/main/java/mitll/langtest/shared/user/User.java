@@ -112,6 +112,10 @@ public class User extends MiniUser implements ReportUser {
     return hasAppPermission;
   }
 
+  public int getGender() {
+    return isMale() ? 0 : 1;
+  }
+
 
   /**
    * Closely related to {@link mitll.langtest.client.custom.INavigation.VIEWS}
@@ -315,6 +319,7 @@ public class User extends MiniUser implements ReportUser {
   }
 
   /**
+   * @see DominoUserDAOImpl#toUser
    * @param permissions
    */
   public void setPermissions(Collection<Permission> permissions) {

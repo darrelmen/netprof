@@ -46,6 +46,7 @@ import mitll.npdata.dao.SlickRefResultJson;
 import mitll.npdata.dao.refaudio.RefResultDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -142,7 +143,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   }
 
   public SlickRefResult toSlick(int projid, Result result, int audioID) {
-    DecodeAlignOutput alignOutput  = result.getAlignOutput();
+    DecodeAlignOutput alignOutput = result.getAlignOutput();
     DecodeAlignOutput decodeOutput = result.getDecodeOutput();
     String model = result.getModel();
     if (model == null) model = "";
@@ -183,8 +184,26 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return dao.getAllAudioID(projid);
   }
 
+
+  @Override
+  public Map<Integer, ISlimResult> getAudioIDMap(int projid, Set<Integer> audioIDs) {
+    return getAudioIDMap(this.getAllSlimForProjectIn(projid, audioIDs));
+  }
+
+  @Override
+  @NotNull
+  public Map<Integer, ISlimResult> getAudioIDMap(int id) {
+    return getAudioIDMap(getAllSlimForProject(id));
+  }
+
+  @NotNull
+  private Map<Integer, ISlimResult> getAudioIDMap(Collection<ISlimResult> jsonResultsForProject) {
+    Map<Integer, ISlimResult> audioToResult = new HashMap<>(jsonResultsForProject.size());
+    jsonResultsForProject.forEach(iSlimResult -> audioToResult.put(iSlimResult.getAudioID(), iSlimResult));
+    return audioToResult;
+  }
+
   /**
-   *
    * @param projid
    * @return
    */
@@ -290,5 +309,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
    * @see RefResultDecoder#writeRefDecode
    */
   @Override
-  public void deleteForProject(int projid) {  dao.deleteForProject(projid);  }
+  public void deleteForProject(int projid) {
+    dao.deleteForProject(projid);
+  }
 }

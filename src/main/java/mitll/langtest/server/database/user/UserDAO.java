@@ -85,7 +85,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   public void ensureDefaultUsers() {
   }
 
-   @Override
+  @Override
   public Set<Integer> getTeacherIDs() {
     return null;
   }
@@ -742,14 +742,20 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
 
   @Override
   public void setProjectManagement(IProjectManagement projectManagement) {
-
   }
 
   @Override
-  public boolean forgotPassword(String user
-      , String url,
-                                //    ,                              String emailForLegacy
-                                String optionalEmail) {
+  public boolean forgotPassword(String user, String url, String optionalEmail) {
+    return false;
+  }
+
+  @Override
+  public boolean addTeacherRole(int userid) {
+    return false;
+  }
+
+  @Override
+  public boolean removeTeacherRole(int userid) {
     return false;
   }
 }

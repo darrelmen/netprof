@@ -359,11 +359,12 @@ public class Project implements IPronunciationLookup, IProject {
 
   /**
    * @see AudioServiceImpl#recalcRefAudio
+   * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
    */
-  public RecalcRefResponse recalcRefAudio() {
+  public RecalcRefResponse recalcRefAudio(int userID) {
     Collection<CommonExercise> exercisesForUser = getRawExercises();
     logger.info("recalcRefAudio " + project + " for " + exercisesForUser.size() + " exercises.");
-    return refResultDecoder.writeRefDecode(getLanguageEnum(), exercisesForUser, project.id());
+    return refResultDecoder.writeRefDecode(getLanguageEnum(), exercisesForUser, project.id(), userID);
   }
 
   public SlickAnalysis getAnalysis() {

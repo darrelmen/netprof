@@ -32,7 +32,6 @@ package mitll.langtest.shared.scoring;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class RecalcRefResponse implements IsSerializable {
-
   private RecalcResponses recalcRefResponse;
   private int num = 0;
 

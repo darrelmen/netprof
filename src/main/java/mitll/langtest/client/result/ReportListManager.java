@@ -371,7 +371,7 @@ public class ReportListManager {
     }
 
     @Override
-    protected void addColumnsToTable(boolean sortEnglish) {
+    protected void addColumnsToTable() {
       addItemID();
     }
 

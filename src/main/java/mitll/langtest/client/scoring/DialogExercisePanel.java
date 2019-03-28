@@ -61,6 +61,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     implements AudioChangeListener, RefAudioGetter, IPlayAudioControl {
   private final Logger logger = Logger.getLogger("DialogExercisePanel");
 
+  private static final String FLOAT_LEFT = "floatLeft";
   private static final String LANGUAGE = "LANGUAGE";
   private static final int WORD_SPACER = 7;
 
@@ -89,12 +90,12 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    */
   HeadlessPlayAudio playAudio;
 
-
   static final boolean DEBUG = false;
   private static final boolean DEBUG_PLAY_PAUSE = false;
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
-  private boolean isRTL = false;
+
+  final boolean isRTL;
 
   final AlignmentFetcher alignmentFetcher;
 
@@ -124,7 +125,12 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     this.exercise = commonExercise;
     this.controller = controller;
     this.listenView = listenView;
-    isMandarin = getProjectStartupInfo() != null && getProjectStartupInfo().getLanguageInfo() == Language.MANDARIN;
+    ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
+
+    isMandarin = projectStartupInfo != null && projectStartupInfo.getLanguageInfo() == Language.MANDARIN;
+    this.isRTL = !isEngAttr() && projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
+    //  logger.info("isRTL " + isRTL);
+
     this.alignmentFetcher = new AlignmentFetcher(exercise.getID(),
         controller, listContainer,
         alignments, this, new AudioChangeListener() {
@@ -153,11 +159,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     if (projectStartupInfo != null) {
       makeClickableWords(projectStartupInfo, null);
 
-      this.isRTL = projectStartupInfo.getLanguageInfo().isRTL();
-      if (isRTL && isEngAttr()) {
-        isRTL = false;
-      }
-
       {
         DivWidget wrapper = new DivWidget();
         wrapper.add(getFLEntry(exercise));
@@ -170,6 +171,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
       makePlayAudio(exercise, null);
     }
+  }
+
+  ProjectStartupInfo getProjectStartupInfo() {
+    return controller == null ? null : controller.getProjectStartupInfo();
   }
 
   protected void stylePhoneRow(UIObject phoneRow) {
@@ -240,17 +245,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
-    Language languageInfo = projectStartupInfo.getLanguageInfo();
-    if (isEngAttr()) {
-      languageInfo = Language.ENGLISH;
-//      logger.info("lang for " +exercise.getID() + " " +exercise.getEnglish() + " " + exercise.getForeignLanguage() + " " +languageInfo);
-    }
+    Language languageInfo = isEngAttr() ? Language.ENGLISH : projectStartupInfo.getLanguageInfo();
+    // logger.info("makeClickableWords " + exercise.getID() + " " + exercise.getFLToShow() + " add float left " + addFloatLeft);
     clickableWords = new ClickableWords(listContainer, exercise.getID(),
         languageInfo, languageInfo.getFontSize(), BLUE, shouldAddFloatLeft());
   }
 
   protected boolean shouldAddFloatLeft() {
-    return true;
+    return !isRTL;
   }
 
   /**
@@ -260,10 +262,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   @Override
   public void getRefAudio(RefAudioListener listener) {
     alignmentFetcher.getRefAudio(listener);
-  }
-
-  ProjectStartupInfo getProjectStartupInfo() {
-    return controller == null ? null : controller.getProjectStartupInfo();
   }
 
   Set<Integer> getReqAudio() {
@@ -470,7 +468,12 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   @NotNull
   protected AllHighlight getAllHighlight(Collection<IHighlightSegment> flclickables) {
-    return new AllHighlight(flclickables, true);
+    boolean addFloatLeft = shouldAddFloatLeft();
+    logger.info("addFloatLeft " + addFloatLeft + " on " + flclickables.size());
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("please don't"));
+//    logger.info("logException stack " + exceptionAsString);
+
+    return new AllHighlight(flclickables, addFloatLeft);
   }
 
   /**
@@ -589,9 +592,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
               // add spacer - also required if we want to select text and copy it somewhere.
               //    clickableRow.add(new InlineHTML(" "));
 
-              if (!isRTL) {
-                addFloatLeft(current);
-              }
+              addFloatLeft(current);
 
               clickablesIterator.next(); // OK, we've done this clickable
             }
@@ -604,16 +605,12 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
           boolean hasSpace = false;
           for (IHighlightSegment iHighlightSegment : unclickable) {
             if (!iHighlightSegment.getContent().trim().isEmpty()) {
-              if (!isRTL) {
-                addFloatLeft(iHighlightSegment);
-              }
+              addFloatLeft(iHighlightSegment);
               clickableRow.add(iHighlightSegment.asWidget());
             } else hasSpace = true;
           }
 
-          if (!isRTL) {
-            addFloatLeft(highlightSegment);
-          }
+          addFloatLeft(highlightSegment);
           if (hasSpace) {
             addSpacerStyle(highlightSegment);
           }
@@ -633,7 +630,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       if (DEBUG_MATCH) logger.info("matchSegmentToWidgetForAudio adding left over " + next);
       {
         Widget w = next.asWidget();
-        if (!isRTL) addFloatLeft(w);
+        addFloatLeft(w);
         clickableRow.add(w);
       }
     }
@@ -681,11 +678,15 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return removePunct(current.getContent().toLowerCase());
   }
 
-  protected void addFloatLeft(IHighlightSegment current) {
+  private void addFloatLeft(IHighlightSegment current) {
     addFloatLeft(current.asWidget());
   }
+
   protected void addFloatLeft(Widget w) {
-    w.addStyleName("floatLeft");
+    if (!isRTL) {
+      //    logger.info("addFloatLeft to (" + isRTL + ") elem '" + w.getElement().getId() + "'");
+      w.addStyleName(FLOAT_LEFT);
+    }
   }
 
   /**
@@ -1048,12 +1049,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     flclickables = new ArrayList<>();
 
     List<String> tokens = e.getTokens();
-
-    if (false) {
-      if (tokens == null && !e.hasEnglishAttr()) {
-        logger.info("getFLEntry : no tokens for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage());
-      }
-    }
+//    if (false) {
+//      if (tokens == null && !e.hasEnglishAttr()) {
+//        logger.info("getFLEntry : no tokens for " + e.getID() + " " + e.getEnglish() + " " + e.getForeignLanguage());
+//      }
+//    }
 
     flClickableRow = clickableWords.getClickableWords(getFL(e), FieldType.FL, flclickables, isRTL, tokens);
     return flClickableRow;

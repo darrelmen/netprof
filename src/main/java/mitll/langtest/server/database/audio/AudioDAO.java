@@ -46,6 +46,7 @@ import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickAudio;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.util.*;
@@ -1118,5 +1119,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public void copyOne(AudioCopy audioCopy, int audioID, int exid, boolean isContext) {
 
+  }
+
+  @NotNull
+  @Override
+  public List<Integer> getAllAudioIDs(int projectID, boolean hasProjectSpecificAudio) {
+    return null;
   }
 }

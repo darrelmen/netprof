@@ -404,8 +404,8 @@ public class ProjectManagement implements IProjectManagement {
 
     // TODO : why would we want to keep going on a project that has no slick project -- if it's new???
 
-    int id = slickProject == null ? -1 : slickProject.id();
     boolean myProject = project.isMyProject();
+    int id = slickProject == null ? -1 : slickProject.id();
     setDependencies(project.getExerciseDAO(), id, myProject);
 
     if (forceReload) {

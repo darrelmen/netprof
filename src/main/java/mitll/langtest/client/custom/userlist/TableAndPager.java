@@ -27,39 +27,38 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.shared.user;
+package mitll.langtest.client.custom.userlist;
 
-/**
- * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos
- */
-public class FirstLastUser extends SimpleUser {
-  protected String affiliation = "";
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.analysis.MemoryItemContainer;
+import mitll.langtest.client.custom.TooltipHelper;
+import org.jetbrains.annotations.NotNull;
 
-  public FirstLastUser() {
+import java.util.Collections;
+
+public class TableAndPager {
+  private static final int HEADING_SIZE = 3;
+
+  @NotNull
+  protected Panel getTableWithPager(DivWidget top, MemoryItemContainer<?> listContainer, String visited, String doubleClickToLearnTheList, Placement placement) {
+    Panel tableWithPager = listContainer.getTableWithPager(Collections.emptyList());
+    addPagerAndHeader(tableWithPager, visited, top);
+    tableWithPager.addStyleName("rightFiveMargin");
+    new TooltipHelper().createAddTooltip(tableWithPager, doubleClickToLearnTheList, placement);
+    return tableWithPager;
   }
 
-  FirstLastUser(int id) {
-    super(id);
-  }
-
-  /**
-   * @param id
-   * @param userid
-   * @param first
-   * @param last
-   * @param lastChecked
-   * @param affiliation
-   * @see mitll.langtest.server.database.user.DominoUserDAOImpl#refreshUserCache
-   */
-  public FirstLastUser(int id, String userid, String first, String last, long lastChecked, String affiliation) {
-    super(id, userid, first, last, lastChecked);
-    this.affiliation = affiliation;
-  }
-
-  public String getAffiliation() {
-    return this.affiliation;
-  }
-  public void setAffiliation(String affilation) {
-    this.affiliation = affilation;
+   void addPagerAndHeader(Panel tableWithPager, String visited, DivWidget top) {
+    Heading w = new Heading(HEADING_SIZE, visited);
+    w.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+    w.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+    top.add(w);
+    top.add(tableWithPager);
+    tableWithPager.getElement().getStyle().setClear(Style.Clear.BOTH);
+    tableWithPager.setWidth("100%");
   }
 }

@@ -177,7 +177,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
   }
 
   @Override
-  protected void addColumnsToTable(boolean sortEnglish) {
+  protected void addColumnsToTable() {
     addPhones(getLabel());
 
     {
@@ -243,7 +243,7 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
   }
 
   /**
-   * @see #addColumnsToTable(boolean)
+   * @see SimplePagingContainer#addColumnsToTable()
    * @param label
    */
   private void addPhones(String label) {

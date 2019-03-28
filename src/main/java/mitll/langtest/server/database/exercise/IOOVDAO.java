@@ -27,39 +27,32 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.shared.user;
+package mitll.langtest.server.database.exercise;
 
-/**
- * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos
- */
-public class FirstLastUser extends SimpleUser {
-  protected String affiliation = "";
+import mitll.langtest.server.database.IDAO;
+import mitll.langtest.shared.exercise.OOV;
+import mitll.langtest.shared.project.Language;
+import mitll.npdata.dao.SlickPendingUser;
 
-  public FirstLastUser() {
-  }
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
-  FirstLastUser(int id) {
-    super(id);
-  }
+public interface IOOVDAO extends IDAO {
+  void insertBulk(Collection<OOV> oovs, int userid, Language language);
+
+  boolean insert(int userid, String oov, Language language);
 
   /**
-   * @param id
-   * @param userid
-   * @param first
-   * @param last
-   * @param lastChecked
-   * @param affiliation
-   * @see mitll.langtest.server.database.user.DominoUserDAOImpl#refreshUserCache
+   * @see
    */
-  public FirstLastUser(int id, String userid, String first, String last, long lastChecked, String affiliation) {
-    super(id, userid, first, last, lastChecked);
-    this.affiliation = affiliation;
-  }
+  boolean update(int id, String equivalent, int byUser);
 
-  public String getAffiliation() {
-    return this.affiliation;
-  }
-  public void setAffiliation(String affilation) {
-    this.affiliation = affilation;
-  }
+  boolean delete(int id);
+
+  List<OOV> forLanguage(Language language);
+
+  Map<String, List<OOV>> getOOVToEquivalents(Language language);
+
+  Map<String, List<OOV>> getOOV(Language language);
 }

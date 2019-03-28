@@ -68,8 +68,8 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   private static final String NUM_ITEMS = "#";
   private static final String NO = "No";
   private static final String YES = "Yes";
-  public static final int DESC_WIDTH = 180;
-  public static final int DESC_MAX_LENGTH = 25;//30;
+  private static final int DESC_WIDTH = 180;
+  private static final int DESC_MAX_LENGTH = 25;//30;
   private final boolean slim;
   private final boolean addOwnerToDescrip;
   private final  boolean addTeacherCol;
@@ -123,11 +123,10 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   }
 
   /**
-   * @param sortEnglish
    * @see #configureTable
    */
   @Override
-  protected void addColumnsToTable(boolean sortEnglish) {
+  protected void addColumnsToTable() {
     List<UserList<CommonShell>> list = getList();
     addItemID(list, getMaxLengthId());
     addNum();

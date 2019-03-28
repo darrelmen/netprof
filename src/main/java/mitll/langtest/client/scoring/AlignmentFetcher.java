@@ -131,7 +131,7 @@ class AlignmentFetcher {
             "\n\texercise " + exerciseID +
             "\n\taudio #" + contextRefID +
             "\n\tspeed  " + contextAudioAttr.getSpeed() +
-            "\n\tisMale " + contextAudioAttr.getUser().isMale()
+            "\n\tisMale " + contextAudioAttr.isMale()
         );
       }
       if (addToRequest(contextAudioAttr)) {

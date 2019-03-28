@@ -112,7 +112,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final String LOCALHOST = "127.0.0.1";
   private static final boolean USE_DOMINO_IGNITE = true;
   private static final boolean USE_DOMINO_CACHE = false;
+
   private static final String TCHR = "TCHR";
+
   private static final int CACHE_TIMEOUT = 1;
   private static final String UNSET = "UNSET";
 
@@ -120,7 +122,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final boolean DEBUG_TEACHERS = false;
   private static final String F_LAST = "F. Last";
 
-  private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
   private static final List<String> DOMAINS =
       Arrays.asList(
@@ -170,6 +171,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final boolean SWITCH_USER_PROJECT = false;
   private static final String ACTIVE = "active";
   private static final String EMAIL = "email";
+  public static final String UNKNOWN = "Unknown";
+  public static final String MALE = "Male";
+  public static final String FEMALE = "Female";
 
   /**
    * If false, don't use email to set the initial user password via email.
@@ -199,6 +203,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private mitll.hlt.domino.shared.model.user.User dominoImportUser;
   private DBUser dominoAdminUser = null;
 
+  private DBUser defaultDBUser = null;
+
   private Ignite ignite = null;
 
   private JSONSerializer serializer = null;
@@ -221,7 +227,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             public DBUser load(Integer key) {
               if (DEBUG_USER_CACHE) logger.info("idToDBUser Load " + key);
               DBUser dbUser = delegate.lookupDBUser(key);
-              if (dbUser == null) dbUser = delegate.lookupDBUser(getDefaultUser());
+              if (dbUser == null) {
+//                dbUser = delegate.lookupDBUser(getDefaultUser());
+                logger.info("idToDBUser : can't find user #" + key + " so returing default user.");
+                dbUser = defaultDBUser;
+              }
               return dbUser;
             }
           });
@@ -241,6 +251,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
               return getUser(lookupUser(key));
             }
           });
+
+  private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
 
   private final LoadingCache<Integer, FirstLastUser> idToFirstLastUser = CacheBuilder.newBuilder()
@@ -342,7 +354,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     props.setProperty(EVT_URL_BASE_MAP_PROP, "a,b");
     pool = Mongo.createPool(new DBProperties(props));
     serializer = Mongo.makeSerializer();
-    logger.info("connectToMongo : OK made serializer " + serializer);
+    logger.info("noServletContextSetup connectToMongo : OK made serializer " + serializer);
     Mailer mailer = new Mailer(new MailerProperties(props));
     ServerProperties dominoProps = getDominoProps(database, props);
     //String appName = dominoProps.getAppName();
@@ -363,10 +375,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
     makeUserService(database, props);
 
-    logger.debug("made" +
+    logger.info("noServletContextSetup made" +
         "\ndelegate " + delegate.getClass() +
-        "\nignite = " + ignite +
-        "\nisCacheEnabled = " + dominoProps.isCacheEnabled());
+        "\nignite   " + ignite +
+        "\nisCacheEnabled " + dominoProps.isCacheEnabled());
   }
 
   @NotNull
@@ -419,7 +431,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public void close() {
     if (!usedDominoResources) {
 //      logger.info("closing connection to " + pool, new Exception());
-     if (pool != null) pool.closeConnection();
+      if (pool != null) pool.closeConnection();
     }
     if (!usedDominoResources && ignite != null) {
       ignite.close();
@@ -506,10 +518,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
       if (adminUser.getPrimaryGroup() == null) {
         logger.warn("\n\n\nensureDefaultUsers no group for " + adminUser);
-        //  adminUser.setPrimaryGroup(makePrimaryGroup(PRIMARY));
       }
 
       dominoImportUser = delegate.getUser(IMPORT_USER);
+      defaultDBUser = delegate.lookupDBUser(defaultUser);
     }
   }
 
@@ -525,8 +537,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", Kind.STUDENT);
     this.importUser = getOrAdd(IMPORT_USER, "Import", USER, Kind.CONTENT_DEVELOPER);
     this.defaultUser = getOrAdd(DEFAULT_USER1, DEFAULT, USER, Kind.AUDIO_RECORDER);
-    this.defaultMale = getOrAdd(DEFAULT_MALE_USER, DEFAULT, "Male", Kind.AUDIO_RECORDER);
-    this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, DEFAULT, "Female", Kind.AUDIO_RECORDER);
+    this.defaultMale = getOrAdd(DEFAULT_MALE_USER, DEFAULT, MALE, Kind.AUDIO_RECORDER);
+    this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, DEFAULT, FEMALE, Kind.AUDIO_RECORDER);
     //  logger.info("ensureDefaultUsersLocal defaultUser " + defaultUser);
 
     this.defaultUsers = new HashSet<>(Arrays.asList(DEFECT_DETECTOR, BEFORE_LOGIN_USER, IMPORT_USER, DEFAULT_USER1, DEFAULT_FEMALE_USER, DEFAULT_MALE_USER, "beforeLoginUser"));
@@ -1181,7 +1193,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   private DBUser lookupUser(int id) {
     try {
-      return idToDBUser.get(id);
+      DBUser dbUser = idToDBUser.get(id);
+      if (dbUser == null) {
+        logger.warn("lookupUser can't find user by id " + id);
+        //     dbUser = idToDBUser.get(defaultUser);
+      }
+      return dbUser;
     } catch (ExecutionException e) {
       logger.warn("lookupUser got " + e);
       return delegate.lookupDBUser(id);
@@ -1245,25 +1262,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
     if (first == null) first = userID;
     String last = user.getLast();
-    if (last == null) last = "Unknown";
+    if (last == null) last = UNKNOWN;
     String email = user.getEmail();
-//    if (email == null || email.isEmpty()) {
-//      email = user.getEmailHash();
-//    }
 
     Kind userKind = user.getUserKind();
 
     Set<String> roleAbbreviations = Collections.singleton(userKind.getRole());
     // logger.info("toClientUserDetail " + user.getUserID() + " role is " + roleAbbreviations + " email " +email);
 
-    boolean copyGender = user.getPermissions().contains(User.Permission.RECORD_AUDIO) ||
-        user.getPermissions().contains(User.Permission.DEVELOP_CONTENT) ||
-        userID.equalsIgnoreCase("FernandoM01");
-
-    mitll.hlt.domino.shared.model.user.User.Gender gender =
-        userKind ==
-            STUDENT && !copyGender ? UNSPECIFIED :
-            user.isMale() ? DMALE : DFEMALE;
+    mitll.hlt.domino.shared.model.user.User.Gender gender = getGender(user, userID, userKind);
 
     if (gender == UNSPECIFIED) {
       logger.info("toClientUserDetail for " + user.getID() + " '" + userID + "' " + user.getUserKind() + " gender is unspecified.");
@@ -1298,6 +1305,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     //logger.info("toClientUserDetail " + " groups for\n\t" + clientUserDetail + " : \n\t" + clientUserDetail.getSecondaryGroups());
 
     return clientUserDetail;
+  }
+
+  private mitll.hlt.domino.shared.model.user.User.Gender getGender(User user, String userID, Kind userKind) {
+    boolean copyGender = user.getPermissions().contains(User.Permission.RECORD_AUDIO) ||
+        user.getPermissions().contains(User.Permission.DEVELOP_CONTENT) ||
+        userID.equalsIgnoreCase("FernandoM01");
+
+    return userKind ==
+        STUDENT && !copyGender ? UNSPECIFIED :
+        user.isMale() ? DMALE : DFEMALE;
   }
 
   /**
@@ -1691,12 +1708,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
     if (delegate == null) {
       logger.warn("getAll delegate is null?");
+      return users;
+    } else {
+      users = delegate.getUsers(-1, opts);
+      long now = System.currentTimeMillis();
+      if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
+      return users;
     }
-
-    users = delegate.getUsers(-1, opts);
-    long now = System.currentTimeMillis();
-    if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
-    return users;
   }
 
   @NotNull
@@ -1882,7 +1900,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   public boolean shouldUseUsualDominoEmail(String email) {
     boolean b = hasBlessedEmail(email);
 
-   // logger.info("shouldUseUsualDominoEmail (addUserViaEmail = " + addUserViaEmail + ") '" + email + "' - " + b);
+    // logger.info("shouldUseUsualDominoEmail (addUserViaEmail = " + addUserViaEmail + ") '" + email + "' - " + b);
 
     return addUserViaEmail && !b;
   }
@@ -1935,6 +1953,76 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
   }
 
+  @Override
+  public boolean addTeacherRole(int userid) {
+    DBUser dbUser = lookupUser(userid);
+
+    if (dbUser != null) {
+      Set<String> roleAbbreviations = dbUser.getRoleAbbreviations();
+      boolean hasTeacher = roleAbbreviations.contains(TCHR);
+      if (hasTeacher) {
+        logger.info("user " + dbUser + " already has teacher role.");
+        return false;
+      } else {
+        roleAbbreviations.add(TCHR);
+        boolean b = doUpdate(dbUser);
+        if (b) {
+          refresh(userid);
+        }
+        return b;
+      }
+
+    } else {
+      logger.error("addTeacherRole huh? couldn't find user to update " + userid);
+      return false;
+    }
+  }
+
+  private void refresh(int userid) {
+    idToDBUser.refresh(userid);
+    idToUser.refresh(userid);
+    idToFirstLastUser.refresh(userid);
+    refreshUserCache(Collections.singleton(userid));
+  }
+
+  @Override
+  public boolean removeTeacherRole(int userid) {
+    DBUser dbUser = lookupUser(userid);
+
+    if (dbUser != null) {
+      Set<String> roleAbbreviations = dbUser.getRoleAbbreviations();
+      boolean hasTeacher = roleAbbreviations.contains(TCHR);
+      if (hasTeacher) {
+//        logger.info("user " + dbUser + " already has teacher role.");
+        roleAbbreviations.remove(TCHR);
+
+        boolean b = doUpdate(dbUser);
+        if (b) {
+          refresh(userid);
+        }
+
+        return b;
+      } else {
+        logger.warn("user " + dbUser + " doesn't have teacher role.");
+        return false;
+      }
+    } else {
+      logger.error("addTeacherRole huh? couldn't find user to update " + userid);
+      return false;
+    }
+  }
+
+  private boolean doUpdate(DBUser dbUser) {
+    SResult<ClientUserDetail> clientUserDetailSResult = updateUser(dbUser);
+
+    if (clientUserDetailSResult.isSuccess()) {
+      return true;
+    } else {
+      logger.warn("doUpdate error " + clientUserDetailSResult);
+      return false;
+    }
+  }
+
   private void setGender(User toUpdate, DBUser dbUser) {
     MiniUser.Gender realGender = toUpdate.getRealGender();
 
@@ -1962,12 +2050,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (updateUser.getEmail().isEmpty()) logger.error("updateUser empty email for " + updateUser);
     if (updateUser.getPrimaryGroup() == null) logger.error("no primary group for " + updateUser);
     if (updateUser.getAffiliation() == null) logger.warn("updateUser no affiliation for " + updateUser);
-    else if (updateUser.getAffiliation().isEmpty()) {
-      //logger.warn("updateUser empty affiliation for " + updateUser);
-    }
+
+//    else if (updateUser.getAffiliation().isEmpty()) {
+//      //logger.warn("updateUser empty affiliation for " + updateUser);
+//    }
 
     return delegate.updateUser(adminUser, getClientUserDetail(updateUser));
   }
+
 
   public boolean isValidAsEmail(String text) {
     return text.trim().toUpperCase().matches(VALID_EMAIL);

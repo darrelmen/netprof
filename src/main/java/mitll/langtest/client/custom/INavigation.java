@@ -31,6 +31,7 @@ package mitll.langtest.client.custom;
 
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ShowTab;
+import mitll.langtest.client.banner.NewBanner;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.user.User;
 
@@ -80,7 +81,9 @@ public interface INavigation extends IViewContaner {
      */
     SCORES("Scores", ProjectMode.DIALOG),
 
-
+    /**
+     * @see NewBanner#getRecNav
+     */
     RECORD_ENTRIES("Record Entries", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
     RECORD_SENTENCES("Record Sentences", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
 
@@ -88,7 +91,9 @@ public interface INavigation extends IViewContaner {
     QC_ENTRIES("QC Entries", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, false),
     FIX_ENTRIES("Fix Entries", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, false),
     QC_SENTENCES("QC Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, true),
-    FIX_SENTENCES("Fix Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, true);
+    FIX_SENTENCES("Fix Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, true),
+
+    OOV_EDITOR("OOV Editor", VOCABULARY);
 
     private final List<User.Permission> perms;
     private final ProjectMode mode;

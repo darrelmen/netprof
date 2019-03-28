@@ -496,6 +496,7 @@ public class DownloadHelper implements IShowStatus {
   }
 
   /**
+   * for h2 locations - it's downloadResults/h2 not h2/downloadResults
    * @param host
    * @param search
    * @param listid
@@ -505,13 +506,14 @@ public class DownloadHelper implements IShowStatus {
    */
   public void doUserPerfDownload(String host, String search, int listid) {
     String s = URL.encodeQueryString(USER + "=" + search + "&" + LISTID + "=" + listid);
-    String s1 = toDominoUrl(host);
+    String s1 = toDominoUrl("");
 
     if (!s1.endsWith("/")) {
       s1 += "/";
     }
-    String url = s1 + "downloadResults?request=" + USER_PERF + "&" + s;
- //   logger.info("url " + url);
+    String url = s1 + "downloadResults" + (host.isEmpty() ? "" : "/" + host) +
+        "?request=" + USER_PERF + "&" + s;
+    //   logger.info("url " + url);
     new DownloadIFrame(url);
   }
 }

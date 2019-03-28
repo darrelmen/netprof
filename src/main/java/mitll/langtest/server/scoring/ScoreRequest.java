@@ -27,39 +27,10 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.shared.user;
+package mitll.langtest.server.scoring;
 
-/**
- * @see mitll.langtest.server.database.analysis.Analysis#getUserInfos
- */
-public class FirstLastUser extends SimpleUser {
-  protected String affiliation = "";
-
-  public FirstLastUser() {
-  }
-
-  FirstLastUser(int id) {
-    super(id);
-  }
-
-  /**
-   * @param id
-   * @param userid
-   * @param first
-   * @param last
-   * @param lastChecked
-   * @param affiliation
-   * @see mitll.langtest.server.database.user.DominoUserDAOImpl#refreshUserCache
-   */
-  public FirstLastUser(int id, String userid, String first, String last, long lastChecked, String affiliation) {
-    super(id, userid, first, last, lastChecked);
-    this.affiliation = affiliation;
-  }
-
-  public String getAffiliation() {
-    return this.affiliation;
-  }
-  public void setAffiliation(String affilation) {
-    this.affiliation = affilation;
-  }
+public class ScoreRequest {
+  String foreignLanguage;
+  String transliteration;
+  String foreignLanguageNorm;
 }

@@ -30,6 +30,7 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.hlt.documentservice.mongo.MADMLog;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -39,6 +40,19 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * What the client wants to know about a reference audio cut.
+ * <p>
+ * Includes info about who recorded it and when, for which exercise, and the path to the audio on the server.
+ * <p>
+ * Also indicates any attributes REGULAR or SLOW and whether it's been played by a reviewer.
+ * Copyright &copy; 2011-2016 Massachusetts Institute of Technology, Lincoln Laboratory
+ *
+ * @author <a href="mailto:gordon.vidaver@ll.mit.edu">Gordon Vidaver</a>
+ * @since 12/6/13
+ * Time: 3:53 PM
+ * To change this template use File | Settings | File Templates.
+ */
 public class AudioAttribute implements IsSerializable, UserAndTime {
   /**
    * @Deprecated - this shouldn't ever be used, since we only return audio that has been recently confirmed to be
@@ -189,7 +203,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   public boolean isMale() {
-    return user != null && user.isMale();
+    return realGender == null || realGender == MiniUser.Gender.Male;
   }
 
   public String getSpeed() {
@@ -211,13 +225,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   }
 
   private void addAttribute(String name, String value) {
-//    if (attributes.containsKey(name)) {
-//      String s = attributes.get(name);
-//      if (!s.equals(REGULAR)) System.out.println("replacing value at " + name + " was " + s + " now " + value);
-//    }
     attributes.put(name, value);
   }
-
 
   public Map<String, String> getAttributes() {
     return attributes;
@@ -235,26 +244,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public String getKey() {
     return "user=" + userid + ", " + getAttributes().toString();
   }
-
-/*  public String getDisplay() {
-    if (hasOnlySpeed()) {
-      String speed = attributes.values().iterator().next();
-      return speed.substring(0, 1).toUpperCase() + speed.substring(1);
-    } else {
-      StringBuilder stringBuilder = new StringBuilder();
-      for (Map.Entry<String, String> pair : attributes.entrySet()) {
-        String key = pair.getKey();
-        stringBuilder.append(key.substring(0, 1).toUpperCase() + key.substring(1));
-
-        String value = pair.getValue();
-        stringBuilder.append(" : " + value.substring(0, 1).toUpperCase() + value.substring(1));
-        stringBuilder.append(", ");
-      }
-      String s = stringBuilder.toString();
-      if (s.endsWith(", ")) s = s.substring(0, s.length() - 2);
-      return s;
-    }
-  }*/
 
   public MiniUser getUser() {
     return user;
@@ -375,10 +364,8 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return "Audio" +
         "\n\tid         " + uniqueID +
         "\n\texid       " + exid +
-        // "\n\tfor ex     " + getID()+
         (getOldexid() == null ? "" : " (old ex " + getOldexid() + ") :") +
         "\n\tpath       " + audioRef +
-        // "\n\tactual     " + actualPath +
         "\n\tattrs      " + attributes +
         "\n\tby         " + userid + "/" + user +
         "\n\ttranscript '" + transcript + "'" +

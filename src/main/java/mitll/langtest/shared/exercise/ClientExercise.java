@@ -32,6 +32,8 @@ package mitll.langtest.shared.exercise;
 import java.util.List;
 
 public interface ClientExercise extends CommonShell, MutableAnnotationExercise, AudioRefExercise, ScoredExercise, Details {
+  String getNormalizedFL();
+
   /**
    * @return
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#addAltFL
@@ -81,4 +83,10 @@ public interface ClientExercise extends CommonShell, MutableAnnotationExercise, 
 
   boolean hasEnglishAttr();
   List<String> getTokens();
+
+  /**
+   *
+   * @return
+   */
+  boolean isSafeToDecode();
 }

@@ -30,11 +30,13 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -80,4 +82,6 @@ public interface ScoringServiceAsync {
    */
 
   void isValidForeignPhrase(int projID, String foreign, String transliteration, AsyncCallback<Collection<String>> async);
+
+  void getOOVs(int projid,  AsyncCallback<List<OOV>> async);
 }

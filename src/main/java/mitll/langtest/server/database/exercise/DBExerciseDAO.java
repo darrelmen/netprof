@@ -205,7 +205,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     try {
       List<String> typeOrder = getTypeOrderFromProject();
 
-      logger.info("readExercises vfor  " +project + " " + typeOrder);
+      logger.info("readExercises vfor  " + project + " " + typeOrder);
       setRootTypes(typeOrder);
 
       int projid = project.id();
@@ -409,7 +409,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @NotNull
   private List<String> getTypeOrderFromProject() {
     List<String> typeOrder = getBaseTypeOrder();
+
+    logger.info("getTypeOrderFromProject typeOrder " + typeOrder);
+
     Collection<String> attributeTypes = getAttributeTypes();
+
+    logger.info("getTypeOrderFromProject attributeTypes " + attributeTypes);
 
     if (attributeTypes.contains(SEMESTER.toString())) {
       //  logger.info("found semester ");
@@ -422,13 +427,35 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
     final List<String> ftypeOrder = new ArrayList<>(typeOrder);
     List<String> withAttr = new ArrayList<>(typeOrder);
-    attributeTypes.forEach(type -> {
+
+    List<String> sortedTypes = new ArrayList<>(attributeTypes);
+    logger.info("getTypeOrderFromProject sortedTypes " + sortedTypes);
+
+    Map<String, Facet> nameToFacet = new HashMap<>();
+
+
+    for (Facet f : Facet.values()) {
+      nameToFacet.put(f.getName(), f);
+    }
+
+    sortedTypes.sort((o1, o2) -> {
+      Facet facet = nameToFacet.get(o1);
+      Facet facet1 = nameToFacet.get(o2);
+
+      return facet == null && facet1 == null ? 0 :
+          facet != null && facet1 == null ? -1 :
+              facet == null ? 1 :
+                  facet.compareTo(facet1);
+    });
+
+    sortedTypes.forEach(type -> {
       if (!ftypeOrder.contains(type)) {
         withAttr.add(type);
       }
     });
+    logger.info("getTypeOrderFromProject withAttr " + withAttr);
 
-    withAttr.addAll(attributeTypes);
+    //withAttr.addAll(attributeTypes);
     getSectionHelper().reorderTypes(withAttr);
     return withAttr;
   }
@@ -540,6 +567,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
   }
 
+
+
   /**
    * @param id
    * @param count
@@ -553,6 +582,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @Override
   public void updatePhonesBulk(List<SlickExercisePhone> pairs) {
     getDao().updatePhonesBulk(pairs);
+  }
+
+  @Override
+  public void updateNormBulk(List<SlickExerciseNorm> pairs) {
+    getDao().updateNormBulk(pairs);
   }
 
   /**

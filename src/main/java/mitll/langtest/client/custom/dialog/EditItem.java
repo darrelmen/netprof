@@ -51,7 +51,6 @@ import java.util.Map;
 
 public class EditItem {
 //  private final Logger logger = Logger.getLogger("EditItem");
-
   public static final String DONE = "OK";
   private final ExerciseController controller;
   private PagingExerciseList<CommonShell, ClientExercise> exerciseList;
@@ -103,8 +102,7 @@ public class EditItem {
 
     userListID = originalList.getID();
     userListName = originalList.getName();
-    EditableExerciseList exerciseList = new EditableExerciseList(controller, right, INavigation.VIEWS.LISTS, originalList);
-    this.exerciseList = exerciseList;
+    this.exerciseList = new EditableExerciseList(controller, right, INavigation.VIEWS.LISTS, originalList);
     setFactory(this.exerciseList);
     this.exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
     // logger.info("setting vertical on " +exerciseList.getElement().getExID());

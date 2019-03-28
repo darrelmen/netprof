@@ -138,10 +138,10 @@ public class ActiveUsersManager {
     }
 
     @Override
-    protected void addColumnsToTable(boolean sortEnglish) {
+    protected void addColumnsToTable() {
       List<ActiveUser> list = getList();
       addUserID(list);
-      super.addColumnsToTable(sortEnglish);
+      super.addColumnsToTable();
 
       addVisitedCol(list);
       addLang(list);
