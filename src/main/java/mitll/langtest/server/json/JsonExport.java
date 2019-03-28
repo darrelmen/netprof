@@ -110,7 +110,7 @@ public class JsonExport {
     logger.info("getContentAsJson " + (justContext? " just context":"vocab"));
 
     for (SectionNode node : sectionHelper.getSectionNodesForTypes()) {
-      logger.info("getContentAsJson " + node.easy());
+    //  logger.info("getContentAsJson " + node.easy());
       addToJsonArrayForChildren(typeToValues, removeExercisesWithMissingAudio, justContext, minimalTypeOrder, jsonArray, node);
     }
     return jsonArray;
