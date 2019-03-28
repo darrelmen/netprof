@@ -39,6 +39,7 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVInfo;
@@ -49,6 +50,7 @@ import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -95,11 +97,11 @@ public interface AudioService extends RemoteService {
   void checkAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
 
   /**
-   * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
    * @param projectid
    * @return
    * @throws DominoSessionException
    * @throws RestrictedOperationException
+   * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
    */
   RecalcRefResponse recalcRefAudio(int projectid) throws DominoSessionException, RestrictedOperationException;
 
@@ -122,4 +124,5 @@ public interface AudioService extends RemoteService {
 
   OOVInfo checkOOV(int id) throws DominoSessionException;
 
+  void updateOOV(int projectID, List<OOV> updates) throws DominoSessionException;
 }

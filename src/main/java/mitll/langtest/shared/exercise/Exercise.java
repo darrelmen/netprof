@@ -87,15 +87,17 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   private List<ExerciseAttribute> attributes = new ArrayList<>();
 
-  private String normalizedFL;
+  /**
+   * Just to use when doing decoding.
+   */
+  private transient String normalizedFL = "";
 
   /**
    *
    */
   private int parentExerciseID = -1;
 
-  private String foreignLanguageNorm;
-
+  //private String foreignLanguageNorm;
 
   // for serialization
   public Exercise() {
@@ -185,7 +187,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int creator,
                   String englishSentence,
                   String foreignLanguage,
-                  //String foreignLanguageNorm,
                   String normalizedFL,
                   String altFL,
                   String meaning,
@@ -629,9 +630,13 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.dominoContextIndex = dominoContextIndex;
   }
 
-  @Override
-  public String getForeignLanguageNorm() {
-    return foreignLanguageNorm;
+//  @Override
+//  public String getForeignLanguageNorm() {
+//    return foreignLanguageNorm;
+//  }
+
+  public String getNormalizedFL() {
+    return normalizedFL;
   }
 
   public String toString() {
@@ -664,9 +669,5 @@ public class Exercise extends AudioExercise implements CommonExercise,
         (builder.toString().isEmpty() ? "" : " \n\tmissing user audio " + builder.toString()) +
         " unit->lesson " + getUnitToValue() +
         " attr " + getAttributes();
-  }
-
-  public String getNormalizedFL() {
-    return normalizedFL;
   }
 }

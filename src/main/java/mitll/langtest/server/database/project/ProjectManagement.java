@@ -59,6 +59,7 @@ import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
@@ -1470,5 +1471,12 @@ public class ProjectManagement implements IProjectManagement {
   public OOVInfo checkOOV(int id) {
     Project project = getProject(id, false);
     return project.getAudioFileHelper().checkOOV(project.getRawExercises(), true);
+  }
+
+  public void updateOOV(List<OOV> updates, int user) {
+    for (OOV update : updates) {
+      boolean update1 = db.getOOVDAO().update(update.getID(), update.getEquivalent(), user);
+      if (!update1) logger.warn("updateOOV can't update " + update);
+    }
   }
 }

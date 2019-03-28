@@ -214,7 +214,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         shared.getEnglish(),
         shared.getMeaning(),
         shared.getForeignLanguage(),
-        shared.getForeignLanguageNorm(),
+        shared.getNormalizedFL(),
         shared.getAltFL(),
         shared.getTransliteration(),
         shared.isOverride(),
@@ -299,7 +299,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     }
 
     String fl = getFL(shared);
-    String foreignLanguageNorm1 = shared.getForeignLanguageNorm();
+    String foreignLanguageNorm1 = shared.getNormalizedFL();
     String foreignLanguageNorm = foreignLanguageNorm1 == null ? fl : foreignLanguageNorm1;
 
     return new SlickExercise(shared.getID() > 0 ? shared.getID() : -1,

@@ -114,5 +114,9 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
    */
   int getDominoContextIndex();
 
-  String getForeignLanguageNorm();
+  /**
+   *
+   * @return
+   */
+//  String getForeignLanguageNorm();
 }

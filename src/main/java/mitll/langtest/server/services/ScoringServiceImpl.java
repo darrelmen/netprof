@@ -509,11 +509,16 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         Language.ENGLISH :
         getProject(customOrPredefExercise == null ? projectID : customOrPredefExercise.getProjectID()).getLanguageEnum();
 
+    if (customOrPredefExercise != null && sentence.equalsIgnoreCase(customOrPredefExercise.getFLToShow())) {
+      String normalizedFL = customOrPredefExercise.getNormalizedFL();
+      if (!normalizedFL.isEmpty() && !customOrPredefExercise.getFLToShow().equalsIgnoreCase(normalizedFL)){
+        sentence = normalizedFL;
+      }
+    }
     PrecalcScores precalcScores =
         audioFileHelper
             .checkForWebservice(exerciseID, english, sentence, projectID, userIDFromSessionOrDB, absoluteAudioFile, language);
 
-    //Language languageEnum = getProject(projectID).getLanguageEnum();
     String absPath = absoluteAudioFile.getAbsolutePath();
     return getPretestScore(reqid,
         (int) resultID,

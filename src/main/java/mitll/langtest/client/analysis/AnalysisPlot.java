@@ -216,7 +216,7 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
   Long getSessionStart() {
     //logger.info("getSessionStart index  " + index + " in " + sessionIDs.size());
     Long aLong = sessionIDs.isEmpty() ? new Long(-1) : sessionIDs.get(index);
-  //  logger.info("index  " + index + " = " + aLong);
+    //  logger.info("index  " + index + " = " + aLong);
     return aLong;
   }
 
@@ -265,7 +265,6 @@ public class AnalysisPlot<T extends CommonShell> extends BasicTimeSeriesPlot<T> 
 
     // get the number of items on the list so we can show the header with a percentage completion.
     if (listid == -1) {
-   //   logger.info("showUserPerformance no listid");
       addChart(userPerformance, userChosenID, false, isTeacherView, 0);
     } else {
       listServiceAsync.getNumOnList(listid, new AsyncCallback<Integer>() {

@@ -39,6 +39,7 @@ import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVInfo;
 import mitll.langtest.shared.project.SlimProject;
@@ -150,4 +151,6 @@ public interface IProjectManagement {
   Map<String,Integer> getNpToDomino(int dominoProjectID);
 
   OOVInfo checkOOV(int id);
+
+  void updateOOV(List<OOV> updates, int user);
 }

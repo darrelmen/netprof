@@ -464,7 +464,10 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     if (audioRef != null) {
       audioRef = CompressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
     }
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getFLToShow(),
+
+    String flToShow = exercise.getFLToShow();
+
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, flToShow,
         "",
         controller,
         controller.getProps().showSpectrogram(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED,

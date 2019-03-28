@@ -69,6 +69,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView extends TableAndPager implements ContentView, CreateListComplete {
+  public static final String FORGET_VISITED_LIST = "Forget visited list.";
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String QUIZ = "Quiz";
@@ -602,7 +603,6 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
     add.addClickHandler(event -> gotDelete(add, getCurrentSelectionFromMyLists()));
     add.setType(ButtonType.DANGER);
     addTooltip(add, DELETE_LIST);
-    // add.setEnabled(!myLists.isEmpty());
     myLists.addButton(add);
     return add;
   }
@@ -617,8 +617,7 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> gotDeleteVisitor(add, getCurrentSelection(visited), visited));
     add.setType(ButtonType.DANGER);
-    // add.setEnabled(!visited.isEmpty());
-    addTooltip(add, "Forget visited list.");
+    addTooltip(add, FORGET_VISITED_LIST);
     visited.addButton(add);
     return add;
   }

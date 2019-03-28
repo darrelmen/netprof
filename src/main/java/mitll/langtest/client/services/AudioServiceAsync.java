@@ -34,6 +34,7 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVInfo;
@@ -43,6 +44,7 @@ import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 
+import java.util.List;
 import java.util.Set;
 
 public interface AudioServiceAsync {
@@ -111,4 +113,5 @@ public interface AudioServiceAsync {
 
   void checkOOV(int id, AsyncCallback<OOVInfo> async);
 
+  void updateOOV(int projectID, List<OOV> updates, AsyncCallback<Void> async);
 }
