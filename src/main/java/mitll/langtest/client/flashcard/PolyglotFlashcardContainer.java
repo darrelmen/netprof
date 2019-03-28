@@ -40,9 +40,9 @@ interface PolyglotFlashcardContainer extends FlashcardContainer {
 
   long getRoundTimeLeftMillis();
 
-  boolean getIsDry();
-
-  PolyglotDialog.MODE_CHOICE getMode();
+//  boolean getIsDry();
+//
+//  PolyglotDialog.MODE_CHOICE getMode();
 
   boolean isInLightningRound();
 

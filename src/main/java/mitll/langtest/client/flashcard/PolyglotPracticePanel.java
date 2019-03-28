@@ -239,11 +239,11 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
    */
   @Override
   protected void recordingStarted() {
-    if (polyglotFlashcardContainer.getMode() != PolyglotDialog.MODE_CHOICE.NOT_YET) {
+//    if (polyglotFlashcardContainer.getMode() != PolyglotDialog.MODE_CHOICE.NOT_YET) {
       polyglotFlashcardContainer.startTimedRun();
-    } else {
-      logger.info("recordingStarted : ignore start time run ? mode " + polyglotFlashcardContainer.getMode());
-    }
+//    } else {
+//      logger.info("recordingStarted : ignore start time run ? mode " + polyglotFlashcardContainer.getMode());
+//    }
     super.recordingStarted();
   }
 

@@ -38,7 +38,6 @@ import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -56,7 +55,6 @@ import mitll.langtest.shared.custom.TimeRange;
 import mitll.langtest.shared.exercise.CommonShell;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Date;
 import java.util.logging.Logger;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
@@ -236,11 +234,6 @@ public class AnalysisTab extends DivWidget {
     boolean isTeacherView = overallBottom != null;
 
     AnalysisPlot analysisPlot = showPlot ? addAnalysisPlot(controller, isPolyglot, isTeacherView ? 700 : maxWidth, isTeacherView) : null;
-
-//    if (!showPlot) {
-//      exerciseLookup = new CommonShellCache<>(controller.getMessageHelper());
-//    }
-
     DivWidget bottom = getBottom(isTeacherView);
 
     if (isTeacherView) { // are we in student or teacher view
@@ -317,7 +310,6 @@ public class AnalysisTab extends DivWidget {
         controller.getSoundManager(), playFeedback, controller,
         controller.getMessageHelper(),
         isPolyglot, maxWidth, controller.getListService());
-    // exerciseLookup = analysisPlot;
     {
       Panel timeControls = getTimeControls(playFeedback, isTeacherView);
       analysisPlot.setTimeWidgets(timeWidgets);

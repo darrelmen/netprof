@@ -116,7 +116,6 @@ public class EditItem {
   public void grabFocus() {
     ((EditableExerciseList) exerciseList).grabFocus();
   }
-
   public void removeHistoryListener() {
     ((EditableExerciseList) exerciseList).removeHistoryListener();
   }
@@ -188,6 +187,10 @@ public class EditItem {
   private class ListEditableDialog extends EditableExerciseDialog<CommonShell, ClientExercise> {
     ListEditableDialog(ExerciseController controller, ClientExercise exercise) {
       super(controller, exercise, EditItem.this.userListID, INavigation.VIEWS.LISTS);
+    }
+
+    @Override protected void addItemsAtTop(Panel container) {
+    //  logger.info("not adding items at top?");
     }
 
     @NotNull

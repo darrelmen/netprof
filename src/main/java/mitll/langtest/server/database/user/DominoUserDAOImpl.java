@@ -228,13 +228,34 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
               if (DEBUG_USER_CACHE) logger.info("idToDBUser Load " + key);
               DBUser dbUser = delegate.lookupDBUser(key);
               if (dbUser == null) {
-//                dbUser = delegate.lookupDBUser(getDefaultUser());
-                logger.info("idToDBUser : can't find user #" + key + " so returing default user.");
-                dbUser = defaultDBUser;
+                logger.warn("idToDBUser no db user with id " + key);
+                dbUser = getStandIn(key);
               }
               return dbUser;
             }
           });
+
+  /**
+   * Try to deal in a way that doesn't collapse multiple users into one.
+   * @param key
+   * @return
+   */
+  @NotNull
+  private DBUser getStandIn(Integer key) {
+    return new DBUser(key,
+        "User_" + key,
+        "Unknown",
+        "Unknown",
+        "",
+        "",
+        UNSPECIFIED,
+        new HashSet<>(),
+
+        new Group(),
+        new HashSet<Group>(),
+        null,
+        new HashSet<>());
+  }
 
   /**
    * @see #getByID
@@ -689,7 +710,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             ") : no email token for " + clientUserDetail);
       }
       return new LoginResult(clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID(),
-          useUsualLogin ? "" : emailToken);
+          useUsualLogin ? "" : emailToken).setResultType(LoginResult.ResultType.Added);
     }
   }
 

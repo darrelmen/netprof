@@ -49,13 +49,13 @@ import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.dialog.EditableExerciseList.SAFE_TEXT_REPLACEMENT;
 
-class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> extends NewUserExercise<T, U> {
+abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> extends NewUserExercise<T, U> {
   private final Logger logger = Logger.getLogger("EditableExerciseDialog");
 
   private static final String FOREIGN_LANGUAGE = "foreignLanguage";
-  public static final String TRANSLITERATION = "transliteration";
+  private static final String TRANSLITERATION = "transliteration";
   private static final String MEANING = "meaning";
-  public static final String ENGLISH = "english";
+  private static final String ENGLISH = "english";
 
   private final HTML fastAnno = new HTML();
   private final HTML slowAnno = new HTML();
@@ -79,8 +79,6 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
     fastAnno.addStyleName("editComment");
     slowAnno.addStyleName("editComment");
   }
-
-  @Override protected void addItemsAtTop(Panel container) {}
 
   boolean shouldDisableNext() {
     return true;
@@ -127,10 +125,10 @@ class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> ex
     return addControlGroupEntrySimple(row, "", rapSlow, slowAnno);
   }
 
-  @Override
-  protected void formInvalid() {
-    postChangeIfDirty(false);
-  }
+//  @Override
+//  protected void formInvalid() {
+//    postChangeIfDirty(false);
+//  }
 
   /**
    * So check if the audio is the original audio and the translation has changed.

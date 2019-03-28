@@ -39,7 +39,6 @@ import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotFlashcardFactory;
 import mitll.langtest.client.flashcard.PolyglotPracticePanel;
 import mitll.langtest.client.flashcard.PracticeFacetExerciseList;
@@ -56,7 +55,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE.POLYGLOT;
+//import static mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE.POLYGLOT;
 
 public class NewQuizHelper<T extends CommonShell & ScoredExercise> extends PracticeHelper<T> {
   private final Logger logger = Logger.getLogger("NewQuizHelper");
@@ -87,10 +86,10 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise> extends Pract
 
     polyglotFlashcardFactory = new PolyglotFlashcardFactory<T, ClientExercise>(controller, exerciseList, INavigation.VIEWS.QUIZ) {
 
-      @Override
-      public PolyglotDialog.MODE_CHOICE getMode() {
-        return POLYGLOT;
-      }
+//      @Override
+//      public PolyglotDialog.MODE_CHOICE getMode() {
+//        return POLYGLOT;
+//      }
 
       /**
        * @see PolyglotPracticePanel#reallyStartOver

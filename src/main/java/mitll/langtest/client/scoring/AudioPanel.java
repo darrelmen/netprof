@@ -548,14 +548,14 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
           long now = System.currentTimeMillis();
           long roundtrip = now - then;
 
-          if (!result.successful) {
+          if (!result.isSuccessful()) {
             logger.warning("getImageURLForAudio : got error for request for type " + type + " and " + path + " and exid " + id);
             waveform.setUrl(LangTest.RED_X_URL.asString());
             if (WARN_ABOUT_MISSING_AUDIO) Window.alert("missing audio file on server " + path);
-          } else if (result.req == -1 || isMostRecentRequest(type, result.req)) { // could be cached
+          } else if (result.getReq() == -1 || isMostRecentRequest(type, result.getReq())) { // could be cached
             showResult(result, imageAndCheck);
           } else {
-            logger.info("\tgetImageURLForAudio : ignoring out of sync response " + result.req + " for " + type);
+            logger.info("\tgetImageURLForAudio : ignoring out of sync response " + result.getReq() + " for " + type);
           }
           if (logMessages) {
             logMessage(result, roundtrip);
@@ -580,15 +580,15 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
 
   private void showResult(ImageResponse result, final ImageAndCheck imageAndCheck) {
     // logger.info("\tgetImageURLForAudio : using new url " + result.imageURL);
-    imageAndCheck.getImage().setUrl(result.imageURL);
+    imageAndCheck.getImage().setUrl(result.getImageURL());
     imageAndCheck.getImage().setVisible(true);
-    audioPositionPopup.reinitialize(result.durationInSeconds);
+    audioPositionPopup.reinitialize(result.getDurationInSeconds());
   }
 
   private void logMessage(ImageResponse result, long roundtrip) {
     String message = "getImageURLForAudio : (success) " + result + " took " + roundtrip + " millis, audio dur " +
-        (result.durationInSeconds * 1000f) + " millis, " +
-        " " + ((float) roundtrip / (float) (result.durationInSeconds * 1000f)) + " roundtrip/audio duration ratio.";
+        (result.getDurationInSeconds() * 1000f) + " millis, " +
+        " " + ((float) roundtrip / (float) (result.getDurationInSeconds() * 1000f)) + " roundtrip/audio duration ratio.";
     controller.getService().logMessage(message, false, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {

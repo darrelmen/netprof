@@ -160,7 +160,9 @@ public class SectionNode implements IsSerializable, Comparable<SectionNode> {
   }
 
   public String easy() {
-    return name + " " + childType + " " + children.size();
+    List<SectionNode> children = getChildren();
+    int size = children == null? 0: children.size();
+    return name + " " + childType + " " + size;
   }
 
   public String toString() {

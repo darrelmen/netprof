@@ -65,7 +65,7 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
    */
   private long roundTimeLeftMillis = -1;
 
-  private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
+  //private PolyglotDialog.MODE_CHOICE mode = PolyglotDialog.MODE_CHOICE.NOT_YET;
   private boolean postedAudio;
   private QuizSpec quizSpec;
 
@@ -176,10 +176,10 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
     controller.setBannerVisible(b);
   }
 
-  @Override
-  public boolean getIsDry() {
-    return mode == PolyglotDialog.MODE_CHOICE.DRY_RUN;
-  }
+//  @Override
+//  public boolean getIsDry() {
+//    return mode == PolyglotDialog.MODE_CHOICE.DRY_RUN;
+//  }
 
   /**
    *
@@ -248,15 +248,15 @@ public class PolyglotFlashcardFactory<L extends CommonShell, T extends ClientExe
     return (recurringTimer != null) && recurringTimer.isRunning();
   }
 
-
-  public void setMode(PolyglotDialog.MODE_CHOICE mode) {
-    this.mode = mode;
-  }
-
-  @Override
-  public PolyglotDialog.MODE_CHOICE getMode() {
-    return mode;
-  }
+//
+//  public void setMode(PolyglotDialog.MODE_CHOICE mode) {
+//    this.mode = mode;
+//  }
+//
+//  @Override
+//  public PolyglotDialog.MODE_CHOICE getMode() {
+//    return mode;
+//  }
 
   @Override
   public long getSessionStartMillis() {

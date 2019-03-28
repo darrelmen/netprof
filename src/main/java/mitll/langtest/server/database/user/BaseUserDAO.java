@@ -42,9 +42,9 @@ import java.util.*;
 public abstract class BaseUserDAO extends DAO {
   private static final Logger logger = LogManager.getLogger(BaseUserDAO.class);
 
-  protected static final String DEFECT_DETECTOR = "defectDetector";
-  protected static final String BEFORE_LOGIN_USER = "beforeLogin";
-  protected static final String IMPORT_USER = "importUser";
+   static final String DEFECT_DETECTOR = "defectDetector";
+   static final String BEFORE_LOGIN_USER = "beforeLogin";
+   static final String IMPORT_USER = "importUser";
 
   public static final String USERS = "users";
 
@@ -93,13 +93,6 @@ public abstract class BaseUserDAO extends DAO {
    */
   public static final int DEFAULT_FEMALE_ID = -3;
   public static final int UNDEFINED_USER = -5;
-
-  @Deprecated
-  public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 99, true, "default", false);
-  @Deprecated
-  public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 99, true, "Male", false);
-  @Deprecated
-  public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female", false);
 
   final Collection<String> admins;
 
@@ -151,6 +144,7 @@ public abstract class BaseUserDAO extends DAO {
    *
    * @param user
    * @return user if add or modified, null if no change was done
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#addUser
    * @see UserManagement#addUser
    * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    */
@@ -159,10 +153,11 @@ public abstract class BaseUserDAO extends DAO {
     if (currentUser == null) {
       LoginResult loginResult = addUserAndGetID(user);
       int userid = loginResult.getId();
-      if (loginResult.getResultType() == LoginResult.ResultType.Unknown) {
-        logger.warn("got result " + loginResult.getResultType());
+      boolean failed = loginResult.getResultType() == LoginResult.ResultType.Unknown;
+      if (failed) {
+        logger.warn("addUser failed : got result " + loginResult.getResultType());
       } else {
-        logger.info("result " + loginResult.getResultType() + " for user " + userid);
+        logger.info("addUser result " + loginResult.getResultType() + " for user " + userid);
       }
 
       User userWhere = userid == -1 ? null : getUserWhere(userid);
@@ -173,7 +168,9 @@ public abstract class BaseUserDAO extends DAO {
       } else {
         logger.warn("addUser : can't find user with id " + userid);
       }
-      logger.info("addUser : added new " + userWhere);
+      if (!failed) {
+        logger.info("addUser : added new " + userWhere);
+      }
       return userWhere;
     } else {
       logger.warn("addUser : user exists ");

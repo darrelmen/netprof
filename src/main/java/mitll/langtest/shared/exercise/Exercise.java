@@ -209,8 +209,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.safeToDecode = candecode;
     safeToDecodeLastChecked = lastChecked;
 
-    this.foreignLanguageNorm = foreignLanguageNorm;
-
     this.dominoID = dominoID;
     this.shouldSwap = shouldSwap;
   }
@@ -596,7 +594,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.isPredef = isPredef;
   }
 
-
   @Override
   public int getParentExerciseID() {
     return parentExerciseID;
@@ -608,6 +605,11 @@ public class Exercise extends AudioExercise implements CommonExercise,
   @Override
   public void setParentExerciseID(int parentExerciseID) {
     this.parentExerciseID = parentExerciseID;
+  }
+
+  @Override
+  public void setDominoID(int dominoID) {
+    this.dominoID = dominoID;
   }
 
   /**

@@ -49,20 +49,24 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.client.qc.FixNPFHelper;
 import mitll.langtest.client.scoring.ASRScoringAudioPanel;
+import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.MiniUser;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
+import static mitll.langtest.client.exercise.WaveformExercisePanel.DOMINO_PROJECT;
 import static mitll.langtest.shared.answer.AudioType.*;
 
 public class ReviewEditableExercise<T extends CommonShell, U extends ClientExercise> extends EditableExerciseDialog<T, U> {
-  public static final String CONTEXT = "context";
+  private static final String CONTEXT = "context";
   private final Logger logger = Logger.getLogger("ReviewEditableExercise");
 
   private static final String MARKING_AUDIO_DEFECT = "marking audio defect";
@@ -132,6 +136,27 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     context.box.setEnabled(false);
     contextTrans.box.setEnabled(false);
     return widgets;
+  }
+
+  @Override
+  protected void addItemsAtTop(Panel container) {
+    List<String> typeOrder = new ArrayList<>(controller.getProjectStartupInfo().getTypeOrder());
+    addDominoProject(typeOrder);
+    new UnitChapterItemHelper<U>(typeOrder).addUnitChapterItem(newUserExercise, container);
+  }
+
+  private void addDominoProject(List<String> typeOrder) {
+    List<SlimProject> allProjects = controller.getAllProjects();
+    int projectID = controller.getProjectID();
+    List<SlimProject> collect = allProjects.stream().filter(s -> s.getID() == projectID).collect(Collectors.toList());
+    if (!collect.isEmpty()) {
+      SlimProject slimProject = collect.get(0);
+      int dominoID = slimProject.getDominoID();
+      if (dominoID > -1) {
+        typeOrder.add(DOMINO_PROJECT);
+        newUserExercise.getUnitToValue().put(DOMINO_PROJECT, "" + dominoID);
+      }
+    }
   }
 
   private int currentTab = 0;
@@ -288,7 +313,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    * @return
    * @see #makeAudioRow
    */
-  public AudioAttribute getAudioAttribute(AudioRefExercise newUserExercise, AudioType audioType) {
+  private AudioAttribute getAudioAttribute(AudioRefExercise newUserExercise, AudioType audioType) {
     // logger.info("getAudioAttribute audio type " + audioType);
 
     AudioAttribute audioAttribute =
@@ -806,15 +831,15 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     });
   }
 
-  @Override
-  protected String getEnglishLabel() {
-    return isEnglish() ? "Meaning<br/>" : "English<br/>";
-  }
-
-  @Override
-  protected String getTransliterationLabel() {
-    return TRANSLITERATION;
-  }
+//  @Override
+//  protected String getEnglishLabel() {
+//    return isEnglish() ? "Meaning<br/>" : "English<br/>";
+//  }
+//
+//  @Override
+//  protected String getTransliterationLabel() {
+//    return TRANSLITERATION;
+//  }
 
   private class MyDivWidget extends DivWidget implements BusyPanel {
     @Override
@@ -848,7 +873,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
       this.exercise = exercise;
     }
 
-    public void setComment(Widget comment) {
+    void setComment(Widget comment) {
       this.comment = comment;
     }
 

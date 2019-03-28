@@ -108,9 +108,9 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
 
     if (practiceHelper != null) {
       PolyglotFlashcardFactory<T, ClientExercise> polyglotFlashcardFactory = practiceHelper.getPolyglotFlashcardFactory();
-      if (polyglotFlashcardFactory != null) {
-        polyglotFlashcardFactory.setMode(practiceHelper.getMode());
-      }
+//      if (polyglotFlashcardFactory != null) {
+//        polyglotFlashcardFactory.setMode(practiceHelper.getMode());
+//      }
       if (getStatsFlashcardFactory() != null) {
         getStatsFlashcardFactory().setNavigation(practiceHelper.getNavigation());
       }

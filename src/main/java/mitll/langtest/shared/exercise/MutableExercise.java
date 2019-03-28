@@ -72,4 +72,6 @@ public interface MutableExercise extends CommonShell, MutableShell {
   void setUnitToValue(Map<String,String> unitToValue);
 
   void setParentExerciseID(int parentExerciseID);
+
+  void setDominoID(int dominoID);
 }

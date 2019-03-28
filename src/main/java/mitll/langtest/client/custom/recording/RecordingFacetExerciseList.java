@@ -63,6 +63,9 @@ public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> 
   private static final List<String> DYNAMIC_FACETS =
       Arrays.asList(DialogMetadata.LANGUAGE.name(), DialogMetadata.SPEAKER.name());
 
+  /**
+   * @see #getFilterRequest(int, List)
+   */
   protected final boolean isContext;
   private boolean isDialog;
 
@@ -90,9 +93,9 @@ public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> 
         listHeader,
         instanceName);
     this.isContext = isContext;
-    ProjectMode mode = controller.getMode();
+ //   ProjectMode mode = controller.getMode();
    // logger.info("mode = " + mode);
-    isDialog = isDialog() && mode == ProjectMode.DIALOG;
+    isDialog = isDialog() && controller.getMode() == ProjectMode.DIALOG;
   //  logger.info("isDialog = " + isDialog);
   }
 

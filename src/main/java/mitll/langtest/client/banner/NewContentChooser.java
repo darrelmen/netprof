@@ -45,9 +45,6 @@ import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.*;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.flashcard.PolyglotDialog;
-import mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE;
-import mitll.langtest.client.flashcard.PolyglotDialog.PROMPT_CHOICE;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.UILifecycle;
@@ -467,11 +464,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private void showDrill(PracticeHelper practiceHelper, VIEWS views) {
     clear();
 
-    if (isPolyglotProject()) {
-      showPolyDialog();
-    } else {
+//    if (isPolyglotProject()) {
+//      showPolyDialog();
+//    } else {
       showPractice(practiceHelper, views);
-    }
+//    }
   }
 
   /**
@@ -488,6 +485,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    *
    * @see #showDrill
    */
+/*
   private void showPolyDialog() {
     mode = MODE_CHOICE.NOT_YET;
 
@@ -533,14 +531,17 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
           @Override
           public void gotPrompt(PROMPT_CHOICE choice) {
-            /*candidatePrompt = choice;*/
+            */
+/*candidatePrompt = choice;*//*
+
           }
         }
     );
   }
+*/
 
   private void showPractice(PracticeHelper toUse, VIEWS views) {
-    toUse.setMode(mode);
+  //  toUse.setMode(mode);
     toUse.setNavigation(this);
     toUse.showContent(divWidget, views);
     toUse.hideList();
@@ -565,8 +566,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
   }
 
-  private MODE_CHOICE candidateMode = MODE_CHOICE.NOT_YET;
-  private MODE_CHOICE mode = MODE_CHOICE.NOT_YET;
+//  private MODE_CHOICE candidateMode = MODE_CHOICE.NOT_YET;
+//  private MODE_CHOICE mode = MODE_CHOICE.NOT_YET;
 
   private void pushFirstUnit() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
@@ -584,7 +585,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void pushUnitOrChapter(String s, MatchInfo next) {
-    logger.info("pushUnitOrChapter ");
+  //  logger.info("pushUnitOrChapter ");
     pushItem(s + "=" + next.getValue());
   }
 

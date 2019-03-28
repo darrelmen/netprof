@@ -39,12 +39,10 @@ import mitll.langtest.shared.user.SimpleUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class AudioExercise extends ExerciseShell {
   //private final transient Logger logger = Logger.getLogger("AudioExercise");
-
   private static final String SPEED = "speed";
   private static final String REGULAR = "regular";
   private static final String SLOW = "slow";
@@ -552,15 +550,17 @@ public class AudioExercise extends ExerciseShell {
     return userToAudio;
   }
 
+  /**
+   * Only use the gender marking on the audio itself, not the user, trying to not depend on the user's
+   * validity...
+   *
+   * @param isMale
+   * @return
+   */
   @NotNull
   private List<AudioAttribute> simpleByGender(boolean isMale) {
     List<AudioAttribute> males = new ArrayList<>();
     for (AudioAttribute audioAttribute : audioAttributes.values()) {
-      //  MiniUser user = audioAttribute.getUser();
-      // if (user == null) {
-      //logger.error ("getByGender : huh? there's no user attached to " + audioAttribute);
-      // } else
-
       if (isMale && audioAttribute.isMale() || (!isMale && !audioAttribute.isMale())) {
         males.add(audioAttribute);
       }

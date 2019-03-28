@@ -31,6 +31,8 @@ package mitll.langtest.client.exercise;
 
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.services.*;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.langtest.shared.project.SlimProject;
 
 import java.util.Collection;
@@ -39,7 +41,7 @@ import java.util.List;
 /**
  * Created by go22670 on 6/14/17.
  */
-public interface Services extends EventRegistration {
+public interface Services<T extends CommonShell & HasUnitChapter> extends EventRegistration {
   List<SlimProject> getAllProjects();
 
   String getHost();
@@ -71,7 +73,7 @@ public interface Services extends EventRegistration {
 
   OpenUserServiceAsync getOpenUserService();
 
-  ExerciseServiceAsync getExerciseService();
+  ExerciseServiceAsync<T> getExerciseService();
   DialogServiceAsync getDialogService();
 
   ListServiceAsync getListService();

@@ -51,6 +51,8 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.*;
 import java.util.*;
 
+import static mitll.langtest.server.database.user.BaseUserDAO.*;
+
 public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   private static final Logger logger = LogManager.getLogger(AudioDAO.class);
 
@@ -71,9 +73,15 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   private final Connection connection;
   private final IUserDAO userDAO;
 
+  @Deprecated
+  public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 99, true, "default", false);
+  @Deprecated
+  public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 99, true, "Male", false);
+  @Deprecated
+  public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female", false);
+
   @Override
   public void deleteForProject(int projID) {
-
   }
 
   @Override
@@ -1100,13 +1108,13 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     createIndex(database, Database.EXID, AUDIO);
   }
 
-  MiniUser checkDefaultUser(long userID, MiniUser user) {
-    if (userID == BaseUserDAO.DEFAULT_USER_ID) {
-      user = BaseUserDAO.DEFAULT_USER;
-    } else if (userID == BaseUserDAO.DEFAULT_MALE_ID) {
-      user = BaseUserDAO.DEFAULT_MALE;
-    } else if (userID == BaseUserDAO.DEFAULT_FEMALE_ID) {
-      user = BaseUserDAO.DEFAULT_FEMALE;
+  private MiniUser checkDefaultUser(long userID, MiniUser user) {
+    if (userID == DEFAULT_USER_ID) {
+      user = DEFAULT_USER;
+    } else if (userID == DEFAULT_MALE_ID) {
+      user = DEFAULT_MALE;
+    } else if (userID == DEFAULT_FEMALE_ID) {
+      user = DEFAULT_FEMALE;
     }
     return user;
   }

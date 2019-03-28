@@ -195,10 +195,14 @@ public class CreateListDialog extends BasicDialog {
    * @param thirdRow
    * @seex
    * @seex mitll.langtest.client.custom.Navigation#getNavigation
+   * @see ListView#doAdd
    */
   public void doCreate(Panel thirdRow) {
     thirdRow.clear();
     Panel child = addEnterKeyBinding();
+
+//    logger.info("doCreate on " + thirdRow.getClass());
+
     thirdRow.add(child);
     zeroPadding(child);
     child.addStyleName("userListContainer");

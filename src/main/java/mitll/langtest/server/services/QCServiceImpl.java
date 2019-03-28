@@ -133,7 +133,7 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
    * @param isMale
    * @see mitll.langtest.client.qc.QCNPFExercise#getGenderGroup
    */
-  @Override
+/*  @Override
   public void markGender(AudioAttribute attr, boolean isMale) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasQCPerm(userIDFromSessionOrDB)) {
@@ -159,25 +159,25 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
 
         // TODO : consider putting this back???
         //   attachAudio(byID);
-/*
+*//*
       String addr = Integer.toHexString(byID.hashCode());
       for (AudioAttribute audioAttribute : byID.getAudioAttributes()) {
         logger.debug("markGender 1 after gender change, now " + audioAttribute + " : " +audioAttribute.getUserid() + " on " + addr);
       }
-*/
+*//*
     //    db.getExerciseDAO(getProjectIDFromUser()).addOverlay(byID);
 
-/*      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(exid);
+*//*      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(exid);
       String adrr3 = Integer.toHexString(customOrPredefExercise.hashCode());
       logger.info("markGender getting " + adrr3 + " : " + customOrPredefExercise);
       for (AudioAttribute audioAttribute : customOrPredefExercise.getAudioAttributes()) {
         logger.debug("markGender 2 after gender change, now " + audioAttribute + " : " +audioAttribute.getUserid() + " on "+ adrr3);
-      }*/
+      }*//*
 
       }
       getSectionHelper().refreshExercise(byID);
     } else {
       throw getRestricted("marking gender");
     }
-  }
+  }*/
 }

@@ -32,13 +32,17 @@ package mitll.testing;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.DynamicRange;
+import mitll.langtest.server.database.DecodeTest;
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
 
 public class AudioTest {
+  private static final Logger logger = LogManager.getLogger(AudioTest.class);
 
   @Test
   public void testRMS() {
@@ -76,10 +80,51 @@ public class AudioTest {
   }
 
   @Test
-  public void testTrim() {
-    String file = "/Users/go22670/netPron2/snrs-no-hp";
+  public void testCheckMP3() {
+    String file = "snrs-no-hp";
     try {
       File file1 = new File(file);
+      if (!file1.exists()) logger.warn("Can't find " + file1.getAbsolutePath());
+      File[] files = file1.listFiles();
+      for (File f : files) {
+        if (f.getName().endsWith(".mp3")) {
+          AudioCheck audioCheck = new AudioCheck(false,26);
+          AudioCheck.ValidityAndDur valid = audioCheck.isValid(f, false, false);
+          double durationInSeconds = audioCheck.getDurationInSeconds(f);
+          logger.info("for " + f.getName() + " " + valid);
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testCheck() {
+    String file = "snrs-no-hp";
+    try {
+      File file1 = new File(file);
+      if (!file1.exists()) logger.warn("Can't find " + file1.getAbsolutePath());
+      File[] files = file1.listFiles();
+      for (File f : files) {
+        if (f.getName().endsWith(".wav")) {
+          AudioCheck audioCheck = new AudioCheck(false,26);
+          AudioCheck.ValidityAndDur valid = audioCheck.isValid(f, false, false);
+          double durationInSeconds = audioCheck.getDurationInSeconds(f);
+          logger.info("for " + f.getName() + " " + valid);
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  @Test
+  public void testTrim() {
+    String file = "snrs-no-hp";
+    try {
+      File file1 = new File(file);
+      if (!file1.exists()) logger.warn("Can't find " + file1.getAbsolutePath());
       File[] files = file1.listFiles();
       for (File f : files) {
         if (f.getName().endsWith(".wav")) {

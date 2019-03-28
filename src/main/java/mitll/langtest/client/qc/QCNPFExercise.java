@@ -321,14 +321,11 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
 
   private Heading getComment() {
     // boolean isComment = getInstance().isQC();
-
     if (logger == null) logger = Logger.getLogger("QCNPFExercise");
 //    logger.info("inst " + getInstance());
 //    logger.info("isQC " + getInstance().isQC());
 
-    String columnLabel = DEFECT;
-
-    Heading heading = new Heading(4, columnLabel);
+    Heading heading = new Heading(4, DEFECT);
     heading.addStyleName("borderBottomQC");
     // if (isComment) heading.setWidth("90px");
     return heading;
@@ -371,7 +368,11 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
       List<MiniUser> maleUsers = toShow.getSortedUsers(malesMap);
       List<MiniUser> femaleUsers = toShow.getSortedUsers(femalesMap);
 
+      maleUsers.forEach(u->logger.info(u.getUserID() + " male? " +u.getRealGender()));
+      femaleUsers.forEach(u->logger.info(u.getUserID() + " female? " +u.getRealGender()));
+
       tabs = new ArrayList<>();
+
       TabPanel tabPanel = new TabPanel();
       addTabsForUsers(toShow, tabPanel, malesMap, maleUsers);
       addTabsForUsers(toShow, tabPanel, femalesMap, femaleUsers);
@@ -448,7 +449,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
     navigationHelper.enableNext(exercise);
   }
 
-  private void addGenderAssignmentButtons(RememberTabAndContent tabAndContent, List<AudioAttribute> audioAttributes,
+ /* private void addGenderAssignmentButtons(RememberTabAndContent tabAndContent, List<AudioAttribute> audioAttributes,
                                           AudioAttribute audio, Widget panelForAudio) {
     Panel vp = new VerticalPanel();
     Panel hp = new HorizontalPanel();
@@ -460,13 +461,13 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
     vp.add(hp);
     vp.add(panelForAudio);
     tabAndContent.getContent().add(vp);
-  }
+  }*/
 
   /**
    * @return
    * @see #addGenderAssignmentButtons(RememberTabAndContent, List, AudioAttribute, Widget)
    */
-  private Button getNextButton() {
+/*  private Button getNextButton() {
     final Button next = new Button("Next");
     next.setType(ButtonType.SUCCESS);
     next.setIcon(IconType.ARROW_RIGHT);
@@ -477,7 +478,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
       loadNext();
     });
     return next;
-  }
+  }*/
 
   /**
    * TODO : this may be undone if someone deletes the audio cut - since this essentially masks out old score
@@ -492,7 +493,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    * @return
    * @see #addTabsForUsers
    */
-  private DivWidget getGenderGroup(final RememberTabAndContent tabAndContent, final AudioAttribute audio,
+ /* private DivWidget getGenderGroup(final RememberTabAndContent tabAndContent, final AudioAttribute audio,
                                    final Button next, final List<AudioAttribute> allByUser) {
     ButtonToolbar w = new ButtonToolbar();
     ButtonGroup buttonGroup = new ButtonGroup();
@@ -511,9 +512,9 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
     female.addClickHandler(event -> markGender(DEFAULT_FEMALE, female, audio, tabAndContent, allByUser, next, false));
 
     return w;
-  }
+  }*/
 
-  private void markGender(final MiniUser defaultWithGender,
+ /* private void markGender(final MiniUser defaultWithGender,
                           final Button offButton,
                           final AudioAttribute audio,
                           final RememberTabAndContent tabAndContent,
@@ -536,7 +537,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
       }
     });
   }
-
+*/
   /**
    * Only show next button if both reg and slow have been set (if both are there)
    *
@@ -791,14 +792,15 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
     commentEntry.setWidth("400px");
 
     commentEntry.addStyleName("leftFiveMargin");
-    commentEntry.addBlurHandler(event -> {
 
-      if (false) {
-        logger.info("makeCommentEntry comment on " +
-            "\n\tex      " + exerciseID +
-            "\n\tfield   " + field +
-            "\n\tcomment " + commentEntry.getText());
-      }
+
+    commentEntry.addBlurHandler(event -> {
+//      if (false) {
+//        logger.info("makeCommentEntry comment on " +
+//            "\n\tex      " + exerciseID +
+//            "\n\tfield   " + field +
+//            "\n\tcomment " + commentEntry.getText());
+//      }
 
       addIncorrectComment(exerciseID, field, sanitize(commentEntry.getText()));
     });

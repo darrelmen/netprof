@@ -50,6 +50,7 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.exercise.*;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.logging.Logger;
@@ -99,6 +100,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
         return new RecordingFacetExerciseList<T>(controller,
             topRow, currentExercisePanel, instanceName, listHeader, myView == INavigation.VIEWS.RECORD_SENTENCES) {
           @Override
+          @NotNull
           protected Panel getMessagePanel(String message) {
             DivWidget divWidget = new DivWidget();
             divWidget.add(super.getMessagePanel(message));
@@ -151,7 +153,7 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
      */
     RecordRefAudioPanel(ClientExercise e, ExerciseController controller1, ListInterface<T, ClientExercise> exerciseList1) {
       super(e, controller1, exerciseList1, RecorderNPFHelper.this.doNormalRecording);
-   //   logger.info("normal recording " + RecorderNPFHelper.this.doNormalRecording);
+      //   logger.info("normal recording " + RecorderNPFHelper.this.doNormalRecording);
     }
 
     @Override
@@ -199,8 +201,6 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
       String content = getExerciseContent(e);
 
       HTML maybeRTLContent = getMaybeRTLContent(content);
-      maybeRTLContent.addStyleName("rightTenMargin");
-      maybeRTLContent.addStyleName("topMargin");
 
       Widget contentWidget = (content.length() > 200) ? getContentScroller(maybeRTLContent) : maybeRTLContent;
 
@@ -258,8 +258,8 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
     /**
      * @param exid
      * @param field
-     * @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
      * @param commentToPost
+     * @see mitll.langtest.client.qc.QCNPFExercise#makeCommentEntry(String, ExerciseAnnotation)
      */
     @Override
     public void addIncorrectComment(int exid, final String field, final String commentToPost) {
