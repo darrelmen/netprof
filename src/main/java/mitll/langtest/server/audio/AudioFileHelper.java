@@ -906,11 +906,18 @@ public class AudioFileHelper implements AlignDecode {
 
     DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(isUsePhoneToDisplay()).setDoDecode(false);
 
-    PrecalcScores precalcScores = null;
+    PrecalcScores precalcScores;
     String transcript = attribute.getTranscript();
 
     if (!transcript.equalsIgnoreCase(exercise.getForeignLanguage())) {
       logger.warn("decodeAndRemember hmm, the audio transcript " + transcript + " doesn't match the exercise " + exercise.getForeignLanguage());
+    } else {
+      String normalizedFL = exercise.getNormalizedFL();
+      if (!normalizedFL.isEmpty() && !exercise.getForeignLanguage().equalsIgnoreCase(normalizedFL)) {
+        transcript = normalizedFL;
+        logger.info("decodeAndRemember using normalized transcript " + transcript);
+
+      }
     }
 
     try {
@@ -1420,14 +1427,14 @@ public class AudioFileHelper implements AlignDecode {
     if (!available && !noted) {
       noted = true;
       logger.info("checkForWebservice local webservice not available" +
-          "\n\tfor     " + theFile.getName() +
-          "\n\tproject " + projid +
-          "\n\texid    " + exid +
-          "\n\tenglish " + english +
-          "\n\titem    " + foreignLanguage +
-          "\n\tuser    " + userid +
+          "\n\tfor      " + theFile.getName() +
+          "\n\tproject  " + projid +
+          "\n\texid     " + exid +
+          "\n\tenglish  " + english +
+          "\n\titem     " + foreignLanguage +
+          "\n\tuser     " + userid +
           "\n\tlanguage " + language +
-          "\n\thost    " + hydraHost
+          "\n\thost     " + hydraHost
       );
       if (theFile.getName().endsWith("mp3")) logger.warn("don't send mp3!");
     }
@@ -1573,7 +1580,7 @@ public class AudioFileHelper implements AlignDecode {
 
       logger.info("getSession " +
           "\n\thost     " + hydraHost +
-        //  "\n\tprojID   " + projID +
+          //  "\n\tprojID   " + projID +
           "\n\tuser     " + TEST_USER +
           "\n\tpass     " + TEST_PASSWORD +
           "\n\tresponse " + json
@@ -1899,10 +1906,12 @@ public class AudioFileHelper implements AlignDecode {
   private String getPhraseToDecode(ClientExercise exercise, Language language) {
     String foreignLanguage = exercise.getForeignLanguage();
     String phraseToDecode;
-    if (exercise.getNormalizedFL().equalsIgnoreCase(foreignLanguage)) {
+    String normalizedFL = exercise.getNormalizedFL();
+    if (normalizedFL.isEmpty() || normalizedFL.equalsIgnoreCase(foreignLanguage)) {
       phraseToDecode = getChecker().getPhraseToDecode(foreignLanguage, language);
     } else {
-      phraseToDecode = getChecker().getPhraseToDecode(exercise.getNormalizedFL(), language);
+      logger.info("getPhraseToDecode using " + normalizedFL + " for "+ exercise.getID());
+      phraseToDecode = getChecker().getPhraseToDecode(normalizedFL, language);
     }
     return phraseToDecode;
   }
