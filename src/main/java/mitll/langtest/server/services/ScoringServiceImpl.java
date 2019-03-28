@@ -519,7 +519,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         audioFileHelper
             .checkForWebservice(exerciseID, english, sentence, projectID, userIDFromSessionOrDB, absoluteAudioFile, language);
 
-    //Language languageEnum = getProject(projectID).getLanguageEnum();
     String absPath = absoluteAudioFile.getAbsolutePath();
     return getPretestScore(reqid,
         (int) resultID,

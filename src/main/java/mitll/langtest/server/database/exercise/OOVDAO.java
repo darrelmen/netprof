@@ -40,10 +40,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -117,6 +114,11 @@ public class OOVDAO implements IOOVDAO {
     return oovs;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkAllExercises(Collection, Set, Set, Set, Map, boolean)
+   * @param language
+   * @return
+   */
   @Override
   public Map<String, List<OOV>> getOOVToEquivalents(Language language) {
     List<SlickOOV> slickOOVS = dao.forLanguageWithEquivalent(language.getLanguage());
