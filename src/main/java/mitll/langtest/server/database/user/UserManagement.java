@@ -59,7 +59,7 @@ public class UserManagement {
    * @see mitll.langtest.server.services.OpenUserServiceImpl#addUser
    */
   public User addUser(HttpServletRequest request, SignUpUser user) {
-    return addUser(user.setIp(getIPInfo(request)));
+    return userDAO.addUser(user.setIp(getIPInfo(request)));
   }
 
   /**

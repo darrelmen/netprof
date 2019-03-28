@@ -45,8 +45,6 @@ public class LoginResult implements IsSerializable {
     Success,
     Failed,
     BadPassword,
-    //SessionNotRestored,
-    //SessionExpired,
     MissingInfo,
     Updated,
     Added,
@@ -130,6 +128,11 @@ public class LoginResult implements IsSerializable {
 
   public ResultType getResultType() {
     return resultType;
+  }
+
+  public LoginResult setResultType(ResultType resultType) {
+    this.resultType = resultType;
+    return this;
   }
 
   public String getSessionID() {

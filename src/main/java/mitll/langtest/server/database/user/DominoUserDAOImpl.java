@@ -698,7 +698,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             ") : no email token for " + clientUserDetail);
       }
       return new LoginResult(clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID(),
-          useUsualLogin ? "" : emailToken);
+          useUsualLogin ? "" : emailToken).setResultType(LoginResult.ResultType.Added);
     }
   }
 

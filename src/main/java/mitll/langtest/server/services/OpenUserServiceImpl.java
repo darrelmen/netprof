@@ -187,7 +187,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
    * I don't think we want to mess with the session until they've logged in with a password!
    *
    * @param url
-   * @return null if existing user
+   * @return null if existing user, result type can only be failed, added, exists, or updated
    * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    */
   @Override

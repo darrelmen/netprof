@@ -31,16 +31,14 @@ package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickUserSession;
 import mitll.npdata.dao.user.UserSessionDAOWrapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import scala.Tuple2;
 
+import javax.servlet.http.HttpSession;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.HashMap;
@@ -76,7 +74,7 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
   /**
    * @param user
    * @return
-   * @see IUserSecurityManager#setSessionUser
+   * @see NPUserSecurityManager#setSessionUserAndRemember(HttpSession, int)
    */
   @Override
   public void add(SlickUserSession user) {
@@ -97,13 +95,6 @@ public class SlickUserSessionDAOImpl extends DAO implements IUserSessionDAO {
   public boolean updateVisitedForSession(String session) {
     return dao.updateVisitedForSession(session);
   }
-
-/*
-  @Override
-  public int getUserForSV(String sesssion, String v) {
-    Collection<Integer> userForSession = dao.getUserForSV(sesssion, v);
-    return userForSession.isEmpty() ? -1 : userForSession.iterator().next();
-  }*/
 
   /**
    * @paramx session
