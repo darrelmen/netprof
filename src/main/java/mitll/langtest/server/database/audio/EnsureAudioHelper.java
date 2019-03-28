@@ -85,7 +85,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
       this.pathHelper = pathHelper;
      // servletContext.getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG)
       String realPath = pathHelper.getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG);
-      logger.info("EnsureAudioHelper path to image " + realPath);
+   //   logger.info("EnsureAudioHelper path to image " + realPath);
       audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange(), realPath);
     }
   }

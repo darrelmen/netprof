@@ -207,6 +207,19 @@ public class JsonScoring {
     }
   }
 
+  /**
+   *
+   * @param projid
+   * @param exerciseID
+   * @param options
+   * @param fullJSON
+   * @param jsonForScore
+   * @param doFlashcard
+   * @param answer
+   * @param addStream
+   * @return
+   * @see #getJsonForAudioForUser(int, int, int, String, int, ScoreServlet.PostRequest, String, File, String, String, DecoderOptions, boolean)
+   */
   public JsonObject getJsonObject(int projid,
                                   int exerciseID,
                                   DecoderOptions options,
@@ -243,6 +256,9 @@ public class JsonScoring {
     if (validity != OK) {
       logger.warn("getJsonObject invalid " + validity + " : " + answer);
     }
+    else if (!addStream){
+      addDurationAndDNR(jsonForScore, answer);
+    }
 
     addValidity(exerciseID, jsonForScore,
         validity,
@@ -252,8 +268,7 @@ public class JsonScoring {
   }
 
   private void addStreamInfo(JsonObject jsonForScore, AudioAnswer answer) {
-    jsonForScore.addProperty("duration", answer.getDurationInMillis());
-    jsonForScore.addProperty(DYNAMIC_RANGE, answer.getDynamicRange());
+    addDurationAndDNR(jsonForScore, answer);
     String path = answer.getPath();
     if (path.isEmpty()) logger.warn("no path?");
     jsonForScore.addProperty("path", path);
@@ -265,6 +280,11 @@ public class JsonScoring {
     long timestamp = answer.getTimestamp();
     //    logger.info("getJsonObject timestamp " + timestamp + " " + new Date(timestamp));
     jsonForScore.addProperty("timestamp", timestamp);
+  }
+
+  private void addDurationAndDNR(JsonObject jsonForScore, AudioAnswer answer) {
+    jsonForScore.addProperty("duration", answer.getDurationInMillis());
+    jsonForScore.addProperty(DYNAMIC_RANGE, answer.getDynamicRange());
   }
 
   /**
