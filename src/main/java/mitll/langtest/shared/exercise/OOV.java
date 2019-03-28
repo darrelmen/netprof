@@ -37,6 +37,7 @@ public class OOV implements HasID {
   private long modified;
   private String oov;
   private String equivalent;
+  private boolean dirty;
 
   public OOV() {
   }
@@ -83,5 +84,14 @@ public class OOV implements HasID {
 
   public void setEquivalent(String text) {
     this.equivalent = text;
+    dirty = true;
+  }
+
+  public boolean isDirty() {
+    return dirty;
+  }
+
+  public String toString() {
+    return id + " : " + getOOV() + " = " + getEquivalent();
   }
 }

@@ -253,8 +253,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * been reached...
    * TODO : add a parameter for expected VAD duration
    * TODO : add a parameter specifying duration of final silence segment
-   *
-   *
+   * <p>
+   * <p>
    * The client is reading the responses generated here at gotPacketResponse
    *
    * @param request
@@ -619,7 +619,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   /**
    * so we get a packet - if it's the next one in the sequence, combine it with the current one and replace it
    * otherwise, we'll have to make a list and combine them...
-   *
+   * <p>
    * deals with gaps
    * <p>
    * Wait for arrival?
@@ -642,7 +642,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
 
     AudioChunk combined = audioChunks.get(0);
-    logger.info("getCombinedAudioChunk Stop - combine " + combined + " with " + (audioChunks.size()-1) + " following chunks.");
+    logger.info("getCombinedAudioChunk Stop - combine " + combined + " with " + (audioChunks.size() - 1) + " following chunks.");
 
     if (combined.getPacket() != 0) {
       logger.warn("\n\n\n\n\n\n getCombinedAudioChunk huh? first packet is " + combined);
@@ -735,7 +735,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     // ordering check...
     {
-     // int packet = combined.getPacket();
+      // int packet = combined.getPacket();
       int nextPacketID = next.getPacket();
       if (packet != nextPacketID - 1) {
         logger.warn("getNextAudioChunk : session " + session +
@@ -1234,6 +1234,17 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
+  @Override
+  public void updateOOV(int projectID, List<OOV> updates) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasAdminOrCDPerm(userIDFromSessionOrDB)) {
+       db.getProjectManagement().updateOOV(updates, userIDFromSessionOrDB);
+    } else {
+      throw getRestricted("Check OOV on a project.");
+    }
+  }
+
+
   /**
    * @param projectid
    * @see mitll.langtest.client.project.ProjectEditForm#getCheckAudio
@@ -1525,9 +1536,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
-   * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
    * @param projid
    * @return
+   * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
    */
   public RecalcRefResponse recalcRefAudio(int projid) throws DominoSessionException {
 
