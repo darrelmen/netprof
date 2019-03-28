@@ -31,19 +31,18 @@ package mitll.langtest.server.scoring;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.google.gson.*;
+import com.google.gson.JsonObject;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.*;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
-import mitll.langtest.server.database.exercise.IProject;
+import mitll.langtest.server.database.project.IProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -64,8 +63,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.server.audio.AudioConversion.LANGTEST_IMAGES_NEW_PRO_F_1_PNG;
-import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES;
-import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.*;
+import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.SUCCESS;
 import static mitll.langtest.server.scoring.Scores.PHONES;
 
 public class ASRWebserviceScoring extends Scoring implements ASR {
@@ -82,26 +80,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   private static final String WAV1 = ".wav";
   private static final String WAV = WAV1;
-  private static final String SCORE = "score";
-  private static final String STATUS = "status";
-  private static final String LOG = "log";
 
-  /**
-   * @see #callKaldiOOV
-   */
-  private static final String OOV = "oov";
-  private static final String NORM = "norm";
-  private static final String NORM_TRANSCRIPT = "norm_transcript";
-  private static final String TRANSCRIPT = "transcript";
-  private static final String IN_VOCAB = "in_vocab";
-
-  private static final String HTTPS = "https"; //""https";
-
-  private static final String WAVEFORM = "waveform";
-  public static final String KALDI = "kaldi";
-  public static final String HYDRA = "hydra";
-  public static final String INVALID_CHAR_INDS = "invalid_char_inds";
-  // private static final String LOCALHOST = "localhost";
+  private static final String KALDI = "kaldi";
+  private static final String HYDRA = "hydra";
 
   private final SLFFile slfFile;
 
@@ -130,6 +111,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   private final AtomicInteger hydraReqCounter = new AtomicInteger();
   private final TranscriptSegmentGenerator generator;
+  private final IKaldiSupport kaldiSupport;
 
   /**
    * @param deployPath
@@ -158,6 +140,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     if (port != -1) {
       setAvailable();
     }
+    this.kaldiSupport = new KaldiSupport(pronunciationLookup, project, properties);
   }
 
   @Override
@@ -350,7 +333,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     JsonObject jsonObject = null;
 
     List<WordAndProns> possibleProns = new ArrayList<>();
-    TransNormDict transNormDict = getHydraDict(sentence, transliteration, possibleProns);
+    /*TransNormDict transNormDict = */
+    getHydraDict(sentence, transliteration, possibleProns);
 
 /*    logger.info("scoreRepeatExercise " +
         "\n\tdict          " + transNormDict.getDict() +
@@ -402,7 +386,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         then = System.currentTimeMillis();
 
         if (useKaldi) {
-          cached = runKaldi(filePath + WAV1, sentence);
+          cached = kaldiSupport.runKaldi(filePath + WAV1, sentence);
           if (cached == null || cached.getScores() == null) {
             logger.warn("scoreRepeatExercise kaldi didn't run properly....");
           } else {
@@ -480,333 +464,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    */
   @Override
   public Collection<String> getKaldiOOV(String fl) {
-    return runOOV(runNorm(fl));
-  }
-
-  private List<String> runNorm(String sentence) {
-    List<String> tokens = new ArrayList<>();
-    try {
-      String json = callKaldiNorm(sentence);
-      JsonObject parse = new JsonParser().parse(json).getAsJsonObject();
-      STATUS_CODES status = getStatus(parse);
-
-      if (status == SUCCESS) {
-        //JsonArray asJsonArray = parse.getAsJsonArray(NORM_TRANSCRIPT);
-        parse.getAsJsonArray(NORM_TRANSCRIPT).forEach(jsonElement -> tokens.add(jsonElement.getAsString()));
-        if (tokens.isEmpty()) {
-          logger.info("runNorm : kaldi tokens were " + tokens + " for " + sentence);
-        }
-      } else if (status == TEXT_NORM_FAILED) {
-        // JsonArray asJsonArray = parse.getAsJsonArray(INVALID_CHAR_INDS);
-        // List<IPair> pairs = getInvalidCharRanges(parse);
-        getInvalidCharRanges(parse)
-            .forEach(pair -> tokens.add(sentence.substring(pair.getFrom(), pair.getTo())));
-      } else {
-        String log = parse.has(LOG) ? parse.get(LOG).getAsString() : "";
-        logger.warn("runNorm failed " +
-            "\n\tstatus   " + status +
-            "\n\tsentence " + sentence +
-            "\n\tjson     " + json +
-            "\n\tlog      " + log.trim()
-        );
-      }
-    } catch (
-        Exception e) {
-      logger.error("Running norm on " +
-          "\n\tsentence " + sentence +
-          "\n\tGot " + e, e);
-    }
-    return tokens;
-  }
-
-  @NotNull
-  private List<IPair> getInvalidCharRanges(JsonObject parse) {
-    List<IPair> pairs = new ArrayList<>();
-    parse.getAsJsonArray(INVALID_CHAR_INDS).forEach(jsonElement -> {
-      pairs.add(new IPair(jsonElement.getAsJsonArray().get(0).getAsInt(),
-          jsonElement.getAsJsonArray().get(1).getAsInt()));
-      //  jsonElement.getAsJsonArray().forEach(jsonElement1 -> jsonElement1.getAsInt());
-    });
-    return pairs;
-  }
-
-  private static class IPair {
-    private int from;
-    private int to;
-
-    public IPair(int from, int to) {
-      this.from = from;
-      this.to = to;
-    }
-
-    public int getFrom() {
-      return from;
-    }
-
-    public int getTo() {
-      return to;
-    }
-
-    public void setFrom(int from) {
-      this.from = from;
-    }
-
-    public void setTo(int to) {
-      this.to = to;
-    }
-  }
-
-  /**
-   * @param tokens
-   * @return
-   * @see #getKaldiOOV
-   */
-  private List<String> runOOV(final List<String> tokens) {
-    List<Boolean> oov = new ArrayList<>();
-    try {
-      String json = callKaldiOOV(tokens);
-      JsonObject parse = new JsonParser().parse(json).getAsJsonObject();
-      STATUS_CODES status = getStatus(parse);
-
-      if (status == SUCCESS) {
-        parse
-            .getAsJsonArray(IN_VOCAB)
-            .forEach(jsonElement -> oov.add(jsonElement.getAsBoolean()));
-      } else if (status == OOV_IN_TRANS) {
-        parse
-            .getAsJsonArray(IN_VOCAB)
-            .forEach(jsonElement -> oov.add(jsonElement.getAsBoolean()));
-      } else {
-        String log = parse.has(LOG) ? parse.get(LOG).getAsString() : "";
-        logger.warn("runOOV failed " +
-            "\n\tstatus " + status +
-            "\n\ttokens " + tokens +
-            "\n\tjson   " + json +
-            "\n\tlog    " + log.trim()
-        );
-      }
-
-    } catch (Exception e) {
-      logger.error("Got " + e, e);
-    }
-
-    if (oov.isEmpty()) {
-      return tokens;
-    } else {
-      List<String> oovTokens = new ArrayList<>(tokens.size());
-      for (int i = 0; i < tokens.size(); i++) {
-        if (!oov.get(i)) {
-          oovTokens.add(tokens.get(i));
-        }
-      }
-      if (!oovTokens.isEmpty()) {
-        logger.warn("runOOV : from " + tokens + " got oov " + oovTokens);
-      }
-      return oovTokens;
-    }
-  }
-
-  /**
-   * http://hydra-dev.llan.ll.mit.edu:5000/score/%7B%22reqid%22:1234,%22request%22:%22decode%22,%22phrase%22:%22%D8%B9%D8%B1%D8%A8%D9%8A%D9%91%22,%22file%22:%22/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav%22%7D
-   *
-   * @param audioPath
-   * @param rawSentence
-   * @return
-   * @see #scoreRepeatExercise
-   */
-  private HydraOutput runKaldi(String audioPath, String rawSentence) {
-    try {
-      long then = System.currentTimeMillis();
-      //logger.info("runKaldi replace " + rawSentence + " with " + rawSentence);
-      String json = callKaldi(rawSentence, audioPath);
-
-      if (json == null) {
-        return getHydraOutputForError("runKaldi got no json from kaldi?");
-      }
-
-      long now = System.currentTimeMillis();
-      long processDur = now - then;
-
-//      logger.info("runKaldi took " + processDur + " for " + sentence + " on " + audioPath);
-
-      try {
-        JsonObject parse = new JsonParser().parse(json).getAsJsonObject();
-
-        STATUS_CODES status = getStatus(parse);
-        String log = parse.has(LOG) ? parse.get(LOG).getAsString() : "";
-        float score = -1F;
-
-        if (status == SUCCESS) {
-          score = parse.get(SCORE).getAsFloat();
-          logger.info("runKaldi " +
-              "\n\ttook      " + processDur +
-              "\n\tdecoding '" + rawSentence + "'" +
-              "\n\tfile      " + audioPath +
-              //"\n\tstatus    " + status +
-              "\n\tscore " + score);
-        } else {
-          logger.warn("runKaldi failed " +
-              "\n\tstatus " + status +
-              "\n\tlog    " + log.trim()
-          );
-          parse = new JsonObject();
-        }
-
-        return new HydraOutput(
-            new Scores(score, new HashMap<>(), (int) processDur)
-                .setKaldiJsonObject(parse),
-            getWordAndProns(rawSentence))
-            .setStatus(status)
-            .setLog(log);
-      } catch (JsonSyntaxException e) {
-        logger.error("got unparseable " +
-                "\n\tjson " + json +
-                "\n\tmesssage " + e.getMessage(),
-            e
-        );
-
-        return new HydraOutput(
-            new Scores(-1F, new HashMap<>(), 0)
-                .setKaldiJsonObject(new JsonObject()),
-            null)
-            .setStatus(ERROR)
-            .setLog(e.getMessage());
-      }
-
-    } catch (Exception e) {
-      logger.error("Got " + e, e);
-      return getHydraOutputForError(e.getMessage());
-    }
-  }
-
-  private HydraOutput getHydraOutputForError(String message) {
-    return new HydraOutput(new Scores(-1F, new HashMap<>(), 0)
-        .setKaldiJsonObject(new JsonObject()), null)
-        .setStatus(ERROR)
-        .setMessage(message)
-        .setLog(message);
-  }
-
-  @NotNull
-  private STATUS_CODES getStatus(JsonObject parse) {
-    JsonElement status1 = parse.get(STATUS);
-    String status = status1 == null ? STATUS_CODES.ERROR.toString() : status1.getAsString();
-    try {
-      return STATUS_CODES.valueOf(status);
-    } catch (IllegalArgumentException e) {
-      logger.warn("getStatus : couldn't parse status " + status);
-      return STATUS_CODES.ERROR;
-    }
-  }
-
-  /**
-   * @param sentence
-   * @param audioPath
-   * @return
-   * @throws IOException
-   * @see #runKaldi
-   */
-  private String callKaldi(String sentence, String audioPath) throws IOException {
-    return doKaldiGet(sentence, getKaldiRequest(sentence, audioPath), SCORE);
-  }
-
-  private String callKaldiNorm(String sentence) throws IOException {
-    // String s1 = "{\"reqid\":1234,\"request\":\"decode\",\"phrase\":\"عربيّ\",\"file\":\"/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav\"}";
-    return doKaldiGet(sentence, getKalidNormRequest(sentence), NORM);
-  }
-
-  /**
-   * @param tokens
-   * @return
-   * @throws IOException
-   * @see #runOOV(List)
-   */
-  private String callKaldiOOV(List<String> tokens) throws IOException {
-    // String s1 = "{\"reqid\":1234,\"request\":\"decode\",\"phrase\":\"عربيّ\",\"file\":\"/opt/netprof/bestAudio/msa/bestAudio/2549/regular_1431731290207_by_511_16K.wav\"}";
-    return doKaldiGet(tokens.toString(), getKalidOOVRequest(tokens), OOV);
-  }
-
-  private String doKaldiGet(String sentence, String jsonRequest, String operation) throws IOException {
-    String prefix = getPrefix(operation);
-    // String encode = URLEncoder.encode(jsonRequest, StandardCharsets.UTF_8.name());
-    String url = prefix;// + encode;
-
-    if (false) {
-      logger.info("runKaldi " + operation +
-          "\n\tcontent  " + sentence +
-          //"\n\treq       " + encode +
-          //  "\n\traw       " + (prefix + jsonRequest) +
-          "\n\tpost      " + url);
-    }
-
-    return new HTTPClient(url).sendAndReceiveAndClose(jsonRequest);
-  }
-
-  /**
-   * TODO : longer term might want different versions of service on same language
-   *
-   * Calls look like:
-   *
-   * http://172.25.252.196/en/oov/{“transcript”:”what”}
-   * https://172.25.252.196/en/score/{“file”:”/opt/...blah.wav”, “transcript”:”what”}
-   * http://172.25.252.196/en/score/{“waveform”:”/opt/blah.wav”, “transcript”:”what”}
-   * http://172.25.252.196/en/norm/{“transcript”:”WhAt”}
-   *
-   * @param operation
-   * @return
-   */
-  @NotNull
-  private String getPrefix(String operation) {
-    String localhost = props.useProxy() ? "hydra-dev" : props.getKaldiHost();
-    //  logger.info("getPrefix using host " +localhost + " for " +operation);
-    String languageCode = project.getLanguageEnum().getLocale();
-    return HTTPS + "://" + localhost + "/" + languageCode + "/" + operation + "/";
-  }
-
-  /**
-   * @param sentence
-   * @param audioPath
-   * @return
-   * @see #callKaldi
-   */
-  private String getKaldiRequest(String sentence, String audioPath) {
-    JsonObject jsonObject = new JsonObject();
-
-    //    logger.info("KALDI " +
-//        "\n\tsentence  " + sentence +
-//        "\n\taudioPath " + audioPath
-//    );
-    jsonObject.addProperty(WAVEFORM, audioPath);
-    jsonObject.addProperty(TRANSCRIPT, sentence.trim());
-
-    return jsonObject.toString();
-  }
-
-  /**
-   * norm/{"transcript":"what is your name"}
-   *
-   * @param sentence
-   * @return
-   */
-  private String getKalidNormRequest(String sentence) {
-    JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty(TRANSCRIPT, sentence);
-    return jsonObject.toString();
-  }
-
-  private String getKalidOOVRequest(List<String> tokens) {
-    JsonObject jsonObject = new JsonObject();
-    JsonArray jsonArray = new JsonArray();
-    tokens.forEach(jsonArray::add);
-    jsonObject.add(NORM_TRANSCRIPT, jsonArray);
-    return jsonObject.toString();
-  }
-
-  @NotNull
-  private List<WordAndProns> getWordAndProns(String sentence) {
-    List<WordAndProns> possibleProns = new ArrayList<>();
-    getHydraDict(sentence, "", possibleProns);
-    return possibleProns;
+    return kaldiSupport.getKaldiOOV(fl);
   }
 
   /**
@@ -1086,34 +744,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   /**
-   * English dict is upper case for some reason.
-   *
-   * @param transcript
-   * @param transliteration
-   * @return
-   */
-//  private String getTokensForKaldi(String transcript, String transliteration) {
-//    String wordsFromPossibleProns = getTokensFromTranscript(transcript, transliteration);
-//    return (languageEnum == Language.ENGLISH) ? wordsFromPossibleProns.toUpperCase() : wordsFromPossibleProns;
-//  }
-
-//  @NotNull
-//  private String getTokensFromTranscript(String transcript, String transliteration) {
-//    List<WordAndProns> possibleProns = new ArrayList<>();
-//
-//    // generate dictionary
-//    getHydraDict(getTranscriptToPost(transcript, false), transliteration, possibleProns);
-//    return getWordsFromPossibleProns(possibleProns);
-//  }
-
-//  @NotNull
-//  private String getWordsFromPossibleProns(List<WordAndProns> possibleProns) {
-//    StringBuilder builder = new StringBuilder();
-//    possibleProns.forEach(wordAndProns -> builder.append(wordAndProns.getWord()).append(" "));
-//    return builder.toString().trim();
-//  }
-
-  /**
    * @param audioPath
    * @param transcript
    * @param lmSentences if multiple alternatives
@@ -1379,17 +1009,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
   ////////////////////////////////
   ////////////////////////////////
-
-  /**
-   * @param lmSentences
-   * @param background
-   * @return
-   * @see AlignDecode#getASRScoreForAudio
-   * @see AlignDecode#getASRScoreForAudio(int, File, Collection, String, DecoderOptions, PrecalcScores)
-   */
-/*  public String getUsedTokens(Collection<String> lmSentences, List<String> background) {
-    return pronunciationLookup.getUsedTokens(lmSentences, background);
-  }*/
 
   /**
    * Make a map of event type to segment end times (so we can map clicks to which segment is clicked on).<br></br>

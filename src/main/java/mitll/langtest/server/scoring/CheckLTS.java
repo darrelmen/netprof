@@ -29,11 +29,9 @@
 
 package mitll.langtest.server.scoring;
 
-
 import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.LTS;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -71,10 +69,11 @@ class CheckLTS {
       logger.warn("CheckLTS : dict is empty? lts = " + lts);
     }
     smallVocabDecoder = new SmallVocabDecoder(htkDictionary, isAsianLanguage, languageInfo);
-    //  this.language = languageInfo != null ? languageInfo.getLanguage() : "";
+
     this.isAsianLanguage = isAsianLanguage;
     removeAllAccents =
         languageInfo != Language.FRENCH &&
+
             languageInfo != Language.TURKISH &&
             languageInfo != Language.CROATIAN &&
             languageInfo != Language.SERBIAN
@@ -110,9 +109,9 @@ class CheckLTS {
    * @return
    * @see Scoring#getBagOfPhones
    */
-  PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
-    return checkLTS2(letterToSoundClass, foreignLanguagePhrase);
-  }
+//  PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
+//    return checkLTS2(letterToSoundClass, foreignLanguagePhrase);
+//  }
 
   private int shown = 0;
 
@@ -352,7 +351,7 @@ class CheckLTS {
    * @param foreignLanguagePhrase
    */
   //this seems to be dead code - it's called by a method that isn't so far as I can tell, called by anything else. Going to not mess with trying to get the transliteration in here
-  private PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
+/*  private PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
     //   logger.info("lang  " + language + " is asian " + isAsianLanguage);
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary, isAsianLanguage, languageInfo);
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, languageInfo != Language.FRENCH, false);
@@ -428,5 +427,5 @@ class CheckLTS {
     }
     //if (multiple % 1000 == 0) logger.debug("mult " + multiple);
     return new PhoneInfo(firstPron, uphones);
-  }
+  }*/
 }

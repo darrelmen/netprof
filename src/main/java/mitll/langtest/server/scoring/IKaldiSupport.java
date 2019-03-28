@@ -27,7 +27,12 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.server.database.exercise;
+package mitll.langtest.server.scoring;
 
-public class ExcelReader {
+import java.util.Collection;
+
+public interface IKaldiSupport {
+  HydraOutput runKaldi(String audioPath, String rawSentence);
+
+  Collection<String> getKaldiOOV(String fl);
 }

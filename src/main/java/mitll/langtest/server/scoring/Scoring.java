@@ -366,9 +366,9 @@ public abstract class Scoring {
    * @return
    * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
    */
-  public PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
-    return checkLTSHelper.getBagOfPhones(foreignLanguagePhrase);
-  }
+//  public PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
+//    return checkLTSHelper.getBagOfPhones(foreignLanguagePhrase);
+//  }
 
   public abstract SmallVocabDecoder getSmallVocabDecoder();
 

@@ -27,8 +27,9 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.server.database.exercise;
+package mitll.langtest.server.database.project;
 
+import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.SlickProject;

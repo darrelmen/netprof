@@ -38,7 +38,6 @@ import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.dialog.InterpreterReader;
-import mitll.langtest.server.database.exercise.IProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.PhoneDAO;

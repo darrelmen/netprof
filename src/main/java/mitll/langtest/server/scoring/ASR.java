@@ -30,12 +30,16 @@
 package mitll.langtest.server.scoring;
 
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.text.Collator;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public interface ASR {
@@ -57,7 +61,7 @@ public interface ASR {
    */
   Collection<String> getOOV(String fl, String transliteration);
 
-  PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
+//  PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
 
   SmallVocabDecoder getSmallVocabDecoder();
 
@@ -100,6 +104,17 @@ public interface ASR {
    */
   boolean isAvailable();
 
+  /**
+   * JUST FOR TESTING
+   * @param audioPath
+   * @param transcript
+   * @param transliteration
+   * @param lmSentences
+   * @param tmpDir
+   * @param decode
+   * @param end
+   * @return
+   */
   HydraOutput runHydra(String audioPath,
                        String transcript,
                        String transliteration,
@@ -117,9 +132,27 @@ public interface ASR {
    */
   TransNormDict getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns);
 
+  /**
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises(Collection, List, ISection, Project, Map, Map, boolean)
+   * @param transcript
+   * @param transliteration
+   * @return
+   */
   List<String> getTokens(String transcript, String transliteration);
+
+  /**
+   * @see mitll.langtest.server.database.audio.SlickTrainingAudioDAO#checkAndAddAudio(Collection, IAudioDAO)
+   * @param transcript
+   * @param transliteration
+   * @return
+   */
   String getNormTranscript(String transcript, String transliteration);
 
+  /**
+   * @see AudioFileHelper#getSegmented(String)
+   * @param input
+   * @return
+   */
   String getSegmented(String input);
 
   IPronunciationLookup getPronunciationLookup();

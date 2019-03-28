@@ -37,7 +37,7 @@ import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.dialog.IDialogSessionDAO;
-import mitll.langtest.server.database.exercise.IProject;
+import mitll.langtest.server.database.project.IProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.scoring.*;

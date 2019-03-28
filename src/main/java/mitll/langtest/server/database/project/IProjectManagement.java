@@ -32,7 +32,6 @@ package mitll.langtest.server.database.project;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
-import mitll.langtest.server.database.exercise.IProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
@@ -44,8 +43,6 @@ import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickProject;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;

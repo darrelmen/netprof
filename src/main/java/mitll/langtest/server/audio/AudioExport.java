@@ -33,7 +33,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.ExcelExport;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
-import mitll.langtest.server.database.exercise.IProject;
+import mitll.langtest.server.database.project.IProject;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.server.sorter.SimpleSorter;

@@ -32,7 +32,7 @@ package mitll.langtest.server.database.copy;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.exercise.IProject;
+import mitll.langtest.server.database.project.IProject;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.shared.project.*;

@@ -30,7 +30,7 @@
 package mitll.langtest.shared.project;
 
 import mitll.langtest.client.project.ProjectEditForm;
-import mitll.langtest.server.database.exercise.IProject;
+import mitll.langtest.server.database.project.IProject;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 

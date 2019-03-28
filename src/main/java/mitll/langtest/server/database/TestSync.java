@@ -29,7 +29,7 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.database.exercise.IProject;
+import mitll.langtest.server.database.project.IProject;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
