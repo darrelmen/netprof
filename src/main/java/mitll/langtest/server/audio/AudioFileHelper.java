@@ -238,12 +238,14 @@ public class AudioFileHelper implements AlignDecode {
     Map<Integer, String> idToNorm = new HashMap<>();
     Set<String> oov = new HashSet<>();
     Set<Integer> unsafe = new HashSet<>();
-    logger.info("checkLTSAndCountPhones : " + language + " checking " + exercises.size() + " exercises...");
+    logger.info("checkOOV : " + language + " checking " + exercises.size() + " exercises...");
 
-    OOVInfo checkInfo = new OOVInfo(0, 0);
+    OOVInfo checkInfo;
     try {
       checkInfo = checkAllExercises(exercises, safe, unsafe, oov, idToNorm, includeKaldi);
+      logger.info("checkOOV Got back " + checkInfo);
     } catch (Exception e) {
+      checkInfo = new OOVInfo();
       logger.error("got " + e, e);
     }
 
@@ -325,6 +327,7 @@ public class AudioFileHelper implements AlignDecode {
     int count = 0;
     logger.info("checkAllExercises for " + exercises.size() + " ex, force " + includeKaldi);
 
+    Set<String> unsafeHighlighted = new TreeSet<>();
     long then = System.currentTimeMillis();
     if (dictModified > 0 || includeKaldi) {
       Map<String, List<OOV>> oovToEquivalents = getSorted();
@@ -334,7 +337,7 @@ public class AudioFileHelper implements AlignDecode {
 //          if (spew2++ < 10 || spew2 % 100 == 0)
 //            logger.info("checkAllExercises for " + exercise.getForeignLanguage() + " last checked " + exercise.getLastChecked() + " vs dict modified " + dictModified);
 
-          boolean validForeignPhrase = isValidForeignPhrase(safe, unsafe, unsafeToNorm, exercise, oov, includeKaldi, oovToEquivalents);
+          boolean validForeignPhrase = isValidForeignPhrase(safe, unsafe, unsafeToNorm, exercise, oov, includeKaldi, oovToEquivalents, unsafeHighlighted);
           //  logger.info("checkLTSAndCountPhones : " + language + " oov " + oov.size());
 
           checkedVocab++;
@@ -354,7 +357,7 @@ public class AudioFileHelper implements AlignDecode {
           // check context sentences
           for (ClientExercise context : exercise.getDirectlyRelated()) {
             CommonExercise commonExercise = context.asCommon();
-            boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, unsafeToNorm, commonExercise, oov, includeKaldi, oovToEquivalents);
+            boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, unsafeToNorm, commonExercise, oov, includeKaldi, oovToEquivalents, unsafeHighlighted);
             checkedDirect++;
 
             if (commonExercise.isSafeToDecode() != validForeignPhrase2) {
@@ -367,13 +370,14 @@ public class AudioFileHelper implements AlignDecode {
           ") " +
           "\n\tchecked vocab  " + checkedVocab +
           "\n\tchecked direct " + checkedDirect +
+          "\n\tunsafeHighlighted " + unsafeHighlighted.size() +
           "\n\tfrom           " + exercises.size() +
           "\n\tfor whether they can be decoded in " + (System.currentTimeMillis() - then) + " millis");
 
-      return new OOVInfo(checkedVocab + checkedDirect, oov.size());
+      return new OOVInfo(checkedVocab + checkedDirect, oov.size(), unsafeHighlighted);
     } else {
       logger.info("checkAllExercises skipped checking exercises since no dictionary.");
-      return new OOVInfo(0, oov.size());
+      return new OOVInfo(0, oov.size(), unsafeHighlighted);
     }
   }
 
@@ -391,6 +395,11 @@ public class AudioFileHelper implements AlignDecode {
     return sorted;
   }
 
+  /**
+   * @param oov
+   * @param suffix
+   * @see #checkOOV(Collection, boolean)
+   */
   private void writeOOV(Set<String> oov, String suffix) {
     if (!oov.isEmpty()) {
       try {
@@ -480,13 +489,16 @@ public class AudioFileHelper implements AlignDecode {
    * @param oovCumulative
    * @param includeKaldi
    * @param oovToEquivalents
+   * @param unsafeHighlighted
    * @return
    * @see #checkLTSAndCountPhones
    */
   private boolean isValidForeignPhrase(Set<Integer> safe, Set<Integer> unsafe,
                                        Map<Integer, String> safeToNorm,
-                                       CommonExercise exercise, Set<String> oovCumulative, boolean includeKaldi,
-                                       Map<String, List<OOV>> oovToEquivalents) {
+                                       CommonExercise exercise, Set<String> oovCumulative,
+                                       boolean includeKaldi,
+                                       Map<String, List<OOV>> oovToEquivalents,
+                                       Set<String> unsafeHighlighted) {
     boolean isKaldi = project.getModelType() == ModelType.KALDI;
     String foreignLanguage = exercise.getForeignLanguage();
 
@@ -494,11 +506,11 @@ public class AudioFileHelper implements AlignDecode {
     if (isKaldi) {
       if (includeKaldi) {
         if (!exercise.hasEnglishAttr()) {
-          validForeignPhrase = checkWithKaldi(exercise, foreignLanguage, oovToEquivalents, safeToNorm, oovCumulative);
+          validForeignPhrase = checkWithKaldi(exercise, foreignLanguage, oovToEquivalents, safeToNorm, unsafeHighlighted, oovCumulative);
         }
       }
     } else {
-      validForeignPhrase = checkWithHydra(exercise, oovToEquivalents, safeToNorm, oovCumulative);
+      validForeignPhrase = checkWithHydra(exercise, oovToEquivalents, safeToNorm, unsafeHighlighted, oovCumulative);
     }
 
     (validForeignPhrase ? safe : unsafe).add(exercise.getID());
@@ -509,6 +521,7 @@ public class AudioFileHelper implements AlignDecode {
   private boolean checkWithKaldi(HasID exercise, String foreignLanguage, Map<String, List<OOV>> oovToEquivalents,
 
                                  Map<Integer, String> safeToNorm,
+                                 Set<String> unsafeHighlighted,
                                  Set<String> oovCumulative) {
     Collection<String> kaldiOOV = getASRScoring().getKaldiOOV(foreignLanguage);
 
@@ -523,26 +536,28 @@ public class AudioFileHelper implements AlignDecode {
           safeToNorm.put(exercise.getID(), foreignLanguage);
         }
       }
-//            else {
-//            }
     }
     oovCumulative.addAll(kaldiOOV);
     if (!kaldiOOV.isEmpty()) {
       logger.warn("isValidForeignPhrase found " + kaldiOOV.size() + " oov tokens " + kaldiOOV + " in " + foreignLanguage);
+      unsafeHighlighted.add(getHighlighted(foreignLanguage, kaldiOOV));
     }
 
     return kaldiOOV.isEmpty();
   }
 
+  private String  getHighlighted(String foreignLanguage, Collection<String> kaldiOOV) {
+    String highlighted = foreignLanguage;
+    for (String oov : kaldiOOV) highlighted = highlighted.replaceAll(oov, "<b>" + oov + "</b>");
+    return highlighted;
+  }
+
   private boolean checkWithHydra(ClientExercise exercise, Map<String, List<OOV>> oovToEquivalents,
 
-                                 Map<Integer, String> safeToNorm, Set<String> oovCumulative) {
-    boolean validForeignPhrase = true;// = exercise.isSafeToDecode();
+                                 Map<Integer, String> safeToNorm, Set<String> unsafeHighlighted, Set<String> oovCumulative) {
+    boolean validForeignPhrase = true;
     String foreignLanguage = exercise.getForeignLanguage();
 
-    // if (isStale(exercise)) {
-    //  logger.info("isValidForeignPhrase STALE ex " + exercise.getProjectID()  + "  " + exercise.getID() + " " + new Date(exercise.getLastChecked()) + " vs " + new Date(dictModified));
-    // int before = oov.size();
     if (!foreignLanguage.isEmpty()) {
       String transliteration = exercise.getTransliteration();
       Collection<String> oov = getASRScoring().getOOV(foreignLanguage, transliteration);
@@ -557,20 +572,18 @@ public class AudioFileHelper implements AlignDecode {
 
           if (oov.isEmpty()) {
             safeToNorm.put(exercise.getID(), foreignLanguage);
+          } else {
+            unsafeHighlighted.add(getHighlighted(foreignLanguage, oov));
           }
         }
-//          else {
-//
-//          }
+        else {
+          unsafeHighlighted.add(getHighlighted(foreignLanguage, oov));
+        }
       }
 
       oovCumulative.addAll(oov);
       validForeignPhrase = oov.isEmpty();
     }
-    // validForeignPhrase = isValidForeignPhrase(exercise);
-//      if (oov.size() > before) {
-//        logger.info("isValidForeignPhrase " + project.getName() + " oov now " + oov.size());
-//      }
 
     if (!validForeignPhrase && DEBUG) {
       logger.info("isValidForeignPhrase valid " + validForeignPhrase + " ex " + foreignLanguage);
@@ -584,14 +597,14 @@ public class AudioFileHelper implements AlignDecode {
    * @param oovs
    * @param replaced
    * @return
-   * @see #isValidForeignPhrase(Set, Set, Map, CommonExercise, Set, boolean, Map)
+   * @see #isValidForeignPhrase(Set, Set, Map, CommonExercise, Set, boolean, Map, Set)
    */
   private String replaceOOVs(Map<String, List<OOV>> oovToEquivalents, String foreignLanguage, Collection<String> oovs, Set<String> replaced) {
     logger.info("replaceOOVs got" +
-        "\n\tfl       " + foreignLanguage +
-        "\n\treplaced " + replaced.size() +
-        "\n\toovs     " + oovs +
-        "\n\t oovToEquivalents " + oovToEquivalents.size());
+        "\n\tfl               " + foreignLanguage +
+        "\n\treplaced         " + replaced.size() +
+        "\n\toovs             " + oovs +
+        "\n\toovToEquivalents " + oovToEquivalents.size());
 
     for (String oov : oovs) {
       List<OOV> equivalents = oovToEquivalents.get(oov);

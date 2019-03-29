@@ -47,7 +47,10 @@ import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.server.scoring.TranscriptSegmentGenerator;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
@@ -108,33 +111,22 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         Result result = db.getResultDAO().getResultByID(resultID);
         int exerciseID = result.getExerciseID();
 
-        boolean isAMAS = serverProps.isAMAS();
         CommonShell exercise = null;
         String sentence = "";
         String transliteration = "";
         int projectIDFromUser = getProjectIDFromUser();
-        if (isAMAS) {
-          exercise = db.getAMASExercise(exerciseID);
-          sentence = exercise.getForeignLanguage();
-        } else {
-          CommonExercise exercise1 = db.getExercise(projectIDFromUser, exerciseID);
 
-          if (exercise1 != null) {
-            transliteration = exercise1.getTransliteration();
-            exercise = exercise1;
-            Collection<ClientExercise> directlyRelated = exercise1.getDirectlyRelated();
-            sentence =
-                result.getAudioType().isContext() && !directlyRelated.isEmpty() ?
-                    directlyRelated.iterator().next().getForeignLanguage() :
-                    exercise.getForeignLanguage();
-          }
+        CommonExercise exercise1 = db.getExercise(projectIDFromUser, exerciseID);
+
+        if (exercise1 != null) {
+          transliteration = exercise1.getTransliteration();
+          exercise = exercise1;
+          Collection<ClientExercise> directlyRelated = exercise1.getDirectlyRelated();
+          sentence =
+              result.getAudioType().isContext() && !directlyRelated.isEmpty() ?
+                  directlyRelated.iterator().next().getForeignLanguage() :
+                  exercise.getForeignLanguage();
         }
-
-        // maintain backward compatibility - so we can show old recordings of ref audio for the context sentence
-//      String sentence = isAMAS ? exercise.getForeignLanguage() :
-//          (result.getAudioType().isContext()) ?
-//              db.getExercise(exerciseID).getDirectlyRelated().iterator().next().getForeignLanguage() :
-//              exercise.getForeignLanguage();
 
         if (exercise == null) {
           logger.warn(getLanguage() + " can't find exercise id " + exerciseID);
@@ -511,7 +503,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
     if (customOrPredefExercise != null && sentence.equalsIgnoreCase(customOrPredefExercise.getFLToShow())) {
       String normalizedFL = customOrPredefExercise.getNormalizedFL();
-      if (!normalizedFL.isEmpty() && !customOrPredefExercise.getFLToShow().equalsIgnoreCase(normalizedFL)){
+      if (!normalizedFL.isEmpty() && !customOrPredefExercise.getFLToShow().equalsIgnoreCase(normalizedFL)) {
         sentence = normalizedFL;
       }
     }
@@ -760,14 +752,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     }
   }
 
-/*  private void logEvent(String exid, String device, int projID) {
-    try {
-      db.logEvent(AUDIO_RECORDING, WRITE_AUDIO_FILE, exid, "Writing audio - got zero duration!", -1, device, projID);
-    } catch (Exception e) {
-      logger.error("got " + e, e);
-    }
-  }*/
-
   /**
    * TODO : remove me - we don't do this anymore.
    * <p>
@@ -831,8 +815,6 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   @Override
   public List<OOV> getOOVs(int projid) {
-    Project project = db.getProject(projid);
-
-    return db.getOOVDAO().forLanguage(project.getLanguageEnum());
+    return db.getOOVDAO().forLanguage(db.getProject(projid).getLanguageEnum());
   }
 }

@@ -47,6 +47,7 @@ import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
@@ -1592,6 +1593,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   protected void getVisibleExercises(final Collection<Integer> visibleIDs, final int currentReq) {
     doOpacityFeedback();
+
     checkAndGetExercises(visibleIDs, currentReq);
   }
 
@@ -1729,7 +1731,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #reallyGetExercises
    * @see ClientExerciseFacetExerciseList#getFullExercisesSuccess
    */
-  void gotFullExercises(final int reqID, Collection<U> toShow) {
+  protected void gotFullExercises(final int reqID, Collection<U> toShow) {
     if (DEBUG) logger.info("gotFullExercises show req " + reqID + " exercises " + getIDs(toShow));
     if (isCurrentReq(reqID)) {
       if (toShow.isEmpty()) {

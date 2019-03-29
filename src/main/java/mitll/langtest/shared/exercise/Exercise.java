@@ -60,10 +60,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private List<ClientExercise> directlyRelated = new ArrayList<>();
 
-  /**
-   * @see #setSafeToDecode
-   */
-  private boolean safeToDecode;
   private transient long safeToDecodeLastChecked;
 
   private int creator = UNDEFINED_USER;
@@ -117,7 +113,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int projectid,
                   long updateTime,
                   String normalizedFL) {
-    super(-1, projectid, false);
+    super(-1, projectid, false, false);
     this.oldid = id;
     this.meaning = meaning;
     this.updateTime = updateTime;
@@ -153,7 +149,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   @Deprecated
   private Exercise(String id, String context, String altcontext, String contextTranslation, String normalizedFL, int projectid) {
-    super(-1, projectid, true);
+    super(-1, projectid, true, false);
     this.foreignLanguage = context;
     this.altfl = altcontext;
     this.english = contextTranslation;
@@ -196,7 +192,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
                   int dominoID,
                   boolean shouldSwap) {
-    super(exid, projectid, isContext);
+    super(exid, projectid, isContext, candecode);
     this.oldid = oldid;
     this.creator = creator;
     setEnglishSentence(englishSentence);
@@ -205,7 +201,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.normalizedFL = normalizedFL;
     setTransliteration(transliteration);
     setAltFL(altFL);
-    this.safeToDecode = candecode;
+
     safeToDecodeLastChecked = lastChecked;
 
     this.dominoID = dominoID;
@@ -256,7 +252,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;
-    this.safeToDecode = candecode;
   }
 
   /**
@@ -266,7 +261,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @see FlexListLayout#getFactory(PagingExerciseList)
    */
   public <T extends CommonExercise> Exercise(T exercise) {
-    super(exercise.getID(), exercise.getProjectID(), exercise.isContext());
+    super(exercise.getID(), exercise.getProjectID(), exercise.isContext(), exercise.isSafeToDecode());
     this.isPredef = exercise.isPredefined();
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getForeignLanguage();
@@ -289,7 +284,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   public CommonShell getShell() {
-    return new ExerciseShell(english, meaning, foreignLanguage, getID(), isContext(), getDirectlyRelated().size());
+    return new ExerciseShell(english, meaning, foreignLanguage, getID(), isContext(), getDirectlyRelated().size(), isSafeToDecode());
   }
 
   public CommonShell asShell() {
@@ -484,13 +479,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return directlyRelated;
   }
 
-  /**
-   * @return
-   * @seex mitll.langtest.client.custom.exercise.ContextCommentNPFExercise#getItemContent
-   */
-  public boolean isSafeToDecode() {
-    return safeToDecode;
-  }
 
   /**
    * @param safeToDecode

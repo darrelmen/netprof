@@ -33,17 +33,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.HTTPClient;
-import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.amas.QAPair;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class MiraClassifier {
   private static final Logger logger = LogManager.getLogger(MiraClassifier.class);
@@ -57,7 +52,6 @@ public class MiraClassifier {
   /**
    * Mira expects forward slashes to separate possible answers.
    *
-   * @param exercise
    * @param questionID
    * @param answer
    * @param url
@@ -65,10 +59,10 @@ public class MiraClassifier {
    * @return
    * @see AutoCRT#getScoreForExercise
    */
-  public Info getMiraScore(AmasExerciseImpl exercise, int questionID, String answer, String miraFlavor, String url,
+  public Info getMiraScore(int questionID, String answer, String miraFlavor, String url,
                            Collection<String> additionalCorrect) {
-    List<QAPair> foreignLanguageQuestions = exercise.getForeignLanguageQuestions();
-    return getMiraScore(questionID, foreignLanguageQuestions, answer, miraFlavor, url, additionalCorrect, exercise.getOldID());
+   // List<QAPair> foreignLanguageQuestions = exercise.getForeignLanguageQuestions();
+    return getMiraScore(questionID, Collections.emptyList(), answer, miraFlavor, url, additionalCorrect, "-1");//exercise.getOldID());
   }
 
   /**

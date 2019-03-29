@@ -405,6 +405,11 @@ public class Dialog implements IDialog, MutableShell {
     return countryCode;
   }
 
+  @Override
+  public boolean isSafeToDecode() {
+    return false;
+  }
+
   public String toString() {
     return "Dialog #" + id +
         "\n\tunit        " + unit +

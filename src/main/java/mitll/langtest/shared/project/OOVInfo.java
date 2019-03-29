@@ -31,12 +31,16 @@ package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * @see mitll.langtest.client.project.ProjectEditForm#addDominoProject
  */
 public class OOVInfo implements IsSerializable {
   private int checked;
   private int oovWords;
+  private Set<String> unsafe = new HashSet<>();
   private boolean needsReload;
 
   public OOVInfo() {
@@ -49,9 +53,10 @@ public class OOVInfo implements IsSerializable {
    * @param secondType
    * @see mitll.langtest.server.domino.ProjectSync#getDominoProject
    */
-  public OOVInfo(int checked, int oovWords) {
+  public OOVInfo(int checked, int oovWords, Set<String> unsafe) {
     this.checked = checked;
     this.oovWords = oovWords;
+    this.unsafe = unsafe;
   }
 
   public int getChecked() {
@@ -69,5 +74,13 @@ public class OOVInfo implements IsSerializable {
 
   public boolean isNeedsReload() {
     return needsReload;
+  }
+
+  public Set<String> getUnsafe() {
+    return unsafe;
+  }
+
+  public String toString() {
+    return "OOVInfo : checked " + checked + " oov " + oovWords + " " + unsafe.size() + " unsafe.";
   }
 }

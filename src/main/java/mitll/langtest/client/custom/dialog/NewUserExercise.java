@@ -425,14 +425,13 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     label.setDirectionEstimator(true);   // automatically detect whether text is RTL
 
     row.addStyleName("leftFiveMargin");
-    row.getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
+ //   row.getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setMarginBottom(label);
     return label;
   }
 
   private void setFontSize(FormField foreignLang) {
-    TextBoxBase box = foreignLang.box;
-    setFontSize(box);
+    setFontSize(foreignLang.box);
   }
 
   private void setFontSize(UIObject box) {
@@ -440,8 +439,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   void setMarginBottom(FormField foreignLang) {
-    TextBoxBase box = foreignLang.box;
-    setMarginBottom(box);
+    setMarginBottom(foreignLang.box);
   }
 
   private void setMarginBottom(UIObject box) {

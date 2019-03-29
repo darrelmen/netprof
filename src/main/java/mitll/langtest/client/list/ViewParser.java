@@ -30,6 +30,7 @@
 package mitll.langtest.client.list;
 
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.shared.exercise.OOV;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
@@ -42,6 +43,11 @@ public class ViewParser {
   private static final String DRILL = "Drill";
   private static final String PRACTICE = "Practice";
 
+  /**
+   * Do something smarter!
+   * @param instance
+   * @return
+   */
   @NotNull
   public INavigation.VIEWS getView(String instance) {
     try {
@@ -55,6 +61,8 @@ public class ViewParser {
         return INavigation.VIEWS.PERFORM_PRESS_AND_HOLD;
       } else if (rawInstance.equalsIgnoreCase(PERFORM.toString())) {
         return PERFORM;
+      } else if (rawInstance.equalsIgnoreCase(OOV_EDITOR.toString())) {
+        return OOV_EDITOR;
       } else {
         instance = instance.replaceAll(" ", "_");
 

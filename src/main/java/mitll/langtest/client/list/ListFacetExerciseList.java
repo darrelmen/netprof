@@ -143,7 +143,6 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
     addContentPair(typeToSelection, pairs);
 
     return pairs;
-    // return addDynamicFacetToPairs(typeToSelection, LANGUAGE_META_DATA, super.getPairs(typeToSelection));
   }
 
   private void addContentPair(Map<String, String> typeToSelection, List<Pair> pairs) {
@@ -283,7 +282,6 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
     return listFacetHelper.getListName(userListID);
   }
 
-
   private void addVisitor(String type, Panel choices, int userListID) {
     //logger.info("addVisitor " + type + " : " + userListID);
     getListService().addVisitor(userListID, controller.getUser(), new AsyncCallback<UserList>() {
@@ -310,7 +308,6 @@ public class ListFacetExerciseList<T extends CommonShell & ScoredExercise>
   private ListServiceAsync getListService() {
     return controller.getListService();
   }
-
   protected Map<Integer, IUserList> getIdToList() {
     return listFacetHelper.getIdToList();
   }

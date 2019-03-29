@@ -30,6 +30,7 @@
 package mitll.langtest.shared.scoring;
 
 import mitll.langtest.client.scoring.AudioPanel;
+import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
@@ -39,6 +40,10 @@ import java.util.List;
 import java.util.Map;
 
 public class PretestScore extends AlignmentAndScore {
+  private static final String SIL = "sil";
+  private static final String SIL1 = "SIL";
+  private static final String UNKNOWN_MODEL = "UNKNOWNMODEL";
+
   private int reqid = 0;
   private Map<String, Float> phoneScores;
   private Map<String, Float> wordScores;
@@ -121,7 +126,7 @@ public class PretestScore extends AlignmentAndScore {
    * @return
    */
   public float getAvgWordScore() {
-    return wordScores == null ? getSegmentAverage(getWordSegments()) : getAverage(wordScores.values());
+    return wordScores == null || wordScores.isEmpty() ? getSegmentAverage(getWordSegments()) : getAverage(wordScores.values());
   }
 
   public List<TranscriptSegment> getWordSegments() {
@@ -140,8 +145,20 @@ public class PretestScore extends AlignmentAndScore {
 
   private float getSegmentAverage(List<TranscriptSegment> transcriptSegments) {
     float total = 0F;
-    for (TranscriptSegment seg : transcriptSegments) total += seg.getScore();
-    return transcriptSegments.isEmpty() ? 0F : total / Integer.valueOf(transcriptSegments.size()).floatValue();
+    if (transcriptSegments == null) {
+      return total;
+    } else {
+      for (TranscriptSegment seg : transcriptSegments) {
+        if (isValidEvent(seg.getEvent())) {
+          total += seg.getScore();
+        }
+      }
+      return transcriptSegments.isEmpty() ? 0F : total / Integer.valueOf(transcriptSegments.size()).floatValue();
+    }
+  }
+
+  private boolean isValidEvent(String event) {
+    return !event.equals(UNKNOWN_MODEL) && !event.equals(SIL) && !event.equals(SIL1);
   }
 
   public Map<NetPronImageType, String> getsTypeToImage() {

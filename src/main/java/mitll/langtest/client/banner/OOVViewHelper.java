@@ -35,7 +35,10 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.Scheduler;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
@@ -51,26 +54,35 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.userlist.TableAndPager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.project.OOVInfo;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class OOVViewHelper extends TableAndPager implements ContentView {
+  private final Logger logger = Logger.getLogger("OOVViewHelper");
+
   public static final String CHECK_COMPLETE = "Check complete.";
   public static final String PLEASE_WAIT = "Please wait...";
   public static final String CHECK_ITEMS_IN_DICT = "Check Items In Dict.";
-  private final Logger logger = Logger.getLogger("OOVViewHelper");
+  public static final String SELECT_AND_ENTER_EQUIVALENT = "Select and enter equivalent.";
 
   private static final String TITLE = "Words Not In Dictionary";
   private static final String EQUIVALENT = "Equivalent";
 
   private final ExerciseController controller;
   private MemoryItemContainer<OOV> oovContainer;
+  private HTML oov;
+  private TextBox equivalent;
+  private final HTML message = new HTML();
+  private Button checkButton;
 
   OOVViewHelper(ExerciseController controller, INavigation.VIEWS oovEditor) {
     this.controller = controller;
@@ -112,7 +124,6 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     addOOVList(outer);
   }
 
-
   private void addOOVList(DivWidget top) {
     top.add(new HTML("Getting words that are not in the dictionary. Please wait..."));
     int projectID = controller.getProjectID();
@@ -124,7 +135,9 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
       }
 
       @Override
-      public void onSuccess(OOVInfo result) {
+      public void onSuccess(OOVInfo oovInfo) {
+
+        logger.info("addOOVList Got " + oovInfo);
         controller.getScoringService().getOOVs(projectID, new AsyncCallback<List<OOV>>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -134,7 +147,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
           @Override
           public void onSuccess(List<OOV> result) {
             top.clear();
-            oovContainer = addVisitedTable(top);
+            oovContainer = addOOVTable(top, oovInfo);
             sortUnsetToTop(result);
             oovContainer.populateTable(result);
             if (!result.isEmpty()) {
@@ -165,16 +178,31 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     Scheduler.get().scheduleDeferred((Command) () -> equivalent.setFocus(true));
   }
 
-  private HTML oov;
-  private TextBox equivalent;
-  private final HTML message = new HTML();
-  private Button checkButton;
-
-  private MemoryItemContainer<OOV> addVisitedTable(DivWidget top) {
+  UnsafeItems unsafeItems;
+  private MemoryItemContainer<OOV> addOOVTable(DivWidget top, OOVInfo oovInfo) {
     MemoryItemContainer<OOV> oovMemoryItemContainer = new OOVMemoryItemContainer();
-    Panel tableWithPager =
-        getTableWithPager(top, oovMemoryItemContainer, TITLE, "Select and enter equivalent.",
-            Placement.TOP);
+
+    DivWidget leftRight = new DivWidget();
+    leftRight.addStyleName("inlineFlex");
+    top.add(leftRight);
+
+    DivWidget left = new DivWidget();
+    leftRight.add(left);
+    getTableWithPager(left, oovMemoryItemContainer, TITLE, SELECT_AND_ENTER_EQUIVALENT,
+        Placement.TOP).setWidth("450px");
+
+    DivWidget right = new DivWidget();
+    right.addStyleName("leftFiveMargin");
+    leftRight.add(right);
+    unsafeItems = new UnsafeItems();
+    getTableWithPager(right,
+        unsafeItems, "Items with missing words", "example items",
+        Placement.TOP).setWidth(550 +
+        "px");
+
+//    logger.info("showing " + toShow.size());
+
+    unsafeItems.populateTable(getWrappers(oovInfo));
 
     DivWidget ldButtons = new DivWidget();
     {
@@ -194,21 +222,29 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
 
     oovMemoryItemContainer.getCellTable().addDomHandler(event -> checkForKeyUpDown(event, oovMemoryItemContainer), KeyUpEvent.getType());
 
-    top.add(ldButtons);
+    left.add(ldButtons);
 
     {
       DivWidget buttonRow = new DivWidget();
-      top.add(buttonRow);
+      left.add(buttonRow);
       buttonRow.add(checkButton = getCheckButton());
     }
     {
       DivWidget buttonRow = new DivWidget();
-      top.add(buttonRow);
+      left.add(buttonRow);
       buttonRow.add(message);
     }
     return oovMemoryItemContainer;
   }
 
+  @NotNull
+  private List<Wrapper> getWrappers(OOVInfo oovInfo) {
+    List<Wrapper> toShow = new ArrayList<>();
+    logger.info("got " + oovInfo.getUnsafe().size());
+    oovInfo.getUnsafe().forEach(item -> toShow.add(new Wrapper(toShow.size(), item)));
+    logger.info("made " + toShow.size());
+    return toShow;
+  }
 
   @NotNull
   private Button getCheckButton() {
@@ -225,21 +261,20 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     add.setEnabled(false);
     message.setText(PLEASE_WAIT);
 
-    updateAndCheck(add, projectID, getDirtyItems());
+    updateAndCheck(projectID, getDirtyItems());
   }
 
-  private void updateAndCheck(Button add, int projectID, List<OOV> items) {
+  private void updateAndCheck(  int projectID, List<OOV> items) {
     controller.getAudioService().updateOOV(projectID, items, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         message.setText("Error - please try again.");
         controller.handleNonFatalError("updateOOV...", caught);
-
       }
 
       @Override
       public void onSuccess(Void result) {
-        checkOOVAgain(add, projectID);
+        checkOOVAgain(projectID);
       }
     });
   }
@@ -249,7 +284,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     return oovContainer.getItems().stream().filter(OOV::isDirty).collect(Collectors.toList());
   }
 
-  private void checkOOVAgain(Button add, int projectID) {
+  private void checkOOVAgain(int projectID) {
     message.setText("Checking dictionary again, please wait...");
     controller.getAudioService().checkOOV(projectID, new AsyncCallback<OOVInfo>() {
       @Override
@@ -261,6 +296,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
       @Override
       public void onSuccess(OOVInfo result) {
 //        if (add != null) add.setEnabled(true);
+        unsafeItems.populateTable(getWrappers(result));
 
         if (result.isNeedsReload()) {
           controller.getExerciseService().reload(projectID, new AsyncCallback<Void>() {
@@ -313,7 +349,6 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
   }
 
   /**
-   *
    * @param event
    * @param oovMemoryItemContainer
    */
@@ -429,6 +464,96 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     @Override
     protected Long getItemDate(OOV shell) {
       return shell.getModified();
+    }
+  }
+
+  private static class Wrapper implements HasID {
+    int id;
+    private String value;
+
+    public Wrapper() {
+    }
+
+    public Wrapper(int id, String value) {
+      this.id = id;
+      this.value = value;
+    }
+
+    @Override
+    public int getID() {
+      return 0;
+    }
+
+    @Override
+    public int compareTo(@NotNull HasID o) {
+      return 0;
+    }
+
+    public String getValue() {
+      return value;
+    }
+  }
+
+  private class UnsafeItems extends MemoryItemContainer<Wrapper> {
+    UnsafeItems() {
+      super(OOVViewHelper.this.controller, "unsafe", "Items with Missing Words", 10, 10);
+    }
+
+//    @Override
+//    public void gotClickOnItem(OOV user) {
+//      super.gotClickOnItem(user);
+//      oov.setText(user.getOOV());
+//      equivalent.setText(user.getEquivalent());
+//      currentOOV = user;
+//    }
+
+    /**
+     * @see SimplePagingContainer#configureTable(boolean)
+     */
+    @Override
+    protected void addColumnsToTable() {
+      List<Wrapper> list = getList();
+      addItemID(list, getMaxLengthId());
+      //addEquivalent(list, 100);
+    }
+
+    @Override
+    protected Column<Wrapper, SafeHtml> getTruncatedCol(int maxLength, GetSafe<Wrapper> getSafe) {
+      Column<Wrapper, SafeHtml> column = new Column<Wrapper, SafeHtml>(new ClickableCell()) {
+        @Override
+        public void onBrowserEvent(Cell.Context context, Element elem, Wrapper object, NativeEvent event) {
+          super.onBrowserEvent(context, elem, object, event);
+          checkGotClick(object, event);
+        }
+
+        @Override
+        public SafeHtml getValue(Wrapper shell) {
+          return getNoWrapContent(shell.getValue());
+        }
+      };
+      column.setSortable(true);
+
+      return column;
+    }
+
+    @Override
+    protected int getIDCompare(Wrapper o1, Wrapper o2) {
+      return Integer.compare(o1.getID(), o2.getID());
+    }
+
+    @Override
+    protected int getDateCompare(Wrapper o1, Wrapper o2) {
+      return 0;
+    }
+
+    @Override
+    protected String getItemLabel(Wrapper shell) {
+      return shell.getValue();
+    }
+
+    @Override
+    protected Long getItemDate(Wrapper shell) {
+      return 0L;
     }
   }
 }

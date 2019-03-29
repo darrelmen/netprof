@@ -92,9 +92,6 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
           "\n\talready   " + getIDs(alreadyFetched));
     }
 
-    //  ExerciseListRequest exerciseListRequest = getExerciseListRequest("");
-    // logger.info("getFullExercises " + exerciseListRequest);
-
     service.getFullExercises(getExerciseListRequest("").setReqID(currentReq),
         requested,
         new AsyncCallback<ExerciseListWrapper<ClientExercise>>() {
@@ -141,7 +138,6 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
     if (DEBUG) logger.info("\tgetFullExercisesSuccess for each visible : " + visibleIDs.size());
 
     if (isCurrentReq(reqID)) {
-      // Map<Integer, ClientExercise> idToEx = rememberFetched(result, alreadyFetched);
       gotFullExercises(reqID, getVisibleExercises(visibleIDs, rememberFetched(result, alreadyFetched)));
     } else {
       if (DEBUG_STALE)

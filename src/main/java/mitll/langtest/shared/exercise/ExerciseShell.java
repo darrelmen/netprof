@@ -46,6 +46,11 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   protected boolean shouldSwap;
 
   /**
+   * @see #setSafeToDecode
+   */
+  boolean safeToDecode;
+
+  /**
    *
    */
   private boolean isContext;
@@ -53,7 +58,6 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   /**
    * @see Exercise#setNumPhones
    */
- // int numPhones;
   private int numContext;
 
   /**
@@ -69,8 +73,8 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
   /**
    * @see AudioExercise#AudioExercise(int, int, boolean)
    */
-  ExerciseShell(int realID, boolean isContext) {
-    this("", "", "", realID, isContext, 0);
+  ExerciseShell(int realID, boolean isContext, boolean safeToDecode) {
+    this("", "", "", realID, isContext, 0, safeToDecode);
   }
 
   /**
@@ -79,6 +83,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
    * @param foreignLanguage
    * @param realID
    * @param isContext
+   * @param safeToDecode
    * @see Exercise#getShell
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseShells
    */
@@ -87,14 +92,15 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
                 String foreignLanguage,
                 int realID,
                 boolean isContext,
-                int numContext) {
+                int numContext, boolean safeToDecode) {
     super(realID);
     this.english = english;
     this.meaning = meaning;
     this.foreignLanguage = foreignLanguage;
-   // this.numPhones = numPhones;
+
     this.isContext = isContext;
     this.numContext = numContext;
+    this.safeToDecode = safeToDecode;
   }
 
   @Override
@@ -224,15 +230,19 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
     return numContext;
   }
 
+  /**
+   * @return
+   * @seex mitll.langtest.client.custom.exercise.ContextCommentNPFExercise#getItemContent
+   */
+  public boolean isSafeToDecode() {
+    return safeToDecode;
+  }
+
   public String toString() {
     return "ExerciseShell " +
-        "\n\tid        " + getID() +
-        "\n\tisContext " + isContext() +
+        "\n\tid         " + getID() +
+        "\n\tisContext  " + isContext() +
         "\n\tshouldSwap " + shouldSwap() +
-        "\n\t: '" + getEnglish() + "'"
-        //+
-        //" states " + getState()
-        //+ "/" + getSecondState()
-        ;
+        "\n\t: '" + getEnglish() + "'";
   }
 }

@@ -508,7 +508,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
    * @see ExerciseList.SetExercisesCallback#onSuccess(ExerciseListWrapper)
    * @see #rememberAndLoadFirst
    */
-  void rememberAndLoadFirst(List<T> exercises,
+  protected void rememberAndLoadFirst(List<T> exercises,
                             String selectionID,
                             String searchIfAny,
                             int exerciseID) {

@@ -63,4 +63,10 @@ public interface CommonShell extends HasID {
   boolean isContext();
 
   int getNumContext();
+
+  /**
+   *
+   * @return
+   */
+  boolean isSafeToDecode();
 }

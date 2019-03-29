@@ -30,14 +30,11 @@
 package mitll.langtest.server.scoring;
 
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.shared.amas.AmasExerciseImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.util.Collection;
-import java.util.Set;
-import java.util.TreeSet;
 
 public class InDictFilter {
   private static final Logger logger = LogManager.getLogger(InDictFilter.class);

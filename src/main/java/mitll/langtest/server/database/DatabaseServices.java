@@ -38,7 +38,6 @@ import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.report.ReportingServices;
 import mitll.langtest.server.database.security.IUserSecurityManager;
-import mitll.langtest.server.database.services.AmasServices;
 import mitll.langtest.server.database.userlist.UserListServices;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -54,7 +53,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface DatabaseServices extends DAOContainer, ProjectServices, AmasServices,
+public interface DatabaseServices extends DAOContainer, ProjectServices, //AmasServices,
     UserListServices, ExerciseServices, ReportingServices {
   Database getDatabase();
 

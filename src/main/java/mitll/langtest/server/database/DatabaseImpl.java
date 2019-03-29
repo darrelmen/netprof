@@ -85,7 +85,6 @@ import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.server.sorter.SimpleSorter;
-import mitll.langtest.shared.amas.AmasExerciseImpl;
 import mitll.langtest.shared.analysis.PhoneReportRequest;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
@@ -959,26 +958,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public IStateManager getStateManager() {
     return stateManager;
-  }
-
-  /**
-   * Amas dedicated calls
-   *
-   * @return
-   */
-  @Override
-  public List<AmasExerciseImpl> getAMASExercises() {
-    return null;
-  }
-
-  @Override
-  public AmasExerciseImpl getAMASExercise(int id) {
-    return null;
-  }
-
-  @Override
-  public ISection<AmasExerciseImpl> getAMASSectionHelper() {
-    return null;
   }
 
   /**

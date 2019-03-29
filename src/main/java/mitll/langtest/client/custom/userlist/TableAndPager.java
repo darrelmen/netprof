@@ -52,8 +52,8 @@ public class TableAndPager {
     return tableWithPager;
   }
 
-   void addPagerAndHeader(Panel tableWithPager, String visited, DivWidget top) {
-    Heading w = new Heading(HEADING_SIZE, visited);
+   void addPagerAndHeader(Panel tableWithPager, String label, DivWidget top) {
+    Heading w = new Heading(HEADING_SIZE, label);
     w.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
     w.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
     top.add(w);

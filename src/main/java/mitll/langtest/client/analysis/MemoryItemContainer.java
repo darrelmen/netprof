@@ -237,7 +237,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @param users
    * @see #getTableWithPager
    */
-  public void populateTable(Collection<T> users) {
+  public MemoryItemContainer<T> populateTable(Collection<T> users) {
     int i = 0;
     int index = 0;
     T userToSelect = null;
@@ -262,6 +262,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     scrollIntoView(index);
 
     makeInitialSelectionFromSet(users, userToSelect);
+
+    return this;
   }
 
   protected void makeInitialSelectionFromSet(Collection<T> users, T userToSelect) {

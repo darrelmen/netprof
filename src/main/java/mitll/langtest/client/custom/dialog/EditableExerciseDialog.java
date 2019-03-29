@@ -33,6 +33,7 @@ import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
@@ -221,6 +222,8 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
     String normalizedFL = newUserExercise.getNormalizedFL();
     foreignLangNorm.setText(normalizedFL);
     boolean show = !normalizedFL.isEmpty() && !normalizedFL.equals(newUserExercise.getFLToShow());
+    if (show)
+      foreignLangNorm.getParent().getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     foreignLangNorm.setVisible(show);
   }
 
@@ -232,6 +235,8 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
       logger.info("setContextFLNorm For " + clientExercise.getID() + " " + clientExercise.getFLToShow() + " = '" + clientExercise.getNormalizedFL() + "'");
       foreignLangContextNorm.setText(normalizedFL);
       boolean visible = !normalizedFL.isEmpty() && !normalizedFL.equals(newUserExercise.getFLToShow());
+      if (visible)
+        foreignLangContextNorm.getParent().getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
       foreignLangContextNorm.setVisible(visible);
     }
   }

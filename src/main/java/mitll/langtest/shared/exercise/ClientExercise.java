@@ -84,9 +84,4 @@ public interface ClientExercise extends CommonShell, MutableAnnotationExercise, 
   boolean hasEnglishAttr();
   List<String> getTokens();
 
-  /**
-   *
-   * @return
-   */
-  boolean isSafeToDecode();
 }
