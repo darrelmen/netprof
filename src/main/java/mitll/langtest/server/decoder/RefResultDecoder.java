@@ -765,7 +765,7 @@ public class RefResultDecoder {
                                     Integer audioID,
                                     AudioFileHelper audioFileHelper,
                                     int userIDFromSession) {
-    PretestScore pretestScore = audioFileHelper.recalcRefAudioWithHelper(projid, audioID, audioFileHelper, userIDFromSession);
+     audioFileHelper.recalcRefAudioWithHelper(projid, audioID, audioFileHelper, userIDFromSession);
   }
 
   /**

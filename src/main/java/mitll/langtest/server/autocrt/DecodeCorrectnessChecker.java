@@ -183,7 +183,7 @@ public class DecodeCorrectnessChecker {
       logger.debug("recoSentence (not correct) is '" + recoSentence + "' length = (" + recoSentence.length() + ")");
     }
 
-    double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getHydecScore() == -1) ? -1 : asrScoreForAudio.getHydecScore();
+    double scoreForAnswer = (asrScoreForAudio == null || asrScoreForAudio.getOverallScore() == -1) ? -1 : asrScoreForAudio.getOverallScore();
     answer.setCorrect(isCorrect && scoreForAnswer > minPronScore);
     answer.setSaidAnswer(isCorrect);
     answer.setDecodeOutput(recoSentence);

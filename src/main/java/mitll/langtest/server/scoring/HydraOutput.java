@@ -73,7 +73,6 @@ public class HydraOutput {
     this.wordLab = wordLab;
     this.phoneLab = phoneLab;
     this.wordAndProns = wordAndProns;
- //   TransNormDict transNormDict1 = transNormDict;
   }
 
   public Scores getScores() {
@@ -146,10 +145,6 @@ public class HydraOutput {
   List<WordAndProns> getWordAndProns() {
     return wordAndProns;
   }
-
-//  public TransNormDict getTransNormDict() {
-//    return transNormDict;
-//  }
 
   public STATUS_CODES getStatus() {
     return status;

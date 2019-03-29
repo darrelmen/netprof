@@ -732,42 +732,15 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private List<CommonExercise> getParentChildPairs(Collection<CommonExercise> exercises) {
     List<CommonExercise> withContext = new ArrayList<>();
     exercises.forEach(commonExercise -> {
-      //  logger.info("\t" + commonExercise.getID() + " " + commonExercise.getDirectlyRelated().size());
       commonExercise.getDirectlyRelated().forEach(clientExercise -> {
-        //withContext.add(commonExercise);
         Exercise copy = new Exercise(commonExercise);
         withContext.add(copy);
         copy.getDirectlyRelated().clear();
         copy.getDirectlyRelated().add(clientExercise.asCommon());
-//            withContext.add(clientExercise.asCommon());
       });
-      // withContext.addAll(commonExercise.getDirectlyRelated());
     });
     return withContext;
   }
-
-  /**
-   * @param onlyExamples
-   * @param userID
-   * @param exerciseShells
-   * @param activityType
-   * @see #makeExerciseListWrapper(ExerciseListRequest, Collection, int)
-   */
-/*  private void markStateForActivity(boolean onlyExamples, int userID, List<T> exerciseShells, ActivityType activityType) {
-    switch (activityType) {
-      case RECORDER:
-        markRecordedState(userID, activityType, exerciseShells, onlyExamples);
-        break;
-      case REVIEW:
-      case QUALITY_CONTROL:
-      case MARK_DEFECTS:
-        db.getStateManager().markState(exerciseShells);
-        break;
-      default:
-        break;
-    }
-  }*/
-
 
   /**
    * 0) Add annotations to fields on exercise

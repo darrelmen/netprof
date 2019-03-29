@@ -219,7 +219,7 @@ public class AudioAnswer extends SimpleAudioAnswer {
    */
   public void setPretestScore(PretestScore pretestScore) {
     this.pretestScore = pretestScore;
-    this.score = pretestScore.getHydecScore();
+    this.score = pretestScore.getOverallScore();
   }
 
   public String getTranscript() {

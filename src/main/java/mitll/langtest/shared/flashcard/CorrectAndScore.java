@@ -64,7 +64,7 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
    * @param result
    */
   public CorrectAndScore(SimpleAudioAnswer result) {
-    this(result.getPretestScore().getHydecScore(), result.getPath());
+    this(result.getPretestScore().getOverallScore(), result.getPath());
 
     PretestScore pretestScore = result.getPretestScore();
     setScores(pretestScore.getTypeToSegments());

@@ -1798,7 +1798,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     if (isCurrentReq(reqID)) {
       reallyShowExercises(result, reqID);
       if (isCurrentReq(reqID)) {
-        if (DEBUG_STALE) logger.info("showExercisesForCurrentReq for progress current " + reqID);
+       // if (DEBUG_STALE) logger.info("showExercisesForCurrentReq for progress current " + reqID);
         setProgressBarScore(getInOrder(), reqID);
       } else {
         if (DEBUG_STALE) logger.info("showExercisesForCurrentReq for progress stale " + reqID);

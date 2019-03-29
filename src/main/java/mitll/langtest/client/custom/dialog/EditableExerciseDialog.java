@@ -200,8 +200,7 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
     // foreign lang
     setFL(newUserExercise);
 
-    foreignLangNorm.setText(newUserExercise.getNormalizedFL());
-    foreignLangNorm.setVisible(!newUserExercise.getNormalizedFL().isEmpty());
+    setFLNorm(newUserExercise);
 
     // translit
     setTranslit(newUserExercise);
@@ -210,13 +209,31 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
     setEnglish(newUserExercise);
 
     setContext(newUserExercise);
-
+    setContextFLNorm(newUserExercise);
     setContextTrans(newUserExercise);
 
     if (rap != null) {
       addAudio(instance == INavigation.VIEWS.FIX_SENTENCES ? newUserExercise.getDirectlyRelated().iterator().next() : newUserExercise);
     }
+  }
 
+  private void setFLNorm(U newUserExercise) {
+    String normalizedFL = newUserExercise.getNormalizedFL();
+    foreignLangNorm.setText(normalizedFL);
+    boolean show = !normalizedFL.isEmpty() && !normalizedFL.equals(newUserExercise.getFLToShow());
+    foreignLangNorm.setVisible(show);
+  }
+
+  private void setContextFLNorm(U newUserExercise) {
+    List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
+    if (!directlyRelated.isEmpty()) {
+      ClientExercise clientExercise = directlyRelated.get(0);
+      String normalizedFL = clientExercise.getNormalizedFL();
+      logger.info("setContextFLNorm For " + clientExercise.getID() + " " + clientExercise.getFLToShow() + " = '" + clientExercise.getNormalizedFL() + "'");
+      foreignLangContextNorm.setText(normalizedFL);
+      boolean visible = !normalizedFL.isEmpty() && !normalizedFL.equals(newUserExercise.getFLToShow());
+      foreignLangContextNorm.setVisible(visible);
+    }
   }
 
   private void addAudio(ClientExercise newUserExercise) {
@@ -298,9 +315,8 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
   private void setContext(U newUserExercise) {
     context.box.setText(originalContext = newUserExercise.getContext().trim());
 
-    String text = context.box.getText();
-    // boolean val = !text.trim().isEmpty();
     if (rapContext != null) {
+      String text = context.box.getText();
       boolean val = !text.trim().isEmpty();
       //   logger.info("setContext Set context '" + text + "' = " + val);
       maybeEnableContext(val);
@@ -316,7 +332,6 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
   }
 
   private void setContextTrans(U newUserExercise) {
-
     contextTrans.box.setText(originalContextTrans = newUserExercise.getContextTranslation().trim());
     if (!useAnnotation(newUserExercise, CONTEXT_TRANSLATION, contextTransAnno)) {
       List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();

@@ -378,7 +378,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
       }
 
       PretestScore pretestScore = audioFileHelper.recalcRefAudioWithHelper(projid, audioID, audioFileHelper, userIDFromSession);
-      if (pretestScore != null) {
+      if (pretestScore != null && pretestScore.isRanNormally()) {
         idToAlignment.put(audioID, pretestScore);
       }
     } else {
@@ -545,6 +545,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    * @param absPath
    * @param language
    * @return
+   * @see #getASRScoreForAudio(int, long, String, String, String, ImageOptions, int, boolean)
    */
   private PretestScore getPretestScore(int reqid,
                                        int resultID,
@@ -597,7 +598,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         "\n\tfile     " + testAudioFile +
         "\n\texid     " + exerciseID +
         "\n\tsentence " + sentence.length() + " characters long" +
-        "\n\tscore    " + asrScoreForAudio.getHydecScore() +
+        "\n\tscore    " + asrScoreForAudio.getOverallScore() +
         "\n\ttook     " + timeToRunHydec + " millis " +
         "\n\tusePhoneToDisplay " + usePhoneToDisplay1);
 

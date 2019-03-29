@@ -117,7 +117,6 @@ public class KaldiSupport implements IKaldiSupport {
               "\n\ttook      " + processDur +
               "\n\tdecoding '" + rawSentence + "'" +
               "\n\tfile      " + audioPath +
-              //"\n\tstatus    " + status +
               "\n\tscore " + score);
         } else {
           logger.warn("runKaldi failed " +

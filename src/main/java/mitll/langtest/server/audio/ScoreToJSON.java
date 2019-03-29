@@ -145,7 +145,7 @@ public class ScoreToJSON {
           }
 
           jsonObject.add("words", jsonWords);
-        } else if (pretestScore.getHydecScore() > -0.1f) {
+        } else if (pretestScore.getOverallScore() > -0.1f) {
           logger.warn("no word transcript for " + pretestScore, new Exception());
         }
       }
@@ -211,42 +211,48 @@ public class ScoreToJSON {
    * @return
    * @see mitll.langtest.server.scoring.JsonScoring#getJsonForAudioForUser
    */
-  public JsonObject getJsonForScore(PretestScore score, boolean usePhoneDisplay, ServerProperties serverProps,
+  public JsonObject getJsonForScore(PretestScore score,
+                                    boolean usePhoneDisplay, ServerProperties serverProps,
                                     Language languageEnum) {
     JsonObject jsonObject = new JsonObject();
-    jsonObject.addProperty(SCORE, score.getHydecScore());
 
-    for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : score.getTypeToSegments().entrySet()) {
-      List<TranscriptSegment> segments = pair.getValue();
-      JsonArray eventArray = new JsonArray();
-      NetPronImageType imageType = pair.getKey();
+    if (score == null) {
+      return jsonObject;
+    } else {
+      jsonObject.addProperty(SCORE, score.getOverallScore());
 
-      boolean usePhone = imageType == NetPronImageType.PHONE_TRANSCRIPT &&
-          (serverProps.usePhoneToDisplay(languageEnum) || usePhoneDisplay);
+      for (Map.Entry<NetPronImageType, List<TranscriptSegment>> pair : score.getTypeToSegments().entrySet()) {
+        List<TranscriptSegment> segments = pair.getValue();
+        JsonArray eventArray = new JsonArray();
+        NetPronImageType imageType = pair.getKey();
 
-      int numSegments = segments.size();
-      for (int i = 0; i < numSegments; i++) {
-        TranscriptSegment segment = segments.get(i);
+        boolean usePhone = imageType == NetPronImageType.PHONE_TRANSCRIPT &&
+            (serverProps.usePhoneToDisplay(languageEnum) || usePhoneDisplay);
 
-        JsonObject object = new JsonObject();
-        String event = segment.getEvent();
+        int numSegments = segments.size();
+        for (int i = 0; i < numSegments; i++) {
+          TranscriptSegment segment = segments.get(i);
 
-        if (isValidEvent(event)) {
-          if (usePhone) {  // remap to display labels
-            event = serverProps.getDisplayPhoneme(languageEnum, segments, numSegments, i, event);
+          JsonObject object = new JsonObject();
+          String event = segment.getEvent();
+
+          if (isValidEvent(event)) {
+            if (usePhone) {  // remap to display labels
+              event = serverProps.getDisplayPhoneme(languageEnum, segments, numSegments, i, event);
+            }
+
+            object.addProperty(EVENT, event);
+            object.addProperty(START, segment.getStart());
+            object.addProperty(END, segment.getEnd());
+            object.addProperty(SCORE, segment.getScore());
+
+            eventArray.add(object);
           }
-
-          object.addProperty(EVENT, event);
-          object.addProperty(START, segment.getStart());
-          object.addProperty(END, segment.getEnd());
-          object.addProperty(SCORE, segment.getScore());
-
-          eventArray.add(object);
         }
-      }
 
-      jsonObject.add(imageType.toString(), eventArray);
+        jsonObject.add(imageType.toString(), eventArray);
+      }
+      return jsonObject;
     }
-    return jsonObject;
   }
 }

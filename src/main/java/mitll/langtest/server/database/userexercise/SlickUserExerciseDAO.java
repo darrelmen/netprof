@@ -503,8 +503,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     Map<String, String> unitToValue = getUnitToValue(slick, typeOrder);
 
-    if (slick.projid() == 16 && slick.id() == 153010) logger.info("makeExercise ex (" + slick.id() +
-        ") " + typeOrder + " - " + unitToValue);
+    if (slick.projid() == 15 && slick.id() == 129640) {
+      logger.info("makeExercise ex (" + slick.id() +
+          ") " + typeOrder + " - " + unitToValue);
+      logger.info("makeExercise ex (" + slick.id() +
+          ") " + foreignlanguage + " " + english + " - " + meaning + " '" + noAccentFL +"'");
+    }
 
     Exercise exercise = new Exercise(
         slick.id(),
@@ -520,7 +524,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         slick.candecode(),
         slick.candecodechecked().getTime(),
         slick.iscontext(),
-//        slick.numphones(),
         slick.legacyid(), // i.e. dominoID
         shouldSwap);
 
@@ -1101,7 +1104,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         "\n\tisPredef = " + isPredef);
 
     return getExercises(allContextPredefByProject, typeOrder, sectionHelper,
-        lookup, allByProject, exToAttrs, /*attributeTypes,*/ false);
+        lookup, allByProject, exToAttrs, false);
   }
 
   @Override

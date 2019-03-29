@@ -277,7 +277,8 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                            boolean useKaldi) {
     long then = System.currentTimeMillis();
 
-    logger.info("scoreRepeatExercise decode =" + decode + " decode/align '" + sentence + "'");
+    logger.info("scoreRepeatExercise " + (decode ? "decode" : "align") + " '" + sentence + "'");
+
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + WAV;
 
@@ -573,19 +574,18 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
       Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(eventAndFileInfo);
 
-/*
       logger.info("getPretestScore sTypeToImage" +
           "\n\tsTypeToImage " + sTypeToImage
       );
-*/
+
       if (typeToSegments.isEmpty()) {
         logger.warn("getPretestScore huh? no segments from words " + result);// + " phones " + phoneLab);
       }
-/*
+
       logger.info("getPretestScore typeToSegments" +
           "\n\ttypeToSegments " + typeToSegments
       );
-*/
+
       Map<String, String> phoneToDisplay = Collections.emptyMap();
       if (reallyUsePhone && this.phoneToDisplay != null) {
         phoneToDisplay = this.phoneToDisplay;
@@ -601,15 +601,17 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       }
 
       Map<String, Float> phoneToScore = getPhoneToScore(scores.getEventScores(), phoneToDisplay);
-      //  logger.info("getPretestScore phone " + phoneToScore);
+      logger.info("getPretestScore phone " + phoneToScore);
 
       Map<String, Float> wordToScore = getWordToScore(scores.getEventScores());
-      //  logger.info("getPretestScore word  " + wordToScore);
+      logger.info("getPretestScore word  " + wordToScore);
 
       maybeClampScore(typeToSegments, scores);
 
+      float overallScore = scores.getHydraScore();
+
       PretestScore pretestScore = new PretestScore(
-          scores.getHydraScore(),
+          overallScore,
           phoneToScore,
           wordToScore,
           sTypeToImage,
@@ -618,6 +620,26 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           (float) duration,
           processDur,
           isMatch(result, typeToSegments));
+
+      if (useKaldi) {
+        if (props.useWordAvgScoreForKaldi()) {
+          pretestScore.setRawOverallScore(overallScore);
+
+          logger.info("getPretestScore word scores   " + pretestScore.getWordScores());
+          logger.info("getPretestScore word segments " + pretestScore.getWordSegments());
+
+          float avgWordScore = pretestScore.getAvgWordScore();
+          logger.info("getPretestScore using word " + avgWordScore + " instead of " +overallScore);
+          overallScore = avgWordScore;
+          pretestScore.setOverallScore(overallScore);
+        } else if (props.usePhoneAvgScoreForKaldi()) {
+          pretestScore.setRawOverallScore(overallScore);
+          float avgPhoneScore = pretestScore.getAvgPhoneScore();
+          logger.info("getPretestScore using phone " + avgPhoneScore + " instead of " +overallScore);
+          overallScore = avgPhoneScore;
+          pretestScore.setOverallScore(overallScore);
+        }
+      }
 
       long now = System.currentTimeMillis();
 

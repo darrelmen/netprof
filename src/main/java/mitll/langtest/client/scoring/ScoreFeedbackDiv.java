@@ -143,8 +143,8 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
       wordTableContainer.add(getPlayButtonDiv());
     }
 
-    float hydecScore = pretestScore != null ? pretestScore.getHydecScore() : 0F;
-    //  logger.info("score " + hydecScore);
+    float hydecScore = pretestScore != null ? pretestScore.getOverallScore() : 0F;
+    //  logger.info("score " + overallScore);
     if (hydecScore > 0) {
       showScoreFeedback(pretestScore, isRTL, wordTableContainer, hydecScore);
       //   logger.info("getWordTableContainer heard " + pretestScore.getRecoSentence());
@@ -179,7 +179,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
 
     wordTableContainer.add(scoreFeedbackDiv);
 
-//    logger.info("showScoreFeedback hydec score " + hydecScore);
+//    logger.info("showScoreFeedback hydec score " + overallScore);
     if (addPraise && hydecScore > NATIVE_THRSHOLD && pretestScore.isFullMatch()) {
       wordTableContainer.add(getPraise());
     }

@@ -61,6 +61,9 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class OOVViewHelper extends TableAndPager implements ContentView {
+  public static final String CHECK_COMPLETE = "Check complete.";
+  public static final String PLEASE_WAIT = "Please wait...";
+  public static final String CHECK_ITEMS_IN_DICT = "Check Items In Dict.";
   private final Logger logger = Logger.getLogger("OOVViewHelper");
 
   private static final String TITLE = "Words Not In Dictionary";
@@ -196,7 +199,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     {
       DivWidget buttonRow = new DivWidget();
       top.add(buttonRow);
-      buttonRow.add(checkButton=getCheckButton());
+      buttonRow.add(checkButton = getCheckButton());
     }
     {
       DivWidget buttonRow = new DivWidget();
@@ -209,7 +212,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
 
   @NotNull
   private Button getCheckButton() {
-    final Button add = new Button("Check Items In Dict.", IconType.CHECK);
+    final Button add = new Button(CHECK_ITEMS_IN_DICT, IconType.CHECK);
     add.setEnabled(false);
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> gotCheck(add));
@@ -220,7 +223,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
   private void gotCheck(Button add) {
     int projectID = controller.getProjectID();
     add.setEnabled(false);
-    message.setText("Please wait...");
+    message.setText(PLEASE_WAIT);
 
     updateAndCheck(add, projectID, getDirtyItems());
   }
@@ -251,13 +254,13 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     controller.getAudioService().checkOOV(projectID, new AsyncCallback<OOVInfo>() {
       @Override
       public void onFailure(Throwable caught) {
-        if (add != null) add.setEnabled(true);
+        // if (add != null) add.setEnabled(true);
         controller.handleNonFatalError("Checking OOV...", caught);
       }
 
       @Override
       public void onSuccess(OOVInfo result) {
-        if (add != null) add.setEnabled(true);
+//        if (add != null) add.setEnabled(true);
 
         if (result.isNeedsReload()) {
           controller.getExerciseService().reload(projectID, new AsyncCallback<Void>() {
@@ -281,7 +284,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
 
           @Override
           public void onSuccess(List<OOV> result) {
-            message.setText("Check complete.");
+            message.setText(CHECK_COMPLETE);
           }
         });
       }
@@ -290,7 +293,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
 
   private void gotBlur(OOV currentOOV) {
     final String text = equivalent.getText();
-   // logger.info("got " + text);
+    // logger.info("got " + text);
     controller.getScoringService().isValidForeignPhrase(controller.getProjectID(),
         text, "", new AsyncCallback<Collection<String>>() {
           @Override
@@ -302,15 +305,18 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
           public void onSuccess(Collection<String> result) {
             if (result.isEmpty()) {
               currentOOV.setEquivalent(text);
-
-              checkButton.setEnabled(true);//!currentOOV.getEquivalent().equals(text));
               oovContainer.redraw();
+              checkButton.setEnabled(!getDirtyItems().isEmpty());
             }
           }
         });
   }
 
-
+  /**
+   *
+   * @param event
+   * @param oovMemoryItemContainer
+   */
   private void checkForKeyUpDown(KeyUpEvent event, MemoryItemContainer<OOV> oovMemoryItemContainer) {
     // arrow up down Paul suggestion.
     int keyCode = event.getNativeEvent().getKeyCode();

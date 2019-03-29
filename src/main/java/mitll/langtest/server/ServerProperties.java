@@ -152,8 +152,6 @@ public class ServerProperties {
   private static final String NETPROF = "netprof";
 
   private static final String POSTGRES_HYDRA = "postgresHydra";
-//  private static final String POSTGRES_DATA2_DIALOG = "postgresData2Dialog";
-
 
   private static final String ADD_USER_VIA_EMAIL = "addUserViaEmail";
   private static final String SEND_HEARTBEAT = "sendHeartbeat";
@@ -163,14 +161,10 @@ public class ServerProperties {
   private static final String SCORING_MODEL = "scoringModel";
   private static final String TALKS_TO_DOMINO = "talksToDomino";
 
-//  public static final String OUR_FORTH_TONE = "uu4";
-
   private static final String FORTH_U_TONE = "ù";
   private static final String THIRD_U_TONE = "ǔ";
   private static final String SECOND_U_TONE = "ú";
   private static final String FIRST_U_TONE = "ū";
-//  public static final String UU = "uu";
-  // public static final String NORMAL_U = "u";
 
   //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
 
@@ -1124,4 +1118,13 @@ public class ServerProperties {
   public String getKaldiHost() {
     return getProp("kaldiHost", "score1-dev");
   }
+
+  public boolean useWordAvgScoreForKaldi() {
+    return getDefaultTrue("useWordAvgScoreForKaldi");
+  }
+
+  public boolean usePhoneAvgScoreForKaldi() {
+    return getDefaultFalse("usePhoneAvgScoreForKaldi");
+  }
+
 }

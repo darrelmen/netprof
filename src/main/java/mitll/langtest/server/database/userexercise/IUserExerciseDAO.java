@@ -204,10 +204,6 @@ public interface IUserExerciseDAO extends IDAO {
 
   Collection<CommonExercise> getOverrides(boolean shouldSwap);
 
-/*
-  Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap);
-*/
-
   List<SlickExercise> getExercisesByIDs(Collection<Integer> exids);
 
   void deleteByExID(Collection<Integer> exids);

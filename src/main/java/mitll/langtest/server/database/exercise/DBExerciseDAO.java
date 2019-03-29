@@ -254,8 +254,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           fullProject, allAttributesByProject, exToAttrs,
           true);
 
-      Map<Integer, CommonExercise> idToContext =
-          getIDToExercise(contextByProject);
+      Map<Integer, CommonExercise> idToContext = getIDToExercise(contextByProject);
 
       if (DEBUG_CONTEXT) {
         logger.info("readExercises project " + project +
@@ -560,17 +559,24 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
    */
   public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp) {
-    int changed = getDao().updateCheckedBulk(safe, true, dictTimestamp);
-    if (changed != safe.size()) {
-      logger.warn("asked to mark " + safe.size() + " but did " + changed);
+    {
+      int changed = getDao().updateCheckedBulk(safe, true, dictTimestamp);
+      if (changed != safe.size()) {
+        logger.warn("markSafeUnsafe asked to mark " + safe.size() + " but did " + changed);
+      } else {
+        logger.info("markSafeUnsafe marked " + safe.size() + " safe");
+      }
     }
-    int i = getDao().updateCheckedBulk(unsafe, false, dictTimestamp);
-    if (i != unsafe.size()) {
-      logger.warn("asked to mark " + unsafe.size() + " but did " + i);
+    {
+      int i = getDao().updateCheckedBulk(unsafe, false, dictTimestamp);
+      if (i != unsafe.size()) {
+        logger.warn("markSafeUnsafe asked to mark " + unsafe.size() + " but did " + i);
+      } else {
+        logger.info("markSafeUnsafe marked " + unsafe.size() + " unsafe");
+
+      }
     }
   }
-
-
 
   /**
    * @param id

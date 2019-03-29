@@ -104,7 +104,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   FormField english;
   FormField foreignLang;
-  HTML foreignLangNorm;
+  HTML foreignLangNorm, foreignLangContextNorm;
   FormField translit;
   FormField context;
   FormField contextTrans;
@@ -238,6 +238,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   private void makeOptionalRows(DivWidget upper) {
     makeContextRow(upper);
+    foreignLangContextNorm = makeForeignLangRow2(upper);
+
     makeContextTransRow(upper);
   }
 
@@ -273,8 +275,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   /**
-   * @see #addFields(ListInterface, Panel)
    * @return
+   * @see #addFields(ListInterface, Panel)
    */
   @NotNull
   protected DivWidget getDominoEditInfo() {
@@ -397,7 +399,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     Panel row = new DivWidget();
     container.add(row);
 
-  //  String foreignLanguageAnnotation = "foreignLanguageAnnotation";
+    //  String foreignLanguageAnnotation = "foreignLanguageAnnotation";
     foreignAnno.getElement().setId(foreignLanguageAnnotation);
 //    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
     FormField foreignLang = makeBoxAndAnno(row, "", foreignAnno);
@@ -421,10 +423,13 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       label.getElement().getStyle().setProperty("fontFamily", "'MyUrduWebFont'");
     }
     label.setDirectionEstimator(true);   // automatically detect whether text is RTL
-    setFontSize(label);
+
+    row.addStyleName("leftFiveMargin");
+    row.getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setMarginBottom(label);
     return label;
   }
+
   private void setFontSize(FormField foreignLang) {
     TextBoxBase box = foreignLang.box;
     setFontSize(box);
@@ -756,7 +761,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
             (refAudio != null && originalRefAudio == null) ||
             (refAudio != null && !refAudio.equals(originalRefAudio));
   }
-
 
   /**
    * @param newUserExercise
@@ -1201,7 +1205,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     } else {
       ClientExercise clientExercise = directlyRelated.get(0);
       if (!clientExercise.getMutableAudio().clearRefAudio()) {
-      //  logger.info("clearContext Didn't clear context ref audio?");
+        //  logger.info("clearContext Didn't clear context ref audio?");
       } else {
         originalContextAudio = "";
       }

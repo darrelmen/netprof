@@ -178,7 +178,7 @@ public class JsonScoring {
 
     if (logger.isInfoEnabled()) {
       PretestScore pretestScore = answer == null ? null : answer.getPretestScore();
-      float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
+      float hydecScore = pretestScore == null ? -1 : pretestScore.getOverallScore();
       logger.info("getJsonForAudioForUser" +
               "\n\tflashcard   " + doFlashcard +
               "\n\texercise id " + exerciseID +
@@ -211,7 +211,6 @@ public class JsonScoring {
   }
 
   /**
-   *
    * @param projid
    * @param exerciseID
    * @param options
@@ -258,8 +257,7 @@ public class JsonScoring {
 
     if (validity != OK) {
       logger.warn("getJsonObject invalid " + validity + " : " + answer);
-    }
-    else if (!addStream){
+    } else if (!addStream) {
       addDurationAndDNR(jsonForScore, answer);
     }
 
@@ -291,7 +289,7 @@ public class JsonScoring {
   }
 
   /**
-   * TODO : connect this to AudioService?
+   *
    *
    * @param projid
    * @param usePhoneToDisplay
@@ -311,7 +309,10 @@ public class JsonScoring {
                                   PretestScore pretestScore) {
     JsonObject jsonForScore;
     ScoreToJSON scoreToJSON = new ScoreToJSON();
-    float hydecScore = pretestScore == null ? -1 : pretestScore.getHydecScore();
+    float rawOverall = pretestScore == null ? -1 : pretestScore.getRawOverallScore();
+    float overallScore = pretestScore == null ? -1 : pretestScore.getOverallScore();
+    float wordAvg = pretestScore == null ? -1 : pretestScore.getAvgWordScore();
+    float phoneAvg = pretestScore == null ? -1 : pretestScore.getAvgPhoneScore();
 
     Project project = db.getProject(projid);
     //  String language = project.getLanguage();
@@ -319,7 +320,11 @@ public class JsonScoring {
     jsonForScore = fullJSON ?
         scoreToJSON.getJsonObject(pretestScore) :
         scoreToJSON.getJsonForScore(pretestScore, usePhoneToDisplay, serverProps, project.getLanguageEnum());
-    jsonForScore.addProperty(SCORE, hydecScore);
+    jsonForScore.addProperty(SCORE, overallScore);
+    jsonForScore.addProperty("rawOverall", rawOverall);
+    jsonForScore.addProperty("wordAvg", wordAvg);
+    jsonForScore.addProperty("phoneAvg", phoneAvg);
+
     jsonForScore.addProperty(FULLMATCH, pretestScore != null && pretestScore.isFullMatch());
 
     if (doFlashcard) {
@@ -327,7 +332,7 @@ public class JsonScoring {
       jsonForScore.addProperty(SAID_WORD, answer.isSaidAnswer());
       jsonForScore.addProperty(RESULT_ID, answer.getResultID());
     } else {
-      jsonForScore.addProperty(IS_CORRECT, hydecScore > MIN_HYDRA_ALIGN);
+      jsonForScore.addProperty(IS_CORRECT, overallScore > MIN_HYDRA_ALIGN);
     }
     return jsonForScore;
   }
@@ -384,7 +389,7 @@ public class JsonScoring {
       options.setDoDecode(false);
 
       answer = getAnswer(reqid, projectID, exerciseID, foreignLanguage, user, wavPath, saveFile,
-          asrScoreForAudio.getHydecScore(),
+          asrScoreForAudio.getOverallScore(),
           deviceType, device,
           options,
           asrScoreForAudio);

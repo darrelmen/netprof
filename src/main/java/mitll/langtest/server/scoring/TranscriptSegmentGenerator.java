@@ -119,24 +119,11 @@ public class TranscriptSegmentGenerator {
     return typeToEndTimes;
   }
 
-/*
-  private void doChinese(Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes) {
-    List<TranscriptSegment> hydraPhoneSegments = typeToEndTimes.get(PHONE_TRANSCRIPT);
-
-    if (hydraPhoneSegments != null) {
-
-    }
-  }
-*/
-
   private void doKoreanPhoneTranslation(Map<NetPronImageType, List<TranscriptSegment>> typeToEndTimes) {
     List<TranscriptSegment> hydraPhoneSegments = typeToEndTimes.get(PHONE_TRANSCRIPT);
 
     if (hydraPhoneSegments != null) {
       String before = DEBUG ? getSeguence(hydraPhoneSegments) : "";
-      //  List<TranscriptSegment> hydraWordSegments = typeToEndTimes.get(WORD_TRANSCRIPT);
-//        Map<String, List<TranscriptSegment>> wordToPhoneSeg = new HashMap<>();
-
       List<TranscriptSegment> allKoreanPhones = new ArrayList<>();
       typeToEndTimes.get(WORD_TRANSCRIPT).forEach(wordSeg -> {
         if (isValid(wordSeg)) {
@@ -150,11 +137,8 @@ public class TranscriptSegmentGenerator {
           }
           allKoreanPhones.addAll(koreanSegments);
         }
-        //wordToPhoneSeg.put(event, segs);
       });
       Collections.sort(allKoreanPhones);
-//        List<TranscriptSegment> koreanSegmentsForWord = getKoreanSegments(hydraPhoneSegments);
-      //      List<TranscriptSegment> koreanSegments = koreanSegments1;
       if (DEBUG) {
         String after = getSeguence(allKoreanPhones);
 

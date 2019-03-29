@@ -2012,7 +2012,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public void rememberScore(int projID, int resultID, PretestScore asrScoreForAudio, boolean isCorrect) {
-    getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getHydecScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson(), isCorrect);
+    getAnswerDAO().changeAnswer(resultID, asrScoreForAudio.getOverallScore(), asrScoreForAudio.getProcessDur(), asrScoreForAudio.getJson(), isCorrect);
     recordWordAndPhone.recordWordAndPhoneInfo(projID, resultID, asrScoreForAudio);
   }
 

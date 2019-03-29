@@ -88,16 +88,14 @@ public class Exercise extends AudioExercise implements CommonExercise,
   private List<ExerciseAttribute> attributes = new ArrayList<>();
 
   /**
-   * Just to use when doing decoding.
+   * Just to use when doing decoding and displayed in Fix Item
    */
-  private transient String normalizedFL = "";
+  private String normalizedFL = "";
 
   /**
    *
    */
   private int parentExerciseID = -1;
-
-  //private String foreignLanguageNorm;
 
   // for serialization
   public Exercise() {
@@ -259,7 +257,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;
     this.safeToDecode = candecode;
-    //this.numPhones = numPhones;
   }
 
   /**
@@ -273,6 +270,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.isPredef = exercise.isPredefined();
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getForeignLanguage();
+    this.normalizedFL = exercise.getNormalizedFL();
+
     this.transliteration = exercise.getTransliteration();
     this.meaning = exercise.getMeaning();
     this.dominoID = exercise.getDominoID();
