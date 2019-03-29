@@ -39,10 +39,7 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
@@ -107,6 +104,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   FormField english;
   FormField foreignLang;
+  HTML foreignLangNorm;
   FormField translit;
   FormField context;
   FormField contextTrans;
@@ -185,7 +183,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       upper.add(dominoEditInfo);
     }
 
-    makeForeignLangRow(upper);
+    foreignLang = makeForeignLangRow(upper, "foreignLanguageAnnotation");
+    foreignLangNorm = makeForeignLangRow2(upper);
+
 
     {
       //final String id1 = "" + listID;
@@ -322,13 +322,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see #addFields
    */
   protected abstract void addItemsAtTop(Panel container);
-  //{
- //   new UnitChapterItemHelper<U>(controller.getProjectStartupInfo().getTypeOrder()).addUnitChapterItem(newUserExercise, container);
-  //}
-
-//  protected void addItemsAtTop(Panel container) {
-//    new UnitChapterItemHelper<U>(controller.getProjectStartupInfo().getTypeOrder()).addUnitChapterItem(newUserExercise, container);
-//  }
 
   private void gotBlur() {
     //  logger.info("gotBlur");
@@ -394,53 +387,71 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     english = makeBoxAndAnno(row, "", englishAnno);
     markPlaceholder(english.box, isEnglish() ? newUserExercise.getMeaning() : newUserExercise.getEnglish(), "Translation (optional)");
   }
-//
-//  String getEnglishLabel() {
-//    return isEnglish() ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
-//  }
 
   /**
    * @param container
    * @return
    */
-  private void makeForeignLangRow(Panel container) {
+  private FormField makeForeignLangRow(Panel container, String foreignLanguageAnnotation) {
     //if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
     Panel row = new DivWidget();
     container.add(row);
 
-    foreignAnno.getElement().setId("foreignLanguageAnnotation");
+  //  String foreignLanguageAnnotation = "foreignLanguageAnnotation";
+    foreignAnno.getElement().setId(foreignLanguageAnnotation);
 //    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
-    foreignLang = makeBoxAndAnno(row, "", foreignAnno);
+    FormField foreignLang = makeBoxAndAnno(row, "", foreignAnno);
     if (getLanguage() == Language.URDU) {
       foreignLang.getWidget().getElement().getStyle().setProperty("fontFamily", "'MyUrduWebFont'");
     }
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
     setFontSize(foreignLang);
     setMarginBottom(foreignLang);
+    return foreignLang;
   }
 
+  private HTML makeForeignLangRow2(Panel container) {
+    //if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
+    Panel row = new DivWidget();
+    container.add(row);
+    HTML label = new HTML();
+    row.add(label);
+
+    if (getLanguage() == Language.URDU) {
+      label.getElement().getStyle().setProperty("fontFamily", "'MyUrduWebFont'");
+    }
+    label.setDirectionEstimator(true);   // automatically detect whether text is RTL
+    setFontSize(label);
+    setMarginBottom(label);
+    return label;
+  }
   private void setFontSize(FormField foreignLang) {
-    foreignLang.box.getElement().getStyle().setFontSize(18, Style.Unit.PX);
+    TextBoxBase box = foreignLang.box;
+    setFontSize(box);
+  }
+
+  private void setFontSize(UIObject box) {
+    box.getElement().getStyle().setFontSize(18, Style.Unit.PX);
+  }
+
+  void setMarginBottom(FormField foreignLang) {
+    TextBoxBase box = foreignLang.box;
+    setMarginBottom(box);
+  }
+
+  private void setMarginBottom(UIObject box) {
+    box.getElement().getStyle().setMarginBottom(MARGIN_BOTTOM, Style.Unit.PX);
   }
 
   private Language getLanguage() {
     return controller.getLanguageInfo();
   }
 
-  void setMarginBottom(FormField foreignLang) {
-    foreignLang.box.getElement().getStyle().setMarginBottom(MARGIN_BOTTOM, Style.Unit.PX);
-  }
-
   private void makeTranslitRow(Panel container) {
     Panel row = new DivWidget();
     container.add(row);
-    String subtext = "";
-    translit = makeBoxAndAnno(row, subtext, translitAnno);
+    translit = makeBoxAndAnno(row, "", translitAnno);
   }
-
-//  String getTransliterationLabel() {
-//    return TRANSLITERATION_OPTIONAL;
-//  }
 
   /**
    * @param container
@@ -774,9 +785,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   protected boolean isEnglish() {
     return controller.getLanguageInfo() == Language.ENGLISH;
   }
-
-//  void formInvalid() {
-//  }
 
   /**
    * Ask the server if the foreign lang text is in our dictionary and can be run through hydec.

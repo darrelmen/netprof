@@ -86,7 +86,6 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    */
   private static final String APPROVED = "Mark Inspected";
   private static final String NO_AUDIO_RECORDED = "No Audio Recorded.";
-  // private static final String COMMENT = "Comment";
 
   private static final String COMMENT_TOOLTIP = "Comments are optional.";
   private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";

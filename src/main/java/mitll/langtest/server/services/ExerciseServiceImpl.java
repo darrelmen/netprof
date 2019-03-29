@@ -1280,6 +1280,12 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     return pair;
   }
 
+  @Override
+  public void reload(int projid) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    db.getExerciseDAO(projid).reload();
+  }
+
   @Nullable
   private CorrectAndScore getCorrectAndScoreClosestToTime(List<CorrectAndScore> correctAndScoresForEx, long nearTime) {
     CorrectAndScore closest = null;

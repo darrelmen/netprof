@@ -37,6 +37,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class OOVInfo implements IsSerializable {
   private int checked;
   private int oovWords;
+  private boolean needsReload;
 
   public OOVInfo() {
   }
@@ -59,5 +60,14 @@ public class OOVInfo implements IsSerializable {
 
   public int getOovWords() {
     return oovWords;
+  }
+
+  public OOVInfo setNeedsReload(boolean v) {
+    needsReload = v;
+    return this;
+  }
+
+  public boolean isNeedsReload() {
+    return needsReload;
   }
 }

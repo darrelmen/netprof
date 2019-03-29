@@ -91,6 +91,9 @@ public class JsonScoring {
   public static final boolean DEBUG = false;
   public static final String ISFULLMATCH = "isfullmatch";
   public static final String RESULT_ID1 = "resultID";
+  public static final String DURATION = "duration";
+  public static final String TIMESTAMP = "timestamp";
+  public static final String PATH = "path";
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
   private final int unknownExID;
@@ -271,7 +274,7 @@ public class JsonScoring {
     addDurationAndDNR(jsonForScore, answer);
     String path = answer.getPath();
     if (path.isEmpty()) logger.warn("no path?");
-    jsonForScore.addProperty("path", path);
+    jsonForScore.addProperty(PATH, path);
 
     if (jsonForScore.get(PRETEST) == null) {
       jsonForScore.add(PRETEST, new JsonObject());
@@ -279,11 +282,11 @@ public class JsonScoring {
 
     long timestamp = answer.getTimestamp();
     //    logger.info("getJsonObject timestamp " + timestamp + " " + new Date(timestamp));
-    jsonForScore.addProperty("timestamp", timestamp);
+    jsonForScore.addProperty(TIMESTAMP, timestamp);
   }
 
   private void addDurationAndDNR(JsonObject jsonForScore, AudioAnswer answer) {
-    jsonForScore.addProperty("duration", answer.getDurationInMillis());
+    jsonForScore.addProperty(DURATION, answer.getDurationInMillis());
     jsonForScore.addProperty(DYNAMIC_RANGE, answer.getDynamicRange());
   }
 
@@ -456,12 +459,7 @@ public class JsonScoring {
     if (exerciseID == 0 || exerciseID == unknownExID) {
       exerciseID = unknownExID;
       // make one up
-      exercise = new Exercise();
-      {
-        Exercise exercise1 = (Exercise) exercise;
-        exercise1.setForeignLanguage(foreignLanguage);
-        exercise1.setID(exerciseID);
-      }
+      exercise = getNotionalExercise(exerciseID, foreignLanguage);
     }
 
     Language language = getLanguage(projectID);
@@ -481,6 +479,18 @@ public class JsonScoring {
     ensureMP3Later(answer.getPath(), user, foreignLanguage, exercise.getEnglish(), language.getLanguage(), exercise);
 
     return answer;
+  }
+
+  @NotNull
+  private ClientExercise getNotionalExercise(int exerciseID, String foreignLanguage) {
+    ClientExercise exercise;
+    exercise = new Exercise();
+    {
+      Exercise exercise1 = (Exercise) exercise;
+      exercise1.setForeignLanguage(foreignLanguage);
+      exercise1.setID(exerciseID);
+    }
+    return exercise;
   }
 
   /**

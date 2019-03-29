@@ -200,6 +200,9 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
     // foreign lang
     setFL(newUserExercise);
 
+    foreignLangNorm.setText(newUserExercise.getNormalizedFL());
+    foreignLangNorm.setVisible(!newUserExercise.getNormalizedFL().isEmpty());
+
     // translit
     setTranslit(newUserExercise);
 
@@ -273,6 +276,10 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
     useAnnotation(newUserExercise, TRANSLITERATION, translitAnno);
   }
 
+  /**
+   * @param newUserExercise
+   * @see #setFields(ClientExercise)
+   */
   private void setFL(U newUserExercise) {
     foreignLang.box.setText(originalForeign = normalize(newUserExercise.getForeignLanguage()));
     useAnnotation(newUserExercise, FOREIGN_LANGUAGE, foreignAnno);
@@ -292,10 +299,10 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
     context.box.setText(originalContext = newUserExercise.getContext().trim());
 
     String text = context.box.getText();
-   // boolean val = !text.trim().isEmpty();
+    // boolean val = !text.trim().isEmpty();
     if (rapContext != null) {
       boolean val = !text.trim().isEmpty();
-   //   logger.info("setContext Set context '" + text + "' = " + val);
+      //   logger.info("setContext Set context '" + text + "' = " + val);
       maybeEnableContext(val);
     }
 

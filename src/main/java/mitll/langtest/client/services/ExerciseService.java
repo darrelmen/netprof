@@ -70,4 +70,6 @@ public interface ExerciseService<T extends CommonShell & ScoredExercise> extends
    * @see mitll.langtest.client.analysis.PlayAudio#playLast
    */
   Pair getLatestScoreAudioPath(int userID, int exid, long nearTime) throws DominoSessionException;
+
+  void reload(int projid) throws DominoSessionException;
 }

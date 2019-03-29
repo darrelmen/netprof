@@ -1225,8 +1225,6 @@ public class ScoreServlet extends DatabaseServlet {
       if (projid != -1) {
         logger.info("getProjid got projid from language " + projid);
       }
-    } else {
-//      logger.info("getProjid got projid from request " + projid);
     }
 
     if (projid == -1) {
@@ -1291,14 +1289,6 @@ public class ScoreServlet extends DatabaseServlet {
     String header = getHeader(request, HeaderValue.KALDI);
     return header != null && header.equalsIgnoreCase("TRUE");
   }
-
-/*  private int getStreamSession(HttpServletRequest request) {
-    return request.getIntHeader(HeaderValue.STREAMSESSION.toString());
-  }
-
-  private int getStreamPacket(HttpServletRequest request) {
-    return request.getIntHeader(HeaderValue.STREAMSPACKET.toString());
-  }*/
 
   private String getHeader(HttpServletRequest request, HeaderValue resultId) {
     return request.getHeader(resultId.toString());
@@ -1429,19 +1419,6 @@ public class ScoreServlet extends DatabaseServlet {
       }
     }
   }
-
-/*  private LoadTesting getLoadTesting() {
-    LoadTesting ref = null;
-    Object databaseReference = getServletContext().getAttribute(LOAD_TESTING);
-    if (databaseReference != null) {
-      ref = (LoadTesting) databaseReference;
-      // logger.debug("found existing audio file reference " + fileHelper + " under " + getServletContext());
-    } else {
-      logger.error("huh? for " + db.getServerProps().getLanguage() + " no existing load test reference?");
-    }
-    return ref;
-  }*/
-
 
   private void addVersion(JsonObject JsonObject, int projid) {
     JsonObject.addProperty(VERSION, VERSION_NOW);

@@ -45,6 +45,10 @@ public interface AudioRefExercise {
    */
   boolean hasAudioNonContext(boolean vocab);
 
+  /**
+   * @see mitll.langtest.client.scoring.DialogExercisePanel#hasAudio
+   * @return
+   */
   boolean hasContextAudio();
 
   String getRefAudio();

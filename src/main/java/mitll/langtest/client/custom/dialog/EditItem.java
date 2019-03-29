@@ -193,7 +193,6 @@ public class EditItem {
     //  logger.info("not adding items at top?");
     }
 
-    @NotNull
     @Override
     protected DivWidget getDominoEditInfo() {
       return null;

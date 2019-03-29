@@ -328,14 +328,14 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     if (currentExercise == null) {
       logger.info("addOverlay : huh? can't find " + userExercise);
     } else {
-      logger.debug("addOverlay at " + userExercise.getOldID() + " found " + currentExercise);
+      logger.info("addOverlay at " + userExercise.getOldID() + " found " + currentExercise);
       synchronized (idToExercise) {
         int i = exercises.indexOf(currentExercise);
-        logger.debug("addOverlay at " + i + " when looking for " + currentExercise);
+        logger.info("addOverlay at " + i + " when looking for " + currentExercise);
         if (i == -1) {
           logger.error("addOverlay : huh? couldn't find " + currentExercise);
         } else {
-          logger.debug("addOverlay step on " + i + " : " + exercises.get(i));
+          logger.info("addOverlay step on " + i + " : " + exercises.get(i));
 
           exercises.set(i, userExercise);
         }
@@ -365,18 +365,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       }
     }
   }
-
-  /**
-   * @param id
-   * @return true if exercise with this id was removed
-   * @seex DatabaseImpl#deleteItem
-   */
-/*  public boolean remove(int id) {
-    synchronized (this) {
-      CommonExercise remove = idToExercise.remove(id);
-      return remove != null && exercises.remove(remove);
-    }
-  }*/
 
   /**
    * This DAO needs to talk to other DAOs.
