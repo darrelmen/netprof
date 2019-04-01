@@ -332,7 +332,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     table.setSelectionModel(selectionModel);
   }
 
-  private ColumnSortEvent.ListHandler<T> getUserSorter(Column<T, SafeHtml> englishCol,
+  protected ColumnSortEvent.ListHandler<T> getUserSorter(Column<T, SafeHtml> englishCol,
                                                        List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, this::getIDCompare);

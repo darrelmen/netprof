@@ -46,7 +46,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ExerciseListRequest implements IsSerializable,IRequest {
+public class ExerciseListRequest implements IsSerializable, IRequest {
   private int reqID = 1;
   private Map<String, Collection<String>> typeToSelection = new HashMap<>();
   private String prefix = "";
@@ -68,8 +68,9 @@ public class ExerciseListRequest implements IsSerializable,IRequest {
   private boolean addContext = false;
   private boolean plainVocab = false;
   private boolean isOnlyFL = false;
+  private boolean exactMatch = false;
+
   private int dialogID = -1;
- // private ProjectType projectType = ProjectType.DEFAULT;
   private ProjectMode mode = ProjectMode.VOCABULARY;
 
   public ExerciseListRequest() {
@@ -341,8 +342,8 @@ public class ExerciseListRequest implements IsSerializable,IRequest {
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.FilterResponseHelper#getSectionHelperFromFiltered
    * @return
+   * @see mitll.langtest.server.database.exercise.FilterResponseHelper#getSectionHelperFromFiltered
    */
 //  public ProjectType getProjectType() {
 //    return projectType;
@@ -352,7 +353,6 @@ public class ExerciseListRequest implements IsSerializable,IRequest {
 //    this.projectType = projectType;
 //    return this;
 //  }
-
   @Override
   public ProjectMode getMode() {
     return mode;
@@ -381,12 +381,21 @@ public class ExerciseListRequest implements IsSerializable,IRequest {
             (onlyExamples ? "\n\tonly examples       " : "") +
             (onlyWithAnno ? "\n\tonly with anno " : "") +
             (onlyForUser ? "\n\tonlyForUser     " : "") +
+            (exactMatch ? "\n\texactMatch     " : "") +
             //   (incorrectFirstOrder ? "\n\tincorrectFirstOrder     " : "") +
             (onlyUninspected ? "\n\tonly uninspected    " : "") +
             (addContext ? "\n\tadd context    " : "") +
-            "\n\tmode    "  + mode +
+            "\n\tmode    " + mode +
             (addFirst ? "\n\tadd first ex    " : "\n\tdon't add first") +
             (QC ? "\n\tqc request    " : "")
         ;
+  }
+
+  public boolean isExactMatch() {
+    return exactMatch;
+  }
+
+  public void setExactMatch(boolean exactMatch) {
+    this.exactMatch = exactMatch;
   }
 }

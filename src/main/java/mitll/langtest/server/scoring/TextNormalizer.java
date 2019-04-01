@@ -99,18 +99,17 @@ public class TextNormalizer {
   }
 
   public String getNorm(String raw) {
-    return String.join(" ", getTokens(raw, removeAccents, false));
+    return String.join(" ", getTokens(raw, removeAccents));
   }
 
   /**
    * @param sentence
    * @param removeAllAccents
-   * @param debug
    * @return
    * @see IPronunciationLookup#getPronunciationsFromDictOrLTS
    * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile
    */
-  public List<String> getTokens(String sentence, boolean removeAllAccents, boolean debug) {
+  public List<String> getTokens(String sentence, boolean removeAllAccents) {
     List<String> all = new ArrayList<>();
  /*   if (sentence.isEmpty()) {
       logger.warn("huh? empty sentence?");
@@ -150,7 +149,7 @@ public class TextNormalizer {
   /**
    * @param s
    * @return
-   * @see #getTokens(String, boolean, boolean)
+   * @see #getTokens(String, boolean)
    */
   public String toFull(String s) {
     StringBuilder builder = new StringBuilder();

@@ -1229,7 +1229,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   public OOVInfo checkOOV(int id) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasAdminOrCDPerm(userIDFromSessionOrDB)) {
-      return db.getProjectManagement().checkOOV(id);
+      OOVInfo oovInfo = db.getProjectManagement().checkOOV(id);
+      db.getAudioDAO().attachAudioToExercises(oovInfo.getUnsafe(), db.getLanguageEnum(id), id);
+      return oovInfo;
     } else {
       throw getRestricted("Check OOV on a project.");
     }

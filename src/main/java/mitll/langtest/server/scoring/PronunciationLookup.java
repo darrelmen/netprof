@@ -206,7 +206,7 @@ public class PronunciationLookup implements IPronunciationLookup {
 
   @Override
   public InDictStat getTokenStats(String transcript) {
-    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct, false);
+    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct);
     int total = transcriptTokens.size();
     int inDict = 0;
     for (String word : transcriptTokens) {
@@ -248,7 +248,7 @@ public class PronunciationLookup implements IPronunciationLookup {
       logger.info("getPronunciationsFromDictOrLTS ask for pron for '" + transcript + "'");
     }
 
-    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct, debug);
+    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct);
 
     if (debug) {
       logger.info("getPronunciationsFromDictOrLTS got              '" + transcriptTokens + "'");

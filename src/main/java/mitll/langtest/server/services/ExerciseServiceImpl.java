@@ -238,16 +238,13 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
         exercisesForSearch = getSearchResult(request, projectID, exercises, predefExercises, prefix);
 
         if (exercisesForSearch.isEmpty()) {
-
           String prefix1 = prefix.replaceAll("\\s++", "");
           if (!prefix1.equals(prefix)) {
-           // logger.info("OK remove the spaces " + prefix1);
+            // logger.info("OK remove the spaces " + prefix1);
             exercisesForSearch = getSearchResult(request, projectID, exercises, predefExercises, prefix1);
           }
         }
       }
-
-
     }
 
     if (DEBUG_ID_LOOKUP) logger.info("getExerciseWhenNoUnitChapter triple resp       " + exercisesForSearch);
@@ -1044,7 +1041,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   public int getExerciseIDOrParent(int exid) throws DominoSessionException {
     int projectIDFromUser = getProjectIDFromUser();
     CommonExercise exerciseByID = getProject(projectIDFromUser).getExerciseByID(exid);
-    if (exerciseByID.isContext()) {
+    if (exerciseByID != null && exerciseByID.isContext()) {
       int parentExerciseID = exerciseByID.getParentExerciseID();
       if (parentExerciseID == -1) {
         parentExerciseID = getParentExerciseID(projectIDFromUser, exid, exerciseByID);

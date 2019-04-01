@@ -63,9 +63,14 @@ public class KaldiSupport implements IKaldiSupport {
   private static final String IN_VOCAB = "in_vocab";
 
   private static final String WAVEFORM = "waveform";
-  private static final String KALDI = "kaldi";
-  private static final String HYDRA = "hydra";
+
   private static final String INVALID_CHAR_INDS = "invalid_char_inds";
+  /**
+   * left french quote -- \\u00AB
+   * right quote - 00BB
+   * ellipsis - 2026
+   */
+  private static final String CLEAN_BEFORE_KALDI = "[()/\\u00AB\\u00BB\\u2026]";
 
   private final IPronunciationLookup pronunciationLookup;
   private final IProject project;
@@ -171,7 +176,7 @@ public class KaldiSupport implements IKaldiSupport {
    */
   @Override
   public Collection<String> getKaldiOOV(String fl) {
-    String fl1 = fl.replaceAll("[()/]", " ");
+    String fl1 = fl.replaceAll(CLEAN_BEFORE_KALDI, " ");
     if (!fl1.equals(fl)) {
       logger.info("getKaldiOOV : replaced " + fl + " with " + fl1);
     }
@@ -184,7 +189,7 @@ public class KaldiSupport implements IKaldiSupport {
    * @return
    * @see #getKaldiOOV
    */
-  private List<String> runOOV(final List<String> tokens) {
+  public List<String> runOOV(final List<String> tokens) {
     List<Boolean> oov = new ArrayList<>();
     try {
       String json = callKaldiOOV(tokens);

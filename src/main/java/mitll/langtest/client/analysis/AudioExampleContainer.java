@@ -76,7 +76,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   /**
    * @see #resetReview
    */
- // private static final String REVIEW1 = "Review";
+  // private static final String REVIEW1 = "Review";
   private static final String REVIEW = "Review";
   private static final String PLAY = "Play";
   private static final String PAUSE = "Pause";
@@ -110,6 +110,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   private Button getPlay() {
     return play;
   }
+
   private Button getReview() {
     return review;
   }
@@ -200,6 +201,10 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     return TABLE_HEIGHT;
   }
 
+  /**
+   * @see #addTable
+   * @return
+   */
   @NotNull
   private DivWidget getButtonRow() {
     DivWidget wrapper = new DivWidget();
@@ -233,22 +238,25 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
       wrapper.add(review);
     }
 
-    {
-      Button learn = new Button(jumpView.toString());
-      learn.addStyleName("topFiveMargin");
-      learn.addStyleName("leftTenMargin");
-      learn.setType(ButtonType.SUCCESS);
-
-      learn.addClickHandler(event -> {
-        learn.setEnabled(false);
-        gotClickOnLearn();
-      });
-      wrapper.add(learn);
-    }
+    wrapper.add(getJumpToLearnButton(wrapper));
 
     DivWidget child = new DivWidget();
     child.add(wrapper);
     return child;
+  }
+
+  private Button getJumpToLearnButton(DivWidget wrapper) {
+    Button learn = new Button(jumpView.toString());
+    learn.addStyleName("topFiveMargin");
+    learn.addStyleName("leftTenMargin");
+    learn.setType(ButtonType.SUCCESS);
+
+    learn.addClickHandler(event -> {
+      learn.setEnabled(false);
+      gotClickOnLearn();
+    });
+    return learn;
+    // wrapper.add(learn);
   }
 
   @NotNull
@@ -285,10 +293,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   private void gotClickOnLearn() {
     T selected = getSelected();
     if (selected != null) {
-      int exid = selected.getExid();
-
-
-      controller.getExerciseService().getExerciseIDOrParent(exid, new AsyncCallback<Integer>() {
+      controller.getExerciseService().getExerciseIDOrParent(selected.getExid(), new AsyncCallback<Integer>() {
         @Override
         public void onFailure(Throwable caught) {
 
@@ -300,8 +305,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
           controller.getShowTab(jumpView).showLearnAndItem(result);
         }
       });
-
-
 //      logger.info("gotClickOnLearn OK show " + exid);
 //      controller.getShowTab(this.jumpView).showLearnAndItem(exid);
     }
@@ -439,7 +442,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
       WordScore lastVisible = table.getVisibleItem(visibleItemCount - 1);
       boolean b = lastVisible.getExid() == lastPlayed;
-     // if (b) logger.info("onLastVisible ON LAST : visible # " + visibleItemCount);
+      // if (b) logger.info("onLastVisible ON LAST : visible # " + visibleItemCount);
       return b;
     }
   }

@@ -120,16 +120,6 @@ public class StudentScores extends TwoColumnAnalysis<UserInfo> {
       protected void addListChoiceBox(DivWidget filterContainer) {
       }
 
-  /*    @Override
-      protected void addRightSideContent(UserInfo selectedUser) {
-        return new DialogSessionAnalysisTab<T>(this.controller,
-            selectedUser,
-            overallBottom,
-            this,
-            req++
-        ).setItemColumnWidth(485);
-      }*/
-
       @NotNull
       @Override
       protected Widget getAnalysisTab(UserInfo selectedUser) {

@@ -76,10 +76,7 @@ public abstract class Scoring {
   final ServerProperties props;
   final LogAndNotify logAndNotify;
 
-  /**
-   * @see SLFFile#createSimpleSLFFile
-   */
-//  public static final String SMALL_LM_SLF = "smallLM.slf";
+  //  public static final String SMALL_LM_SLF = "smallLM.slf";
 
   private final CheckLTS checkLTSHelper;
 
@@ -329,7 +326,7 @@ public abstract class Scoring {
    * @return
    */
   @NotNull
-  public Collection<String> getOOV(String fl, String transliteration) {
+  private Collection<String> getOOV(String fl, String transliteration) {
     Set<String> oovForFL = checkLTSHelper.checkLTS(fl, transliteration);
 
  /*   List<String> inOrder = new ArrayList<>(oovForFL);
@@ -407,4 +404,10 @@ public abstract class Scoring {
     return b.toString().trim();
   }
 
+  /**
+   * @see SLFFile#createSimpleSLFFile
+   */
+  public CheckLTS getCheckLTSHelper() {
+    return checkLTSHelper;
+  }
 }

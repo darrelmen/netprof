@@ -30,6 +30,7 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.DatabaseServices;
+import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.IDialog;
@@ -42,7 +43,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static mitll.langtest.server.database.exercise.SectionHelper.ANY;
 
@@ -510,13 +510,12 @@ public class FilterResponseHelper implements IResponseFilter {
     } else if (onlyExamples) {
       logger.info("filterExercises OK doing examples 3");
       exercises = getContextExercises(exercises);
-    } else {
-      boolean includeLanguage = hasDialogs(projid);
-      if (includeLanguage) {
+    } else if (hasDialogs(projid)) {
 //        logger.info("filterExercises remove english - before " + exercises.size());
-        exercises = getCommonExercisesWithoutEnglish(exercises);
-  //      logger.info("filterExercises remove english - after  " + exercises.size());
-      }
+      exercises = getCommonExercisesWithoutEnglish(exercises);
+      //      logger.info("filterExercises remove english - after  " + exercises.size());
+    } else if (request.isExactMatch()) {
+      exercises = getExactMatch(request.getPrefix(), databaseServices.getProject(projid).getLanguageEnum(), exercises);
     }
 
     logger.info("filterExercises" +
@@ -557,6 +556,19 @@ public class FilterResponseHelper implements IResponseFilter {
                         attr.getValue().equalsIgnoreCase(Language.ENGLISH.name()))
                 .collect(Collectors.toList())
                 .isEmpty())
+        .collect(Collectors.toList());
+    return exercises;
+  }
+
+  @NotNull
+  private List<CommonExercise> getExactMatch(String prefix, Language language, List<CommonExercise> exercises) {
+    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(language);
+    exercises = exercises
+        .stream()
+        .filter(ex ->
+            smallVocabDecoder.getTokens(ex.getForeignLanguage()).equals(prefix) ||
+                smallVocabDecoder.getTokens(ex.getContext()).equals(prefix)
+        )
         .collect(Collectors.toList());
     return exercises;
   }

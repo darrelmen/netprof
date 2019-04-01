@@ -54,14 +54,16 @@ public interface ASR {
   Collection<String> getKaldiOOV(String fl);
 
   /**
-   * @see AudioFileHelper#checkLTSOnForeignPhrase(String, String)
    * @param fl
    * @param transliteration
    * @return
+   * @see AudioFileHelper#checkLTSOnForeignPhrase(String, String)
    */
-  Collection<String> getOOV(String fl, String transliteration);
+//  Collection<String> getOOV(String fl, String transliteration);
 
 //  PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
+
+  CheckLTS getCheckLTSHelper();
 
   SmallVocabDecoder getSmallVocabDecoder();
 
@@ -106,6 +108,7 @@ public interface ASR {
 
   /**
    * JUST FOR TESTING
+   *
    * @param audioPath
    * @param transcript
    * @param transliteration
@@ -133,25 +136,25 @@ public interface ASR {
   TransNormDict getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns);
 
   /**
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises(Collection, List, ISection, Project, Map, Map, boolean)
    * @param transcript
    * @param transliteration
    * @return
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises(Collection, List, ISection, Project, Map, Map, boolean)
    */
   List<String> getTokens(String transcript, String transliteration);
 
   /**
-   * @see mitll.langtest.server.database.audio.SlickTrainingAudioDAO#checkAndAddAudio(Collection, IAudioDAO)
    * @param transcript
    * @param transliteration
    * @return
+   * @see mitll.langtest.server.database.audio.SlickTrainingAudioDAO#checkAndAddAudio(Collection, IAudioDAO)
    */
   String getNormTranscript(String transcript, String transliteration);
 
   /**
-   * @see AudioFileHelper#getSegmented(String)
    * @param input
    * @return
+   * @see AudioFileHelper#getSegmented(String)
    */
   String getSegmented(String input);
 
