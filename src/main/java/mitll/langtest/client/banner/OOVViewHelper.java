@@ -39,6 +39,7 @@ import com.google.gwt.cell.client.Cell;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
@@ -52,21 +53,27 @@ import mitll.langtest.client.analysis.MemoryItemContainer;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.userlist.TableAndPager;
+import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.client.exercise.TextNorm;
+import mitll.langtest.client.scoring.PhonesChoices;
+import mitll.langtest.client.scoring.TwoColumnExercisePanel;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.project.OOVInfo;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class OOVViewHelper extends TableAndPager implements ContentView {
+  public static final String OOV = "OOV";
+  public static final String ITEMS_WITH_MISSING_WORDS = "Items with Missing Words";
+  public static final String ITEMS_WITH_MISSING_WORDS1 = "Items with missing words";
   private final Logger logger = Logger.getLogger("OOVViewHelper");
 
   public static final String CHECK_COMPLETE = "Check complete.";
@@ -83,6 +90,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
   private TextBox equivalent;
   private final HTML message = new HTML();
   private Button checkButton;
+  private OOVInfo oovInfo;
 
   OOVViewHelper(ExerciseController controller, INavigation.VIEWS oovEditor) {
     this.controller = controller;
@@ -178,7 +186,9 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     Scheduler.get().scheduleDeferred((Command) () -> equivalent.setFocus(true));
   }
 
-  UnsafeItems unsafeItems;
+  private UnsafeItems unsafeItems;
+  private DivWidget exampleContainer;
+
   private MemoryItemContainer<OOV> addOOVTable(DivWidget top, OOVInfo oovInfo) {
     MemoryItemContainer<OOV> oovMemoryItemContainer = new OOVMemoryItemContainer();
 
@@ -187,62 +197,94 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     top.add(leftRight);
 
     DivWidget left = new DivWidget();
+    left.getElement().setId("left");
     leftRight.add(left);
-    getTableWithPager(left, oovMemoryItemContainer, TITLE, SELECT_AND_ENTER_EQUIVALENT,
-        Placement.TOP).setWidth("450px");
+
+    Panel tableWithPager = getTableWithPager(left, oovMemoryItemContainer, TITLE, SELECT_AND_ENTER_EQUIVALENT,
+        Placement.TOP);
+    tableWithPager.getElement().getStyle().setClear(Style.Clear.BOTH);
+    tableWithPager.setWidth("450px");
 
     DivWidget right = new DivWidget();
     right.addStyleName("leftFiveMargin");
     leftRight.add(right);
     unsafeItems = new UnsafeItems();
+
     getTableWithPager(right,
-        unsafeItems, "Items with missing words", "example items",
+        unsafeItems, ITEMS_WITH_MISSING_WORDS1, "example items",
         Placement.TOP).setWidth(550 +
         "px");
 
 //    logger.info("showing " + toShow.size());
 
-    unsafeItems.populateTable(getWrappers(oovInfo));
-
-    DivWidget ldButtons = new DivWidget();
-    {
-      ldButtons.addStyleName("inlineFlex");
-      ldButtons.addStyleName("topFiveMargin");
-      oov = new HTML();
-      oov.setWidth("100px");
-      ldButtons.add(oov);
-      equivalent = new TextBox();
-      equivalent.addBlurHandler(event -> gotBlur(currentOOV));
-      equivalent.setVisibleLength(100);
-      equivalent.addStyleName("leftFiveMargin");
-      ldButtons.add(equivalent);
-
-      equivalent.addKeyUpHandler(event -> checkForKeyUpDown(event, oovMemoryItemContainer));
-    }
-
+    showUnsafe(oovInfo);
     oovMemoryItemContainer.getCellTable().addDomHandler(event -> checkForKeyUpDown(event, oovMemoryItemContainer), KeyUpEvent.getType());
 
-    left.add(ldButtons);
+
+    DivWidget below = new DivWidget();
+    below.getElement().setId("below");
+    below.getElement().getStyle().setClear(Style.Clear.BOTH);
+    below.addStyleName("topFiveMargin");
+
+    top.add(below);
+
+    exampleContainer = new DivWidget();
+
+    exampleContainer.addStyleName("topFiveMargin");
+    exampleContainer.addStyleName("leftFiveMargin");
+    Style style = exampleContainer.getElement().getStyle();
+    style.setOverflow(Style.Overflow.HIDDEN);
+    style.setProperty("maxWidth","800px");
+    style.setPaddingRight(50, Style.Unit.PX);
+    below.add(exampleContainer);
+
+    below.add(getOOVAndEquivalent(oovMemoryItemContainer));
 
     {
       DivWidget buttonRow = new DivWidget();
-      left.add(buttonRow);
+      below.add(buttonRow);
       buttonRow.add(checkButton = getCheckButton());
     }
     {
       DivWidget buttonRow = new DivWidget();
-      left.add(buttonRow);
+      below.add(buttonRow);
       buttonRow.add(message);
     }
     return oovMemoryItemContainer;
   }
 
+  private void showUnsafe(OOVInfo oovInfo) {
+    this.oovInfo = oovInfo;
+    unsafeItems.populateTable(getWrappers(oovInfo));
+  }
+
+  @NotNull
+  private DivWidget getOOVAndEquivalent(MemoryItemContainer<OOV> oovMemoryItemContainer) {
+    DivWidget oovRow = new DivWidget();
+    oovRow.getElement().setId("oovRow");
+    {
+      oovRow.addStyleName("inlineFlex");
+      oovRow.addStyleName("topFiveMargin");
+      oov = new HTML();
+      oov.setWidth("100px");
+      oovRow.add(oov);
+      equivalent = new TextBox();
+      equivalent.addBlurHandler(event -> gotBlur(currentOOV));
+      equivalent.setVisibleLength(100);
+      equivalent.addStyleName("leftFiveMargin");
+      oovRow.add(equivalent);
+
+      equivalent.addKeyUpHandler(event -> checkForKeyUpDown(event, oovMemoryItemContainer));
+    }
+    return oovRow;
+  }
+
   @NotNull
   private List<Wrapper> getWrappers(OOVInfo oovInfo) {
     List<Wrapper> toShow = new ArrayList<>();
-    logger.info("got " + oovInfo.getUnsafe().size());
-    oovInfo.getUnsafe().forEach(item -> toShow.add(new Wrapper(toShow.size(), item)));
-    logger.info("made " + toShow.size());
+//    logger.info("getWrappers got  " + oovInfo.getUnsafe().size());
+    oovInfo.getUnsafe().forEach(item -> toShow.add(new Wrapper(toShow.size(), item.getForeignLanguage())));
+  //  logger.info("getWrappers made " + toShow.size());
     return toShow;
   }
 
@@ -264,7 +306,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     updateAndCheck(projectID, getDirtyItems());
   }
 
-  private void updateAndCheck(  int projectID, List<OOV> items) {
+  private void updateAndCheck(int projectID, List<OOV> items) {
     controller.getAudioService().updateOOV(projectID, items, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -281,22 +323,27 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
 
   @NotNull
   private List<OOV> getDirtyItems() {
-    return oovContainer.getItems().stream().filter(OOV::isDirty).collect(Collectors.toList());
+    return oovContainer.getItems().stream().filter(mitll.langtest.shared.exercise.OOV::isDirty).collect(Collectors.toList());
+  }
+
+  @NotNull
+  private List<OOV> getUnmatchedItems() {
+    return oovContainer.getItems().stream().filter(oov -> oov.getEquivalent().isEmpty()).collect(Collectors.toList());
   }
 
   private void checkOOVAgain(int projectID) {
     message.setText("Checking dictionary again, please wait...");
+
     controller.getAudioService().checkOOV(projectID, new AsyncCallback<OOVInfo>() {
       @Override
       public void onFailure(Throwable caught) {
-        // if (add != null) add.setEnabled(true);
         controller.handleNonFatalError("Checking OOV...", caught);
       }
 
       @Override
       public void onSuccess(OOVInfo result) {
 //        if (add != null) add.setEnabled(true);
-        unsafeItems.populateTable(getWrappers(result));
+        showUnsafe(result);
 
         if (result.isNeedsReload()) {
           controller.getExerciseService().reload(projectID, new AsyncCallback<Void>() {
@@ -334,7 +381,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
         text, "", new AsyncCallback<Collection<String>>() {
           @Override
           public void onFailure(Throwable caught) {
-
+            controller.handleNonFatalError("checking if valid...", caught);
           }
 
           @Override
@@ -343,6 +390,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
               currentOOV.setEquivalent(text);
               oovContainer.redraw();
               checkButton.setEnabled(!getDirtyItems().isEmpty());
+              message.setHTML(getUnmatchedItems().size() + " items left.");
             }
           }
         });
@@ -394,15 +442,51 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
 
   private class OOVMemoryItemContainer extends MemoryItemContainer<OOV> {
     OOVMemoryItemContainer() {
-      super(OOVViewHelper.this.controller, "oov", "OOV", 10, 10);
+      super(OOVViewHelper.this.controller, "oov", OOV, 10, 10);
     }
 
     @Override
     public void gotClickOnItem(OOV user) {
       super.gotClickOnItem(user);
+
+      logger.info("gotClickOnItem got click on " + user);
       oov.setText(user.getOOV());
       equivalent.setText(user.getEquivalent());
       currentOOV = user;
+
+      exampleContainer.clear();
+
+      Set<ClientExercise> unsafe = oovInfo.getUnsafe();
+      List<ClientExercise> collect = getMatches(user.getOOV(), unsafe);
+      if (collect.isEmpty()) {
+        TextNorm textNorm = new TextNorm();
+        collect = getMatches(textNorm.fromFull(user.getOOV()), unsafe);
+      }
+      if (!collect.isEmpty()) {
+        exampleContainer.add(getExample(collect.get(0)));
+      } else {
+        logger.info("no match for " + oovInfo);
+      }
+    }
+
+    private Panel getExample(ClientExercise exercise) {
+      TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<>(exercise,
+          controller,
+          null,
+          new HashMap<>(), true, new IListenView() {
+        @Override
+        public int getVolume() {
+          return 100;
+        }
+
+        @Override
+        public int getDialogSessionID() {
+          return -1;
+        }
+      },
+          false, () -> "");
+      widgets.addWidgets(true, false, PhonesChoices.HIDE);
+      return widgets;
     }
 
     /**
@@ -467,6 +551,11 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     }
   }
 
+  @NotNull
+  private List<ClientExercise> getMatches(String oov, Set<ClientExercise> unsafe) {
+    return unsafe.stream().filter(ex -> ex.getForeignLanguage().contains(oov)).collect(Collectors.toList());
+  }
+
   private static class Wrapper implements HasID {
     int id;
     private String value;
@@ -496,7 +585,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
 
   private class UnsafeItems extends MemoryItemContainer<Wrapper> {
     UnsafeItems() {
-      super(OOVViewHelper.this.controller, "unsafe", "Items with Missing Words", 10, 10);
+      super(OOVViewHelper.this.controller, "unsafe", ITEMS_WITH_MISSING_WORDS, 10, 10);
     }
 
 //    @Override

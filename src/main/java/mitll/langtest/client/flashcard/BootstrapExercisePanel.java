@@ -470,7 +470,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
 
           @Override
           public void useInvalidResult(int exid, Validity validity, double dynamicRange) {
-            receivedAudioAnswer(new AudioAnswer("", validity, -1, 0, exid));
+            receivedAudioAnswer(new AudioAnswer("", validity, dynamicRange, 0, -1, exid));
           }
         };
 

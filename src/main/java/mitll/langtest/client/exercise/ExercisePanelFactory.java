@@ -60,10 +60,6 @@ public abstract class ExercisePanelFactory<T extends HasID, U extends HasID> {
     this.exerciseList = exerciseList;
   }
 
- /* public void setExerciseList(ListInterface<T, U> exerciseList) {
-    this.exerciseList = exerciseList;
-  }
-*/
   /**
    * @param e
    * @return

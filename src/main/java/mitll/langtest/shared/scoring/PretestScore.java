@@ -144,17 +144,36 @@ public class PretestScore extends AlignmentAndScore {
   }
 
   private float getSegmentAverage(List<TranscriptSegment> transcriptSegments) {
-    float total = 0F;
-    if (transcriptSegments == null) {
-      return total;
+    if (transcriptSegments == null || transcriptSegments.isEmpty()) {
+      return 0F;
     } else {
-      for (TranscriptSegment seg : transcriptSegments) {
-        if (isValidEvent(seg.getEvent())) {
-          total += seg.getScore();
-        }
+      float numValidSegments = getNumValidSegments(transcriptSegments);
+      if (numValidSegments == 0) {
+        return 0F;
+      } else {
+        return getValidSegmentScoreTotal(transcriptSegments) / numValidSegments;
       }
-      return transcriptSegments.isEmpty() ? 0F : total / Integer.valueOf(transcriptSegments.size()).floatValue();
     }
+  }
+
+  public float getValidSegmentScoreTotal(List<TranscriptSegment> transcriptSegments) {
+    float total = 0F;
+    for (TranscriptSegment seg : transcriptSegments) {
+      if (isValidEvent(seg.getEvent())) {
+        total += seg.getScore();
+      }
+    }
+    return total;
+  }
+
+  public float getNumValidSegments(List<TranscriptSegment> transcriptSegments) {
+    float total = 0F;
+    for (TranscriptSegment seg : transcriptSegments) {
+      if (isValidEvent(seg.getEvent())) {
+        total += 1F;
+      }
+    }
+    return total;
   }
 
   private boolean isValidEvent(String event) {

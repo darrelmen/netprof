@@ -168,7 +168,6 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   }
 
   protected void setMaxWidth() {
-  //  table.getElement().getStyle().setProperty("maxWidth", MAX_WIDTH + "px");
   }
 
   protected int getPageSize() {

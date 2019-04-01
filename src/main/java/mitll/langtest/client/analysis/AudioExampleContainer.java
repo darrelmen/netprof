@@ -76,14 +76,14 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   /**
    * @see #resetReview
    */
-  private static final String REVIEW1 = "Review";
-  private static final String REVIEW = REVIEW1;
+ // private static final String REVIEW1 = "Review";
+  private static final String REVIEW = "Review";
   private static final String PLAY = "Play";
+  private static final String PAUSE = "Pause";
 
   protected static final boolean DEBUG = false;
 
   private static final int TABLE_HEIGHT = 225;
-  private static final String PAUSE = "Pause";
 
   private final INavigation.VIEWS jumpView;
   private final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
@@ -110,7 +110,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   private Button getPlay() {
     return play;
   }
-
   private Button getReview() {
     return review;
   }
@@ -449,7 +448,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
    *
    */
   private void resetReview() {
-    review.setText(REVIEW1);
+    review.setText(REVIEW);
     review.setIcon(IconType.PLAY);
     isReview = false;
   }

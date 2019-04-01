@@ -55,10 +55,11 @@ import static mitll.langtest.client.project.ProjectChoices.PLEASE_WAIT;
  * @param <T>
  */
 public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
-  private final Logger logger = Logger.getLogger("TwoColumnAnalysis");
-
+  //private final Logger logger = Logger.getLogger("TwoColumnAnalysis");
   private static final int DELAY_MILLIS = 2000;
+
   final AnalysisServiceAsync analysisServiceAsync = GWT.create(AnalysisService.class);
+
   private Object waitToken = null;
 
   @NotNull

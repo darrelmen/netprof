@@ -403,12 +403,10 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   }
 
   protected void makePlayAudio(T e, DivWidget flContainer) {
-    //if (/*hasAudio(e) || */true) {
+
     flContainer.add(playAudio = getPlayAudioPanel());
     alignmentFetcher.setPlayAudio(playAudio);
-    //} else {
-    //   logger.info("makeFirstRow no audio in " + e.getAudioAttributes());
-    // }
+
   }
 
   protected void stylePhoneRow(UIObject phoneRow) {

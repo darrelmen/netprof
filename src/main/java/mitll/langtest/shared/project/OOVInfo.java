@@ -30,8 +30,11 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.exercise.ClientExercise;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -40,7 +43,7 @@ import java.util.Set;
 public class OOVInfo implements IsSerializable {
   private int checked;
   private int oovWords;
-  private Set<String> unsafe = new HashSet<>();
+  private Set<ClientExercise> unsafe = new HashSet<>();
   private boolean needsReload;
 
   public OOVInfo() {
@@ -51,9 +54,9 @@ public class OOVInfo implements IsSerializable {
    * @param name
    * @param first
    * @param secondType
-   * @see mitll.langtest.server.domino.ProjectSync#getDominoProject
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkAllExercises
    */
-  public OOVInfo(int checked, int oovWords, Set<String> unsafe) {
+  public OOVInfo(int checked, int oovWords, Set<ClientExercise> unsafe) {
     this.checked = checked;
     this.oovWords = oovWords;
     this.unsafe = unsafe;
@@ -76,7 +79,7 @@ public class OOVInfo implements IsSerializable {
     return needsReload;
   }
 
-  public Set<String> getUnsafe() {
+  public Set<ClientExercise> getUnsafe() {
     return unsafe;
   }
 

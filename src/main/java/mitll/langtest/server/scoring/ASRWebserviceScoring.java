@@ -625,17 +625,19 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
         if (props.useWordAvgScoreForKaldi()) {
           pretestScore.setRawOverallScore(overallScore);
 
-          logger.info("getPretestScore word scores   " + pretestScore.getWordScores());
-          logger.info("getPretestScore word segments " + pretestScore.getWordSegments());
+          if (DEBUG) {
+            logger.info("getPretestScore word scores   " + pretestScore.getWordScores());
+            logger.info("getPretestScore word segments " + pretestScore.getWordSegments());
+          }
 
           float avgWordScore = pretestScore.getAvgWordScore();
-          logger.info("getPretestScore using word " + avgWordScore + " instead of " +overallScore);
+          logger.info("getPretestScore using word " + avgWordScore + " instead of " + overallScore);
           overallScore = avgWordScore;
           pretestScore.setOverallScore(overallScore);
         } else if (props.usePhoneAvgScoreForKaldi()) {
           pretestScore.setRawOverallScore(overallScore);
           float avgPhoneScore = pretestScore.getAvgPhoneScore();
-          logger.info("getPretestScore using phone " + avgPhoneScore + " instead of " +overallScore);
+          logger.info("getPretestScore using phone " + avgPhoneScore + " instead of " + overallScore);
           overallScore = avgPhoneScore;
           pretestScore.setOverallScore(overallScore);
         }

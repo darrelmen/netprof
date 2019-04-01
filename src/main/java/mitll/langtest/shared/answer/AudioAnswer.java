@@ -69,20 +69,23 @@ public class AudioAnswer extends SimpleAudioAnswer {
   public AudioAnswer() {
   }
 
+
   /**
    * @param path
    * @param validity
-   * @param reqid
+   * @param dynamicRange
    * @param duration
+   * @param reqid
    * @param exid
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
-  public AudioAnswer(String path, Validity validity, int reqid, long duration, int exid) {
+  public AudioAnswer(String path, Validity validity, double dynamicRange, long duration, int reqid, int exid) {
     this.path = path;
     this.validity = validity;
     this.reqid = reqid;
     this.durationInMillis = duration;
     this.exid = exid;
+    this.dynamicRange = dynamicRange;
   }
 
   /**

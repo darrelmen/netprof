@@ -614,8 +614,7 @@ public class ClickableWords {
   }
 
   private Character getFullCharacter(char c) {
-    int offset = c - ZERO;
-    int full = FULL_WIDTH_ZERO + offset;
+    int full = FULL_WIDTH_ZERO + (c - ZERO);
     return Character.valueOf((char) full);
   }
 

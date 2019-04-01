@@ -45,11 +45,9 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.scoring.AudioContext;
-import mitll.langtest.shared.scoring.DecoderOptions;
-import mitll.langtest.shared.scoring.ImageOptions;
-import mitll.langtest.shared.scoring.PretestScore;
+import mitll.langtest.shared.scoring.*;
 import mitll.langtest.shared.user.MiniUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -57,6 +55,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.List;
 
 import static mitll.langtest.server.audio.AudioConversion.LANGTEST_IMAGES_NEW_PRO_F_1_PNG;
 import static mitll.langtest.shared.answer.Validity.OK;
@@ -289,8 +288,6 @@ public class JsonScoring {
   }
 
   /**
-   *
-   *
    * @param projid
    * @param usePhoneToDisplay
    * @param fullJSON
@@ -311,11 +308,21 @@ public class JsonScoring {
     ScoreToJSON scoreToJSON = new ScoreToJSON();
     float rawOverall = pretestScore == null ? -1 : pretestScore.getRawOverallScore();
     float overallScore = pretestScore == null ? -1 : pretestScore.getOverallScore();
+
     float wordAvg = pretestScore == null ? -1 : pretestScore.getAvgWordScore();
+
+    if (DEBUG && pretestScore != null) {
+      List<TranscriptSegment> transcriptSegments = pretestScore.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
+      logger.info("getJsonObject for " + answer.getExid() + " # word segments " + transcriptSegments.size());
+      logger.info("getJsonObject for " + answer.getExid() + " word scores " + pretestScore.getWordScores());
+      logger.info("getJsonObject for " + answer.getExid() + " # valid segments " + pretestScore.getNumValidSegments(transcriptSegments));
+      logger.info("getJsonObject for " + answer.getExid() + " total for valid segments " + pretestScore.getValidSegmentScoreTotal(transcriptSegments));
+      logger.info("getJsonObject for " + answer.getExid() + " wordAvg " + wordAvg);
+    }
+
     float phoneAvg = pretestScore == null ? -1 : pretestScore.getAvgPhoneScore();
 
     Project project = db.getProject(projid);
-    //  String language = project.getLanguage();
 
     jsonForScore = fullJSON ?
         scoreToJSON.getJsonObject(pretestScore) :

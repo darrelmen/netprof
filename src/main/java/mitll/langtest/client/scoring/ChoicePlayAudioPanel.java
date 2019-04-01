@@ -146,6 +146,8 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
     Button actual = (Button) widget;
     actual.setEnabled(false);
 
+    logger.info("makePlayButton " + getId() );
+
     addChoices(playButton, includeContext, actual, false);
 
     return actual;

@@ -33,10 +33,10 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.TextNorm;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.*;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -67,9 +67,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
   public static final String BLUE = "#2196F3";
-
-  private static final char FULL_WIDTH_ZERO = '\uFF10';
-  private static final char FULL_WIDTH_NINE = '\uFF10' + 9;
 
   final T exercise;
   final ExerciseController controller;
@@ -104,6 +101,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    */
   private final boolean isMandarin;
   final IListenView listenView;
+
+  private final TextNorm textNorm = new TextNorm();
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -671,11 +670,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   private String getLCSegment(TranscriptSegment wordSegment) {
-    return removePunct(wordSegment.getEvent().toLowerCase());
+    return textNorm.removePunct(wordSegment.getEvent().toLowerCase());
   }
 
   private String getLCClickable(IHighlightSegment current) {
-    return removePunct(current.getContent().toLowerCase());
+    return textNorm.removePunct(current.getContent().toLowerCase());
   }
 
   private void addFloatLeft(IHighlightSegment current) {
@@ -970,58 +969,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     }
     //logger.info("found " + c + " clickables " + sb);
     return c;
-  }
-
-  /**
-   * Remove arabic full stop
-   * Remove arabic comma
-   * Remove arabic question mark...
-   * exclamation point
-   * chinese fill with comma
-   * ideographic comma
-   * right double quote
-   * double quote
-   * <p>
-   * 2d = dash like in twenty-first
-   *
-   * left quote and right quote : LEFT SINGLE QUOTATION MARK and RIGHT SINGLE QUOTATION MARK
-   *
-   * @param t
-   * @return
-   * @see #doOneToManyMatch
-   */
-  private String removePunct(String t) {
-    return fromFull(t
-        .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
-        .replaceAll("['%\\u06D4\\u060C\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u002D\\u0021\\u2026\\u005C\\u2013\\u061F\\uFF0C\\u201D\\u2018\\u2019]", ""));
-  }
-
-  /**
-   * Go from full width numbers to normal width
-   *
-   * @param s
-   * @return
-   */
-  private String fromFull(String s) {
-    StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < s.length(); i++) {
-      char c = s.charAt(i);
-      if (c >= FULL_WIDTH_ZERO && c <= FULL_WIDTH_NINE) {
-        int offset = c - FULL_WIDTH_ZERO;
-        int full = '0' + offset;
-        builder.append(Character.valueOf((char) full).toString());
-      } else {
-        builder.append(c);
-      }
-    }
-    String s1 = builder.toString();
-//    if (!s.isEmpty() && !s.equalsIgnoreCase(s1)) {
-//      logger.warning("fromFull before '" +
-//          s +
-//          "' after '" + s1 +
-//          "'");
-//    }
-    return s1;
   }
 
   @NotNull
