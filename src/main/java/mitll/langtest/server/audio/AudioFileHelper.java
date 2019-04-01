@@ -209,7 +209,7 @@ public class AudioFileHelper implements AlignDecode {
       synchronized (this) {
         if (!checkedLTS) {
           checkedLTS = true;
-          return checkOOV(exercises, false, true).getChecked();
+          return checkOOV(exercises, false, true, 0).getChecked();
         } else {
           return 0;
         }
@@ -232,9 +232,10 @@ public class AudioFileHelper implements AlignDecode {
    * @param exercises
    * @param includeKaldi
    * @param removeStale
+   * @param index
    * @return OOVInfo
    */
-  public OOVInfo checkOOV(Collection<CommonExercise> exercises, boolean includeKaldi, boolean removeStale) {
+  public OOVInfo checkOOV(Collection<CommonExercise> exercises, boolean includeKaldi, boolean removeStale, int index) {
     long now = System.currentTimeMillis();
     Set<Integer> safe = new HashSet<>();
     Map<Integer, String> idToNorm = new HashMap<>();
@@ -251,7 +252,7 @@ public class AudioFileHelper implements AlignDecode {
       logger.error("got " + e, e);
     }
 
-    writeOOV(oov, OOV, removeStale);
+    writeOOV(oov, OOV + "_"+index, removeStale);
 
     long then = System.currentTimeMillis();
 
@@ -315,7 +316,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param oov
    * @param includeKaldi
    * @return
-   * @see #checkOOV(Collection, boolean, boolean)
+   * @see #checkOOV(Collection, boolean, boolean, int)
    */
   private OOVInfo checkAllExercises(Collection<CommonExercise> exercises,
 
@@ -401,7 +402,7 @@ public class AudioFileHelper implements AlignDecode {
   /**
    * @param oov
    * @param suffix
-   * @see #checkOOV(Collection, boolean, boolean)
+   * @see #checkOOV(Collection, boolean, boolean, int)
    */
   private void writeOOV(Set<String> oov, String suffix, boolean removeStale) {
     if (!oov.isEmpty()) {

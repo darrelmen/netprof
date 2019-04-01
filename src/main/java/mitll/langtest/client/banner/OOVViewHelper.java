@@ -48,6 +48,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.Command;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -55,12 +56,8 @@ import mitll.langtest.client.analysis.MemoryItemContainer;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.userlist.TableAndPager;
-import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.client.exercise.TextNorm;
-import mitll.langtest.client.scoring.PhonesChoices;
-import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.OOVInfo;
 import org.jetbrains.annotations.NotNull;
@@ -102,7 +99,10 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
    */
   private OOVInfo oovInfo;
 
-  OOVViewHelper(ExerciseController controller, INavigation.VIEWS oovEditor) {
+  private int num = 0;
+  private int offset = 100;
+
+  OOVViewHelper(ExerciseController controller) {
     this.controller = controller;
   }
 
@@ -117,34 +117,38 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
 //        //   grabFocus();
 //      }
 
-      @Override
-      protected void onUnload() {
-        super.onUnload();
-        List<OOV> dirtyItems = getDirtyItems();
-        if (!dirtyItems.isEmpty()) {
-          controller.getAudioService().updateOOV(controller.getProjectID(), dirtyItems, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              message.setText("Error - please try again.");
-              controller.handleNonFatalError("updateOOV...", caught);
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-
-            }
-          });
-        }
-      }
+//      @Override
+//      protected void onUnload() {
+//        super.onUnload();
+//
+//
+//        updateOOV();
+//      }
     };
 
     listContent.add(outer);
     addOOVList(outer);
   }
 
-  private int num = 0;
-  private int offset = 100;
+  private void updateOOV() {
+    List<OOV> dirtyItems = getDirtyItems();
+    if (!dirtyItems.isEmpty()) {
+      controller.getAudioService().updateOOV(controller.getProjectID(), dirtyItems, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          message.setText("Error - please try again.");
+          controller.handleNonFatalError("updateOOV...", caught);
+        }
 
+        @Override
+        public void onSuccess(Void result) {
+          logger.info("updateOOV wrote update for " + dirtyItems.size());
+        }
+      });
+    }
+  }
+
+  Timer currentTimer;
   /**
    * Initial query
    *
@@ -154,7 +158,30 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     top.add(new HTML("Getting words that are not in the dictionary. Please wait..."));
     top.add(getProgressBarDiv(true));
     oovInfo = new OOVInfo();
-    checkOOVRepeatedly(top, controller.getProjectID());
+
+    waitAndThenCheck(top);
+  }
+
+  private void waitAndThenCheck(DivWidget top) {
+    if (controller.getProjectStartupInfo() == null) {
+      currentTimer = new Timer() {
+        @Override
+        public void run() {
+//          logger.info("loadNextOnTimer ----> at " + System.currentTimeMillis() + "  firing on " + currentTimer);
+          //loadNext();
+          if (controller.getProjectStartupInfo() == null) {
+            waitAndThenCheck(top);
+          }
+          else {
+            checkOOVRepeatedly(top, controller.getProjectID());
+          }
+        }
+      };
+      currentTimer.schedule(1000);
+    }
+    else {
+      checkOOVRepeatedly(top, controller.getProjectID());
+    }
   }
 
   private ProgressBar progressBar;
@@ -168,11 +195,8 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
   @NotNull
   private DivWidget getProgressBarDiv(ProgressBar scoreProgress) {
     DivWidget scoreContainer = new DivWidget();
-    // scoreContainer.addStyleName("rehearseScoreContainer");
-    // scoreContainer.addStyleName("floatLeft");
 
     scoreContainer.addStyleName("topFiveMargin");
-    //  scoreContainer.addStyleName("leftFiveMargin");
     scoreContainer.getElement().getStyle().setMarginBottom(0, PX);
     scoreContainer.add(scoreProgress);
 
@@ -192,9 +216,13 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     style.setFontSize(16, PX);
 
     progressBar.setWidth(200 + "%");
-
   }
 
+  /**
+   * @see #addOOVList(DivWidget)
+   * @param top
+   * @param projectID
+   */
   private void checkOOVRepeatedly(DivWidget top, int projectID) {
     controller.getAudioService().checkOOV(projectID, num, offset, new AsyncCallback<OOVInfo>() {
       @Override
@@ -565,6 +593,9 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
               oovContainer.redraw();
               checkButton.setEnabled(!getDirtyItems().isEmpty());
               message.setHTML(getUnmatchedItems().size() + " items left.");
+
+              updateOOV();
+
             }
           }
         });

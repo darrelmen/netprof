@@ -117,7 +117,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     coreRehearseHelper = new CoreRehearseViewHelper(controller, CORE_REHEARSE);
     performPressAndHoldHelper = new PerformViewHelper(controller, PERFORM_PRESS_AND_HOLD);
     performHelper = new PerformViewHelper(controller, PERFORM);
-    oovHelper = new OOVViewHelper(controller, OOV_EDITOR);
+    oovHelper = new OOVViewHelper(controller);
     this.controller = controller;
     this.banner = banner;
 
