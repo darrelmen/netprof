@@ -31,7 +31,6 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.OOV;
@@ -111,7 +110,7 @@ public interface AudioServiceAsync {
 
   void getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript, AsyncCallback<AudioAttribute> async);
 
-  void checkOOV(int id, AsyncCallback<OOVInfo> async);
+  void checkOOV(int id, int num, int offset, AsyncCallback<OOVInfo> async);
 
   void updateOOV(int projectID, List<OOV> updates, AsyncCallback<Void> async);
 }

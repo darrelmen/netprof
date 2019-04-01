@@ -29,7 +29,7 @@
 
 package mitll.langtest.server.services;
 
-import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -63,7 +63,6 @@ import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVInfo;
-import mitll.langtest.shared.project.ProjectInfo;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
@@ -1224,12 +1223,21 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return byID == null ? MiniUser.Gender.Unspecified : byID.getRealGender();
   }
 
-
+  /**
+   *
+   * @param id
+   * @param num
+   * @param offset
+   * @return
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   * @see mitll.langtest.client.banner.OOVViewHelper#checkOOVRepeatedly(DivWidget, int)
+   */
   @Override
-  public OOVInfo checkOOV(int id) throws DominoSessionException, RestrictedOperationException {
+  public OOVInfo checkOOV(int id, int num, int offset) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasAdminOrCDPerm(userIDFromSessionOrDB)) {
-      OOVInfo oovInfo = db.getProjectManagement().checkOOV(id);
+      OOVInfo oovInfo = db.getProjectManagement().checkOOV(id, num, offset);
       db.getAudioDAO().attachAudioToExercises(oovInfo.getUnsafe(), db.getLanguageEnum(id), id);
       return oovInfo;
     } else {

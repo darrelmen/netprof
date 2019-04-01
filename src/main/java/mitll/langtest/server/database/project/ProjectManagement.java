@@ -1467,10 +1467,35 @@ public class ProjectManagement implements IProjectManagement {
     return dominoImport == null ? Collections.emptyMap() : dominoImport.getNPIDToDominoID(dominoProjectID);
   }
 
+  /**
+   * Clear oov table of stale entries when we start over...
+   * @param id
+   * @param num
+   * @param offset
+   * @return
+   * @see mitll.langtest.server.services.AudioServiceImpl#checkOOV(int, int, int)
+   */
   @Override
-  public OOVInfo checkOOV(int id) {
+  public OOVInfo checkOOV(int id, int num, int offset) {
     Project project = getProject(id, false);
-    return project.getAudioFileHelper().checkOOV(project.getRawExercises(), true);
+    List<CommonExercise> rawExercises = project.getRawExercises();
+    int total = rawExercises.size();
+
+    if (num < 0) num = 0;
+    if (offset < 1) offset = 100;
+
+    if (num > total) {
+      num = total;
+    }
+    if (num + offset > total) {
+      offset = total - num;
+    }
+
+    List<CommonExercise> commonExercises = rawExercises.subList(num, num + offset);
+    boolean removeStale = num == 0;
+    logger.info("checkOOV removeStale " + removeStale);
+    OOVInfo oovInfo = project.getAudioFileHelper().checkOOV(commonExercises, true, removeStale);
+    return oovInfo.setTotal(total);
   }
 
   public void updateOOV(List<OOV> updates, int user) {

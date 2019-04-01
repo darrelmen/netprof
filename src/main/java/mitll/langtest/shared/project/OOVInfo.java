@@ -31,10 +31,9 @@ package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.OOV;
 
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -43,10 +42,19 @@ import java.util.Set;
 public class OOVInfo implements IsSerializable {
   private int checked;
   private int oovWords;
+  private int total;
   private Set<ClientExercise> unsafe = new HashSet<>();
   private boolean needsReload;
 
   public OOVInfo() {
+  }
+
+  public void add(OOVInfo other) {
+    this.checked += other.checked;
+    this.oovWords += other.oovWords;
+    this.total = other.total;
+    this.unsafe.addAll(other.unsafe);
+    this.needsReload = other.needsReload;
   }
 
   /**
@@ -81,6 +89,15 @@ public class OOVInfo implements IsSerializable {
 
   public Set<ClientExercise> getUnsafe() {
     return unsafe;
+  }
+
+  public int getTotal() {
+    return total;
+  }
+
+  public OOVInfo setTotal(int total) {
+    this.total = total;
+    return this;
   }
 
   public String toString() {

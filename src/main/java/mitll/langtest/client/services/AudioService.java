@@ -29,7 +29,6 @@
 
 package mitll.langtest.client.services;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
@@ -122,7 +121,7 @@ public interface AudioService extends RemoteService {
 
   void refreshExercises(int projid, Set<Integer> exids) throws DominoSessionException;
 
-  OOVInfo checkOOV(int id) throws DominoSessionException;
+  OOVInfo checkOOV(int id, int num, int offset) throws DominoSessionException;
 
   void updateOOV(int projectID, List<OOV> updates) throws DominoSessionException;
 }

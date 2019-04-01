@@ -30,8 +30,10 @@
 package mitll.langtest.client.banner;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
@@ -66,20 +68,25 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import static com.google.gwt.dom.client.Style.Unit.PX;
 
 public class OOVViewHelper extends TableAndPager implements ContentView {
   public static final INavigation.VIEWS LEARN = INavigation.VIEWS.LEARN;
+  public static final String CHECKING_OOV = "Checking OOV...";
   private final Logger logger = Logger.getLogger("OOVViewHelper");
 
-  public static final String OOV = "OOV";
-  public static final String ITEMS_WITH_MISSING_WORDS = "Items with Missing Words";
-  public static final String ITEMS_WITH_MISSING_WORDS1 = "Items with missing words";
+  public static final String OOV = "Not In Dict.";
+  private static final String ITEMS_WITH_MISSING_WORDS = "Items with Missing Words";
+  private static final String ITEMS_WITH_MISSING_WORDS1 = "Items with missing words";
 
-  public static final String CHECK_COMPLETE = "Check complete.";
-  public static final String PLEASE_WAIT = "Please wait...";
-  public static final String CHECK_ITEMS_IN_DICT = "Check Items In Dict.";
-  public static final String SELECT_AND_ENTER_EQUIVALENT = "Select and enter equivalent.";
+  private static final String CHECK_COMPLETE = "Check complete.";
+  private static final String PLEASE_WAIT = "Please wait...";
+  /**
+   *
+   */
+  private static final String CHECK_ITEMS_IN_DICT = "Check Items In Dict.";
+  private static final String SELECT_AND_ENTER_EQUIVALENT = "Select and enter equivalent.";
 
   private static final String TITLE = "Words Not In Dictionary";
   private static final String EQUIVALENT = "Equivalent";
@@ -90,6 +97,9 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
   private TextBox equivalent;
   private final HTML message = new HTML();
   private Button checkButton;
+  /**
+   *
+   */
   private OOVInfo oovInfo;
 
   OOVViewHelper(ExerciseController controller, INavigation.VIEWS oovEditor) {
@@ -132,38 +142,107 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     addOOVList(outer);
   }
 
+  private int num = 0;
+  private int offset = 100;
+
+  /**
+   * Initial query
+   *
+   * @param top
+   */
   private void addOOVList(DivWidget top) {
     top.add(new HTML("Getting words that are not in the dictionary. Please wait..."));
-    int projectID = controller.getProjectID();
+    top.add(getProgressBarDiv(true));
+    oovInfo = new OOVInfo();
+    checkOOVRepeatedly(top, controller.getProjectID());
+  }
 
-    controller.getAudioService().checkOOV(projectID, new AsyncCallback<OOVInfo>() {
+  private ProgressBar progressBar;
+
+  private DivWidget getProgressBarDiv(boolean showInitially) {
+    ProgressBar scoreProgress = progressBar = new ProgressBar(ProgressBarBase.Style.DEFAULT);
+    progressBar.setVisible(showInitially);
+    return getProgressBarDiv(scoreProgress);
+  }
+
+  @NotNull
+  private DivWidget getProgressBarDiv(ProgressBar scoreProgress) {
+    DivWidget scoreContainer = new DivWidget();
+    // scoreContainer.addStyleName("rehearseScoreContainer");
+    // scoreContainer.addStyleName("floatLeft");
+
+    scoreContainer.addStyleName("topFiveMargin");
+    //  scoreContainer.addStyleName("leftFiveMargin");
+    scoreContainer.getElement().getStyle().setMarginBottom(0, PX);
+    scoreContainer.add(scoreProgress);
+
+    styleProgressBar(scoreProgress);
+    scoreContainer.setWidth("200px");
+
+    return scoreContainer;
+  }
+
+  private void styleProgressBar(ProgressBar progressBar) {
+    Style style = progressBar.getElement().getStyle();
+    style.setMarginTop(5, PX);
+    style.setMarginLeft(5, PX);
+    style.setMarginBottom(0, PX);
+
+    style.setHeight(25, PX);
+    style.setFontSize(16, PX);
+
+    progressBar.setWidth(200 + "%");
+
+  }
+
+  private void checkOOVRepeatedly(DivWidget top, int projectID) {
+    controller.getAudioService().checkOOV(projectID, num, offset, new AsyncCallback<OOVInfo>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("Checking OOV...", caught);
       }
 
       @Override
-      public void onSuccess(OOVInfo oovInfo) {
+      public void onSuccess(OOVInfo oovInfoForBatch) {
+        num += offset;
 
-        logger.info("addOOVList Got " + oovInfo);
-        controller.getScoringService().getOOVs(projectID, new AsyncCallback<List<OOV>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            controller.handleNonFatalError("getting oovs", caught);
-          }
+        oovInfo.add(oovInfoForBatch);
 
-          @Override
-          public void onSuccess(List<OOV> result) {
-            top.clear();
-            oovContainer = addOOVTable(top, oovInfo);
-            sortUnsetToTop(result);
-            oovContainer.populateTable(result);
-            if (!result.isEmpty()) {
-              oovContainer.gotClickOnItem(result.get(0));
-            }
-            grabFocus();
-          }
-        });
+        //logger.info("addOOVList Got " + oovInfo);
+        if (num < oovInfo.getTotal()) {
+          setProgressPercent(oovInfoForBatch);
+          checkOOVRepeatedly(top, projectID);
+        } else {
+          getOOVs(oovInfo, projectID, top);
+        }
+      }
+    });
+  }
+
+  private void setProgressPercent(OOVInfo oovInfoForBatch) {
+    float percent = 100F * ((float) num / (float) oovInfoForBatch.getTotal());
+//          logger.info("checkOOVRepeatedly : OK now at " + num + " or " + percent);
+    progressBar.setPercent(percent);
+  }
+
+  private void getOOVs(OOVInfo oovInfo, int projectID, DivWidget top) {
+    controller.getScoringService().getOOVs(projectID, new AsyncCallback<List<OOV>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("getting oovs", caught);
+      }
+
+      @Override
+      public void onSuccess(List<OOV> result) {
+        top.clear();
+        logger.info("getOOVs got " + result.size());
+        oovContainer = addOOVTable(top, oovInfo);
+        sortUnsetToTop(result);
+        oovContainer.populateTable(result);
+        if (!result.isEmpty()) {
+          oovContainer.gotClickOnItem(result.get(0));
+        }
+        grabFocus();
       }
     });
   }
@@ -257,6 +336,9 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
       below.add(buttonRow);
       buttonRow.add(message);
     }
+
+    below.add(getProgressBarDiv(false));
+
     return oovMemoryItemContainer;
   }
 
@@ -310,6 +392,9 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     }
   }
 
+  /**
+   * @param oovInfo
+   */
   private void showUnsafe(OOVInfo oovInfo) {
     this.oovInfo = oovInfo;
     unsafeItems.populateTable(getWrappers(oovInfo));
@@ -401,42 +486,64 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
   private void checkOOVAgain(int projectID) {
     message.setText("Checking dictionary again, please wait...");
 
-    controller.getAudioService().checkOOV(projectID, new AsyncCallback<OOVInfo>() {
+    num = 0;
+    offset = 100;
+    oovInfo = new OOVInfo();
+    progressBar.setVisible(true);
+
+    checkOOVAgainRecurse(projectID);
+  }
+
+  private void checkOOVAgainRecurse(int projectID) {
+    controller.getAudioService().checkOOV(projectID, num, offset, new AsyncCallback<OOVInfo>() {
       @Override
       public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("Checking OOV...", caught);
+        controller.handleNonFatalError(CHECKING_OOV, caught);
       }
 
       @Override
       public void onSuccess(OOVInfo result) {
-//        if (add != null) add.setEnabled(true);
-        showUnsafe(result);
-
-        if (result.isNeedsReload()) {
-          controller.getExerciseService().reload(projectID, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              controller.handleNonFatalError("updating exercises...", caught);
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-              logger.info("update complete...");
-            }
-          });
+        num += offset;
+        oovInfo.add(result);
+//        logger.info("addOOVList " +num + " " + offset + " vs " + result.getTotal()+
+//            "  Got " + result);
+        if (num < result.getTotal()) {
+          setProgressPercent(result);
+          checkOOVAgainRecurse(projectID);
+        } else {
+          progressBar.setVisible(false);
+          showUnsafeAgain(oovInfo, projectID);
         }
-        controller.getScoringService().getOOVs(projectID, new AsyncCallback<List<OOV>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            message.setText("Error - please try again.");
-            controller.handleNonFatalError("getting oovs", caught);
-          }
+      }
+    });
+  }
 
-          @Override
-          public void onSuccess(List<OOV> result) {
-            message.setText(CHECK_COMPLETE);
-          }
-        });
+  private void showUnsafeAgain(OOVInfo result, int projectID) {
+    showUnsafe(result);
+
+    if (result.isNeedsReload()) {
+      controller.getExerciseService().reload(projectID, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("updating exercises...", caught);
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          logger.info("update complete...");
+        }
+      });
+    }
+    controller.getScoringService().getOOVs(projectID, new AsyncCallback<List<OOV>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        message.setText("Error - please try again.");
+        controller.handleNonFatalError("getting oovs", caught);
+      }
+
+      @Override
+      public void onSuccess(List<OOV> result) {
+        message.setText(CHECK_COMPLETE);
       }
     });
   }
@@ -524,7 +631,14 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
       //getExample(user);
     }
 
-    private void getExample(OOV user) {
+    /**
+     * So the trouble is we need to do exact match on the tokens in the item, not the text.
+     * i.e. 1 should not match "blah 16 blah"
+     *
+     * @param exercise
+     * @return
+     */
+/*    private void getExample(OOV user) {
       Set<ClientExercise> unsafe = oovInfo.getUnsafe();
 
       List<ClientExercise> collect = getMatches(user.getOOV(), unsafe);
@@ -557,9 +671,9 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
         });
         logger.info("no match for " + oovInfo);
       }
-    }
+    }*/
 
-    private Panel getExample(ClientExercise exercise) {
+/*    private Panel getExample(ClientExercise exercise) {
       TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<>(exercise,
           controller,
           null,
@@ -577,7 +691,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
           false, () -> "");
       widgets.addWidgets(true, false, PhonesChoices.HIDE);
       return widgets;
-    }
+    }*/
 
     /**
      * @see SimplePagingContainer#configureTable(boolean)

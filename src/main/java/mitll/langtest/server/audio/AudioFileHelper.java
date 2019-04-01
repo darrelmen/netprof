@@ -102,6 +102,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final String DEFAULT_EXID = "2";
 
   private static final boolean DEBUG_EDIT = false;
+  public static final String OOV = "oov";
 
   // private static final String PERCENT_SYMBOL = "%";
 
@@ -208,7 +209,7 @@ public class AudioFileHelper implements AlignDecode {
       synchronized (this) {
         if (!checkedLTS) {
           checkedLTS = true;
-          return checkOOV(exercises, false).getChecked();
+          return checkOOV(exercises, false, true).getChecked();
         } else {
           return 0;
         }
@@ -230,9 +231,10 @@ public class AudioFileHelper implements AlignDecode {
    *
    * @param exercises
    * @param includeKaldi
+   * @param removeStale
    * @return OOVInfo
    */
-  public OOVInfo checkOOV(Collection<CommonExercise> exercises, boolean includeKaldi) {
+  public OOVInfo checkOOV(Collection<CommonExercise> exercises, boolean includeKaldi, boolean removeStale) {
     long now = System.currentTimeMillis();
     Set<Integer> safe = new HashSet<>();
     Map<Integer, String> idToNorm = new HashMap<>();
@@ -249,7 +251,7 @@ public class AudioFileHelper implements AlignDecode {
       logger.error("got " + e, e);
     }
 
-    writeOOV(oov, "oov");
+    writeOOV(oov, OOV, removeStale);
 
     long then = System.currentTimeMillis();
 
@@ -313,7 +315,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param oov
    * @param includeKaldi
    * @return
-   * @see #checkOOV(Collection, boolean)
+   * @see #checkOOV(Collection, boolean, boolean)
    */
   private OOVInfo checkAllExercises(Collection<CommonExercise> exercises,
 
@@ -399,28 +401,13 @@ public class AudioFileHelper implements AlignDecode {
   /**
    * @param oov
    * @param suffix
-   * @see #checkOOV(Collection, boolean)
+   * @see #checkOOV(Collection, boolean, boolean)
    */
-  private void writeOOV(Set<String> oov, String suffix) {
+  private void writeOOV(Set<String> oov, String suffix, boolean removeStale) {
     if (!oov.isEmpty()) {
       try {
-        String fileName = "Project_" + suffix + project.getLanguage() + "_" + project.getName() + ".txt";
-        File file = new File("/tmp/" + fileName);
-        logger.info("writeOOV writing " + oov.size() + " oov items to " + file.getAbsolutePath());
-        FileWriter oovTokens = new FileWriter(file);
-        List<String> strings = new ArrayList<>(oov);
-        strings.sort(Comparator.naturalOrder());
-
-        for (String token : strings) {
-          try {
-            oovTokens.write(token + "\n");
-          } catch (IOException e) {
-            break;
-          }
-        }
-        oovTokens.close();
-
-        addOOVToOOVTable(oov);
+        writeToFile(oov, suffix);
+        addOOVToOOVTable(oov, removeStale);
       } catch (IOException e) {
         logger.error("writeOOV got " + e);
       }
@@ -429,25 +416,46 @@ public class AudioFileHelper implements AlignDecode {
 
       Set<String> oov1 = getPronunciationLookup().getOOV();
       if (!oov1.isEmpty()) {
-        addOOVToOOVTable(oov);
-        writeOOV(oov1, suffix);
+        addOOVToOOVTable(oov, removeStale);
+        writeOOV(oov1, suffix, removeStale);
       }
     }
   }
 
+  private void writeToFile(Set<String> oov, String suffix) throws IOException {
+    String fileName = "Project_" + suffix + project.getLanguage() + "_" + project.getName() + ".txt";
+    File file = new File("/tmp/" + fileName);
+    logger.info("writeOOV writing " + oov.size() + " oov items to " + file.getAbsolutePath());
+    FileWriter oovTokens = new FileWriter(file);
+    List<String> strings = new ArrayList<>(oov);
+    strings.sort(Comparator.naturalOrder());
+
+    for (String token : strings) {
+      try {
+        oovTokens.write(token + "\n");
+      } catch (IOException e) {
+        break;
+      }
+    }
+    oovTokens.close();
+  }
+
   /**
-   * Don't add known oov entries.
+   * Don't step on oov entries with mappings.
+   *
    *
    * @param oov
+   * @param removeStale
    */
-  private void addOOVToOOVTable(Set<String> oov) {
+  private void addOOVToOOVTable(Set<String> oov, boolean removeStale) {
     Language languageEnum = project.getLanguageEnum();
 
     int defaultUser = db.getUserDAO().getDefaultUser();
     List<OOV> toAdd = getOOVToAdd(oov, languageEnum, defaultUser);
-
-    removeStaleOOV(oov, languageEnum);
-
+    if (removeStale) {
+      logger.info("remove stale entries");
+      removeStaleOOV(oov, languageEnum);
+    }
     logger.info("addOOV adding " + toAdd.size());
 
     db.getOOVDAO().insertBulk(toAdd, defaultUser, languageEnum);
@@ -455,13 +463,12 @@ public class AudioFileHelper implements AlignDecode {
 
   @NotNull
   private List<OOV> getOOVToAdd(Set<String> oov, Language languageEnum, int defaultUser) {
-    List<OOV> toAdd = new ArrayList<>();
-
     Map<String, List<OOV>> currentOOVToEquivalents = db.getOOVDAO().getOOV(languageEnum);
 
     logger.info("addOOV to add - " + oov.size() + " known " + currentOOVToEquivalents.size());
 
     long now = System.currentTimeMillis();
+    List<OOV> toAdd = new ArrayList<>();
     oov.forEach(oovEntry -> {
       if (!currentOOVToEquivalents.containsKey(oovEntry)) {
         toAdd.add(new OOV(-1, defaultUser, now, oovEntry, ""));
@@ -470,9 +477,15 @@ public class AudioFileHelper implements AlignDecode {
     return toAdd;
   }
 
+  /**
+   * @param oov
+   * @param languageEnum
+   */
   private void removeStaleOOV(Set<String> oov, Language languageEnum) {
     List<OOV> known = db.getOOVDAO().forLanguage(languageEnum);
-    List<OOV> toRemove = known.stream().filter(oovEntry -> oovEntry.getEquivalent().isEmpty() && !oov.contains(oovEntry.getOOV())).collect(Collectors.toList());
+    List<OOV> toRemove = known.stream().filter(oovEntry ->
+        oovEntry.getEquivalent().isEmpty() &&
+            !oov.contains(oovEntry.getOOV())).collect(Collectors.toList());
 
     logger.info("addOOV remove " + toRemove.size() + " : " + toRemove);
 

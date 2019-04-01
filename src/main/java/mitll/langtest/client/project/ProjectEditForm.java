@@ -397,7 +397,7 @@ public class ProjectEditForm extends UserDialog {
           logger.warning("coudn't create project?");
           Window.alert("Sorry, couldn't create a new project.");
         } else {
-          lifecycleSupport.refreshStartupInfoAnTell(true,projID);
+          lifecycleSupport.refreshStartupInfoAnTell(true, projID);
 //          services.tellOtherServerToRefreshProject(projID);
         }
       }
@@ -888,8 +888,17 @@ public class ProjectEditForm extends UserDialog {
     showCheckOOV(info, w);
   }
 
+  private int num = 0;
+  private  int offset = 100;
+
   private void showCheckOOV(ProjectInfo info, Button w) {
-    controller.getAudioServiceAsyncForHost(info.getHost()).checkOOV(info.getID(), new AsyncCallback<OOVInfo>() {
+    num = 0;
+    offset = 100;
+    checkOOV(info, w);
+  }
+
+  private void checkOOV(ProjectInfo info, Button w) {
+    controller.getAudioServiceAsyncForHost(info.getHost()).checkOOV(info.getID(), num, offset, new AsyncCallback<OOVInfo>() {
       @Override
       public void onFailure(Throwable caught) {
         messageHelper.handleNonFatalError("Checking OOV...", caught);
@@ -897,8 +906,14 @@ public class ProjectEditForm extends UserDialog {
 
       @Override
       public void onSuccess(OOVInfo result) {
-        w.setEnabled(true);
-        feedback.setText("Checked " + result.getChecked() + " items, found " + result.getOovWords() + " OOV words.");
+        if (num + offset > result.getTotal()) {
+          w.setEnabled(true);
+          feedback.setText("Checked " + result.getChecked() + " items, found " + result.getOovWords() + " OOV words.");
+        } else {
+          feedback.setText("Checking : checked " + num + " items...");
+          num += offset;
+          checkOOV(info, w);
+        }
       }
     });
   }

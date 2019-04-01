@@ -147,7 +147,7 @@ public interface IProjectManagement {
 
   Map<String,Integer> getNpToDomino(int dominoProjectID);
 
-  OOVInfo checkOOV(int id);
+  OOVInfo checkOOV(int id, int num, int offset);
 
   void updateOOV(List<OOV> updates, int user);
 }
