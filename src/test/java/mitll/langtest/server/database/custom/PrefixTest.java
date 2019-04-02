@@ -2,7 +2,7 @@ package mitll.langtest.server.database.custom;
 
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import org.junit.Test;
 
 public class PrefixTest extends BaseTest {

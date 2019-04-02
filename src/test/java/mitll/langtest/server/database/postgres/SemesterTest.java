@@ -4,7 +4,7 @@ import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.ITestSection;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.TextNormalizer;

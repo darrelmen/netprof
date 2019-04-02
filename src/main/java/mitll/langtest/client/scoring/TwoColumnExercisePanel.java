@@ -112,7 +112,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * @see #shouldShowPhones
    */
   private PhonesChoices phonesChoices;
-  EnglishDisplayChoices englishDisplayChoices;
+  private EnglishDisplayChoices englishDisplayChoices;
 
   private static final boolean DEBUG = false;
 
@@ -174,7 +174,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     this.phonesChoices = phonesChoices;
     this.englishDisplayChoices = englishDisplayChoices;
-    // logger.info("eng " +englishDisplayChoices);
 
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
 
@@ -304,9 +303,9 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     if (hasEnglish) {
       lr.getElement().getStyle().setProperty("minWidth", "345px");
 
-//      Widget englishWidget = getEnglishWidget(e, english, englishDisplayChoices == EnglishDisplayChoices.HIDE);
-
       DivWidget englishContainer = new DivWidget();
+      englishContainer.setWidth("100%");
+//      englishContainer.getElement().getStyle().setProperty("minWidth", "345px");
 
       boolean showEng = englishDisplayChoices == EnglishDisplayChoices.SHOW;
       String toUse = showEng ? english : replaceWithDashes(english);

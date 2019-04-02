@@ -30,15 +30,13 @@
 package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.exercise.BulkImport;
-import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.scoring.TextNormalizer;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
