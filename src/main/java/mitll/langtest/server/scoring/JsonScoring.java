@@ -55,6 +55,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 import static mitll.langtest.server.audio.AudioConversion.LANGTEST_IMAGES_NEW_PRO_F_1_PNG;
@@ -425,7 +426,7 @@ public class JsonScoring {
                                            int projid) {
     AudioFileHelper audioFileHelper = getAudioFileHelper(projid);
     return audioFileHelper
-        .getASRScoreForAudio(reqid, testAudioFile, sentence, transliteration, DEFAULT, "" + exerciseID,
+        .getASRScoreForAudio(reqid, testAudioFile, sentence, Collections.singleton(sentence), transliteration, DEFAULT, "" + exerciseID,
             null,
             new DecoderOptions()
                 .setDoDecode(false)

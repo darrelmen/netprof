@@ -40,9 +40,7 @@ import mitll.npdata.dao.SlickExerciseNorm;
 import mitll.npdata.dao.SlickExercisePhone;
 import mitll.npdata.dao.SlickUpdateDominoPair;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends SimpleExerciseDAO<T> {
@@ -61,7 +59,7 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   List<CommonExercise> getUserDefinedByProjectExactMatch(String fl, int userIDFromSession);
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkForOOV
    * @param safe
    * @param unsafe
    * @param dictTimestamp

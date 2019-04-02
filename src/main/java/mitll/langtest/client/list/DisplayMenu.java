@@ -48,13 +48,14 @@ import java.util.logging.Logger;
  * @see FacetExerciseList#getPagerAndSort(ExerciseController)
  */
 public class DisplayMenu {
-  private static final int OPTIONS_WIDTH = 161;//85
   private final Logger logger = Logger.getLogger("DisplayMenu");
+
+  private static final int OPTIONS_WIDTH = 161;
 
   private static final String SHOW_CM_SIMPLIFIED = "Show CM Simplified";
   private static final String SHOW_CM_TRADITIONAL = "Show CM Traditional";
 
-  private static final String SHOW1 = "Show and Download";//"Options";
+  private static final String SHOW1 = "Show and Download";
   private static final String DOWNLOAD = "Download Content";
   private static final String SHOW_ALTERNATE_TEXT = "Show Alternate text";
   private static final String SHOW_PRIMARY_TEXT = "Show Primary text";
@@ -217,9 +218,9 @@ public class DisplayMenu {
   }
 
   private boolean getStored(String show, boolean defaultVal) {
-    Boolean showFL = defaultVal;
+    boolean showFL = defaultVal;
     if (show != null) {
-      showFL = Boolean.valueOf(show);
+      showFL = Boolean.parseBoolean(show);
     }
     return showFL;
   }
@@ -230,7 +231,6 @@ public class DisplayMenu {
   }
 
   private void fireShowEvent() {
-//    LangTest.EVENT_BUS.fireEvent(new ShowEvent());
     showEventListener.gotShow();
   }
 

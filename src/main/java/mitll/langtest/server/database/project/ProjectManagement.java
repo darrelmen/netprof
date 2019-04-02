@@ -115,6 +115,7 @@ public class ProjectManagement implements IProjectManagement {
   private static final String ANSWERS1 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
   private static final Pattern pattern = Pattern.compile(ANSWERS1);
   public static final boolean DEBUG_USER_FOR_FILE = false;
+  public static final boolean CHECK_FOR_OOV_ON_STARTUP = false;
 
   /**
    * JUST FOR TESTING
@@ -449,9 +450,12 @@ public class ProjectManagement implements IProjectManagement {
               isPolyglot(project))
       );
 
-      if (myProject) {
-        new Thread(() -> project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises), "checkLTSAndCountPhones_" + project.getID()).start();
+      if (CHECK_FOR_OOV_ON_STARTUP) {
+        if (myProject) {
+          new Thread(() -> project.getAudioFileHelper().checkForOOV(rawExercises), "checkLTSAndCountPhones_" + project.getID()).start();
+        }
       }
+
 //      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);
 
       //Set<Integer> exids = new HashSet<>();
@@ -1469,18 +1473,23 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * Clear oov table of stale entries when we start over...
+   *
    * @param id
    * @param num
    * @param offset
    * @return
    * @see mitll.langtest.server.services.AudioServiceImpl#checkOOV(int, int, int)
+   * @see mitll.langtest.client.banner.OOVViewHelper#checkOOVRepeatedly
    */
   @Override
   public OOVInfo checkOOV(int id, int num, int offset) {
     Project project = getProject(id, false);
     List<CommonExercise> rawExercises = project.getRawExercises();
+
+
     int total = rawExercises.size();
 
+    logger.info("checkOOV req for " + id + " num " + num + " offset " + offset + " total " + total);
     if (num < 0) num = 0;
     if (offset < 1) offset = 100;
 
@@ -1493,9 +1502,8 @@ public class ProjectManagement implements IProjectManagement {
 
     List<CommonExercise> commonExercises = rawExercises.subList(num, num + offset);
     boolean removeStale = num == 0;
-   // logger.info("checkOOV removeStale " + removeStale);
-    OOVInfo oovInfo = project.getAudioFileHelper().checkOOV(commonExercises, true, removeStale, num);
-    return oovInfo.setTotal(total);
+    logger.info("checkOOV removeStale " + removeStale + " for " + commonExercises.size());
+    return project.getAudioFileHelper().checkOOV(commonExercises, true).setTotal(total);
   }
 
   public void updateOOV(List<OOV> updates, int user) {

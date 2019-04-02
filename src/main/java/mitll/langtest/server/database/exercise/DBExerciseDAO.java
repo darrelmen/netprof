@@ -57,7 +57,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private final SlickProject project;
   private final Project fullProject;
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_ROOT_TYPE = true;
+  private static final boolean DEBUG_ROOT_TYPE = false;
   private static final boolean DEBUG_USER_CREATED = false;
   private final Map<Integer, CommonExercise> idToContextExercise = new HashMap<>();
   private final Map<Integer, CommonExercise> idToUserExercise = new HashMap<>();
@@ -208,7 +208,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     try {
       List<String> typeOrder = getTypeOrderFromProject();
 
-      logger.info("readExercises vfor  " + project + " " + typeOrder);
+     // logger.info("readExercises vfor  " + project + " " + typeOrder);
       setRootTypes(typeOrder);
 
       int projid = project.id();
@@ -556,7 +556,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * @param safe
    * @param unsafe
    * @param dictTimestamp
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkForOOV
    */
   public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp) {
     {

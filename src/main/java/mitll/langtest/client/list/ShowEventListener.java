@@ -30,5 +30,8 @@
 package mitll.langtest.client.list;
 
 interface ShowEventListener {
+  /**
+   * @see DisplayMenu#fireShowEvent()
+   */
   void gotShow();
 }

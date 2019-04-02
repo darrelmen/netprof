@@ -2158,7 +2158,6 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
 
   @Override
   public void gotShow() {
-    // logger.warning("gotShow");
     askServerForExercise(-1);
   }
 

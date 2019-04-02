@@ -53,16 +53,6 @@ public interface ASR {
 
   Collection<String> getKaldiOOV(String fl);
 
-  /**
-   * @param fl
-   * @param transliteration
-   * @return
-   * @see AudioFileHelper#checkLTSOnForeignPhrase(String, String)
-   */
-//  Collection<String> getOOV(String fl, String transliteration);
-
-//  PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
-
   CheckLTS getCheckLTSHelper();
 
   SmallVocabDecoder getSmallVocabDecoder();

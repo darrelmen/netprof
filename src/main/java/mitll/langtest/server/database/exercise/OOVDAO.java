@@ -86,16 +86,16 @@ public class OOVDAO implements IOOVDAO {
     return dao.delete(id) > 0;
   }
 
-  @Override
-  public boolean insert(int userid, String oov, Language language) {
-    Timestamp modified = new Timestamp(System.currentTimeMillis());
-    return dao.insert(new SlickOOV(-1,
-        userid,
-        language.getLanguage(),
-        modified,
-        oov,
-        "")) > 0;
-  }
+//  @Override
+//  public boolean insert(int userid, String oov, Language language) {
+//    Timestamp modified = new Timestamp(System.currentTimeMillis());
+//    return dao.insert(new SlickOOV(-1,
+//        userid,
+//        language.getLanguage(),
+//        modified,
+//        oov,
+//        "")) > 0;
+//  }
 
   @Override
   public boolean update(int id, String equivalent, int byUser) {

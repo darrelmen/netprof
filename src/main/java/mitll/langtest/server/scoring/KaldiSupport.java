@@ -91,7 +91,7 @@ public class KaldiSupport implements IKaldiSupport {
    * @param audioPath
    * @param rawSentence
    * @return
-   * @see #scoreRepeatExercise
+   * @see ASRWebserviceScoring#scoreRepeatExercise
    */
   @Override
   public HydraOutput runKaldi(String audioPath, String rawSentence) {
@@ -189,7 +189,7 @@ public class KaldiSupport implements IKaldiSupport {
    * @return
    * @see #getKaldiOOV
    */
-  public List<String> runOOV(final List<String> tokens) {
+  private List<String> runOOV(final List<String> tokens) {
     List<Boolean> oov = new ArrayList<>();
     try {
       String json = callKaldiOOV(tokens);
@@ -242,14 +242,11 @@ public class KaldiSupport implements IKaldiSupport {
       HydraOutput.STATUS_CODES status = getStatus(parse);
 
       if (status == SUCCESS) {
-        //JsonArray asJsonArray = parse.getAsJsonArray(NORM_TRANSCRIPT);
         parse.getAsJsonArray(NORM_TRANSCRIPT).forEach(jsonElement -> tokens.add(jsonElement.getAsString()));
         if (tokens.isEmpty()) {
           logger.info("runNorm : kaldi tokens were " + tokens + " for " + sentence);
         }
       } else if (status == TEXT_NORM_FAILED) {
-        // JsonArray asJsonArray = parse.getAsJsonArray(INVALID_CHAR_INDS);
-        // List<IPair> pairs = getInvalidCharRanges(parse);
         logger.info("runNorm " + sentence);
         getInvalidCharRanges(parse)
             .forEach(pair -> {
@@ -278,15 +275,54 @@ public class KaldiSupport implements IKaldiSupport {
   @NotNull
   private List<IPair> getInvalidCharRanges(JsonObject parse) {
     List<IPair> pairs = new ArrayList<>();
-    parse.getAsJsonArray(INVALID_CHAR_INDS).forEach(jsonElement -> {
-      pairs.add(new IPair(jsonElement.getAsJsonArray().get(0).getAsInt(),
-          jsonElement.getAsJsonArray().get(1).getAsInt()));
-      //  jsonElement.getAsJsonArray().forEach(jsonElement1 -> jsonElement1.getAsInt());
-    });
+
+    parse
+        .getAsJsonArray(INVALID_CHAR_INDS)
+        .forEach(jsonElement -> {
+          JsonArray asJsonArray = jsonElement.getAsJsonArray();
+          pairs.add(new IPair(asJsonArray.get(0).getAsInt(), asJsonArray.get(1).getAsInt()));
+        });
+
+    pairs.sort(IPair::compareTo);
+
+    ListIterator<IPair> iterator = pairs.listIterator();
+
+    boolean gotToEnd = false;
+
+    while (!gotToEnd) {
+      while (iterator.hasNext()) {
+        IPair current = iterator.next();
+        if (iterator.hasNext()) {
+          IPair next = iterator.next();
+          logger.info("getInvalidCharRanges Check " + current + " against " + next + " for overlap.");
+          if (next.contains(current)) {
+            IPair previous = iterator.previous();
+            if (iterator.hasPrevious()) {
+              previous = iterator.previous();
+            }
+            logger.info("getInvalidCharRanges : remove   " + previous + " since overlapped by " + next);
+            logger.info("getInvalidCharRanges : list before " + pairs);
+            iterator.remove();
+            logger.info("getInvalidCharRanges : list after  " + pairs);
+            break;
+          }
+          else {
+            iterator.previous();
+          }
+        }
+      }
+      gotToEnd = !iterator.hasNext();
+      if (!gotToEnd) {
+        logger.info("getInvalidCharRanges examine " + pairs + " again.");
+      }
+    }
+
+    logger.info("getInvalidCharRanges : list finally " +pairs);
+
     return pairs;
   }
 
-  private static class IPair {
+  private static class IPair implements Comparable<IPair> {
     private int from;
     private int to;
 
@@ -303,17 +339,19 @@ public class KaldiSupport implements IKaldiSupport {
       return to;
     }
 
+    boolean contains(IPair other) {
+      return from <= other.from && to >= other.to;
+    }
+
     public String toString() {
       return "[" + from + " - " + to + "]";
     }
 
-//    public void setFrom(int from) {
-//      this.from = from;
-//    }
-//
-//    public void setTo(int to) {
-//      this.to = to;
-//    }
+    @Override
+    public int compareTo(@NotNull IPair o) {
+      int compare = Integer.compare(getFrom(), o.getFrom());
+      return compare == 0 ? Integer.compare(getTo(), o.getTo()) : compare;
+    }
   }
 
 

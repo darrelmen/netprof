@@ -43,6 +43,7 @@ import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -206,7 +207,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @return PretestScore object
    * @see AudioFileHelper#getASRScoreForAudio
    */
-  public PretestScore scoreRepeat(String testAudioDir,
+  /*public PretestScore scoreRepeat(String testAudioDir,
                                   String testAudioFileNoSuffix,
                                   String sentence,
                                   Collection<String> lmSentences,
@@ -223,14 +224,17 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
                                   PrecalcScores precalcScores,
                                   boolean usePhoneToDisplay,
                                   boolean kaldi) {
-    return scoreRepeatExercise(testAudioDir, testAudioFileNoSuffix,
-        sentence, lmSentences, transliteration,
+    return scoreRepeatExercise(testAudioDir,
+        testAudioFileNoSuffix,
+        sentence,
+        lmSentences,
+        transliteration,
         imageOutDir,
         imageOptions,
         decode,
 
         useCache, prefix, precalcScores, usePhoneToDisplay, kaldi);
-  }
+  }*/
 
   /**
    * Use hydra to do scoring<br></br>
@@ -259,9 +263,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @param usePhoneToDisplay
    * @param useKaldi              true if using the new kaldi protocol!
    * @return score info coming back from alignment/reco
-   * @see #scoreRepeat
+   * @see AudioFileHelper#getASRScoreForAudio(int, String, String, Collection, String, ImageOptions, String, PrecalcScores, DecoderOptions, boolean)
    */
-  private PretestScore scoreRepeatExercise(String testAudioDir,
+  @Override
+  public PretestScore scoreRepeat(String testAudioDir,
                                            String testAudioFileNoSuffix,
                                            String sentence,
                                            Collection<String> lmSentences, // TODO make two params, transcript and lm (null if no slf)
@@ -955,22 +960,15 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     // logger.info("getTokens for " +transcript);
     List<WordAndProns> possibleProns = new ArrayList<>();
 
-    String cleaned = getTranscriptToPost(transcript, false);
-
     // generate dictionary
-    getHydraDict(cleaned, transliteration, possibleProns);
+    getHydraDict(getTranscriptToPost(transcript, false), transliteration, possibleProns);
     List<String> collect = possibleProns.stream().map(WordAndProns::getWord).collect(Collectors.toList());
     // logger.info("getTokens for " +transcript + " = " +collect);
     return collect;
   }
 
   public String getNormTranscript(String transcript, String transliteration) {
-    List<WordAndProns> possibleProns = new ArrayList<>();
-
-    String cleaned = getTranscriptToPost(transcript, false);
-
-    // generate dictionary
-    return getHydraDict(cleaned, transliteration, possibleProns).getNormTranscript();
+    return getHydraDict(getTranscriptToPost(transcript, false), transliteration, new ArrayList<>()).getNormTranscript();
   }
 
   /**

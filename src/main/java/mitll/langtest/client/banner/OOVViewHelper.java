@@ -69,11 +69,13 @@ import java.util.stream.Collectors;
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
 public class OOVViewHelper extends TableAndPager implements ContentView {
-  public static final INavigation.VIEWS LEARN = INavigation.VIEWS.LEARN;
-  public static final String CHECKING_OOV = "Checking OOV...";
   private final Logger logger = Logger.getLogger("OOVViewHelper");
 
-  public static final String OOV = "Not In Dict.";
+  private static final int CHUNK = 300;
+  private static final INavigation.VIEWS LEARN = INavigation.VIEWS.LEARN;
+  private static final String CHECKING_OOV = "Checking OOV...";
+
+  private static final String OOV = "Not In Dict.";
   private static final String ITEMS_WITH_MISSING_WORDS = "Items with Missing Words";
   private static final String ITEMS_WITH_MISSING_WORDS1 = "Items with missing words";
 
@@ -100,7 +102,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
   private OOVInfo oovInfo;
 
   private int num = 0;
-  private int offset = 100;
+  private int offset = CHUNK;
 
   OOVViewHelper(ExerciseController controller) {
     this.controller = controller;
@@ -110,22 +112,10 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
   public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
     listContent.clear();
 
-    DivWidget outer = new DivWidget() {
-//      @Override
-//      protected void onLoad() {
-//        super.onLoad();
-//        //   grabFocus();
-//      }
+    num = 0;
+    offset = CHUNK;
 
-//      @Override
-//      protected void onUnload() {
-//        super.onUnload();
-//
-//
-//        updateOOV();
-//      }
-    };
-
+    DivWidget outer = new DivWidget();
     listContent.add(outer);
     addOOVList(outer);
   }
@@ -148,7 +138,6 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     }
   }
 
-  Timer currentTimer;
   /**
    * Initial query
    *
@@ -164,22 +153,22 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
 
   private void waitAndThenCheck(DivWidget top) {
     if (controller.getProjectStartupInfo() == null) {
-      currentTimer = new Timer() {
+      Timer currentTimer = new Timer() {
         @Override
         public void run() {
 //          logger.info("loadNextOnTimer ----> at " + System.currentTimeMillis() + "  firing on " + currentTimer);
-          //loadNext();
+
           if (controller.getProjectStartupInfo() == null) {
+            logger.info("Wait for project startup...");
             waitAndThenCheck(top);
-          }
-          else {
+          } else {
+            logger.info("checking for oov.");
             checkOOVRepeatedly(top, controller.getProjectID());
           }
         }
       };
       currentTimer.schedule(1000);
-    }
-    else {
+    } else {
       checkOOVRepeatedly(top, controller.getProjectID());
     }
   }
@@ -219,9 +208,9 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
   }
 
   /**
-   * @see #addOOVList(DivWidget)
    * @param top
    * @param projectID
+   * @see #addOOVList(DivWidget)
    */
   private void checkOOVRepeatedly(DivWidget top, int projectID) {
     controller.getAudioService().checkOOV(projectID, num, offset, new AsyncCallback<OOVInfo>() {
@@ -786,10 +775,10 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     }
   }
 
-  @NotNull
-  private List<ClientExercise> getMatches(String oov, Set<ClientExercise> unsafe) {
-    return unsafe.stream().filter(ex -> ex.getForeignLanguage().contains(oov)).collect(Collectors.toList());
-  }
+//  @NotNull
+//  private List<ClientExercise> getMatches(String oov, Set<ClientExercise> unsafe) {
+//    return unsafe.stream().filter(ex -> ex.getForeignLanguage().contains(oov)).collect(Collectors.toList());
+//  }
 
   private static class Wrapper implements HasID {
     int id;
@@ -798,7 +787,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     public Wrapper() {
     }
 
-    public Wrapper(int id, String value) {
+    Wrapper(int id, String value) {
       this.id = id;
       this.value = value;
     }
@@ -813,7 +802,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
       return Integer.compare(getID(), o.getID());
     }
 
-    public String getValue() {
+    String getValue() {
       return value;
     }
 

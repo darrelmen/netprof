@@ -37,11 +37,12 @@ import mitll.npdata.dao.SlickPendingUser;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public interface IOOVDAO extends IDAO {
   void insertBulk(Collection<OOV> oovs, int userid, Language language);
 
-  boolean insert(int userid, String oov, Language language);
+//  boolean insert(int userid, String oov, Language language);
 
   /**
    * @see
@@ -50,9 +51,19 @@ public interface IOOVDAO extends IDAO {
 
   boolean delete(int id);
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#removeStaleOOV
+   * @param language
+   * @return
+   */
   List<OOV> forLanguage(Language language);
 
   Map<String, List<OOV>> getOOVToEquivalents(Language language);
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#getOOVToAdd
+   * @param language
+   * @return
+   */
   Map<String, List<OOV>> getOOV(Language language);
 }
