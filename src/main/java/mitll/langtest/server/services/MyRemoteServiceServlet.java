@@ -38,7 +38,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
@@ -63,7 +63,7 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.server.database.exercise.Project.MANDARIN;
+import static mitll.langtest.server.database.project.Project.MANDARIN;
 
 @SuppressWarnings("serial")
 public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implements LogAndNotify {

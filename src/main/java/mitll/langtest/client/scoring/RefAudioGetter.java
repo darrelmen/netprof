@@ -37,7 +37,7 @@ import java.util.Collection;
  * Created by go22670 on 5/3/17.
  */
 public interface RefAudioGetter {
-  void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices);
+  void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices);
 
   void getRefAudio(RefAudioListener listener);
 

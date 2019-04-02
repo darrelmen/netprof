@@ -30,16 +30,24 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.audio.IEnsureAudioHelper;
 import mitll.langtest.server.database.excel.ExcelExport;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
-import mitll.langtest.server.database.project.IProject;
+import mitll.langtest.server.database.exercise.ExerciseServices;
 import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.exercise.Search;
+import mitll.langtest.server.database.exercise.TripleExercises;
+import mitll.langtest.server.database.project.IProject;
+import mitll.langtest.server.database.project.Project;
+import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.scoring.LTSFactory;
 import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.user.MiniUser;
 import org.apache.commons.io.FileUtils;
@@ -79,6 +87,55 @@ public class AudioExport {
   public AudioExport(ServerProperties props, ServletContext servletContext) {
     this.props = props;
     this.servletContext = servletContext;
+  }
+
+  public void writeZip(OutputStream out,
+                       Map<String, Collection<String>> typeToSection,
+                       int projectid,
+                       AudioExportOptions options,
+                       IEnsureAudioHelper ensureAudioHelper,
+                       ExerciseServices exerciseServices,
+                       ProjectServices projectServices,
+                       DAOContainer daoContainer) throws Exception {
+    Project project = projectServices.getProject(projectid);
+    ISection<CommonExercise> sectionHelper = project.getSectionHelper();
+    Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
+        exerciseServices.getExercises(projectid, false) :
+        sectionHelper.getExercisesForSelectionState(typeToSection);
+
+    if (!options.getSearch().isEmpty()) {
+      TripleExercises<CommonExercise> exercisesForSearch = new Search<>(projectServices)
+          .getExercisesForSearch(
+              options.getSearch(),
+              exercisesForSelectionState, !options.isUserList() && typeToSection.isEmpty(), projectid, true);
+      exercisesForSelectionState = exercisesForSearch.getByExercise();
+    }
+
+    // Project project = getProject(projectid);
+
+    String language = project.getLanguage();// getLanguage(project);
+
+//    if (!typeToSection.isEmpty()) {
+    logger.info("writeZip for project " + projectid +
+        "\n\tensure audio for " + exercisesForSelectionState.size() +
+        "\n\texercises for " + language +
+        "\n\tselection " + typeToSection);
+
+    if (options.getIncludeAudio()) {
+      Language languageEnum = project.getLanguageEnum();
+      daoContainer.getAudioDAO().attachAudioToExercises(exercisesForSelectionState, languageEnum, projectid);
+      ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, languageEnum);
+    }
+
+    //new AudioExport(getServerProps(), pathHelper.getContext())
+    writeZip(out,
+        typeToSection,
+        sectionHelper,
+        exercisesForSelectionState,
+        language,
+        false,
+        options,
+        project.isEnglish());
   }
 
   /**

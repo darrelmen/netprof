@@ -31,7 +31,7 @@ package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.shared.project.ProjectStatus;

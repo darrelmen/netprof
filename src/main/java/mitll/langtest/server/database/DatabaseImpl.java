@@ -1595,7 +1595,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @throws Exception
    * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
    */
-  public void writeZip(OutputStream out,
+/*  public void writeZip(OutputStream out,
                        Map<String, Collection<String>> typeToSection,
                        int projectid,
                        AudioExportOptions options,
@@ -1637,7 +1637,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
             false,
             options,
             project.isEnglish());
-  }
+  }*/
 
   @Override
   public String getLanguage(CommonExercise ex) {

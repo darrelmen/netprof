@@ -32,7 +32,7 @@ package mitll.langtest.server.services;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.*;

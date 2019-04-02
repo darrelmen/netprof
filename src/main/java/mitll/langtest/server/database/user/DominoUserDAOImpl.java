@@ -50,7 +50,7 @@ import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.BaseAudioDAO;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
@@ -92,7 +92,7 @@ import static mitll.hlt.domino.server.ServerInitializationManager.*;
 import static mitll.hlt.domino.server.user.MongoUserServiceDelegate.USERS_C;
 import static mitll.hlt.domino.server.util.ServerProperties.CACHE_ENABLED_PROP;
 import static mitll.hlt.domino.server.util.ServerProperties.EVT_URL_BASE_MAP_PROP;
-import static mitll.langtest.server.database.exercise.Project.MANDARIN;
+import static mitll.langtest.server.database.project.Project.MANDARIN;
 import static mitll.langtest.shared.user.Kind.*;
 
 /**

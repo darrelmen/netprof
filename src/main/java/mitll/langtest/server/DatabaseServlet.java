@@ -32,7 +32,7 @@ package mitll.langtest.server;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.audio.IEnsureAudioHelper;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
 import org.apache.logging.log4j.LogManager;

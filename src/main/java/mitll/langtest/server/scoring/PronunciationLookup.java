@@ -31,7 +31,7 @@ package mitll.langtest.server.scoring;
 
 
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.LTS;

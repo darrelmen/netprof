@@ -27,61 +27,9 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.server.database.exercise;
+package mitll.langtest.client.scoring;
 
-import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.project.Project;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasUnitChapter;
-
-import java.util.List;
-import java.util.Set;
-
-public interface SimpleExerciseDAO<T extends CommonShell & HasUnitChapter> {
-  /**
-   * @return
-   * @see DatabaseImpl#getExercise
-   * @see DatabaseImpl#makeDAO
-   * @see Project#getRawExercises
-   */
-  List<T> getRawExercises();
-
-  /**
-   * @param id
-   * @return
-   * @see DatabaseImpl#getExercise
-   */
-  T getExercise(int id);
-
-  int getNumExercises();
-
-  ISection<T> getSectionHelper();
-
-  /**
-   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject(Project, boolean, boolean)
-   */
-  void reload();
-
-  /**
-   * ONLY FROM excel
-   * @see ExcelImport#readFromSheet
-   * @return
-   */
-  List<String> getTypeOrder();
-
-  /**
-   * @see DatabaseImpl#getIDs
-   * @return
-   */
-  Set<Integer> getIDs();
-
-  /**
-   * @see Project#isConfigured
-   * @return
-   */
-  boolean isConfigured();
-
-  void addUserExercise(CommonExercise commonExercise);
-
-}
+/**
+ * Created by go22670 on 5/8/17.
+ */
+public enum EnglishDisplayChoices { SHOW, HIDE}

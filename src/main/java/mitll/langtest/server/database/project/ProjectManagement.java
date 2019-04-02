@@ -85,7 +85,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.Thread.sleep;
 import static mitll.hlt.domino.server.ServerInitializationManager.MONGO_ATT_NAME;
-import static mitll.langtest.server.database.exercise.Project.MANDARIN;
+import static mitll.langtest.server.database.project.Project.MANDARIN;
 
 public class ProjectManagement implements IProjectManagement {
   private static final Logger logger = LogManager.getLogger(ProjectManagement.class);

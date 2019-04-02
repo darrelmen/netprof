@@ -204,7 +204,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
    * @param e
    * @return
    */
-  private InlineLabel getLabel(T e) {
+  private InlineLabel getLabel(Details e) {
     String unitChapterLabel = getUnitChapterLabel(e.getUnitToValue());
     if (unitChapterLabel.length() > MAXLEN) unitChapterLabel = unitChapterLabel.substring(0, MAXLEN) + "...";
     InlineLabel inlineLabel = new InlineLabel(unitChapterLabel);

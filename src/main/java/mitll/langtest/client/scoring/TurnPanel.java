@@ -126,7 +126,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
 
   /**
    * @param wrapper
-   * @see DialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices)
+   * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
   protected void styleMe(DivWidget wrapper) {
     this.bubble = wrapper;

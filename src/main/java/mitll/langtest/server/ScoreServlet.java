@@ -32,7 +32,7 @@ package mitll.langtest.server;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import mitll.langtest.server.database.DAOContainer;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.report.ReportingServices;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.json.ProjectExport;

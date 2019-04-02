@@ -32,7 +32,7 @@ package mitll.langtest.server.database.phone;
 import com.google.gson.JsonObject;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseServices;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.result.ResultDAO;
 import mitll.langtest.server.database.word.WordDAO;
 import mitll.langtest.shared.analysis.*;

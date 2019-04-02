@@ -33,7 +33,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.dialog.*;
 import mitll.npdata.dao.*;
 import mitll.npdata.dao.dialog.DialogSessionDAOWrapper;

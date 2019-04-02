@@ -78,7 +78,6 @@ public class TripleExercises<T extends CommonExercise> {
     this.byID = byID;
   }
 
-
   public boolean isEmpty() {
     return byExercise.isEmpty() && byContext.isEmpty() && byID.isEmpty();
   }

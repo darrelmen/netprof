@@ -47,12 +47,12 @@ import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.RefAudioGetter;
 import mitll.langtest.client.scoring.ScoreProgressBar;
@@ -1865,6 +1865,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     boolean showALTFL = factory.getALTFLChoice();
 
     PhonesChoices phoneChoices = factory.getPhoneChoices();
+    EnglishDisplayChoices englishDisplayChoices = factory.getEnglishChoices();
     for (U exercise : result) {
       if (isStale(reqID)) {
         if (DEBUG_STALE) {
@@ -1880,7 +1881,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
           getters.add(refAudioGetter);
           refAudioGetter.setReq(getCurrentExerciseReq());
           //   long then2 = System.currentTimeMillis();
-          refAudioGetter.addWidgets(showFL, showALTFL, phoneChoices);
+          refAudioGetter.addWidgets(showFL, showALTFL, phoneChoices, englishDisplayChoices);
           // long now = System.currentTimeMillis();
           //     logger.info("makeExercisePanels took " +(now-then2) + " millis to make panel for " + exercise.getID());
         }

@@ -29,9 +29,9 @@
 
 package mitll.langtest.server.database.exercise;
 
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.scoring.IPronunciationLookup;
-import mitll.langtest.server.services.ListServiceImpl;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;

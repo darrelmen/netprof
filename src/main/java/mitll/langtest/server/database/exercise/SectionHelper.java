@@ -31,6 +31,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.*;
 import org.apache.logging.log4j.LogManager;

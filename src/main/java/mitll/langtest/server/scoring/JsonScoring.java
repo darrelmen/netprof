@@ -38,7 +38,7 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.ScoreToJSON;
 import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;

@@ -32,7 +32,7 @@ package mitll.langtest.server.database.analysis;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.audio.NativeAudioResult;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.result.SlickResultDAO;

@@ -48,7 +48,7 @@ import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserDialog;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.langtest.shared.scoring.RecalcResponses;

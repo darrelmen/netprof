@@ -34,7 +34,7 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.IReport;
 import mitll.langtest.server.database.ReportStats;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.mail.MailSupport;

@@ -36,7 +36,7 @@ import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.BulkImport;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.*;

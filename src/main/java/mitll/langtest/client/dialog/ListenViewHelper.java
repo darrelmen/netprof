@@ -51,6 +51,7 @@ import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.RefAudioGetter;
 import mitll.langtest.client.scoring.TurnPanel;
@@ -677,7 +678,7 @@ public class ListenViewHelper<T extends TurnPanel>
   @NotNull
   T getTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
     T turn = reallyGetTurnPanel(clientExercise, columns);
-    turn.addWidgets(true, false, PhonesChoices.HIDE);
+    turn.addWidgets(true, false, PhonesChoices.HIDE, EnglishDisplayChoices.SHOW);
     turn.addPlayListener(this);
     turn.addDomHandler(event -> gotTurnClick(turn), ClickEvent.getType());
     return turn;

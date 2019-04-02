@@ -32,7 +32,7 @@ package mitll.langtest.server.domino;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.exercise.ExerciseServices;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
@@ -52,7 +52,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.server.database.exercise.Project.MANDARIN;
+import static mitll.langtest.server.database.project.Project.MANDARIN;
 import static mitll.langtest.server.database.project.ProjectManagement.MODIFIED;
 import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS;
 import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.*;

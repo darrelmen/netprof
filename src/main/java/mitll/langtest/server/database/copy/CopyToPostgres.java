@@ -38,7 +38,7 @@ import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.dialog.InterpreterReader;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.phone.Phone;
 import mitll.langtest.server.database.phone.PhoneDAO;
 import mitll.langtest.server.database.phone.RecordWordAndPhone;
@@ -83,7 +83,7 @@ import static java.lang.Thread.sleep;
 import static mitll.langtest.server.ServerProperties.DEFAULT_NETPROF_AUDIO_DIR;
 import static mitll.langtest.server.database.copy.CopyToPostgres.ACTION.*;
 import static mitll.langtest.server.database.copy.CopyToPostgres.OPTIONS.*;
-import static mitll.langtest.server.database.exercise.Project.MANDARIN;
+import static mitll.langtest.server.database.project.Project.MANDARIN;
 
 /**
  * Take an old netprof 1 website (excel spreadsheet and h2.db file) and copy its info

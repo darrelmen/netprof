@@ -36,7 +36,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.server.database.excel.UserPerfToExcel;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
@@ -350,15 +350,11 @@ public class DownloadServlet extends DatabaseServlet {
                              int projid) {
     //logger.debug("writeAudioZip : request " + projid + " " + language + " query " + queryString);
     String[] split1 = queryString.split(REGEXAMPERSAND);
-    Project project = db.getProject(projid);
-    String unitChapter = getUnitAndChapter(split1);
-
-    Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(unitChapter);
-    AudioExportOptions audioExportOptions =
-        getAudioExportOptions(split1);
+    Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(getUnitAndChapter(split1));
+    AudioExportOptions audioExportOptions = getAudioExportOptions(split1);
 
     {
-      String zipFileName = getZipFileName(db, typeToSection, projid, project.getLanguageEnum().toDisplay(), audioExportOptions.getInfo());
+      String zipFileName = getZipFileName(db, typeToSection, projid, db.getProject(projid).getLanguageEnum().toDisplay(), audioExportOptions.getInfo());
       //logger.info("writeAudioZip zip file name " + zipFileName);
       setHeader(response, zipFileName);
     }
@@ -423,7 +419,20 @@ public class DownloadServlet extends DatabaseServlet {
                         int projectid,
                         AudioExportOptions options) {
     try {
-      getDatabase().writeZip(response.getOutputStream(), typeToSection, projectid, options, ensureAudioHelper);
+      Project project = db.getProject(projectid);
+
+      DatabaseImpl database = getDatabase();
+
+      new AudioExport(db.getServerProps(), project.getPathHelper().getContext())
+          .writeZip(response.getOutputStream(),
+              typeToSection,
+              projectid,
+              options,
+              ensureAudioHelper,
+              database,
+              database,
+              database);
+
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
@@ -497,7 +506,8 @@ public class DownloadServlet extends DatabaseServlet {
 
   private String getZipFileName(DatabaseImpl db,
                                 Map<String, Collection<String>> typeToSection,
-                                int projectid, String language,
+                                int projectid,
+                                String language,
 
                                 String info) {
     String name = getBaseName(db, typeToSection, projectid, language, info);

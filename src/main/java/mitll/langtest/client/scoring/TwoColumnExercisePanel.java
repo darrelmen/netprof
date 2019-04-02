@@ -31,6 +31,11 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.MouseOutEvent;
+import com.google.gwt.event.dom.client.MouseOutHandler;
+import com.google.gwt.event.dom.client.MouseOverEvent;
+import com.google.gwt.event.dom.client.MouseOverHandler;
+import com.google.gwt.event.shared.HandlerRegistration;
 import com.google.gwt.user.client.ui.InlineLabel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
@@ -79,7 +84,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
   private final CommentAnnotator annotationHelper;
   /**
-   * @see #addWidgets(boolean, boolean, PhonesChoices)
+   * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
   private static final boolean showInitially = false;
   private UnitChapterItemHelper<ClientExercise> commonExerciseUnitChapterItemHelper;
@@ -104,9 +109,10 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private boolean showFL;
   private boolean showALTFL;
   /**
-   *
+   * @see #shouldShowPhones
    */
   private PhonesChoices phonesChoices;
+  EnglishDisplayChoices englishDisplayChoices;
 
   private static final boolean DEBUG = false;
 
@@ -158,14 +164,17 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * @param showFL
    * @param showALTFL
    * @param phonesChoices
+   * @param englishDisplayChoices
    * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels
    */
   @Override
-  public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
+  public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
     this.showFL = showFL;
     this.showALTFL = showALTFL;
 
     this.phonesChoices = phonesChoices;
+    this.englishDisplayChoices = englishDisplayChoices;
+    // logger.info("eng " +englishDisplayChoices);
 
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
 
@@ -216,7 +225,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * Row 5: context sentence fl - eng
    *
    * @return
-   * @see #addWidgets(boolean, boolean, PhonesChoices)
+   * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getQuestionContent
    */
   private Widget getItemContent(final T e) {
@@ -224,8 +233,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     Panel card = new DivWidget();
     card.setWidth("100%");
-
-    String english = isEnglish() && isMeaningValid(e) ? e.getMeaning() : e.getEnglish();
 
     //  logger.info("For "  +e.getID() + " meaning " + e.getMeaning() + " " + e.getEnglish() + " " + english);
     SimpleRecordAudioPanel<T> recordPanel =
@@ -237,6 +244,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       rowWidget.getElement().setId("firstRow");
       card.add(rowWidget);
 
+      String english = getEnglishToShow(e);
       boolean hasEnglish = isValid(english);
       {
         DivWidget flContainer = makeFirstRow(e, recordPanel);
@@ -265,6 +273,10 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     return card;
   }
 
+  private String getEnglishToShow(T e) {
+    return isEnglish() && isMeaningValid(e) ? e.getMeaning() : e.getEnglish();
+  }
+
   @NotNull
   private DivWidget getScoringRow(Widget recordPanel) {
     DivWidget rowWidget = getRowWidget();
@@ -273,6 +285,16 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     return rowWidget;
   }
 
+  private boolean showingEnglish = true;
+  private boolean showingEnglishContext = true;
+
+  /**
+   * @param e
+   * @param english
+   * @param hasEnglish
+   * @return
+   * @see #getItemContent
+   */
   @NotNull
   private DivWidget getUnitChapterAndDropdown(T e, String english, boolean hasEnglish) {
     DivWidget lr = getHorizDiv();
@@ -281,7 +303,38 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     if (hasEnglish) {
       lr.getElement().getStyle().setProperty("minWidth", "345px");
-      lr.add(getEnglishWidget(e, english));
+
+//      Widget englishWidget = getEnglishWidget(e, english, englishDisplayChoices == EnglishDisplayChoices.HIDE);
+
+      DivWidget englishContainer = new DivWidget();
+
+      boolean showEng = englishDisplayChoices == EnglishDisplayChoices.SHOW;
+      String toUse = showEng ? english : replaceWithDashes(english);
+
+      showingEnglish = showEng;
+      englishContainer.add(getEnglishWidget(e, toUse));
+      lr.add(englishContainer);
+
+      if (!showEng) {
+        addMouseOverHandler(englishContainer, mouseOverEvent -> {
+          if (!showingEnglish) {
+            showingEnglish = true;
+
+//            logger.info("mouse over...");
+            englishContainer.clear();
+            englishContainer.add(getEnglishWidget(e, english));
+          }
+        });
+        addMouseOutHandler(englishContainer, mouseOutEvent -> {
+          if (showingEnglish) {
+            showingEnglish = false;
+
+  //          logger.info("mouse out...");
+            englishContainer.clear();
+            englishContainer.add(getEnglishWidget(e, toUse));
+          }
+        });
+      }
     }
 
     lr.add(getItemWidget(e));
@@ -297,7 +350,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private boolean isEnglish() {
     return controller.getLanguageInfo() == Language.ENGLISH;
   }
-
 
   /**
    * Left to right, in the first row, we have the record button, the play audio widget, and the fl text
@@ -511,13 +563,49 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
           context.setWidth(LEFT_WIDTH);
         }
 
-        Widget contextTransWidget = addContextTranslation(contextEx, contextTranslation, annotationHelper);
+        boolean showEng = englishDisplayChoices == EnglishDisplayChoices.SHOW;
+        String toUse = showEng ? contextTranslation : replaceWithDashes(contextTranslation);
+
+        Widget contextTransWidget = addContextTranslation(contextEx, toUse, annotationHelper);
+
 
         if (contextTransWidget != null) {
+
+
+          DivWidget englishContainer = new DivWidget();
+
           contextTransWidget.addStyleName("rightsidecolor");
           contextTransWidget.addStyleName("leftFiveMargin");
-          contextTransWidget.setWidth(RIGHT_WIDTH);
-          rowWidget.add(contextTransWidget);
+
+          rowWidget.add(englishContainer);
+
+          englishContainer.add(contextTransWidget);
+          englishContainer.setWidth(RIGHT_WIDTH);
+
+          showingEnglishContext = showEng;
+
+          if (!showEng) {
+            addMouseOverHandler(englishContainer, mouseOverEvent -> {
+              if (!showingEnglishContext) {
+                showingEnglishContext = true;
+
+//            logger.info("mouse over...");
+                englishContainer.clear();
+                englishContainer.add(addContextTranslation(contextEx, contextTranslation, annotationHelper));
+              }
+            });
+            addMouseOutHandler(englishContainer, mouseOutEvent -> {
+              if (showingEnglishContext) {
+                showingEnglishContext = false;
+
+                //          logger.info("mouse out...");
+                englishContainer.clear();
+                englishContainer.add(addContextTranslation(contextEx, toUse, annotationHelper));
+              }
+            });
+          }
+
+          //rowWidget.add(contextTransWidget);
         }
       }
     }
@@ -560,15 +648,38 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     return itemContainer;
   }
 
+
   @NotNull
   private Widget getEnglishWidget(T e, String english) {
+//    if (replaceWithDashes) {
+//      english = replaceWithDashes(english);
+//      logger.info("now " + english);
+//    }
+
     Widget englishWidget = getEntry(e, QCNPFExercise.ENGLISH, english,
         FieldType.EN,
         showInitially, new ArrayList<>(), true, annotationHelper, false);
+
+
     englishWidget.addStyleName("rightsidecolor");
     englishWidget.getElement().setId("englishWidget");
     englishWidget.addStyleName(FLOAT_LEFT);
     return englishWidget;
+  }
+
+  @NotNull
+  private String replaceWithDashes(String english) {
+    english = english.replaceAll("[^\\s]", "-");
+    return english;
+  }
+
+
+  private HandlerRegistration addMouseOutHandler(Widget divWidget, MouseOutHandler handler) {
+    return divWidget.addDomHandler(handler, MouseOutEvent.getType());
+  }
+
+  private HandlerRegistration addMouseOverHandler(Widget divWidget, MouseOverHandler handler) {
+    return divWidget.addDomHandler(handler, MouseOverEvent.getType());
   }
 
   private void addField(Panel grid, Widget widget) {

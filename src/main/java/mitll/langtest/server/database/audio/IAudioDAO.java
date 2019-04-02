@@ -32,7 +32,7 @@ package mitll.langtest.server.database.audio;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.UserTimeBase;

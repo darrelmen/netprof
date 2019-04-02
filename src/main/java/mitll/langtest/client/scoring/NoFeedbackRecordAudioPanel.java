@@ -61,7 +61,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   /**
    * @param exercise
    * @param controller
-   * @see RecordDialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices)
+   * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
   NoFeedbackRecordAudioPanel(T exercise, ExerciseController controller, SessionManager sessionManager) {
     this.exercise = exercise;

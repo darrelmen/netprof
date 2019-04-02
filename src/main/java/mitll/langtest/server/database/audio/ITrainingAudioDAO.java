@@ -30,9 +30,8 @@
 package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.domino.AudioCopy;
-import mitll.npdata.dao.SlickAudio;
 import mitll.npdata.dao.SlickTrainingAudio;
 
 import java.util.Collection;

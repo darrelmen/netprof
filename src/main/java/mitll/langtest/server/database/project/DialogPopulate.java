@@ -38,7 +38,6 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.dialog.*;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.dialog.Dialog;

@@ -388,9 +388,10 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @param showFL
    * @param showALTFL
    * @param phonesChoices
+   * @param englishDisplayChoices
    */
   @Override
-  public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
+  public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
 //    boolean isPressAndHold = rehearseView instanceof PerformViewHelper;
     // logger.info("is perform " + isPressAndHold);
     NoFeedbackRecordAudioPanel<ClientExercise> recordPanel =
@@ -432,7 +433,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     }
 
     add(flContainer);
-    super.addWidgets(showFL, showALTFL, phonesChoices);
+    super.addWidgets(showFL, showALTFL, phonesChoices, englishDisplayChoices);
 
     if (columns == MIDDLE) {
       flClickableRow.addStyleName("inlineFlex");
@@ -571,7 +572,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
   /**
    * @return
-   * @see #addWidgets(boolean, boolean, PhonesChoices)
+   * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
   @NotNull
   private DivWidget getHorizDiv() {

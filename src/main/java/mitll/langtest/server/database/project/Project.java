@@ -27,7 +27,7 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.server.database.exercise;
+package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
@@ -37,7 +37,10 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
-import mitll.langtest.server.database.project.*;
+import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.exercise.IPronunciationLookup;
+import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.json.JsonExport;
@@ -383,11 +386,11 @@ public class Project implements IPronunciationLookup, IProject {
     return fullTrie != null;
   }
 
-  ExerciseTrie<CommonExercise> getFullContextTrie() {
+  public ExerciseTrie<CommonExercise> getFullContextTrie() {
     return fullContextTrie;
   }
 
-  public void stopDecode() {
+  void stopDecode() {
     if (refResultDecoder != null) refResultDecoder.setStopDecode(true);
   }
 

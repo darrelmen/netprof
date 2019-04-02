@@ -31,6 +31,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -412,11 +413,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private List<String> getTypeOrderFromProject() {
     List<String> typeOrder = getBaseTypeOrder();
 
-    logger.info("getTypeOrderFromProject typeOrder " + typeOrder);
-
     Collection<String> attributeTypes = getAttributeTypes();
 
-    logger.info("getTypeOrderFromProject attributeTypes " + attributeTypes);
+    logger.info("getTypeOrderFromProject " +
+        "\n\ttypeOrder      " + typeOrder +
+        "\n\tattributeTypes " + attributeTypes);
 
     if (attributeTypes.contains(SEMESTER.toString())) {
       //  logger.info("found semester ");
@@ -434,7 +435,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     logger.info("getTypeOrderFromProject sortedTypes " + sortedTypes);
 
     Map<String, Facet> nameToFacet = new HashMap<>();
-
 
     for (Facet f : Facet.values()) {
       nameToFacet.put(f.getName(), f);

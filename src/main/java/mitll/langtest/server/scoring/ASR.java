@@ -32,7 +32,7 @@ package mitll.langtest.server.scoring;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
@@ -40,7 +40,6 @@ import java.text.Collator;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface ASR {
   String UNKNOWN_MODEL = "UNKNOWNMODEL";

@@ -31,7 +31,7 @@ package mitll.langtest.server.json;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.npdata.dao.SlickProject;
 
 import java.util.Collection;

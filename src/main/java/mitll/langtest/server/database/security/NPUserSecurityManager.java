@@ -29,8 +29,7 @@
 
 package mitll.langtest.server.database.security;
 
-import mitll.hlt.domino.shared.model.user.UserDescriptor;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.user.ActiveInfo;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -52,7 +51,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.server.services.MyRemoteServiceServlet.X_FORWARDED_FOR;
 

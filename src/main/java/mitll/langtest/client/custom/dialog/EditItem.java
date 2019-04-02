@@ -39,12 +39,12 @@ import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.AlignmentOutput;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -163,7 +163,7 @@ public class EditItem {
             }
           },
               false, () -> "");
-          widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
+          widgets.addWidgets(getFLChoice(), false, getPhoneChoices(), EnglishDisplayChoices.SHOW);
           return widgets;
         } else {
           // logger.info("getExercisePanel got " + exercise.getID() + " " + exercise.getEnglish() + " - " + exercise.getForeignLanguage() + " predef " + exercise.isPredefined());

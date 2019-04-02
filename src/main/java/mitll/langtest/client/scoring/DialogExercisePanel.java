@@ -152,7 +152,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   @Override
-  public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
+  public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
 
     if (projectStartupInfo != null) {
@@ -988,7 +988,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   /**
    * @param e
    * @return
-   * @see #addWidgets(boolean, boolean, PhonesChoices)
+   * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    * @see TwoColumnExercisePanel#makeFirstRow
    */
   @NotNull

@@ -40,7 +40,7 @@ import org.apache.logging.log4j.Logger;
 import java.text.Collator;
 import java.util.*;
 
-import static mitll.langtest.server.database.exercise.Project.MANDARIN;
+import static mitll.langtest.server.database.project.Project.MANDARIN;
 
 public class LTSFactory {
   private static final Logger logger = LogManager.getLogger(LTSFactory.class);
