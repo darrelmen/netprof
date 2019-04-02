@@ -1072,7 +1072,7 @@ public class EasyReportTest extends BaseTest {
     DatabaseImpl db = getAndPopulate();
     int projectid = 7;
     Project project = db.getProject(projectid);
-    project.getAudioFileHelper().checkLTSAndCountPhones(project.getRawExercises());
+    project.getAudioFileHelper().checkForOOV(project.getRawExercises());
 
     try {
       Thread.sleep(20000);
@@ -1086,7 +1086,7 @@ public class EasyReportTest extends BaseTest {
     DatabaseImpl db = getAndPopulate();
     int projectid = 8;
     Project project = db.getProject(projectid);
-    project.getAudioFileHelper().checkLTSAndCountPhones(project.getRawExercises());
+    project.getAudioFileHelper().checkForOOV(project.getRawExercises());
   }
 
   @Test

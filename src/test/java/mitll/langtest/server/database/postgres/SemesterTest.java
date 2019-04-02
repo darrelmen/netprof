@@ -22,6 +22,23 @@ import java.util.List;
 public class SemesterTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(SemesterTest.class);
 
+
+  @Test
+  public void testReplace() {
+    String test = " [(1, 000)]";
+    String kaldiOOV = getKaldiOOV(test);
+    logger.info("got " + kaldiOOV);
+  }
+
+  public String getKaldiOOV(String fl) {
+    String fl1 = fl.replaceAll("[\\(\\)\\/]", "");
+    if (!fl1.equals(fl)) {
+      logger.info("replaced " + fl + " with " + fl1);
+    }
+    return fl1;
+
+  }
+
   @Test
   public void testGerman() {
     DatabaseImpl andPopulate = getDatabase().setInstallPath("", false);
@@ -99,15 +116,14 @@ public class SemesterTest extends BaseTest {
 
     logger.info("now " + s);
 
-    String f="１９９０";
+    String f = "１９９０";
 
     s = textNormalizer.fromFull(f);
 
-    logger.info("was  " +f+
+    logger.info("was  " + f +
         "" +
         "now " + s);
   }
-
 
 
   @Test
@@ -130,7 +146,7 @@ public class SemesterTest extends BaseTest {
 
     logger.info("Safe " + safeToDecode + " " + exerciseByID);
 
-    OOVInfo oovInfo = andPopulate.getProjectManagement().checkOOV(projectid);
+    OOVInfo oovInfo = andPopulate.getProjectManagement().checkOOV(projectid, 0, 100);
 
     logger.info("oovInfo " + oovInfo);
   }
