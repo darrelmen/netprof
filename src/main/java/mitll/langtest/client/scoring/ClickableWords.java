@@ -723,7 +723,7 @@ public class ClickableWords {
     WordBounds wordBounds = factory.findNextWord(html.toLowerCase(), toFind, 0);
 
     if (wordBounds == null) {
-      logger.warning("showSearchMatch can't find " +
+      logger.info("showSearchMatch can't find " +
           "\n\ttoken '" + searchToken + "' " +
           "\n\tin    '" + html + "'");
 

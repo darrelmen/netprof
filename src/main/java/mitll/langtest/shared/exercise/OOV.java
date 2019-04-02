@@ -36,7 +36,7 @@ public class OOV implements HasID {
   private int userid;
   private long modified;
   private String oov;
-  private String equivalent;
+  private String equivalent = "";
   private boolean dirty;
 
   public OOV() {
@@ -82,9 +82,13 @@ public class OOV implements HasID {
     return equivalent;
   }
 
+  /**
+   * @see mitll.langtest.client.banner.OOVViewHelper#gotBlur
+   * @param text
+   */
   public void setEquivalent(String text) {
+    dirty = !text.equals(equivalent);
     this.equivalent = text;
-    dirty = true;
   }
 
   public boolean isDirty() {

@@ -467,12 +467,12 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   @NotNull
   protected AllHighlight getAllHighlight(Collection<IHighlightSegment> flclickables) {
-    boolean addFloatLeft = shouldAddFloatLeft();
-    logger.info("addFloatLeft " + addFloatLeft + " on " + flclickables.size());
+   // boolean addFloatLeft = shouldAddFloatLeft();
+  //  logger.info("addFloatLeft " + addFloatLeft + " on " + flclickables.size());
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("please don't"));
 //    logger.info("logException stack " + exceptionAsString);
 
-    return new AllHighlight(flclickables, addFloatLeft);
+    return new AllHighlight(flclickables, shouldAddFloatLeft());
   }
 
   /**

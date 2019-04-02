@@ -617,13 +617,12 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.dominoContextIndex = dominoContextIndex;
   }
 
-//  @Override
-//  public String getForeignLanguageNorm() {
-//    return foreignLanguageNorm;
-//  }
-
   public String getNormalizedFL() {
     return normalizedFL;
+  }
+
+  public void setNormalizedFL(String normalizedFL) {
+    this.normalizedFL = normalizedFL;
   }
 
   public String toString() {

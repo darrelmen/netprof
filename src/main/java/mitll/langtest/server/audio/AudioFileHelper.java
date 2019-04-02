@@ -279,16 +279,16 @@ public class AudioFileHelper implements AlignDecode {
       List<SlickExerciseNorm> pairs = new ArrayList<>();
       idToNorm.forEach((k, v) -> pairs.add(new SlickExerciseNorm(k, v)));
 
-      //if (!pairs.isEmpty()) {
       logger.info("\ncheckOOV updating " + pairs.size() + " exercises");
-      // }
 
       project.getExerciseDAO().updateNormBulk(pairs);
 
       pairs.forEach(p -> {
         CommonExercise exerciseByID = getExerciseByID(p.id());
-        if (!exerciseByID.getNormalizedFL().equals(p.foreignlanguagenorm())) {
+        String foreignlanguagenorm = p.foreignlanguagenorm();
+        if (!exerciseByID.getNormalizedFL().equals(foreignlanguagenorm)) {
           changed.add(exerciseByID);
+          exerciseByID.getMutable().setNormalizedFL(foreignlanguagenorm);
         }
       });
     }
@@ -307,10 +307,10 @@ public class AudioFileHelper implements AlignDecode {
       logger.info("checkLTSAndCountPhones out of " + exercises.size() + " dict and LTS fails on " + checkInfo.getOovWords());
     }
 
-    if (!changed.isEmpty()) {
-      logger.info("\ncheckOOV " + changed.size() + " exercises changed their normalized form.");
-      project.getExerciseDAO().reload();
-    }
+//    if (!changed.isEmpty()) {
+//      logger.info("\ncheckOOV " + changed.size() + " exercises changed their normalized form.");
+//      project.getExerciseDAO().reload();
+//    }
 
     return checkInfo.setNeedsReload(!changed.isEmpty());
   }
@@ -554,6 +554,9 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
+   * So the set of replaced tokens is all the unique tokens that were replaced.
+   * The oov tokens for this item may have the same OOV token repeated.
+   *
    * @param exercise
    * @param foreignLanguage
    * @param oovToEquivalents
@@ -562,29 +565,44 @@ public class AudioFileHelper implements AlignDecode {
    * @param oovCumulative
    * @return
    */
-  private boolean checkWithKaldi(HasID exercise, String foreignLanguage, Map<String, List<OOV>> oovToEquivalents,
+  private boolean checkWithKaldi(ClientExercise exercise, String foreignLanguage, Map<String, List<OOV>> oovToEquivalents,
 
                                  Map<Integer, String> safeToNorm,
                                  Set<ClientExercise> unsafeHighlighted,
                                  Set<String> oovCumulative) {
+    // run it once
     Collection<String> kaldiOOV = getASRScoring().getKaldiOOV(foreignLanguage);
 
+    Set<String> replaced = new HashSet<>();
+    String normalized = "";
     if (!kaldiOOV.isEmpty()) {  // try again with equivalents
-      Set<String> replaced = new HashSet<>();
-      foreignLanguage = replaceOOVs(oovToEquivalents, foreignLanguage, kaldiOOV, replaced);
-      if (replaced.size() == kaldiOOV.size()) {
-        logger.info("isValidForeignPhrase all oov replaced for " + foreignLanguage);
-        kaldiOOV = getASRScoring().getKaldiOOV(foreignLanguage);
+      normalized = replaceOOVs(oovToEquivalents, foreignLanguage, kaldiOOV, replaced);
+      if (replaced.containsAll(kaldiOOV)) {
+        logger.info("checkWithKaldi : all oov replaced to form " + normalized);
+        // just make sure!
+        kaldiOOV = getASRScoring().getKaldiOOV(normalized);
 
         if (kaldiOOV.isEmpty()) {
-          safeToNorm.put(exercise.getID(), foreignLanguage);
+          safeToNorm.put(exercise.getID(), normalized);
+        }
+      } else {
+        logger.info("checkWithKaldi oov      " + kaldiOOV.size() + " : " + kaldiOOV);
+        if (!replaced.isEmpty()) {
+          logger.info("checkWithKaldi replaced " + replaced.size() + " : " + replaced);
         }
       }
     }
+
     oovCumulative.addAll(kaldiOOV);
     if (!kaldiOOV.isEmpty()) {
-      logger.warn("isValidForeignPhrase found " + kaldiOOV.size() + " oov tokens " + kaldiOOV + " in " + foreignLanguage);
-      unsafeHighlighted.add(getExerciseByID(exercise.getID()));//getHighlighted(foreignLanguage, kaldiOOV));
+      logger.info("checkWithKaldi - remaining OOVs: " +
+          "\n\tfound         " + kaldiOOV.size() + " oov tokens " + kaldiOOV +
+          "\n\treplaced with " + replaced.size() + " tokens " + replaced +
+          "\n\tin   " + foreignLanguage +
+          "\n\tnorm " + normalized
+      );
+
+      unsafeHighlighted.add(exercise);//getHighlighted(foreignLanguage, kaldiOOV));
     }
 
     return kaldiOOV.isEmpty();
@@ -671,11 +689,12 @@ public class AudioFileHelper implements AlignDecode {
 
       if (equivalents != null && !equivalents.isEmpty()) {
         OOV oov1 = equivalents.get(0);
-        String equivalent = oov1.getEquivalent();// + " ";
+        // add space paddding so we're sure to have a separator
+        String equivalent = " " + oov1.getEquivalent() + " ";
         if (!foreignLanguage.contains(oovToUse)) {
 //          logger.info("replaceOOVs couldn't find the token " + oovToUse);
           oovToUse = getSmallVocabDecoder().fromFull(oov);
-          boolean found = foreignLanguage.contains(oovToUse);
+          //boolean found = foreignLanguage.contains(oovToUse);
 //          if (found) {
 //            logger.info("replaceOOVs found with " + oovToUse);
 //          }
@@ -692,11 +711,14 @@ public class AudioFileHelper implements AlignDecode {
         replaced.add(oov);
       }
     }
-   // foreignLanguage = foreignLanguage.replaceAll("\\s++", " ");
+    foreignLanguage = foreignLanguage.replaceAll("\\s++", " ");
 
     logger.info("replaceOOVs " +
-        "\n\treplace   " + orig +
-        "\n\twith norm " + foreignLanguage);
+        "\n\treplace         " + orig +
+        "\n\twith norm       " + foreignLanguage +
+        "\n\toovs     tokens " + oovs +
+        "\n\treplaced tokens " + replaced
+    );
 
     return foreignLanguage;
   }

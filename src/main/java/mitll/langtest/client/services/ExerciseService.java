@@ -33,6 +33,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.OOVInfo;
 
 import java.util.Collection;
 
@@ -71,5 +72,10 @@ public interface ExerciseService<T extends CommonShell & ScoredExercise> extends
    */
   Pair getLatestScoreAudioPath(int userID, int exid, long nearTime) throws DominoSessionException;
 
+  /**
+   * @see mitll.langtest.client.banner.OOVViewHelper#showUnsafeAgain(OOVInfo, int)
+   * @param projid
+   * @throws DominoSessionException
+   */
   void reload(int projid) throws DominoSessionException;
 }

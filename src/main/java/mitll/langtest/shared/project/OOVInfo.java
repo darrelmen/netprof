@@ -33,6 +33,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.OOV;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -54,7 +55,7 @@ public class OOVInfo implements IsSerializable {
     this.oovWords += other.oovWords;
     this.total = other.total;
     this.unsafe.addAll(other.unsafe);
-    this.needsReload = other.needsReload;
+    this.needsReload |= other.needsReload;
   }
 
   /**
@@ -78,11 +79,20 @@ public class OOVInfo implements IsSerializable {
     return oovWords;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkOOV
+   * @param v
+   * @return
+   */
   public OOVInfo setNeedsReload(boolean v) {
     needsReload = v;
     return this;
   }
 
+  /**
+   * @see mitll.langtest.client.banner.OOVViewHelper#showUnsafeAgain(OOVInfo, int)
+   * @return
+   */
   public boolean isNeedsReload() {
     return needsReload;
   }

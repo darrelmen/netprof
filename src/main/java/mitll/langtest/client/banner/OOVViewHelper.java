@@ -132,7 +132,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
 
         @Override
         public void onSuccess(Void result) {
-          logger.info("updateOOV wrote update for " + dirtyItems.size());
+          logger.info("updateOOV wrote update for " + dirtyItems.size() + " dirty items...");
         }
       });
     }
@@ -539,6 +539,8 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     showUnsafe(result);
 
     if (result.isNeedsReload()) {
+      logger.info("OK tell exercise service on netprof instance to reload....");
+
       controller.getExerciseService().reload(projectID, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
