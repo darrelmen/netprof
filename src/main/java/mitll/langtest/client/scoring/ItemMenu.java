@@ -94,17 +94,17 @@ class ItemMenu {
       element.getStyle().setMarginTop(3, Style.Unit.PX);
     }
 
-
-    UserListSupport userListSupport = new UserListSupport(controller);
-    userListSupport.addListOptions(dropdownContainer, exercise.getID());
-
-
     {
-      NavLink share = new NavLink(SHARE_ITEM);
-      dropdownContainer.add(share);
-      share.setHref(userListSupport.getMailToExercise(exercise));
+      UserListSupport userListSupport = new UserListSupport(controller);
+      userListSupport.addListOptions(dropdownContainer, exercise.getID());
+
+      {
+        NavLink share = new NavLink(SHARE_ITEM);
+        dropdownContainer.add(share);
+        share.setHref(userListSupport.getMailToExercise(exercise));
+      }
+      userListSupport.addSendLinkWhatYouSee(dropdownContainer);
     }
-    userListSupport.addSendLinkWhatYouSee(dropdownContainer);
 
     dropdownContainer.add(new Divider());
 

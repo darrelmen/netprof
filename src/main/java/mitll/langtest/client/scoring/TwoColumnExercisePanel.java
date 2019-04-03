@@ -29,6 +29,7 @@
 
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Dropdown;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.MouseOutEvent;
@@ -114,12 +115,18 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private PhonesChoices phonesChoices;
   private EnglishDisplayChoices englishDisplayChoices;
 
-  private static final boolean DEBUG = false;
 
   private final ItemMenu itemMenu;
   private final boolean addPlayer;
-  private final boolean isContext;
+
   private final SessionManager sessionManager;
+
+  private boolean showingEnglish = true;
+  private boolean showingEnglishContext = true;
+
+  private Dropdown dropdownContainer;
+
+  private static final boolean DEBUG = false;
 
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
@@ -131,7 +138,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * @param alignments
    * @param addPlayer
    * @param listenView
-   * @param isContext
    * @param sessionManager
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.banner.LearnHelper#getFactory
@@ -139,20 +145,17 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
    */
   public TwoColumnExercisePanel(final T commonExercise,
-                                final ExerciseController controller,
+                                final ExerciseController<T> controller,
                                 final ListInterface<?, ?> listContainer,
                                 Map<Integer, AlignmentOutput> alignments,
                                 boolean addPlayer,
                                 IListenView listenView,
-                                boolean isContext,
                                 SessionManager sessionManager) {
     super(commonExercise, controller, listContainer, alignments, listenView);
 
     this.sessionManager = sessionManager;
     this.listContainer = listContainer;
-    this.isContext = isContext;
     this.addPlayer = addPlayer;
-
     //  logger.info("Adding isContext " + isContext + " ex " + commonExercise.getID() + " " + commonExercise.getEnglish() + " " + commonExercise.getForeignLanguage());
 
     addStyleName("twoColumnStyle");
@@ -215,6 +218,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     }
   }
 
+  private SimpleRecordAudioPanel recordPanel;
 
   /**
    * Row 1: FL - ENGLISH
@@ -236,7 +240,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     //  logger.info("For "  +e.getID() + " meaning " + e.getMeaning() + " " + e.getEnglish() + " " + english);
     SimpleRecordAudioPanel<T> recordPanel =
         new SimpleRecordAudioPanel<>(controller, e, listContainer, addPlayer, listenView, sessionManager);
-
+    this.recordPanel = recordPanel;
     // add the first row
     {
       DivWidget rowWidget = getRowWidget();
@@ -284,8 +288,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     return rowWidget;
   }
 
-  private boolean showingEnglish = true;
-  private boolean showingEnglishContext = true;
 
   /**
    * @param e
@@ -318,7 +320,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
         addMouseOverHandler(englishContainer, mouseOverEvent -> {
           if (!showingEnglish) {
             showingEnglish = true;
-
 //            logger.info("mouse over...");
             englishContainer.clear();
             englishContainer.add(getEnglishWidget(e, english));
@@ -327,8 +328,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
         addMouseOutHandler(englishContainer, mouseOutEvent -> {
           if (showingEnglish) {
             showingEnglish = false;
-
-  //          logger.info("mouse out...");
+            //          logger.info("mouse out...");
             englishContainer.clear();
             englishContainer.add(getEnglishWidget(e, toUse));
           }
@@ -340,7 +340,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     {
       DivWidget dropC = new DivWidget();
-      dropC.add(itemMenu.getDropdown());
+      dropC.add(dropdownContainer = itemMenu.getDropdown());
       lr.add(dropC);
     }
     return lr;
@@ -348,6 +348,16 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
   private boolean isEnglish() {
     return controller.getLanguageInfo() == Language.ENGLISH;
+  }
+
+  /**
+   * @see mitll.langtest.client.banner.OOVViewHelper
+   */
+  public void hideRecordButton() {
+    recordPanel.setVisible(false);
+    recordPanel.getPostAudioRecordButton().setVisible(false);
+    dropdownContainer.setVisible(false);
+  //  logger.info("hide " + recordPanel.getElement().getId());
   }
 
   /**
@@ -448,16 +458,12 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     recordButtonContainer.addStyleName("recordingRowStyle");
     PostAudioRecordButton postAudioRecordButton = recordPanel.getPostAudioRecordButton();
     recordButtonContainer.add(postAudioRecordButton);
-
-
     return recordButtonContainer;
   }
 
   protected void makePlayAudio(T e, DivWidget flContainer) {
-
     flContainer.add(playAudio = getPlayAudioPanel());
     alignmentFetcher.setPlayAudio(playAudio);
-
   }
 
   protected void stylePhoneRow(UIObject phoneRow) {
@@ -628,7 +634,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    */
   @NotNull
   private ChoicePlayAudioPanel<T> getPlayAudioPanel() {
-    return new ChoicePlayAudioPanel<T>(exercise, controller, isContext, this);
+    return new ChoicePlayAudioPanel<T>(exercise, controller, exercise.isContext(), this);
   }
 
   /**
@@ -847,7 +853,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
               " RECORD_CONTEXT audio id "
           );
         }
-
         contextAudioChanged(id, duration);
       }
 

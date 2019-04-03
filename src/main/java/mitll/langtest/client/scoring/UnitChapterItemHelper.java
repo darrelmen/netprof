@@ -132,6 +132,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
    */
   private Panel getUnitLessonForExercise(T exercise) {
     // Panel flow = new HorizontalPanel();
+    logger.info("getUnitLessonForExercise for " + exercise);
     Panel flow = new DivWidget();
     flow.addStyleName("inlineFlex");
     //flow.getElement().setId("getUnitLessonForExercise_unitLesson");
@@ -269,7 +270,8 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
   @NotNull
   private String getTypeAndValue(String type, String subtext) {
     return "<span>" +
-        "<h5>" + type + "<small style='margin-left:5px'>" + subtext + "</small>" +
+        "<h5>" + "<small>" + type + "</small>" +
+        "<span style='margin-left:5px;float:right'>" + subtext + "</span>" +
         "</h5>" +
         "</span>";
   }

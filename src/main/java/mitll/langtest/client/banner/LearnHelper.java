@@ -110,7 +110,6 @@ public class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleC
             alignments,
             false,
             LearnHelper.this,
-            e.isContext(),
             sessionManager);
       }
     };

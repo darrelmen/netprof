@@ -767,6 +767,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   @Override
   public Collection<String> isValidForeignPhrase(int projectID, String foreign, String transliteration) {
     AudioFileHelper audioFileHelper = getAudioFileHelper(projectID);
+    if (audioFileHelper == null) logger.warn("isValidForeignPhrase no audio file helper for " +projectID);
     return audioFileHelper == null ? Collections.emptyList() : audioFileHelper.checkLTSOnForeignPhrase(foreign, transliteration);
   }
 

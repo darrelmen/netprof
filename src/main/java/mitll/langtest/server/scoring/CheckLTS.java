@@ -53,7 +53,7 @@ public class CheckLTS {
   private final Language languageInfo;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_OOV = true;
+  private static final boolean DEBUG_OOV = false;
   private static final String POUND = "#";
 
   /**
@@ -97,7 +97,6 @@ public class CheckLTS {
   public Set<String> checkLTS(String foreignLanguagePhrase, String transliteration) {
     return checkLTS(letterToSoundClass, foreignLanguagePhrase, transliteration);
   }
-
 
   private int shown = 0;
 
@@ -232,15 +231,18 @@ public class CheckLTS {
       oov.add(e.getMessage());
       return oov;
     }
+
     if (foreignLanguagePhrase.trim().isEmpty()) {
       //logger.warn("huh fl is empty?");
-    } else {
-      if (DEBUG)
-        logger.info("checkLTS : for phrase '" + foreignLanguagePhrase + "' : inlts " + inlts + " indict " + indict);
+    } else if (DEBUG) {
+      logger.info("checkLTS : for phrase '" + foreignLanguagePhrase + "' : inlts " + inlts + " indict " + indict);
     }
+
     if (DEBUG || (DEBUG_OOV && !oov.isEmpty()))
-      logger.info("checkLTS '" + languageInfo + "' tokens : '" + tokens + "' oov " + oov.size() + " : " + oov +
-          " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
+      logger.info("checkLTS '" + languageInfo + "'" +
+          "\n\ttokens '" + tokens + "'" +
+          "\n\toov    " + oov.size() + " : " + oov +
+          "\n\tfor    " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
 
     return oov;
   }

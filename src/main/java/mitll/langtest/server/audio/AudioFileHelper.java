@@ -104,8 +104,6 @@ public class AudioFileHelper implements AlignDecode {
   private static final boolean DEBUG_EDIT = false;
   public static final String OOV = "oov";
 
-  // private static final String PERCENT_SYMBOL = "%";
-
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
   private final MP3Support mp3Support;
@@ -623,15 +621,15 @@ public class AudioFileHelper implements AlignDecode {
                                  Map<Integer, String> safeToNorm, Set<ClientExercise> unsafeHighlighted, Set<String> oovCumulative) {
     boolean validForeignPhrase = true;
     String foreignLanguage = exercise.getForeignLanguage();
-
+    Collection<String> oov = null;
     if (!foreignLanguage.isEmpty()) {
       String transliteration = exercise.getTransliteration();
-      Collection<String> oov = getASRScoring().getCheckLTSHelper().checkLTS(foreignLanguage, transliteration);
+      oov = getASRScoring().getCheckLTSHelper().checkLTS(foreignLanguage, transliteration);
 
       if (!oov.isEmpty()) {
         Set<String> replaced = new HashSet<>();
         foreignLanguage = replaceOOVs(oovToEquivalents, foreignLanguage, oov, replaced);
-        if (replaced.size() == oov.size()) {
+        if (replaced.containsAll(oov)) {
           logger.info("isValidForeignPhrase all oov replaced for " + foreignLanguage);
 
           oov = getASRScoring().getCheckLTSHelper().checkLTS(foreignLanguage, transliteration);
@@ -651,7 +649,8 @@ public class AudioFileHelper implements AlignDecode {
     }
 
     if (!validForeignPhrase && DEBUG) {
-      logger.info("isValidForeignPhrase valid " + validForeignPhrase + " ex " + foreignLanguage);
+      logger.info("isValidForeignPhrase valid " + validForeignPhrase + " ex " + foreignLanguage +
+          " \n\toov " + oov);
     }
     return validForeignPhrase;
   }

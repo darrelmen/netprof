@@ -63,7 +63,7 @@ public class BasicDialog {
   private static final boolean DEBUG = false;
   static final String TRY_AGAIN = "Try Again";
 
-  protected FormField addControlFormField(Panel dialogBox) {
+  public FormField addControlFormField(Panel dialogBox) {
     return addControlFormField(dialogBox, "", false, 0, 30, -1, "");
   }
 

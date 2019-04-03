@@ -183,9 +183,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   private boolean isEngAttr() {
     List<ExerciseAttribute> language =
-        exercise.getAttributes()
-            .stream()
-            .filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(LANGUAGE)).collect(Collectors.toList());
+        exercise == null ? Collections.emptyList() :
+            exercise.getAttributes()
+                .stream()
+                .filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(LANGUAGE)).collect(Collectors.toList());
     return !language.isEmpty() && language.get(0).getValue().equalsIgnoreCase(Language.ENGLISH.toString());
   }
 
@@ -213,7 +214,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see TwoColumnExercisePanel#makeFirstRow
    */
   void makePlayAudio(T e, DivWidget flContainer) {
-    //if (hasAudio(e)) {
     playAudio = new HeadlessPlayAudio(controller.getSoundManager(), listenView);
     alignmentFetcher.setPlayAudio(playAudio);
     rememberAudio(getRegularSpeedIfAvailable(e));
@@ -248,7 +248,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     // logger.info("makeClickableWords " + exercise.getID() + " " + exercise.getFLToShow() + " add float left " + addFloatLeft);
 
 
-    clickableWords = new ClickableWords(listContainer, exercise.getID(),
+    clickableWords = new ClickableWords<T>(listContainer, exercise.getID(),
         languageInfo, languageInfo.getFontSize(), BLUE, shouldAddFloatLeft(),
         controller.getExerciseService(), controller.getUser());
   }
@@ -470,8 +470,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   @NotNull
   protected AllHighlight getAllHighlight(Collection<IHighlightSegment> flclickables) {
-   // boolean addFloatLeft = shouldAddFloatLeft();
-  //  logger.info("addFloatLeft " + addFloatLeft + " on " + flclickables.size());
+    // boolean addFloatLeft = shouldAddFloatLeft();
+    //  logger.info("addFloatLeft " + addFloatLeft + " on " + flclickables.size());
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("please don't"));
 //    logger.info("logException stack " + exceptionAsString);
 

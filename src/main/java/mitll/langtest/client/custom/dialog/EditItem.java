@@ -148,7 +148,7 @@ public class EditItem {
         // logger.info("unit " + exercise.getUnitToValue());
 
         if (exercise.isPredefined() || exercise.isContext()) {
-          TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<>(exercise,
+          TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<ClientExercise>(exercise,
               controller,
               exerciseList,
               alignments, true, new IListenView() {
@@ -162,7 +162,7 @@ public class EditItem {
               return -1;
             }
           },
-              false, () -> "");
+              () -> "");
           widgets.addWidgets(getFLChoice(), false, getPhoneChoices(), EnglishDisplayChoices.SHOW);
           return widgets;
         } else {
