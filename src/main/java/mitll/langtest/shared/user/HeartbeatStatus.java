@@ -32,19 +32,22 @@ package mitll.langtest.shared.user;
 import com.google.gwt.user.client.rpc.IsSerializable;
 
 public class HeartbeatStatus implements IsSerializable {
-  private boolean hasSession;
-  private boolean codeHasUpdated;
+  private boolean hasSession = false;
+  private boolean codeHasUpdated = false;
+  private boolean permissionsChanged = false;
 
-  public HeartbeatStatus() {}
+  public HeartbeatStatus() {
+  }
 
   /**
-   * @see mitll.langtest.server.services.OpenUserServiceImpl#setCurrentUserToProject
    * @param hasSession
    * @param codeHasUpdated
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#setCurrentUserToProject
    */
-  public HeartbeatStatus(boolean hasSession, boolean codeHasUpdated) {
+  public HeartbeatStatus(boolean hasSession, boolean codeHasUpdated, boolean permissionsChanged) {
     this.hasSession = hasSession;
     this.codeHasUpdated = codeHasUpdated;
+    this.permissionsChanged = permissionsChanged;
   }
 
   public boolean isHasSession() {
@@ -53,5 +56,9 @@ public class HeartbeatStatus implements IsSerializable {
 
   public boolean isCodeHasUpdated() {
     return codeHasUpdated;
+  }
+
+  public boolean isPermissionsChanged() {
+    return permissionsChanged;
   }
 }

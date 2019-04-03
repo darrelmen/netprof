@@ -121,13 +121,13 @@ public class ActiveUsersManager {
   }
 
   protected void gotUsers(List<ActiveUser> result, Panel dialogVPanel, DialogBox dialogBox) {
-    activeUserBasicUserContainer = getUserContainer();
-    dialogVPanel.add(activeUserBasicUserContainer.getTableWithPager(result));
-
-
     DivWidget horiz = new DivWidget();
     horiz.setWidth("100%");
     addButtons(dialogBox, horiz);
+
+
+    activeUserBasicUserContainer = getUserContainer();
+    dialogVPanel.add(activeUserBasicUserContainer.getTableWithPager(result));
     dialogVPanel.add(horiz);
   }
 

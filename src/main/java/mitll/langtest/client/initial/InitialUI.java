@@ -66,10 +66,12 @@ import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.HeartbeatStatus;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
@@ -322,7 +324,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   }
 
   private void pushClearHistory() {
-  //  logger.info("pushClearHistory -");
+    //  logger.info("pushClearHistory -");
     History.newItem("");
   }
 
@@ -380,11 +382,12 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     if (userManager.getCurrent() != null) {
       ProjectStartupInfo projectStartupInfo = lifecycleSupport.getProjectStartupInfo();
       String implementationVersion = lifecycleSupport.getStartupInfo().getImplementationVersion();
+      boolean teacher = isTeacher(userManager.getCurrent());
       if (projectStartupInfo == null) {
         long then = System.currentTimeMillis();
         Timer timer = getWifiTimer();
 
-        controller.getOpenUserService().checkHeartbeat(implementationVersion, new AsyncCallback<HeartbeatStatus>() {
+        controller.getOpenUserService().checkHeartbeat(implementationVersion, teacher, new AsyncCallback<HeartbeatStatus>() {
           @Override
           public void onFailure(Throwable caught) {
             cancelHeartbeatTimer(timer);
@@ -398,6 +401,9 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
             if (result.isCodeHasUpdated()) {
               logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
               Window.Location.reload();
+            } else if (result.isPermissionsChanged()) {
+              logger.info("confirmCurrentProject : 1  took " + (now - then) + " millis - perm changed!");
+              Window.Location.reload();
             }
           }
         });
@@ -406,7 +412,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
           long then = System.currentTimeMillis();
 
           Timer timer = getWifiTimer();
-          controller.getOpenUserService().setCurrentUserToProject(projectStartupInfo.getProjectid(), implementationVersion, new AsyncCallback<HeartbeatStatus>() {
+          controller.getOpenUserService().setCurrentUserToProject(projectStartupInfo.getProjectid(), implementationVersion, teacher, new AsyncCallback<HeartbeatStatus>() {
             @Override
             public void onFailure(Throwable caught) {
               cancelHeartbeatTimer(timer);
@@ -423,12 +429,20 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
               } else if (!result.isHasSession()) {
                 logger.info("confirmCurrentProject : took " + (now - then) + " millis to check on user - logging out!");
                 logout();
+              } else if (result.isPermissionsChanged()) {
+                logger.info("confirmCurrentProject : 2 took " + (now - then) + " millis - perm changed!");
+                Window.Location.reload();
               }
             }
           });
         }
       }
     }
+  }
+
+  private boolean isTeacher(User userWhere) {
+    Collection<Permission> permissions = userWhere.getPermissions();
+    return permissions.contains(Permission.TEACHER_PERM) || permissions.contains(Permission.PROJECT_ADMIN);
   }
 
   private void cancelHeartbeatTimer(Timer timer) {
@@ -539,17 +553,17 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 //      if (userManager.isPolyglot()) {
 //        logger.info("\tpolyglot users don't get to change projects.");
 //      } else {
-        forgetProjectForUser();
+      forgetProjectForUser();
 
-        pushClearHistory();
-        clearStartupInfo();
+      pushClearHistory();
+      clearStartupInfo();
 
-        breadcrumbHelper.clearBreadcrumbs();
-        breadcrumbHelper.addCrumbs(true);
+      breadcrumbHelper.clearBreadcrumbs();
+      breadcrumbHelper.addCrumbs(true);
 
-        clearContent();
-        addProjectChoices(0, null);
-        showCogMenu();
+      clearContent();
+      addProjectChoices(0, null);
+      showCogMenu();
 //      }
     } else {
       logger.warning("chooseProjectAgain no user --- ");
@@ -653,7 +667,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
                                final Panel firstRow,
                                final EventRegistration eventRegistration,
                                final String resetPassToken) {
-   // logger.info("handleResetPass token '" + resetPassToken + "' for password reset");
+    // logger.info("handleResetPass token '" + resetPassToken + "' for password reset");
 
     {
       Panel resetPassword =

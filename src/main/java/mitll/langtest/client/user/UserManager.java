@@ -322,9 +322,9 @@ public class UserManager {
     return current.isMale();
   }
 
-  public boolean isTeacher() {
-    return current.isTeacher() || current.isCD();
-  }
+//  public boolean isTeacher() {
+//    return current.isTeacher() || current.isCD();
+//  }
 
   public boolean isAdmin() {
     return current != null && current.isAdmin();
@@ -348,7 +348,7 @@ public class UserManager {
    *
    * @return
    */
-  public boolean isPolyglot() {
-    return getCurrent() != null && getPermissions().size() == 1 && getPermissions().iterator().next() == Permission.POLYGLOT;
-  }
+//  public boolean isPolyglot() {
+//    return getCurrent() != null && getPermissions().size() == 1 && getPermissions().iterator().next() == Permission.POLYGLOT;
+//  }
 }

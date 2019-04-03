@@ -40,11 +40,12 @@ public enum Permission implements IsSerializable {
   QUALITY_CONTROL("Quality Control", Kind.QAQC),    // mark defects, fix defects
   RECORD_AUDIO("Record Audio", Kind.AUDIO_RECORDER),          // record audio
   DEVELOP_CONTENT("Develop Content", Kind.CONTENT_DEVELOPER), // not sure how different from Record Audio
-  PROJECT_ADMIN("Project Admin", Kind.PROJECT_ADMIN),         // make new projects, edit via domino
+  PROJECT_ADMIN("Project Admin", Kind.PROJECT_ADMIN);         // make new projects, edit via domino
+
   /**
    * @see DominoUserDAOImpl#toUser
    */
-  POLYGLOT("Polyglot");     // only see polyglot projects
+//  POLYGLOT("Polyglot");     // only see polyglot projects
 
   private String name;
   private Kind kind;
@@ -52,9 +53,9 @@ public enum Permission implements IsSerializable {
   Permission() {
   }
 
-  Permission(String name) {
+/*  Permission(String name) {
     this.name = name;
-  }
+  }*/
 
   Permission(String name, Kind kind) {
     this.name = name;
@@ -64,7 +65,6 @@ public enum Permission implements IsSerializable {
   public String getName() {
     return name;
   }
-
   public Kind getKind() {
     return kind;
   }

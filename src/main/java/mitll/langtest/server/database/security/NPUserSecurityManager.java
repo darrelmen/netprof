@@ -224,7 +224,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     Timestamp modified = new Timestamp(System.currentTimeMillis());
     String id = session.getId();
 
-  //  log.info("setSessionUserAndRemember : set session " + id + " user " + id1);
+    //  log.info("setSessionUserAndRemember : set session " + id + " user " + id1);
 
     userSessionDAO.add(
         new SlickUserSession(-1,
@@ -772,8 +772,10 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     User sessUser = userDAO.getByID(id);
     long now = System.currentTimeMillis();
 
-    if (sessUser != null) {
-      log.info("getUserForID " + id + " is a " + sessUser.getUserKind() + " teacher? " +sessUser.isTeacher());
+    if (DEBUG) {
+      if (sessUser != null) {
+        log.info("getUserForID " + id + " is a " + sessUser.getUserKind() + " teacher? " + sessUser.isTeacher());
+      }
     }
 
     if (now - then > 20) {

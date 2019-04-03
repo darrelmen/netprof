@@ -80,15 +80,15 @@ public class UserMenu {
   private static final String GETTING_ALL_TEACHERS = "getting all teachers";
   private static final String GETTING_ACTIVE_USERS = "getting active users";
   private static final String ALL_TEACHERS = "All Teachers";
+  private static final String ACTIVE_TEACHERS = "Active Teachers";
 
   /**
    *
    */
   private static final String PENDING_TEACHER_REQUESTS = "Pending Teacher Requests";
-  private static final String ACTIVE_TEACHERS = "Active Teachers";
 
   /**
-   *
+   * @see #maybeAddReqInstructor(List)
    */
   private static final String REQUEST_INSTRUCTOR_STATUS = "Request Instructor Status";
   private static final List<String> REQ_MESSAGE = Arrays.asList(
@@ -257,7 +257,7 @@ public class UserMenu {
 
     choices.add(getChangePassword());
 
-    logger.info("getStandardUserMenuChoices...");
+ //   logger.info("getStandardUserMenuChoices...");
 
     LinkAndTitle maybeAddReqInstructor = maybeAddReqInstructor(choices);
     if (maybeAddReqInstructor != null) {
@@ -276,7 +276,7 @@ public class UserMenu {
             // pendingTeachers.setTitle(PENDING_TEACHER_REQUESTS + " (" + result.size() + ")");
             boolean notPending = result.stream().noneMatch(activeUser -> activeUser.getID() == controller.getUser());
             boolean pending = !notPending;
-            logger.info("got not Pending " + notPending);
+            //logger.info("got not Pending " + notPending);
             if (pending) {
               teacherStatus.getMyLink().setActive(notPending);
               teacherStatus.getMyLink().setDisabled(pending);
@@ -287,8 +287,6 @@ public class UserMenu {
       } else {
         logger.info("no project yet...");
       }
-    } else {
-      //setPendingTitle();
     }
 
     choices.add(getLogOut());
@@ -296,7 +294,7 @@ public class UserMenu {
     return choices;
   }
 
-  public void setPendingTitle(int size) {
+  void setPendingTitle(int size) {
     pendingTeachers.setTitle(PENDING_TEACHER_REQUESTS + " (" + size + ")");
   }
 

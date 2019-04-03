@@ -1423,7 +1423,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param isPoly
    * @see #toUser
    */
-  private void handleAffiliationUser(DBUser dominoUser, Set<Permission> permissionSet, User user, boolean isPoly) {
+/*  private void handleAffiliationUser(DBUser dominoUser, Set<Permission> permissionSet, User user, boolean isPoly) {
     if (isPoly) permissionSet.add(Permission.POLYGLOT);
 
     int id = user.getID();
@@ -1442,7 +1442,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         userProjectDAO.setCurrentProjectForUser(id, projectAssignment);
       }
     }
-  }
+  }*/
 
   /**
    * Get language from secondary group, then try to match language to a polyglot project.
@@ -1453,7 +1453,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    * @see #handleAffiliationUser
    */
-  private int getProjectAssignment(DBUser dominoUser, int id, boolean isPoly) {
+/*  private int getProjectAssignment(DBUser dominoUser, int id, boolean isPoly) {
     Collection<Group> secondaryGroups = dominoUser.getSecondaryGroups();
     int projID = -1;
     if (!secondaryGroups.isEmpty()) {
@@ -1479,14 +1479,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       logger.info("getProjectAssignment no groups for user id " + id);
     }
     return projID;
-  }
+  }*/
 
   /**
    * @param next
    * @return
    * @see #getProjectAssignment
    */
-  private Language getLanguageMatchingGroup(Group next) {
+/*  private Language getLanguageMatchingGroup(Group next) {
     //logger.info("getLanguageMatchingGroup : found secondary " + next);
     String name = next.getName();
     Language language = getLanguage(name);
@@ -1500,7 +1500,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       }
     }
     return language;
-  }
+  }*/
 
   private Language getLanguage(String lang) {
     Language language = Language.UNKNOWN;

@@ -57,29 +57,41 @@ import java.util.logging.Logger;
 class PendingUsersManager extends ActiveUsersManager {
   private final Logger logger = Logger.getLogger("PendingUsersManager");
 
-  public static final String APPROVED = "Approved?";
+  private static final String APPROVED = "Approved?";
+  private Set<Integer> appprove = new HashSet<>();
+  private Set<Integer> disapprove = new HashSet<>();
+
+  private Button okButton, disapproveButton, approveButton;
 
   PendingUsersManager(ExerciseController controller) {
     super(controller);
   }
 
+  /**
+   * @see #show(String, int)
+   * @param hours
+   * @param dialogBox
+   * @param dialogVPanel
+   */
   protected void getUsers(int hours, DialogBox dialogBox, Panel dialogVPanel) {
     addPrompt(dialogVPanel);
 
+//    logger.info("getUsers req " +controller.getProjectID());
     controller.getUserService().getPendingUsers(controller.getProjectID(), new AsyncCallback<List<ActiveUser>>() {
       @Override
       public void onFailure(Throwable caught) {
-        handleFailure(caught, "getting pending teacher requests");
-      }
-
-
-      private void handleFailure(Throwable caught, String msg) {
-        controller.getMessageHelper().handleNonFatalError(msg, caught);
+        controller.getMessageHelper().handleNonFatalError("getting pending teacher requests", caught);
       }
 
       @Override
       public void onSuccess(List<ActiveUser> result) {
+      //  logger.info("gotUsers req " +controller.getProjectID() + " " +result.size());
         gotUsers(result, dialogVPanel, dialogBox);
+
+        boolean enabled = !result.isEmpty();
+//        logger.info("has items :  " +enabled);
+        disapproveButton.setEnabled(enabled);
+        approveButton.setEnabled(enabled);
       }
     });
   }
@@ -90,7 +102,6 @@ class PendingUsersManager extends ActiveUsersManager {
 
       @Override
       protected void addVisitedCols(List<ActiveUser> list) {
-       // super.addVisitedCol(list);
         addIsApproved();
       }
 
@@ -139,8 +150,12 @@ class PendingUsersManager extends ActiveUsersManager {
     dialogVPanel.add(child);
   }
 
-  private Button okButton;
-
+  /**
+   *
+   * @param dialogBox
+   * @param horiz
+   * @return
+   */
   @Override
   protected Button addButtons(DialogBox dialogBox, DivWidget horiz) {
     {
@@ -158,25 +173,26 @@ class PendingUsersManager extends ActiveUsersManager {
 
 
     {
-      Button disapprove = getButton("Disapprove");
-      disapprove.addClickHandler(event -> gotDisapprove());
-      disapprove.setType(ButtonType.WARNING);
-      disapprove.addStyleName("leftFiveMargin");
-      disapprove.addStyleName("rightFiveMargin");
-      horiz.add(disapprove);
+      disapproveButton = getButton("Disapprove");
+      disapproveButton.addClickHandler(event -> gotDisapprove());
+      disapproveButton.setType(ButtonType.WARNING);
+      disapproveButton.addStyleName("leftFiveMargin");
+      disapproveButton.addStyleName("rightFiveMargin");
+      horiz.add(disapproveButton);
     }
 
-    Button approve = getButton("Approve");
-    approve.addClickHandler(event -> gotApprove());
-    horiz.add(approve);
+    {
+      approveButton = getButton("Approve");
+      approveButton.addClickHandler(event -> gotApprove());
+      horiz.add(approveButton);
+    }
 
     return okButton;
   }
 
   @Override
   protected void gotOKClick(DialogBox dialogBox) {
-
-    logger.info("\n\n\ngotOKClick got ok click! " + appprove + " vs " + disapprove);
+//    logger.info("\n\n\ngotOKClick got ok click! " + appprove + " vs " + disapprove);
     controller.getUserService().approveAndDisapprove(appprove, disapprove, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -184,17 +200,11 @@ class PendingUsersManager extends ActiveUsersManager {
 
       @Override
       public void onSuccess(Void result) {
-        logger.info("\n\n\nOK, done");
-        logger.info("\n\n\nOK, done");
-        logger.info("\n\n\nOK, done");
-
+        logger.info("OK, done");
       }
     });
     super.gotOKClick(dialogBox);
   }
-
-  private Set<Integer> appprove = new HashSet<>();
-  private Set<Integer> disapprove = new HashSet<>();
 
   private void gotDisapprove() {
     okButton.setEnabled(true);
@@ -203,8 +213,7 @@ class PendingUsersManager extends ActiveUsersManager {
       int id = currentSelection.getID();
       appprove.remove(id);
       disapprove.add(id);
-      currentSelection.setState(ActiveUser.PENDING.DENIED);
-      reload();
+      afterAction(currentSelection, ActiveUser.PENDING.DENIED);
     }
   }
 
@@ -216,9 +225,12 @@ class PendingUsersManager extends ActiveUsersManager {
       int id = currentSelection.getID();
       disapprove.remove(id);
       appprove.add(id);
-      currentSelection.setState(ActiveUser.PENDING.APPROVED);
-      reload();
-
+      afterAction(currentSelection, ActiveUser.PENDING.APPROVED);
     }
+  }
+
+  private void afterAction(ActiveUser currentSelection, ActiveUser.PENDING approved) {
+    currentSelection.setState(approved);
+    reload();
   }
 }

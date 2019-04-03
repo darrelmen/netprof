@@ -338,6 +338,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private void setCogTitle() {
+   // logger.warning("setCogTitle  project " + controller.getProjectID());
     if (controller.getProjectID() > -1) {
       controller.getUserService().getPendingUsers(controller.getProjectID(), new AsyncCallback<List<ActiveUser>>() {
         @Override
@@ -355,7 +356,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
         }
       });
     } else {
-      logger.warning("no project");
+      logger.warning("setCogTitle no project");
     }
   }
 
@@ -556,8 +557,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private void setDialogNavVisible(boolean visible) {
-    ProjectMode mode = controller.getMode();
-    dialognav.setVisible(visible && mode == ProjectMode.DIALOG);
+    dialognav.setVisible(visible && controller.getMode() == ProjectMode.DIALOG);
   }
 
   @Override
@@ -568,7 +568,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     if (val && navigation != null) {
       VIEWS currentView = navigation.getCurrentView();
-      logger.info("setCogVisible current view " +currentView);
+      //logger.info("setCogVisible current view " + currentView);
       setVisibleChoicesByMode(currentView.getMode());
     }
 
@@ -604,16 +604,16 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     User current = controller.getUserManager().getCurrent();
 
     if (current != null) {
-    List<String> perms = new ArrayList<>();
-//      logger.info("kind " + current.getUserKind());
-//      logger.info("perms " + current.getPermissions());
-      String suffix = current.getUserKind() != Kind.STUDENT ? "( " + current.getUserKind().getName() + ")" : "";
+      List<String> perms = new ArrayList<>();
+//      logger.info("setUserName kind " + current.getUserKind());
+//      logger.info("setUserName perms " + current.getPermissions());
+      String suffix = "";//current.getUserKind() != Kind.STUDENT ? "( " + current.getUserKind().getName() + ")" : "";
 
       current.getPermissions().forEach(permission -> perms.add(permission.getKind().getName()));
       if (!perms.isEmpty()) {
-        suffix += " "+ perms;
+        suffix += " " + perms;
       }
-//      logger.info("suffix " + suffix);
+//      logger.info("setUserName suffix " + suffix);
       new TooltipHelper().createAddTooltip(userDrop, current.getFullName() + suffix, Placement.LEFT);
     }
 
@@ -627,11 +627,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private void defectMenuVisible() {
-    boolean qc = isQC();
-    boolean b = hasProjectChoice();
+   // boolean qc = isQC();
+  //  boolean b = hasProjectChoice();
 //    logger.info("is QC " + controller.getUser() + " : " + qc + " has choice " + b);
-    boolean visible = qc && b;
-    setDefectNavVisible(visible);
+  //  boolean visible = isQC() && hasProjectChoice();
+    setDefectNavVisible(isQC() && hasProjectChoice());
   }
 
   private void setDefectNavVisible(boolean visible) {
@@ -727,11 +727,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private void recordMenuVisible() {
     if (recnav != null) {
-      boolean visible = isPermittedToRecord() && hasProjectChoice();
-//      boolean learnVisible = viewToLink.get(VIEWS.LEARN).isVisible();
-      //    logger.info("recordMenuVisible learn vis " + learnVisible);
-      //    visible &= learnVisible;
-      setRecNavVisible(visible);
+      setRecNavVisible(isPermittedToRecord() && hasProjectChoice());
     }
   }
 

@@ -168,7 +168,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     {
       Set<Permission> userPerms = new HashSet<>(controller.getPermissions());
 
-      logger.info("getCurrentView user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
+    //  logger.info("getCurrentView user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
       List<Permission> requiredPerms = currentStoredView.getPerms();
       userPerms.retainAll(requiredPerms);
 
@@ -179,15 +179,14 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         if (hasStartup) {
           ProjectType projectType = controller.getProjectStartupInfo().getProjectType();
           ProjectMode mode = currentStoredView.getMode();
-
-          logger.info("getCurrentView : projectType " + projectType + " mode " + mode);
+          //logger.info("getCurrentView : projectType " + projectType + " mode " + mode);
 
           if (mode == ProjectMode.DIALOG && projectType == NP) {
             currentStoredView = LEARN;
           } else if (mode == VOCABULARY && projectType == ProjectType.DIALOG) {
             currentStoredView = DIALOG;
           } else {
-            logger.info("OK - no inconsistency...");
+        //    logger.info("OK - no inconsistency...");
           }
         }
       }
