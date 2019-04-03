@@ -158,12 +158,14 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     this.controller = langTest;
     this.choices = new ProjectChoices(langTest, this);
     this.breadcrumbHelper = new BreadcrumbHelper(userManager, lifecycleSupport, this);
+    UserMenu userMenu = new UserMenu(langTest, userManager, this);
     banner =
         new NewBanner(userManager,
             this,
-            new UserMenu(langTest, userManager, this),
+            userMenu,
             breadcrumbHelper.getBreadcrumbs(),
             controller);
+    userMenu.setBanner(banner);
   }
 
   public INavigation getNavigation() {

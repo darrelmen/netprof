@@ -61,6 +61,8 @@ public interface IBanner {
 
   void setCogVisible(boolean val);
 
+  void setCogTitle();
+
   void reset();
 
   /**

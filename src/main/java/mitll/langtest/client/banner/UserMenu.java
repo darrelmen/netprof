@@ -83,7 +83,7 @@ public class UserMenu {
   private static final String ACTIVE_TEACHERS = "Active Teachers";
 
   /**
-   *
+   * @see
    */
   private static final String PENDING_TEACHER_REQUESTS = "Pending Teacher Requests";
 
@@ -121,7 +121,7 @@ public class UserMenu {
   private final UserManager userManager;
 
   private final LifecycleSupport lifecycleSupport;
-  private final ExerciseController controller;
+  private final ExerciseController<?> controller;
   private final UserState userState;
   private final PropertyHandler props;
 
@@ -129,15 +129,15 @@ public class UserMenu {
    * @see #getLogOut
    */
   private final UILifecycle uiLifecycle;
+  private LinkAndTitle pendingTeachers;
+  private IBanner banner;
 
   /**
    * @param langTest
    * @param userManager
    * @see InitialUI#InitialUI(LangTest, UserManager)
    */
-  public UserMenu(LangTest langTest,
-                  UserManager userManager,
-                  UILifecycle uiLifecycle) {
+  public UserMenu(LangTest langTest, UserManager userManager, UILifecycle uiLifecycle) {
     this.lifecycleSupport = langTest;
     this.userState = langTest;
     this.props = langTest.getProps();
@@ -146,7 +146,6 @@ public class UserMenu {
     this.uiLifecycle = uiLifecycle;
   }
 
-  private LinkAndTitle pendingTeachers;
 
   /**
    * @return
@@ -160,10 +159,7 @@ public class UserMenu {
     choices.add(new LinkAndTitle(ACTIVE_TEACHERS, new SuccessClickHandler(this::showActiveTeachers)));
     choices.add(new LinkAndTitle(ALL_TEACHERS, new SuccessClickHandler(this::showAllTeachers)));
     choices.add(pendingTeachers = new LinkAndTitle(PENDING_TEACHER_REQUESTS, new SuccessClickHandler(this::showPendingTeachers)));
-
-    //choices.add(new LinkAndTitle("Users", new UsersClickHandler(), true));
     addSendReport(choices);
-    // choices.add(new LinkAndTitle(REPORT_LIST, new ReportListHandler()));
     choices.add(new LinkAndTitle(REPORT_LIST, new SuccessClickHandler(() -> new ReportListManager(controller).showReportList())));
     choices.add(new LinkAndTitle(SEND_TEST_EXCEPTION, event -> sendTestExceptionToAllServers()));
 
@@ -257,7 +253,7 @@ public class UserMenu {
 
     choices.add(getChangePassword());
 
- //   logger.info("getStandardUserMenuChoices...");
+    //   logger.info("getStandardUserMenuChoices...");
 
     LinkAndTitle maybeAddReqInstructor = maybeAddReqInstructor(choices);
     if (maybeAddReqInstructor != null) {
@@ -294,6 +290,10 @@ public class UserMenu {
     return choices;
   }
 
+  /**
+   * @param size
+   * @see NewBanner#setCogTitle()
+   */
   void setPendingTitle(int size) {
     pendingTeachers.setTitle(PENDING_TEACHER_REQUESTS + " (" + size + ")");
   }
@@ -395,6 +395,14 @@ public class UserMenu {
     return new LinkAndTitle(LOG_OUT, event -> uiLifecycle.logout());
   }
 
+  public void setBanner(IBanner banner) {
+    this.banner = banner;
+  }
+
+  public IBanner getBanner() {
+    return banner;
+  }
+
   private class SuccessClickHandler implements ClickHandler {
     final OnSuccess onSuccess;
 
@@ -464,7 +472,7 @@ public class UserMenu {
   }
 
   private void showPendingTeachers() {
-    new PendingUsersManager(controller).show(PENDING_TEACHER_REQUESTS, 0);
+    new PendingUsersManager(controller, getBanner()).show(PENDING_TEACHER_REQUESTS, 0);
   }
 
   private void handleFailure(Throwable caught, String msg) {

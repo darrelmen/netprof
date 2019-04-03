@@ -62,16 +62,18 @@ class PendingUsersManager extends ActiveUsersManager {
   private Set<Integer> disapprove = new HashSet<>();
 
   private Button okButton, disapproveButton, approveButton;
+  private IBanner banner;
 
-  PendingUsersManager(ExerciseController controller) {
+  PendingUsersManager(ExerciseController controller, IBanner banner) {
     super(controller);
+    this.banner = banner;
   }
 
   /**
-   * @see #show(String, int)
    * @param hours
    * @param dialogBox
    * @param dialogVPanel
+   * @see #show(String, int)
    */
   protected void getUsers(int hours, DialogBox dialogBox, Panel dialogVPanel) {
     addPrompt(dialogVPanel);
@@ -85,7 +87,7 @@ class PendingUsersManager extends ActiveUsersManager {
 
       @Override
       public void onSuccess(List<ActiveUser> result) {
-      //  logger.info("gotUsers req " +controller.getProjectID() + " " +result.size());
+        //  logger.info("gotUsers req " +controller.getProjectID() + " " +result.size());
         gotUsers(result, dialogVPanel, dialogBox);
 
         boolean enabled = !result.isEmpty();
@@ -151,7 +153,6 @@ class PendingUsersManager extends ActiveUsersManager {
   }
 
   /**
-   *
    * @param dialogBox
    * @param horiz
    * @return
@@ -204,6 +205,9 @@ class PendingUsersManager extends ActiveUsersManager {
       }
     });
     super.gotOKClick(dialogBox);
+
+    // refresh the menu after OK
+    banner.setCogTitle();
   }
 
   private void gotDisapprove() {

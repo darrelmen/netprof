@@ -337,7 +337,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     return rnav;
   }
 
-  private void setCogTitle() {
+  /**
+   * @see #setUserName(String)
+   */
+  public void setCogTitle() {
    // logger.warning("setCogTitle  project " + controller.getProjectID());
     if (controller.getProjectID() > -1) {
       controller.getUserService().getPendingUsers(controller.getProjectID(), new AsyncCallback<List<ActiveUser>>() {
@@ -626,13 +629,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     return controller.getProjectStartupInfo() != null;
   }
 
-  private void defectMenuVisible() {
-   // boolean qc = isQC();
-  //  boolean b = hasProjectChoice();
-//    logger.info("is QC " + controller.getUser() + " : " + qc + " has choice " + b);
-  //  boolean visible = isQC() && hasProjectChoice();
-    setDefectNavVisible(isQC() && hasProjectChoice());
-  }
+  private void defectMenuVisible() {    setDefectNavVisible(isQC() && hasProjectChoice());  }
 
   private void setDefectNavVisible(boolean visible) {
     defectnav.setVisible(visible);
