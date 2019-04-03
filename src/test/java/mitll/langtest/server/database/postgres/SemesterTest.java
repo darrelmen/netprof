@@ -11,6 +11,7 @@ import mitll.langtest.server.scoring.TextNormalizer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.SectionNode;
 import mitll.langtest.shared.project.OOVInfo;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -154,7 +155,7 @@ public class SemesterTest extends BaseTest {
   private void addRemove(DatabaseImpl andPopulate, int admin) {
     IUserDAO userDAO = andPopulate.getUserDAO();
     User userWhere = userDAO.getUserWhere(admin);
-    Collection<User.Permission> permissions = userWhere.getPermissions();
+    Collection<Permission> permissions = userWhere.getPermissions();
     logger.info("permissions " + permissions);
     boolean b = userDAO.removeTeacherRole(admin);
     logger.info("remove " + b);
