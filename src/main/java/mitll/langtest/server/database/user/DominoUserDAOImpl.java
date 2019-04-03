@@ -662,7 +662,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
                              String dialect,
                              String userID,
                              boolean enabled,
-                             Collection<User.Permission> permissions,
+                             Collection<Permission> permissions,
                              Kind kind,
 
                              String emailH,
@@ -1329,8 +1329,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   }
 
   private mitll.hlt.domino.shared.model.user.User.Gender getGender(User user, String userID, Kind userKind) {
-    boolean copyGender = user.getPermissions().contains(User.Permission.RECORD_AUDIO) ||
-        user.getPermissions().contains(User.Permission.DEVELOP_CONTENT) ||
+    boolean copyGender = user.getPermissions().contains(Permission.RECORD_AUDIO) ||
+        user.getPermissions().contains(Permission.DEVELOP_CONTENT) ||
         userID.equalsIgnoreCase("FernandoM01");
 
     return userKind ==
@@ -1367,7 +1367,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
     //   logger.debug("toUser : user " + dominoUser.getUserId() + " email " + email);//, new Exception());
 
-    Set<User.Permission> permissionSet = new HashSet<>();
+    Set<Permission> permissionSet = new HashSet<>();
 //    String emailHash = email == null ? "" : isValidEmailGrammar(email) ? Md5Hash.getHash(email) : email;
     boolean isMale = isMaleHardChoice(dominoUser);
 
@@ -1400,7 +1400,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     user.setFirst(dominoUser.getFirstName());
     user.setLast(dominoUser.getLastName());
     if (user.isAdmin()) {
-      permissionSet.add(User.Permission.PROJECT_ADMIN); // a little redundant with isAdmin...
+      permissionSet.add(Permission.PROJECT_ADMIN); // a little redundant with isAdmin...
     }
 
  /*   if (user.isPoly()) {
@@ -1423,8 +1423,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param isPoly
    * @see #toUser
    */
-  private void handleAffiliationUser(DBUser dominoUser, Set<User.Permission> permissionSet, User user, boolean isPoly) {
-    if (isPoly) permissionSet.add(User.Permission.POLYGLOT);
+  private void handleAffiliationUser(DBUser dominoUser, Set<Permission> permissionSet, User user, boolean isPoly) {
+    if (isPoly) permissionSet.add(Permission.POLYGLOT);
 
     int id = user.getID();
     int mostRecentByUser = userProjectDAO.getCurrentProjectForUser(id);
@@ -1567,7 +1567,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    * @see
    */
-  private Kind getUserKind(mitll.hlt.domino.shared.model.user.User dominoUser, Set<User.Permission> permissionSet) {
+  private Kind getUserKind(mitll.hlt.domino.shared.model.user.User dominoUser, Set<Permission> permissionSet) {
     Set<String> roleAbbreviations = dominoUser.getRoleAbbreviations();
 
     Kind kindToUse = Kind.STUDENT;
@@ -1588,7 +1588,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    */
   @NotNull
-  private Set<Kind> setPermissions(Set<User.Permission> permissionSet, Set<String> roleAbbreviations) {
+  private Set<Kind> setPermissions(Set<Permission> permissionSet, Set<String> roleAbbreviations) {
     Set<Kind> seen = new HashSet<>();
     //    logger.warn("getUserKind user " + userId + " has multiple roles - choosing first one... " + roleAbbreviations.size());
     for (String role : roleAbbreviations) {
@@ -1982,13 +1982,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       Set<String> roleAbbreviations = dbUser.getRoleAbbreviations();
       boolean hasTeacher = roleAbbreviations.contains(TCHR);
       if (hasTeacher) {
-        logger.info("user " + dbUser + " already has teacher role.");
+        logger.info("addTeacherRole user " + dbUser + " already has teacher role.");
         return false;
       } else {
         roleAbbreviations.add(TCHR);
         boolean b = doUpdate(dbUser);
         if (b) {
           refresh(userid);
+        }
+        else {
+          logger.warn("addTeacherRole couldn't update " +dbUser);
         }
         return b;
       }

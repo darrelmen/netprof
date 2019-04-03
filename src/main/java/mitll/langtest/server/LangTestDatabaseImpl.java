@@ -43,6 +43,7 @@ import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.project.StartupInfo;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -139,7 +140,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     if (byID == null) {
       logger.error("huh? no user by " + userIDFromSession);
     } else {
-      boolean hasPerm = byID.getPermissions().contains(User.Permission.PROJECT_ADMIN);
+      boolean hasPerm = byID.getPermissions().contains(Permission.PROJECT_ADMIN);
       if (hasPerm) {
         db.sendReport(userIDFromSession);
       } else {

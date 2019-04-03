@@ -36,15 +36,13 @@ import mitll.npdata.dao.SlickPendingUser;
 import java.util.List;
 
 public interface IPendingUserDAO extends IDAO {
-  //enum PENDING {REQUESTED, APPROVED, DENIED}
-
-  void insert(int userid, int projid);
+  boolean insert(int userid, int projid);
 
   /**
 
    * @see
    */
-  void update(int id, ActiveUser.PENDING state, int byUser);
+  boolean update(int id, ActiveUser.PENDING state, int byUser);
 
   List<SlickPendingUser> pendingOnProject(int projid);
 }

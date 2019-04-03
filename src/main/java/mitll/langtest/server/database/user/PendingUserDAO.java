@@ -34,6 +34,8 @@ import mitll.langtest.shared.user.ActiveUser;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickPendingUser;
 import mitll.npdata.dao.project.PendingUserDAOWrapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -41,9 +43,8 @@ import java.util.List;
 /**
  * @see DatabaseImpl#initializeDAOs
  */
-public class PendingUserDAO  implements IPendingUserDAO {
-//  private static final Logger logger = LogManager.getLogger(PendingUserDAO.class);
-
+public class PendingUserDAO implements IPendingUserDAO {
+  private static final Logger logger = LogManager.getLogger(PendingUserDAO.class);
   private final PendingUserDAOWrapper dao;
 
   /**
@@ -69,14 +70,24 @@ public class PendingUserDAO  implements IPendingUserDAO {
   }
 
   @Override
-  public void insert(int userid, int projid) {
+  public boolean insert(int userid, int projid) {
     Timestamp modified = new Timestamp(System.currentTimeMillis());
-    dao.insert(new SlickPendingUser(-1, userid, projid, modified, ActiveUser.PENDING.REQUESTED.toString(), modified, -1));
+    return dao.insert(new SlickPendingUser(-1, userid, projid, modified, ActiveUser.PENDING.REQUESTED.toString(), modified, -1)) > 0;
   }
 
+  /**
+   *
+   * @param id
+   * @param state
+   * @param byUser
+   * @return
+   */
   @Override
-  public void update(int id, ActiveUser.PENDING state, int byUser) {
-    dao.update(id, state.toString(), byUser);
+  public boolean update(int id, ActiveUser.PENDING state, int byUser) {
+    int update = dao.update(id, state.toString(), byUser);
+    logger.info("update " + id + " = " + state + " rows " + update);
+    boolean b = update > 0;
+    return b;
   }
 
   @Override

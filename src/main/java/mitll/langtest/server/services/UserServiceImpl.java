@@ -39,6 +39,7 @@ import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.user.ActiveUser;
 import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickPendingUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -46,6 +47,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * These calls require a session.
@@ -117,7 +119,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @throws DominoSessionException
    */
   @Override
-  public void sendTeacherRequest() throws DominoSessionException {
+  public ActiveUser.PENDING sendTeacherRequest() throws DominoSessionException {
     User userFromSession = getUserFromSession();
     int id = userFromSession.getID();
     getMailSupport().sendHTMLEmail(serverProps.getHelpEmail(), serverProps.getMailReplyTo(),
@@ -138,7 +140,18 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
             "<br/>Thanks,<br/> Netprof Administrator"
     );
 
-    db.getPendingUserDAO().insert(id, getProjectIDFromUser(id));
+    int projectIDFromUser = getProjectIDFromUser(id);
+
+    List<SlickPendingUser> collect = db.getPendingUserDAO().pendingOnProject(projectIDFromUser).stream().filter(slickPendingUser -> slickPendingUser.id() == id).collect(Collectors.toList());
+    if (collect.isEmpty()) {
+      return (db.getPendingUserDAO().insert(id, projectIDFromUser)) ? ActiveUser.PENDING.REQUESTED : ActiveUser.PENDING.ERROR;
+    } else {
+      try {
+        return ActiveUser.PENDING.valueOf(collect.get(0).state());
+      } catch (IllegalArgumentException e) {
+        return ActiveUser.PENDING.ERROR;
+      }
+    }
   }
 
   private String getBaseURL() {
@@ -146,7 +159,6 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   public List<ActiveUser> getPendingUsers(int projid) throws DominoSessionException {
-    /*int userIDFromSession =*/
     getUserIDFromSessionOrDB();
     List<ActiveUser> pending = new ArrayList<>();
 
@@ -178,6 +190,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
 
   /**
    * Consider sending email to person
+   * Also need to add role on domino user!
    *
    * @param toApproveUser
    * @throws DominoSessionException
@@ -185,20 +198,15 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   @Override
   public void approveAndDisapprove(Collection<Integer> approve, Collection<Integer> disapprove) throws DominoSessionException {
     int userIDFromSession = getUserIDFromSessionOrDB();
-    approve.forEach(id -> db.getPendingUserDAO().update(id, ActiveUser.PENDING.APPROVED, userIDFromSession));
+
+    approve.forEach(userid -> {
+      if (!db.getPendingUserDAO().update(userid, ActiveUser.PENDING.APPROVED, userIDFromSession)) {
+        logger.warn("approveAndDisapprove didn't approve " + userid);
+      } else {
+        logger.info("approveAndDisapprove pending user " + userid + " is approved");
+        db.getUserDAO().addTeacherRole(userid);
+      }
+    });
     disapprove.forEach(id -> db.getPendingUserDAO().update(id, ActiveUser.PENDING.DENIED, userIDFromSession));
-
   }
-
-/*  @Override
-  public void approve(int toApproveUser) throws DominoSessionException {
-    int userIDFromSession = getUserIDFromSessionOrDB();
-    db.getPendingUserDAO().update(toApproveUser, IPendingUserDAO.PENDING.APPROVED, userIDFromSession);
-  }
-
-  @Override
-  public void disapprove(int toApproveUser) throws DominoSessionException {
-    int userIDFromSession = getUserIDFromSessionOrDB();
-    db.getPendingUserDAO().update(toApproveUser, IPendingUserDAO.PENDING.DENIED, userIDFromSession);
-  }*/
 }

@@ -42,6 +42,7 @@ import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectType;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -243,10 +244,10 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
       logger.error("no user in session?");
       throw new DominoSessionException();
     }
-    Collection<User.Permission> permissions = userFromSession.getPermissions();
+    Collection<Permission> permissions = userFromSession.getPermissions();
     return
-        permissions.contains(User.Permission.TEACHER_PERM) ||
-            permissions.contains(User.Permission.PROJECT_ADMIN);
+        permissions.contains(Permission.TEACHER_PERM) ||
+            permissions.contains(Permission.PROJECT_ADMIN);
   }
 
   /**

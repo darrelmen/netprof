@@ -54,8 +54,8 @@ public abstract class BaseUserDAO extends DAO {
   static final String EMAIL = "emailH";
   static final String DEVICE = "device";
   static final String USER_ID = "userID";
-  static final List<User.Permission> CD_PERMISSIONS = Arrays.asList(User.Permission.QUALITY_CONTROL, User.Permission.RECORD_AUDIO);
-  static final List<User.Permission> EMPTY_PERM = new ArrayList<>();
+  static final List<Permission> CD_PERMISSIONS = Arrays.asList(Permission.QUALITY_CONTROL, Permission.RECORD_AUDIO);
+  static final List<Permission> EMPTY_PERM = new ArrayList<>();
   static final String ENABLED = "enabled";
   static final String RESET_PASSWORD_KEY = "resetPasswordKey";
   static final String ENABLED_REQ_KEY = "enabledReqKey";
@@ -221,7 +221,7 @@ public abstract class BaseUserDAO extends DAO {
     return userid != null && (admins.contains(userid.toLowerCase()));
   }
 
-  private static final List<User.Permission> EMPTY_PERMISSIONS = Collections.emptyList();
+  private static final List<Permission> EMPTY_PERMISSIONS = Collections.emptyList();
 
   /**
    * public for test access... for now
@@ -297,7 +297,7 @@ public abstract class BaseUserDAO extends DAO {
                                String dialect,
                                String userID,
                                boolean enabled,
-                               Collection<User.Permission> permissions,
+                               Collection<Permission> permissions,
                                Kind kind,
 
 

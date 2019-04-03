@@ -49,6 +49,7 @@ import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -116,27 +117,27 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
   protected boolean hasAdminPerm(int userIDFromSessionOrDB) throws DominoSessionException {
     return getPermissions(userIDFromSessionOrDB)
-        .contains(User.Permission.PROJECT_ADMIN);
+        .contains(Permission.PROJECT_ADMIN);
   }
 
   boolean hasAdminOrCDPerm(int userIDFromSessionOrDB) throws DominoSessionException {
-    Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
+    Collection<Permission> permissions = getPermissions(userIDFromSessionOrDB);
     boolean hasPerm = permissions
-        .contains(User.Permission.PROJECT_ADMIN) || permissions.contains(User.Permission.DEVELOP_CONTENT);
+        .contains(Permission.PROJECT_ADMIN) || permissions.contains(Permission.DEVELOP_CONTENT);
 //    logger.info("hasAdminOrCDPerm for " + userIDFromSessionOrDB + " are " + permissions + " has perm " + hasPerm);
     return hasPerm;
   }
 
   boolean hasCDPerm(int userIDFromSessionOrDB) throws DominoSessionException {
-    Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
-    boolean hasPerm = permissions.contains(User.Permission.DEVELOP_CONTENT);
+    Collection<Permission> permissions = getPermissions(userIDFromSessionOrDB);
+    boolean hasPerm = permissions.contains(Permission.DEVELOP_CONTENT);
     logger.info("hasCDPerm for " + userIDFromSessionOrDB + " are " + permissions + " has perm " + hasPerm);
     return hasPerm;
   }
 
   boolean hasQCPerm(int userIDFromSessionOrDB) throws DominoSessionException {
-    Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
-    return permissions.contains(User.Permission.QUALITY_CONTROL) || permissions.contains(User.Permission.PROJECT_ADMIN);
+    Collection<Permission> permissions = getPermissions(userIDFromSessionOrDB);
+    return permissions.contains(Permission.QUALITY_CONTROL) || permissions.contains(Permission.PROJECT_ADMIN);
   }
 
   /**
@@ -146,7 +147,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @return
    * @throws DominoSessionException
    */
-  protected Collection<User.Permission> getPermissions(int userIDFromSessionOrDB) throws DominoSessionException {
+  protected Collection<Permission> getPermissions(int userIDFromSessionOrDB) throws DominoSessionException {
 //    logger.info("getPermissions for" + "\nuser " + userIDFromSessionOrDB);
     User userFromSession = db.getUserDAO().getByID(userIDFromSessionOrDB);
     if (userFromSession == null) {

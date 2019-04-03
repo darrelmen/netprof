@@ -38,6 +38,7 @@ import mitll.langtest.server.database.result.UserToCount;
 import mitll.langtest.server.database.user.*;
 import mitll.langtest.shared.project.ProjectStatus;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickUserProject;
 import org.apache.logging.log4j.LogManager;
@@ -303,11 +304,11 @@ public class UserCopy {
     }
   }
 
-  private boolean doesGenderMatter(Collection<User.Permission> permissions) {
-    return permissions.contains(User.Permission.RECORD_AUDIO) ||
-        permissions.contains(User.Permission.DEVELOP_CONTENT) ||
-        permissions.contains(User.Permission.QUALITY_CONTROL) ||
-        permissions.contains(User.Permission.TEACHER_PERM);
+  private boolean doesGenderMatter(Collection<Permission> permissions) {
+    return permissions.contains(Permission.RECORD_AUDIO) ||
+        permissions.contains(Permission.DEVELOP_CONTENT) ||
+        permissions.contains(Permission.QUALITY_CONTROL) ||
+        permissions.contains(Permission.TEACHER_PERM);
   }
 
   /**
