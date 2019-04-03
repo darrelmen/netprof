@@ -299,6 +299,8 @@ public class UserMenu {
   }
 
   /**
+   * Only can add a instructor request in a project.
+   *
    * @param choices
    * @return
    */
@@ -307,7 +309,8 @@ public class UserMenu {
 
     if (current != null &&
         !current.isTeacher() &&
-        !current.getPermissions().contains(Permission.TEACHER_PERM)
+        !current.getPermissions().contains(Permission.TEACHER_PERM) &&
+        controller.getProjectStartupInfo() != null
     ) {
       LinkAndTitle e = new LinkAndTitle(REQUEST_INSTRUCTOR_STATUS,
           new SuccessClickHandler(() -> new DialogHelper(true)
@@ -333,8 +336,7 @@ public class UserMenu {
                                 "OK", "Cancel");
                           } else {
                             new DialogHelper(false).show("Request status is " + result,
-                                Arrays.asList(
-                                    "Your request status is " + result + "."),
+                                Arrays.asList("Your request status is " + result + "."),
                                 getListener(),
                                 "OK", "Cancel");
                           }

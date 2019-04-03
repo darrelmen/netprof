@@ -162,10 +162,10 @@ public class MailSupport {
 //    }
   }
 
- public boolean sendHTMLEmail(String to,
-                        String replyTo,
-                        String subject,
-                        String message) {
+  public boolean sendHTMLEmail(String to,
+                               String replyTo,
+                               String subject,
+                               String message) {
     return sendEmail(null, to, replyTo, subject, message, null, Collections.emptyList());
   }
 
