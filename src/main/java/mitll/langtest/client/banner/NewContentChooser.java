@@ -168,7 +168,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     {
       Set<Permission> userPerms = new HashSet<>(controller.getPermissions());
 
-    //  logger.info("getCurrentView user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
+      //  logger.info("getCurrentView user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
       List<Permission> requiredPerms = currentStoredView.getPerms();
       userPerms.retainAll(requiredPerms);
 
@@ -177,17 +177,31 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         currentStoredView = hasStartup && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
       } else /*if (!userPerms.isEmpty())*/ {
         if (hasStartup) {
-          ProjectType projectType = controller.getProjectStartupInfo().getProjectType();
-          ProjectMode mode = currentStoredView.getMode();
-          //logger.info("getCurrentView : projectType " + projectType + " mode " + mode);
+          String value = getStorage().getValue(MODE);
+          logger.info("selected mode is " + value);
 
-          if (mode == ProjectMode.DIALOG && projectType == NP) {
-            currentStoredView = LEARN;
-          } else if (mode == VOCABULARY && projectType == ProjectType.DIALOG) {
-            currentStoredView = DIALOG;
-          } else {
-        //    logger.info("OK - no inconsistency...");
+          try {
+            ProjectMode storedMode = ProjectMode.valueOf(value);
+
+            ProjectMode viewMode = currentStoredView.getMode();
+            logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
+
+            if (viewMode == ProjectMode.DIALOG && storedMode == ProjectMode.VOCABULARY) {
+              // currentStoredView = LEARN;
+              logger.warning("force learn view?");
+            } else if (viewMode == VOCABULARY && storedMode == ProjectMode.DIALOG) {
+              //currentStoredView = DIALOG;
+              logger.warning("force dialog view?");
+            } else {
+              logger.info("OK - no inconsistency...");
+            }
+
+          } catch (IllegalArgumentException e) {
+            e.printStackTrace();
           }
+
+          //ProjectType projectType = controller.getProjectStartupInfo().getProjectType();
+
         }
       }
     }
@@ -235,8 +249,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
     if (DEBUG) {
-      logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
-//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("showView "  + view));
+      logger.info("showView : " +
+          "\n\tshow    " + view +
+          "\n\tcurrent " + currentStoredView + " from click " + fromClick);
+
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("showView " + view));
 //      logger.info("logException stack " + exceptionAsString);
     }
 
@@ -491,65 +508,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     showQuizForReal(fromClick);
   }
 
-  /**
-   * TODO : remove this - why support something from a year ago?
-   *
-   * @see #showDrill
-   */
-/*
-  private void showPolyDialog() {
-    mode = MODE_CHOICE.NOT_YET;
-
-    new PolyglotDialog(
-        new DialogHelper.CloseListener() {
-          @Override
-          public boolean gotYes() {
-            mode = candidateMode;
-            if (mode == MODE_CHOICE.DRY_RUN) {
-              pushFirstUnit();
-            } else if (mode == MODE_CHOICE.POLYGLOT) {
-              pushSecondUnit();
-            } else {
-              return false;
-            }
-
-            return true;
-          }
-
-          @Override
-          public void gotNo() {
-            setBannerVisible(true);
-            PracticeHelper practiceHelper = NewContentChooser.this.practiceHelper;
-            practiceHelper.setVisible(true);
-          }
-
-          @Override
-          public void gotHidden() {
-            if (mode != MODE_CHOICE.NOT_YET) {
-              setBannerVisible(false);
-              PracticeHelper practiceHelper = NewContentChooser.this.practiceHelper;
-              practiceHelper.setVisible(false);
-            }
-//        logger.info("mode is " + mode);
-            showPractice(practiceHelper, PRACTICE);
-          }
-        },
-        new PolyglotDialog.ModeChoiceListener() {
-          @Override
-          public void gotMode(MODE_CHOICE choice) {
-            candidateMode = choice;
-          }
-
-          @Override
-          public void gotPrompt(PROMPT_CHOICE choice) {
-            */
-  /*candidatePrompt = choice;*//*
-
-          }
-        }
-    );
-  }
-*/
   private void showPractice(PracticeHelper toUse, VIEWS views) {
     //  toUse.setMode(mode);
     toUse.setNavigation(this);
@@ -672,7 +630,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     storeValue(mode == ProjectMode.DIALOG ? DIALOG : LEARN);
     getStorage().storeValue(MODE, mode.name());
 
-    if (DEBUG) logger.info("storeViewForMode OK mode now = " + controller.getMode());
+    if (DEBUG) {
+      logger.info("storeViewForMode OK mode now = " + controller.getMode());
+    }
   }
 
   @NotNull
@@ -784,7 +744,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
   private void pushItem(String url) {
     if (DEBUG_PUSH_ITEM) logger.info("pushItem - " + url);
-
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
 //    logger.info("logException stack " + exceptionAsString);
 

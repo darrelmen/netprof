@@ -799,12 +799,6 @@ public class ProjectChoices extends ThumbnailChoices {
       importButtonContainer.setVisible(projectForLang.getDominoID() > 0);
     }
 
-//    {
-//      Button button = getCheckOOVButton(projectForLang, label);
-//      button.addStyleName("leftFiveMargin");
-//      horiz2.add(getButtonContainer(button));
-//    }
-
     {
       if (isAllowedToDelete(projectForLang)) {
         Button deleteButton = getDeleteButton(projectForLang, label);
