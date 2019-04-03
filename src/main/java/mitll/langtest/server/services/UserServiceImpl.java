@@ -33,6 +33,7 @@ import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.UserService;
+import mitll.langtest.server.database.user.IPendingUserDAO;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.user.ActiveUser;
@@ -42,6 +43,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -144,7 +146,8 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
   }
 
   public List<ActiveUser> getPendingUsers(int projid) throws DominoSessionException {
-    int userIDFromSession = getUserIDFromSessionOrDB();
+    /*int userIDFromSession =*/
+    getUserIDFromSessionOrDB();
     List<ActiveUser> pending = new ArrayList<>();
 
     db
@@ -152,6 +155,14 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
         .pendingOnProject(projid)
         .forEach(p -> {
           User userWhere = db.getUserDAO().getUserWhere(p.userid());
+          String state = p.state();
+          ActiveUser.PENDING pending1 = null;
+          try {
+            pending1 = ActiveUser.PENDING.valueOf(state);
+          } catch (IllegalArgumentException e) {
+            pending1 = ActiveUser.PENDING.REQUESTED;
+          }
+
           pending.add(new ActiveUser(new FirstLastUser(
               p.userid(),
               userWhere.getUserID(),
@@ -159,8 +170,35 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
               userWhere.getLast(),
               p.changed().getTime(),
               userWhere.getAffiliation()),
-              p.changed().getTime()));
+              p.changed().getTime())
+              .setState(pending1));
         });
     return pending;
   }
+
+  /**
+   * Consider sending email to person
+   *
+   * @param toApproveUser
+   * @throws DominoSessionException
+   */
+  @Override
+  public void approveAndDisapprove(Collection<Integer> approve, Collection<Integer> disapprove) throws DominoSessionException {
+    int userIDFromSession = getUserIDFromSessionOrDB();
+    approve.forEach(id -> db.getPendingUserDAO().update(id, ActiveUser.PENDING.APPROVED, userIDFromSession));
+    disapprove.forEach(id -> db.getPendingUserDAO().update(id, ActiveUser.PENDING.DENIED, userIDFromSession));
+
+  }
+
+/*  @Override
+  public void approve(int toApproveUser) throws DominoSessionException {
+    int userIDFromSession = getUserIDFromSessionOrDB();
+    db.getPendingUserDAO().update(toApproveUser, IPendingUserDAO.PENDING.APPROVED, userIDFromSession);
+  }
+
+  @Override
+  public void disapprove(int toApproveUser) throws DominoSessionException {
+    int userIDFromSession = getUserIDFromSessionOrDB();
+    db.getPendingUserDAO().update(toApproveUser, IPendingUserDAO.PENDING.DENIED, userIDFromSession);
+  }*/
 }

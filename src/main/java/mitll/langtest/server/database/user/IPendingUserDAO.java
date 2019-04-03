@@ -30,12 +30,13 @@
 package mitll.langtest.server.database.user;
 
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.shared.user.ActiveUser;
 import mitll.npdata.dao.SlickPendingUser;
 
 import java.util.List;
 
 public interface IPendingUserDAO extends IDAO {
-  enum PENDING {REQUESTED, APPROVED, DENIED}
+  //enum PENDING {REQUESTED, APPROVED, DENIED}
 
   void insert(int userid, int projid);
 
@@ -43,8 +44,7 @@ public interface IPendingUserDAO extends IDAO {
 
    * @see
    */
-  void update(int id, PENDING state, int byUser);
+  void update(int id, ActiveUser.PENDING state, int byUser);
 
   List<SlickPendingUser> pendingOnProject(int projid);
-
 }

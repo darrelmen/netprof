@@ -48,7 +48,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 /**
@@ -119,9 +118,8 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
   protected DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
                                            List<TranscriptSegment> phonesInWord,
                                            AudioControl audioControl,
-                                           TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
-                                           boolean simpleLayout) {
-    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, false);
+                                           boolean simpleLayout, IHighlightSegment wordHighlight) {
+    return new WordTable().getPhoneDivBelowWord(audioControl, phonesInWord, simpleLayout, wordSegment, false, wordHighlight);
   }
 
   /**

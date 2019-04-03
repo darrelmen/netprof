@@ -41,6 +41,7 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.analysis.BasicUserContainer;
@@ -59,7 +60,7 @@ public class ActiveUsersManager {
   private static final String LAST_ACTIVITY = "Last Active";
   private static final int INTCOL_WIDTH = 110;
 
-  private final ExerciseController controller;
+  protected final ExerciseController controller;
   private static final int TOP = 56;
 
   /**
@@ -81,7 +82,7 @@ public class ActiveUsersManager {
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
 
-    int left = ((Window.getClientWidth()) / 2) - 200;
+    int left = 50;//((Window.getClientWidth()) / 2) - 200;
     dialogBox.setPopupPosition(left, TOP);
 
     final Panel dialogVPanel = new VerticalPanel();
@@ -108,27 +109,63 @@ public class ActiveUsersManager {
     });
   }
 
+  protected void addPrompt(Panel dialogVPanel) {
+  }
+
+  private ActiveUserBasicUserContainer activeUserBasicUserContainer;
+
+  protected void reload() {
+    activeUserBasicUserContainer.redraw();
+  }
+
   protected void gotUsers(List<ActiveUser> result, Panel dialogVPanel, DialogBox dialogBox) {
-    dialogVPanel.add(new ActiveUserBasicUserContainer().getTableWithPager(result));
+    activeUserBasicUserContainer = getUserContainer();
+    dialogVPanel.add(activeUserBasicUserContainer.getTableWithPager(result));
+
 
     DivWidget horiz = new DivWidget();
     horiz.setWidth("100%");
-    horiz.add(getOKButton(dialogBox));
+    addButtons(dialogBox, horiz);
     dialogVPanel.add(horiz);
+  }
+
+  protected ActiveUserBasicUserContainer getUserContainer() {
+    return new ActiveUserBasicUserContainer();
+  }
+
+  public ActiveUser getCurrentSelection() {
+    return activeUserBasicUserContainer.getCurrentSelection();
+  }
+
+  protected Button addButtons(DialogBox dialogBox, DivWidget horiz) {
+    Button okButton = getOKButton(dialogBox);
+    horiz.add(okButton);
+    return okButton;
   }
 
   @NotNull
   private Button getOKButton(DialogBox dialogBox) {
-    Button ok = new Button("OK");
-    ok.setType(ButtonType.SUCCESS);
-    ok.setSize(ButtonSize.LARGE);
-    ok.addStyleName("floatRight");
-    ok.addClickHandler(event -> dialogBox.hide());
+    String ok1 = "OK";
+    Button ok = getButton(ok1);
+    ok.addClickHandler(event -> gotOKClick(dialogBox));
     return ok;
   }
 
-  private class ActiveUserBasicUserContainer extends BasicUserContainer<ActiveUser> {
-    ActiveUserBasicUserContainer() {
+  protected void gotOKClick(DialogBox dialogBox) {
+    dialogBox.hide();
+  }
+
+  @NotNull
+  protected Button getButton(String ok1) {
+    Button ok = new Button(ok1);
+    ok.setType(ButtonType.SUCCESS);
+    ok.setSize(ButtonSize.LARGE);
+    ok.addStyleName("floatRight");
+    return ok;
+  }
+
+  protected class ActiveUserBasicUserContainer extends BasicUserContainer<ActiveUser> {
+    protected ActiveUserBasicUserContainer() {
       super(ActiveUsersManager.this.controller, "activeUser", "User");
     }
 
@@ -143,12 +180,16 @@ public class ActiveUsersManager {
       addUserID(list);
       super.addColumnsToTable();
 
+      addVisitedCols(list);
+    }
+
+    protected void addVisitedCols(List<ActiveUser> list) {
       addVisitedCol(list);
       addLang(list);
       addProj(list);
     }
 
-    void addUserID(List<ActiveUser> list) {
+    protected void addUserID(List<ActiveUser> list) {
       Column<ActiveUser, SafeHtml> userCol = getClickable(this::getIDString);
       table.setColumnWidth(userCol, 55 + "px");
       addColumn(userCol, new TextHeader("ID"));
@@ -193,7 +234,7 @@ public class ActiveUsersManager {
       table.addColumnSortHandler(getProjSorter(userCol, list));
     }
 
-    private void addVisitedCol(List<ActiveUser> list) {
+    protected void addVisitedCol(List<ActiveUser> list) {
       Column<ActiveUser, SafeHtml> dateCol = getVisitedColumn();
       dateCol.setSortable(true);
       addColumn(dateCol, new TextHeader(LAST_ACTIVITY));

@@ -38,7 +38,7 @@ import org.jetbrains.annotations.NotNull;
  */
 class LinkAndTitle {
   private final ClickHandler clickHandler;
-  private final String title;
+  private String title;
   private final String linkURL;
   private NavLink myLink;
 
@@ -66,7 +66,6 @@ class LinkAndTitle {
   }
 
   /**
-   *
    * @return
    */
   @NotNull
@@ -84,6 +83,11 @@ class LinkAndTitle {
 
   NavLink getMyLink() {
     return myLink;
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+    myLink.setText(title);
   }
 
   @Override

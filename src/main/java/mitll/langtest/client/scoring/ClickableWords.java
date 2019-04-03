@@ -36,14 +36,20 @@ import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.PopupPanel;
+import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.custom.dialog.WordBounds;
 import mitll.langtest.client.custom.dialog.WordBoundsFactory;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
-import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -52,7 +58,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 3/23/17.
  */
-public class ClickableWords {
+public class ClickableWords<T extends CommonShell & HasUnitChapter> {
   private final Logger logger = Logger.getLogger("ClickableWords");
 
   private static final boolean DEBUG_CHINESE = false;
@@ -69,12 +75,12 @@ public class ClickableWords {
   private static final char FULL_WIDTH_ZERO = '\uFF10';
   private static final char ZERO = '0';
 
-  private boolean isJapanese = false;
-  private boolean isUrdu = false;
+  private boolean isJapanese;
+  private boolean isUrdu;
 
   private final int exercise;
 
-  private boolean hasClickableAsian = false;
+  private boolean hasClickableAsian;
 
   private final ListInterface listContainer;
   private final WordBoundsFactory factory = new WordBoundsFactory();
@@ -84,6 +90,8 @@ public class ClickableWords {
   private final boolean addFloatLeft;
 
   private static final boolean DEBUG = false;
+//  private ExerciseServiceAsync<T> exerciseServiceAsync;
+//  private int userID;
 
   /**
    * @param listContainer
@@ -92,13 +100,22 @@ public class ClickableWords {
    * @param fontSize
    * @param highlightColor
    * @param addFloatLeft
+   * @param exerciseServiceAsync
+   * @param userID
    * @see RefAudioGetter#addWidgets
    * @see DialogExercisePanel#makeClickableWords
    */
-  public ClickableWords(ListInterface listContainer, int exercise, Language language, int fontSize, String highlightColor, boolean addFloatLeft) {
+  ClickableWords(ListInterface listContainer,
+                        int exercise, Language language, int fontSize,
+                        String highlightColor, boolean addFloatLeft,
+                        ExerciseServiceAsync<T> exerciseServiceAsync,
+                        int userID) {
     this.listContainer = listContainer;
     this.exercise = exercise;
     this.highlightColor = highlightColor;
+
+//    this.exerciseServiceAsync = exerciseServiceAsync;
+//    this.userID = userID;
 
     isJapanese = language == Language.JAPANESE;
     isUrdu = language == Language.URDU;
@@ -109,7 +126,7 @@ public class ClickableWords {
     this.fontSize = fontSize;
     this.addFloatLeft = addFloatLeft;
 
- //   logger.info("addFloatLeft ex " + exercise + " = " + addFloatLeft);
+    //   logger.info("addFloatLeft ex " + exercise + " = " + addFloatLeft);
   }
 
   /**
@@ -120,7 +137,7 @@ public class ClickableWords {
    * @param clickables
    * @param isRTL
    * @param tokensForMandarin
-   * @see DialogExercisePanel#getFLEntry(ClientExercise)
+   * @see DialogExercisePanel#makeClickableWords(ProjectStartupInfo, ListInterface)
    * @see TwoColumnExercisePanel#getFLEntry
    */
   DivWidget getClickableWords(String value,
@@ -140,7 +157,6 @@ public class ClickableWords {
         "\n\tis chinese " +isChineseCharacter);*/
 
     return getClickableDiv(
-        // isChineseCharacter ? tokensForMandarin :
         getTokens(value, isChineseCharacter, tokensForMandarin),
         getSearchTokens(isChineseCharacter), dir, clickables, fieldType);
   }
@@ -287,7 +303,7 @@ public class ClickableWords {
    * @return
    * @see TwoColumnExercisePanel#getContext
    */
-  public DivWidget getClickableWordsHighlight(String contextSentence,
+  DivWidget getClickableWordsHighlight(String contextSentence,
                                               String highlight,
                                               FieldType fieldType,
                                               List<IHighlightSegment> clickables,
@@ -683,12 +699,91 @@ public class ClickableWords {
     return highlightSegmentDiv;
   }
 
+  //DecoratedPopupPanel thePopup;
+
   private void addClickableProperties(HTML highlightSegment, String removePunct) {
     highlightSegment.getElement().getStyle().setCursor(Style.Cursor.POINTER);
     highlightSegment.addClickHandler(clickEvent -> Scheduler.get().scheduleDeferred(() -> putTextInSearchBox(removePunct)));
-    highlightSegment.addMouseOverHandler(mouseOverEvent -> highlightSegment.addStyleName("underline"));
-    highlightSegment.addMouseOutHandler(mouseOutEvent -> highlightSegment.removeStyleName("underline"));
+
+
+    highlightSegment.addMouseOverHandler(mouseOverEvent -> {
+      highlightSegment.addStyleName("underline");
+
+//      String oldClassName = highlightSegment.getElement().getClassName();
+      //     logger.info("mouseOverEvent oldClassName " +oldClassName);
+
+
+  /*    ExerciseListRequest request = new ExerciseListRequest(0, userID)
+          .setPrefix(removePunct)
+          .setLimit(1);
+
+      exerciseServiceAsync.getExerciseIds(request, new AsyncCallback<ExerciseListWrapper<T>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(ExerciseListWrapper<T> result) {
+          ClientExercise firstExercise = result.getFirstExercise();
+
+          if (firstExercise != null) {
+            String cleaned = getSearchText(firstExercise.getForeignLanguage());
+//            boolean found = Arrays.asList(cleaned.split("\\s+")).contains(removePunct.toLowerCase());
+            boolean found = cleaned.equalsIgnoreCase(removePunct);
+            if (found) {
+
+              if (thePopup != null && thePopup.isVisible()) {
+                thePopup.hide();
+                thePopup = null;
+              }
+
+              logger.info("found " + firstExercise.getEnglish() + " " + firstExercise.getForeignLanguage());
+              thePopup = new DecoratedPopupPanel();
+              thePopup.setAutoHideEnabled(true);
+              thePopup.clear();
+              thePopup.add(new HTML(firstExercise.getEnglish()));
+              thePopup.addAutoHidePartner(highlightSegment.getElement()); // fix for bug Wade found where click didn't toggle comment
+              showOrHideRelative(thePopup, highlightSegment);
+
+            } else {
+              logger.info("not same " +
+                  "\n\teng      " + firstExercise.getEnglish() +
+                  "\n\tfl       " + firstExercise.getForeignLanguage() +
+                  "\n\tcleaned  " + cleaned +
+                  "\n\tsearch   " + removePunct);
+
+            }
+          }
+        }
+      });*/
+
+
+    });
+
+    highlightSegment.addMouseOutHandler(mouseOutEvent -> {
+      highlightSegment.removeStyleName("underline");
+
+   /*   if (thePopup != null && thePopup.isVisible()) {
+        thePopup.hide();
+        thePopup = null;
+      }*/
+      //   logger.info("addMouseOutHandler oldClassName " +highlightSegment.getElement().getClassName());
+
+    });
   }
+
+/*
+  void showOrHideRelative(PopupPanel popup, UIObject popupButton) {
+    if (popup.isShowing()) {// fix for bug that Wade found -- if we click off of popup, it dismisses it,
+      // but if that click is on the button, it would immediately shows it again
+      popup.hide();
+    } else {
+      popup.getElement().getStyle().setZIndex(1100);
+      popup.showRelativeTo(popupButton);
+    }
+  }
+*/
 
   /**
    * Use bigflfont for RTL.
@@ -750,12 +845,17 @@ public class ClickableWords {
 
   private void putTextInSearchBox(String html) {
     // logger.info("putTextInSearchBox original " + html);
-    String s1 = html.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, " ").replaceAll("’", " ");
-    String s2 = s1.split(GoodwaveExercisePanel.SPACE_REGEX)[0].toLowerCase();
+    //  String s2 = getSearchText(html);
     // logger.info("putTextInSearchBox after    " + s2);
     if (listContainer != null) {
-      listContainer.searchBoxEntry(s2);
+      listContainer.searchBoxEntry(getSearchText(html));
     }
+  }
+
+  @NotNull
+  private String getSearchText(String html) {
+    String s1 = html.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, " ").replaceAll("’", " ");
+    return s1.split(GoodwaveExercisePanel.SPACE_REGEX)[0].toLowerCase();
   }
 
   /**

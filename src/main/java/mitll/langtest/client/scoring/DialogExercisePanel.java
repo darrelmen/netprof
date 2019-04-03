@@ -69,7 +69,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   public static final String BLUE = "#2196F3";
 
   final T exercise;
-  final ExerciseController controller;
+  final ExerciseController<T> controller;
   DivWidget flClickableRow;
   ClickableWords clickableWords;
   /**
@@ -117,7 +117,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see ListenViewHelper#getTurnPanel
    */
   DialogExercisePanel(final T commonExercise,
-                      final ExerciseController controller,
+                      final ExerciseController<T> controller,
                       final ListInterface<?, ?> listContainer,
                       Map<Integer, AlignmentOutput> alignments,
                       IListenView listenView) {
@@ -246,8 +246,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
     Language languageInfo = isEngAttr() ? Language.ENGLISH : projectStartupInfo.getLanguageInfo();
     // logger.info("makeClickableWords " + exercise.getID() + " " + exercise.getFLToShow() + " add float left " + addFloatLeft);
+
+
     clickableWords = new ClickableWords(listContainer, exercise.getID(),
-        languageInfo, languageInfo.getFontSize(), BLUE, shouldAddFloatLeft());
+        languageInfo, languageInfo.getFontSize(), BLUE, shouldAddFloatLeft(),
+        controller.getExerciseService(), controller.getUser());
   }
 
   protected boolean shouldAddFloatLeft() {
@@ -573,7 +576,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                 }
 //                String event = wordSegment.getEvent();
 //                phonesInWordAll.forEach(ph -> logger.info(event + " " + ph.toString()));
-                showPhones(combinedTranscriptSegment, phonesInWordAll, audioControl, phoneMap, clickablePhones, simpleLayout);
+                showPhones(combinedTranscriptSegment, phonesInWordAll, audioControl, clickablePhones, simpleLayout, current);
               }
 
               if (DEBUG_MATCH) {
@@ -808,7 +811,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     if (lcSegment.equalsIgnoreCase(lcClickable)) {  // easy match -
       if (showPhones) {
-        showPhones(wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, simpleLayout);
+        showPhones(wordSegment, phonesInWord, audioControl, clickablePhones, simpleLayout, clickable);
       }
 
       return clickable;
@@ -820,7 +823,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       } else { // all clickables match this segment
         AllHighlight allHighlight = getAllHighlight(bulk);
         if (showPhones) {
-          showPhones(wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, simpleLayout);
+          showPhones(wordSegment, phonesInWord, audioControl, clickablePhones, simpleLayout, allHighlight);
         }
 
         if (DEBUG || DEBUG_MATCH)
@@ -834,10 +837,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   private void showPhones(TranscriptSegment wordSegment,
                           List<TranscriptSegment> phonesInWord,
                           AudioControl audioControl,
-                          TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                           DivWidget clickablePhones,
-                          boolean simpleLayout) {
-    addSouthClickable(clickablePhones, getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap, simpleLayout));
+                          boolean simpleLayout,
+                          IHighlightSegment wordHighlight) {
+    addSouthClickable(clickablePhones, getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, simpleLayout, wordHighlight));
   }
 
   private void addSouthClickable(DivWidget clickablePhones, DivWidget phoneDivBelowWord) {
@@ -849,8 +852,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param wordSegment
    * @param phonesInWord
    * @param audioControl
-   * @param phoneMap
    * @param simpleLayout
+   * @param wordHighlight
    * @return
    * @see #doOneToManyMatch
    */
@@ -858,8 +861,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   protected DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
                                            List<TranscriptSegment> phonesInWord,
                                            AudioControl audioControl,
-                                           TreeMap<TranscriptSegment, IHighlightSegment> phoneMap, boolean simpleLayout) {
-    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, true);
+                                           boolean simpleLayout, IHighlightSegment wordHighlight) {
+    return new WordTable().getPhoneDivBelowWord(audioControl, phonesInWord, simpleLayout, wordSegment, true, wordHighlight);
   }
 
   /**
@@ -941,7 +944,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 */
 
-  private void dumpMatchComparison(List<IHighlightSegment> clickables, List<TranscriptSegment> segments, int c) {
+/*  private void dumpMatchComparison(List<IHighlightSegment> clickables, List<TranscriptSegment> segments, int c) {
     logger.info("transcriptMatchesOneToOne  clickables " + c + " segments " + segments.size());
     StringBuilder builder = new StringBuilder();
     for (IHighlightSegment clickable : clickables) {
@@ -956,7 +959,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       builder2.append(segment.getEvent()).append(" ");
     }
     logger.info("transcriptMatchesOneToOne align    : " + builder2);
-  }
+  }*/
 
   private int getNumClickable(List<IHighlightSegment> clickables) {
     int c = 0;

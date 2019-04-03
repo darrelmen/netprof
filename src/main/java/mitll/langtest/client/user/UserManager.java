@@ -292,10 +292,29 @@ public class UserManager {
   private void gotNewUser(User result) {
     if (DEBUG) logger.info("UserManager.gotNewUser " + result);
     if (result != null) {
+      String first = result.getFirst();
+      String last = result.getLast();
+
+      boolean fvalid = !first.isEmpty() && !first.equalsIgnoreCase("First");
+      boolean lvalid = !last.isEmpty() && !last.equalsIgnoreCase("Last");
+
+      abbreviation = fvalid && lvalid ?
+          first.substring(0, 1).toUpperCase() + "." + last.substring(0, 1).toUpperCase() + "." :
+          getUserID();
+
       this.current = result;
-      // logger.info("\tgotNewUser current user " + current);
+      logger.info("gotNewUser ab " + abbreviation +
+          " current user " + current);
+
       userNotification.gotUser(result);
+
     }
+  }
+
+  private String abbreviation;
+
+  public String getAbbreviation() {
+    return abbreviation;
   }
 
   public boolean isMale() {

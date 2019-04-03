@@ -514,9 +514,10 @@ public class FilterResponseHelper implements IResponseFilter {
 //        logger.info("filterExercises remove english - before " + exercises.size());
       exercises = getCommonExercisesWithoutEnglish(exercises);
       //      logger.info("filterExercises remove english - after  " + exercises.size());
-    } else if (request.isExactMatch()) {
-      exercises = getExactMatch(request.getPrefix(), databaseServices.getProject(projid).getLanguageEnum(), exercises);
     }
+//    else if (request.isExactMatch()) {
+//      exercises = getExactMatch(request.getPrefix(), databaseServices.getProject(projid).getLanguageEnum(), exercises);
+//    }
 
     logger.info("filterExercises" +
         "\n\tfilter req " + request +
@@ -560,18 +561,18 @@ public class FilterResponseHelper implements IResponseFilter {
     return exercises;
   }
 
-  @NotNull
-  private List<CommonExercise> getExactMatch(String prefix, Language language, List<CommonExercise> exercises) {
-    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(language);
-    exercises = exercises
-        .stream()
-        .filter(ex ->
-            smallVocabDecoder.getTokens(ex.getForeignLanguage()).equals(prefix) ||
-                smallVocabDecoder.getTokens(ex.getContext()).equals(prefix)
-        )
-        .collect(Collectors.toList());
-    return exercises;
-  }
+//  @NotNull
+//  private List<CommonExercise> getExactMatch(String prefix, Language language, List<CommonExercise> exercises) {
+//    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(language);
+//    exercises = exercises
+//        .stream()
+//        .filter(ex ->
+//            smallVocabDecoder.getTokens(ex.getForeignLanguage()).equals(prefix) ||
+//                smallVocabDecoder.getTokens(ex.getContext()).equals(prefix)
+//        )
+//        .collect(Collectors.toList());
+//    return exercises;
+//  }
 
   private List<CommonExercise> getParentChildPairs(List<CommonExercise> exercises, int projid) {
     List<CommonExercise> pairs = new ArrayList<>();

@@ -282,7 +282,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    * @see #makeHeaderRow()
    */
   private String getGreeting() {
-    return userManager.getUserID() == null ? "" : ("" + userManager.getUserID());
+    return userManager.getUserID() == null ? "" : ("" + userManager.getAbbreviation());
   }
 
   /**
@@ -536,9 +536,9 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     if (userManager.hasUser()) {
       // logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
 
-      if (userManager.isPolyglot()) {
-        logger.info("\tpolyglot users don't get to change projects.");
-      } else {
+//      if (userManager.isPolyglot()) {
+//        logger.info("\tpolyglot users don't get to change projects.");
+//      } else {
         forgetProjectForUser();
 
         pushClearHistory();
@@ -550,7 +550,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
         clearContent();
         addProjectChoices(0, null);
         showCogMenu();
-      }
+//      }
     } else {
       logger.warning("chooseProjectAgain no user --- ");
     }

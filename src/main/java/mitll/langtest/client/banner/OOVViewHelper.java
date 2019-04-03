@@ -580,7 +580,9 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
           @Override
           public void onSuccess(Collection<String> result) {
             if (result.isEmpty()) {
-              currentOOV.setEquivalent(text);
+              if (currentOOV != null) {
+                currentOOV.setEquivalent(text);
+              }
               oovContainer.redraw();
               checkButton.setEnabled(!getDirtyItems().isEmpty());
               message.setHTML(getUnmatchedItems().size() + " items left.");

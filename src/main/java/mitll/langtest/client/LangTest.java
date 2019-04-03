@@ -76,6 +76,7 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.HasUnitChapter;
@@ -90,7 +91,7 @@ import java.util.logging.Logger;
 import static mitll.langtest.client.banner.NewContentChooser.MODE;
 
 public class LangTest implements
-    EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport, UserState {
+    EntryPoint, UserFeedback, ExerciseController<ClientExercise>, UserNotification, LifecycleSupport, UserState {
   private final Logger logger = Logger.getLogger("LangTest");
 
   private static final String LOCALHOST = "127.0.0.1";
@@ -131,7 +132,7 @@ public class LangTest implements
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
   private final OpenUserServiceAsync openUserService = GWT.create(OpenUserService.class);
-  private final ExerciseServiceAsync<?> exerciseServiceAsync = GWT.create(ExerciseService.class);
+  private final ExerciseServiceAsync<ClientExercise> exerciseServiceAsync = GWT.create(ExerciseService.class);
   private final DialogServiceAsync dialogServiceAsync = GWT.create(DialogService.class);
   private final ListServiceAsync listServiceAsync = GWT.create(ListService.class);
   private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
@@ -1081,7 +1082,7 @@ public class LangTest implements
     return qcServiceAsync;
   }
 
-  public ExerciseServiceAsync<?> getExerciseService() {
+  public ExerciseServiceAsync<ClientExercise> getExerciseService() {
     return exerciseServiceAsync;
   }
 

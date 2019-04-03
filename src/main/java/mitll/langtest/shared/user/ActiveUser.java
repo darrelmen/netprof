@@ -29,6 +29,8 @@
 
 package mitll.langtest.shared.user;
 
+import com.google.gwt.user.client.rpc.IsSerializable;
+
 /**
  * @seex mitll.langtest.server.database.analysis.Analysis#getUserInfos
  * @see mitll.langtest.client.result.ActiveUsersManager#show
@@ -37,6 +39,10 @@ public class ActiveUser extends SimpleUser {
   private String projectName = "";
   private String language = "";
   private long visited;
+
+  public enum PENDING implements IsSerializable {REQUESTED, APPROVED, DENIED}
+
+  private PENDING state;
 
   public ActiveUser() {
   }
@@ -87,5 +93,14 @@ public class ActiveUser extends SimpleUser {
 
   public void setLanguage(String language) {
     this.language = language;
+  }
+
+  public PENDING getState() {
+    return state;
+  }
+
+  public ActiveUser setState(PENDING state) {
+    this.state = state;
+    return this;
   }
 }

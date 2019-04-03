@@ -29,6 +29,7 @@
 
 package mitll.langtest.client.services;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.domino.user.ChangePasswordView;
@@ -38,6 +39,7 @@ import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.user.ActiveUser;
 import mitll.langtest.shared.user.User;
 
+import java.util.Collection;
 import java.util.List;
 
 @RemoteServiceRelativePath("user-manager")
@@ -56,6 +58,10 @@ public interface UserService extends RemoteService {
 
   List<ActiveUser> getPendingUsers(int projid) throws DominoSessionException;
 
+//  void approve(int toApproveUser) throws DominoSessionException;
+//  void disapprove(int toApproveUser) throws DominoSessionException;
+//
+
   void logout() throws DominoSessionException;
 
   /**
@@ -67,4 +73,6 @@ public interface UserService extends RemoteService {
   boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword) throws DominoSessionException;
 
   void sendTeacherRequest() throws DominoSessionException;
+
+  void approveAndDisapprove(Collection<Integer> approve, Collection<Integer> disapprove) throws  DominoSessionException;
 }

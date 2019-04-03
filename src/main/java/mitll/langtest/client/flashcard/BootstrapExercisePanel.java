@@ -184,9 +184,11 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     // add answer widget to do the recording
     toAddTo.add(getAnswerAndRecordButtonRow(exerciseID, controller));
 
-    if (exercise.hasContext()) {
-      addContextSentenceToShowWhileWaiting(controller, toAddTo);
-    }
+    //
+//    if (exercise.hasContext()) {
+//      addContextSentenceToShowWhileWaiting(controller, toAddTo);
+//    }
+
     scoreFeedbackRow = new DivWidget();
     scoreFeedbackRow.addStyleName("bottomFiveMargin");
     scoreFeedbackRow.setHeight("52px");
@@ -206,16 +208,16 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     toAddTo.add(wrapper);
   }
 
-  private void addContextSentenceToShowWhileWaiting(ExerciseController controller, Panel toAddTo) {
+ /* private void addContextSentenceToShowWhileWaiting(ExerciseController<T> controller, Panel toAddTo) {
     ClientExercise contextSentence = exercise.getDirectlyRelated().iterator().next();
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     if (projectStartupInfo != null) {
       int fontSize = projectStartupInfo.getLanguageInfo().getFontSize();
 
       Language languageInfo = controller.getLanguageInfo();
-      languageInfo.isRTL();
+    //  languageInfo.isRTL();
       ClickableWords commonExerciseClickableWords =
-          new ClickableWords(null, exercise.getID(), languageInfo, fontSize, BLUE, true);
+          new ClickableWords<T>(null, exercise.getID(), languageInfo, fontSize, BLUE, true, controller.getExerciseService(), controller.getUser());
 
       String flToShow = contextSentence.getFLToShow();
       String toHighlight = exercise.getFLToShow();
@@ -235,7 +237,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
       toAddTo.add(contextSentenceWhileWaiting);
     }
   }
-
+*/
   private RecordButtonPanel answerWidget;
   private Widget button;
   private RecordButton realRecordButton;

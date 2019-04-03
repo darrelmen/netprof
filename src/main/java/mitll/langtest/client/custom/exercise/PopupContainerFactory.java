@@ -47,23 +47,6 @@ public class PopupContainerFactory {
   //private final Logger logger = Logger.getLogger("PopupContainerFactory");
   private final PopupHelper popupHelper = new PopupHelper();
 
-  /**
-   * @param commentEntryText
-   * @return
-   * @seex NPFExercise#getNextListButton
-   */
-  /*public DecoratedPopupPanel makePopupAndButton(PopupContainerFactory.HidePopupTextBox commentEntryText,
-                                                Button triggerButton,
-                                                Tooltip triggerButtonTooltip,
-                                                ClickHandler clickHandler) {
-    final DecoratedPopupPanel thePopup = getPopup(commentEntryText, clickHandler);
-
-    thePopup.addAutoHidePartner(triggerButton.getElement()); // fix for bug Wade found where click didn't toggle comment
-
-    configurePopupButton(triggerButton, thePopup, commentEntryText, triggerButtonTooltip);
-
-    return thePopup;
-  }*/
 
   /**
    * @param commentEntryText
@@ -122,9 +105,7 @@ public class PopupContainerFactory {
   }
 
   void showOrHideRelative(PopupPanel popup, UIObject popupButton, TextBox textEntry, Tooltip tooltip) {
-    boolean visible = popup.isShowing();
-
-    if (visible) {// fix for bug that Wade found -- if we click off of popup, it dismisses it,
+    if (popup.isShowing()) {// fix for bug that Wade found -- if we click off of popup, it dismisses it,
       // but if that click is on the button, it would immediately shows it again
       //System.out.println("popup visible " + visible);
       popup.hide();

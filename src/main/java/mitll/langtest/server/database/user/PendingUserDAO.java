@@ -29,29 +29,20 @@
 
 package mitll.langtest.server.database.user;
 
-import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.project.ProjectServices;
+import mitll.langtest.shared.user.ActiveUser;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickPendingUser;
-import mitll.npdata.dao.SlickUserProject;
 import mitll.npdata.dao.project.PendingUserDAOWrapper;
-import mitll.npdata.dao.project.UserProjectDAOWrapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import scala.Tuple2;
 
 import java.sql.Timestamp;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @see DatabaseImpl#initializeDAOs
  */
 public class PendingUserDAO  implements IPendingUserDAO {
-  private static final Logger logger = LogManager.getLogger(PendingUserDAO.class);
+//  private static final Logger logger = LogManager.getLogger(PendingUserDAO.class);
 
   private final PendingUserDAOWrapper dao;
 
@@ -80,11 +71,11 @@ public class PendingUserDAO  implements IPendingUserDAO {
   @Override
   public void insert(int userid, int projid) {
     Timestamp modified = new Timestamp(System.currentTimeMillis());
-    dao.insert(new SlickPendingUser(-1, userid, projid, modified, PENDING.REQUESTED.toString(), modified, -1));
+    dao.insert(new SlickPendingUser(-1, userid, projid, modified, ActiveUser.PENDING.REQUESTED.toString(), modified, -1));
   }
 
   @Override
-  public void update(int id, PENDING state, int byUser) {
+  public void update(int id, ActiveUser.PENDING state, int byUser) {
     dao.update(id, state.toString(), byUser);
   }
 

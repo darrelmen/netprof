@@ -374,15 +374,9 @@ public class CommentBox extends PopupContainerFactory {
 
   private class MyPopup extends DecoratedPopupPanel {
     private String field;
-
     public void setField(String field) {
       this.field = field;
     }
-
-    /*@Override
-    protected void onLoad() {
-      logger.info("got load on " + getElement().getId());
-    }*/
 
     /**
      * @param commentBox
