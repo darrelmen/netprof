@@ -69,13 +69,9 @@ public interface UserServiceAsync {
 
   void getTeachers(AsyncCallback<List<ActiveUser>> async);
 
-  void sendTeacherRequest(AsyncCallback<Void> async);
-
+  void sendTeacherRequest(AsyncCallback<ActiveUser.PENDING> async);
 
   void getPendingUsers(int projid, AsyncCallback<List<ActiveUser>> async);
 
   void approveAndDisapprove(Collection<Integer> approve, Collection<Integer> disapprove, AsyncCallback<Void> async);
-
-//  void disapprove(int toApproveUser, AsyncCallback<Void> async);
-//  void approve(int toApproveUser, AsyncCallback<Void> async);
 }

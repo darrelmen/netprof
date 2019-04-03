@@ -365,11 +365,11 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   private boolean askForDemographic(User user) {
-    Collection<User.Permission> permissions = user.getPermissions();
+    Collection<Permission> permissions = user.getPermissions();
     return
-        permissions.contains(User.Permission.DEVELOP_CONTENT) ||
-            permissions.contains(User.Permission.RECORD_AUDIO) ||
-            permissions.contains(User.Permission.QUALITY_CONTROL);
+        permissions.contains(Permission.DEVELOP_CONTENT) ||
+            permissions.contains(Permission.RECORD_AUDIO) ||
+            permissions.contains(Permission.QUALITY_CONTROL);
   }
 
   private TextBoxBase makeSignUpUsername(Fieldset fieldset) {

@@ -42,7 +42,7 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -178,8 +178,8 @@ public class ListContainer extends MemoryItemContainer<UserList<CommonShell>> {
   }
 
   private boolean canMakeQuiz() {
-    Collection<User.Permission> permissions = controller.getPermissions();
-    return permissions.contains(User.Permission.TEACHER_PERM) || permissions.contains(User.Permission.PROJECT_ADMIN);
+    Collection<Permission> permissions = controller.getPermissions();
+    return permissions.contains(Permission.TEACHER_PERM) || permissions.contains(Permission.PROJECT_ADMIN);
   }
 
   @Override

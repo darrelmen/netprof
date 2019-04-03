@@ -969,7 +969,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
           dialogSession.setID(result);
         } else {
           logger.warning("setSession invalid req " + dialogSession);
-          controller.getNavigation();
+          String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("setSession"));
+          logger.info("logException stack " + exceptionAsString);
+          //    controller.getNavigation().showInitialState();
 
         }
       }

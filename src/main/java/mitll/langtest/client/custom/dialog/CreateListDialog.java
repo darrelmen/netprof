@@ -57,7 +57,7 @@ import mitll.langtest.shared.custom.QuizSpec;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -723,8 +723,8 @@ public class CreateListDialog extends BasicDialog {
     if (isEditing() && current.isFavorite()) {
       return false;
     } else {
-      Collection<User.Permission> permissions = controller.getPermissions();
-      return permissions.contains(User.Permission.TEACHER_PERM) || permissions.contains(User.Permission.PROJECT_ADMIN);
+      Collection<Permission> permissions = controller.getPermissions();
+      return permissions.contains(Permission.TEACHER_PERM) || permissions.contains(Permission.PROJECT_ADMIN);
     }
   }
 

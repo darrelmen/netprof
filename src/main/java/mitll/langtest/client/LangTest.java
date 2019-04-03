@@ -77,12 +77,11 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 
 import java.util.*;
@@ -905,28 +904,19 @@ public class LangTest implements
   private void checkLogin() {
     //console("checkLogin");
     //logger.info("checkLogin -- ");
-    // userManager.isUserExpired();
     userManager.checkLogin();
-  }
-
-//  public boolean showCompleted() {
-//    return isReviewMode() || hasPermission(User.Permission.RECORD_AUDIO);
-//  }
-
-  private boolean isReviewMode() {
-    return hasPermission(User.Permission.QUALITY_CONTROL);
   }
 
   /**
    * @return
    */
   @Override
-  public Collection<User.Permission> getPermissions() {
+  public Collection<Permission> getPermissions() {
     User current = getCurrent();
     return current != null ? current.getPermissions() : Collections.emptyList();
   }
 
-  public boolean hasPermission(User.Permission permission) {
+  public boolean hasPermission(Permission permission) {
     //  logger.info("hasPermission user permissions " + getPermissions() + " for " + getUser());
     return getPermissions().contains(permission);
   }

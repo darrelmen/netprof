@@ -58,13 +58,15 @@ import mitll.langtest.shared.exercise.MatchInfo;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectType;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
+import static mitll.langtest.shared.project.ProjectMode.VOCABULARY;
+import static mitll.langtest.shared.project.ProjectType.NP;
 
 /**
  * Created by go22670 on 4/10/17.
@@ -90,7 +92,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   private final PracticeHelper practiceHelper;
   private final QuizChoiceHelper quizHelper;
-  private final ExerciseController controller;
+  private final ExerciseController<?> controller;
   private final IBanner banner;
 
   private VIEWS currentSection = VIEWS.NONE;
@@ -151,7 +153,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @NotNull
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
-    if (DEBUG_VIEW) logger.info("getCurrentView currentView " + currentView);
+    boolean hasStartup = controller.getProjectStartupInfo() != null;
+    if (DEBUG_VIEW) {
+      logger.info("getCurrentView currentView " + currentView + " has startup " + hasStartup);
+    }
     VIEWS currentStoredView;
     try {
       currentStoredView = currentView == null ? VIEWS.NONE : // Not sure how this can ever happen but saw exceptions.
@@ -161,33 +166,40 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
 
     {
-      Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
+      Set<Permission> userPerms = new HashSet<>(controller.getPermissions());
 
-      //    logger.info("user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
-      List<User.Permission> requiredPerms = currentStoredView.getPerms();
+      logger.info("getCurrentView user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
+      List<Permission> requiredPerms = currentStoredView.getPerms();
       userPerms.retainAll(requiredPerms);
 
       if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
         logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
-        currentStoredView = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
+        currentStoredView = hasStartup && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
+      } else /*if (!userPerms.isEmpty())*/ {
+        if (hasStartup) {
+          ProjectType projectType = controller.getProjectStartupInfo().getProjectType();
+          ProjectMode mode = currentStoredView.getMode();
+
+          logger.info("getCurrentView : projectType " + projectType + " mode " + mode);
+
+          if (mode == ProjectMode.DIALOG && projectType == NP) {
+            currentStoredView = LEARN;
+          } else if (mode == VOCABULARY && projectType == ProjectType.DIALOG) {
+            currentStoredView = DIALOG;
+          } else {
+            logger.info("OK - no inconsistency...");
+          }
+        }
       }
     }
 
     if (currentStoredView == NONE) {
-      currentStoredView = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
+      currentStoredView = hasStartup && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
     }
+
     return currentStoredView;
   }
 
-  /* private boolean isNPQUser() {
-     boolean isNPQ = false;
-     String affiliation = controller.getUserState().getCurrent().getAffiliation();
-     if (affiliation != null && affiliation.equalsIgnoreCase("NPQ")) {
-       isNPQ = true;
-     }
-     return isNPQ;
-   }
- */
   @NotNull
   private VIEWS getInitialView() {
     return isPolyglotProject() ? PRACTICE : LEARN;
@@ -467,7 +479,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 //    if (isPolyglotProject()) {
 //      showPolyDialog();
 //    } else {
-      showPractice(practiceHelper, views);
+    showPractice(practiceHelper, views);
 //    }
   }
 
@@ -532,16 +544,15 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           @Override
           public void gotPrompt(PROMPT_CHOICE choice) {
             */
-/*candidatePrompt = choice;*//*
+  /*candidatePrompt = choice;*//*
 
           }
         }
     );
   }
 */
-
   private void showPractice(PracticeHelper toUse, VIEWS views) {
-  //  toUse.setMode(mode);
+    //  toUse.setMode(mode);
     toUse.setNavigation(this);
     toUse.showContent(divWidget, views);
     toUse.hideList();
@@ -585,7 +596,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void pushUnitOrChapter(String s, MatchInfo next) {
-  //  logger.info("pushUnitOrChapter ");
+    //  logger.info("pushUnitOrChapter ");
     pushItem(s + "=" + next.getValue());
   }
 
@@ -696,7 +707,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private boolean isTeacher() {
-    return controller.getUserManager().hasPermission(User.Permission.TEACHER_PERM);
+    return controller.getUserManager().hasPermission(Permission.TEACHER_PERM);
   }
 
   /**

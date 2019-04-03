@@ -33,7 +33,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ShowTab;
 import mitll.langtest.client.banner.NewBanner;
 import mitll.langtest.shared.project.ProjectMode;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.Permission;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -41,10 +41,10 @@ import java.util.List;
 
 import static mitll.langtest.shared.project.ProjectMode.EITHER;
 import static mitll.langtest.shared.project.ProjectMode.VOCABULARY;
-import static mitll.langtest.shared.user.User.Permission.*;
+import static mitll.langtest.shared.user.Permission.*;
 
 /**
- * Closely related to {@link mitll.langtest.shared.user.User.Permission}
+ * Closely related to {@link Permission}
  * Created by go22670 on 4/10/17.
  */
 public interface INavigation extends IViewContaner {
@@ -70,6 +70,9 @@ public interface INavigation extends IViewContaner {
     STUDY("Study", ProjectMode.DIALOG),
     LISTEN("Listen", ProjectMode.DIALOG),
 
+    /**
+     *
+     */
     REHEARSE("Rehearse", ProjectMode.DIALOG, true),
     CORE_REHEARSE("Rehearse (auto play)", ProjectMode.DIALOG, false),
 
@@ -95,7 +98,7 @@ public interface INavigation extends IViewContaner {
 
     OOV_EDITOR("Missing In Dictionary", VOCABULARY);
 
-    private final List<User.Permission> perms;
+    private final List<Permission> perms;
     private final ProjectMode mode;
     private boolean isQC;
     private boolean isFix;
@@ -104,13 +107,13 @@ public interface INavigation extends IViewContaner {
 
     final String display;
 
-    VIEWS(String display, List<User.Permission> perms) {
+    VIEWS(String display, List<Permission> perms) {
       this.display = display;
       this.perms = perms;
       this.mode = EITHER;
     }
 
-    VIEWS(String display, List<User.Permission> perms, boolean isQC, boolean isFix, boolean isContext) {
+    VIEWS(String display, List<Permission> perms, boolean isQC, boolean isFix, boolean isContext) {
       this.display = display;
       this.perms = perms;
       this.mode = EITHER;
@@ -142,7 +145,7 @@ public interface INavigation extends IViewContaner {
       return vals[(this.ordinal() + 1) % vals.length];
     }
 
-    public List<User.Permission> getPerms() {
+    public List<Permission> getPerms() {
       return perms;
     }
 

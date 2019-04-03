@@ -59,12 +59,12 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.user.ActiveUser;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * Created by go22670 on 1/8/17.
@@ -309,7 +309,7 @@ public class UserMenu {
 
     if (current != null &&
         !current.isTeacher() &&
-        !current.getPermissions().contains(User.Permission.TEACHER_PERM)
+        !current.getPermissions().contains(Permission.TEACHER_PERM)
     ) {
       LinkAndTitle e = new LinkAndTitle(REQUEST_INSTRUCTOR_STATUS,
           new SuccessClickHandler(() -> new DialogHelper(true)
@@ -318,20 +318,28 @@ public class UserMenu {
                     @Override
                     public boolean gotYes() {
                       //logger.info("Sending request.");
-                      controller.getUserService().sendTeacherRequest(new AsyncCallback<Void>() {
+                      controller.getUserService().sendTeacherRequest(new AsyncCallback<ActiveUser.PENDING>() {
                         @Override
                         public void onFailure(Throwable caught) {
                         }
 
                         @Override
-                        public void onSuccess(Void result) {
-                          new DialogHelper(false).show("Request Received",
-                              Arrays.asList(
-                                  "Your request has been received.",
-                                  "Please wait for another instructor or administrator to approve your request.",
-                                  "You will receive email when you are approved."),
-                              getListener(),
-                              "OK", "Cancel");
+                        public void onSuccess(ActiveUser.PENDING result) {
+                          if (result == ActiveUser.PENDING.REQUESTED) {
+                            new DialogHelper(false).show("Request Received",
+                                Arrays.asList(
+                                    "Your request has been received.",
+                                    "Please wait for another instructor or administrator to approve your request.",
+                                    "You will receive email when you are approved."),
+                                getListener(),
+                                "OK", "Cancel");
+                          } else {
+                            new DialogHelper(false).show("Request status is " + result,
+                                Arrays.asList(
+                                    "Your request status is " + result + "."),
+                                getListener(),
+                                "OK", "Cancel");
+                          }
                         }
                       });
                       return true;
@@ -361,7 +369,6 @@ public class UserMenu {
         teacherStatus.getMyLink().setActive(false);
         teacherStatus.getMyLink().setDisabled(true);
         teacherStatus.setTitle("Request Pending...");
-        //getMyLink().setVisible(false);
         return true;
       }
 

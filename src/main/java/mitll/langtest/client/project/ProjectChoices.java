@@ -58,15 +58,14 @@ import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;
-import mitll.langtest.shared.user.User.Permission;
+import mitll.langtest.shared.user.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS;
-import static mitll.langtest.shared.user.User.Permission.*;
+import static mitll.langtest.shared.user.Permission.*;
 
 /**
  * Created by go22670 on 1/12/17.
@@ -151,7 +150,7 @@ public class ProjectChoices extends ThumbnailChoices {
   private final UILifecycle uiLifecycle;
 
   private final LifecycleSupport lifecycleSupport;
-  private final ExerciseController controller;
+  private final ExerciseController<?> controller;
   private final UserNotification userNotification;
 
   private final OpenUserServiceAsync userService;
@@ -237,7 +236,7 @@ public class ProjectChoices extends ThumbnailChoices {
     List<SlimProject> filtered = new ArrayList<>();
     Collection<Permission> permissions = controller.getPermissions();
     boolean canRecord = isCanRecord(permissions);
-    boolean isPoly = permissions.contains(POLYGLOT);
+    //boolean isPoly = permissions.contains(POLYGLOT);
 //    logger.info("isPoly " + isPoly + " startup " + projectStartupInfo);
 
     /*    logger.info("getVisibleProjects : Examining  " + projects.size() + " projects," +
@@ -262,22 +261,24 @@ public class ProjectChoices extends ThumbnailChoices {
       }
     }
 
-    List<SlimProject> filtered2 = new ArrayList<>();
-    if (isPoly) {
-      for (SlimProject project : filtered) {
-        if (isPolyglot(project) || project.hasChildren()) {
-          filtered2.add(project);
-        }
-      }
-    } else {
-      filtered2 = filtered;
-    }
-    return filtered2;
+//    List<SlimProject> filtered2 = new ArrayList<>();
+//    if (isPoly) {
+//      for (SlimProject project : filtered) {
+//        if (isPolyglot(project) || project.hasChildren()) {
+//          filtered2.add(project);
+//        }
+//      }
+//    } else {
+//      filtered2 = filtered;
+//    }
+    return filtered;
   }
 
+/*
   private boolean isPolyglot(SlimProject project) {
     return project.getProjectType() == ProjectType.POLYGLOT;
   }
+*/
 
   private boolean isCanRecord(Collection<Permission> permissions) {
     return permissions.contains(RECORD_AUDIO) ||

@@ -35,6 +35,7 @@ import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.SimpleUser;
 import mitll.langtest.shared.user.User;
 
@@ -149,8 +150,8 @@ public class UserManager {
         !result.isEnabled() ||
         !result.isValid() ||
         !result.isHasAppPermission() ||
-        ((result.getPermissions().contains(User.Permission.RECORD_AUDIO) ||
-            result.getPermissions().contains(User.Permission.DEVELOP_CONTENT)) &&
+        ((result.getPermissions().contains(Permission.RECORD_AUDIO) ||
+            result.getPermissions().contains(Permission.DEVELOP_CONTENT)) &&
             result.getRealGender() == MiniUser.Gender.Unspecified)
     ) {
       clearUser();
@@ -303,8 +304,8 @@ public class UserManager {
           getUserID();
 
       this.current = result;
-      logger.info("gotNewUser ab " + abbreviation +
-          " current user " + current);
+//      logger.info("gotNewUser ab " + abbreviation +
+//          " current user " + current);
 
       userNotification.gotUser(result);
 
@@ -333,12 +334,12 @@ public class UserManager {
     return current;
   }
 
-  public boolean hasPermission(User.Permission permission) {
-    Collection<User.Permission> permissions = getPermissions();
+  public boolean hasPermission(Permission permission) {
+    Collection<Permission> permissions = getPermissions();
     return permissions != null && permissions.contains(permission);
   }
 
-  public Collection<User.Permission> getPermissions() {
+  public Collection<Permission> getPermissions() {
     return current.getPermissions();
   }
 
@@ -348,6 +349,6 @@ public class UserManager {
    * @return
    */
   public boolean isPolyglot() {
-    return getCurrent() != null && getPermissions().size() == 1 && getPermissions().iterator().next() == User.Permission.POLYGLOT;
+    return getCurrent() != null && getPermissions().size() == 1 && getPermissions().iterator().next() == Permission.POLYGLOT;
   }
 }

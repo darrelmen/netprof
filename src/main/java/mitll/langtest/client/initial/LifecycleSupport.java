@@ -32,7 +32,7 @@ package mitll.langtest.client.initial;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.StartupInfo;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.Permission;
 
 import java.util.Collection;
 
@@ -54,7 +54,7 @@ public interface LifecycleSupport extends EventRegistration {
 
   StartupInfo getStartupInfo();
 
-  Collection<User.Permission> getPermissions();
+  Collection<Permission> getPermissions();
 
   void onFailure(Throwable caught, long then);
 }

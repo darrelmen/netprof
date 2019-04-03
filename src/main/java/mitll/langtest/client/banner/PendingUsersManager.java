@@ -87,13 +87,16 @@ class PendingUsersManager extends ActiveUsersManager {
   @Override
   protected ActiveUserBasicUserContainer getUserContainer() {
     return new ActiveUserBasicUserContainer() {
-//      private static final String NO = "No";
-//      private static final String YES = "Yes";
 
       @Override
       protected void addVisitedCols(List<ActiveUser> list) {
-        super.addVisitedCol(list);
+       // super.addVisitedCol(list);
         addIsApproved();
+      }
+
+      @Override
+      protected String getDateColHeader() {
+        return "Request time";
       }
 
       private void addIsApproved() {
@@ -172,6 +175,8 @@ class PendingUsersManager extends ActiveUsersManager {
 
   @Override
   protected void gotOKClick(DialogBox dialogBox) {
+
+    logger.info("\n\n\ngotOKClick got ok click! " + appprove + " vs " + disapprove);
     controller.getUserService().approveAndDisapprove(appprove, disapprove, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -179,7 +184,9 @@ class PendingUsersManager extends ActiveUsersManager {
 
       @Override
       public void onSuccess(Void result) {
-        logger.info("OK, done");
+        logger.info("\n\n\nOK, done");
+        logger.info("\n\n\nOK, done");
+        logger.info("\n\n\nOK, done");
 
       }
     });

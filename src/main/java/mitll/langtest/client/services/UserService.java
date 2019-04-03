@@ -72,7 +72,7 @@ public interface UserService extends RemoteService {
    */
   boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword) throws DominoSessionException;
 
-  void sendTeacherRequest() throws DominoSessionException;
+  ActiveUser.PENDING sendTeacherRequest() throws DominoSessionException;
 
   void approveAndDisapprove(Collection<Integer> approve, Collection<Integer> disapprove) throws  DominoSessionException;
 }

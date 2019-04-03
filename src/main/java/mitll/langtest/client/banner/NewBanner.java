@@ -49,6 +49,8 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.ActiveUser;
+import mitll.langtest.shared.user.Kind;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
@@ -71,8 +73,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String RECORD = "Record";
   private static final String QC = "QC";
 
-  private static final List<VIEWS> STANDARD_VIEWS =
-      Arrays.asList(LEARN, VIEWS.PRACTICE, QUIZ, PROGRESS, LISTS);
+  private static final List<VIEWS> STANDARD_VIEWS = Arrays.asList(LEARN, VIEWS.PRACTICE, QUIZ, PROGRESS, LISTS);
 
   private static final List<VIEWS> DIALOG_VIEWS_IN_DROPDOWN =
       Arrays.asList(
@@ -81,7 +82,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
           REHEARSE,
           CORE_REHEARSE,
           PERFORM_PRESS_AND_HOLD,
-          PERFORM);//, VIEWS.SCORES);
+          PERFORM);
 
   private static final List<VIEWS> DIALOG_VIEWS =
       Arrays.asList(
@@ -102,8 +103,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   static {
     BOTH.addAll(DIALOG_VIEWS);
   }
-
-  private static final List<VIEWS> POLY_VIEWS = Arrays.asList(LEARN, VIEWS.PRACTICE, PROGRESS);
 
   private static final String appNameToUse = "netprof";
   private static final String NETPROF = appNameToUse + (PropertyHandler.IS_BETA ? "BETA" : "");
@@ -422,15 +421,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see #addWidgets
    */
   private void addChoicesForUser(ComplexWidget nav) {
-    boolean isPoly = controller.getPermissions().size() == 1 && controller.getPermissions().iterator().next() == User.Permission.POLYGLOT;
+    //boolean isPoly = controller.getPermissions().size() == 1 && controller.getPermissions().iterator().next() == Permission.POLYGLOT;
     boolean isDialog = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == DIALOG;
-    List<VIEWS> toShow = isPoly ?
-        POLY_VIEWS :
-        (isDialog ?
-            DIALOG_VIEWS :
-            STANDARD_VIEWS);
+    List<VIEWS> toShow = (isDialog ? DIALOG_VIEWS : STANDARD_VIEWS);
 
-    if (DEBUG) logger.info("addChoicesForUser " + toShow.size());
+    if (DEBUG) {
+      logger.info("addChoicesForUser " + toShow.size() + " : startup : " + controller.getProjectStartupInfo() + " : " + toShow);
+    }
 
     boolean first = true;
     for (VIEWS choice : toShow) {
@@ -548,7 +545,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see InitialUI#showUserPermissions
    */
   @Override
-  public void reflectPermissions(Collection<User.Permission> permissions) {
+  public void reflectPermissions(Collection<Permission> permissions) {
     recordMenuVisible();
     defectMenuVisible();
 
@@ -570,7 +567,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     viewToLink.values().forEach(choice -> choice.setVisible(val));
 
     if (val && navigation != null) {
-      setVisibleChoicesByMode(navigation.getCurrentView().getMode());
+      VIEWS currentView = navigation.getCurrentView();
+      logger.info("setCogVisible current view " +currentView);
+      setVisibleChoicesByMode(currentView.getMode());
     }
 
     cog.setVisible(isAdmin());
@@ -605,7 +604,17 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     User current = controller.getUserManager().getCurrent();
 
     if (current != null) {
-      new TooltipHelper().createAddTooltip(userDrop, current.getFullName(), Placement.LEFT);
+    List<String> perms = new ArrayList<>();
+//      logger.info("kind " + current.getUserKind());
+//      logger.info("perms " + current.getPermissions());
+      String suffix = current.getUserKind() != Kind.STUDENT ? "( " + current.getUserKind().getName() + ")" : "";
+
+      current.getPermissions().forEach(permission -> perms.add(permission.getKind().getName()));
+      if (!perms.isEmpty()) {
+        suffix += " "+ perms;
+      }
+//      logger.info("suffix " + suffix);
+      new TooltipHelper().createAddTooltip(userDrop, current.getFullName() + suffix, Placement.LEFT);
     }
 
     recordMenuVisible();
@@ -630,7 +639,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private boolean isPermittedToRecord() {
-    return controller.getUserState().hasPermission(User.Permission.RECORD_AUDIO) || isAdmin();
+    return controller.getUserState().hasPermission(Permission.RECORD_AUDIO) || isAdmin();
   }
 
   private boolean isAdmin() {
@@ -641,7 +650,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     // logger.info("isQC " + controller.getUserState().getPermissions() + " is admin " + isAdmin());
     boolean admin = isAdmin();
     // logger.info("is admin " + admin);
-    boolean canDoQC = controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL);
+    boolean canDoQC = controller.getUserState().hasPermission(Permission.QUALITY_CONTROL);
     // logger.info("is canDoQC " + canDoQC);
     return canDoQC || admin;
   }

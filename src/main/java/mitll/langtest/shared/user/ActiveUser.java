@@ -40,7 +40,7 @@ public class ActiveUser extends SimpleUser {
   private String language = "";
   private long visited;
 
-  public enum PENDING implements IsSerializable {REQUESTED, APPROVED, DENIED}
+  public enum PENDING implements IsSerializable {REQUESTED, APPROVED, DENIED, ERROR}
 
   private PENDING state;
 

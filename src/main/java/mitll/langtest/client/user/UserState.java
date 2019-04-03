@@ -29,6 +29,7 @@
 
 package mitll.langtest.client.user;
 
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
@@ -40,9 +41,9 @@ public interface UserState {
 
   boolean isAdmin();
 
-  Collection<User.Permission> getPermissions();
+  Collection<Permission> getPermissions();
 
-  boolean hasPermission(User.Permission permission);
+  boolean hasPermission(Permission permission);
 
   void logout();
 }

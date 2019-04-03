@@ -51,14 +51,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class ActiveUsersManager {
-  //private final Logger logger = Logger.getLogger("ActiveUsersManager");
+  private final Logger logger = Logger.getLogger("ActiveUsersManager");
 
   private static final int HOUR = 60 * 60 * 1000;
   private static final String LOGGED_IN = "Logged In";
   private static final String LAST_ACTIVITY = "Last Active";
   private static final int INTCOL_WIDTH = 110;
+  public static final String OK = "OK";
 
   protected final ExerciseController controller;
   private static final int TOP = 56;
@@ -145,13 +147,13 @@ public class ActiveUsersManager {
 
   @NotNull
   private Button getOKButton(DialogBox dialogBox) {
-    String ok1 = "OK";
-    Button ok = getButton(ok1);
+    Button ok = getButton(OK);
     ok.addClickHandler(event -> gotOKClick(dialogBox));
     return ok;
   }
 
   protected void gotOKClick(DialogBox dialogBox) {
+    logger.info("gotOKClick!!!");
     dialogBox.hide();
   }
 
@@ -234,6 +236,10 @@ public class ActiveUsersManager {
       table.addColumnSortHandler(getProjSorter(userCol, list));
     }
 
+    /**
+     * @see #get
+     * @param list
+     */
     protected void addVisitedCol(List<ActiveUser> list) {
       Column<ActiveUser, SafeHtml> dateCol = getVisitedColumn();
       dateCol.setSortable(true);
