@@ -201,13 +201,16 @@ class PendingUsersManager extends ActiveUsersManager {
 
       @Override
       public void onSuccess(Void result) {
+
         logger.info("OK, done");
+
+        // refresh the menu after OK
+        banner.setCogTitle();
       }
     });
     super.gotOKClick(dialogBox);
 
-    // refresh the menu after OK
-    banner.setCogTitle();
+
   }
 
   private void gotDisapprove() {

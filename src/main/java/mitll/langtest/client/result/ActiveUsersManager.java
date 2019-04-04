@@ -152,8 +152,11 @@ public class ActiveUsersManager {
     return ok;
   }
 
+  /**
+   * Hide the dialog.
+   * @param dialogBox
+   */
   protected void gotOKClick(DialogBox dialogBox) {
-    logger.info("gotOKClick!!!");
     dialogBox.hide();
   }
 
@@ -237,8 +240,8 @@ public class ActiveUsersManager {
     }
 
     /**
-     * @see #get
      * @param list
+     * @see #get
      */
     protected void addVisitedCol(List<ActiveUser> list) {
       Column<ActiveUser, SafeHtml> dateCol = getVisitedColumn();

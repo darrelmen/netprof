@@ -70,6 +70,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 1/8/17.
  */
 public class UserMenu {
+  public static final String REQUEST_PENDING = "Request Pending...";
   private final Logger logger = Logger.getLogger("UserMenu");
 
   private static final String ARE_YOU_AN_INSTRUCTOR = "Are you an instructor?";
@@ -83,7 +84,7 @@ public class UserMenu {
   private static final String ACTIVE_TEACHERS = "Active Teachers";
 
   /**
-   * @see
+   * @see #addPendingTeacher(List)
    */
   private static final String PENDING_TEACHER_REQUESTS = "Pending Teacher Requests";
 
@@ -153,17 +154,30 @@ public class UserMenu {
    */
   List<LinkAndTitle> getCogMenuChoicesForAdmin() {
     List<LinkAndTitle> choices = new ArrayList<>();
-    choices.add(new LinkAndTitle(MANAGE_USERS, props.getDominoURL()));
-    choices.add(new LinkAndTitle(ACTIVE_USERS, new SuccessClickHandler(() -> showActiveUsers(24))));
-    choices.add(new LinkAndTitle(ACTIVE_USERS_WEEK, new SuccessClickHandler(() -> showActiveUsers(7 * 24))));
-    choices.add(new LinkAndTitle(ACTIVE_TEACHERS, new SuccessClickHandler(this::showActiveTeachers)));
-    choices.add(new LinkAndTitle(ALL_TEACHERS, new SuccessClickHandler(this::showAllTeachers)));
-    choices.add(pendingTeachers = new LinkAndTitle(PENDING_TEACHER_REQUESTS, new SuccessClickHandler(this::showPendingTeachers)));
+
+    choices.add(new LinkAndTitle(MANAGE_USERS, props.getDominoURL()).setAdmin(true));
+    choices.add(new LinkAndTitle(ACTIVE_USERS, new SuccessClickHandler(() -> showActiveUsers(24))).setAdmin(true));
+    choices.add(new LinkAndTitle(ACTIVE_USERS_WEEK, new SuccessClickHandler(() -> showActiveUsers(7 * 24))).setAdmin(true));
+    choices.add(new LinkAndTitle(ACTIVE_TEACHERS, new SuccessClickHandler(this::showActiveTeachers)).setAdmin(true));
+    choices.add(new LinkAndTitle(ALL_TEACHERS, new SuccessClickHandler(this::showAllTeachers)).setAdmin(true));
+    choices.addAll(getCogMenuChoicesForTeacher());
     addSendReport(choices);
-    choices.add(new LinkAndTitle(REPORT_LIST, new SuccessClickHandler(() -> new ReportListManager(controller).showReportList())));
-    choices.add(new LinkAndTitle(SEND_TEST_EXCEPTION, event -> sendTestExceptionToAllServers()));
+    choices.add(new LinkAndTitle(REPORT_LIST, new SuccessClickHandler(() -> new ReportListManager(controller).showReportList())).setAdmin(true));
+    choices.add(new LinkAndTitle(SEND_TEST_EXCEPTION, event -> sendTestExceptionToAllServers()).setAdmin(true));
 
     return choices;
+  }
+
+ private List<LinkAndTitle> getCogMenuChoicesForTeacher() {
+    List<LinkAndTitle> choices = new ArrayList<>();
+    addPendingTeacher(choices);
+    return choices;
+  }
+
+  private void addPendingTeacher(List<LinkAndTitle> choices) {
+    choices.add(pendingTeachers =
+        new LinkAndTitle(PENDING_TEACHER_REQUESTS,
+            new SuccessClickHandler(this::showPendingTeachers)).setTeacher(true).setAdmin(true));
   }
 
   private void sendTestExceptionToAllServers() {
@@ -191,23 +205,24 @@ public class UserMenu {
     controller.logMessageOnServer(TEST_EXCEPTION, TEST_EXCEPTION_MSG, true);
   }
 
-
+  /**
+   * Add events and recordings choices.
+   * @return
+   */
   List<LinkAndTitle> getProjectSpecificChoices() {
     List<LinkAndTitle> choices = new ArrayList<>();
-    String nameForAnswer = props.getNameForAnswer() + "s";
-    // choices.add(new LinkAndTitle(getCapitalized(nameForAnswer), new ResultsClickHandler()));
-    choices.add(new LinkAndTitle(getCapitalized(nameForAnswer),
-//        new ResultsClickHandler()
+    choices.add(new LinkAndTitle(getCapitalized(props.getNameForAnswer() + "s"),
         new SuccessClickHandler(() -> new ResultManager(
             props.getNameForAnswer(),
             lifecycleSupport.getProjectStartupInfo().getTypeOrder(),
             lifecycleSupport,
             controller).showResults()
         )
-    ));
+    ).setAdmin(true).setMustHaveProject(true));
     //  choices.add(new Banner.LinkAndTitle("Monitoring", new MonitoringClickHandler(), true));
     choices.add(new LinkAndTitle(EVENTS,
-        new SuccessClickHandler(() -> new EventTable().show(lazyGetService(), controller.getMessageHelper()))));
+        new SuccessClickHandler(() -> new EventTable().show(lazyGetService(), controller.getMessageHelper()))).setAdmin(true).setMustHaveProject(true)
+    );
     return choices;
   }
 
@@ -215,7 +230,7 @@ public class UserMenu {
     choices.add(new LinkAndTitle(SEND_REPORT, event -> {
       new ModalInfoDialog(STATUS_REPORT_BEING_GENERATED, IT_CAN_TAKE_AWHILE);
       sendReport();
-    }));
+    }).setAdmin(true));
   }
 
   private void sendReport() {
@@ -260,39 +275,46 @@ public class UserMenu {
       teacherStatus = maybeAddReqInstructor;
       teacherReq.add(maybeAddReqInstructor);
 
-      if (controller.getProjectID() > 0) {
-        controller.getUserService().getPendingUsers(controller.getProjectID(), new AsyncCallback<List<ActiveUser>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-
-          }
-
-          @Override
-          public void onSuccess(List<ActiveUser> result) {
-            // pendingTeachers.setTitle(PENDING_TEACHER_REQUESTS + " (" + result.size() + ")");
-            boolean notPending = result.stream().noneMatch(activeUser -> activeUser.getID() == controller.getUser());
-            boolean pending = !notPending;
-            //logger.info("got not Pending " + notPending);
-            if (pending) {
-              teacherStatus.getMyLink().setActive(notPending);
-              teacherStatus.getMyLink().setDisabled(pending);
-              teacherStatus.setTitle("Request Pending...");
-            }
-          }
-        });
-      } else {
-        logger.info("no project yet...");
-      }
+      updatePendingTeacherTitleLater();
     }
 
+//    if (isATeacherAndThereIsAProject(controller.getUserManager().getCurrent())) {
+//      addPendingTeacher(choices);
+//    }
     choices.add(getLogOut());
 
     return choices;
   }
 
+  private void updatePendingTeacherTitleLater() {
+    if (controller.getProjectID() > 0) {
+      controller.getUserService().getPendingUsers(controller.getProjectID(), new AsyncCallback<List<ActiveUser>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(List<ActiveUser> result) {
+          // pendingTeachers.setTitle(PENDING_TEACHER_REQUESTS + " (" + result.size() + ")");
+          boolean notPending = result.stream().noneMatch(activeUser -> activeUser.getID() == controller.getUser());
+          boolean pending = !notPending;
+          //logger.info("got not Pending " + notPending);
+          if (pending) {
+            teacherStatus.getMyLink().setActive(notPending);
+            teacherStatus.getMyLink().setDisabled(pending);
+            teacherStatus.setTitle(REQUEST_PENDING);
+          }
+        }
+      });
+    } else {
+      logger.info("no project yet...");
+    }
+  }
+
   /**
    * @param size
-   * @see NewBanner#setCogTitle()
+   * @see NewBanner#setCogTitle
    */
   void setPendingTitle(int size) {
     pendingTeachers.setTitle(PENDING_TEACHER_REQUESTS + " (" + size + ")");
@@ -303,15 +325,10 @@ public class UserMenu {
    *
    * @param choices
    * @return
+   * @see #getStandardUserMenuChoices(List)
    */
   private LinkAndTitle maybeAddReqInstructor(List<LinkAndTitle> choices) {
-    User current = userManager.getCurrent();
-
-    if (current != null &&
-        !current.isTeacher() &&
-        !current.getPermissions().contains(Permission.TEACHER_PERM) &&
-        controller.getProjectStartupInfo() != null
-    ) {
+    if (notATeacherButThereIsAProject(userManager.getCurrent())) {
       LinkAndTitle e = new LinkAndTitle(REQUEST_INSTRUCTOR_STATUS,
           new SuccessClickHandler(() -> new DialogHelper(true)
               .show(ARE_YOU_AN_INSTRUCTOR,
@@ -354,11 +371,25 @@ public class UserMenu {
                     public void gotHidden() {
 
                     }
-                  }, "OK", "Cancel")));
+                  }, "OK", "Cancel"))).setMustHaveProject(true);
       choices.add(e);
 
       return e;
     } else return null;
+  }
+
+  private boolean notATeacherButThereIsAProject(User current) {
+    return current != null &&
+        !current.isTeacher() &&
+        !current.getPermissions().contains(Permission.TEACHER_PERM) &&
+        controller.getProjectStartupInfo() != null;
+  }
+
+  private boolean isATeacherAndThereIsAProject(User current) {
+    return current != null &&
+        (current.isTeacher() ||
+            current.getPermissions().contains(Permission.TEACHER_PERM)) &&
+        controller.getProjectStartupInfo() != null;
   }
 
   @NotNull
@@ -368,7 +399,7 @@ public class UserMenu {
       public boolean gotYes() {
         teacherStatus.getMyLink().setActive(false);
         teacherStatus.getMyLink().setDisabled(true);
-        teacherStatus.setTitle("Request Pending...");
+        teacherStatus.setTitle(REQUEST_PENDING);
         return true;
       }
 

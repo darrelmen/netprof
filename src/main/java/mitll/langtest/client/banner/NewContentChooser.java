@@ -178,13 +178,13 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       } else /*if (!userPerms.isEmpty())*/ {
         if (hasStartup) {
           String value = getStorage().getValue(MODE);
-          logger.info("selected mode is " + value);
+         // logger.info("selected mode is " + value);
 
           try {
             ProjectMode storedMode = ProjectMode.valueOf(value);
 
             ProjectMode viewMode = currentStoredView.getMode();
-            logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
+           // logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
 
             if (viewMode == ProjectMode.DIALOG && storedMode == ProjectMode.VOCABULARY) {
               // currentStoredView = LEARN;
@@ -193,7 +193,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
               //currentStoredView = DIALOG;
               logger.warning("force dialog view?");
             } else {
-              logger.info("OK - no inconsistency...");
+           //   logger.info("OK - no inconsistency...");
             }
 
           } catch (IllegalArgumentException e) {

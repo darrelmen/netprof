@@ -917,7 +917,7 @@ public class LangTest implements
   }
 
   public boolean hasPermission(Permission permission) {
-    //  logger.info("hasPermission user permissions " + getPermissions() + " for " + getUser());
+    // logger.info("hasPermission user permissions " + getPermissions() + " for " + getUser());
     return getPermissions().contains(permission);
   }
 
