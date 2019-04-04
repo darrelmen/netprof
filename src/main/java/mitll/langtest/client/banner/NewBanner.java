@@ -364,10 +364,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
         @Override
         public void onSuccess(List<ActiveUser> result) {
-          if (!result.isEmpty()) {
-            cog.setText("(" + result.size() + ")");
-            userMenu.setPendingTitle(result.size());
-          }
+          cog.setText(result.isEmpty() ? "" : "(" + result.size() + ")");
+          userMenu.setPendingTitle(result.size());
         }
       });
     } else {

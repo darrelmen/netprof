@@ -248,7 +248,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
 
   DBUser getDominoAdminUser();
 
-  void setProjectManagement(IProjectManagement projectManagement);
+  //void setProjectManagement(IProjectManagement projectManagement);
 
   Set<Integer> getTeacherIDs();
   <T> Map<Integer, T> getJustTeachers(Map<Integer, T> activeSince);

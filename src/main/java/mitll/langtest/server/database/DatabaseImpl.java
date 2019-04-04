@@ -221,7 +221,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     initializeDAOs(pathHelper, dominoUserDAO);
 
-    dominoUserDAO.setUserProjectDAO(getUserProjectDAO());
+   // dominoUserDAO.setUserProjectDAO(getUserProjectDAO());
 
     {
       long now = System.currentTimeMillis();
@@ -307,7 +307,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.info("populateProjects no project management yet...");
     } else {
       projectManagement.populateProjects(projID);
-      setProjectManagement();
+   //   setProjectManagement();
 
       if (TEST_SYNC) {  // right now I can't run the test since I need mongo.. etc.
         new TestSync(this);
@@ -316,9 +316,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return this;
   }
 
-  private void setProjectManagement() {
-    userDAO.setProjectManagement(getProjectManagement());
-  }
+//  private void setProjectManagement() {
+//    userDAO.setProjectManagement(getProjectManagement());
+//  }
 
   /**
    * Slick db connection.
@@ -973,30 +973,23 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @see DatabaseServices#setInstallPath(String, ServletContext, boolean)
    */
   private void makeDAO(String lessonPlanFileOnlyForImport, boolean loadAll) {
-    logger.info("makeDAO - " + lessonPlanFileOnlyForImport);
-
+    //logger.info("makeDAO - " + lessonPlanFileOnlyForImport);
     if (userManagement == null) {
       synchronized (this) {
         //  logger.info("makeDAO makeExerciseDAO -- " + lessonPlanFileOnlyForImport);
         makeExerciseDAO(lessonPlanFileOnlyForImport);
 
         if (!serverProps.useH2()) {
-          //        userExerciseDAO.useExToPhones(new ExerciseToPhone().getExerciseToPhone(refresultDAO));
           if (loadAll) {
             populateProjects(-1);
-          } else {
-            setProjectManagement();
           }
-
+//          else {
+//            setProjectManagement();
+//          }
           //    logger.info("set exercise dao " + exerciseDAO + " on " + userExerciseDAO);
           if (projectManagement.getProjects().isEmpty()) {
             logger.warn("\nmakeDAO no projects loaded yet...?");
           }
-      /*      else {
-              ExerciseDAO<CommonExercise> exerciseDAO = projectManagement.getFirstProject().getExerciseDAO();
-              logger.info("using exercise dao from first project " + exerciseDAO);
-              userExerciseDAO.setExerciseDAO(exerciseDAO);
-            }*/
         }
 
         if (serverProps.useH2()) {
@@ -1006,7 +999,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
         trainingAudioDAO.checkAndAddAudio(projectManagement.getProjects(), audioDAO);
       }
       userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO);
-
     }
   }
 

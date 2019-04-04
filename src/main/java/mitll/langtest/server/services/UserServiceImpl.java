@@ -33,7 +33,6 @@ import mitll.hlt.domino.server.util.ServletUtil;
 import mitll.langtest.client.domino.user.ChangePasswordView;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.services.UserService;
-import mitll.langtest.server.database.user.IPendingUserDAO;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.user.ActiveUser;
@@ -223,6 +222,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
             "<li>Review student audio and scores in the Progress View.</li>" +
             "<li>Create quizzes students can take on the website or the iPad.</li>" +
             "<li>Create your own content with reference audio in the Lists View.</li>" +
+            "<li>Approve other instructor permission requests.</li>" +
             "</ul>" +
             "<br/><span>Please tell us if you have any questions or issues.</span>" +
             "<br/><span>Thanks,</span>" +

@@ -168,7 +168,7 @@ public class UserMenu {
     return choices;
   }
 
- private List<LinkAndTitle> getCogMenuChoicesForTeacher() {
+  private List<LinkAndTitle> getCogMenuChoicesForTeacher() {
     List<LinkAndTitle> choices = new ArrayList<>();
     addPendingTeacher(choices);
     return choices;
@@ -207,6 +207,7 @@ public class UserMenu {
 
   /**
    * Add events and recordings choices.
+   *
    * @return
    */
   List<LinkAndTitle> getProjectSpecificChoices() {
@@ -317,7 +318,8 @@ public class UserMenu {
    * @see NewBanner#setCogTitle
    */
   void setPendingTitle(int size) {
-    pendingTeachers.setTitle(PENDING_TEACHER_REQUESTS + " (" + size + ")");
+    logger.info("setPendingTitle " + size);
+    pendingTeachers.setTitle(PENDING_TEACHER_REQUESTS + ((size == 0) ? "" : " (" + size + ")"));
   }
 
   /**

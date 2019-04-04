@@ -59,12 +59,6 @@ public class EmailHelper {
     replyTo = serverProperties.getMailReplyTo();
   }
 
-/*
-  private String getHash(String toHash) {
-    return StringUtils.toHexString(Md5Utils.getMd5Digest(toHash.getBytes()));
-  }
-*/
-
   /**
    * @param email
    * @param url

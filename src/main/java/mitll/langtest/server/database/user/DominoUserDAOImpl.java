@@ -168,12 +168,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 */
 
   private static final long STALE_DUR = 24L * 60L * 60L * 1000L;
-  private static final boolean SWITCH_USER_PROJECT = false;
+ // private static final boolean SWITCH_USER_PROJECT = false;
   private static final String ACTIVE = "active";
   private static final String EMAIL = "email";
   public static final String UNKNOWN = "Unknown";
   public static final String MALE = "Male";
-  public static final String FEMALE = "Female";
+  private static final String FEMALE = "Female";
 
   /**
    * If false, don't use email to set the initial user password via email.
@@ -203,14 +203,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private mitll.hlt.domino.shared.model.user.User dominoImportUser;
   private DBUser dominoAdminUser = null;
 
-  private DBUser defaultDBUser = null;
-
   private Ignite ignite = null;
 
   private JSONSerializer serializer = null;
-  private IUserProjectDAO userProjectDAO;
 
-  private IProjectManagement projectManagement;
   private Group primaryGroup = null;
   private static final boolean DEBUG_USER_CACHE = false;
 
@@ -542,7 +538,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       }
 
       dominoImportUser = delegate.getUser(IMPORT_USER);
-      defaultDBUser = delegate.lookupDBUser(defaultUser);
+    //  DBUser defaultDBUser = delegate.lookupDBUser(defaultUser);
     }
   }
 
@@ -2166,13 +2162,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return dominoAdminUser;
   }
 
-  public void setUserProjectDAO(IUserProjectDAO userProjectDAO) {
-    this.userProjectDAO = userProjectDAO;
-  }
-
-  public void setProjectManagement(IProjectManagement projectManagement) {
-    this.projectManagement = projectManagement;
-  }
+//
+//  public void setUserProjectDAO(IUserProjectDAO userProjectDAO) {
+//    IUserProjectDAO userProjectDAO1 = userProjectDAO;
+//  }
+//
+//  public void setProjectManagement(IProjectManagement projectManagement) {
+//    IProjectManagement projectManagement1 = projectManagement;
+//  }
 
   @Override
   public boolean updateProject(int oldID, int newprojid) {

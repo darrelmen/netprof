@@ -300,7 +300,7 @@ public class UserManager {
       boolean lvalid = !last.isEmpty() && !last.equalsIgnoreCase("Last");
 
       abbreviation = fvalid && lvalid ?
-          first.substring(0, 1).toUpperCase() + "." + last.substring(0, 1).toUpperCase() + "." :
+          first.substring(0, 1).toUpperCase() + last.substring(0, 1).toUpperCase() :
           getUserID();
 
       this.current = result;
@@ -321,10 +321,6 @@ public class UserManager {
   public boolean isMale() {
     return current.isMale();
   }
-
-//  public boolean isTeacher() {
-//    return current.isTeacher() || current.isCD();
-//  }
 
   public boolean isAdmin() {
     return current != null && current.isAdmin();

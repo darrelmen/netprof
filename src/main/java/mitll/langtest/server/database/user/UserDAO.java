@@ -740,9 +740,9 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return null;
   }
 
-  @Override
-  public void setProjectManagement(IProjectManagement projectManagement) {
-  }
+//  @Override
+//  public void setProjectManagement(IProjectManagement projectManagement) {
+//  }
 
   @Override
   public boolean forgotPassword(String user, String url, String optionalEmail) {

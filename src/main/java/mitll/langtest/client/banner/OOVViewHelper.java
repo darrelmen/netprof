@@ -322,7 +322,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     }
 
     addRightSide(leftRight);
-    
+
     showUnsafe(oovInfo);
     oovMemoryItemContainer.getCellTable().addDomHandler(event -> checkForKeyUpDown(event, oovMemoryItemContainer), KeyUpEvent.getType());
 
