@@ -71,6 +71,9 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private static final String FLOAT_LEFT = "floatLeft";
   private static final String N_A = "N/A";
 
+  /**
+   *
+   */
   private static final String LEFT_WIDTH = "60%";
   private static final int LEFT_WIDTH_NO_ENGLISH_VALUE = 85;
   private static final String LEFT_WIDTH_NO_ENGLISH = LEFT_WIDTH_NO_ENGLISH_VALUE + "%";
@@ -219,6 +222,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   }
 
   private SimpleRecordAudioPanel recordPanel;
+  private Widget meaningWidget, flEntry, firstRow;
 
   /**
    * Row 1: FL - ENGLISH
@@ -252,6 +256,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       {
         DivWidget flContainer = makeFirstRow(e, recordPanel);
         flContainer.setWidth(hasEnglish ? LEFT_WIDTH : LEFT_WIDTH_NO_ENGLISH);
+        this.firstRow = flContainer;
         rowWidget.add(flContainer);
       }
 
@@ -313,7 +318,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       String toUse = showEng ? english : replaceWithDashes(english);
 
       showingEnglish = showEng;
-      englishContainer.add(getEnglishWidget(e, toUse));
+      englishContainer.add(meaningWidget = getEnglishWidget(e, toUse));
       lr.add(englishContainer);
 
       if (!showEng) {
@@ -351,13 +356,22 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   }
 
   /**
+   * Cheesy hack to make it just show the fl term in OOVViewHelper
    * @see mitll.langtest.client.banner.OOVViewHelper
    */
   public void hideRecordButton() {
     recordPanel.setVisible(false);
     recordPanel.getPostAudioRecordButton().setVisible(false);
     dropdownContainer.setVisible(false);
-  //  logger.info("hide " + recordPanel.getElement().getId());
+    flEntry.setWidth("90%");
+    if (meaningWidget != null) {
+      meaningWidget.setVisible(false);
+      //  logger.info("hide " + meaningWidget.getElement().getId());
+      firstRow.setWidth("90%");
+      meaningWidget.getParent().getParent().setWidth("1px");
+      meaningWidget.getParent().getParent().getElement().getStyle().clearProperty("minWidth");
+    }
+    //  logger.info("hide " + recordPanel.getElement().getId());
   }
 
   /**
@@ -396,7 +410,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
       // add FL row
       if (showFL || getFL(e).trim().equals(trimmedAltFL) || trimmedAltFL.isEmpty()) {
-        fieldContainer.add(getFLEntry(e));
+        fieldContainer.add(flEntry = getFLEntry(e));
         fieldContainer.add(flClickableRowPhones = clickableWords.getClickableDiv(isRTL));
         flClickableRowPhones.getElement().setId("flClickableRowPhones");
         stylePhoneRow(flClickableRowPhones);
@@ -443,6 +457,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
                   showInitially,
                   new ArrayList<>(), true, annotationHelper, false);
           addField(fieldContainer, meaningWidget);
+          this.meaningWidget = meaningWidget;
         }
       }
 

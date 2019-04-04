@@ -60,6 +60,7 @@ import mitll.langtest.client.custom.userlist.TableAndPager;
 import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.client.exercise.TextNorm;
 import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
@@ -76,6 +77,7 @@ import java.util.stream.Collectors;
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
 public class OOVViewHelper extends TableAndPager implements ContentView {
+  public static final int EXAMPLE_WIDTH = 610;
   private final Logger logger = Logger.getLogger("OOVViewHelper");
 
   private static final int CHUNK = 300;
@@ -261,22 +263,21 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
 
       @Override
       public void onSuccess(List<OOV> result) {
-        top.clear();
-        // logger.info("getOOVs got " + result.size());
-
-        ClientExercise next = oovInfo.getUnsafe().iterator().next();
-        next.getAudioAttributes();
-//        logger.info("unsafe " + next);
-//        logger.info("unsafe audio " + next.getAudioAttributes());
-        oovContainer = addOOVTable(top, oovInfo);
-        sortUnsetToTop(result);
-        oovContainer.populateTable(result);
-        if (!result.isEmpty()) {
-          oovContainer.gotClickOnItem(result.get(0));
-        }
-        grabFocus();
+        gotOOVs(result, top, oovInfo);
       }
     });
+  }
+
+  private void gotOOVs(List<OOV> result, DivWidget top, OOVInfo oovInfo) {
+    top.clear();
+    // logger.info("getOOVs got " + result.size());
+    oovContainer = addOOVTable(top, oovInfo);
+    sortUnsetToTop(result);
+    oovContainer.populateTable(result);
+    if (!result.isEmpty()) {
+      oovContainer.gotClickOnItem(result.get(0));
+    }
+    grabFocus();
   }
 
   private void sortUnsetToTop(List<OOV> result) {
@@ -297,7 +298,6 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     Scheduler.get().scheduleDeferred((Command) () -> equivalent.setFocus(true));
   }
 
-
   /**
    * @param top
    * @param oovInfo
@@ -310,8 +310,8 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     leftRight.addStyleName("inlineFlex");
     top.add(leftRight);
 
+    DivWidget left = new DivWidget();
     {
-      DivWidget left = new DivWidget();
       left.getElement().setId("left");
       leftRight.add(left);
 
@@ -321,21 +321,8 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
       tableWithPager.setWidth("450px");
     }
 
-    {
-      DivWidget right = new DivWidget();
-      right.addStyleName("leftFiveMargin");
-      leftRight.add(right);
-
-      unsafeItems = new UnsafeItems();
-
-      getTableWithPager(right,
-          unsafeItems, ITEMS_WITH_MISSING_WORDS1, "example items",
-          Placement.TOP).setWidth(550 + "px");
-      right.add(buttonRowBelowExamples = getButtonRow());
-    }
-
-//    logger.info("showing " + toShow.size());
-
+    addRightSide(leftRight);
+    
     showUnsafe(oovInfo);
     oovMemoryItemContainer.getCellTable().addDomHandler(event -> checkForKeyUpDown(event, oovMemoryItemContainer), KeyUpEvent.getType());
 
@@ -345,19 +332,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     below.getElement().getStyle().setClear(Style.Clear.BOTH);
     below.addStyleName("topFiveMargin");
 
-    top.add(below);
-
- /*   exampleContainer = new DivWidget();
-
-    exampleContainer.addStyleName("topFiveMargin");
-    exampleContainer.addStyleName("leftFiveMargin");
-    Style style = exampleContainer.getElement().getStyle();
-    style.setOverflow(Style.Overflow.HIDDEN);
-    style.setProperty("maxWidth", "800px");
-    style.setProperty("minHeight", "160px");
-    style.setPaddingRight(50, Style.Unit.PX);
-*/
-    //  below.add(exampleContainer);
+    left.add(below);
 
     below.add(getOOVAndEquivalent(oovMemoryItemContainer));
 
@@ -377,27 +352,36 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     return oovMemoryItemContainer;
   }
 
+  private void addRightSide(DivWidget leftRight) {
+    DivWidget right = new DivWidget();
+    right.addStyleName("leftFiveMargin");
+    leftRight.add(right);
+
+    unsafeItems = new UnsafeItems();
+
+    Panel example_items = getTableWithPager(right,
+        unsafeItems, ITEMS_WITH_MISSING_WORDS1, "example items",
+        Placement.TOP);
+    example_items.setWidth(550 + "px");
+    example_items.getElement().getStyle().setMarginBottom(10, PX);
+    right.add(buttonRowBelowExamples = getButtonRow());
+  }
+
   /**
    * @return
    * @see #addTable
    */
   @NotNull
   private DivWidget getButtonRow() {
-//    DivWidget wrapper = new DivWidget();
-////    wrapper.addStyleName("floatRight");
-//    wrapper.getElement().getStyle().setMarginTop(10, Style.Unit.PX);
-//    wrapper.add(getJumpToLearnButton());
     DivWidget child = new DivWidget();
     child.addStyleName("topFiveMargin");
     Style style = child.getElement().getStyle();
-    //   style.setMarginTop(10, Style.Unit.PX);
-    child.setWidth("650px");
+    child.setWidth(EXAMPLE_WIDTH +
+        "px");
     style.setPaddingRight(40, PX);
     style.setPaddingTop(10, PX);
-//    child.add(wrapper);
     return child;
   }
-
 
   /**
    * @param oovInfo
@@ -407,7 +391,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     unsafeItems.populateTable(getWrappers(oovInfo));
   }
 
-  BasicDialog basicDialog = new BasicDialog();
+  private BasicDialog basicDialog = new BasicDialog();
 
   @NotNull
   private DivWidget getOOVAndEquivalent(MemoryItemContainer<OOV> oovMemoryItemContainer) {
@@ -451,8 +435,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
   private List<Wrapper> getWrappers(OOVInfo oovInfo) {
     List<Wrapper> toShow = new ArrayList<>();
 //    logger.info("getWrappers got  " + oovInfo.getUnsafe().size());
-    oovInfo.getUnsafe().forEach(item -> toShow.add(new Wrapper(item)));//.getID(), item.getForeignLanguage())));
-    //  logger.info("getWrappers made " + toShow.size());
+    oovInfo.getUnsafe().forEach(item -> toShow.add(new Wrapper(item)));
     return toShow;
   }
 
@@ -470,7 +453,6 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     int projectID = controller.getProjectID();
     add.setEnabled(false);
     message.setText(PLEASE_WAIT);
-
     updateAndCheck(projectID, getDirtyItems());
   }
 
@@ -568,35 +550,37 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
 
   private void gotBlur(OOV currentOOV) {
     final String text = equivalent.getText();
-    logger.info("gotBlur '" + text + "'");
-    controller.getScoringService().isValidForeignPhrase(controller.getProjectID(),
-        text, "", new AsyncCallback<Collection<String>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            controller.handleNonFatalError("checking if valid...", caught);
-          }
-
-          @Override
-          public void onSuccess(Collection<String> result) {
-            if (result.isEmpty()) {
-              if (currentOOV != null) {
-                logger.info("gotBlur now " + currentOOV.getOOV() + " = " + text);
-                currentOOV.setEquivalent(text);
-              } else {
-                logger.info("gotBlur no oov now " + currentOOV);
-              }
-              oovContainer.redraw();
-              checkButton.setEnabled(!getDirtyItems().isEmpty());
-              message.setHTML(getUnmatchedItems().size() + " items left.");
-
-              updateOOV();
-
-            } else {
-              logger.info("gotBlur got OOV " + result);
-              basicDialog.markWarn(formField,"Try Again","Not in the dictionary.");
+    if (currentOOV != null && !currentOOV.getEquivalent().equalsIgnoreCase(text)) {
+      //logger.info("gotBlur '" + text + "'");
+      controller.getScoringService().isValidForeignPhrase(controller.getProjectID(),
+          text, "", new AsyncCallback<Collection<String>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              controller.handleNonFatalError("checking if valid...", caught);
             }
-          }
-        });
+
+            @Override
+            public void onSuccess(Collection<String> result) {
+              if (result.isEmpty()) {
+               // if (currentOOV != null) {
+                 // logger.info("gotBlur now " + currentOOV.getOOV() + " = " + text);
+                  currentOOV.setEquivalent(text);
+//                } else {
+//                  logger.info("gotBlur no oov now " + currentOOV);
+//                }
+                oovContainer.redraw();
+                checkButton.setEnabled(!getDirtyItems().isEmpty());
+                //  message.setHTML(getUnmatchedItems().size() + " items left.");
+
+                updateOOV();
+
+              } else {
+                logger.info("gotBlur got OOV " + result);
+                basicDialog.markWarn(formField, "Try Again", "Not in the dictionary.");
+              }
+            }
+          });
+    }
   }
 
   /**
@@ -655,6 +639,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
       oov.setText(user.getOOV());
       equivalent.setText(user.getEquivalent());
       currentOOV = user;
+      unsafeItems.selectItem(user.getOOV());
 //      exampleContainer.clear();
     }
 
@@ -720,11 +705,6 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     }
   }
 
-//  @NotNull
-//  private List<ClientExercise> getMatches(String oov, Set<ClientExercise> unsafe) {
-//    return unsafe.stream().filter(ex -> ex.getForeignLanguage().contains(oov)).collect(Collectors.toList());
-//  }
-
   /**
    * So the trouble is we need to do exact match on the tokens in the item, not the text.
    * i.e. 1 should not match "blah 16 blah"
@@ -773,11 +753,6 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
      * @param value
      * @see #getWrappers(OOVInfo)
      */
-    Wrapper(int id, String value) {
-      this.id = id;
-      this.value = value;
-    }
-
     Wrapper(ClientExercise exercise) {
       this.id = exercise.getID();
       this.value = exercise.getForeignLanguage();
@@ -798,12 +773,12 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
       return value;
     }
 
-    public String toString() {
-      return "#" + id + " : " + value;
-    }
-
     public ClientExercise getExercise() {
       return exercise;
+    }
+
+    public String toString() {
+      return "#" + id + " : " + value;
     }
   }
 
@@ -819,6 +794,33 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
       getExampleAndAdd(buttonRowBelowExamples, user.getExercise());
     }
 
+    void selectItem(String oov) {
+      List<Wrapper> collect = findItemsWith(oov);
+      if (collect.isEmpty()) {
+        TextNorm textNorm = new TextNorm();
+        String s = textNorm.fromFull(oov);
+        collect = findItemsWith(s);
+      }
+      if (!collect.isEmpty()) {
+        //logger.info("found "+collect.size());
+        Wrapper wrapper = collect.get(0);
+        markCurrentExercise(wrapper.getID());
+        gotClickOnItem(wrapper);
+        if (collect.size() > 1) {
+          message.setText("Found in " + collect.size() + " items.");
+        } else {
+          message.setText("");
+        }
+      } else {
+        message.setText("No match found on the right.");
+      }
+    }
+
+    @NotNull
+    private List<Wrapper> findItemsWith(String oov) {
+      return getList().stream().filter(wrapper -> wrapper.getValue().contains(oov)).collect(Collectors.toList());
+    }
+
     /**
      * @see SimplePagingContainer#configureTable(boolean)
      */
@@ -826,7 +828,6 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     protected void addColumnsToTable() {
       List<Wrapper> list = getList();
       addItemID(list, getMaxLengthId());
-      //addEquivalent(list, 100);
     }
 
     @Override

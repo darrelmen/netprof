@@ -256,13 +256,6 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     return table.getSelectionModel();
   }
 
- /* public void clearSelection() {
-    T currentSelection = getCurrentSelection();
-    if (currentSelection != null) {
-      getSelectionModel().setSelected(currentSelection, false);
-    }
-  }*/
-
   /**
    * @param currentExercise
    * @see mitll.langtest.client.list.PagingExerciseList#onResize()
