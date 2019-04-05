@@ -200,13 +200,14 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   }
 
   /**
+   * @param limit
    * @return
    * @see mitll.langtest.client.instrumentation.EventTable#show
    */
-  public List<Event> getEvents() throws DominoSessionException, RestrictedOperationException {
+  public List<Event> getEvents(int limit) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasAdminPerm(userIDFromSessionOrDB)) {
-      return db.getEventDAO().getAll(getProjectIDFromUser(userIDFromSessionOrDB));
+      return db.getEventDAO().getAllWithLimit(getProjectIDFromUser(userIDFromSessionOrDB), limit);
     } else {
       throw getRestricted("getting events");
     }
@@ -279,7 +280,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     /**
      * @see
      */
-  //  String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
+    //  String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     //åString configDir1 = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
     // logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
 

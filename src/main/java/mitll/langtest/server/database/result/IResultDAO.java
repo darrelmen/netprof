@@ -29,9 +29,9 @@
 
 package mitll.langtest.server.database.result;
 
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.ReportStats;
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -76,11 +76,11 @@ public interface IResultDAO extends IDAO {
   /**
    * @param projid
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getMonitorResults
+   * @see DatabaseServices#getMonitorResults
    */
   List<MonitorResult> getMonitorResults(int projid);
 
-  List<MonitorResult> getMonitorResultsKnownExercises(int projid);
+  List<MonitorResult> getMonitorResultsKnownExercises(int projid, int limit);
 
   List<MonitorResult> getMonitorResultsByExerciseID(int id);
 

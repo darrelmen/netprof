@@ -56,7 +56,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 2/16/17.
  */
 public class ResultTypeAhead {
-  private final Logger logger = Logger.getLogger("ResultTypeAhead");
+  //private final Logger logger = Logger.getLogger("ResultTypeAhead");
 
   private static final String USER_ID = "User";
 

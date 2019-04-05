@@ -47,7 +47,6 @@ import mitll.npdata.dao.SlickPerfResult;
 import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.result.ResultDAOWrapper;
 import mitll.npdata.dao.result.SlickCorrectAndScore;
-import mitll.npdata.dao.result.SlickExerciseScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -276,8 +275,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
-  public List<MonitorResult> getMonitorResultsKnownExercises(int projid) {
-    return getMonitorResults(dao.getAllByProjectKnownExercises(projid));
+  public List<MonitorResult> getMonitorResultsKnownExercises(int projid, int limit) {
+    return getMonitorResults(dao.getAllByProjectKnownExercises(projid, limit));
   }
 
   private List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {
@@ -609,7 +608,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }*/
 
   /**
-   *
    * @param projid
    * @param minScore
    * @return

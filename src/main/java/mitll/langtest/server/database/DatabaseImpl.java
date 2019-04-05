@@ -36,7 +36,6 @@ import mitll.langtest.server.*;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.server.audio.AudioExportOptions;
-import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.SlickAnnotationDAO;
@@ -1383,15 +1382,16 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * @param projid
+   * @param limit
    * @return
    * @see mitll.langtest.server.services.ResultServiceImpl#getResults(int, Map, int, String)
    * @see DownloadServlet#returnSpreadsheet
    */
   @Override
-  public Collection<MonitorResult> getMonitorResults(int projid) {
-    List<MonitorResult> monitorResults = resultDAO.getMonitorResultsKnownExercises(projid);
+  public Collection<MonitorResult> getMonitorResults(int projid, int limit) {
+    List<MonitorResult> monitorResults = resultDAO.getMonitorResultsKnownExercises(projid, limit);
 
-    logger.info("getMonitorResults got back " + monitorResults.size() + " for project " + projid);
+    logger.info("getMonitorResults got back            " + monitorResults.size() + " for project " + projid);
     List<MonitorResult> monitorResultsWithText = getMonitorResultsWithText(monitorResults, projid);
     logger.info("getMonitorResults got back after join " + monitorResultsWithText.size() + " for project " + projid);
 
@@ -1403,7 +1403,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param projid
    * @return
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getResults
-   * @see #getMonitorResults(int)
+   * @see DatabaseServices#getMonitorResults(int, int)
    */
   @Override
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults, int projid) {

@@ -55,6 +55,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
   private static final Logger logger = LogManager.getLogger(ResultServiceImpl.class);
 
   private static final int MAX = 30;
+  public static final int LIMIT = 50000;
 
   /**
    * NOTE NOTE NOTE - we skip doing ensure ogg/mp3 on files for now - since this service will likely not be
@@ -135,7 +136,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
             @Override
             public Collection<MonitorResult> load(Integer key) throws Exception {
               // logger.info("Load " + key);
-              List<MonitorResult> monitorResultsKnownExercises = db.getResultDAO().getMonitorResultsKnownExercises(key);
+              List<MonitorResult> monitorResultsKnownExercises = db.getResultDAO().getMonitorResultsKnownExercises(key, LIMIT);
               db.getMonitorResultsWithText(monitorResultsKnownExercises, key);
               return db.getMonitorResultsWithText(monitorResultsKnownExercises, key);
             }
@@ -151,7 +152,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
             @Override
             public Collection<MonitorResult> load(Integer key) throws Exception {
               // logger.info("Load " + key);
-              return db.getMonitorResults(key);
+              return db.getMonitorResults(key, LIMIT);
             }
           });
 
@@ -182,7 +183,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     try {
       results = projectToResults.get(projectID);
     } catch (ExecutionException e) {
-      results = db.getResultDAO().getMonitorResultsKnownExercises(projectID);
+      results = db.getResultDAO().getMonitorResultsKnownExercises(projectID, LIMIT);
     }
     // filter on unit->value
     if (!unitToValue.isEmpty()) {
@@ -315,6 +316,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
   /**
    * get cached results... fall back to getting them again...
    *
+   * @see #getResultAlternatives(Map, String, String)
    * @param userid
    * @return
    */
@@ -325,7 +327,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     try {
       results = projectToResults2.get(projectID);
     } catch (ExecutionException e) {
-      results = db.getMonitorResults(projectID);
+      results = db.getMonitorResults(projectID, LIMIT);
     }
 
     logger.info("getMonitorResults : before " + results.size() + " for project " + projectID + " and user " + userid);

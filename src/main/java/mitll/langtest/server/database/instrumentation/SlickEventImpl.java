@@ -45,7 +45,7 @@ import java.util.*;
 /**
  * Created by go22670 on 5/13/16.
  */
-public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/ {
+public class SlickEventImpl implements IEventDAO {
   private static final Logger logger = LogManager.getLogger(SlickEventImpl.class);
   private static final int MAX_EVENTS_TO_SHOW = 20000;
   private final EventDAOWrapper eventDAOWrapper;
@@ -82,7 +82,7 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
    * @param exToInt
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyOneConfig
    */
-  public void copyTableOnlyOnce(IEventDAO other,
+  private void copyTableOnlyOnce(IEventDAO other,
                                 int projid,
                                 Map<Integer, Integer> oldToNewUserID,
                                 Map<String, Integer> exToInt) {
@@ -230,7 +230,7 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
   }
 
   @Override
-  public List<Event> getAll(Integer projid) {
+  public List<Event> getAll(int projid) {
     logger.info("get events for " + projid);
     List<SlickEvent> all = eventDAOWrapper.getAll(projid);
     logger.info("got events for " + projid + " num = " + all.size());
@@ -238,10 +238,15 @@ public class SlickEventImpl implements IEventDAO/*, ISchema<Event, SlickEvent>*/
     return getEvents(all);
   }
 
+  /**
+   *
+   * @param projid
+   * @param limit
+   * @return
+   */
   @Override
-  public List<Event> getAllMax(int projid) {
-    List<SlickEvent> all = eventDAOWrapper.getAllMax(projid, MAX_EVENTS_TO_SHOW);
-    return getEvents(all);
+  public List<Event> getAllWithLimit(int projid, int limit) {
+    return getEvents(eventDAOWrapper.getAllMax(projid, limit));
   }
 
   private List<Event> getEvents(Collection<SlickEvent> all) {
