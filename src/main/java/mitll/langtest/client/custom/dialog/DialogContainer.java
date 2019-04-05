@@ -29,14 +29,169 @@
 
 package mitll.langtest.client.custom.dialog;
 
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.TextHeader;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.dialog.IDialog;
 
+import java.util.List;
+
 public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContainer<T> {
-  public DialogContainer(ExerciseController<?> controller) {
+  DialogContainer(ExerciseController<?> controller) {
     super(controller, "netprof" + ":" + controller.getUser() + ":" + "dialogs", "Dialogs",
         20, 10);
+  }
+
+  @Override
+  protected void addColumnsToTable() {
+    List<T> list = getList();
+
+    addUnit(list, 10);
+    addChapter(list, 10);
+    addItemID(list, getMaxLengthId());
+
+    addEnglish(list, 50);
+    addOrientation(list, 50);
+
+    addDateCol(list);
+  }
+
+  /**
+   * @param list
+   * @param maxLength
+   */
+  private void addEnglish(List<T> list, int maxLength) {
+    Column<T, SafeHtml> userCol = getEquivColumn(maxLength);
+    table.setColumnWidth(userCol, getIdWidth() + "px");
+    addColumn(userCol, new TextHeader("English"));
+    table.addColumnSortHandler(getSorter(userCol, list));
+  }
+
+  private Column<T, SafeHtml> getEquivColumn(int maxLength) {
+    return getTruncatedCol(maxLength, this::getEquivValue);
+  }
+
+  private ColumnSortEvent.ListHandler<T> getSorter(Column<T, SafeHtml> englishCol,
+                                                   List<T> dataList) {
+    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, this::getEquivCompare);
+    return columnSortHandler;
+  }
+
+  private int getEquivCompare(T o1, T o2) {
+    int i = o1.getEnglish().compareTo(o2.getEnglish());
+    return i == 0 ? o1.getForeignLanguage().compareTo(o2.getForeignLanguage()) : i;
+  }
+
+  private String getEquivValue(T thing) {
+    return thing.getEnglish();
+  }
+
+
+  /**
+   * @param list
+   * @param maxLength
+   */
+  private void addOrientation(List<T> list, int maxLength) {
+    Column<T, SafeHtml> userCol = getOrientColumn(maxLength);
+    table.setColumnWidth(userCol, getIdWidth() + "px");
+    addColumn(userCol, new TextHeader("Orientation"));
+    table.addColumnSortHandler(getOrientSorter(userCol, list));
+  }
+
+  private Column<T, SafeHtml> getOrientColumn(int maxLength) {
+    return getTruncatedCol(maxLength, this::getOrientValue);
+  }
+
+  private ColumnSortEvent.ListHandler<T> getOrientSorter(Column<T, SafeHtml> englishCol,
+                                                         List<T> dataList) {
+    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, this::getOrientCompare);
+    return columnSortHandler;
+  }
+
+  private int getOrientCompare(T o1, T o2) {
+    int i = o1.getOrientation().compareTo(o2.getOrientation());
+    return i == 0 ? o1.getForeignLanguage().compareTo(o2.getForeignLanguage()) : i;
+  }
+
+  private String getOrientValue(T thing) {
+    return thing.getOrientation();
+  }
+
+  /**
+   * @param list
+   * @param maxLength
+   */
+  private void addUnit(List<T> list, int maxLength) {
+    Column<T, SafeHtml> userCol = getUnitColumn(maxLength);
+    table.setColumnWidth(userCol, getIdWidth() + "px");
+    addColumn(userCol, new TextHeader("Unit"));
+    table.addColumnSortHandler(getUnitSorter(userCol, list));
+  }
+
+  private Column<T, SafeHtml> getUnitColumn(int maxLength) {
+    return getTruncatedCol(maxLength, this::getUnitValue);
+  }
+
+  private String getUnitValue(T thing) {
+    return thing.getUnit();
+  }
+
+  private ColumnSortEvent.ListHandler<T> getUnitSorter(Column<T, SafeHtml> englishCol,
+                                                       List<T> dataList) {
+    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, this::getUnitCompare);
+    return columnSortHandler;
+  }
+
+  private int getUnitCompare(T o1, T o2) {
+    int i = o1.getUnit().compareTo(o2.getUnit());
+    return i == 0 ? getChapterCompare(o1, o2) : i;
+  }
+
+
+  /**
+   * @param list
+   * @param maxLength
+   */
+  private void addChapter(List<T> list, int maxLength) {
+    Column<T, SafeHtml> userCol = getChapterColumn(maxLength);
+    table.setColumnWidth(userCol, getIdWidth() + "px");
+    addColumn(userCol, new TextHeader("Chapter"));
+    table.addColumnSortHandler(getChapterSorter(userCol, list));
+  }
+
+  private Column<T, SafeHtml> getChapterColumn(int maxLength) {
+    return getTruncatedCol(maxLength, this::getChapterValue);
+  }
+
+  private String getChapterValue(T thing) {
+    return thing.getChapter();
+  }
+
+  private ColumnSortEvent.ListHandler<T> getChapterSorter(Column<T, SafeHtml> englishCol,
+                                                          List<T> dataList) {
+    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, this::getChapterCompare);
+    return columnSortHandler;
+  }
+
+  private int getChapterCompare(T o1, T o2) {
+    int i = o1.getChapter().compareTo(o2.getChapter());
+    return i == 0 ? o1.getForeignLanguage().compareTo(o2.getForeignLanguage()) : i;
+  }
+
+
+  protected String getDateColHeader() {
+    return "Modified";
+  }
+
+  protected int getMaxLengthId() {
+    return 100;
   }
 
   @Override
