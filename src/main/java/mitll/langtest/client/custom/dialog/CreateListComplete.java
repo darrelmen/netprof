@@ -30,11 +30,12 @@
 package mitll.langtest.client.custom.dialog;
 
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.exercise.CommonShell;
 
 /**
  * Created by go22670 on 7/6/17.
  */
-public interface CreateListComplete {
-  void madeIt(UserList userList);
+public interface CreateListComplete<T extends UserList<CommonShell>> {
+  void madeIt(T userList);
   void gotEdit();
 }

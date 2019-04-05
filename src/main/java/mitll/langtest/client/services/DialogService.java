@@ -63,6 +63,13 @@ public interface DialogService extends RemoteService {
   ExerciseListWrapper<IDialog> getDialogs(ExerciseListRequest request) throws DominoSessionException;
 
   /**
+   *
+   * @param id
+   * @throws DominoSessionException
+   */
+  boolean delete(int id) throws DominoSessionException;
+
+  /**
    * @see mitll.langtest.client.dialog.ListenViewHelper#showContent
    * @param id
    * @return

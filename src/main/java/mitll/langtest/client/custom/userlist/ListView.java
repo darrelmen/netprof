@@ -68,7 +68,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 7/3/17.
  */
-public class ListView extends TableAndPager implements ContentView, CreateListComplete {
+public class ListView<T extends UserList<CommonShell>>  extends TableAndPager implements ContentView, CreateListComplete<T> {
   public static final String FORGET_VISITED_LIST = "Forget visited list.";
   private final Logger logger = Logger.getLogger("ListView");
 
@@ -158,8 +158,8 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
   private static final int VISITED_HEIGHT = (MY_LIST_HEIGHT / 2) - MARGIN_FOR_BUTTON - browseBigger;
   private static final int BROWSE_HEIGHT = (MY_LIST_HEIGHT / 2) - MARGIN_FOR_BUTTON + browseBigger;
 
-  private final ExerciseController controller;
-  private ListContainer myLists;
+  private final ExerciseController<?> controller;
+  private ListContainer<T> myLists;
   private final Set<String> names = new HashSet<>();
   private Button quizButton, editButton, removeButton;
 
@@ -209,31 +209,31 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
   }
 
   private void addVisited(DivWidget top) {
-    ListContainer listContainer = addVisitedTable(top);
+    ListContainer<T> listContainer = addVisitedTable(top);
 
-    controller.getListService().getListsForUser(false, true, false, new AsyncCallback<Collection<UserList<CommonShell>>>() {
+    controller.getListService().getListsForUser(false, true, false, new AsyncCallback<Collection<T>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting lists visited by user", caught);
       }
 
       @Override
-      public void onSuccess(Collection<UserList<CommonShell>> result) {
+      public void onSuccess(Collection<T> result) {
         listContainer.populateTable(result);
       }
     });
   }
 
-  private ListContainer addVisitedTable(DivWidget top) {
-    ListContainer listContainer =
-        new ListContainer(controller, VISITED_PAGE_SIZE, false, "visited", VISITED_SHORT_SIZE, false, false) {
+  private ListContainer<T> addVisitedTable(DivWidget top) {
+    ListContainer<T> listContainer =
+        new ListContainer<T>(controller, VISITED_PAGE_SIZE, false, "visited", VISITED_SHORT_SIZE, false, false) {
           @Override
           protected boolean hasDoubleClick() {
             return true;
           }
 
           @Override
-          protected void gotDoubleClickOn(UserList<CommonShell> selected) {
+          protected void gotDoubleClickOn(T selected) {
             showLearnList(this);
           }
         };
@@ -253,23 +253,23 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
   }
 
   private void addPublic(DivWidget bottom) {
-    ListContainer listContainer = addPublicTable(bottom);
-    controller.getListService().getLists(new AsyncCallback<Collection<UserList<CommonShell>>>() {
+    ListContainer<T> listContainer = addPublicTable(bottom);
+    controller.getListService().getLists(new AsyncCallback<Collection<T>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting all lists", caught);
       }
 
       @Override
-      public void onSuccess(Collection<UserList<CommonShell>> result) {
+      public void onSuccess(Collection<T> result) {
         listContainer.populateTable(result);
       }
     });
   }
 
-  private ListContainer addPublicTable(DivWidget bottom) {
-    ListContainer listContainer =
-        new ListContainer(controller, BROWSE_PAGE_SIZE, false, STORAGE_ID, BROWSE_SHORT_PAGE_SIZE, false, true) {
+  private ListContainer<T> addPublicTable(DivWidget bottom) {
+    ListContainer<T> listContainer =
+        new ListContainer<T>(controller, BROWSE_PAGE_SIZE, false, STORAGE_ID, BROWSE_SHORT_PAGE_SIZE, false, true) {
 
           @Override
           protected boolean hasDoubleClick() {
@@ -277,7 +277,7 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
           }
 
           @Override
-          protected void gotDoubleClickOn(UserList<CommonShell> selected) {
+          protected void gotDoubleClickOn(T selected) {
             if (selected.getListType() == UserList.LIST_TYPE.QUIZ) {
               showQuiz(this);
             } else {
@@ -307,14 +307,14 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
   private void addYourLists(DivWidget left) {
     showYourLists(Collections.emptyList(), left);
 
-    controller.getListService().getListsForUser(true, false, canMakeQuiz(), new AsyncCallback<Collection<UserList<CommonShell>>>() {
+    controller.getListService().getListsForUser(true, false, canMakeQuiz(), new AsyncCallback<Collection<T>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting lists created by user", caught);
       }
 
       @Override
-      public void onSuccess(Collection<UserList<CommonShell>> result) {
+      public void onSuccess(Collection<T> result) {
         myLists.populateTable(result);
         populateUniqueListNames(result);
         Scheduler.get().scheduleDeferred(() -> setShareHREF(getCurrentSelectionFromMyLists()));
@@ -327,7 +327,7 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
    * @param left
    * @see #addYourLists
    */
-  private void showYourLists(Collection<UserList<CommonShell>> result, DivWidget left) {
+  private void showYourLists(Collection<T> result, DivWidget left) {
     ListContainer myLists = new MyListContainer();
     Panel tableWithPager = (ListView.this.myLists = myLists).getTableWithPager(result);
 
@@ -339,7 +339,7 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
     left.add(getButtons(ListView.this.myLists));
   }
 
-  private void populateUniqueListNames(Collection<UserList<CommonShell>> result) {
+  private void populateUniqueListNames(Collection<T> result) {
     result.forEach(list -> {
       if (list.getUserID() == controller.getUser()) {
         names.add(list.getName());
@@ -359,7 +359,7 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
    * @return
    */
   @NotNull
-  private DivWidget getButtons(ListContainer container) {
+  private DivWidget getButtons(ListContainer<T> container) {
     DivWidget buttons = new DivWidget();
     buttons.addStyleName("inlineFlex");
     buttons.addStyleName("topFiveMargin");
@@ -470,12 +470,10 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> editList());
     addTooltip(successButton, EDIT_THE_ITEMS_ON_LIST);
-    //  successButton.setEnabled(!myLists.isEmpty());
     return successButton;
   }
 
   private void editList() {
-    //UserList<CommonShell> currentSelectionFromMyLists = getCurrentSelectionFromMyLists();
     EditItem editItem = new EditItem(controller);
     new DialogHelper(true).show(
         ADD_EDIT_ITEMS + " : " + getListName(),
@@ -495,20 +493,20 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
   }
 
   @NotNull
-  private DivWidget getLDButtons(ListContainer container) {
+  private DivWidget getLDButtons(ListContainer<T> container) {
     DivWidget buttons = new DivWidget();
     buttons.addStyleName("topFiveMargin");
     addDrillAndLearn(buttons, container);
     return buttons;
   }
 
-  private void addDrillAndLearn(DivWidget buttons, ListContainer container) {
+  private void addDrillAndLearn(DivWidget buttons, ListContainer<T> container) {
     buttons.add(getLearnButton(container));
     buttons.add(getDrillButton(container));
   }
 
   @NotNull
-  private Button getLearnButton(ListContainer container) {
+  private Button getLearnButton(ListContainer<T> container) {
     Button learn = getSuccessButton(LEARN);
     learn.setType(ButtonType.INFO);
     learn.addClickHandler(event -> showLearnList(container));
@@ -518,7 +516,7 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
     return learn;
   }
 
-  private void showLearnList(ListContainer container) {
+  private void showLearnList(ListContainer<T> container) {
     controller.getNavigation().showListIn(getListID(container), INavigation.VIEWS.LEARN);
   }
 
@@ -526,12 +524,12 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
    * @param container
    * @see ListView.MyListContainer#gotDoubleClickOn
    */
-  private void showQuiz(ListContainer container) {
+  private void showQuiz(ListContainer<T>  container) {
     controller.showListIn(getListID(container), INavigation.VIEWS.QUIZ);
   }
 
   @NotNull
-  private Button getDrillButton(ListContainer container) {
+  private Button getDrillButton(ListContainer<T> container) {
     Button drill = getSuccessButton(DRILL);
     drill.setType(ButtonType.INFO);
 
@@ -543,7 +541,7 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
   }
 
   @NotNull
-  private Button getQuizButton(ListContainer container) {
+  private Button getQuizButton(ListContainer<T> container) {
     Button drill = getSuccessButton(QUIZ);
     drill.setType(ButtonType.INFO);
 
@@ -555,7 +553,7 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
     return drill;
   }
 
-  private int getListID(ListContainer container) {
+  private int getListID(ListContainer<T> container) {
     if (container == null) return -1;
     else {
       UserList<CommonShell> currentSelection = getCurrentSelection(container);
@@ -607,12 +605,12 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
     return add;
   }
 
-  private UserList<CommonShell> getCurrentSelectionFromMyLists() {
+  private T getCurrentSelectionFromMyLists() {
     return getCurrentSelection(myLists);
   }
 
   @NotNull
-  private Button getRemoveVisitorButton(ListContainer visited) {
+  private Button getRemoveVisitorButton(ListContainer<T> visited) {
     final Button add = new Button("", IconType.MINUS);
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> gotDeleteVisitor(add, getCurrentSelection(visited), visited));
@@ -626,7 +624,7 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
     new TooltipHelper().addTopTooltip(add, tip);
   }
 
-  private UserList<CommonShell> getCurrentSelection(ListContainer container) {
+  private T getCurrentSelection(ListContainer<T> container) {
     return container.getCurrentSelection();
   }
 
@@ -840,7 +838,7 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
     UserList<CommonShell> currentSelection = myLists.getCurrentSelection();
     boolean isQuiz = currentSelection.getListType() == UserList.LIST_TYPE.QUIZ;
     return new UserListSupport(controller)
-        .getMailTo(currentSelection.getID(), currentSelection.getName(), isQuiz);
+        .getMailToList(currentSelection.getID(), currentSelection.getName(), isQuiz);
   }
 
   /**
@@ -848,7 +846,7 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
    * @see CreateListDialog#addUserList
    */
   @Override
-  public void madeIt(UserList userList) {
+  public void madeIt(T userList) {
     // logger.info("madeIt made it " + userList.getName());
     try {
       dialogHelper.hide();
@@ -883,13 +881,13 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
     }
   }
 
-  private class MyListContainer extends ListContainer {
+  private class MyListContainer extends ListContainer<T> {
     MyListContainer() {
       super(ListView.this.controller, 18, true, MY_LISTS, 15, true, false);
     }
 
     @Override
-    public void gotClickOnItem(final UserList<CommonShell> user) {
+    public void gotClickOnItem(final T user) {
       super.gotClickOnItem(user);
       setShareHREF(user);
       enableQuizButton(quizButton);
@@ -901,14 +899,14 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
     }
 
     @Override
-    protected void gotDoubleClickOn(UserList<CommonShell> selected) {
+    protected void gotDoubleClickOn(T selected) {
       //    logger.info("gotDoubleClickOn got double click on " + selected);
       //showLearnOrQuiz(selected);
       editList();
     }
   }
 
-  private void setShareHREF(UserList<CommonShell> user) {
+  private void setShareHREF(T user) {
     if (user != null) {
       setShareButtonHREF();
       // share.setEnabled(!user.isFavorite());
@@ -916,7 +914,7 @@ public class ListView extends TableAndPager implements ContentView, CreateListCo
   }
 
 
-  private void showQuiz(UserList<CommonShell> selected) {
+  private void showQuiz(T selected) {
     if (selected != null) {
       if (selected.getListType() == UserList.LIST_TYPE.QUIZ) {
         showQuiz(myLists);

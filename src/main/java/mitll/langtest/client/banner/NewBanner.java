@@ -257,6 +257,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     rememberViewAndLink(nav, RECORD_ENTRIES);
     rememberViewAndLink(nav, RECORD_SENTENCES);
     rememberViewAndLink(nav, OOV_EDITOR);
+    rememberViewAndLink(nav, DIALOG_EDITOR);
 
     recnav.add(nav);
     return recnav;

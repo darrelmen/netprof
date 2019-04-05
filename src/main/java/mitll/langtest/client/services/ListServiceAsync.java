@@ -41,7 +41,7 @@ import java.util.Map;
 public interface ListServiceAsync {
   void getAllQuiz(AsyncCallback<Collection<IUserListLight>> async);
 
-  void getListsForUser(boolean onlyCreated, boolean visited, boolean includeQuiz, AsyncCallback<Collection<UserList<CommonShell>>> async);
+  <T extends UserList<CommonShell>> void getListsForUser(boolean onlyCreated, boolean visited, boolean includeQuiz, AsyncCallback<Collection<T>> async);
 
   /**
    * @param onlyCreated
@@ -78,7 +78,7 @@ public interface ListServiceAsync {
 
   void deleteItemFromList(int listid, int exid, AsyncCallback<Boolean> async);
 
-  void getLists(AsyncCallback<Collection<UserList<CommonShell>>> async);
+  <T extends UserList<CommonShell>> void getLists(AsyncCallback<Collection<T>> async);
 
   void removeVisitor(int userListID, int user, AsyncCallback<Void> async);
 

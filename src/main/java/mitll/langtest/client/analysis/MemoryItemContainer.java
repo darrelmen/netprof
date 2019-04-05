@@ -309,12 +309,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 //        if (DEBUG) logger.info("new start of next newIndex " + newStart + "/" + newIndex + "/page = " + pageNum +
 //            " vs current " + table.getVisibleRange());
         table.setVisibleRange(newStart, pageSize);
-//        if (doRedraw) {
-//          table.redraw();
-//        }
       }
     }
-    //  i++;
   }
 
   @Override

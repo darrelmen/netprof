@@ -229,21 +229,34 @@ public class UserListSupport {
   }
 
   private String getMailToList(IUserList ul) {
-    return getMailTo(ul.getID(), ul.getName(), false);
+    return getMailToList(ul.getID(), ul.getName(), false);
   }
 
   @NotNull
-  public String getMailTo(int listid, String name, boolean isQuiz) {
-    String selector = "Lists=" + listid;
+  public String getMailToDialog(int dialogID, String name) {
+    return getMailToGeneric(name, SelectionState.DIALOG + "=" + dialogID, "dialog", getInstance(INavigation.VIEWS.LISTEN.toString()));
+  }
 
+  @NotNull
+  public String getMailToList(int listid, String name, boolean isQuiz) {
+    return getMailToGeneric(name, isQuiz, "Lists=" + listid);
+  }
+
+  @NotNull
+  private String getMailToGeneric(String name, boolean isQuiz, String selector) {
+    String type = isQuiz ? "quiz" : "list";
+    return getMailToGeneric(name, selector, type, getInstance(getView(isQuiz)));
+  }
+
+  @NotNull
+  private String getMailToGeneric(String name, String selector, String type, String instance) {
     String s = getURL() +
         "#" +
         SelectionState.SECTION_SEPARATOR + selector +
         getProjectParam() +
-        getInstance(isQuiz);
+        instance;
 
     String encode = URL.encode(s);
-    String type = isQuiz ? "quiz" : "list";
 
     return "mailto:" +
         "?" +
@@ -256,11 +269,23 @@ public class UserListSupport {
 
   @NotNull
   private String getInstance(boolean isQuiz) {
-    return SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=" +
-        (isQuiz ?
-            INavigation.VIEWS.QUIZ.toString() :
-            INavigation.VIEWS.LEARN.toString()
-        );
+    return getInstance(getView(isQuiz));
+  }
+
+  @NotNull
+  public String getInstance(String view) {
+    return getInstancePrefix() + view;
+  }
+
+  @NotNull
+  private String getInstancePrefix() {
+    return SelectionState.SECTION_SEPARATOR + SelectionState.INSTANCE + "=";
+  }
+
+  private String getView(boolean isQuiz) {
+    return isQuiz ?
+        INavigation.VIEWS.QUIZ.toString() :
+        INavigation.VIEWS.LEARN.toString();
   }
 
   @NotNull

@@ -57,7 +57,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   private static final float MAX_PAGES = 2f;
   private static final int MIN_PAGE_SIZE = 3;
   private static final float DEFAULT_PAGE_SIZE = 15f;
-  protected final ExerciseController controller;
+  protected final ExerciseController<?> controller;
   private final ListDataProvider<T> dataProvider;
   /**
    *

@@ -43,7 +43,7 @@ import java.util.List;
 public interface DialogServiceAsync {
   void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
 
-  void getDialogs(ExerciseListRequest request, AsyncCallback<ExerciseListWrapper<IDialog>> async);
+  <T extends IDialog> void getDialogs(ExerciseListRequest request, AsyncCallback<ExerciseListWrapper<T>> async);
 
   void getDialog(int id, AsyncCallback<IDialog> async);
 
@@ -51,5 +51,7 @@ public interface DialogServiceAsync {
 
   void getDialogSessions(int userid, int dialogid, AsyncCallback<List<IDialogSession>> async);
 
- // void getLatestDialogSessionID(int dialogid, AsyncCallback<Integer> async);
+  void delete(int id, AsyncCallback<Boolean> async);
+
+  // void getLatestDialogSessionID(int dialogid, AsyncCallback<Integer> async);
 }

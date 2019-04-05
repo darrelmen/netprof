@@ -465,6 +465,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }
 
   @Override
+  public boolean delete(int id) {
+    return dao.delete(id) > 0;
+  }
+
+  @Override
   public DialogAttributeJoinHelper getDialogAttributeJoinHelper() {
     return dialogAttributeJoinHelper;
   }

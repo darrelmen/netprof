@@ -77,11 +77,11 @@ import java.util.stream.Collectors;
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
 public class OOVViewHelper extends TableAndPager implements ContentView {
-  public static final int EXAMPLE_WIDTH = 610;
   private final Logger logger = Logger.getLogger("OOVViewHelper");
 
+  private static final int EXAMPLE_WIDTH = 610;
+
   private static final int CHUNK = 300;
-  //  private static final INavigation.VIEWS LEARN = INavigation.VIEWS.LEARN;
   private static final String CHECKING_OOV = "Checking OOV...";
 
   private static final String OOV = "Not In Dict.";

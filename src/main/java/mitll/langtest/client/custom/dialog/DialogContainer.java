@@ -27,48 +27,35 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.server.database.dialog;
+package mitll.langtest.client.custom.dialog;
 
-import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.IDAO;
-import mitll.langtest.shared.dialog.DialogStatus;
-import mitll.langtest.shared.dialog.DialogType;
+import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.dialog.IDialog;
 
-import java.util.List;
+public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContainer<T> {
+  public DialogContainer(ExerciseController<?> controller) {
+    super(controller, "netprof" + ":" + controller.getUser() + ":" + "dialogs", "Dialogs",
+        20, 10);
+  }
 
-public interface IDialogDAO extends IDAO {
-  int add(int userid,
-          int projid,
-          int dominoID,
-          int imageID,
+  @Override
+  protected int getIDCompare(IDialog o1, IDialog o2) {
+    return Integer.compare(o1.getID(), o2.getID());
+  }
 
-          long modified,
-          long lastimport,
-          String unit,
-          String lesson,
-          DialogType kind,
-          DialogStatus status,
-          String entitle,
-          String orientation
-  );
+  @Override
+  protected int getDateCompare(IDialog o1, IDialog o2) {
+    return Long.compare(o1.getModified(), o2.getModified());
+  }
 
-  boolean delete(int id);
+  @Override
+  protected String getItemLabel(IDialog shell) {
+    return shell.getForeignLanguage();
+  }
 
-  int ensureDefault(int defaultUser);
-
-  List<IDialog> getDialogs(int projid);
-
-  /**
-   * @see DatabaseImpl#createTables
-   * @return
-   */
-  DialogAttributeJoinHelper getDialogAttributeJoinHelper();
-
-  /**
-   * For when we want to drop the current dialog data and reload
-   * @see mitll.langtest.server.database.project.DialogPopulate#cleanDialog
-   * @param id
-   */
-  void removeForProject(int id);
+  @Override
+  protected Long getItemDate(IDialog shell) {
+    return shell.getModified();
+  }
 }

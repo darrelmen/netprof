@@ -96,7 +96,8 @@ public interface INavigation extends IViewContaner {
     QC_SENTENCES("QC Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, true),
     FIX_SENTENCES("Fix Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, true),
 
-    OOV_EDITOR("Missing In Dictionary", VOCABULARY);
+    OOV_EDITOR("Missing In Dictionary", VOCABULARY),
+    DIALOG_EDITOR("Dialog Editor", ProjectMode.DIALOG);
 
     private final List<Permission> perms;
     private final ProjectMode mode;

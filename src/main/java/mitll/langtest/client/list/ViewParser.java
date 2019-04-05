@@ -45,6 +45,7 @@ public class ViewParser {
 
   /**
    * Do something smarter!
+   *
    * @param instance
    * @return
    */
@@ -63,6 +64,8 @@ public class ViewParser {
         return PERFORM;
       } else if (rawInstance.equalsIgnoreCase(OOV_EDITOR.toString())) {
         return OOV_EDITOR;
+      } else if (rawInstance.equalsIgnoreCase(DIALOG_EDITOR.toString())) {
+        return DIALOG_EDITOR;
       } else {
         instance = instance.replaceAll(" ", "_");
 

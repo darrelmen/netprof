@@ -30,7 +30,6 @@
 package mitll.langtest.shared.custom;
 
 public interface IUserList extends IUserListLight {
-
   String getDescription();
 
   int getProjid();
