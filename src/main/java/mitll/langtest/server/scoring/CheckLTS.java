@@ -55,6 +55,7 @@ public class CheckLTS {
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_OOV = false;
   private static final String POUND = "#";
+  private int shown = 0;
 
   /**
    * @param lts
@@ -66,26 +67,12 @@ public class CheckLTS {
     this.letterToSoundClass = lts;
     this.htkDictionary = htkDictionary;
     this.languageInfo = languageInfo;
+    this.isAsianLanguage = isAsianLanguage;
+
     if (htkDictionary == null || (htkDictionary.isEmpty() && hasModel)) {
       logger.warn("CheckLTS : dict is empty? lts = " + lts);
     }
     smallVocabDecoder = new SmallVocabDecoder(htkDictionary, isAsianLanguage, languageInfo);
-
-    this.isAsianLanguage = isAsianLanguage;
-//    logger.info("lang " + languageProperty  + " asian " + isAsianLanguage);
-//    if (isAsianLanguage) logger.warn("using mandarin segmentation.");
-  }
-
-  private boolean areAllPhonesValid(String[] pron) {
-    boolean allValid = true;
-    for (String p : pron) {
-      if (checkInvalidPhone(p)) allValid = false;
-    }
-    return allValid;
-  }
-
-  private boolean checkInvalidPhone(String p) {
-    return p.equalsIgnoreCase(POUND);
   }
 
   /**
@@ -96,12 +83,6 @@ public class CheckLTS {
    */
   public Set<String> checkLTS(String foreignLanguagePhrase, String transliteration) {
     return checkLTS(letterToSoundClass, foreignLanguagePhrase, transliteration);
-  }
-
-  private int shown = 0;
-
-  private boolean hasUsableTransliteration(Collection<String> foreignTokens, Collection<String> translitTokens) {
-    return (foreignTokens.size() == translitTokens.size()) || (foreignTokens.size() == 1);
   }
 
   //private int spew = 0;
@@ -290,6 +271,10 @@ public class CheckLTS {
     return translitOk;
   }
 
+  private boolean hasUsableTransliteration(Collection<String> foreignTokens, Collection<String> translitTokens) {
+    return (foreignTokens.size() == translitTokens.size()) || (foreignTokens.size() == 1);
+  }
+
   private String getCons(String[] tokens) {
     return String.join("-", tokens);
   }
@@ -329,6 +314,18 @@ public class CheckLTS {
       }
     }
     return b && valid;
+  }
+
+  private boolean areAllPhonesValid(String[] pron) {
+    boolean allValid = true;
+    for (String p : pron) {
+      if (checkInvalidPhone(p)) allValid = false;
+    }
+    return allValid;
+  }
+
+  private boolean checkInvalidPhone(String p) {
+    return p.equalsIgnoreCase(POUND);
   }
 
   /**

@@ -54,7 +54,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class ActiveUsersManager {
-  private final Logger logger = Logger.getLogger("ActiveUsersManager");
+ // private final Logger logger = Logger.getLogger("ActiveUsersManager");
 
   private static final int HOUR = 60 * 60 * 1000;
   private static final String LOGGED_IN = "Logged In";
@@ -164,7 +164,7 @@ public class ActiveUsersManager {
   protected Button getButton(String ok1) {
     Button ok = new Button(ok1);
     ok.setType(ButtonType.SUCCESS);
-    ok.setSize(ButtonSize.LARGE);
+    //ok.setSize(ButtonSize.LARGE);
     ok.addStyleName("floatRight");
     return ok;
   }
@@ -194,7 +194,7 @@ public class ActiveUsersManager {
       addProj(list);
     }
 
-    protected void addUserID(List<ActiveUser> list) {
+    void addUserID(List<ActiveUser> list) {
       Column<ActiveUser, SafeHtml> userCol = getClickable(this::getIDString);
       table.setColumnWidth(userCol, 55 + "px");
       addColumn(userCol, new TextHeader("ID"));
@@ -243,7 +243,7 @@ public class ActiveUsersManager {
      * @param list
      * @see #get
      */
-    protected void addVisitedCol(List<ActiveUser> list) {
+    void addVisitedCol(List<ActiveUser> list) {
       Column<ActiveUser, SafeHtml> dateCol = getVisitedColumn();
       dateCol.setSortable(true);
       addColumn(dateCol, new TextHeader(LAST_ACTIVITY));

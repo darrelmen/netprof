@@ -69,8 +69,9 @@ public class KaldiSupport implements IKaldiSupport {
    * left french quote -- \\u00AB
    * right quote - 00BB
    * ellipsis - 2026
+   * light horizontal
    */
-  private static final String CLEAN_BEFORE_KALDI = "[()/\\u00AB\\u00BB\\u2026]";
+  private static final String CLEAN_BEFORE_KALDI = "[()/\\u00AB\\u00BB\\u2026\\u2500]";
 
   private final IPronunciationLookup pronunciationLookup;
   private final IProject project;
@@ -161,18 +162,15 @@ public class KaldiSupport implements IKaldiSupport {
   @NotNull
   private List<WordAndProns> getWordAndProns(String sentence) {
     List<WordAndProns> possibleProns = new ArrayList<>();
-    getHydraDict(sentence, "", possibleProns);
+//    getHydraDict(sentence, "", possibleProns);
+    pronunciationLookup.createHydraDict(sentence, "", possibleProns);
     return possibleProns;
-  }
-
-  private void getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns) {
-    pronunciationLookup.createHydraDict(cleaned, transliteration, possibleProns);
   }
 
   /**
    * @param fl
    * @return
-   * @see AudioFileHelper#isValidForeignPhrase(Set, Set, CommonExercise, Set, boolean)
+   * @see AudioFileHelper#isValidForeignPhrase
    */
   @Override
   public Collection<String> getKaldiOOV(String fl) {

@@ -312,8 +312,8 @@ public abstract class Scoring {
     if (fl.isEmpty()) {
       return false;
     } else {
-      Collection<String> oovForFL = getOOV(fl, transliteration);
-      return oovForFL.isEmpty();
+     // Collection<String> oovForFL = checkLTSHelper.checkLTS(fl, transliteration);
+      return checkLTSHelper.checkLTS(fl, transliteration).isEmpty();
     }
   }
 
@@ -325,11 +325,11 @@ public abstract class Scoring {
    * @param transliteration
    * @return
    */
-  @NotNull
+/*  @NotNull
   private Collection<String> getOOV(String fl, String transliteration) {
     Set<String> oovForFL = checkLTSHelper.checkLTS(fl, transliteration);
 
- /*   List<String> inOrder = new ArrayList<>(oovForFL);
+ *//*   List<String> inOrder = new ArrayList<>(oovForFL);
 
     //if (oov.addAll(oovForFL)) {
     // logger.info("validLTS : For " + fl + " got " + oovForFL + " now " + oov.size() + " set = " + oov.hashCode());
@@ -345,9 +345,9 @@ public abstract class Scoring {
       } catch (NumberFormatException e) {
         // ok not an int
       }
-    }*/
+    }*//*
     return oovForFL;
-  }
+  }*/
 
   /**
    * Must be public.

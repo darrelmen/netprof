@@ -54,8 +54,12 @@ public class TextNormalizer {
    * FF01 = full width exclamation
    * FF1B - full semi
    * 002D - hyphen
+   * left french quote -- \\u00AB
+   * right quote - 00BB
+   * ellipsis - 2026
+   * light horizontal
    */
-  private static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193\\u2026\\uFF01\\uFF1B\\u002D;~/']";
+  private static final String REMOVE_ME = "[()/\\u00AB\\u00BB\\u2026\\u2500\\u0130\\u2022\\u2219\\u2191\\u2193\\uFF01\\uFF1B\\u002D;~/']";
   private static final String REPLACE_ME_OE = "[\\u0152\\u0153]";
 
   private static final String P_Z = "\\p{Z}+";
@@ -67,9 +71,8 @@ public class TextNormalizer {
   private static final String P_P = "\\p{P}";
   private static final String INTERNAL_PUNCT_REGEX = "(?:(?<!\\S)\\p{Punct}+)|(?:\\p{Punct}+(?!\\S))";
 
-  private static final boolean DEBUG = false;
+  //private static final boolean DEBUG = false;
   private static final String NORMAL_I = "I";
-
 
   private final Pattern punctCleaner;
   private final Pattern tickPattern;

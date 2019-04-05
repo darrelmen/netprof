@@ -632,7 +632,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       if (!perms.isEmpty()) {
         suffix += " " + perms;
       }
-      String tip = current.getFullName() + suffix;
+      String tip = current.getFullName() + " (" +current.getUserID()+
+          ") "+ suffix;
       userDrop.setTitle(tip);
       logger.info("setUserName suffix " + suffix);
       new TooltipHelper().createAddTooltip(userDrop, tip, Placement.LEFT);

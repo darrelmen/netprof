@@ -86,7 +86,7 @@ public class UserMenu {
   /**
    * @see #addPendingTeacher(List)
    */
-  private static final String PENDING_TEACHER_REQUESTS = "Pending Teacher Requests";
+  private static final String PENDING_TEACHER_REQUESTS = "Pending Instructor Requests";
 
   /**
    * @see #maybeAddReqInstructor(List)
