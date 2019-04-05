@@ -116,30 +116,6 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
     }
   }
 
-  /**
-   * @param defaultUser
-   * @param exToAudio      NOT USED!
-   * @param project
-   * @param englishProject
-   * @return
-   */
-  @Override
-  public Map<Dialog, SlickDialog> getDialogs(int defaultUser,
-                                             Map<ClientExercise, String> exToAudio,
-                                             Project project,
-                                             Project englishProject) {
-//    File excelFile = getExcelFile(project);
-//
-//    if (excelFile.exists()) {
-//      logger.info("no interpreter spreadsheet for " + project.getName());
-//      return Collections.emptyMap();
-//    } else {
-//      return getDialogsFromExcel(defaultUser, project, englishProject, excelFile);
-//    }
-
-    return Collections.emptyMap();
-  }
-
   private Map<Dialog, SlickDialog> getDialogsFromExcel(int defaultUser,
                                                        Project project,
                                                        Project englishProject,

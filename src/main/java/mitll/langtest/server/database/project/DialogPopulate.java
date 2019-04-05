@@ -72,7 +72,7 @@ import static mitll.langtest.shared.answer.AudioType.REGULAR;
  */
 public class DialogPopulate {
   private static final Logger logger = LogManager.getLogger(DialogPopulate.class);
-  private static final boolean DO_AUDIO_COPY = false;
+ // private static final boolean DO_AUDIO_COPY = false;
 
   private final DatabaseImpl db;
   /**
@@ -96,11 +96,8 @@ public class DialogPopulate {
    * @param project
    * @see ProjectManagement#addDialogInfo
    */
-  public boolean addDialogInfo(Project project) {
-    int projid = project.getID();
-    IDialogDAO dialogDAO = db.getDialogDAO();
-
-    List<IDialog> dialogs1 = dialogDAO.getDialogs(projid);
+  boolean addDialogInfo(Project project) {
+    List<IDialog> dialogs1 = db.getDialogDAO().getDialogs(project.getID());
     if (dialogs1.isEmpty()) {
       logger.info("addDialogInfo no dialog info yet loaded for " + project);
       return true;
@@ -134,10 +131,7 @@ public class DialogPopulate {
       return false;
     } else {
       waitUntilTrieReady(project);
-
-      //   maybeDoDialogImport(project, englishProject, dialogDAO);
       maybeDoInterpreterImport(project, englishProject, dialogDAO, keepAudio, excel);
-
       return true;
     }
   }
@@ -180,25 +174,6 @@ public class DialogPopulate {
   }
 
   /**
-   * Legacy --
-   * @param project
-   * @param englishProject
-   * @param dialogDAO
-   */
-/*  private void maybeDoDialogImport(Project project, Project englishProject, IDialogDAO dialogDAO) {
-    Language languageEnum = project.getLanguageEnum();
-
-    if (shouldTryToReadDialogInfo(languageEnum)) {
-      Project productionByLanguage = db.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
-
-      int defaultUser = db.getUserDAO().getDefaultUser();
-      Map<ClientExercise, String> exToAudio = new HashMap<>();
-      addDialogs(project, englishProject, dialogDAO, exToAudio, defaultUser, DialogType.DIALOG,
-          getDialogReader(languageEnum).getDialogs(defaultUser, exToAudio, project, productionByLanguage));
-    }
-  }*/
-
-  /**
    * @param project
    * @param englishProject
    * @param dialogDAO
@@ -207,6 +182,7 @@ public class DialogPopulate {
    * @param dialogType
    * @param dialogToSlick
    * @param keepAudio
+   * @see #maybeDoInterpreterImport(Project, Project, IDialogDAO, boolean, String)
    */
   private void addDialogs(Project project,
                           Project englishProject,

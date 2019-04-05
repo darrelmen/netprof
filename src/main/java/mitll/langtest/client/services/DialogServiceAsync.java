@@ -51,5 +51,5 @@ public interface DialogServiceAsync {
 
   void getDialogSessions(int userid, int dialogid, AsyncCallback<List<IDialogSession>> async);
 
-  void getLatestDialogSessionID(int dialogid, AsyncCallback<Integer> async);
+ // void getLatestDialogSessionID(int dialogid, AsyncCallback<Integer> async);
 }

@@ -29,10 +29,15 @@
 
 package mitll.langtest.server.database.dialog;
 
+import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.domino.ProjectSync;
+import mitll.langtest.shared.dialog.Dialog;
+import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickDialogAttributeJoin;
 import mitll.npdata.dao.dialog.DialogAttributeJoinDAOWrapper;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +45,10 @@ import java.util.Map;
 public class DialogAttributeJoinHelper implements IDialogAttributeJoin {
   private final DialogAttributeJoinDAOWrapper attributeJoinDAOWrapper;
 
+  /**
+   * @see DialogDAO#DialogDAO(Database, DBConnection, DatabaseImpl)
+   * @param attributeJoinDAOWrapper
+   */
   DialogAttributeJoinHelper(DialogAttributeJoinDAOWrapper attributeJoinDAOWrapper) {
     this.attributeJoinDAOWrapper = attributeJoinDAOWrapper;
   }
@@ -63,12 +72,20 @@ public class DialogAttributeJoinHelper implements IDialogAttributeJoin {
     return true;
   }
 
+  /**
+   * @see DialogDAO#getDialogs
+   * @param projid
+   * @return
+   */
   @Override
   public Map<Integer, Collection<SlickDialogAttributeJoin>> getAllJoinByProject(int projid) {
     return attributeJoinDAOWrapper.allByProject(projid);
   }
 
-
+  /**
+   * @see mitll.langtest.server.database.project.DialogPopulate#addDialogAttributes(IDialogDAO, int, Timestamp, Map, Dialog, int)
+   * @param joins
+   */
   @Override
   public void addBulkAttributeJoins(List<SlickDialogAttributeJoin> joins) {
     attributeJoinDAOWrapper.addBulk(joins);

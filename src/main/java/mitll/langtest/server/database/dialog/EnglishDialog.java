@@ -39,6 +39,7 @@ import org.apache.logging.log4j.Logger;
 import java.util.ArrayList;
 import java.util.Map;
 
+@Deprecated
 public class EnglishDialog extends DialogReader implements IDialogReader {
   private static final Logger logger = LogManager.getLogger(EnglishDialog.class);
 
@@ -108,7 +109,7 @@ public class EnglishDialog extends DialogReader implements IDialogReader {
    * @return
    * @see mitll.langtest.server.database.project.DialogPopulate#populateDatabase
    */
-  @Override
+  //@Override
   public Map<Dialog, SlickDialog> getDialogs(int defaultUser,
                                              Map<ClientExercise, String> exToAudio,
                                              Project project, Project englishProject) {

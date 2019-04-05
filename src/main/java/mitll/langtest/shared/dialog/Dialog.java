@@ -368,11 +368,6 @@ public class Dialog implements IDialog, MutableShell {
     return this;
   }
 
-//  @Override
-//  public int getNumPhones() {
-//    return 0;
-//  }
-
   @Override
   public boolean isContext() {
     return false;

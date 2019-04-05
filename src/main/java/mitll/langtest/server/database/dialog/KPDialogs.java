@@ -41,6 +41,7 @@ import java.util.Map;
 /**
  * Dialog data from Paul - 6/20/18
  */
+@Deprecated
 public class KPDialogs extends DialogReader implements IDialogReader {
  // private static final Logger logger = LogManager.getLogger(KPDialogs.class);
 
@@ -277,12 +278,10 @@ public class KPDialogs extends DialogReader implements IDialogReader {
    * @return
    * @see mitll.langtest.server.database.project.DialogPopulate#populateDatabase
    */
-  @Override
+  //@Override
   public Map<Dialog, SlickDialog> getDialogs(int defaultUser,
                                              Map<ClientExercise, String> exToAudio,
                                              Project project, Project englishProject) {
     return getDialogsByProp(defaultUser, exToAudio, project, dialogProps, cv);
   }
-
-
 }

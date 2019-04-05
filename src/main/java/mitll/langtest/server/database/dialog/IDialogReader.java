@@ -31,7 +31,6 @@ package mitll.langtest.server.database.dialog;
 
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.dialog.Dialog;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.npdata.dao.SlickDialog;
 
 import java.util.Map;
@@ -45,9 +44,16 @@ public interface IDialogReader {
    * @param englishProject
    * @return
    */
-  Map<Dialog, SlickDialog> getDialogs(int defaultUser,
-                                      Map<ClientExercise, String> exToAudio, Project project, Project englishProject);
+//  Map<Dialog, SlickDialog> getDialogs(int defaultUser,
+//                                      Map<ClientExercise, String> exToAudio, Project project, Project englishProject);
 
-  Map<Dialog, SlickDialog> getInterpreterDialogs(int defaultUser,
-                                                 Project project, Project englishProject, String excelFile);
+  /**
+   * @param defaultUser
+   * @param project
+   * @param englishProject
+   * @param excelFile
+   * @return
+   * @see mitll.langtest.server.database.project.DialogPopulate#maybeDoInterpreterImport
+   */
+  Map<Dialog, SlickDialog> getInterpreterDialogs(int defaultUser, Project project, Project englishProject, String excelFile);
 }

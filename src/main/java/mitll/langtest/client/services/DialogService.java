@@ -31,6 +31,7 @@ package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;
@@ -41,11 +42,24 @@ import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.exercise.FilterResponse;
 
 import java.util.List;
+import java.util.Map;
 
 @RemoteServiceRelativePath("dialog-manager")
 public interface DialogService extends RemoteService {
+  /**
+   * @see mitll.langtest.client.dialog.DialogExerciseList#getTypeToValues(Map, int)
+   * @param request
+   * @return
+   * @throws DominoSessionException
+   */
   FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException;
 
+  /**
+   * @see mitll.langtest.client.dialog.DialogExerciseList#getExerciseIDs(Map, String, int, ExerciseListRequest)
+   * @param request
+   * @return
+   * @throws DominoSessionException
+   */
   ExerciseListWrapper<IDialog> getDialogs(ExerciseListRequest request) throws DominoSessionException;
 
   /**
@@ -56,6 +70,13 @@ public interface DialogService extends RemoteService {
    */
   IDialog getDialog(int id) throws DominoSessionException;
 
+
+  /**
+   * @see RehearseViewHelper#setSession
+   * @param dialogSession
+   * @return
+   * @throws DominoSessionException
+   */
   int addSession(DialogSession dialogSession) throws DominoSessionException;
 
   /**
@@ -64,7 +85,7 @@ public interface DialogService extends RemoteService {
    * @return
    * @throws DominoSessionException
    */
-  int getLatestDialogSessionID(int dialogid) throws DominoSessionException;
+ // int getLatestDialogSessionID(int dialogid) throws DominoSessionException;
 
   /**
    * @see mitll.langtest.client.analysis.SessionAnalysis#SessionAnalysis

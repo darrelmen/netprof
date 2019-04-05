@@ -82,9 +82,6 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
    */
   @Override
   public List<IDialogSession> getDialogSessions(int userid, int dialogid) {
-/*    if (dialogid == -1) {
-
-    }*/
     return getiDialogSessions(getByUserAndDialog(userid, dialogid));
   }
 
@@ -96,14 +93,13 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
   @NotNull
   private List<IDialogSession> getiDialogSessions(Collection<SlickDialogSession> byProjID) {
     return byProjID.stream().map(ds -> {
-      INavigation.VIEWS views = getViews(ds);
       return new DialogSession(ds.id(),
           ds.userid(),
           ds.projid(),
           ds.dialogid(),
           ds.modified().getTime(),
           ds.end().getTime(),
-          views,
+          getViews(ds),
           DialogStatus.valueOf(ds.status()),
           ds.numrecordings(),
           ds.score(),
@@ -123,7 +119,6 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
     }
     return views;
   }
-
 
   @Override
   public Map<Integer, Float> getLatestDialogSessionScores(int projid, int userid) {
@@ -148,10 +143,12 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
     return dialogIDToScore;
   }
 
+/*
   @Override
   public List<Integer> getUsersForDialog(int dialogID) {
     return dao.uniqueUsersForDialog(dialogID);
   }
+*/
 
   /**
    * Take the most recent one, but not if it's a study and we already have a rehearse or a perform
@@ -206,7 +203,7 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
    * @return
    * @see mitll.langtest.server.database.project.DialogPopulate#populateDatabase(Project)
    */
-  @Override
+/*  @Override
   public int add(int userid,
                  int projid,
                  int dialogid,
@@ -233,7 +230,7 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
         score,
         speakingRate
     ));
-  }
+  }*/
 
   /**
    * @param ds
@@ -242,8 +239,7 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
    */
   @Override
   public int add(DialogSession ds) {
-    logger.info("Add session " + ds);
-
+   // logger.info("add : add session " + ds);
     int dialogid = ds.getDialogid();
     if (dialogid < 1) {
       logger.warn("\n\n\ninvalid dialog id " + dialogid + " for " +ds);
@@ -300,8 +296,8 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
    *
    * @param projid
    */
-  @Override
-  public void removeForProject(int projid) {
-    dao.removeForProject(projid);
-  }
+//  @Override
+//  public void removeForProject(int projid) {
+//    dao.removeForProject(projid);
+//  }
 }

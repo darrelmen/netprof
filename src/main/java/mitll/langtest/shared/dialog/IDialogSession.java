@@ -35,6 +35,10 @@ import mitll.langtest.shared.exercise.*;
 public interface IDialogSession extends HasID {
   int getUserid();
 
+  /**
+   * @see mitll.langtest.server.database.dialog.DialogSessionDAO#add(DialogSession)
+   * @return
+   */
   int getProjid();
 
   int getDialogid();

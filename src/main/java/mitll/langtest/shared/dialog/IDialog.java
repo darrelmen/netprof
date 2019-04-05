@@ -52,18 +52,15 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored {
 
   DialogType getKind();
 
-
   String getImageRef();
-
 
   String getOrientation();
 
 
   String getUnit();
-
   String getChapter();
-  String getCountryCode();
 
+  String getCountryCode();
 
   String getAttributeValue(DialogMetadata metadata);
 

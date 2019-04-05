@@ -29,17 +29,20 @@
 
 package mitll.langtest.server.database.dialog;
 
-import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.shared.dialog.*;
+import mitll.langtest.shared.dialog.DialogSession;
+import mitll.langtest.shared.dialog.IDialogSession;
 import mitll.npdata.dao.SlickDialogSession;
 
 import java.util.List;
 import java.util.Map;
 
 public interface IDialogSessionDAO extends IDAO {
+/*
   List<Integer> getUsersForDialog(int dialogID);
+*/
 
+/*
   int add(int userid,
           int projid,
           int dialogid,
@@ -52,8 +55,16 @@ public interface IDialogSessionDAO extends IDAO {
           float score,
           float speakingrate
   );
+*/
 
   // seems like we want a summary of the latest scores
+
+  /**
+   * @see mitll.langtest.server.services.DialogServiceImpl#getScoreHistoryForDialogs(int, List)
+   * @param projid
+   * @param userid
+   * @return
+   */
   Map<Integer, Float> getLatestDialogSessionScores(int projid, int userid);
 
   /**
@@ -70,7 +81,7 @@ public interface IDialogSessionDAO extends IDAO {
    * @param id
    * @see mitll.langtest.server.database.project.DialogPopulate#cleanDialog
    */
-  void removeForProject(int id);
+ // void removeForProject(int id);
 
   /**
    * @see mitll.langtest.server.services.DialogServiceImpl#addSession
@@ -81,5 +92,9 @@ public interface IDialogSessionDAO extends IDAO {
 
   SlickDialogSession byID(int dialogSessionID);
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#updateDialogSessionWithAnswer(int, long)
+   * @param slickDialogSession
+   */
   void update(SlickDialogSession slickDialogSession);
 }

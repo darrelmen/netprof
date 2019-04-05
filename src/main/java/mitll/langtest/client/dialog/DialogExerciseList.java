@@ -92,14 +92,15 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   }
 
   protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
-    if (!isThereALoggedInUser()) return;
-    final long then = System.currentTimeMillis();
+    if (isThereALoggedInUser()) {
+      final long then = System.currentTimeMillis();
 
-    if (DEBUG) logger.info("getTypeToValues req " + typeToSelection);
+      if (DEBUG) logger.info("getTypeToValues req " + typeToSelection);
 
-    FilterRequest filterRequest = getFilterRequest(userListID, getPairs(typeToSelection));
-    if (DEBUG) logger.info("getTypeToValues filterRequest " + filterRequest);
-    controller.getDialogService().getTypeToValues(filterRequest, getTypeToValuesCallback(typeToSelection, then));
+      FilterRequest filterRequest = getFilterRequest(userListID, getPairs(typeToSelection));
+      if (DEBUG) logger.info("getTypeToValues filterRequest " + filterRequest);
+      controller.getDialogService().getTypeToValues(filterRequest, getTypeToValuesCallback(typeToSelection, then));
+    }
   }
 
   protected void getExerciseIDs(Map<String, Collection<String>> typeToSection,
@@ -162,11 +163,11 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
    */
   protected void populatePanels(Collection<IDialog> result, int reqID, DivWidget exerciseContainer) {
     //  long then = System.currentTimeMillis();
-    exerciseContainer.add(showProjectChoices(result, scoreHistoryPerExercise));
+    exerciseContainer.add(showProjectChoices(result));
     //  long now = System.currentTimeMillis();
   }
 
-  private Section showProjectChoices(Collection<IDialog> result, Map<Integer, CorrectAndScore> idToScore) {
+  private Section showProjectChoices(Collection<IDialog> result) {
     // logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
     final Section section = thumbnailChoices.getScrollingSection();
 
@@ -174,14 +175,14 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
       final Container flags = new Container();
       flags.setWidth(CHOICES_WIDTH + "px");
  //     flags.getElement().getStyle().setProperty("minWidth", "800px");
-      flags.add(addFlags(result, idToScore));
+      flags.add(addFlags(result));
       section.add(flags);
     }
 
     return section;
   }
 
-  private Thumbnails addFlags(Collection<IDialog> dialogs, Map<Integer, CorrectAndScore> idToScore) {
+  private Thumbnails addFlags(Collection<IDialog> dialogs) {
     Thumbnails current = new Thumbnails();
     current.getElement().getStyle().setMarginBottom(70, Style.Unit.PX);
 

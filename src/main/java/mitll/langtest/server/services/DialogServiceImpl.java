@@ -62,7 +62,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   /**
    * @param request
    * @return
-   * @see mitll.langtest.client.banner.DialogExerciseList#getTypeToValues
+   * @see mitll.langtest.client.dialog.DialogExerciseList#getTypeToValues
    */
   public FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException {
     ISection<IDialog> sectionHelper = getDialogSectionHelper();
@@ -95,13 +95,9 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
 
       if (userIDFromSessionOrDB != -1) {
-        List<IDialog> dialogList = getDialogs(request, sectionHelper, userIDFromSessionOrDB);
-
-        dialogList = getFilteredBySearchTerm(request, dialogList);
-        dialogList.sort(this::getDialogComparator);
+        List<IDialog> dialogList = getDialogsForRequest(request, sectionHelper, userIDFromSessionOrDB);
 
         Map<Integer, CorrectAndScore> scoreHistoryPerExercise = getScoreHistoryForDialogs(userIDFromSessionOrDB, dialogList);
-
 
         setDialogScores(dialogList, scoreHistoryPerExercise);
 
@@ -111,6 +107,15 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
         return new ExerciseListWrapper<>();
       }
     }
+  }
+
+  @NotNull
+  private List<IDialog> getDialogsForRequest(ExerciseListRequest request, ISection<IDialog> sectionHelper, int userIDFromSessionOrDB) {
+    List<IDialog> dialogList = getDialogs(request, sectionHelper, userIDFromSessionOrDB);
+
+    dialogList = getFilteredBySearchTerm(request, dialogList);
+    dialogList.sort(this::getDialogComparator);
+    return dialogList;
   }
 
   private void setDialogScores(List<IDialog> dialogList, Map<Integer, CorrectAndScore> scoreHistoryPerExercise) {
@@ -130,6 +135,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    * @param userIDFromSessionOrDB
    * @param dialogList
    * @return
+   * @see #getDialogs(ExerciseListRequest)
    */
   @NotNull
   private Map<Integer, CorrectAndScore> getScoreHistoryForDialogs(int userIDFromSessionOrDB, List<IDialog> dialogList) {
@@ -180,7 +186,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    * @return
    * @throws DominoSessionException
    */
-  @Override
+/*  @Override
   public int getLatestDialogSessionID(int dialogid) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
 
@@ -188,7 +194,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     SlickRelatedResult slickRelatedResult = db.getRelatedResultDAO()
         .latestByProjectForDialogForUser(getProjectIDFromUser(userIDFromSessionOrDB), dialogid, userIDFromSessionOrDB);
     return slickRelatedResult == null ? -1 : slickRelatedResult.dialogsessionid();
-  }
+  }*/
 
   // user implicit -
 
@@ -236,7 +242,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   /**
    * @param dialogSession
    * @throws DominoSessionException
-   * @see RehearseViewHelper#clearScores
+   * @see RehearseViewHelper#setSession
    */
   @Override
   public int addSession(DialogSession dialogSession) throws DominoSessionException {

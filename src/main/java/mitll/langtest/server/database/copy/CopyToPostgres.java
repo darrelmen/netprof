@@ -1805,7 +1805,8 @@ public class CopyToPostgres<T extends CommonShell> {
           logger.info("\ncopyDialog populate for " + project);
        //   DialogPopulate dialogPopulate = new DialogPopulate(database, getPathHelper(database));
           //logger.info("populate found " + englishProject);
-          if (!new DialogPopulate(database, getPathHelper(database)).populateDatabase(project, englishProject, keepAudio, excel, appendOK)) {
+          if (!new DialogPopulate(database, getPathHelper(database))
+              .populateDatabase(project, englishProject, keepAudio, excel, appendOK)) {
             logger.warn("project " + project + " already has dialog data.");
           } else {
             logger.info("added the dialogs to " + project);
