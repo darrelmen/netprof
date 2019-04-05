@@ -62,6 +62,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.server.services.ResultServiceImpl.LIMIT;
+
 @SuppressWarnings("serial")
 public class DownloadServlet extends DatabaseServlet {
   private static final Logger logger = LogManager.getLogger(DownloadServlet.class);
@@ -691,10 +693,10 @@ public class DownloadServlet extends DatabaseServlet {
       new UserPerfToExcel().writeExcelToStream(userInfo, userListNoExercises, outputStream);
     } else if (encodedFileName.toLowerCase().contains(RESULTS)) {
       setFilenameHeader(response, prefix + RESULTS_XLSX);
-      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid), db.getTypeOrder(projectid), outputStream);
+      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid, LIMIT), db.getTypeOrder(projectid), outputStream);
     } else if (encodedFileName.toLowerCase().contains(EVENTS)) {
       setFilenameHeader(response, prefix + EVENTS_XLSX);
-      new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(projectid), outputStream);
+      new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAllWithLimit(projectid, 50000), outputStream);
     } else {
       logger.error("returnSpreadsheet huh? can't handle request " + encodedFileName);
     }

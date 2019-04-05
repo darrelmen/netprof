@@ -51,6 +51,7 @@ import java.util.List;
 
 public class EventTable extends PagerTable {
   private static final int PAGE_SIZE = 5;
+  public static final String CLOSE = "Close";
   private Widget lastTable = null;
   private Button closeButton;
   MessageHelper messageHelper;
@@ -66,7 +67,7 @@ public class EventTable extends PagerTable {
     // Enable glass background.
     dialogBox.setGlassEnabled(true);
 
-    closeButton = new Button("Close");
+    closeButton = new Button(CLOSE);
     closeButton.setEnabled(true);
     closeButton.getElement().setId("closeButton");
 
@@ -76,7 +77,7 @@ public class EventTable extends PagerTable {
     int top = (Window.getClientHeight()) / 20;
     dialogBox.setPopupPosition(left, top);
 
-    service.getEvents(new AsyncCallback<Collection<Event>>() {
+    service.getEvents(25000, new AsyncCallback<Collection<Event>>() {
       public void onFailure(Throwable caught) {
 //        if (!caught.getMessage().trim().equals("0")) {
 //          Window.alert("getEvents couldn't contact server");

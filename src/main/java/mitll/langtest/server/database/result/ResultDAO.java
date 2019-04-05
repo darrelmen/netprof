@@ -32,6 +32,7 @@ package mitll.langtest.server.database.result;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
@@ -62,7 +63,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   private static final String LEARN = "learn";
 
   @Override
-  public List<MonitorResult> getMonitorResultsKnownExercises(int projid) {
+  public List<MonitorResult> getMonitorResultsKnownExercises(int projid, int limit) {
     return null;
   }
 
@@ -177,7 +178,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   /**
    * @param projid
    * @return
-   * @see DatabaseImpl#getMonitorResults(int)
+   * @see DatabaseServices#getMonitorResults(int, int)
    */
   @Override
   public List<MonitorResult> getMonitorResults(int projid) {

@@ -96,8 +96,9 @@ public interface LangTestDatabase extends RemoteService {
   /**
    * @return
    * @see mitll.langtest.client.instrumentation.EventTable#show
+   * @param limit
    */
-  Collection<Event> getEvents() throws DominoSessionException, RestrictedOperationException;
+  Collection<Event> getEvents(int limit) throws DominoSessionException, RestrictedOperationException;
 
   void sendReport() throws DominoSessionException, RestrictedOperationException;
 }

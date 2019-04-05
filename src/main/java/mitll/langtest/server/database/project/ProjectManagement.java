@@ -913,7 +913,7 @@ public class ProjectManagement implements IProjectManagement {
 
   @Override
   public List<Project> getMatchingProjects(Language languageMatchingGroup, boolean isPoly) {
-    List<Project> projectByLangauge = getProjectByLangauge(languageMatchingGroup);
+    List<Project> projectByLangauge = getProjectByLanguage(languageMatchingGroup);
     return projectByLangauge.stream()
         .filter(project ->
             (!isPoly || isPolyglot(project)) &&
@@ -928,7 +928,7 @@ public class ProjectManagement implements IProjectManagement {
    * @return
    */
   @Override
-  public List<Project> getProjectByLangauge(Language name) {
+  public List<Project> getProjectByLanguage(Language name) {
     return idToProject
         .values()
         .stream()

@@ -579,17 +579,17 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
 
       Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(eventAndFileInfo);
 
-      logger.info("getPretestScore sTypeToImage" +
-          "\n\tsTypeToImage " + sTypeToImage
-      );
+//      logger.info("getPretestScore sTypeToImage" +
+//          "\n\tsTypeToImage " + sTypeToImage
+//      );
 
       if (typeToSegments.isEmpty()) {
         logger.warn("getPretestScore huh? no segments from words " + result);// + " phones " + phoneLab);
       }
 
-      logger.info("getPretestScore typeToSegments" +
-          "\n\ttypeToSegments " + typeToSegments
-      );
+//      logger.info("getPretestScore typeToSegments" +
+//          "\n\ttypeToSegments " + typeToSegments
+//      );
 
       Map<String, String> phoneToDisplay = Collections.emptyMap();
       if (reallyUsePhone && this.phoneToDisplay != null) {
@@ -606,10 +606,9 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       }
 
       Map<String, Float> phoneToScore = getPhoneToScore(scores.getEventScores(), phoneToDisplay);
-      logger.info("getPretestScore phone " + phoneToScore);
-
+ //     logger.info("getPretestScore phone " + phoneToScore);
       Map<String, Float> wordToScore = getWordToScore(scores.getEventScores());
-      logger.info("getPretestScore word  " + wordToScore);
+//      logger.info("getPretestScore word  " + wordToScore);
 
       maybeClampScore(typeToSegments, scores);
 

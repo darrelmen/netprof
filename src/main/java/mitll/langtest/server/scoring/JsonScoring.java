@@ -115,7 +115,6 @@ public class JsonScoring {
    * @param postedWordOrPhrase
    * @param user               by this user
    * @param request            mostly decode, could be record if doing appen corpora recording
-   * @param wavPath            relative path to posted audio file
    * @param saveFile           File handle to file
    * @param deviceType         iPad,iPhone, or browser
    * @param device             id for device - helpful for iPads, etc.
@@ -133,12 +132,12 @@ public class JsonScoring {
 
                                            int user,
                                            ScoreServlet.PostRequest request,
-                                           String wavPath,
                                            File saveFile,
                                            String deviceType,
                                            String device,
                                            DecoderOptions options,
                                            boolean fullJSON) {
+    String wavPath = saveFile.getAbsolutePath();
     long start = System.currentTimeMillis();
     long then = System.currentTimeMillis();
 
@@ -220,7 +219,7 @@ public class JsonScoring {
    * @param answer
    * @param addStream
    * @return
-   * @see #getJsonForAudioForUser(int, int, int, String, int, ScoreServlet.PostRequest, String, File, String, String, DecoderOptions, boolean)
+   * @see #getJsonForAudioForUser(int, int, int, String, int, ScoreServlet.PostRequest, File, String, String, DecoderOptions, boolean)
    */
   public JsonObject getJsonObject(int projid,
                                   int exerciseID,
@@ -292,7 +291,7 @@ public class JsonScoring {
    * @param projid
    * @param usePhoneToDisplay
    * @param fullJSON
-   * @param doFlashcard
+   * @param doFlashcard if true mark result with whether they said the prompt
    * @param answer
    * @param pretestScore
    * @return

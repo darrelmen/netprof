@@ -191,11 +191,11 @@ class EventDAO extends DAO implements IEventDAO {
 
   @Override
   public List<Event> getAll() {
-    return getAllMax(-1);
+    return getAllWithLimit(-1, 10000);
   }
 
   @Override
-  public List<Event> getAll(Integer projid) {
+  public List<Event> getAll(int projid) {
     try {
       return getEvents("SELECT * from " + EVENT);
     } catch (Exception ee) {
@@ -208,8 +208,8 @@ class EventDAO extends DAO implements IEventDAO {
   }
 
   @Override
-  public List<Event> getAllMax(int projid) {
-    return getAll(projid);
+  public List<Event> getAllWithLimit(int projid, int limit) {
+    return Collections.emptyList();
   }
 
   /**

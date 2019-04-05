@@ -30,6 +30,7 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.project.StartupInfo;
 
@@ -43,7 +44,12 @@ public interface LangTestDatabaseAsync {
 
   void logEvent(String id, String widgetType, String exid, String context, int userid, String device, int projID, AsyncCallback<Void> async);
 
-  void getEvents(AsyncCallback<Collection<Event>> async);
+  /**
+   * @see mitll.langtest.client.instrumentation.EventTable#show(LangTestDatabaseAsync, MessageHelper)
+   * @param limit
+   * @param async
+   */
+  void getEvents(int limit, AsyncCallback<Collection<Event>> async);
 
   void getMaleFemaleProgress(AsyncCallback<Map<String, Float>> async);
 

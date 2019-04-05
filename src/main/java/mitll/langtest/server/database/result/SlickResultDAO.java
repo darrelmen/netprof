@@ -284,9 +284,8 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
     return getMonitorResults(getDao().resultsInTimeRange(userid, projectid,  from, to));
   }
 
-  @Override
-  public List<MonitorResult> getMonitorResultsKnownExercises(int projid) {
-    return getMonitorResults(dao.getAllByProjectKnownExercises(projid));
+  public List<MonitorResult> getMonitorResultsKnownExercises(int projid, int limit) {
+    return getMonitorResults(dao.getAllByProjectKnownExercises(projid, limit));
   }
 
   public List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {
@@ -618,7 +617,6 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }*/
 
   /**
-   *
    * @param projid
    * @param minScore
    * @return

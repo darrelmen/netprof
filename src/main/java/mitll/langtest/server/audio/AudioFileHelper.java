@@ -1855,9 +1855,10 @@ public class AudioFileHelper implements AlignDecode {
     long then = System.currentTimeMillis();
 
     boolean shouldDoDecoding = options.shouldDoDecoding() && !options.shouldDoAlignment();
+    String method = shouldDoDecoding ? "\n\t" + (shouldDoDecoding ? "Decoding " : "Aligning ") : "";
     logger.info("getASRScoreForAudio (" + getLanguage() + ")" +
-            "\n\t" + (shouldDoDecoding ? "Decoding " : "Aligning ") +
-            (kaldi ? "\n\tKALDI!" : "") +
+            method +
+            (kaldi ? "\n\tKALDI : " : "") +
             "" + testAudioFile +
             "\n\twith sentence '" + sentence + "'" +
 //        "\n\treq# " + reqid +

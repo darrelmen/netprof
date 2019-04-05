@@ -64,6 +64,7 @@ public class AudioConversion extends AudioBase {
   private static final String MP3 = ".mp3";
   private static final String WAV = ".wav";
   public static final String LANGTEST_IMAGES_NEW_PRO_F_1_PNG = "langtest/images/NewProF1.png";
+  private static final int MIN_CONVERT_TO_WARN = 20;
   private final AudioCheck audioCheck;
   private static final int MIN_WARN_DUR = 50;
 
@@ -151,7 +152,7 @@ public class AudioConversion extends AudioBase {
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > MIN_WARN_DUR) {
-      logger.debug("getValidityAndDur: took " + diff + " millis to write wav file (" + file.getName() +
+      logger.info("getValidityAndDur: took " + diff + " millis to write wav file (" + file.getName() +
           ") " + valid.getDurationInMillis() + " millis long");
     }
     return valid;
@@ -270,7 +271,7 @@ public class AudioConversion extends AudioBase {
         long now = System.currentTimeMillis();
         long diff = now - then;
 
-        if (diff > 5) {
+        if (diff > MIN_CONVERT_TO_WARN) {
           logger.info("convertTo16Khz : " +
               "\n\ttook            " + diff + " millis to convert " +
               "\n\toriginal        " + orig.getName() +
