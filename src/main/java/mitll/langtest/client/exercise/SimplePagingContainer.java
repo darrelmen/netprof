@@ -418,6 +418,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     }
   }
 
+  /**
+   * @see ClickablePagingContainer#getVisibleIDs()
+   * @return
+   */
   Range getVisibleRange() {
     return table.getVisibleRange();
   }
@@ -432,23 +436,6 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     this.comp = comp;
   }
 
-  /**
-   * @param comp
-   * @see mitll.langtest.client.list.PagingExerciseList#sortBy
-   */
- /* @Override
-  public void sortBy(Comparator<T> comp) {
-    this.comp = comp;
-    long then = System.currentTimeMillis();
-    if (DEBUG || true) logger.info("sortBy about to sort ------- ");
-    List<T> list = getList();
-
-    List<T> newList = new ArrayList<>(list);
-    newList.sort(comp);
-
-    long now = System.currentTimeMillis();
-    if (DEBUG|| true) logger.info("sortBy finished sort in " + (now - then) + " ----- ");
-  }*/
   public void hide() {
     table.setVisible(false);
   }

@@ -75,13 +75,19 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    *
    */
   private static final String LEFT_WIDTH = "60%";
-  private static final int LEFT_WIDTH_NO_ENGLISH_VALUE = 85;
+  private static final int LEFT_WIDTH_NO_ENGLISH_VALUE = 82;
+  /**
+   * @see #getItemContent
+   */
   private static final String LEFT_WIDTH_NO_ENGLISH = LEFT_WIDTH_NO_ENGLISH_VALUE + "%";
 
   /**
    *
    */
   private static final String RIGHT_WIDTH = "40%";
+  /**
+   * @see #getUnitChapterAndDropdown(ClientExercise, String, boolean)
+   */
   private static final String RIGHT_WIDTH_NO_ENGLISH = (100 - LEFT_WIDTH_NO_ENGLISH_VALUE) + "%";
 
   static final int CONTEXT_INDENT = 45;//50;
@@ -255,6 +261,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       boolean hasEnglish = isValid(english);
       {
         DivWidget flContainer = makeFirstRow(e, recordPanel);
+//        flContainer.addStyleName("floatLeft");
+
         flContainer.setWidth(hasEnglish ? LEFT_WIDTH : LEFT_WIDTH_NO_ENGLISH);
         this.firstRow = flContainer;
         rowWidget.add(flContainer);
@@ -306,6 +314,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     DivWidget lr = getHorizDiv();
     addFloatLeft(lr);
     lr.setWidth(hasEnglish ? RIGHT_WIDTH : RIGHT_WIDTH_NO_ENGLISH);
+//    lr.addStyleName("floatRight");
 
     if (hasEnglish) {
       lr.getElement().getStyle().setProperty("minWidth", "345px");
