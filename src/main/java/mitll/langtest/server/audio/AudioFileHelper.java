@@ -1022,7 +1022,7 @@ public class AudioFileHelper implements AlignDecode {
 
       audioFileHelper = getExerciseDependentAudioFileHelper(audioFileHelper, customOrPredefExercise);
 
-      if (customOrPredefExercise.isSafeToDecode()) {
+      if (customOrPredefExercise != null && customOrPredefExercise.isSafeToDecode()) {
         return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession, null, db.getProject(projid).getLanguageEnum());
       } else {
         return new PretestScore();

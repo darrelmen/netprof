@@ -366,7 +366,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     style.setBottom(0, Style.Unit.PX);
     style.setOverflowY(Style.Overflow.AUTO);
     style.setPosition(Style.Position.FIXED);
-    style.setPaddingRight(225, Style.Unit.PX);
+ //   style.setPaddingRight(225, Style.Unit.PX);
 
     return verticalContainer;
   }

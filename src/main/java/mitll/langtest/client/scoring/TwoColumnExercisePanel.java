@@ -68,20 +68,31 @@ import static mitll.langtest.client.scoring.PhonesChoices.SHOW;
 public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExercisePanel<T> {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
+  /**
+   * @see #getRowWidget
+   */
+  private static final String SCORING_ROW_STYLE = "scoringRowStyle";
+
   private static final String FLOAT_LEFT = "floatLeft";
   private static final String N_A = "N/A";
 
   /**
-   *
+   * @see #getItemContent(ClientExercise)
    */
   private static final String LEFT_WIDTH = "60%";
-  private static final int LEFT_WIDTH_NO_ENGLISH_VALUE = 85;
+  private static final int LEFT_WIDTH_NO_ENGLISH_VALUE = 82;
+  /**
+   * @see #getItemContent
+   */
   private static final String LEFT_WIDTH_NO_ENGLISH = LEFT_WIDTH_NO_ENGLISH_VALUE + "%";
 
   /**
    *
    */
   private static final String RIGHT_WIDTH = "40%";
+  /**
+   * @see #getUnitChapterAndDropdown(ClientExercise, String, boolean)
+   */
   private static final String RIGHT_WIDTH_NO_ENGLISH = (100 - LEFT_WIDTH_NO_ENGLISH_VALUE) + "%";
 
   static final int CONTEXT_INDENT = 45;//50;
@@ -255,8 +266,13 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       boolean hasEnglish = isValid(english);
       {
         DivWidget flContainer = makeFirstRow(e, recordPanel);
+//        flContainer.addStyleName("floatLeft");
+
         flContainer.setWidth(hasEnglish ? LEFT_WIDTH : LEFT_WIDTH_NO_ENGLISH);
         this.firstRow = flContainer;
+//        DivWidget w = new DivWidget();
+//        w.getElement().setId("middle");
+//        flContainer.add(w);
         rowWidget.add(flContainer);
       }
 
@@ -306,6 +322,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     DivWidget lr = getHorizDiv();
     addFloatLeft(lr);
     lr.setWidth(hasEnglish ? RIGHT_WIDTH : RIGHT_WIDTH_NO_ENGLISH);
+//    lr.addStyleName("floatRight");
 
     if (hasEnglish) {
       lr.getElement().getStyle().setProperty("minWidth", "345px");
@@ -719,7 +736,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   @NotNull
   private DivWidget getRowWidget() {
     DivWidget flContainer = new DivWidget();
-    flContainer.addStyleName("scoringRowStyle");
+    flContainer.addStyleName(SCORING_ROW_STYLE);
     return flContainer;
   }
 

@@ -85,6 +85,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     implements ShowEventListener, ChoicesContainer {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
 
+  /**
+   * Try to avoid wrap on the pager text
+   */
+  private static final int MIN_WIDTH_PAGER = 262;
+
   private static final String RECORDED = "Recorded";
 
   private static final String PRACTICED = " practiced.";
@@ -189,6 +194,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private final Map<Integer, U> fetched = new ConcurrentHashMap<>();
   private final INavigation.VIEWS views;
   private final String pageSizeSelected;
+  private final String visibleItemStorage;
 
   /**
    * @param secondRow             add the section panel to this row
@@ -208,6 +214,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     super(currentExerciseVPanel, controller, listOptions);
     this.views = views;
     this.pageSizeSelected = PAGE_SIZE_SELECTED + "_" + views.toString();
+    this.visibleItemStorage = "visibleItem" + "_" + views.toString();
     sectionPanel = new DivWidget();
     sectionPanel.getElement().setId("sectionPanel_" + getInstance());
     sectionPanel.addStyleName("rightFiveMargin");
@@ -298,7 +305,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       tableWithPager.addStyleName("floatLeft");
       tableWithPager.setWidth("100%");
 
-      tableWithPager.getElement().getStyle().setProperty("minWidth", "250px");
+      tableWithPager.getElement().getStyle().setProperty("minWidth", MIN_WIDTH_PAGER +
+          "px");
     }
 
     {
@@ -399,6 +407,14 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   protected int getPageIndex() {
     return controller.getStorage().getInt(pageSizeSelected);
+  }
+
+  protected int getVisibleItem() {
+    return controller.getStorage().getInt(visibleItemStorage);
+  }
+
+  protected void setVisibleItem(int item) {
+    controller.getStorage().setInt(visibleItemStorage, item);
   }
 
   private void onPageSizeChange(ListBox pagesize) {
@@ -1470,9 +1486,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
 
   /**
-   * TODO : do different thing for AVP.
+   * Remembers the first visible item and then if the initial item is not that, will
+   * scroll to it, as long as it's on the list of items.
+   *
    * <p>
-   * TODO : scroll to visible item
+   * scrolls to visible item
    * <p>
    * goes ahead and asks the server for the next item so we don't have to wait for it.
    *
@@ -1480,9 +1498,31 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see ExerciseList#checkAndAskServer
    */
   protected void askServerForExercise(int itemID) {
-    if (itemID > 0) pagingContainer.markCurrentExercise(itemID);
+    if (itemID > 0) {
+      int remembered = getVisibleItem();
+//      logger.info("askServerForExercise " + itemID + " vs " + remembered);
+
+      if (remembered > 0) {
+        boolean didIt = pagingContainer.markCurrentExercise(remembered);
+        if (!didIt) {
+          setVisibleItem(-1);
+          pagingContainer.markCurrentExercise(itemID);
+        }
+      } else {
+        pagingContainer.markCurrentExercise(itemID);
+      }
+    }
 
     Collection<Integer> visibleIDs = pagingContainer.getVisibleIDs();
+
+    if (itemID <= 0) {
+      if (!visibleIDs.isEmpty()) {
+        Integer firstVisible = visibleIDs.iterator().next();
+//        int remembered = getVisibleItem();
+//        logger.info("askServerForExercise firstVisible " + firstVisible + " vs " + remembered);
+        setVisibleItem(firstVisible);
+      }
+    }
 
     if (visibleIDs.isEmpty()) {
       if (DEBUG) logger.info("askServerForExercise skipping empty visible range?");
@@ -1800,7 +1840,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     if (isCurrentReq(reqID)) {
       reallyShowExercises(result, reqID);
       if (isCurrentReq(reqID)) {
-       // if (DEBUG_STALE) logger.info("showExercisesForCurrentReq for progress current " + reqID);
+        // if (DEBUG_STALE) logger.info("showExercisesForCurrentReq for progress current " + reqID);
         setProgressBarScore(getInOrder(), reqID);
       } else {
         if (DEBUG_STALE) logger.info("showExercisesForCurrentReq for progress stale " + reqID);

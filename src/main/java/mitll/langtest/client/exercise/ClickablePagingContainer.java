@@ -224,9 +224,9 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
    * @param itemID
    * @see mitll.langtest.client.list.PagingExerciseList#markCurrentExercise
    */
-  public void markCurrentExercise(int itemID) {
+  public boolean markCurrentExercise(int itemID) {
     if (getList() == null || getList().isEmpty()) {
-      return;
+      return false;
     }
 
     if (idToExercise.isEmpty()) {
@@ -236,7 +236,12 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     if (DEBUG) {
       logger.info("markCurrentExercise for " + itemID + " in " + idToExercise.size() + " found " + found);
     }
-    markCurrent(getIndex(found), found);
+    if (found == null) {
+      return false;
+    } else {
+      markCurrent(getIndex(found), found);
+      return true;
+    }
   }
 
   private void markCurrent(int i, T itemToSelect) {
