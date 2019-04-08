@@ -81,17 +81,18 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see mitll.langtest.client.custom.dialog.CreateListDialog#doCreate
    */
   @Override
-  public UserList addUserList(String name, String description, String dliClass, boolean isPublic,
-                              UserList.LIST_TYPE listType,
-                              int size,
-                              QuizSpec quizSpec, Map<String, String> unitChapter) throws DominoSessionException {
+  public <T extends UserList> T addUserList(String name, String description, String dliClass, boolean isPublic,
+                                            UserList.LIST_TYPE listType,
+                                            int size,
+                                            QuizSpec quizSpec, Map<String, String> unitChapter) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     IUserListManager userListManager = getUserListManager();
     int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
 
-    return listType == UserList.LIST_TYPE.NORMAL ?
+    UserList userList = listType == UserList.LIST_TYPE.NORMAL ?
         userListManager.addUserList(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser) :
         userListManager.addQuiz(userIDFromSessionOrDB, name, description, dliClass, isPublic, projectIDFromUser, size, quizSpec, unitChapter);
+    return (T) userList;
   }
 
   /**
@@ -222,10 +223,10 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
    * @see UserContainer#getQuizListBox
    */
   @Override
-  public Collection<IUserListLight> getAllQuiz() throws DominoSessionException {
+  public Collection<INameable> getAllQuiz() throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     long then = System.currentTimeMillis();
-    Collection<IUserListLight> listsForUser =
+    Collection<INameable> listsForUser =
         getUserListManager().getUserListDAO().getAllOrMineLight(getProjectIDFromUser(userIDFromSessionOrDB), userIDFromSessionOrDB, true);
 
     long now = System.currentTimeMillis();

@@ -29,7 +29,30 @@
 
 package mitll.langtest.shared.custom;
 
-public interface IUserListTriple extends INameable {
-   String getDescription();
-   String getClassMarker();
+import mitll.langtest.shared.exercise.HasID;
+
+public class Nameable implements INameable {
+  private int id = -1;
+  private String name;
+
+  public Nameable() {}
+
+  public Nameable(int id, String name) {
+    this.id = id;
+    this.name = name;
+  }
+
+  public int getID() {
+    return id;
+  }
+
+  @Override
+  public String getName() {
+    return name;
+  }
+
+  @Override
+  public int compareTo(HasID o) {
+    return Integer.compare(getID(), o.getID());
+  }
 }

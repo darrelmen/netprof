@@ -49,7 +49,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.server.services.AnalysisServiceImpl;
 import mitll.langtest.shared.analysis.UserInfo;
-import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.custom.INameable;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -448,21 +448,21 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     listBox.addStyleName("floatLeft");
     listBox.getElement().getStyle().setMarginBottom(2, Style.Unit.PX);
 
-    controller.getListService().getAllQuiz(new AsyncCallback<Collection<IUserListLight>>() {
+    controller.getListService().getAllQuiz(new AsyncCallback<Collection<INameable>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting my lists", caught);
       }
 
       @Override
-      public void onSuccess(Collection<IUserListLight> result) {
+      public void onSuccess(Collection<INameable> result) {
         useLists(result, listBox);
       }
     });
     return listBox;
   }
 
-  private void useLists(Collection<IUserListLight> result, ListBox quizListBox) {
+  private void useLists(Collection<INameable> result, ListBox quizListBox) {
     this.rememberedLists = new ArrayList<>();
 
     result.forEach(ul -> rememberedLists.add(ul.getID()));

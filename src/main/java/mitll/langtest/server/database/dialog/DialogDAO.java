@@ -111,8 +111,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
         DialogType.DEFAULT,
         DialogStatus.DEFAULT,
         "",
-        ""
-    );
+        "",
+        true);
   }
 
   private SlickDialog getDefaultDialog() {
@@ -158,7 +158,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
       IProject project = databaseImpl.getIProject(projid);
 
       dialogAttributeJoinHelper.getAllJoinByProject(projid).forEach((dialogID, slickDialogAttributeJoins) -> {
-        configureDialog(projid,  idToDialog.get(dialogID), idToPair, dialogIDToRelated, dialogIDToCoreRelated, project, dialogID, slickDialogAttributeJoins);
+        configureDialog(projid, idToDialog.get(dialogID), idToPair, dialogIDToRelated, dialogIDToCoreRelated, project, dialogID, slickDialogAttributeJoins);
       });
     }
 
@@ -199,10 +199,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }
 
   /**
-   * @see #configureDialog(int, Dialog, Map, Map, Map, IProject, Integer, Collection)
    * @param relatedExercises
    * @param project
    * @param dialog
+   * @see #configureDialog(int, Dialog, Map, Map, Map, IProject, Integer, Collection)
    */
   private void addCoreVocab(List<SlickRelatedExercise> relatedExercises, IProject project, Dialog dialog) {
     if (relatedExercises != null) {
@@ -221,9 +221,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }
 
   /**
-   * @see #getDialogs(int)
    * @param slickDialog
    * @return
+   * @see #getDialogs(int)
    */
   private Dialog makeDialog(SlickDialog slickDialog) {
     return new Dialog(
@@ -243,13 +243,13 @@ public class DialogDAO extends DAO implements IDialogDAO {
         new ArrayList<>(),
         new ArrayList<>(),
         getDialogType(slickDialog),
-        database.getProject(slickDialog.projid()).getProject().countrycode());
+        database.getProject(slickDialog.projid()).getProject().countrycode(), slickDialog.isprivate());
   }
 
   /**
-   * @see #makeDialog(SlickDialog)
    * @param slickDialog
    * @return
+   * @see #makeDialog(SlickDialog)
    */
   @Nullable
   private DialogType getDialogType(SlickDialog slickDialog) {
@@ -428,6 +428,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @param dominoID
    * @param modified
    * @param status
+   * @param isPrivate
    * @return
    * @see #ensureDefault
    * @see #addDefault(int)
@@ -446,8 +447,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
                  DialogType kind,
                  DialogStatus status,
                  String entitle,
-                 String orientation
-  ) {
+                 String orientation,
+                 boolean isPrivate) {
     return dao.insert(new SlickDialog(
         -1,
         userid,
@@ -460,7 +461,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
         kind.toString(),
         status.toString(),
         entitle,
-        orientation
+        orientation,
+        isPrivate
     ));
   }
 

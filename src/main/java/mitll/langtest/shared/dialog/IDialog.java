@@ -29,6 +29,8 @@
 
 package mitll.langtest.shared.dialog;
 
+import mitll.langtest.shared.custom.INameable;
+import mitll.langtest.shared.custom.IPublicPrivate;
 import mitll.langtest.shared.exercise.*;
 
 import java.util.List;
@@ -37,7 +39,7 @@ import java.util.Map;
 /**
  * @see mitll.langtest.server.services.DialogServiceImpl#getScoreHistoryForDialogs
  */
-public interface IDialog extends CommonShell, HasUnitChapter, Scored {
+public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable, IPublicPrivate {
   int getUserid();
 
   int getProjid();

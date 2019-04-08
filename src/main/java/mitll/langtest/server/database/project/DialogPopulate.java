@@ -145,6 +145,7 @@ public class DialogPopulate {
    * @param dialogDAO
    * @param keepAudio
    * @param excel
+   * @see #populateDatabase(Project, Project, boolean, String, boolean)
    */
   private void maybeDoInterpreterImport(Project project, Project englishProject, IDialogDAO dialogDAO,
                                         boolean keepAudio, String excel) {
@@ -191,7 +192,8 @@ public class DialogPopulate {
                           int defaultUser,
                           DialogType dialogType,
 
-                          Map<Dialog, SlickDialog> dialogToSlick, boolean keepAudio) {
+                          Map<Dialog, SlickDialog> dialogToSlick,
+                          boolean keepAudio) {
     Set<Dialog> dialogs = dialogToSlick.keySet();
 
     long now = System.currentTimeMillis();
@@ -216,7 +218,7 @@ public class DialogPopulate {
       int dialogID = dialogDAO.add(defaultUser, projid, 1, imageID, now, now,
           dialog.getUnit(), dialog.getChapter(),
           dialogType, DialogStatus.DEFAULT,
-          dialog.getEnglish(), dialog.getOrientation());
+          dialog.getEnglish(), dialog.getOrientation(), false);
 
       // add dialog attributes
       addDialogAttributes(dialogDAO, defaultUser, modified, attrToInt, dialog, dialogID);

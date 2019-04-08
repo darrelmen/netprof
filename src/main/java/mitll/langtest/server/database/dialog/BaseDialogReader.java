@@ -100,7 +100,8 @@ public class BaseDialogReader {
         dialogType.toString(),
         DialogStatus.DEFAULT.toString(),
         title,
-        orientation
+        orientation,
+        false
     );
 
 
@@ -113,7 +114,7 @@ public class BaseDialogReader {
 
         dialogAttr,
         exercises,
-        new ArrayList<>(coreExercises), dialogType, countryCode);
+        new ArrayList<>(coreExercises), dialogType, countryCode, false);
 
     outputDialogToSlick.put(dialog, slickDialog);
   }

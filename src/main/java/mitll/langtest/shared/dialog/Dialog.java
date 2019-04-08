@@ -60,7 +60,6 @@ public class Dialog implements IDialog, MutableShell {
   private String fltitle;
   private String entitle;
 
-
   private String unit;
   private String chapter;
   private String countryCode;
@@ -74,6 +73,7 @@ public class Dialog implements IDialog, MutableShell {
   private List<ExerciseAttribute> attributes = new ArrayList<>();
   private List<ClientExercise> exercises = new ArrayList<>();
   private List<ClientExercise> coreVocabulary = new ArrayList<>();
+  private boolean isPrivate;
 
   private float score = -1;
 
@@ -98,6 +98,7 @@ public class Dialog implements IDialog, MutableShell {
    * @param coreExercises
    * @param type
    * @param countryCode
+   * @param isPrivate
    * @see mitll.langtest.server.database.dialog.DialogDAO#makeDialog
    * @see BasicDialogReader#addDialogPair
    */
@@ -116,7 +117,8 @@ public class Dialog implements IDialog, MutableShell {
                 List<ExerciseAttribute> attributes,
                 List<ClientExercise> exercises,
                 List<ClientExercise> coreExercises,
-                DialogType type, String countryCode) {
+                DialogType type,
+                String countryCode, boolean isPrivate) {
     this.id = id;
     this.userid = userid;
     this.projid = projid;
@@ -133,7 +135,8 @@ public class Dialog implements IDialog, MutableShell {
     this.exercises = exercises;
     this.coreVocabulary = coreExercises;
     this.kind = type;
-    this.countryCode=countryCode;
+    this.countryCode = countryCode;
+    this.isPrivate = isPrivate;
   }
 
   @Override
@@ -327,7 +330,7 @@ public class Dialog implements IDialog, MutableShell {
    */
   @Override
   public void setScore(float score) {
- //   logger.info("setScore " + score);
+    //   logger.info("setScore " + score);
     this.score = score;
   }
 
@@ -405,6 +408,16 @@ public class Dialog implements IDialog, MutableShell {
     return false;
   }
 
+  @Override
+  public String getName() {
+    return getForeignLanguage();
+  }
+
+  @Override
+  public boolean isPrivate() {
+    return isPrivate;
+  }
+
   public String toString() {
     return "Dialog #" + id +
         "\n\tunit        " + unit +
@@ -413,6 +426,7 @@ public class Dialog implements IDialog, MutableShell {
         "\n\tfltitle     " + fltitle +
         "\n\torientation " + orientation +
         "\n\timage       " + imageRef +
+        "\n\tprivate     " + isPrivate +
         "\n\t# ex        " + exercises.size() +
         "\n\t# core      " + coreVocabulary.size() +
         "\n\tattr        " + attributes;

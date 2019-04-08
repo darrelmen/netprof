@@ -35,7 +35,7 @@ import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
-import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.custom.INameable;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -319,7 +319,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
   }
 
   @Override
-  public List<IUserListLight> getAllOrMineLight(int projid, int userid, boolean isQuiz) {
+  public List<INameable> getAllOrMineLight(int projid, int userid, boolean isQuiz) {
     return null;
   }
 

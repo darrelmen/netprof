@@ -47,7 +47,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.custom.dialog.CreateListComplete;
+import mitll.langtest.client.custom.dialog.CreateComplete;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.dialog.DialogHelper;
@@ -68,7 +68,7 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 7/3/17.
  */
-public class ListView<T extends UserList<CommonShell>>  extends TableAndPager implements ContentView, CreateListComplete<T> {
+public class ListView<T extends UserList<CommonShell>> extends TableAndPager implements ContentView, CreateComplete<T> {
   public static final String FORGET_VISITED_LIST = "Forget visited list.";
   private final Logger logger = Logger.getLogger("ListView");
 
@@ -524,7 +524,7 @@ public class ListView<T extends UserList<CommonShell>>  extends TableAndPager im
    * @param container
    * @see ListView.MyListContainer#gotDoubleClickOn
    */
-  private void showQuiz(ListContainer<T>  container) {
+  private void showQuiz(ListContainer<T> container) {
     controller.showListIn(getListID(container), INavigation.VIEWS.QUIZ);
   }
 
@@ -738,13 +738,10 @@ public class ListView<T extends UserList<CommonShell>>  extends TableAndPager im
    */
   private DialogHelper doAdd() {
     DivWidget contents = new DivWidget();
-    CreateListDialog createListDialog = new CreateListDialog(this, controller, names);
+    CreateListDialog<UserList<CommonShell>> createListDialog = new CreateListDialog<UserList<CommonShell>>(this, controller, names );
     createListDialog.doCreate(contents);
-
-
     return getNewListButton(contents, createListDialog, CREATE_NEW_LIST);
   }
-
 
   /**
    * @return
@@ -752,7 +749,7 @@ public class ListView<T extends UserList<CommonShell>>  extends TableAndPager im
    */
   private DialogHelper doAddQuiz() {
     DivWidget contents = new DivWidget();
-    CreateListDialog createListDialog = new CreateListDialog(this, controller, names).setIsQuiz(true);
+    CreateListDialog<UserList<CommonShell>> createListDialog = new CreateListDialog<UserList<CommonShell>>(this, controller, names).setIsQuiz(true);
     createListDialog.doCreate(contents);
 
     return getNewListButton(contents, createListDialog, "Create New Quiz");
@@ -793,7 +790,7 @@ public class ListView<T extends UserList<CommonShell>>  extends TableAndPager im
 
   private void doEdit() {
     DivWidget contents = new DivWidget();
-    editDialog = new CreateListDialog(this, controller, myLists.getCurrentSelection(), true, names);
+    editDialog = new CreateListDialog<UserList<CommonShell>>(this, controller, myLists.getCurrentSelection(), true, names);
     editDialog.doCreate(contents);
 
     DialogHelper dialogHelper = new DialogHelper(true);

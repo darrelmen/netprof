@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface ListServiceAsync {
-  void getAllQuiz(AsyncCallback<Collection<IUserListLight>> async);
+  void getAllQuiz(AsyncCallback<Collection<INameable>> async);
 
   <T extends UserList<CommonShell>> void getListsForUser(boolean onlyCreated, boolean visited, boolean includeQuiz, AsyncCallback<Collection<T>> async);
 
@@ -65,10 +65,10 @@ public interface ListServiceAsync {
    * @param async
    * @see mitll.langtest.client.custom.exercise.NewListButton#addUserList
    */
-  void addUserList(String name, String description, String dliClass,
+  <T extends UserList> void addUserList(String name, String description, String dliClass,
                    boolean isPublic, UserList.LIST_TYPE listType, int size,
                    QuizSpec quizSpec, Map<String, String> unitChapter,
-                   AsyncCallback<UserList> async);
+                   AsyncCallback<T> async);
 
   void addVisitor(int userListID, int user, AsyncCallback<UserList> asyncCallback);
 

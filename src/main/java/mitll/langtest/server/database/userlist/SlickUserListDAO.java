@@ -36,9 +36,9 @@ import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.services.ListServiceImpl;
-import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.custom.INameable;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.custom.UserListLight;
+import mitll.langtest.shared.custom.Nameable;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.User;
@@ -405,12 +405,12 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @see UserContainer#getQuizListBox
    */
   @Override
-  public List<IUserListLight> getAllOrMineLight(int projid, int userid, boolean isQuiz) {
+  public List<INameable> getAllOrMineLight(int projid, int userid, boolean isQuiz) {
     Collection<SlickLightList> slickUserExerciseLists = getSlickAllOrMineLight(projid, userid, isQuiz);
-    List<IUserListLight> names = new ArrayList<>(slickUserExerciseLists.size());
+    List<INameable> names = new ArrayList<>(slickUserExerciseLists.size());
     slickUserExerciseLists
         .forEach(slickUserExerciseList ->
-            names.add(new UserListLight(slickUserExerciseList.id(), slickUserExerciseList.name())));
+            names.add(new Nameable(slickUserExerciseList.id(), slickUserExerciseList.name())));
     return names;
   }
 

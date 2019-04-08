@@ -32,7 +32,7 @@ package mitll.langtest.server.database.userlist;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
-import mitll.langtest.shared.custom.IUserListLight;
+import mitll.langtest.shared.custom.INameable;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -80,7 +80,7 @@ public interface IUserListDAO extends IDAO {
   UserList<CommonShell> getWhere(int unique, boolean warnIfMissing);
 
   Collection<UserList<CommonShell>> getAllPublicNotMine(int userid, int projid);
-  List<IUserListLight> getAllOrMineLight(int projid, int userid, boolean isQuiz);
+  List<INameable> getAllOrMineLight(int projid, int userid, boolean isQuiz);
   Collection<UserList<CommonShell>> getAllQuiz(int projid);
   Collection<SlickUserExerciseList> getSlickAllPublicOrMine(int projid, int userID, boolean isQuiz);
   Collection<SlickLightList> getSlickAllOrMineLight(int projid, int userID, boolean isQuiz);

@@ -29,22 +29,26 @@
 
 package mitll.langtest.shared.custom;
 
-public interface IUserList extends IUserListLight {
+public interface IUserList extends INameable, IPublicPrivate {
   String getDescription();
 
   int getProjid();
 
   int getUserID();
+
   String getUserChosenID();
+
   String getFirstInitialName();
 
   int getNumItems();
 
   int getRoundTimeMinutes();
+
   int getMinScore();
+
   boolean shouldShowAudio();
 
-  boolean isPrivate();
+//  boolean isPrivate();
 
   void setNumItems(int numItems);
 }

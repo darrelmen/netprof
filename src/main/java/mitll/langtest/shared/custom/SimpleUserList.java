@@ -29,7 +29,7 @@
 
 package mitll.langtest.shared.custom;
 
-public class SimpleUserList extends UserListLight implements IUserList {
+public class SimpleUserList extends Nameable implements IUserList {
   private int projid;
   private int userid;
   private int numItems;

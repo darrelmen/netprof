@@ -29,9 +29,7 @@
 
 package mitll.langtest.client.custom.dialog;
 
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.exercise.CommonShell;
 
 /**
  * Created by go22670 on 7/6/17.

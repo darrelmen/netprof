@@ -50,8 +50,8 @@ public interface IDialogDAO extends IDAO {
           DialogType kind,
           DialogStatus status,
           String entitle,
-          String orientation
-  );
+          String orientation,
+          boolean isPrivate);
 
   boolean delete(int id);
 
