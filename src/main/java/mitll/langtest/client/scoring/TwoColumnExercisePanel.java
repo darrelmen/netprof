@@ -68,11 +68,16 @@ import static mitll.langtest.client.scoring.PhonesChoices.SHOW;
 public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExercisePanel<T> {
   private Logger logger = Logger.getLogger("TwoColumnExercisePanel");
 
+  /**
+   * @see #getRowWidget
+   */
+  private static final String SCORING_ROW_STYLE = "scoringRowStyle";
+
   private static final String FLOAT_LEFT = "floatLeft";
   private static final String N_A = "N/A";
 
   /**
-   *
+   * @see #getItemContent(ClientExercise)
    */
   private static final String LEFT_WIDTH = "60%";
   private static final int LEFT_WIDTH_NO_ENGLISH_VALUE = 82;
@@ -265,6 +270,9 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
         flContainer.setWidth(hasEnglish ? LEFT_WIDTH : LEFT_WIDTH_NO_ENGLISH);
         this.firstRow = flContainer;
+//        DivWidget w = new DivWidget();
+//        w.getElement().setId("middle");
+//        flContainer.add(w);
         rowWidget.add(flContainer);
       }
 
@@ -728,7 +736,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   @NotNull
   private DivWidget getRowWidget() {
     DivWidget flContainer = new DivWidget();
-    flContainer.addStyleName("scoringRowStyle");
+    flContainer.addStyleName(SCORING_ROW_STYLE);
     return flContainer;
   }
 
