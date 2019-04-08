@@ -32,49 +32,36 @@ package mitll.langtest.client.custom.dialog;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.History;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.custom.userlist.ListContainer;
-import mitll.langtest.client.custom.userlist.TableAndPager;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.UserListSupport;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 7/3/17.
  */
-public class DialogEditorView<T extends IDialog> extends TableAndPager implements ContentView, CreateDialogComplete<T> {
+public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   private final Logger logger = Logger.getLogger("DialogEditorView");
 
   private static final String LIST = "dialog";
   private static final String DELETE_LIST = "Delete " + LIST + ".";
 
-  private static final String MAKE_A_NEW_LIST = "Make a new " + LIST + ".";
   //private static final int MAX_HEIGHT = 710;
 
   /**
@@ -83,12 +70,8 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
   private static final int MIN_WIDTH = 659;//599;
 
   private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items in the " + LIST + ".";
- // private static final String MY_LISTS = "myLists";
+  // private static final String MY_LISTS = "myLists";
 
-  /**
-   * @see #getEdit
-   */
-  private static final String EDIT_THE_LIST = "Edit the " + LIST + ", make it public.";
   /**
    *
    */
@@ -103,7 +86,6 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
   private static final String ITEMS = "Items";
   private static final String ADD = "Add";
   private static final String CANCEL = "Cancel";
-  private static final String EDIT_TITLE = "";
 
   private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to view a " + LIST;
 
@@ -114,7 +96,6 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
 
 
   public static final String DIALOG = "Dialog";
-  private static final String CREATE_NEW_LIST = "Create New " + DIALOG;
   private static final String EDIT1 = "Edit";
 //  private static final String EDIT = EDIT1;
 
@@ -123,11 +104,8 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
    */
   private static final String ADD_EDIT_ITEMS = "Add/Edit Items";
 
-  private static final int MY_LIST_HEIGHT = 560;//530;//560;
+  private static final int MY_LIST_HEIGHT = 500;//530;//560;
 
-  private final ExerciseController controller;
-  private DialogContainer<T> myLists;
-  private final Set<String> names = new HashSet<>();
   private Button editButton, removeButton;
 
   /**
@@ -135,22 +113,17 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
    * @see mitll.langtest.client.banner.NewContentChooser#NewContentChooser
    */
   public DialogEditorView(ExerciseController controller) {
-    this.controller = controller;
+    super(controller);
+  }
+
+  @Override
+  protected String getItemName() {
+    return "Dialog";
   }
 
   public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
-    names.clear();
+    super.showContent(listContent, instanceName);
 
-    listContent.clear();
-
-    DivWidget leftRight = new DivWidget();
-    leftRight.addStyleName("inlineFlex");
-    listContent.add(leftRight);
-
-    DivWidget left = new DivWidget();
-    leftRight.add(left);
-    left.addStyleName("rightFiveMargin");
-    left.addStyleName("cardBorderShadow");
 //    DivWidget right = new DivWidget();
 //    right.getElement().setId("right");
 
@@ -171,7 +144,7 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
 //
 //    styleTopAndBottom(bottom);
 
-    addYourLists(left);
+    addYours(left);
   }
 
 //  private void styleTopAndBottom(DivWidget bottom) {
@@ -180,9 +153,8 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
 //    bottom.addStyleName("cardBorderShadow");
 //  }
 
-  private void addYourLists(DivWidget left) {
-    showYourLists(Collections.emptyList(), left);
-
+  private void addYours(DivWidget left) {
+    showYours(Collections.emptyList(), left);
 
     ExerciseListRequest request = new ExerciseListRequest(0, controller.getUser());
     controller.getDialogService().getDialogs(request,
@@ -195,6 +167,8 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
           @Override
           public void onSuccess(ExerciseListWrapper<T> result) {
             myLists.populateTable(result.getExercises());
+            populateUniqueListNames(result.getExercises());
+
             Scheduler.get().scheduleDeferred(() -> setShareHREF(getCurrentSelectionFromMyLists()));
           }
         });
@@ -203,10 +177,10 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
   /**
    * @param result
    * @param left
-   * @see #addYourLists
+   * @see #addYours
    */
-  private void showYourLists(Collection<T> result, DivWidget left) {
-    DialogContainer<T> myLists = new MyListContainer();
+  private void showYours(Collection<T> result, DivWidget left) {
+    DialogContainer<T> myLists = new MyDialogContainer();
     Panel tableWithPager = (this.myLists = myLists).getTableWithPager(result);
 
     new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.RIGHT);
@@ -217,82 +191,39 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
     left.add(getButtons(DialogEditorView.this.myLists));
   }
 
-//  private void populateUniqueListNames(Collection<IDialog> result) {
-//    result.forEach(list -> {
-//      if (list.getUserID() == controller.getUser()) {
-//        names.add(list.getName());
-//      }
-//    });
+  @Override
+  protected void populateUniqueListNames(Collection<T> result) {
+    result.forEach(list -> {
+      // if (list.getUserID() == controller.getUser()) {
+      names.add(list.getName());
+      logger.info("names now " + names);
+      // }
+    });
+  }
+
+  @NotNull
+  @Override
+  protected CreateDialog<T> getCreateDialog() {
+    return new CreateDialogDialog<T>(names, controller);
+  }
+
+  @Override
+  protected void editList() {
+
+  }
+
+  @Override
+  protected void doDelete(UIObject delete, T currentSelection) {
+
+  }
+
+//  @Override
+//  protected void doEdit() {
+//
 //  }
 
-  private Button share;
 
-  /**
-   * @param container
-   * @return
-   */
-  @NotNull
-  private DivWidget getButtons(DialogContainer<T> container) {
-    DivWidget buttons = new DivWidget();
-    buttons.addStyleName("inlineFlex");
-    buttons.addStyleName("topFiveMargin");
-    buttons.getElement().getStyle().setProperty("minWidth", MIN_WIDTH + "px");
-    buttons.add(getAddButton());
-
-
-    buttons.add(removeButton = getRemoveButton());
-
-    buttons.add(editButton = getEdit());
-    buttons.add(getAddItems());
-    // buttons.add(getImport());
-    buttons.add(share = getShare());
-    // addDrillAndLearn(buttons, container);
-
-    return buttons;
-  }
-
-  private Button getEdit() {
-    Button successButton = getSuccessButton(EDIT_TITLE);
-    successButton.setIcon(IconType.PENCIL);
-    successButton.addClickHandler(event -> doEdit());
-    addTooltip(successButton, EDIT_THE_LIST);
-    return successButton;
-  }
-
-  private Button getShare() {
-    Button successButton = getSuccessButton(SHARE);
-    successButton.setIcon(IconType.SHARE);
-    addTooltip(successButton, SHARE_THE_LIST);
-    return successButton;
-  }
-
-
-  /**
-   * @return
-   * @see #getButtons
-   */
-  private IsWidget getAddItems() {
-    Button successButton = getSuccessButton(ITEMS);
-    successButton.setIcon(IconType.PENCIL);
-    successButton.addClickHandler(event -> editList());
-    addTooltip(successButton, EDIT_THE_ITEMS_ON_LIST);
-    //  successButton.setEnabled(!myLists.isEmpty());
-    return successButton;
-  }
-
-  private void editList() {
-    //IDialog currentSelectionFromMyLists = getCurrentSelectionFromMyLists();
- /*   EditItem editItem = new EditItem(controller);
-    new DialogHelper(true).show(
-        ADD_EDIT_ITEMS + " : " + getListName(),
-        Collections.emptyList(),
-        editItem.editItem(getCurrentSelectionFromMyLists()),
-        "Done",
-        null,
-        new MyShownCloseListener(editItem), MAX_HEIGHT, -1, true);*/
-  }
-
-/*  @NotNull
+  /*  @NotNull
   private String getListName() {
     IDialog originalList = getCurrentSelectionFromMyLists();
     boolean hasDescrip = !originalList.getOrientation().isEmpty();
@@ -300,60 +231,8 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
         (hasDescrip ? " (" + originalList.getOrientation() + ")" : "");
   }*/
 
-  @NotNull
-  private Button getSuccessButton(String learn1) {
-    Button learn = new Button(learn1);
-    learn.setType(ButtonType.SUCCESS);
-    learn.addStyleName("leftFiveMargin");
-    return learn;
-  }
 
-  private DialogHelper dialogHelper;
-
-  /**
-   * @return
-   * @see #getButtons
-   */
-  @NotNull
-  private Button getAddButton() {
-    final Button add = new Button("", IconType.PLUS);
-    add.addClickHandler(event -> dialogHelper = doAdd());
-    add.setType(ButtonType.SUCCESS);
-    addTooltip(add, MAKE_A_NEW_LIST);
-    return add;
-  }
-
-
-  @NotNull
-  private Button getRemoveButton() {
-    final Button add = new Button("", IconType.MINUS);
-    add.addStyleName("leftFiveMargin");
-    add.addClickHandler(event -> gotDelete(add, getCurrentSelectionFromMyLists()));
-    add.setType(ButtonType.DANGER);
-    addTooltip(add, DELETE_LIST);
-    myLists.addButton(add);
-    return add;
-  }
-
-  private T getCurrentSelectionFromMyLists() {
-    return getCurrentSelection(myLists);
-  }
-
-
-  private void addTooltip(Widget add, String tip) {
-    new TooltipHelper().addTopTooltip(add, tip);
-  }
-
-  private T getCurrentSelection(DialogContainer<T> container) {
-    return container.getCurrentSelection();
-  }
-
-  private void gotDelete(Button delete, T currentSelection) {
-    if (currentSelection != null) {
-      warnFirst(delete, currentSelection);
-    }
-  }
-
+/*
   private void doDelete(UIObject delete, T currentSelection) {
     final int uniqueID = currentSelection.getID();
     controller.logEvent(delete, "Button", currentSelection.getEnglish(), "Delete");
@@ -374,8 +253,9 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
       }
     });
   }
+*/
 
-  private void warnFirst(Button delete, T currentSelection) {
+ /* private void warnFirst(Button delete, T currentSelection) {
     new DialogHelper(true).show(
         "Delete " + currentSelection.getForeignLanguage() + " forever?",
         new Heading(2, "Are you sure?"),
@@ -397,9 +277,9 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
           }
         },
         500, -1);
-  }
+  }*/
 
-  private void removeFromLists(DialogContainer<T> listContainer, T currentSelection) {
+/*  private void removeFromLists(DialogContainer<T> listContainer, T currentSelection) {
     if (listContainer == myLists) {
       String name = currentSelection.getForeignLanguage();
       names.remove(name);
@@ -421,99 +301,11 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
       Scheduler.get().scheduleDeferred(() -> listContainer.markCurrentExercise(id));
 
     }
-  }
-
-  /**
-   * TODO : fill in creation dialog
-   *
-   * @return
-   * @see #getAddButton
-   */
-  private DialogHelper doAdd() {
-    DivWidget contents = new DivWidget();
-//    CreateListDialog createListDialog = new CreateListDialog(this, controller, names);
-//    createListDialog.doCreate(contents);
-    return getNewListButton(contents, null, CREATE_NEW_LIST);
-  }
-
+  }*/
 
   @NotNull
-  private DialogHelper getNewListButton(DivWidget contents, CreateListDialog createListDialog, String title) {
-    DialogHelper dialogHelper = new DialogHelper(true);
-    createListDialog.setDialogHelper(dialogHelper);
-    Button closeButton = dialogHelper.show(
-        title,
-        Collections.emptyList(),
-        contents,
-        ADD,
-        CANCEL,
-        new DialogHelper.CloseListener() {
-          @Override
-          public boolean gotYes() {
-            return createListDialog.isOKToCreate();
-          }
-
-          @Override
-          public void gotNo() {
-          }
-
-          @Override
-          public void gotHidden() {
-
-          }
-        }, 580);
-
-    closeButton.setType(ButtonType.SUCCESS);
-    closeButton.setIcon(IconType.PLUS);
-    return dialogHelper;
-  }
-
-  private CreateListDialog editDialog;
-
-  private void doEdit() {
-    DivWidget contents = new DivWidget();
- /*   editDialog = new CreateListDialog(this, controller, myLists.getCurrentSelection(), true, names);
-    editDialog.doCreate(contents);
-
-    DialogHelper dialogHelper = new DialogHelper(true);
-    Button closeButton = dialogHelper.show(
-        EDIT,
-        Collections.emptyList(),
-        contents,
-        SAVE,
-        CANCEL,
-        new DialogHelper.CloseListener() {
-          @Override
-          public boolean gotYes() {
-            boolean okToCreate = editDialog.isValidName();
-            if (okToCreate) {
-              editDialog.doEdit(myLists.getCurrentSelection(), myLists);
-
-
-              myLists.flush();
-              myLists.redraw();
-              //enableQuizButton(quizButton);
-            }
-            return okToCreate;
-          }
-
-          @Override
-          public void gotNo() {
-          }
-
-          @Override
-          public void gotHidden() {
-
-          }
-
-
-        }, 550);
-
-    closeButton.setType(ButtonType.SUCCESS);*/
-  }
-
-  @NotNull
-  private String getMailTo() {
+  @Override
+  protected String getMailTo() {
     IDialog currentSelection = myLists.getCurrentSelection();
 
     return new UserListSupport(controller)
@@ -525,7 +317,7 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
    * @param userList
    * @see CreateListDialog#addUserList
    */
-  @Override
+ /* @Override
   public void madeIt(T userList) {
     // logger.info("madeIt made it " + userList.getName());
     try {
@@ -539,6 +331,7 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
     }
     Scheduler.get().scheduleDeferred(() -> myLists.markCurrentExercise(userList.getID()));
   }
+*/
 
   /**
    * @seex CreateListDialog#makeCreateButton
@@ -548,8 +341,8 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
     //  editDialog.doEdit(myLists.getCurrentSelection(), myLists);
   }
 
-  private class MyListContainer extends DialogContainer<T> {
-    MyListContainer() {
+  private class MyDialogContainer extends DialogContainer<T> {
+    MyDialogContainer() {
       super(DialogEditorView.this.controller);
     }
 
@@ -567,22 +360,22 @@ public class DialogEditorView<T extends IDialog> extends TableAndPager implement
 
     @Override
     protected void gotDoubleClickOn(T selected) {
-         logger.info("gotDoubleClickOn got double click on " + selected);
+      logger.info("gotDoubleClickOn got double click on " + selected);
       //showLearnOrQuiz(selected);
       editList();
     }
   }
 
-  private void setShareHREF(T user) {
-    if (user != null) {
-      setShareButtonHREF();
-      // share.setEnabled(!user.isFavorite());
-    }
-  }
-
-
+/*
   private void setShareButtonHREF() {
     share.setHref(getMailTo());
+  }
+*/
+
+  @NotNull
+  @Override
+  protected CreateDialog<T> getEditDialog() {
+    return null;
   }
 
   private class MyShownCloseListener implements DialogHelper.ShownCloseListener {

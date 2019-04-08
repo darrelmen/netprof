@@ -30,7 +30,6 @@
 package mitll.langtest.client.custom.userlist;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -40,14 +39,14 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
-import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.custom.dialog.CreateComplete;
+import mitll.langtest.client.custom.dialog.ContentEditorView;
+import mitll.langtest.client.custom.dialog.CreateDialog;
 import mitll.langtest.client.custom.dialog.CreateListDialog;
 import mitll.langtest.client.custom.dialog.EditItem;
 import mitll.langtest.client.dialog.DialogHelper;
@@ -55,22 +54,20 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.user.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 7/3/17.
  */
-public class ListView<T extends UserList<CommonShell>> extends TableAndPager implements ContentView, CreateComplete<T> {
-  public static final String FORGET_VISITED_LIST = "Forget visited list.";
+public class ListView<T extends UserList<CommonShell>> extends ContentEditorView<T> {
   private final Logger logger = Logger.getLogger("ListView");
+
+  public static final String FORGET_VISITED_LIST = "Forget visited list.";
 
   private static final String QUIZ = "Quiz";
   private static final String DO_QUIZ = "Do quiz";
@@ -158,35 +155,32 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
   private static final int VISITED_HEIGHT = (MY_LIST_HEIGHT / 2) - MARGIN_FOR_BUTTON - browseBigger;
   private static final int BROWSE_HEIGHT = (MY_LIST_HEIGHT / 2) - MARGIN_FOR_BUTTON + browseBigger;
 
-  private final ExerciseController<?> controller;
-  private ListContainer<T> myLists;
-  private final Set<String> names = new HashSet<>();
-  private Button quizButton, editButton, removeButton;
+  // private ListContainer<T> myLists;
+  //  private final Set<String> names = new HashSet<>();
+  private Button quizButton;
 
   /**
    * @param controller
    * @see mitll.langtest.client.banner.NewContentChooser#NewContentChooser
    */
   public ListView(ExerciseController controller) {
-    this.controller = controller;
+    super(controller);
+  }
+
+  @Override
+  protected String getItemName() {
+    return "List";
   }
 
   public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
-    names.clear();
 
-    listContent.clear();
-    DivWidget leftRight = new DivWidget();
-    leftRight.addStyleName("inlineFlex");
-    listContent.add(leftRight);
+    super.showContent(listContent, instanceName);
 
-    DivWidget left = new DivWidget();
-    leftRight.add(left);
-    left.addStyleName("rightFiveMargin");
-    left.addStyleName("cardBorderShadow");
     DivWidget right = new DivWidget();
     right.getElement().setId("right");
 
     leftRight.add(right);
+
 
     right.setWidth("100%");
     DivWidget top = new DivWidget();
@@ -339,7 +333,7 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
     left.add(getButtons(ListView.this.myLists));
   }
 
-  private void populateUniqueListNames(Collection<T> result) {
+  protected void populateUniqueListNames(Collection<T> result) {
     result.forEach(list -> {
       if (list.getUserID() == controller.getUser()) {
         names.add(list.getName());
@@ -347,41 +341,44 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
     });
   }
 
-  private boolean canMakeQuiz() {
+  @Override
+  protected boolean canMakeQuiz() {
     Collection<Permission> permissions = controller.getPermissions();
     return permissions.contains(Permission.TEACHER_PERM) || permissions.contains(Permission.PROJECT_ADMIN);
   }
-
-  private Button share;
 
   /**
    * @param container
    * @return
    */
   @NotNull
-  private DivWidget getButtons(ListContainer<T> container) {
-    DivWidget buttons = new DivWidget();
-    buttons.addStyleName("inlineFlex");
-    buttons.addStyleName("topFiveMargin");
-    buttons.getElement().getStyle().setProperty("minWidth", MIN_WIDTH + "px");
-    buttons.add(getAddButton());
+  @Override
+  protected DivWidget getButtons(ButtonMemoryItemContainer<T> container) {
+//    DivWidget buttons = new DivWidget();
+//    buttons.addStyleName("inlineFlex");
+//    buttons.addStyleName("topFiveMargin");
+//    buttons.getElement().getStyle().setProperty("minWidth", MIN_WIDTH + "px");
+//    buttons.add(getAddButton());
+//
+//    if (canMakeQuiz()) {
+//      buttons.add(getAddQuizButton());
+//    }
+//
+//    buttons.add(removeButton = getRemoveButton());
+//
+//    buttons.add(editButton = getEdit());
+//    buttons.add(getAddItems());
+//    buttons.add(getImport());
+//    buttons.add(share = getShare());
 
-    if (canMakeQuiz()) {
-      buttons.add(getAddQuizButton());
-    }
-
-    buttons.add(removeButton = getRemoveButton());
-
-    buttons.add(editButton = getEdit());
-    buttons.add(getAddItems());
-    buttons.add(getImport());
-    buttons.add(share = getShare());
+    DivWidget buttons = super.getButtons(container);
     addDrillAndLearn(buttons, container);
     if (canMakeQuiz()) {
       buttons.add(quizButton = getQuizButton(myLists));
     }
     return buttons;
   }
+/*
 
   private Button getEdit() {
     Button successButton = getSuccessButton(EDIT_TITLE);
@@ -399,6 +396,7 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
     //  successButton.setEnabled(!myLists.isEmpty());
     return successButton;
   }
+*/
 
 /*
   private Button getPublic() {
@@ -409,20 +407,13 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
   }
 */
 
-  private IsWidget getImport() {
-    Button successButton = getSuccessButton(IMPORT);
-    successButton.setIcon(IconType.UPLOAD);
-    // successButton.setSize(ButtonSize.LARGE);
-    successButton.addClickHandler(event -> doImport());
-    return successButton;
-  }
 
-  private void doImport() {
-    UserList<CommonShell> currentSelection = getCurrentSelection(myLists);
-    doImport(currentSelection, currentSelection.isFavorite());
-  }
-
-  private void doImport(UserList<CommonShell> currentSelection, boolean favorite) {
+  /* private void doImport() {
+     UserList<CommonShell> currentSelection = getCurrentSelection(myLists);
+     doImport(currentSelection, currentSelection.isFavorite());
+   }
+ */
+ /* private void doImport(UserList<CommonShell> currentSelection, boolean favorite) {
     ImportBulk importBulk = new ImportBulk();
     DivWidget contents = importBulk.showImportItem(controller.getLanguage());
 
@@ -460,20 +451,32 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
 
     closeButton.setType(ButtonType.SUCCESS);
   }
+*/
+  @Override
+  protected boolean gotYesOnImport(T currentSelection, ImportBulk importBulk) {
+    boolean favorite = getCurrentSelection(myLists).isFavorite();
+    if (favorite) {
+      Window.alert(CAN_T_IMPORT_INTO_FAVORITES);
+      return false;
+    } else {
+      importBulk.doBulk(controller, currentSelection, myLists);
+      return true;
+    }
+  }
 
   /**
    * @return
    * @see #getButtons
    */
-  private IsWidget getAddItems() {
-    Button successButton = getSuccessButton(ITEMS);
-    successButton.setIcon(IconType.PENCIL);
-    successButton.addClickHandler(event -> editList());
-    addTooltip(successButton, EDIT_THE_ITEMS_ON_LIST);
-    return successButton;
-  }
-
-  private void editList() {
+//  private IsWidget getAddItems() {
+//    Button successButton = getSuccessButton(ITEMS);
+//    successButton.setIcon(IconType.PENCIL);
+//    successButton.addClickHandler(event -> editList());
+//    addTooltip(successButton, EDIT_THE_ITEMS_ON_LIST);
+//    return successButton;
+//  }
+  @Override
+  protected void editList() {
     EditItem editItem = new EditItem(controller);
     new DialogHelper(true).show(
         ADD_EDIT_ITEMS + " : " + getListName(),
@@ -500,13 +503,13 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
     return buttons;
   }
 
-  private void addDrillAndLearn(DivWidget buttons, ListContainer<T> container) {
+  private void addDrillAndLearn(DivWidget buttons, ButtonMemoryItemContainer<T> container) {
     buttons.add(getLearnButton(container));
     buttons.add(getDrillButton(container));
   }
 
   @NotNull
-  private Button getLearnButton(ListContainer<T> container) {
+  private Button getLearnButton(ButtonMemoryItemContainer<T> container) {
     Button learn = getSuccessButton(LEARN);
     learn.setType(ButtonType.INFO);
     learn.addClickHandler(event -> showLearnList(container));
@@ -516,7 +519,7 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
     return learn;
   }
 
-  private void showLearnList(ListContainer<T> container) {
+  private void showLearnList(ButtonMemoryItemContainer<T> container) {
     controller.getNavigation().showListIn(getListID(container), INavigation.VIEWS.LEARN);
   }
 
@@ -524,12 +527,12 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
    * @param container
    * @see ListView.MyListContainer#gotDoubleClickOn
    */
-  private void showQuiz(ListContainer<T> container) {
+  private void showQuiz(ButtonMemoryItemContainer<T> container) {
     controller.showListIn(getListID(container), INavigation.VIEWS.QUIZ);
   }
 
   @NotNull
-  private Button getDrillButton(ListContainer<T> container) {
+  private Button getDrillButton(ButtonMemoryItemContainer<T> container) {
     Button drill = getSuccessButton(DRILL);
     drill.setType(ButtonType.INFO);
 
@@ -541,7 +544,7 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
   }
 
   @NotNull
-  private Button getQuizButton(ListContainer<T> container) {
+  private Button getQuizButton(ButtonMemoryItemContainer<T> container) {
     Button drill = getSuccessButton(QUIZ);
     drill.setType(ButtonType.INFO);
 
@@ -553,39 +556,30 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
     return drill;
   }
 
-  private int getListID(ListContainer<T> container) {
+  private int getListID(ButtonMemoryItemContainer<T> container) {
     if (container == null) return -1;
     else {
-      UserList<CommonShell> currentSelection = getCurrentSelection(container);
+      T currentSelection = getCurrentSelection(container);
       return currentSelection == null ? -1 : currentSelection.getID();
     }
   }
 
-  @NotNull
-  private Button getSuccessButton(String learn1) {
-    Button learn = new Button(learn1);
-    learn.setType(ButtonType.SUCCESS);
-    learn.addStyleName("leftFiveMargin");
-    return learn;
-  }
-
-  private DialogHelper dialogHelper;
 
   /**
    * @return
    * @see #getButtons
    */
+//  @NotNull
+//  private Button getAddButton() {
+//    final Button add = new Button("", IconType.PLUS);
+//    add.addClickHandler(event -> dialogHelper = doAdd());
+//    add.setType(ButtonType.SUCCESS);
+//    addTooltip(add, MAKE_A_NEW_LIST);
+//    return add;
+//  }
+  @Override
   @NotNull
-  private Button getAddButton() {
-    final Button add = new Button("", IconType.PLUS);
-    add.addClickHandler(event -> dialogHelper = doAdd());
-    add.setType(ButtonType.SUCCESS);
-    addTooltip(add, MAKE_A_NEW_LIST);
-    return add;
-  }
-
-  @NotNull
-  private Button getAddQuizButton() {
+  protected Button getAddQuizButton() {
     final Button add = new Button(QUIZ, IconType.PLUS);
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> dialogHelper = doAddQuiz());
@@ -594,7 +588,7 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
     return add;
   }
 
-  @NotNull
+ /* @NotNull
   private Button getRemoveButton() {
     final Button add = new Button("", IconType.MINUS);
     add.addStyleName("leftFiveMargin");
@@ -604,10 +598,10 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
     myLists.addButton(add);
     return add;
   }
-
-  private T getCurrentSelectionFromMyLists() {
+*/
+/*  private T getCurrentSelectionFromMyLists() {
     return getCurrentSelection(myLists);
-  }
+  }*/
 
   @NotNull
   private Button getRemoveVisitorButton(ListContainer<T> visited) {
@@ -620,25 +614,18 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
     return add;
   }
 
-  private void addTooltip(Widget add, String tip) {
-    new TooltipHelper().addTopTooltip(add, tip);
-  }
+  //  private void gotDelete(Button delete, UserList<CommonShell> currentSelection) {
+//    if (currentSelection != null) {
+//      if (currentSelection.getListType() == UserList.LIST_TYPE.QUIZ) {
+//        warnFirst(delete, currentSelection);
+//      } else {
+//        doDelete(delete, currentSelection);
+//      }
+//    }
+//  }
 
-  private T getCurrentSelection(ListContainer<T> container) {
-    return container.getCurrentSelection();
-  }
-
-  private void gotDelete(Button delete, UserList<CommonShell> currentSelection) {
-    if (currentSelection != null) {
-      if (currentSelection.getListType() == UserList.LIST_TYPE.QUIZ) {
-        warnFirst(delete, currentSelection);
-      } else {
-        doDelete(delete, currentSelection);
-      }
-    }
-  }
-
-  private void doDelete(UIObject delete, UserList<CommonShell> currentSelection) {
+  @Override
+  protected void doDelete(UIObject delete, T currentSelection) {
     final int uniqueID = currentSelection.getID();
     controller.logEvent(delete, "Button", currentSelection.getName(), "Delete");
 
@@ -664,31 +651,7 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
     }
   }
 
-  private void warnFirst(Button delete, UserList<CommonShell> currentSelection) {
-    new DialogHelper(true).show(
-        "Delete " + currentSelection.getName() + " forever?",
-        new Heading(2, "Are you sure?"),
-        new DialogHelper.CloseListener() {
-          @Override
-          public boolean gotYes() {
-            doDelete(delete, currentSelection);
-            return true;
-          }
-
-          @Override
-          public void gotNo() {
-
-          }
-
-          @Override
-          public void gotHidden() {
-
-          }
-        },
-        500, -1);
-  }
-
-  private void gotDeleteVisitor(Button delete, UserList<CommonShell> currentSelection, ListContainer container) {
+  private void gotDeleteVisitor(Button delete, T currentSelection, ListContainer container) {
     if (currentSelection == null) return;
 
     delete.setEnabled(false);
@@ -708,39 +671,19 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
     });
   }
 
-  private void removeFromLists(ListContainer listContainer, UserList<CommonShell> currentSelection) {
-    if (listContainer == myLists) {
-      String name = currentSelection.getName();
-      names.remove(name);
-    }
-
-    int index = listContainer.getIndex(currentSelection);
-    //logger.info("deleteList ---> did do deleteList " + uniqueID + " index " + index);
-    listContainer.forgetItem(currentSelection);
-    int numItems = listContainer.getNumItems();
-    if (numItems == 0) {
-      //delete.setEnabled(false);
-      listContainer.disableAll();
-    } else {
-      if (index == numItems) index = numItems - 1;
-      HasID at = listContainer.getAt(index);
-      //logger.info("next is " + at.getName());
-      int id = at.getID();
-//      listContainer.markCurrentExercise(id);
-      Scheduler.get().scheduleDeferred(() -> listContainer.markCurrentExercise(id));
-
-    }
-  }
-
   /**
    * @return
    * @see #getAddButton
    */
-  private DialogHelper doAdd() {
-    DivWidget contents = new DivWidget();
-    CreateListDialog<UserList<CommonShell>> createListDialog = new CreateListDialog<UserList<CommonShell>>(this, controller, names );
-    createListDialog.doCreate(contents);
-    return getNewListButton(contents, createListDialog, CREATE_NEW_LIST);
+//  private DialogHelper doAdd() {
+//    DivWidget contents = new DivWidget();
+//    CreateListDialog<UserList<CommonShell>> createListDialog = new CreateListDialog<UserList<CommonShell>>(this, controller, names);
+//    createListDialog.doCreate(contents);
+//    return getNewListButton(contents, createListDialog, CREATE_NEW_LIST);
+//  }
+  @NotNull
+  protected CreateDialog<T> getCreateDialog() {
+    return new CreateListDialog<T>(this, controller, names);
   }
 
   /**
@@ -786,11 +729,12 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
     return dialogHelper;
   }
 
-  private CreateListDialog editDialog;
+//  private CreateDialog<T> editDialog;
 
-  private void doEdit() {
+/*  @Override
+  protected CreateDialog<T> doEdit() {
     DivWidget contents = new DivWidget();
-    editDialog = new CreateListDialog<UserList<CommonShell>>(this, controller, myLists.getCurrentSelection(), true, names);
+    CreateDialog<T> editDialog = getEditDialog();
     editDialog.doCreate(contents);
 
     DialogHelper dialogHelper = new DialogHelper(true);
@@ -828,21 +772,26 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
         }, 550);
 
     closeButton.setType(ButtonType.SUCCESS);
+
+    return editDialog;
+  }*/
+
+  @Override
+  protected void afterGotYesOnEdit() {
+    enableQuizButton(quizButton);
   }
 
   @NotNull
-  private String getMailTo() {
-    UserList<CommonShell> currentSelection = myLists.getCurrentSelection();
-    boolean isQuiz = currentSelection.getListType() == UserList.LIST_TYPE.QUIZ;
-    return new UserListSupport(controller)
-        .getMailToList(currentSelection.getID(), currentSelection.getName(), isQuiz);
+  @Override
+  protected CreateDialog<T> getEditDialog() {
+    return new CreateListDialog<T>(this, controller, myLists.getCurrentSelection(), true, names);
   }
 
   /**
    * @param userList
    * @see CreateListDialog#addUserList
    */
-  @Override
+/*  @Override
   public void madeIt(T userList) {
     // logger.info("madeIt made it " + userList.getName());
     try {
@@ -855,7 +804,7 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
       logger.warning("got " + e);
     }
     Scheduler.get().scheduleDeferred(() -> myLists.markCurrentExercise(userList.getID()));
-  }
+  }*/
 
   /**
    * @seex CreateListDialog#makeCreateButton
@@ -901,15 +850,17 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
       //showLearnOrQuiz(selected);
       editList();
     }
+
   }
 
-  private void setShareHREF(T user) {
-    if (user != null) {
-      setShareButtonHREF();
-      // share.setEnabled(!user.isFavorite());
-    }
+  @NotNull
+  @Override
+  protected String getMailTo() {
+    UserList<CommonShell> currentSelection = myLists.getCurrentSelection();
+    boolean isQuiz = currentSelection.getListType() == UserList.LIST_TYPE.QUIZ;
+    return new UserListSupport(controller)
+        .getMailToList(currentSelection.getID(), currentSelection.getName(), isQuiz);
   }
-
 
   private void showQuiz(T selected) {
     if (selected != null) {
@@ -917,10 +868,6 @@ public class ListView<T extends UserList<CommonShell>> extends TableAndPager imp
         showQuiz(myLists);
       }
     }
-  }
-
-  private void setShareButtonHREF() {
-    share.setHref(getMailTo());
   }
 
   private class MyShownCloseListener implements DialogHelper.ShownCloseListener {

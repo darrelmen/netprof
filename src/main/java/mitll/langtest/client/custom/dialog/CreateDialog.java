@@ -29,11 +29,10 @@
 
 package mitll.langtest.client.custom.dialog;
 
-import com.github.gwtbootstrap.client.ui.ControlGroup;
-import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.RadioButton;
 import com.github.gwtbootstrap.client.ui.TextArea;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
@@ -44,6 +43,7 @@ import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.DialogHelper;
@@ -65,12 +65,13 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends BasicDialog {
-  protected static final String CREATE_NEW_LIST = "Create New List";
-  protected static final String TEXT_BOX = "TextBox";
-  private static final int DESC_WIDTH = 455;
   private final Logger logger = Logger.getLogger("CreateDialog");
 
-  protected static final String ALL = "All";
+  static final String CREATE_NEW_LIST = "Create New List";
+  static final String TEXT_BOX = "TextBox";
+  private static final int DESC_WIDTH = 455;
+
+  private static final String ALL = "All";
   private static final int LIST_WIDTH = 60;
   private static final String PLEASE_FILL_IN_A_TITLE = "Please fill in a title";
 
@@ -84,29 +85,29 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
 
   //  private static final String CREATE_NEW_LIST = "Create New List";
 //  private static final String TEXT_BOX = "TextBox";
-  private static final String CONTENT_GROUP = "Content_Group";
-
-  private static final String CLASS = "Course Info";
+//  private static final String CONTENT_GROUP = "Content_Group";
+//
+//  private static final String CLASS = "Course Info";
   private static final String TITLE = "Title";
 //  private static final String DESCRIPTION_OPTIONAL = "Description";
 
 
-  protected final ExerciseController controller;
+  protected final ExerciseController<?> controller;
 
   private final Set<String> names;
 
-  protected boolean isEdit;
-  protected FormField titleBox;
-  protected RadioButton publicChoice;
-  protected RadioButton privateChoice;
+  final boolean isEdit;
+  FormField titleBox;
+  RadioButton publicChoice;
+  private RadioButton privateChoice;
   protected KeyPressHelper enterKeyButtonHelper;
-  protected List<ListBox> allUnitChapter;
-  protected TextArea theDescription;
-  private T current;
+  private List<ListBox> allUnitChapter;
+  TextArea theDescription;
+  private final T current;
 
   private ControlGroup publicPrivateGroup;
 
-  public CreateDialog(T current, Set<String> names, boolean isEdit, ExerciseController controller) {
+  CreateDialog(T current, Set<String> names, boolean isEdit, ExerciseController controller) {
     this.current = current;
     this.names = names;
     this.isEdit = isEdit;
@@ -119,8 +120,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     this.dialogHelper = dialogHelper;
   }
 
-
-  protected void checkEnter(KeyUpEvent event) {
+  void checkEnter(KeyUpEvent event) {
     if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
       gotEnter();
     }
@@ -142,7 +142,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     }
   }
 
-  protected void gotChangeFor(String type, ListBox listBox, List<ListBox> all) {
+  private void gotChangeFor(String type, ListBox listBox, List<ListBox> all) {
     int i = all.indexOf(listBox);
     int nextIndex = i + 1;
     if (nextIndex < all.size()) {
@@ -188,6 +188,8 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
   }
 
   protected abstract void doCreate();
+
+  public abstract void doEdit(T currentSelection, ButtonMemoryItemContainer<T> container);
 
   /**
    * @param thirdRow
@@ -243,7 +245,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     return ret;
   }
 
-  protected boolean isEditing() {
+  boolean isEditing() {
     return current != null;
   }
 
@@ -260,7 +262,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
   }
 
   @NotNull
-  protected ListBox getListBox() {
+  ListBox getListBox() {
     return getListBox(LIST_WIDTH);
   }
 
@@ -276,7 +278,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
    * @param titleBox
    * @return
    */
-  protected boolean validateCreateList(FormField titleBox) {
+  private boolean validateCreateList(FormField titleBox) {
     if (titleBox.getSafeText().isEmpty()) {
       markError(titleBox, PLEASE_FILL_IN_A_TITLE);
       return false;
@@ -285,7 +287,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     }
   }
 
-  protected void zeroPadding(Panel createContent) {
+  private void zeroPadding(Panel createContent) {
     createContent.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
     createContent.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
   }
@@ -299,7 +301,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
   }
 
   @NotNull
-  protected Widget getPrivacyChoices() {
+  Widget getPrivacyChoices() {
     FluidRow row = new FluidRow();
 
     publicChoice = new RadioButton(PUBLIC_PRIVATE_GROUP, PUBLIC);
@@ -330,7 +332,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
    * @param listBox
    * @see #getQuizChoices(boolean)
    */
-  protected void addSorted(ProjectStartupInfo projectStartupInfo, ListBox listBox) {
+  private void addSorted(ProjectStartupInfo projectStartupInfo, ListBox listBox) {
     List<String> items = new ArrayList<>();
     projectStartupInfo.getSectionNodes().forEach(sectionNode -> {
       String name = sectionNode.getName();
@@ -347,7 +349,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     Scheduler.get().scheduleDeferred(() -> titleBox.box.setFocus(true));
   }
 
-  protected void addTitle(FluidRow row) {
+  private void addTitle(FluidRow row) {
     titleBox = addControlFormField(row, "", "");
     titleBox.getWidget().getElement().getStyle().setMarginTop(10, Style.Unit.PX);
 
@@ -394,7 +396,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
   }
 
   @NotNull
-  protected Panel addEnterKeyBinding() {
+  private Panel addEnterKeyBinding() {
     enterKeyButtonHelper = new KeyPressHelper(true);
     return new DivWidget() {
       @Override
@@ -405,12 +407,12 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     };
   }
 
-  protected String sanitize(String text) {
+  String sanitize(String text) {
     return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
   }
 
   @NotNull
-  protected Map<String, String> getUnitAndChapterSelections() {
+  Map<String, String> getUnitAndChapterSelections() {
     Map<String, String> unitToChapter = new LinkedHashMap<>();
     List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
 
@@ -422,11 +424,11 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
   }
 
   protected class RowAndCol {
-    private Grid grid;
+    private final Grid grid;
     private int col;
     private int row;
 
-    public RowAndCol(Grid grid, int col, int row) {
+    RowAndCol(Grid grid, int col, int row) {
       this.grid = grid;
       this.col = col;
       this.row = row;

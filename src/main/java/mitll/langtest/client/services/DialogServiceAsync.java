@@ -53,5 +53,7 @@ public interface DialogServiceAsync {
 
   void delete(int id, AsyncCallback<Boolean> async);
 
+  void addDialog(IDialog dialog, AsyncCallback<IDialog> async);
+
   // void getLatestDialogSessionID(int dialogid, AsyncCallback<Integer> async);
 }

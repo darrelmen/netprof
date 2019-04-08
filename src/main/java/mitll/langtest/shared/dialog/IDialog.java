@@ -54,6 +54,8 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable,
 
   DialogType getKind();
 
+  int getImageID();
+
   String getImageRef();
 
   String getOrientation();
@@ -89,4 +91,6 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable,
   List<String> getSpeakers();
 
   Map<String, List<ClientExercise>> groupBySpeaker();
+
+  IMutableDialog getMutable();
 }

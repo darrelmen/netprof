@@ -424,6 +424,36 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }
 
   /**
+   * TODO : store creation time?
+   *
+   * @param toAdd
+   * @return
+   */
+  @Override
+  public IDialog add(IDialog toAdd) {
+    int add = add(
+        toAdd.getUserid(),
+        toAdd.getProjid(),
+        -1,
+        toAdd.getImageID(),
+        toAdd.getModified(),
+        toAdd.getModified(),
+        toAdd.getUnit(),
+        toAdd.getChapter(),
+        toAdd.getKind(),
+        DialogStatus.DEFAULT,
+        toAdd.getEnglish(),
+        toAdd.getOrientation(),
+        toAdd.isPrivate()
+    );
+
+    if (add > -1) {
+      toAdd.getMutable().setID(add);
+    }
+    return toAdd;
+  }
+
+  /**
    * @param userid
    * @param dominoID
    * @param modified

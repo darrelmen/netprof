@@ -29,8 +29,11 @@
 
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.dialog.ListenViewHelper;
@@ -48,6 +51,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -57,7 +61,7 @@ import java.util.stream.Collectors;
  * @see ListenViewHelper#reallyGetTurnPanel
  */
 public class TurnPanel extends DialogExercisePanel<ClientExercise> {
-  // private final Logger logger = Logger.getLogger("TurnPanel");
+ private final Logger logger = Logger.getLogger("TurnPanel");
 
   private static final String FLOAT_LEFT = "floatLeft";
 
@@ -149,9 +153,72 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
       }
     }
 
+    Button play = new Button("play");
+    play.addClickHandler(new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        String cc = controller.getLanguageInfo().getLocale();
+        if (columns == ListenViewHelper.COLUMNS.LEFT ||  exercise.hasEnglishAttr()) {
+          cc = "en-US";
+        }
+        if (cc.equals("ko")) cc = "ko-KR";
+        logger.info("speak " + exercise.getForeignLanguage() + " as " + cc);
+        speak2(exercise.getForeignLanguage(), cc);
+      }
+    });
+    flClickableRow.add(play);
+
+
     flClickableRow.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
     addMarginStyle();
   }
+
+  /**
+   * <script src='https://code.responsivevoice.org/responsivevoice.js'></script>
+   *
+   * <input onclick="responsiveVoice.speak('This is the text you want to speak');" type='button' value='🔊 Play' />
+   *
+   * @param w
+   */
+  public native void speak() /*-{
+      $wnd.responsiveVoice.speak('This is the text you want to speak');
+  }-*/;
+
+
+  /**
+   * var msg = new SpeechSynthesisUtterance();
+   * var voices = window.speechSynthesis.getVoices();
+   * msg.voice = voices[10]; // Note: some voices don't support altering params
+   * msg.voiceURI = 'native';
+   * msg.volume = 1; // 0 to 1
+   * msg.rate = 1; // 0.1 to 10
+   * msg.pitch = 2; //0 to 2
+   * msg.text = 'Hello World';
+   * msg.lang = 'en-US';
+   *
+   * msg.onend = function(e) {
+   *   console.log('Finished in ' + event.elapsedTime + ' seconds.');
+   * };
+   *
+   * speechSynthesis.speak(msg);
+   */
+  public native void speak2(String text, String language) /*-{
+      var msg = new SpeechSynthesisUtterance();
+      var voices = window.speechSynthesis.getVoices();
+      msg.voice = voices[10]; // Note: some voices don't support altering params
+      msg.voiceURI = 'native';
+      msg.volume = 1; // 0 to 1
+      msg.rate = 1; // 0.1 to 10
+      msg.pitch = 1; //0 to 2
+      msg.text = text;//'Hello World';
+      msg.lang = language;//'en-US';
+
+      msg.onend = function(e) {
+          console.log('Finished in ' + event.elapsedTime + ' seconds.');
+      };
+
+      speechSynthesis.speak(msg);
+  }-*/;
 
   @Override
   protected void addFloatLeft(Widget w) {

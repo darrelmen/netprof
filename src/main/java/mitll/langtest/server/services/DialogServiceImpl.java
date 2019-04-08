@@ -267,4 +267,9 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     getUserIDFromSessionOrDB();
     return db.getDialogDAO().delete(id);
   }
+
+  @Override
+  public IDialog addDialog(IDialog dialog) throws DominoSessionException {
+    return db.getDialogDAO().add(dialog);
+  }
 }

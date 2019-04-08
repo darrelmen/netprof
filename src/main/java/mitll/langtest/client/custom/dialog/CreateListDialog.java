@@ -38,6 +38,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.KeyPressHelper;
@@ -97,7 +98,7 @@ public class CreateListDialog<T extends UserList> extends CreateDialog<T> {
   private static final String CONTENT_GROUP = "Content_Group";
 
   private static final String CLASS = "Course Info";
-  private static final String TITLE = "Title";
+  //  private static final String TITLE = "Title";
   private final CreateComplete<T> listView;
   private FormField classBox;
   private RadioButton sentenceChoice;
@@ -151,29 +152,6 @@ public class CreateListDialog<T extends UserList> extends CreateDialog<T> {
     return this;
   }
 
-  /**
-   * @param thirdRow
-   * @seex
-   * @seex mitll.langtest.client.custom.Navigation#getNavigation
-   * @see ListView#doAdd
-   */
-/*  public void doCreate(Panel thirdRow) {
-    thirdRow.clear();
-    Panel child = addEnterKeyBinding();
-
-//    logger.info("doCreate on " + thirdRow.getClass());
-
-    thirdRow.add(child);
-    zeroPadding(child);
-    child.addStyleName("userListContainer");
-
-    FluidRow row = new FluidRow();
-    child.add(row);
-
-    addTitle(row);
-
-    addDescription(child);
-  }*/
   @Override
   protected void addFieldsBelowDescription(Panel child) {
     addClassBox(child);
@@ -308,10 +286,6 @@ public class CreateListDialog<T extends UserList> extends CreateDialog<T> {
     }
     return w;
   }
-
-  // private boolean isEditing() {
-//    return current != null;
-//  }
 
   @NotNull
   private HTML getDurationLabel() {
@@ -524,16 +498,13 @@ public class CreateListDialog<T extends UserList> extends CreateDialog<T> {
    * @paramx duration
    * @see #gotCreate
    */
-  private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic,
+  private void addUserList(final FormField titleBox,
+                           TextArea area,
+                           FormField classBox,
+                           boolean isPublic,
                            UserList.LIST_TYPE listType) {
     final String safeText = titleBox.getSafeText();
     //  logger.info("addUserList " + safeText);
-    Map<String, String> unitToChapter = getUnitAndChapterSelections();
-
-    QuizSpec quizSpec = new QuizSpec(duration, minScore, playAudio, true, "");
-    if (sentenceChoice != null && sentenceChoice.getValue())
-      quizSpec.setExercisetypes(QuizSpec.EXERCISETYPES.SENTENCES);
-    else if (bothChoice != null && bothChoice.getValue()) quizSpec.setExercisetypes(QuizSpec.EXERCISETYPES.BOTH);
 
     controller.getListService().addUserList(
         safeText,
@@ -542,8 +513,8 @@ public class CreateListDialog<T extends UserList> extends CreateDialog<T> {
         isPublic,
         listType,
         quizSize,
-        quizSpec,
-        unitToChapter,
+        getQuizSpec(),
+        getUnitAndChapterSelections(),
         new AsyncCallback<T>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -562,13 +533,27 @@ public class CreateListDialog<T extends UserList> extends CreateDialog<T> {
         });
   }
 
+  @NotNull
+  private QuizSpec getQuizSpec() {
+    QuizSpec quizSpec = new QuizSpec(duration, minScore, playAudio, true, "");
+
+    if (sentenceChoice != null && sentenceChoice.getValue()) {
+      quizSpec.setExercisetypes(QuizSpec.EXERCISETYPES.SENTENCES);
+    } else if (bothChoice != null && bothChoice.getValue()) {
+      quizSpec.setExercisetypes(QuizSpec.EXERCISETYPES.BOTH);
+    }
+
+    return quizSpec;
+  }
+
   /**
    * @param currentSelection
    * @param container
    * @see ListView#doEdit
    * @see ListView#gotEdit
    */
-  public void doEdit(UserList<CommonShell> currentSelection, ListContainer container) {
+  @Override
+  public void doEdit(T currentSelection, ButtonMemoryItemContainer<T> container) {
     currentSelection.setName(titleBox.getSafeText());
     currentSelection.setDescription(sanitize(theDescription.getText()));
     currentSelection.setClassMarker(sanitize(classBox.getSafeText()));

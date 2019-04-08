@@ -62,6 +62,7 @@ public interface DialogService extends RemoteService {
    */
   ExerciseListWrapper<IDialog> getDialogs(ExerciseListRequest request) throws DominoSessionException;
 
+  IDialog addDialog(IDialog dialog) throws DominoSessionException;
   /**
    *
    * @param id

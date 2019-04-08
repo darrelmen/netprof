@@ -29,848 +29,182 @@
 
 package mitll.langtest.client.custom.dialog;
 
-import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.ListBox;
-import com.github.gwtbootstrap.client.ui.RadioButton;
-import com.github.gwtbootstrap.client.ui.TextArea;
-import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
-import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.bootstrap.ItemSorter;
-import mitll.langtest.client.custom.userlist.ListContainer;
-import mitll.langtest.client.custom.userlist.ListView;
-import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.dialog.KeyPressHelper;
+import com.google.gwt.user.client.ui.Grid;
+import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
-import mitll.langtest.shared.common.DominoSessionException;
-import mitll.langtest.shared.custom.QuizSpec;
-import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.user.Permission;
+import mitll.langtest.shared.dialog.Dialog;
+import mitll.langtest.shared.dialog.DialogType;
+import mitll.langtest.shared.dialog.IDialog;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
-public class CreateDialogDialog extends BasicDialog {
+public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
   private final Logger logger = Logger.getLogger("CreateDialogDialog");
 
-  private static final int DESC_WIDTH = 455;
-  private static final int LIST_WIDTH = 60;
+  private FormField entitleBox;
 
-  private static final String ALL = "All";
-  private static final String HEAR_ITEMS = "Hear Items";
+  public CreateDialogDialog(T current, Set<String> names, boolean isEdit, ExerciseController controller) {
+    super(current, names, isEdit, controller);
+  }
+
+  CreateDialogDialog(Set<String> names, ExerciseController controller) {
+    super(null, names, false, controller);
+  }
+
   /**
-   * @see #getPlayAudioCheck
-   */
-  private static final String PLAY_AUDIO = "Play Audio?";
-
-
-  private static final String QUIZ_SIZE = "# Items";
-  /**
-   * @see #getDurationLabel
-   */
-  private static final String DURATION_MINUTES = "Duration (Min.)";
-  private static final int DEFAULT_QUIZ_SIZE = 10;
-
-  private static final int MIN_DURATION = 1;
-  private static final int DEFAULT_DURATION = 1;
-  private static final String PUBLIC_QUIZZES = "Public quizzes can be seen by all students.";
-  private static final int DEFAULT_MIN_SCORE = 30;
-  private static final int MAX_SCORE = 71;
-  private static final int MIN_SCORE = 0;
-  private static final String MIN_SCORE1 = "Min. Score to Adv.";
-
-
-  private static final String PLEASE_MARK_EITHER_PUBLIC_OR_PRIVATE = "Please mark either public or private.";
-  private static final String NAME_ALREADY_USED = "Name already used. Please choose another.";
-  private static final int MAX_DURATION = 21;
-  private static final int MAX_QUIZ_SIZE = 110;
-  private static final int MIN_QUIZ_SIZE = 0;
-
-  private static final String SHOW_AS_QUIZ = "Show as Quiz";
-  /**
+   * TODO : add en title
+   * TODO : add unit/chapter drop downs
    *
-   */
-  private static final String CREATE_A_NEW_QUIZ = "Create a new quiz. (Items are chosen randomly.)";
-  private static final String IS_A_QUIZ = "Is a quiz?";
-
-  private static final String MAKE_A_QUIZ = "Make a quiz?";
-
-  private static final String PUBLIC = "Public";
-  private static final String PRIVATE = "Private";
-  private static final String KEEP_LIST_PUBLIC_PRIVATE = "Keep Public/Private?";
-  private static final String CREATE_NEW_LIST = "Create New List";
-  private static final String TEXT_BOX = "TextBox";
-  private static final String PUBLIC_PRIVATE_GROUP = "Public_Private_Group";
-  private static final String CONTENT_GROUP = "Content_Group";
-
-  private static final String PLEASE_FILL_IN_A_TITLE = "Please fill in a title";
-
-  private static final String CLASS = "Course Info";
-  private static final String TITLE = "Title";
-  private static final String DESCRIPTION_OPTIONAL = "Description";
-  private final CreateComplete listView;
-  private FormField titleBox;
-  private final ExerciseController controller;
-  private KeyPressHelper enterKeyButtonHelper;
-  private TextArea theDescription;
-  private FormField classBox;
-  private RadioButton publicChoice, privateChoice;
-  private RadioButton sentenceChoice;
-  private RadioButton bothChoice;
-  private UserList current = null;
-  private boolean isEdit;
-  private ControlGroup publicPrivateGroup;
-  /**
-   *
-   */
-  private boolean playAudio;
-
-  private int quizSize = DEFAULT_QUIZ_SIZE;
-  private int minScore = DEFAULT_MIN_SCORE;
-  private int duration = DEFAULT_DURATION;
-
-  private Heading modeDep;
-  private boolean isQuiz = false;
-  private final Set<String> names;
-
-  /**
-   * @param listView
-   * @param controller
-   * @param current
-   * @param isEdit
-   * @see ListView#doEdit
-   */
-  public CreateDialogDialog(CreateComplete listView, ExerciseController controller, UserList current, boolean isEdit, Set<String> names) {
-    this(listView, controller, names);
-    this.current = current;
-    this.isEdit = isEdit;
-
-    this.isQuiz = current.getListType() == UserList.LIST_TYPE.QUIZ;
-    this.minScore = current.getMinScore();
-    this.duration = current.getDuration();
-    this.playAudio = current.shouldShowAudio();
-  }
-
-  /**
-   * @param listView
-   * @param controller
-   * @param names
-   * @see ListView#doAdd
-   */
-  public CreateDialogDialog(CreateComplete listView, ExerciseController controller, Set<String> names) {
-    this.listView = listView;
-    this.controller = controller;
-    this.names = names;
-  }
-
-  public CreateDialogDialog setIsQuiz(boolean isQuiz) {
-    this.isQuiz = isQuiz;
-    return this;
-  }
-
-  public boolean isOKToCreate() {
-    if (isOKToCreate(names)) {
-      doCreate();
-      return true;
-    } else {
-      //logger.info("doAdd dialog not valid ");
-      return false;
-    }
-  }
-
-  /**
-   * @param thirdRow
-   * @seex
-   * @seex mitll.langtest.client.custom.Navigation#getNavigation
-   * @see ListView#doAdd
-   */
-  public void doCreate(Panel thirdRow) {
-    thirdRow.clear();
-    Panel child = addEnterKeyBinding();
-
-//    logger.info("doCreate on " + thirdRow.getClass());
-
-    thirdRow.add(child);
-    zeroPadding(child);
-    child.addStyleName("userListContainer");
-
-    FluidRow row = new FluidRow();
-    child.add(row);
-
-    {
-      titleBox = addControlFormField(row, "", "");
-      titleBox.getWidget().getElement().getStyle().setMarginTop(10, Style.Unit.PX);
-
-      final TextBoxBase box = titleBox.box;
-      titleBox.setHint(TITLE);
-      if (isEditing()) box.setText(current.getName());
-      box.getElement().setId("CreateListDialog_Title");
-      box.addKeyUpHandler(this::checkEnter);
-      box.addBlurHandler(event -> controller.logEvent(box, TEXT_BOX, CREATE_NEW_LIST, "Title = " + box.getValue()));
-    }
-
-    {
-      row = new FluidRow();
-      child.add(row);
-
-      theDescription = new TextArea();
-      theDescription.setWidth(DESC_WIDTH +
-          "px");
-
-      theDescription.setPlaceholder(DESCRIPTION_OPTIONAL + " (optional)");
-      theDescription.addKeyUpHandler(this::checkEnter);
-
-      if (isEditing()) theDescription.setText(current.getDescription());
-      final FormField description = getSimpleFormField(row, "", theDescription, 1, "");
-
-      description.box.getElement().setId("CreateListDialog_Description");
-      description.box.addBlurHandler(event -> controller.logEvent(description.box, TEXT_BOX, CREATE_NEW_LIST, "Description = " + description.box.getValue()));
-    }
-
-    {
-      row = new FluidRow();
-      child.add(row);
-
-      classBox = addControlFormField(row);
-      classBox.setHint(CLASS + " (optional)");
-      classBox.box.addKeyUpHandler(this::checkEnter);
-      if (isEditing()) classBox.setText(current.getClassMarker());
-      classBox.box.getElement().setId("CreateListDialog_CourseInfo");
-      classBox.box.addBlurHandler(event -> controller.logEvent(classBox.box, TEXT_BOX, CREATE_NEW_LIST, "CourseInfo = " + classBox.box.getValue()));
-    }
-
-    if (canMakeQuiz()) {
-      if (isQuiz) {
-        if (isEdit) {
-          child.add(getQuizChoices());
-          addEditOptions(child);
-        } else {
-          addQuizOptions(child);
-        }
-      } else {
-        if (isEdit) {
-          child.add(getQuizChoices());
-          addEditOptions(child);
-        }
-      }
-    }
-
-    child.add(getPrivacyChoices());
-
-    addWarningField(child);
-
-    Scheduler.get().scheduleDeferred(() -> titleBox.box.setFocus(true));
-  }
-
-  private void checkEnter(KeyUpEvent event) {
-    if (event.getNativeEvent().getKeyCode() == KeyCodes.KEY_ENTER) {
-      gotEnter();
-    }
-  }
-
-  private void gotEnter() {
-    if (isOKToCreate()) {
-      dialogHelper.close();
-    }
-  }
-
-  private void addQuizOptions(Panel child) {
-    child.add(getQuizChoices());
-
-    DivWidget createQuizOptions = new DivWidget();
-    styleQuizOptions(createQuizOptions);
-    checkQuizOptionsVisible();
-    child.add(createQuizOptions);
-
-    createQuizOptions.add(getQuizChoices(true));
-  }
-
-  /**
    * @param child
    */
-  private void addEditOptions(Panel child) {
-    editQuizOptions = new DivWidget();
-    styleQuizOptions(editQuizOptions);
-    editQuizOptions.add(getQuizChoices(false));
-    child.add(editQuizOptions);
+  @Override
+  protected void addFieldsBelowDescription(Panel child) {
+//    FluidRow row = new FluidRow();
+//    child.add(row);
 
-    editQuizOptions.setVisible(isQuiz);
-  }
-
-
-  private void styleQuizOptions(DivWidget quizOptions) {
-    quizOptions.addStyleName("leftFiveMargin");
-    quizOptions.addStyleName("rightFiveMargin");
-    quizOptions.addStyleName("url-box");
-  }
-
-  private List<ListBox> allUnitChapter;
-
-  @NotNull
-  private Grid getQuizChoices(boolean isCreate) {
-    Grid grid = new Grid(isCreate ? 4 : 2, 4);
+    Grid grid = new Grid(2, 4);
 
 
     int col = 0;
     int row = 0;
 
-    if (isCreate) {
-      ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-      List<String> typeOrder = projectStartupInfo.getTypeOrder();
+    RowAndCol rowAndCol = new RowAndCol(grid, col, row).invoke();
 
-      if (typeOrder.size() > 2) typeOrder = typeOrder.subList(0, 2);
-      for (String type : typeOrder) {
-        grid.setWidget(row, col++, getLabel(type));
-      }
+    grid.addStyleName("leftFiveMargin");
 
-      row++;
-      col = 0;
-      List<ListBox> all = new ArrayList<>();
-      allUnitChapter = all;
-      boolean first = true;
-      for (String type : typeOrder) {
-        ListBox listBox = getListBox(100);
-        listBox.addChangeHandler(event -> gotChangeFor(type, listBox, all));
-        all.add(listBox);
-        grid.setWidget(row, col++, listBox);
-        listBox.addItem(ALL);
+    child.add(grid);
 
-        if (first) {
-          addSorted(projectStartupInfo, listBox);
-          first = false;
-        }
+    ListBox listBox = getListBox(200);
+    listBox.addStyleName("leftFiveMargin");
+    listBox.addItem("-- Choose type of dialog --");
+    listBox.addItem(DialogType.DIALOG.toString());
+    listBox.addItem(DialogType.INTERPRETER.toString());
+    //listBox.addChangeHandler(event -> gotChangeOn);
 
-      }
+    child.add(listBox);
 
-      grid.setWidget(row, col++, getContentChoices());
-
-      row++;
-      col = 0;
-
-      grid.setWidget(row, col++, getQuizSizeLabel());
-    }
-
-    grid.setWidget(row, col++, getDurationLabel());
-    grid.setWidget(row, col++, getLabel(MIN_SCORE1));
-    grid.setWidget(row, col++, getHearLabel());
-
-    row++;
-    col = 0;
-    if (isCreate) {
-      grid.setWidget(row, col++, getSizeChoices());
-    }
-    grid.setWidget(row, col++, getDurationChoices());
-    grid.setWidget(row, col++, getMinScoreChoices());
-    grid.setWidget(row, col++, getPlayAudioCheck());
-    return grid;
+    child.add(getPrivacyChoices());
+    moveFocusToTitleLater();
   }
 
-  /**
-   * @param projectStartupInfo
-   * @param listBox
-   * @see #getQuizChoices(boolean)
-   */
-  private void addSorted(ProjectStartupInfo projectStartupInfo, ListBox listBox) {
-    List<String> items = new ArrayList<>();
-    projectStartupInfo.getSectionNodes().forEach(sectionNode -> {
-      String name = sectionNode.getName();
-      if (name.isEmpty()) {
-        logger.warning("huh? section node name is empty for " + sectionNode);
-      } else {
-        items.add(name);
-      }
-    });
-    new ItemSorter().getSortedItems(items).forEach(listBox::addItem);
-  }
-
-  private void gotChangeFor(String type, ListBox listBox, List<ListBox> all) {
-    int i = all.indexOf(listBox);
-    int nextIndex = i + 1;
-    if (nextIndex < all.size()) {
-      ListBox nextBox = all.get(nextIndex);
-
-      String current = listBox.getSelectedValue();
-      Pair pair = new Pair(type, current);
-
-      ArrayList<Pair> pairs = new ArrayList<>();
-      pairs.add(pair);
-      controller.getExerciseService().getTypeToValues(new FilterRequest(0, pairs, -1),
-          new AsyncCallback<FilterResponse>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              if (caught instanceof DominoSessionException) {
-                logger.info("getTypeToValues : got " + caught);
-              }
-              controller.handleNonFatalError("no type to values", caught);
-            }
-
-            /**
-             * fixes downstream selections that no longer make sense.
-             * @param response
-             */
-            @Override
-            public void onSuccess(FilterResponse response) {
-              Map<String, Set<MatchInfo>> typeToValues = response.getTypeToValues();
-              // logger.info("got " + typeToValues);
-              List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
-              //   logger.info("got " + typeOrder );
-              String key = typeOrder.get(nextIndex);
-              // logger.info("key " + key );
-              Set<MatchInfo> matchInfos = typeToValues.get(key);
-              nextBox.clear();
-              nextBox.addItem(ALL);
-              if (matchInfos != null) {
-                matchInfos.forEach(matchInfo -> nextBox.addItem(matchInfo.getValue()));
-              }
-            }
-          });
-
-    }
-  }
-
-  @NotNull
-  private HTML getHearLabel() {
-    HTML label;
-    label = getLabel(HEAR_ITEMS);
-    label.addStyleName("leftTenMargin");
-    return label;
-  }
-
-  @NotNull
-  private CheckBox getPlayAudioCheck() {
-    CheckBox w = new CheckBox(PLAY_AUDIO);
-    w.addStyleName("leftFiveMargin");
-    w.addValueChangeHandler(event -> playAudio = w.getValue());
-    if (current != null) {
-      // logger.info("got " + current.getID() + " " + current.shouldShowAudio());
-      w.setValue(current.shouldShowAudio());
-    } else {
-      logger.info("getPlayAudioCheck no current list?");
-    }
-    return w;
-  }
-
-  private boolean isEditing() {
-    return current != null;
-  }
-
-  @NotNull
-  private HTML getDurationLabel() {
-    return getLabel(DURATION_MINUTES);
-  }
-
-  @NotNull
-  private HTML getLabel(String html) {
-    HTML w = new HTML(html);
-    w.addStyleName("leftFiveMargin");
-    w.setWidth("100px");
-    return w;
-  }
-
-  @NotNull
-  private HTML getQuizSizeLabel() {
-    return getEditableLabel(QUIZ_SIZE);
-  }
-
-  @NotNull
-  private HTML getEditableLabel(String quizSize) {
-    HTML quiz_size = getLabel(quizSize);
-    quiz_size.setVisible(current == null);
-    return quiz_size;
-  }
-
-  private ListBox getSizeChoices() {
-    ListBox w = getListBox();
-    for (int i = MIN_QUIZ_SIZE; i < MAX_QUIZ_SIZE; i += 10) {
-      w.addItem("" + i);
-    }
-    w.setSelectedValue("" + DEFAULT_QUIZ_SIZE);
-    w.addChangeHandler(event -> gotListSelection(w.getValue()));
-    w.setVisible(current == null);
-
-    return w;
-  }
-
-  private ListBox getDurationChoices() {
-    ListBox w = getListBox();
-
-    for (int i = MIN_DURATION; i < MAX_DURATION; i++) {
-      w.addItem("" + i);
-    }
-    w.setSelectedValue("" + (isEditing() ? (duration = current.getDuration()) : DEFAULT_DURATION));
-    w.addChangeHandler(event -> gotDurationSelection(w.getValue()));
-    return w;
-  }
-
-  private ListBox getMinScoreChoices() {
-    ListBox w = getListBox();
-    for (int i = MIN_SCORE; i < MAX_SCORE; i += 10) {
-      w.addItem("" + i);
-    }
-
-    w.setSelectedValue("" + (isEditing() ? (minScore = current.getMinScore()) : DEFAULT_MIN_SCORE));
-
-    w.addChangeHandler(event -> gotListSelection3(w.getValue()));
-    return w;
-  }
-
-  @NotNull
-  private ListBox getListBox() {
-    return getListBox(LIST_WIDTH);
-  }
-
-  @NotNull
-  private ListBox getListBox(int width) {
-    ListBox w = new ListBox();
-    w.setWidth(width + "px");
-    w.addStyleName("topFiveMargin");
-    return w;
-  }
-
-  private void checkQuizOptionsVisible() {
-    // createQuizOptions.setVisible(isQuiz && current == null);
-    if (editQuizOptions != null) {
-      editQuizOptions.setVisible(isQuiz && isEditing());
-    }
-  }
-
-
-  private void gotListSelection(String value) {
-    quizSize = Integer.parseInt(value);
-  }
-
-  private void gotDurationSelection(String value) {
-    duration = Integer.parseInt(value);
-  }
-
-  private void gotListSelection3(String value) {
-    minScore = Integer.parseInt(value);
-  }
-
-  private DivWidget editQuizOptions;
-
-  private void addWarningField(Panel child) {
-    FluidRow row;
-    row = new FluidRow();
+  @Override
+  protected void addDescription(Panel child) {
+    FluidRow row = new FluidRow();
     child.add(row);
-    modeDep = new Heading(4, PUBLIC_QUIZZES);
-    modeDep.setHeight(14 + "px");
-    modeDep.getElement().getStyle().setColor("blue");
-    modeDep.addStyleName("leftFiveMargin");
-    modeDep.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
-    modeDep.setVisible(false);
-    row.add(modeDep);
+    addEnTitle(row);
+    super.addDescription(child);
   }
 
+  private void addEnTitle(FluidRow row) {
+    entitleBox = addControlFormField(row, "", "");
+    //   entitleBox.getWidget().getElement().getStyle().setMarginTop(10, Style.Unit.PX);
 
-  @NotNull
-  private Widget getQuizChoices() {
-    FluidRow row = new FluidRow();
-
-    //   logger.info("getQuizChoices edit = " + isEdit);
-    CheckBox checkBox = new CheckBox(isEdit ? SHOW_AS_QUIZ : CREATE_A_NEW_QUIZ);
-    checkBox.addValueChangeHandler(event -> {
-      isQuiz = checkBox.getValue();
-      checkQuizOptionsVisible();
-    });
-    checkBox.setValue(isQuiz);
-
-    Panel hp = new HorizontalPanel();
-    checkBox.addStyleName("leftFiveMargin");
-    hp.add(checkBox);
-
-//    if (isEditing()) {
-//      boolean isQuiz = current.getListType() == UserList.LIST_TYPE.QUIZ;
-//      checkBox.setValue(isQuiz);
-//      this.isQuiz = isQuiz;
-//    }
-
-    row.add(addControlGroupEntry(row, isEdit ? IS_A_QUIZ : MAKE_A_QUIZ, hp, ""));
-    return row;
+    final TextBoxBase box = entitleBox.box;
+    entitleBox.setHint("English Title (optional)");
+    if (isEditing()) box.setText(getCurrent().getName());
+    box.getElement().setId("En_Title");
+    box.addKeyUpHandler(this::checkEnter);
+    box.addBlurHandler(event -> controller.logEvent(box, TEXT_BOX, CREATE_NEW_LIST, "English Title = " + box.getValue()));
   }
 
-  @NotNull
-  private Widget getPrivacyChoices() {
-    FluidRow row = new FluidRow();
-
-    publicChoice = new RadioButton(PUBLIC_PRIVATE_GROUP, PUBLIC);
-    publicChoice.addClickHandler(event -> gotClickOnPublic());
-
-    RadioButton radioButton2 = new RadioButton(PUBLIC_PRIVATE_GROUP, PRIVATE);
-    privateChoice = radioButton2;
-    privateChoice.addClickHandler(event -> gotClickOnPrivate());
-    // students by default have private lists - ?
-    {
-      boolean isPrivate = getDefaultPrivacy();
-
-      publicChoice.setValue(!isPrivate);
-      radioButton2.setValue(isPrivate);
-    }
-
-    Panel hp = new HorizontalPanel();
-    hp.add(publicChoice);
-    radioButton2.addStyleName("leftFiveMargin");
-    hp.add(radioButton2);
-
-    row.add(publicPrivateGroup = addControlGroupEntry(row, KEEP_LIST_PUBLIC_PRIVATE, hp, ""));
-    return row;
-  }
-
-  @NotNull
-  private Widget getContentChoices() {
-    FluidRow row = new FluidRow();
-
-    RadioButton vocabChoice = new RadioButton(CONTENT_GROUP, "Items");
-    // vocabChoice.addClickHandler(event -> gotClickOnPublic());
-
-    RadioButton radioButton2 = new RadioButton(CONTENT_GROUP, "Sentences");
-    sentenceChoice = radioButton2;
-
-    bothChoice = new RadioButton(CONTENT_GROUP, "Both");
-
-    //privateChoice.addClickHandler(event -> gotClickOnPrivate());
-    // students by default have private lists - ?
-    {
-      // boolean isPrivate = getDefaultPrivacy();
-
-      vocabChoice.setValue(true);
-      // radioButton2.setValue(isPrivate);
-    }
-
-    Panel hp = new VerticalPanel();
-    hp.addStyleName("inlineFlex");
-    hp.add(vocabChoice);
-    //radioButton2.addStyleName("leftFiveMargin");
-    hp.add(sentenceChoice);
-    hp.add(bothChoice);
-
-    ControlGroup contentChoiceGroup;
-    row.add(contentChoiceGroup = addControlGroupEntry(row, "Content Type", hp, ""));
-    contentChoiceGroup.getElement().getStyle().setMarginTop(-23, Style.Unit.PX);
-    return row;
-  }
-
-
-  private void gotClickOnPublic() {
-    modeDep.setVisible(isQuiz);
-  }
-
-  private void gotClickOnPrivate() {
-    modeDep.setVisible(false);
-  }
-
-  private boolean getDefaultPrivacy() {
-    boolean isPrivate = true;
-    if (isEditing()) isPrivate = current.isPrivate();
-    return isPrivate;
-  }
-
-  @NotNull
-  private Panel addEnterKeyBinding() {
-    enterKeyButtonHelper = new KeyPressHelper(true);
-    return new DivWidget() {
-      @Override
-      protected void onUnload() {
-        super.onUnload();
-        enterKeyButtonHelper.removeKeyHandler();
-      }
-    };
-  }
 
   /**
-   * @see ListView#doAdd
+   * TODO figure out image upload...
+   * TODO :add dialog type drop down
    */
-  private void doCreate() {
-    gotCreate(enterKeyButtonHelper, theDescription, classBox, publicChoice);
-  }
-
-  /**
-   * TODO: add time range widgets
-   *
-   * @param enterKeyButtonHelper
-   * @param area
-   * @param classBox
-   * @param publicRadio
-   */
-  private void gotCreate(KeyPressHelper enterKeyButtonHelper,
-                         TextArea area,
-                         FormField classBox,
-                         RadioButton publicRadio) {
+  @Override
+  protected void doCreate() {
     enterKeyButtonHelper.removeKeyHandler();
-    addUserList(titleBox, area, classBox, publicRadio.getValue(), getListType());
-  }
 
-  @NotNull
-  private UserList.LIST_TYPE getListType() {
-    boolean canMakeQuiz = canMakeQuiz();
-    return canMakeQuiz && isQuiz ? UserList.LIST_TYPE.QUIZ : UserList.LIST_TYPE.NORMAL;
-  }
-
-  private boolean canMakeQuiz() {
-    if (isEditing() && current.isFavorite()) {
-      return false;
-    } else {
-      Collection<Permission> permissions = controller.getPermissions();
-      return permissions.contains(Permission.TEACHER_PERM) || permissions.contains(Permission.PROJECT_ADMIN);
-    }
-  }
-
-  /**
-   * @param names
-   * @return
-   * @see ListView#doAdd
-   */
-  private boolean isOKToCreate(Set<String> names) {
-    boolean ret = true;
-
-    if (!isValidName()) {
-      ret = false;
-    } else if (names.contains(titleBox.getSafeText())) {
-      markError(titleBox, NAME_ALREADY_USED);
-      ret = false;
-    } else if ((!publicChoice.getValue() && !privateChoice.getValue())) {
-      markErrorBlur(publicPrivateGroup,
-          publicChoice,
-          "",
-          PLEASE_MARK_EITHER_PUBLIC_OR_PRIVATE,
-          Placement.TOP, true);
-      ret = false;
-    }
-    return ret;
-  }
-
-  /**
-   * @return
-   * @see #isOKToCreate
-   */
-  public boolean isValidName() {
-    return validateCreateList(titleBox);
-  }
-
-  /**
-   * @param titleBox
-   * @param area
-   * @param classBox
-   * @param isPublic
-   * @param listType
-   * @paramx duration
-   * @see #gotCreate
-   */
-  private void addUserList(final FormField titleBox, TextArea area, FormField classBox, boolean isPublic,
-                           UserList.LIST_TYPE listType) {
-    final String safeText = titleBox.getSafeText();
-    //  logger.info("addUserList " + safeText);
-    Map<String, String> unitToChapter = new LinkedHashMap<>();
     List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
 
+    Map<String, String> unitAndChapterSelections = getUnitAndChapterSelections();
 
-    if (allUnitChapter != null) {
-      allUnitChapter.forEach(listBox -> unitToChapter.put(typeOrder.get(unitToChapter.size()), listBox.getSelectedValue()));
-      // logger.info("addUserList " + unitToChapter);
-    }
+    String unit = typeOrder.size() > 0 ? unitAndChapterSelections.get(typeOrder.get(0)) : "";
+    String chapter = typeOrder.size() > 1 ? unitAndChapterSelections.get(typeOrder.get(1)) : "";
 
-    QuizSpec quizSpec = new QuizSpec(duration, minScore, playAudio, true, "");
-    if (sentenceChoice != null && sentenceChoice.getValue()) quizSpec.setExercisetypes(QuizSpec.EXERCISETYPES.SENTENCES);
-    else if (bothChoice != null && bothChoice.getValue()) quizSpec.setExercisetypes(QuizSpec.EXERCISETYPES.BOTH);
+    int imageID = -1;
 
-    controller.getListService().addUserList(
-        safeText,
-        sanitize(area.getText()),
-        classBox.getSafeText(),
-        isPublic,
-        listType,
-        quizSize,
-        quizSpec,
-        unitToChapter,
-        new AsyncCallback<UserList>() {
+    String imageRef = "";
+
+    DialogType dialogType = DialogType.DIALOG;
+
+    IDialog newDialog = new Dialog(-1,
+        controller.getUser(),
+        controller.getProjectID(),
+        imageID,
+        -1,
+        System.currentTimeMillis(),
+
+        unit,
+        chapter,
+        sanitize(theDescription.getText()),
+        imageRef,
+        titleBox.getSafeText(),
+        "",
+        new ArrayList<>(),
+        new ArrayList<>(),
+        new ArrayList<>(),
+        dialogType,
+        "",
+        publicChoice.getValue()
+    );
+
+    controller.getDialogService().addDialog(newDialog,
+        new AsyncCallback<IDialog>() {
           @Override
           public void onFailure(Throwable caught) {
-            controller.handleNonFatalError("making a new list", caught);
+            controller.handleNonFatalError("making a new dialog", caught);
           }
 
           @Override
-          public void onSuccess(UserList result) {
-            if (result == null) {
-              markError(titleBox, "You already have a list named " + safeText);
-            } else {
-              //   logger.info("addUserList onSuccess " + result);
-              listView.madeIt(result);
-            }
+          public void onSuccess(IDialog result) {
+            logger.info("Got " + result);
           }
         });
   }
 
-  private void zeroPadding(Panel createContent) {
-    createContent.getElement().getStyle().setPaddingLeft(0, Style.Unit.PX);
-    createContent.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
+  @Override
+  protected void setDescription(T current) {
+    if (isEditing()) theDescription.setText(getCurrent().getOrientation());
   }
 
-  /**
-   * @param titleBox
-   * @return
-   */
-  private boolean validateCreateList(FormField titleBox) {
-    if (titleBox.getSafeText().isEmpty()) {
-      markError(titleBox, PLEASE_FILL_IN_A_TITLE);
-      return false;
-    } else {
-      return true;
-    }
+
+//  @Override
+//  protected void setDescription(T current) {
+//    current.getMutable().setOrientation(theDescription.getText());
+//  }
+
+  @NotNull
+  @Override
+  protected String getDescriptionOptional() {
+    return "Orientation";
   }
 
-  private String sanitize(String text) {
-    return SimpleHtmlSanitizer.sanitizeHtml(text).asString();
+  @Override
+  protected void gotClickOnPublic() {
+    getCurrent().getMutable().setIsPrivate(false);
   }
 
-  /**
-   * @param currentSelection
-   * @param container
-   * @see ListView#doEdit
-   * @see ListView#gotEdit
-   */
-  public void doEdit(UserList<CommonShell> currentSelection, ListContainer container) {
-    currentSelection.setName(titleBox.getSafeText());
-    currentSelection.setDescription(sanitize(theDescription.getText()));
-    currentSelection.setClassMarker(sanitize(classBox.getSafeText()));
-    {
-      boolean aPrivate = !publicChoice.getValue();
-      currentSelection.setPrivate(aPrivate);
-    }
-    UserList.LIST_TYPE listType = getListType();
-    currentSelection.setListType(listType);
-    currentSelection.setDuration(duration);
-    currentSelection.setMinScore(minScore);
-    currentSelection.setShowAudio(playAudio);
-
-    controller.getListService().update(currentSelection, new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("changing a list", caught);
-      }
-
-      @Override
-      public void onSuccess(Void result) {
-        container.redraw();
-      }
-    });
+  @Override
+  protected void gotClickOnPrivate() {
+    getCurrent().getMutable().setIsPrivate(true);
   }
 
-  private DialogHelper dialogHelper;
+  @Override
+  public void doEdit(T currentSelection, ButtonMemoryItemContainer<T> container) {
 
-  public void setDialogHelper(DialogHelper dialogHelper) {
-    this.dialogHelper = dialogHelper;
   }
 }

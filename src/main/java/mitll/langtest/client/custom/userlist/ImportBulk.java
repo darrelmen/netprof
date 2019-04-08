@@ -34,6 +34,7 @@ import com.github.gwtbootstrap.client.ui.TextArea;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.custom.UserList;
@@ -55,7 +56,7 @@ public class ImportBulk {
   private static final int CHARACTER_WIDTH = 150;
   private TextArea textArea;
 
-  DivWidget showImportItem(String language) {
+  public DivWidget showImportItem(String language) {
     DivWidget inner = new DivWidget();
     DivWidget upper = new DivWidget();
     String width = IMPORT_WIDTH + "px";
@@ -81,7 +82,7 @@ public class ImportBulk {
     return inner;
   }
 
-  void doBulk(ExerciseController controller, UserList<CommonShell> ulid, ListContainer myLists) {
+  void doBulk(ExerciseController controller, UserList<CommonShell> ulid, ButtonMemoryItemContainer myLists) {
     controller.getListService().reallyCreateNewItems(ulid.getID(), sanitize(textArea.getText()),
         new AsyncCallback<List<CommonShell>>() {
           @Override
@@ -129,7 +130,7 @@ public class ImportBulk {
 
           @Override
           public void onSuccess(Void aVoid) {
-         //   logger.info("updated " + exids.size() + " items on netprof");
+            //   logger.info("updated " + exids.size() + " items on netprof");
           }
         });
   }

@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
  * @see mitll.langtest.server.database.dialog.DialogDAO#getDialogs
  * @see mitll.langtest.server.database.dialog.DialogReader#addDialogPair
  */
-public class Dialog implements IDialog, MutableShell {
+public class Dialog implements IDialog, MutableShell, IMutableDialog {
   private final transient Logger logger = Logger.getLogger("Dialog");
 
   private static final String SPEAKER = "Speaker".toLowerCase();
@@ -118,7 +118,8 @@ public class Dialog implements IDialog, MutableShell {
                 List<ClientExercise> exercises,
                 List<ClientExercise> coreExercises,
                 DialogType type,
-                String countryCode, boolean isPrivate) {
+                String countryCode,
+                boolean isPrivate) {
     this.id = id;
     this.userid = userid;
     this.projid = projid;
@@ -416,6 +417,30 @@ public class Dialog implements IDialog, MutableShell {
   @Override
   public boolean isPrivate() {
     return isPrivate;
+  }
+
+  @Override
+  public void setIsPrivate(boolean val) {
+    this.isPrivate = val;
+  }
+
+  public IMutableDialog getMutable() {
+    return this;
+  }
+
+  @Override
+  public void setOrientation(String orientation) {
+    this.orientation = orientation;
+  }
+
+  @Override
+  public int getImageID() {
+    return imageid;
+  }
+
+  @Override
+  public void setID(int id) {
+    this.id = id;
   }
 
   public String toString() {

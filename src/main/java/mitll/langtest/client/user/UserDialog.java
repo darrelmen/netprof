@@ -225,7 +225,7 @@ public class UserDialog extends BasicDialog {
     commentPopup.add(vp);
   }
 
-  protected Panel getTwoPartForm(Heading heading, Fieldset fieldset) {
+  Panel getTwoPartForm(Heading heading, Fieldset fieldset) {
     Form form = getUserForm();
     form.add(heading);
     form.add(fieldset);

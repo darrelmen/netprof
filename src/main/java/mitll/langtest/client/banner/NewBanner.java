@@ -49,14 +49,12 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.ActiveUser;
-import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
@@ -243,6 +241,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     return recnav;
   }
 
+  private NavLink dialogEditor;
+
   /**
    * @return
    */
@@ -257,7 +257,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     rememberViewAndLink(nav, RECORD_ENTRIES);
     rememberViewAndLink(nav, RECORD_SENTENCES);
     rememberViewAndLink(nav, OOV_EDITOR);
-    rememberViewAndLink(nav, DIALOG_EDITOR);
+    dialogEditor = rememberViewAndLink(nav, DIALOG_EDITOR);
 
     recnav.add(nav);
     return recnav;
@@ -293,8 +293,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     return rnav;
   }
 
-  private void rememberViewAndLink(ComplexWidget recnav, VIEWS record) {
-    viewToLink.put(record, getChoice(recnav, record));
+  private NavLink rememberViewAndLink(ComplexWidget recnav, VIEWS record) {
+    NavLink choice = getChoice(recnav, record);
+    viewToLink.put(record, choice);
+    return choice;
   }
 
   @NotNull
@@ -562,11 +564,18 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     boolean isDialog = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == DIALOG;
     boolean visible = hasProjectChoice() && isDialog;
     setDialogNavVisible(visible);
-    //   logger.info("reflectPermissions : " + permissions);
+
+    logger.info("reflectPermissions : " + permissions);
   }
 
   private void setDialogNavVisible(boolean visible) {
-    dialognav.setVisible(visible && controller.getMode() == ProjectMode.DIALOG);
+    boolean isDialogMode = controller.getMode() == ProjectMode.DIALOG;
+    dialognav.setVisible(visible && isDialogMode);
+
+    if (dialogEditor != null) {
+      dialogEditor.setVisible(isDialogMode);
+    }
+    else logger.warning("no dialog editor choice yet");
   }
 
   @Override
@@ -725,6 +734,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       logger.info("setVisibleChoicesByMode dialognav " + dialognav.getElement().getId() + " is " + isDialogMode);
 
     setDialogNavVisible(isDialogMode);
+
+    if (dialogEditor != null) {
+      dialogEditor.setVisible(isDialogMode);
+    }
   }
 
   private void hideOrShowByMode(List<VIEWS> standardViews) {
