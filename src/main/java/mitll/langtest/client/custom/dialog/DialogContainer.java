@@ -39,6 +39,10 @@ import mitll.langtest.shared.dialog.IDialog;
 
 import java.util.List;
 
+/**
+ * TODO : add public/private column, and to dialog itself!
+ * @param <T>
+ */
 public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContainer<T> {
   DialogContainer(ExerciseController<?> controller) {
     super(controller, "netprof" + ":" + controller.getUser() + ":" + "dialogs", "Dialogs",
