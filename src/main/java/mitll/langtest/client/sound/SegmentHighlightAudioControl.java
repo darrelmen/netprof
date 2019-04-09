@@ -83,6 +83,8 @@ public class SegmentHighlightAudioControl implements AudioControl {
 
   @Override
   public void update(double position) {
+
+    logger.info("update " + position);
     wordSegments.update(position);
     if (phoneSegments != null) {
       phoneSegments.update(position);

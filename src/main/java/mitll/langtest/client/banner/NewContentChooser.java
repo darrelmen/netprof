@@ -66,7 +66,6 @@ import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
 import static mitll.langtest.shared.project.ProjectMode.VOCABULARY;
-import static mitll.langtest.shared.project.ProjectType.NP;
 
 /**
  * Created by go22670 on 4/10/17.
@@ -100,7 +99,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PUSH_ITEM = false;
-  private static final boolean DEBUG_VIEW = false;
+  private static final boolean DEBUG_VIEW = true;
 
   /**
    * @param controller
@@ -165,6 +164,15 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       currentStoredView = VIEWS.NONE;
     }
 
+//    ProjectType projectType = hasStartup ? controller.getProjectStartupInfo().getProjectType() : ProjectType.NP;
+
+    ProjectMode storedMode = VOCABULARY;
+    if (hasStartup) {
+      String value = getStorage().getValue(MODE);
+      storedMode = ProjectMode.valueOf(value);
+      ProjectMode viewMode = currentStoredView.getMode();
+      logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
+    }
     {
       Set<Permission> userPerms = new HashSet<>(controller.getPermissions());
 
@@ -173,18 +181,18 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       userPerms.retainAll(requiredPerms);
 
       if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
-        logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
-        currentStoredView = hasStartup && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
+        logger.info("getCurrentView : user userPerms " + userPerms + " falling back to default view for (" + storedMode + ")");
+        currentStoredView = hasStartup && storedMode == ProjectMode.DIALOG ? DIALOG : LEARN;
       } else /*if (!userPerms.isEmpty())*/ {
         if (hasStartup) {
-          String value = getStorage().getValue(MODE);
-         // logger.info("selected mode is " + value);
+          //String value = getStorage().getValue(MODE);
+          // logger.info("selected mode is " + value);
 
           try {
-            ProjectMode storedMode = ProjectMode.valueOf(value);
+            //ProjectMode storedMode = ProjectMode.valueOf(value);
 
             ProjectMode viewMode = currentStoredView.getMode();
-           // logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
+            // logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
 
             if (viewMode == ProjectMode.DIALOG && storedMode == ProjectMode.VOCABULARY) {
               // currentStoredView = LEARN;
@@ -193,7 +201,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
               //currentStoredView = DIALOG;
               logger.warning("force dialog view?");
             } else {
-           //   logger.info("OK - no inconsistency...");
+              //   logger.info("OK - no inconsistency...");
             }
 
           } catch (IllegalArgumentException e) {
@@ -207,7 +215,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
 
     if (currentStoredView == NONE) {
-      currentStoredView = hasStartup && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
+      currentStoredView = hasStartup && storedMode == ProjectMode.DIALOG ? DIALOG : LEARN;
     }
 
     return currentStoredView;
@@ -416,16 +424,25 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
   }
 
+  /**
+   * @param views
+   * @see #showView(VIEWS, boolean, boolean)
+   * @see #clearPushAndShow(ContentView, VIEWS)
+   */
   private void clearAndPushKeep(VIEWS views) {
     clear();
 
     SelectionState selectionState = new SelectionState();
     if (selectionState.getView() != views) {
       //   logger.info("setInstanceHistory clearing history for instance " + views);
-      int dialog = selectionState.getDialog();
-      pushItem(getInstanceParam(views) + maybeAddDialogParam(dialog));
+      // int dialog = selectionState.getDialog();
+      pushItem(getInstanceParam(views) + maybeAddDialogParam(selectionState.getDialog()));
     } else {
       logger.info("setInstanceHistory NOT clearing history for instance " + views);
+
+
+      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("views " + views));
+      logger.info("logException stack " + exceptionAsString);
     }
   }
 
@@ -458,9 +475,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   @NotNull
   private String getTypeToSelection() {
-    Map<String, Collection<String>> typeToSection = getURLTypeToSelection();
+    // Map<String, Collection<String>> typeToSection = getURLTypeToSelection();
     //   logger.info("setInstanceHistory clearing history for instance " + views);
-    return getURLParams(typeToSection);
+    return getURLParams(getURLTypeToSelection());
   }
 
   private Map<String, Collection<String>> getURLTypeToSelection() {
@@ -534,9 +551,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
   }
 
-//  private MODE_CHOICE candidateMode = MODE_CHOICE.NOT_YET;
-//  private MODE_CHOICE mode = MODE_CHOICE.NOT_YET;
-
   private void pushFirstUnit() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
@@ -560,7 +574,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   /**
    * Only for polyglot...
    */
-  private void pushSecondUnit() {
+/*  private void pushSecondUnit() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
     if (projectStartupInfo != null) {
@@ -577,7 +591,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         }
       }
     }
-  }
+  }*/
 
   /**
    * So an view specified in the url trumps a stored one in storage, but if there's none in storage, use it.

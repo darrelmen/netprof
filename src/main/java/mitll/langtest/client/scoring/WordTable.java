@@ -589,20 +589,20 @@ public class WordTable {
       String phoneLabel = getPhoneEvent(phoneSegment);
       if (!shouldSkipPhone(phoneLabel)) {
         boolean hasNext = iterator.hasNext();
-        String phoneLabel1 = phoneLabel;
-        String displayEvent = phoneSegment.getDisplayEvent();
-        if (!phoneLabel1.equals(displayEvent)) {
-          phoneLabel1 = displayEvent;
-        }
+        String phoneLabel1 = getPhoneLabel(phoneSegment, phoneLabel);
         SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel1 + (hasNext ? NBSP : ""), BLUE);
         //  logger.info("\taddPhonesBelowWord2 word " + wordSegment + " phone " + phoneLabel + " : " + h.getContent());
 //        if (phoneSegment.isIn(wordSegment)) {
-        HTML clickable = h.getClickable();
+        {
+          HTML clickable = h.getClickable();
 
-        addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, clickable);
+          addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, clickable);
 
-        clickable.addMouseOverHandler(event -> wordHighlight.asWidget().addStyleName("underline"));
-        clickable.addMouseOutHandler(event -> wordHighlight.asWidget().removeStyleName("underline"));
+          if (wordHighlight != null) {
+            clickable.addMouseOverHandler(event -> wordHighlight.asWidget().addStyleName("underline"));
+            clickable.addMouseOutHandler(event -> wordHighlight.asWidget().removeStyleName("underline"));
+          }
+        }
 
         //      }
 //        IHighlightSegment put = phoneMap.put(phoneSegment, h);
@@ -627,6 +627,15 @@ public class WordTable {
     }
   }
 
+  private String getPhoneLabel(TranscriptSegment phoneSegment, String phoneLabel) {
+    String phoneLabel1 = phoneLabel;
+    String displayEvent = phoneSegment.getDisplayEvent();
+    if (!phoneLabel1.equals(displayEvent)) {
+      phoneLabel1 = displayEvent;
+    }
+    return phoneLabel1;
+  }
+
   /**
    * When clicked, tell audioControl to play segment
    *
@@ -638,7 +647,7 @@ public class WordTable {
    */
   private void addClickHandler(AudioControl audioControl, TranscriptSegment segmentToPlay, Label header) {
     if (audioControl != null) {
-      if (false) logger.info("addClickHandler add handler for " + segmentToPlay + " when click on " + header.getText());
+    //  if (false) logger.info("addClickHandler add handler for " + segmentToPlay + " when click on " + header.getText());
       header.addClickHandler(event -> {
 
       //  logger.info("addClickHandler click on " + segmentToPlay + " header " + header.getText());

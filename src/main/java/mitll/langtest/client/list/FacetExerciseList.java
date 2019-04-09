@@ -900,7 +900,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   @NotNull
   private Anchor getShowMoreAnchor(final Map<String, Set<MatchInfo>> typeToValues, final String type, int remaining) {
     Anchor anchor = new Anchor();
-    String showMore = "<i>View all " + type + "s (" + remaining + ")</i>";
+    String whatItIs = type.endsWith("s") ? type : type + "s";
+    String showMore = "<i>View all " + whatItIs + " (" + remaining + ")</i>";
     anchor.setHTML(showMore);
     anchor.addClickHandler(event -> {
       typeToShowAll.put(type, true);
