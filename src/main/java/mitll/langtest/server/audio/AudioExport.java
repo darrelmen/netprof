@@ -51,6 +51,7 @@ import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.user.MiniUser;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -313,7 +314,8 @@ public class AudioExport {
                                    OutputStream out,
                                    AudioExportOptions options,
                                    boolean isEnglish,
-                                   MiniUser user, boolean isCallerAdmin) throws Exception {
+                                   MiniUser user,
+                                   boolean isCallerAdmin) throws Exception {
     ZipOutputStream zOut = new ZipOutputStream(out);
 
     String baseName = baseName(language1, name).replaceAll(",", "_");
@@ -796,6 +798,7 @@ public class AudioExport {
     String trim = english.trim();
 
     String name = trim.equals("N/A") ? foreignLanguage1 : trim + (includeFL ? "_" + foreignLanguage1 : "");
+    name = StringUtils.stripAccents(name);
     name = name.trim();
     name = name
         .replaceAll("\"", "\\'")
@@ -832,7 +835,8 @@ public class AudioExport {
                                int exid,
                                int resultID,
                                String filePath,
-                               boolean isMP3, boolean isMale) throws IOException {
+                               boolean isMP3,
+                               boolean isMale) throws IOException {
     File mp3 = new File(filePath);
     if (mp3.exists()) {
 //      logger.debug("copyAudioAtPath found mp3 " + mp3.getAbsolutePath());

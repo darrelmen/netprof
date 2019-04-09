@@ -251,43 +251,21 @@ public class User extends MiniUser implements ReportUser {
     return startupInfo;
   }
 
-
-  public String getFirst() {
-    return first;
-  }
-
-  public void setFirst(String first) {
-    this.first = first;
-  }
-
-  public String getLast() {
-    return last;
-  }
-
-  public void setLast(String last) {
-    this.last = last;
-  }
-
-  public String getFullName() {
-    return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? getName() : getUserID();
-  }
-
-  @Nullable
-  public String getFirstInitialName() {
-    String f = first == null ? "" :
-        (first.length() > 0 ?
-            first.substring(0, 1) + ". " : "");
-    String l = last == null ? "" : last;
-    String both = f + l;
-    // logger.info("getFirstInitialName Got " +userid + " " + firstLastUser + " : " + s);
-
-    if (both.isEmpty() || both.equalsIgnoreCase("F. Last")) {
-      both = getUserID();
-    }
-    // logger.info("now Got " +userid + " " + firstLastUser + " : " + s);
-
-    return both;
-  }
+//  public String getFirst() {
+//    return first;
+//  }
+//
+//  public void setFirst(String first) {
+//    this.first = first;
+//  }
+//
+//  public String getLast() {
+//    return last;
+//  }
+//
+//  public void setLast(String last) {
+//    this.last = last;
+//  }
 
   public Collection<Permission> getPermissions() {
     return permissions;

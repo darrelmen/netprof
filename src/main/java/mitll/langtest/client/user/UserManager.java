@@ -293,23 +293,24 @@ public class UserManager {
   private void gotNewUser(User result) {
     if (DEBUG) logger.info("UserManager.gotNewUser " + result);
     if (result != null) {
-      String first = result.getFirst();
-      String last = result.getLast();
-
-      boolean fvalid = !first.isEmpty() && !first.equalsIgnoreCase("First");
-      boolean lvalid = !last.isEmpty() && !last.equalsIgnoreCase("Last");
-
-      abbreviation = fvalid && lvalid ?
-          first.substring(0, 1).toUpperCase() + last.substring(0, 1).toUpperCase() :
-          getUserID();
-
+      setAbbreviation(result);
       this.current = result;
 //      logger.info("gotNewUser ab " + abbreviation +
 //          " current user " + current);
-
       userNotification.gotUser(result);
-
     }
+  }
+
+  private void setAbbreviation(User result) {
+    String first = result.getFirst();
+    String last = result.getLast();
+
+    boolean fvalid = !first.isEmpty() && !first.equalsIgnoreCase("First");
+    boolean lvalid = !last.isEmpty() && !last.equalsIgnoreCase("Last");
+
+    abbreviation = fvalid && lvalid ?
+        first.substring(0, 1).toUpperCase() + last.substring(0, 1).toUpperCase() :
+        getUserID();
   }
 
   private String abbreviation;
@@ -338,13 +339,4 @@ public class UserManager {
   public Collection<Permission> getPermissions() {
     return current.getPermissions();
   }
-
-  /**
-   * Only one perm = polyglot
-   *
-   * @return
-   */
-//  public boolean isPolyglot() {
-//    return getCurrent() != null && getPermissions().size() == 1 && getPermissions().iterator().next() == Permission.POLYGLOT;
-//  }
 }

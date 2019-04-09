@@ -31,6 +31,7 @@ package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.server.database.user.UserDAO;
+import org.jetbrains.annotations.Nullable;
 
 public class MiniUser extends FirstLastUser {
   private int age;
@@ -131,6 +132,27 @@ public class MiniUser extends FirstLastUser {
    */
   public void setTimestampMillis(long startTime) {
     setLastChecked(startTime);
+  }
+
+  public String getFullName() {
+    return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? getName() : getUserID();
+  }
+
+  @Nullable
+  public String getFirstInitialName() {
+    String f = first == null ? "" :
+        (first.length() > 0 ?
+            first.substring(0, 1) + ". " : "");
+    String l = last == null ? "" : last;
+    String both = f + l;
+    // logger.info("getFirstInitialName Got " +userid + " " + firstLastUser + " : " + s);
+
+    if (both.isEmpty() || both.equalsIgnoreCase("F. Last")) {
+      both = getUserID();
+    }
+    // logger.info("now Got " +userid + " " + firstLastUser + " : " + s);
+
+    return both;
   }
 
   public boolean isAdmin() {

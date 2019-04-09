@@ -208,6 +208,7 @@ public class UserMenu {
   /**
    * Add events and recordings choices.
    *
+   * @see NewBanner#getRightSideChoices
    * @return
    */
   List<LinkAndTitle> getProjectSpecificChoices() {
@@ -318,7 +319,7 @@ public class UserMenu {
    * @see NewBanner#setCogTitle
    */
   void setPendingTitle(int size) {
-    logger.info("setPendingTitle " + size);
+   // logger.info("setPendingTitle " + size);
     pendingTeachers.setTitle(PENDING_TEACHER_REQUESTS + ((size == 0) ? "" : " (" + size + ")"));
   }
 

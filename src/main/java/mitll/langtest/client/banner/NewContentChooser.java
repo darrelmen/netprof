@@ -99,7 +99,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PUSH_ITEM = false;
-  private static final boolean DEBUG_VIEW = true;
+  private static final boolean DEBUG_VIEW = false;
 
   /**
    * @param controller
@@ -154,7 +154,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     String currentView = getCurrentStoredView();
     boolean hasStartup = controller.getProjectStartupInfo() != null;
     if (DEBUG_VIEW) {
-      logger.info("getCurrentView currentView " + currentView + " has startup " + hasStartup);
+      logger.info("getCurrentView currentView '" + currentView + "' has startup " + hasStartup);
     }
     VIEWS currentStoredView;
     try {
@@ -169,9 +169,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     ProjectMode storedMode = VOCABULARY;
     if (hasStartup) {
       String value = getStorage().getValue(MODE);
-      storedMode = ProjectMode.valueOf(value);
-      ProjectMode viewMode = currentStoredView.getMode();
-      logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
+      if (value != null && !value.isEmpty()) {
+        storedMode = ProjectMode.valueOf(value);
+        //ProjectMode viewMode = currentStoredView.getMode();
+      //  logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
+      }
     }
     {
       Set<Permission> userPerms = new HashSet<>(controller.getPermissions());

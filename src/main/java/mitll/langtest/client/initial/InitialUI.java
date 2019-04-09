@@ -86,9 +86,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
   private static final boolean DEBUG = false;
 
-
   private static final boolean DO_HEARTBEAT = true;
-
 
   private static final int TOP_OF_ROOT = 52;//58;//48;//58;
 
@@ -534,7 +532,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       logger.warning("showNavigation : first row has " + childCount + " child(ren) - not adding tab panel???");
     }
   }
-
 
   @Override
   public void resetLanguageSelection(int levelToRemove, SlimProject project) {

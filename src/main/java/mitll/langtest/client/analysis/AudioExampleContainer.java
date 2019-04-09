@@ -71,6 +71,7 @@ import java.util.logging.Logger;
 public abstract class AudioExampleContainer<T extends WordScore> extends SimplePagingContainer<T>
     implements PlayListener {
   private final Logger logger = Logger.getLogger("AudioExampleContainer");
+  public static final int REF_AUDIO_WIDTH = 85;
 
   private static final String REFERENCE = "Reference";
   /**
@@ -217,7 +218,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     }
 
     {
-      Button play = getPlayButton(80, false);
+      Button play = getPlayButton(REF_AUDIO_WIDTH, false);
       wrapper.add(play);
       this.refAudio = play;
     }
