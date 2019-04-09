@@ -416,6 +416,9 @@ public class ProjectManagement implements IProjectManagement {
       if (projectDAO.maybeSetDominoIDs(project)) {
         logger.info("configureProject : updated domino ids on " + project);
       }
+      // remember to put the audio back on the exercises after a reload or else json export will
+      // filter them out since they have no audio!
+      db.getAudioDAO().attachAudioToExercises(project.getRawExercises(), project.getLanguageEnum(), projectID);
     }
 
     if (project.getExerciseDAO() == null) {

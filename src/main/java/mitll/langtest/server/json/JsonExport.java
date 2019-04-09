@@ -76,7 +76,7 @@ public class JsonExport {
   private AudioFileHelper audioFileHelper;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_JSON = true;
+  private static final boolean DEBUG_JSON = false;
 
   /**
    * @param sectionHelper
@@ -107,10 +107,10 @@ public class JsonExport {
 
     List<String> minimalTypeOrder = getMinimalTypeOrder();
 
-    logger.info("getContentAsJson " + (justContext? " just context":"vocab"));
+    logger.info("getContentAsJson " + (justContext ? " just context" : "vocab"));
 
     for (SectionNode node : sectionHelper.getSectionNodesForTypes()) {
-    //  logger.info("getContentAsJson " + node.easy());
+      //  logger.info("getContentAsJson " + node.easy());
       addToJsonArrayForChildren(typeToValues, removeExercisesWithMissingAudio, justContext, minimalTypeOrder, jsonArray, node);
     }
     return jsonArray;
@@ -184,7 +184,13 @@ public class JsonExport {
 
         if (jsonForSelection.size() == 0) {
           if (DEBUG_JSON) {
-            logger.info("getJsonForNode no leaf content for " + type + " = " + name);
+            logger.info("getJsonForNode no leaf content for " + type + " = " + name +
+                "\n\ttypeToValues " + typeToValues +
+                "\n\tremoveExercisesWithMissingAudio " + removeExercisesWithMissingAudio +
+                "\n\tremoveCantDecode " +
+                "\n\tjustContext  " + justContext +
+                "\n\tfirstTypes   " + firstTypes
+            );
           }
 
           jsonForNode = null;
@@ -236,7 +242,10 @@ public class JsonExport {
       jsonArray.add(jsonForNode1);
     } else {
       if (DEBUG_JSON) {
-        logger.info("addToJsonArrayForChildren : no content (remove = " + removeExercisesWithMissingAudio + ") for " + type1 + " = " + name1);
+        logger.info("addToJsonArrayForChildren : no content (remove = " + removeExercisesWithMissingAudio + ") for " + type1 + " = " + name1 +
+            "\n\tfirstTypes   " + firstTypes +
+            "\n\ttypeToValues " + typeToValues
+        );
       }
     }
   }
@@ -257,7 +266,7 @@ public class JsonExport {
       Collection<String> firstTypes) {
     List<CommonExercise> filteredExercises = getFilteredExercises(typeToValues, removeExercisesWithMissingAudio, removeCantDecode, justContext);
 
-    if (DEBUG) {
+    if (DEBUG_JSON) {
       if (filteredExercises.isEmpty()) {
         logger.warn("getJsonForSelection no content for " + typeToValues);
       }
@@ -286,11 +295,11 @@ public class JsonExport {
 
     if (justContext) {
       List<CommonExercise> context = new ArrayList<>();
-      if (DEBUG) logger.info("getFilteredExercises for " + typeToValues + " found " + exercisesForState.size());
+      if (DEBUG_JSON && false) logger.info("getFilteredExercises for " + typeToValues + " found " + exercisesForState.size());
       exercisesForState.forEach(ex -> {
         ex.getDirectlyRelated().forEach(c -> context.add(c.asCommon()));
       });
-      if (DEBUG) logger.info("getFilteredExercises for " + typeToValues + " context " + context.size());
+      if (DEBUG_JSON && false) logger.info("getFilteredExercises for " + typeToValues + " context " + context.size());
 
       exercisesForState = context;
     } else {
@@ -299,7 +308,7 @@ public class JsonExport {
 
     List<CommonExercise> filteredExercises = getFilteredExercises(removeExercisesWithMissingAudio, removeCantDecode, exercisesForState);
 
-    if (DEBUG) {
+    if (DEBUG_JSON) {
       if (!exercisesForState.isEmpty() && filteredExercises.isEmpty()) {
         logger.warn("getFilteredExercises for " + typeToValues + " removed all " + exercisesForState.size());
       } else {
@@ -337,6 +346,9 @@ public class JsonExport {
   }
 
   private void removeMissingAudio(boolean removeExercisesWithMissingAudio, List<CommonExercise> copy) {
+
+
+    int before = copy.size();
     if (removeExercisesWithMissingAudio) {
       Iterator<CommonExercise> iterator = copy.iterator();
       for (; iterator.hasNext(); ) {
@@ -347,9 +359,17 @@ public class JsonExport {
         }
       }
     }
+
+    if (DEBUG_JSON) {
+      int after = copy.size();
+      if (after != before) {
+        logger.warn("removeMissingAudio before " + before + " after " + after);
+      }
+    }
   }
 
   private void removeCantDecode(boolean removeCantDecode, List<CommonExercise> copy) {
+    int before = copy.size();
     if (removeCantDecode) {
 //      logger.info("getJsonForSelection before had " + exercisesForState.size());
       Iterator<CommonExercise> iterator = copy.iterator();
@@ -365,6 +385,12 @@ public class JsonExport {
         }
       }
       //    logger.info("getJsonForSelection after  had " + exercisesForState.size());
+    }
+    if (DEBUG_JSON) {
+      int after = copy.size();
+      if (after != before) {
+        logger.warn("removeMissingAudio before " + before + " after " + after);
+      }
     }
   }
 
