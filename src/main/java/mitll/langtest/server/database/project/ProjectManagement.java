@@ -417,6 +417,9 @@ public class ProjectManagement implements IProjectManagement {
       if (projectDAO.maybeSetDominoIDs(project)) {
         logger.info("configureProject : updated domino ids on " + project);
       }
+      // remember to put the audio back on the exercises after a reload or else json export will
+      // filter them out since they have no audio!
+      db.getAudioDAO().attachAudioToExercises(project.getRawExercises(), project.getLanguageEnum(), projectID);
     }
 
     if (project.getExerciseDAO() == null) {
@@ -563,11 +566,11 @@ public class ProjectManagement implements IProjectManagement {
       }
 
       if (userID == -1) {
-        logger.info("getUserForFile couldn't find recorder of (" +oldUser+ ") " + requestURI);
+        logger.info("getUserForFile couldn't find recorder of (" + oldUser + ") " + requestURI);
       }
       if (oldUser != -1 && userID != -1) {
         if (oldUser != userID) {
-        logger.info("getUserForFile remember " + oldUser + "->" + userID);
+          logger.info("getUserForFile remember " + oldUser + "->" + userID);
         }
         oldToNew.put(oldUser, userID);
       }
@@ -627,7 +630,7 @@ public class ProjectManagement implements IProjectManagement {
           Integer userID = project.getUserForFile(requestURI);
           if (userID != null) {
             if (DEBUG_USER_FOR_FILE) {
-            logger.info("getUserForFile : user in project #" + project.getID() + " for " + requestURI + " is " + userID);
+              logger.info("getUserForFile : user in project #" + project.getID() + " for " + requestURI + " is " + userID);
             }
             return userID;
           }
