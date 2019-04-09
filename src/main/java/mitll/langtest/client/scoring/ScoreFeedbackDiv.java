@@ -37,19 +37,23 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadContainer;
-import mitll.langtest.client.sound.*;
+import mitll.langtest.client.sound.HeadlessPlayAudio;
+import mitll.langtest.client.sound.IHighlightSegment;
+import mitll.langtest.client.sound.PlayAudioPanel;
+import mitll.langtest.client.sound.SegmentHighlightAudioControl;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 5/19/17.
  */
 public class ScoreFeedbackDiv extends ScoreProgressBar {
-//  private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
+  private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
 
   private static final double NATIVE_THRSHOLD = 0.75D;
   private static final String OVERALL_SCORE = "Overall Score";
@@ -164,6 +168,8 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
 
   protected void showScoreFeedback(AlignmentAndScore pretestScore, boolean isRTL, DivWidget wordTableContainer,
                                    float hydecScore) {
+   // logger.info("showScoreFeedback score "+ hydecScore+  " " + pretestScore);
+
     DivWidget scoreFeedbackDiv = new DivWidget();
     scoreFeedbackDiv.add(progressBar);
 
@@ -171,7 +177,7 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
 
     Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = pretestScore.getTypeToSegments();
     scoreFeedbackDiv.add(new WordTable()
-        .getDivWord(typeToSegments, (AudioControl)headlessPlayAudio, typeToSegmentToWidget, isRTL));
+        .getDivWord(typeToSegments, headlessPlayAudio, typeToSegmentToWidget, isRTL));
 
     headlessPlayAudio.setListener(new SegmentHighlightAudioControl(typeToSegmentToWidget, 0));
     // so it will play on drill tab...

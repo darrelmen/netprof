@@ -576,7 +576,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                 }
 //                String event = wordSegment.getEvent();
 //                phonesInWordAll.forEach(ph -> logger.info(event + " " + ph.toString()));
-                showPhones(combinedTranscriptSegment, phonesInWordAll, audioControl, clickablePhones, simpleLayout, current);
+                showPhones(combinedTranscriptSegment, phonesInWordAll, audioControl,phoneMap,  clickablePhones, simpleLayout, current);
               }
 
               if (DEBUG_MATCH) {
@@ -811,7 +811,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     if (lcSegment.equalsIgnoreCase(lcClickable)) {  // easy match -
       if (showPhones) {
-        showPhones(wordSegment, phonesInWord, audioControl, clickablePhones, simpleLayout, clickable);
+        showPhones(wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, simpleLayout, clickable);
       }
 
       return clickable;
@@ -823,7 +823,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       } else { // all clickables match this segment
         AllHighlight allHighlight = getAllHighlight(bulk);
         if (showPhones) {
-          showPhones(wordSegment, phonesInWord, audioControl, clickablePhones, simpleLayout, allHighlight);
+          showPhones(wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, simpleLayout, allHighlight);
         }
 
         if (DEBUG || DEBUG_MATCH)
@@ -837,10 +837,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   private void showPhones(TranscriptSegment wordSegment,
                           List<TranscriptSegment> phonesInWord,
                           AudioControl audioControl,
+                          TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                           DivWidget clickablePhones,
                           boolean simpleLayout,
                           IHighlightSegment wordHighlight) {
-    addSouthClickable(clickablePhones, getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, simpleLayout, wordHighlight));
+    addSouthClickable(clickablePhones, getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl,phoneMap, simpleLayout, wordHighlight));
   }
 
   private void addSouthClickable(DivWidget clickablePhones, DivWidget phoneDivBelowWord) {
@@ -861,8 +862,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   protected DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
                                            List<TranscriptSegment> phonesInWord,
                                            AudioControl audioControl,
+                                           TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                            boolean simpleLayout, IHighlightSegment wordHighlight) {
-    return new WordTable().getPhoneDivBelowWord(audioControl, phonesInWord, simpleLayout, wordSegment, true, wordHighlight);
+    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, true, wordHighlight);
   }
 
   /**
