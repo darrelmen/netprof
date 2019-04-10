@@ -1209,7 +1209,7 @@ public class ScoreServlet extends DatabaseServlet {
         requestType = ALIGN;
       }
 
-      return jsonScoring.getJsonForAudioForUser(
+      JsonObject jsonForAudioForUser = jsonScoring.getJsonForAudioForUser(
           reqid,
           projid,
           realExID,
@@ -1225,6 +1225,8 @@ public class ScoreServlet extends DatabaseServlet {
               .setAllowAlternates(getAllowAlternates(request))
               .setUsePhoneToDisplay(getUsePhoneToDisplay(request)),
           fullJSON);
+      jsonForAudioForUser.addProperty("scoring", getIsKaldi(request) ? "Kaldi" : "Hydra");
+      return jsonForAudioForUser;
     } else {
       JsonObject jsonObject = new JsonObject();
       new JsonScoring(getDatabase()).addValidity(realExID, jsonObject, Validity.TOO_LONG, "" + reqid);
@@ -1376,7 +1378,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (projid > 0) {
       Project project1 = getProject(projid);
       String flText = getHeader(request, HeaderValue.EXERCISE_TEXT);
-      if (flText == null) {
+      if (flText == null || flText.isEmpty()) {
         logger.info("getExerciseIDFromText no optional header " + HeaderValue.EXERCISE_TEXT);
         return new ExAndText(realExID, decoded);
       } else {
