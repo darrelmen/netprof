@@ -92,8 +92,9 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
   /**
    * TODO : why not concurrent hash map...
    *
+   * Look in the map of
    * @param audioToAlignment
-   * @param idToAudio
+   * @param idToAudio for all that are missing alignment
    * @param exercise
    */
   private void setAlignmentInfo(Map<Integer, AlignmentOutput> audioToAlignment,
@@ -103,12 +104,12 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
       AlignmentOutput currentAlignment = audioAttribute.getAlignmentOutput();
       if (currentAlignment == null) {
         synchronized (audioToAlignment) {
-          AlignmentOutput alignmentOutput1 = audioToAlignment.get(audioAttribute.getUniqueID());
+          AlignmentOutput alignmentOutput = audioToAlignment.get(audioAttribute.getUniqueID());
 
-          if (alignmentOutput1 == null) {
+          if (alignmentOutput == null) {
             idToAudio.put(audioAttribute.getUniqueID(), audioAttribute);
           } else {  // not sure how this can happen
-            audioAttribute.setAlignmentOutput(alignmentOutput1);
+            audioAttribute.setAlignmentOutput(alignmentOutput);
           }
         }
       }
@@ -156,7 +157,6 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
    * @see #rememberAlignments
    */
   private Map<Integer, AlignmentAndScore> getAlignmentsFromDB(int projid, Set<Integer> audioIDs, Language language) {
-
     if (DEBUG) logger.info("getAlignmentsFromDB asking for " + audioIDs.size());
 
     if (audioIDs.isEmpty()) {
