@@ -578,7 +578,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
         );*/
       }
 
-      new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(projid, project, iDialog.getExercises());
+      new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(project, iDialog.getExercises());
     }
 
     return iDialog;

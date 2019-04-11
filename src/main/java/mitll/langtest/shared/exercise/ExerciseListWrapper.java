@@ -43,35 +43,30 @@ public class ExerciseListWrapper<T extends HasID> implements IsSerializable {
 
   private int reqID;
   private List<T> exercises;
-  private ClientExercise firstExercise;
   private Map<Integer, CorrectAndScore> scoreHistoryPerExercise;
   private Map<Integer, Float> idToScore = new HashMap<>();
 
   /**
    * @param reqID
    * @param ids
-   * @param firstExercise
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
    */
-  public ExerciseListWrapper(int reqID, List<T> ids, ClientExercise firstExercise) {
-    this(reqID, ids, firstExercise, new HashMap<>());
+  public ExerciseListWrapper(int reqID, List<T> ids) {
+    this(reqID, ids, new HashMap<>());
   }
 
   /**
    * @param reqID
    * @param ids
-   * @param firstExercise
    * @see mitll.langtest.server.services.ExerciseServiceImpl#makeExerciseListWrapper
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    */
   public ExerciseListWrapper(int reqID,
                              List<T> ids,
-                             ClientExercise firstExercise,
                              Map<Integer, CorrectAndScore> scoreHistoryPerExercise
   ) {
     this.reqID = reqID;
     this.exercises = ids;
-    this.firstExercise = firstExercise;
     this.scoreHistoryPerExercise = scoreHistoryPerExercise;
   }
 
@@ -85,10 +80,6 @@ public class ExerciseListWrapper<T extends HasID> implements IsSerializable {
 
   public int getSize() {
     return exercises.size();
-  }
-
-  public ClientExercise getFirstExercise() {
-    return firstExercise;
   }
 
   /**
@@ -112,7 +103,6 @@ public class ExerciseListWrapper<T extends HasID> implements IsSerializable {
   }
 
   public String toString() {
-    return "req " + reqID + " has " + exercises.size() + " exercises" +
-        (firstExercise != null ? ", first is " + firstExercise.getID() : "");
+    return "req " + reqID + " has " + exercises.size() + " exercises";
   }
 }

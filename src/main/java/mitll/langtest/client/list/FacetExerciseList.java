@@ -52,9 +52,7 @@ import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.client.scoring.PhonesChoices;
-import mitll.langtest.client.scoring.RefAudioGetter;
-import mitll.langtest.client.scoring.ScoreProgressBar;
+import mitll.langtest.client.scoring.*;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -1767,7 +1765,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   @NotNull
   Set<Integer> getNextPageIDs() {
-    CommonShell currentSelection = pagingContainer.getCurrentSelection();
+    T currentSelection = pagingContainer.getCurrentSelection();
     List<T> items = pagingContainer.getItems();
     int i = items.indexOf(currentSelection);
 
@@ -1828,16 +1826,38 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 //    logger.info("logException stack:\n" + exceptionAsString);
   }
 
+  /**
+   * TODO : don't do this - add the cached alignments as a separate return field in ExerciseListWrapper.
+   * That way we don't wait for the second request to return.
+   *
+   * @param result
+   * @param reqID
+   * @param exerciseContainer
+   */
   protected void populatePanels(Collection<U> result, int reqID, DivWidget exerciseContainer) {
     long then = System.currentTimeMillis();
     List<RefAudioGetter> getters = makeExercisePanels(result, exerciseContainer, reqID);
     long now = System.currentTimeMillis();
 
-    if (DEBUG)
-      logger.info("reallyShowExercises made " + getters.size() + " panels in " + (now - then) + " millis for req " + getCurrentExerciseReq() + " ");
+    if (DEBUG || true) {
+      logger.info("populatePanels made " + getters.size() + " panels in " + (now - then) + " millis for req " + getCurrentExerciseReq() + " ");
+    }
 
-    if (!getters.isEmpty()) {
-      getRefAudio(getters.iterator());
+    // get existing alignment info in one call!
+    {
+      Set<Integer> audioIDs = new HashSet<>();
+      getters.forEach(refAudioGetter -> audioIDs.addAll(refAudioGetter.getReqAudioIDs()));
+
+      logger.info("populatePanels asking for " + audioIDs.size() + " to fill cache...");
+      long then2 = System.currentTimeMillis();
+      getters.iterator().next().getAndRememberCachedAlignents(
+          () -> {
+            logger.info("got answer back for request for " + audioIDs.size() + " audio ids in " +
+                (System.currentTimeMillis() - then2));
+           // if (!getters.isEmpty()) {
+              getRefAudio(getters.iterator());
+          //  }
+          }, audioIDs);
     }
   }
 
@@ -1930,7 +1950,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
    * Don't recurse...
    *
    * @param iterator
-   * @see #showExercises(Collection, int)
+   * @see #populatePanels(Collection, int, DivWidget)
    */
   private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
     if (iterator.hasNext()) {

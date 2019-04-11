@@ -33,7 +33,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -91,6 +90,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   HeadlessPlayAudio playAudio;
 
   static final boolean DEBUG = false;
+  static final boolean DEBUG_SHOW_ALIGNMENT = true;
   private static final boolean DEBUG_PLAY_PAUSE = false;
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
@@ -129,7 +129,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     isMandarin = projectStartupInfo != null && projectStartupInfo.getLanguageInfo() == Language.MANDARIN;
     this.isRTL = !isEngAttr() && projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
-  //  logger.info("isRTL " + isRTL);
+    //  logger.info("isRTL " + isRTL);
 
     this.alignmentFetcher = new AlignmentFetcher(exercise.getID(),
         controller, listContainer,
@@ -140,7 +140,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       }
 
       @Override
-      public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
+      public void audioChangedWithAlignment(int id, long duration) {
       }
     });
     Style style = getElement().getStyle();
@@ -233,9 +233,17 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param next
    */
   private void maybeShowAlignment(AudioAttribute next) {
-    if (next != null && next.getAlignmentOutput() != null) {
-      //   logger.info("maybeShowAlignment audio for " + this + "  " + next);
-      showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
+//    AlignmentOutput alignmentOutput = alignmentFetcher.getAlignment(next.getUniqueID());
+//    if (next != null && next.getAlignmentOutput() != null) {
+//      //   logger.info("maybeShowAlignment audio for " + this + "  " + next);
+//      showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
+//    }
+    if (next != null) {
+      AlignmentOutput alignmentOutput = alignmentFetcher.getAlignment(next.getUniqueID());
+      if (alignmentOutput != null) {
+        //   logger.info("maybeShowAlignment audio for " + this + "  " + next);
+        showAlignment(next.getUniqueID(), next.getDurationInMillis(), alignmentOutput);
+      }
     }
   }
 
@@ -245,10 +253,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
-    Language languageInfo = isEngAttr() ? Language.ENGLISH: projectStartupInfo.getLanguageInfo();
-  //  boolean addFloatLeft = shouldAddFloatLeft();
-
-   // logger.info("makeClickableWords " + exercise.getID() + " " + exercise.getFLToShow() + " add float left " + addFloatLeft);
+    Language languageInfo = isEngAttr() ? Language.ENGLISH : projectStartupInfo.getLanguageInfo();
+    //  boolean addFloatLeft = shouldAddFloatLeft();
+    // logger.info("makeClickableWords " + exercise.getID() + " " + exercise.getFLToShow() + " add float left " + addFloatLeft);
 
     clickableWords = new ClickableWords(listContainer, exercise.getID(),
         languageInfo, languageInfo.getFontSize(), BLUE, shouldAddFloatLeft());
@@ -267,8 +274,18 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     alignmentFetcher.getRefAudio(listener);
   }
 
+  @Override
+  public Set<Integer> getReqAudioIDs() {
+    return alignmentFetcher.getReqAudioIDs();
+  }
+
   Set<Integer> getReqAudio() {
-    return alignmentFetcher.getReqAudio();
+    return alignmentFetcher.getAllReqAudioIDs();
+  }
+
+  @Override
+  public void getAndRememberCachedAlignents(RefAudioListener listener, Set<Integer> req) {
+    alignmentFetcher.getAndRememberCachedAlignents(listener, req);
   }
 
   /**
@@ -288,13 +305,16 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   /**
    * @param id
    * @param duration
-   * @param alignmentOutputFromAudio
    * @see TwoColumnExercisePanel#makeFirstRow
    */
   @Override
-  public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
+  public void audioChangedWithAlignment(int id, long duration) {
+    AlignmentOutput alignmentOutputFromAudio = alignmentFetcher.getAlignment(id);
+
     if (alignmentOutputFromAudio != null) {
       alignmentFetcher.rememberAlignment(id, alignmentOutputFromAudio);
+    } else {
+      logger.warning("audioChangedWithAlignment : no alignment info for audio #" + id);
     }
     if (DEBUG) logger.info("audioChangedWithAlignment " + id + " : " + alignmentOutputFromAudio);
     audioChanged(id, duration);
@@ -327,19 +347,19 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     if (alignmentOutput != null) {
       if (currentAudioDisplayed != id) {
         currentAudioDisplayed = id;
-        if (DEBUG) {
+        if (DEBUG_SHOW_ALIGNMENT) {
           logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
         }
 
         return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, flClickableRowPhones);
       } else {
-        if (DEBUG) {
+        if (DEBUG_SHOW_ALIGNMENT) {
           logger.info("showAlignment SKIP for ex " + exercise.getID() + " audio id " + id + " vs " + currentAudioDisplayed);
         }
         return null;
       }
     } else {
-      if (DEBUG || true)
+      if (DEBUG_SHOW_ALIGNMENT)
         logger.warning("showAlignment no alignment info for " + this + " id " + id + " dur " + duration);
       return null;
     }
@@ -682,7 +702,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   protected void addFloatLeft(Widget w) {
     if (!isRTL) {
-  //    logger.info("addFloatLeft to (" + isRTL + ") elem '" + w.getElement().getId() + "'");
+      //    logger.info("addFloatLeft to (" + isRTL + ") elem '" + w.getElement().getId() + "'");
       w.addStyleName(FLOAT_LEFT);
     }
   }

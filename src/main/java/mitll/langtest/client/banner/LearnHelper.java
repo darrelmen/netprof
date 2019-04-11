@@ -98,6 +98,11 @@ public class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleC
     };
   }
 
+  /**
+   * All exercise panels share same alignment cache!
+   * @param exerciseList
+   * @return
+   */
   protected ExercisePanelFactory<T, ClientExercise> getFactory(final PagingExerciseList<T, ClientExercise> exerciseList) {
     return new ExercisePanelFactory<T, ClientExercise>(controller, exerciseList) {
       private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();

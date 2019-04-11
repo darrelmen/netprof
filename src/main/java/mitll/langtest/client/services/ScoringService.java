@@ -56,6 +56,9 @@ public interface ScoringService extends RemoteService {
 
 
   Map<Integer, AlignmentAndScore> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException;
+
+  Map<Integer, AlignmentAndScore> getCachedAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException;
+
   AlignmentAndScore getStudentAlignment(int projid, int resultID) throws DominoSessionException;
 
   /**
@@ -77,6 +80,7 @@ public interface ScoringService extends RemoteService {
                                    ImageOptions imageOptions,
                                    int exerciseID,
                                    boolean usePhonemeMap) throws DominoSessionException, RestrictedOperationException;
+
   /**
    * @param resultid
    * @param roundTrip
@@ -100,10 +104,10 @@ public interface ScoringService extends RemoteService {
   void recalcAlignments(int projid) throws DominoSessionException, RestrictedOperationException;
 
   /**
-   * @see mitll.langtest.client.LangTest#tellHydraServerToRefreshProject
    * @param projID
    * @throws DominoSessionException
    * @throws RestrictedOperationException
+   * @see mitll.langtest.client.LangTest#tellHydraServerToRefreshProject
    */
   void configureAndRefresh(int projID) throws DominoSessionException, RestrictedOperationException;
 
