@@ -86,14 +86,24 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
 
     child.add(grid);
 
-    ListBox listBox = getListBox(200);
-    listBox.addStyleName("leftFiveMargin");
-    listBox.addItem("-- Choose type of dialog --");
-    listBox.addItem(DialogType.DIALOG.toString());
-    listBox.addItem(DialogType.INTERPRETER.toString());
+    {
+      ListBox listBox = getListBox(200);
+      listBox.addStyleName("leftFiveMargin");
+      listBox.addItem("-- Choose type of dialog --");
+      listBox.addItem(DialogType.DIALOG.toString());
+      listBox.addItem(DialogType.INTERPRETER.toString());
+      child.add(listBox);
+    }
+    {
+      ListBox listBox = getListBox(200);
+      listBox.addStyleName("leftFiveMargin");
+      listBox.addItem("-- Choose first speaker --");
+      listBox.addItem("English Speaker");
+      listBox.addItem(controller.getProjectStartupInfo().getLanguageInfo().toDisplay() + " Speaker");
+      child.add(listBox);
+    }
     //listBox.addChangeHandler(event -> gotChangeOn);
 
-    child.add(listBox);
 
     child.add(getPrivacyChoices());
     moveFocusToTitleLater();

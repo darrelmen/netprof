@@ -29,11 +29,8 @@
 
 package mitll.langtest.client.scoring;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.dialog.ListenViewHelper;
@@ -61,7 +58,7 @@ import java.util.stream.Collectors;
  * @see ListenViewHelper#reallyGetTurnPanel
  */
 public class TurnPanel extends DialogExercisePanel<ClientExercise> {
- private final Logger logger = Logger.getLogger("TurnPanel");
+  private final Logger logger = Logger.getLogger("TurnPanel");
 
   private static final String FLOAT_LEFT = "floatLeft";
 
@@ -153,20 +150,20 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
       }
     }
 
-    Button play = new Button("play");
-    play.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        String cc = controller.getLanguageInfo().getLocale();
-        if (columns == ListenViewHelper.COLUMNS.LEFT ||  exercise.hasEnglishAttr()) {
-          cc = "en-US";
-        }
-        if (cc.equals("ko")) cc = "ko-KR";
-        logger.info("speak " + exercise.getForeignLanguage() + " as " + cc);
-        speak2(exercise.getForeignLanguage(), cc);
-      }
-    });
-    flClickableRow.add(play);
+//    Button play = new Button("play");
+//    play.addClickHandler(new ClickHandler() {
+//      @Override
+//      public void onClick(ClickEvent event) {
+//        String cc = controller.getLanguageInfo().getLocale();
+//        if (columns == ListenViewHelper.COLUMNS.LEFT ||  exercise.hasEnglishAttr()) {
+//          cc = "en-US";
+//        }
+//        if (cc.equals("ko")) cc = "ko-KR";
+//        logger.info("speak " + exercise.getForeignLanguage() + " as " + cc);
+//        speak2(exercise.getForeignLanguage(), cc);
+//      }
+//    });
+//    flClickableRow.add(play);
 
 
     flClickableRow.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
@@ -197,7 +194,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
    * msg.lang = 'en-US';
    *
    * msg.onend = function(e) {
-   *   console.log('Finished in ' + event.elapsedTime + ' seconds.');
+   * console.log('Finished in ' + event.elapsedTime + ' seconds.');
    * };
    *
    * speechSynthesis.speak(msg);
@@ -213,7 +210,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
       msg.text = text;//'Hello World';
       msg.lang = language;//'en-US';
 
-      msg.onend = function(e) {
+      msg.onend = function (e) {
           console.log('Finished in ' + event.elapsedTime + ' seconds.');
       };
 
