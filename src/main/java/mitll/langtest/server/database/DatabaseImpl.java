@@ -219,7 +219,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     // then connect to mongo
     DominoUserDAOImpl dominoUserDAO = new DominoUserDAOImpl(this, servletContext);
 
-    initializeDAOs(pathHelper, dominoUserDAO);
+    initializeDAOs(dominoUserDAO);
 
    // dominoUserDAO.setUserProjectDAO(getUserProjectDAO());
 
@@ -330,7 +330,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @see #DatabaseImpl(ServerProperties, PathHelper, LogAndNotify, ServletContext)
    */
-  private void initializeDAOs(PathHelper pathHelper, IUserDAO dominoUserDAO) {
+  private void initializeDAOs(IUserDAO dominoUserDAO) {
     eventDAO = new SlickEventImpl(dbConnection);
 
     this.userDAO = dominoUserDAO;
@@ -377,14 +377,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     createTables();
 
     new Thread(() -> {
-      while (getUserDAO().getDefaultUser() < 1) {
-        try {
-          sleep(1000);
-          logger.info("finalSetup ---> no default user yet.....");
-        } catch (InterruptedException e) {
-          e.printStackTrace();
-        }
-      }
+      waitForDefaultUser();
 
       {
         int defaultUser = getUserDAO().getDefaultUser();
@@ -397,6 +390,17 @@ public class DatabaseImpl implements Database, DatabaseServices {
     afterDAOSetup(slickAudioDAO);
 
     logger.info("finalSetup : tables = " + getTables());
+  }
+
+  public void waitForDefaultUser() {
+    while (getUserDAO().getDefaultUser() < 1) {
+      try {
+        sleep(1000);
+        logger.info("finalSetup ---> no default user yet.....");
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
   }
 
   /**
@@ -413,11 +417,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
     if (userDAO instanceof UserDAO) {
       userDAO.ensureDefaultUsers();
     }
-    int defaultProject = getDefaultProject();
-    // make sure we have a template exercise
 
-    slickAudioDAO.setDefaultResult(resultDAO.ensureDefault(defaultProject, userDAO.getBeforeLoginUser(),
-        userExerciseDAO.ensureTemplateExercise(defaultProject)));
+    {
+      int defaultProject = getDefaultProject();
+      // make sure we have a template exercise
+
+      slickAudioDAO.setDefaultResult(resultDAO.ensureDefault(defaultProject, userDAO.getBeforeLoginUser(),
+          userExerciseDAO.ensureTemplateExercise(defaultProject)));
+    }
 
     try {
       ((UserListManager) userListManager).setUserExerciseDAO(userExerciseDAO);
@@ -1357,6 +1364,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * TODO : put back in limit without breaking reporting
+   *
    * @param projid
    * @return
    * @see mitll.langtest.server.services.ResultServiceImpl#getResults(int, Map, int, String)
@@ -1932,7 +1940,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
         reportUsers.getAllUsers(),
         reportUsers.getDeviceUsers(),
         userProjectDAO.getUserToProject(),
-        serverProps.getNPServer(),
         this.getLogAndNotify());
   }
 
@@ -2203,6 +2210,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @NotNull
   public ProjectSync getProjectSync() {
     return new ProjectSync(this, this.getProjectManagement(), this, this.getUserExerciseDAO(), this);
+  }
+
+  public ReportHelper getReportHelper() {
+    return reportHelper;
   }
 
   public String toString() {
