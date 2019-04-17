@@ -1705,16 +1705,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @deprecated
    */
   public List<DBUser> getAll() {
-    long then = System.currentTimeMillis();
     logger.info("getAll calling get all users");
-    FindOptions<UserColumn> opts = getUserColumnFindOptions();
-    List<DBUser> users = Collections.emptyList();
-
     if (delegate == null) {
-      logger.warn("getAll delegate is null?");
+      logger.warn("\n\ngetAll delegate is null?\n\n");
     }
 
-    users = delegate.getUsers(-1, opts);
+    long then = System.currentTimeMillis();
+    List<DBUser> users = delegate == null ? Collections.emptyList() : delegate.getUsers(-1, getUserColumnFindOptions());
     long now = System.currentTimeMillis();
     if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
     return users;
