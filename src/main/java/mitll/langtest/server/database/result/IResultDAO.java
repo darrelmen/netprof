@@ -80,7 +80,8 @@ public interface IResultDAO extends IDAO {
    */
   List<MonitorResult> getMonitorResults(int projid);
 
-  List<MonitorResult> getMonitorResultsKnownExercises(int projid, int limit);
+  List<MonitorResult> getMonitorResultsKnownExercises(int projid);
+  List<MonitorResult> getMonitorResultsKnownExercisesWithLimit(int projid, int limit);
 
   List<MonitorResult> getMonitorResultsByExerciseID(int id);
 

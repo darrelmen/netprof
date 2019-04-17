@@ -136,7 +136,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
             @Override
             public Collection<MonitorResult> load(Integer key) throws Exception {
               // logger.info("Load " + key);
-              List<MonitorResult> monitorResultsKnownExercises = db.getResultDAO().getMonitorResultsKnownExercises(key, LIMIT);
+              List<MonitorResult> monitorResultsKnownExercises = db.getResultDAO().getMonitorResultsKnownExercises(key);
               db.getMonitorResultsWithText(monitorResultsKnownExercises, key);
               return db.getMonitorResultsWithText(monitorResultsKnownExercises, key);
             }
@@ -152,7 +152,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
             @Override
             public Collection<MonitorResult> load(Integer key) throws Exception {
               // logger.info("Load " + key);
-              return db.getMonitorResults(key, LIMIT);
+              return db.getMonitorResults(key);
             }
           });
 
@@ -183,7 +183,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     try {
       results = projectToResults.get(projectID);
     } catch (ExecutionException e) {
-      results = db.getResultDAO().getMonitorResultsKnownExercises(projectID, LIMIT);
+      results = db.getResultDAO().getMonitorResultsKnownExercises(projectID);
     }
     // filter on unit->value
     if (!unitToValue.isEmpty()) {
@@ -327,7 +327,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
     try {
       results = projectToResults2.get(projectID);
     } catch (ExecutionException e) {
-      results = db.getMonitorResults(projectID, LIMIT);
+      results = db.getMonitorResults(projectID);
     }
 
     logger.info("getMonitorResults : before " + results.size() + " for project " + projectID + " and user " + userid);

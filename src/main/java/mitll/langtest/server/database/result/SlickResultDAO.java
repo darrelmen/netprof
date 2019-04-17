@@ -275,8 +275,13 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
-  public List<MonitorResult> getMonitorResultsKnownExercises(int projid, int limit) {
-    return getMonitorResults(dao.getAllByProjectKnownExercises(projid, limit));
+  public List<MonitorResult> getMonitorResultsKnownExercises(int projid) {
+    return getMonitorResults(dao.getAllByProjectKnownExercises(projid));
+  }
+
+  @Override
+  public List<MonitorResult> getMonitorResultsKnownExercisesWithLimit(int projid, int limit) {
+    return getMonitorResults(dao.getAllByProjectKnownExercisesWithLimit(projid, limit));
   }
 
   private List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {

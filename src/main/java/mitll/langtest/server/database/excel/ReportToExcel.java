@@ -121,7 +121,7 @@ public class ReportToExcel {
     {
       boolean byLanguage = false;
       Map<String, Map<Integer, ReportStats>> nameToYearToStats = getLangToYearToStats(copy, byLanguage);
-      writeYTDAndHistorical(copy, wb, nameToYearToStats, !byLanguage, deviceRecordings);
+      writeYTDAndHistorical(copy, wb, nameToYearToStats, true, deviceRecordings);
     }
   }
 
@@ -400,7 +400,9 @@ public class ReportToExcel {
                                       boolean perProject,
                                       INFO recordingType,
                                       int yearToReport) {
-    logger.info("writeWeeklySheetForYear per project " + perProject + " type " + recordingType + " for year " + yearToReport);
+    logger.info("writeWeeklySheetForYear per project " + perProject +
+        "\n\ttype     " + recordingType +
+        "\n\tfor year " + yearToReport);
 
     int rownum = 0;
 
@@ -536,9 +538,22 @@ public class ReportToExcel {
     for (int i = 0; i < maxCol; i++) sheet.autoSizeColumn(i);
   }
 
+  /**
+   *
+   * @param langToYearToStats
+   * @param thisYear
+   * @return
+   */
   private Map<String, Integer> getWeektoCountFirstLang(Map<String, Map<Integer, ReportStats>> langToYearToStats, int thisYear) {
     Map<Integer, ReportStats> firstLanguage = langToYearToStats.values().iterator().next();
-    return firstLanguage.get(thisYear).getKeyToValue(INFO.ALL_RECORDINGS_WEEKLY);
+    ReportStats reportStats = firstLanguage.get(thisYear);
+    if (reportStats == null) {
+      logger.warn("getWeektoCountFirstLang : in " + langToYearToStats + "\n\tno year " + thisYear);
+      return new HashMap<>();
+    }
+    else {
+      return reportStats.getKeyToValue(INFO.ALL_RECORDINGS_WEEKLY);
+    }
   }
 
   private int addFooterRow(XSSFWorkbook workbook, Sheet sheet, int rownum, Set<String> sortedLang, XSSFCellStyle greenStyle, boolean perProject) {

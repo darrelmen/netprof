@@ -85,11 +85,11 @@ public class ReportStats {
   }
 
   private void mergeKeyToValue(Map<INFO, Integer> intKeyToValue, Map<INFO, Integer> otherMap) {
-    otherMap.forEach((k, v) -> intKeyToValue.merge(k, v, (a, b) -> a + b));
+    otherMap.forEach((k, v) -> intKeyToValue.merge(k, v, Integer::sum));
   }
 
   private void mergeKeyToValue2(Map<String, Integer> intKeyToValue, Map<String, Integer> otherMap) {
-    otherMap.forEach((k, v) -> intKeyToValue.merge(k, v, (a, b) -> a + b));
+    otherMap.forEach((k, v) -> intKeyToValue.merge(k, v, Integer::sum));
   }
 
   /**
@@ -115,7 +115,6 @@ public class ReportStats {
     this(toCopy);
 
     intKeyToValue.putAll(toCopy.intKeyToValue);
-
 
     Map<INFO, Map<String, Integer>> intMultiKeyToValue = toCopy.intMultiKeyToValue;
 
@@ -152,11 +151,12 @@ public class ReportStats {
 
   /**
    * Little hack to deal with mandarin renaming...
+   *
    * @return
    */
   public String getLanguage() {
     String language = this.language;
-    if (language.equalsIgnoreCase("Mandarin")) language="Chinese";
+    if (language.equalsIgnoreCase("Mandarin")) language = "Chinese";
     return language;
   }
 
