@@ -982,6 +982,7 @@ public class ProjectManagement implements IProjectManagement {
    * @param projectid
    * @param onlyOne   if false loads all the projects
    * @return
+   * @see #getProject(int, boolean)
    */
   private Project lazyGetProject(int projectid, boolean onlyOne) {
     logger.info("lazyGetProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +

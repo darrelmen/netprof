@@ -125,7 +125,7 @@ public class ReportStats {
     this.html = toCopy.html;
   }
 
-  ReportStats(SlickProject project, int year) {
+  public ReportStats(SlickProject project, int year) {
     this(project.id(), project.language(), project.name(), year, new JsonObject());
   }
 

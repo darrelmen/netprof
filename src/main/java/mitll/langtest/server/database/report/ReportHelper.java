@@ -29,11 +29,13 @@
 
 package mitll.langtest.server.database.report;
 
+import com.google.gson.JsonObject;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.IReport;
 import mitll.langtest.server.database.ReportStats;
+import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -44,6 +46,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -61,6 +64,14 @@ public class ReportHelper {
   private final PathHelper pathHelper;
   private final MailSupport mailSupport;
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#afterDAOSetup
+   * @param services
+   * @param projectDAO
+   * @param userDAO
+   * @param pathHelper
+   * @param mailSupport
+   */
   public ReportHelper(DatabaseServices services,
                       IProjectDAO projectDAO,
                       IUserDAO userDAO,
@@ -194,5 +205,45 @@ public class ReportHelper {
           }
         });
     return stats;
+  }
+
+  /**
+   * FOR TESTING
+   *
+   * @return
+   *
+   */
+  public List<JsonObject> doReportAllYears(IReport iReport) {
+    return doReportForYear(iReport, -1);
+  }
+
+  /**
+   * JUST FOR TESTING
+   *
+   * JUST FOR TESTING
+   */
+  public List<JsonObject> doReportForYear(IReport report, int year) {
+    List<JsonObject> jsons = new ArrayList<>();
+
+
+    List<ReportStats> allReports = new ArrayList<>();
+
+    Collection<Project> projects = getProjects();
+    List<Project> copy = new ArrayList<>(projects);
+
+    // sort by name...?
+    copy.sort(Comparator.comparing(o -> o.getName().toLowerCase()));
+
+    copy.forEach(project -> {
+          try {
+            jsons.add(report.writeReportToFile(new ReportStats(project.getProject(), year), pathHelper, allReports));
+          } catch (IOException e) {
+            logger.error("got " + e);
+          }
+        }
+    );
+
+    report.getSummaryReport(allReports, pathHelper);
+    return jsons;
   }
 }
