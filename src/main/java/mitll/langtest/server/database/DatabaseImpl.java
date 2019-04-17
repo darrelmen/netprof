@@ -1356,15 +1356,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
+   * TODO : put back in limit without breaking reporting
    * @param projid
-   * @param limit
    * @return
    * @see mitll.langtest.server.services.ResultServiceImpl#getResults(int, Map, int, String)
    * @see DownloadServlet#returnSpreadsheet
    */
   @Override
-  public Collection<MonitorResult> getMonitorResults(int projid, int limit) {
-    List<MonitorResult> monitorResults = resultDAO.getMonitorResultsKnownExercises(projid, limit);
+  public Collection<MonitorResult> getMonitorResults(int projid) {
+    List<MonitorResult> monitorResults = resultDAO.getMonitorResultsKnownExercises(projid);
 
     logger.info("getMonitorResults got back            " + monitorResults.size() + " for project " + projid);
     List<MonitorResult> monitorResultsWithText = getMonitorResultsWithText(monitorResults, projid);
@@ -1378,7 +1378,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
    * @param projid
    * @return
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getResults
-   * @see DatabaseServices#getMonitorResults(int, int)
+   * @see DatabaseServices#getMonitorResults(int)
    */
   @Override
   public List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults, int projid) {

@@ -88,10 +88,9 @@ public interface DatabaseServices extends DAOContainer, ProjectServices, //AmasS
    * @see mitll.langtest.server.services.ResultServiceImpl#getMonitorResults(int)
    * @see mitll.langtest.server.services.ResultServiceImpl#getResults(int, Map, int, String)
    * @param projid
-   * @param limit
    * @return
    */
-  Collection<MonitorResult> getMonitorResults(int projid, int limit);
+  Collection<MonitorResult> getMonitorResults(int projid);
 
   List<MonitorResult> getMonitorResultsWithText(List<MonitorResult> monitorResults, int projid);
 
