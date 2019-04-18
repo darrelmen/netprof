@@ -61,8 +61,8 @@ public class AudioCheck {
   private static final float MAX_VALUE = 32768.0F;
   private static final ValidityAndDur INVALID_AUDIO = new ValidityAndDur();
   private static final boolean DEBUG = false;
-  private static final int WAV_HEADER_LENGTH = 44;
-  public static final boolean DUMP_POWER_INFO = true;
+  public static final int WAV_HEADER_LENGTH = 44;
+  private static final boolean DUMP_POWER_INFO = true;
   private final int minDynamicRange;
 
   // TODO :make a server prop
@@ -78,13 +78,12 @@ public class AudioCheck {
     this.minDynamicRange = minDynamicRange;
   }
 
-
   /**
    * @param file
    * @return
    * @see mitll.langtest.server.services.AudioServiceImpl#getImageForAudioFile
    */
-  public double getDurationInSeconds(String file) {
+  public double getDurationInSeconds(String file) throws UnsupportedAudioFileException {
     return getDurationInSeconds(new File(file));
   }
 
@@ -93,13 +92,15 @@ public class AudioCheck {
    * @return
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise
    */
-  public double getDurationInSeconds(File file) {
+  public double getDurationInSeconds(File file) throws UnsupportedAudioFileException {
     AudioInputStream audioInputStream = null;
     try {
       audioInputStream = getAudioInputStream(file);
       double dur = getDurationInSeconds(audioInputStream);
       audioInputStream.close();
       return dur;
+    } catch (UnsupportedAudioFileException un) {
+      throw un;
     } catch (Exception e) {
       try {
         if (audioInputStream != null) audioInputStream.close();
@@ -128,10 +129,9 @@ public class AudioCheck {
   public AudioCheck.ValidityAndDur isValid(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
     try {
       long length = file.length();
-      String fileInfo = file.getAbsolutePath();
 
       if (length < WAV_HEADER_LENGTH) {
-        logger.warn("isValid : audio file " + fileInfo + " length was " + length + " bytes.");
+        logger.warn("isValid : audio file " + file.getAbsolutePath() + " length was " + length + " bytes.");
         return new AudioCheck.ValidityAndDur(Validity.TOO_SHORT, 0, false);
       } else {
         return getValidityAndDur(file, !useSensitiveTooLoudCheck, quietAudioOK);
@@ -198,9 +198,9 @@ public class AudioCheck {
       }
       validityAndDur.setMaxMinRange(dynamicRange.dnr);
     }
-//    else {
-//     // logger.info("file " +fileInfo + " not valid so not doing DNR");
-//    }
+    //else {
+    // logger.info("file " +fileInfo + " not valid so not doing DNR");
+    //}
   }
 
   private void addDynamicRange(File file, ValidityAndDur validityAndDur) {
@@ -307,6 +307,9 @@ public class AudioCheck {
     boolean bigEndian = format.isBigEndian();
     if (bigEndian) {
       logger.warn("checkWavFileWithClipThreshold huh? wavFile " + fileInfo + " is in big endian format?");
+      logger.warn("checkWavFileWithClipThreshold " +
+          "\n\tformat     " + format +
+          "\n\tframe size " + format.getFrameSize() + " # channels " + format.getChannels());
     }
 
     int fsize = format.getFrameSize();

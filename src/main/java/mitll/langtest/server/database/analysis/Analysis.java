@@ -116,13 +116,15 @@ public abstract class Analysis extends DAO {
         userInfos.add(value);
       }
     });
-    long now = System.currentTimeMillis();
 
-    if (now - then > 100) {
-      logger.info("getUserInfos : took " + (now - then) + " to get " + idToUserInfo.size() + " user infos"
-          // +         ", skipped " + skipped
-      );
+    {
+      long now = System.currentTimeMillis();
+
+      if (now - then > 50) {
+        logger.info("getUserInfos : took " + (now - then) + " to get " + idToUserInfo.size() + " user infos");
+      }
     }
+
     return userInfos;
   }
 
@@ -250,6 +252,7 @@ public abstract class Analysis extends DAO {
 
   /**
    * sigh - filter first on date or exids, like via the database...
+   *
    * @param next
    * @param from
    * @param to
@@ -286,7 +289,7 @@ public abstract class Analysis extends DAO {
       if (timestamp >= from && timestamp <= to) {
         resultIDs.add(bs.getResultID());
       } else if (DEBUG) {
-        logger.info("getResultIDsInTimeWindow : skip " + bs.getResultID() + " at " + new Date(timestamp) + " : " +timestamp + " not in (" + from + " - " + to + ")");
+        logger.info("getResultIDsInTimeWindow : skip " + bs.getResultID() + " at " + new Date(timestamp) + " : " + timestamp + " not in (" + from + " - " + to + ")");
       }
     });
 
@@ -342,7 +345,6 @@ public abstract class Analysis extends DAO {
       return phoneReport;
     }
   }*/
-
   public PhoneSummary getPhoneSummary(int userid, UserInfo next) {
     if (next == null) {
       return new PhoneSummary();

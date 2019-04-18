@@ -104,7 +104,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
           .getUserInfo(db.getUserDAO(), MIN_RECORDINGS, -1);
       long now = System.currentTimeMillis();
       if (now - then > 100) {
-        logger.info("took " + (now - then) + " millis to get " + userInfo.size() + " user infos.");
+        logger.info("getUsersWithRecordings took " + (now - then) + " millis to get " + userInfo.size() + " user infos.");
       }
       return userInfo;
     } else {

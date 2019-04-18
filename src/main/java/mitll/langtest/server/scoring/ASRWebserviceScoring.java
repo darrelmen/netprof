@@ -331,8 +331,13 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     if (cached != null) {
       logger.info("scoreRepeatExercise : using cached score for " + filePath);
     }
-    Double cachedDuration = getFileDuration(wavFile, filePath);
-
+    Double cachedDuration = null;
+    try {
+      cachedDuration = getFileDuration(wavFile, filePath);
+    } catch (UnsupportedAudioFileException e) {
+      logger.warn("not a wav file? " + wavFile, e);
+      return new PretestScore(-1f);
+    }
     // actually run the scoring
     JsonObject jsonObject = null;
 
@@ -729,7 +734,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    * @see #scoreRepeatExercise
    */
   @NotNull
-  private Double getFileDuration(File wavFile, String filePath) {
+  private Double getFileDuration(File wavFile, String filePath) throws UnsupportedAudioFileException {
     Double cachedDuration = fileToDuration.getIfPresent(filePath);
     if (cachedDuration == null) {
       cachedDuration = new AudioCheck(props.shouldTrimAudio(), props.getMinDynamicRange()).getDurationInSeconds(wavFile);

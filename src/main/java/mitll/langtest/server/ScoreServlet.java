@@ -31,6 +31,7 @@ package mitll.langtest.server;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.report.ReportingServices;
@@ -1176,23 +1177,29 @@ public class ScoreServlet extends DatabaseServlet {
         requestType = PostRequest.ALIGN;
       }
 
-      return jsonScoring.getJsonForAudioForUser(
-          reqid,
-          projid,
-          realExID,
+      if (saveFile.length() < AudioCheck.WAV_HEADER_LENGTH) {
+        JsonObject jsonObject = new JsonObject();
+        new JsonScoring(getDatabase()).addValidity(realExID, jsonObject, Validity.TOO_SHORT, "" + reqid);
+        return jsonObject;
+      } else {
+        return jsonScoring.getJsonForAudioForUser(
+            reqid,
+            projid,
+            realExID,
 
-          postedWordOrPhrase,
+            postedWordOrPhrase,
 
-          userid,
-          requestType,
-          saveFile.getAbsolutePath(),
-          saveFile,
-          deviceType,
-          device,
-          new DecoderOptions()
-              .setAllowAlternates(getAllowAlternates(request))
-              .setUsePhoneToDisplay(getUsePhoneToDisplay(request)),
-          fullJSON);
+            userid,
+            requestType,
+            saveFile.getAbsolutePath(),
+            saveFile,
+            deviceType,
+            device,
+            new DecoderOptions()
+                .setAllowAlternates(getAllowAlternates(request))
+                .setUsePhoneToDisplay(getUsePhoneToDisplay(request)),
+            fullJSON);
+      }
     } else {
       JsonObject jsonObject = new JsonObject();
       new JsonScoring(getDatabase()).addValidity(realExID, jsonObject, Validity.TOO_LONG, "" + reqid);
