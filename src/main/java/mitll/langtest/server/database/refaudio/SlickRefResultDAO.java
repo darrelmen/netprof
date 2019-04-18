@@ -66,6 +66,7 @@ import java.util.stream.Collectors;
 
 public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
   private static final Logger logger = LogManager.getLogger(SlickRefResultDAO.class);
+
   private static final int WARN_THRESHOLD = 50;
   private static final String WORDS = "{\"words\":[]}";
   private static final boolean USE_PHONE_TO_DISPLAY = true;

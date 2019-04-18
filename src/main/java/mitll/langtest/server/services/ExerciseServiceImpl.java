@@ -1072,7 +1072,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     Set<ClientExercise> toAddAudioTo = getCommonExercisesWithAnnotationsAdded(ids, exercises, projectID);
     long now = System.currentTimeMillis();
 
-    if (now - then > 10 || DEBUG_FULL)
+    if (now - then > 20 || DEBUG_FULL)
       logger.info("getFullExercises took " + (now - then) + " to get " + exercises.size() + " exercises" +
           "\n\tfor req = " + ids);
 
@@ -1121,6 +1121,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     maybeAddPlayedMarkings(request, exercises, userID);
 
+    then = System.currentTimeMillis();
+
     Set<Integer> audioIDs = new HashSet<>();
     for (ClientExercise exercise : exercises) {
       for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
@@ -1130,8 +1132,12 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     }
     Map<Integer, AlignmentAndScore> cachedAlignments = db.getRefResultDAO().getCachedAlignments(projectID, audioIDs);
 
+    now = System.currentTimeMillis();
+    if (now - then > 30 || DEBUG_FULL)
+      logger.info("getFullExercises took " + (now - then) + " to get cached scores for " + exercises.size() + " exercises");
+
     // for (CommonExercise exercise : exercises) logger.info("\treturning " + exercise.getID());
-    return new ExerciseListWrapper<>(request.getReqID(), exercises, scoreHistoryPerExercise,cachedAlignments);
+    return new ExerciseListWrapper<>(request.getReqID(), exercises, scoreHistoryPerExercise, cachedAlignments);
   }
 
   private void maybeAddPlayedMarkings(ExerciseListRequest request, List<ClientExercise> exercises, int userID) {
@@ -1242,7 +1248,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     Map<Integer, CorrectAndScore> scoreHistories = getScoreHistories(contextIDs, exercises.isEmpty(), userID, language);
 
     long now = System.currentTimeMillis();
-    if (now - then > 0) {
+    if (now - then > 20) {
       logger.info("getScoreHistoryPerExercise took " + (now - then) + " to get score histories for " + exercises.size() +
           "\n\t exercises: " + scoreHistories.keySet());
     }
@@ -1265,7 +1271,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
                                                                      List<ClientExercise> exercises,
                                                                      int projectID) {
     Set<ClientExercise> toAddAudioTo = new HashSet<>();
-    logger.info("getCommonExercisesWithAnnotationsAdded " + ids);
+
+    if (DEBUG) logger.info("getCommonExercisesWithAnnotationsAdded " + ids);
+
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
 //      logger.info("ex " + byID.getID() + " eng " + byID.getEnglish() + " fl " + byID.getForeignLanguage() + " " + byID.getMeaning());

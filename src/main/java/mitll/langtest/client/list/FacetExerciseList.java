@@ -1973,6 +1973,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
             final int reqid = next.getReq();
             if (isCurrentReq(reqid)) {
               Scheduler.get().scheduleDeferred(() -> {
+                logger.info("schedule later...");
                 if (isCurrentReq(reqid)) {
                   getRefAudio(iterator);
                 } else {
@@ -1980,6 +1981,10 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
                       ") for panel vs " + getCurrentExerciseReq());
                 }
               });
+
+//              if (isCurrentReq(reqid)) {
+//                getRefAudio(iterator);
+//              }
             }
           } else {
             //   logger.info("\tgetRefAudio all panels complete...");
