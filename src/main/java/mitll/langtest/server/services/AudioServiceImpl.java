@@ -637,14 +637,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
 
     AudioChunk combined = audioChunks.get(0);
-    logger.info("getCombinedAudioChunk Stop - combine " + combined + " with " + (audioChunks.size()-1) + " following chunks.");
+    logger.info("getCombinedAudioChunk Stop - combine " + combined + " with " + (audioChunks.size() - 1) + " following chunks.");
 
     if (combined.getPacket() != 0) {
       logger.warn("\n\n\n\n\n\n getCombinedAudioChunk huh? first packet is " + combined);
     }
 
     for (int i = 1; i < audioChunks.size(); i++) {
-     // AudioChunk next = getNextAudioChunk(audioChunks, combined.getPacket(), i, session);
+      // AudioChunk next = getNextAudioChunk(audioChunks, combined.getPacket(), i, session);
       combined = combined.concat(getNextAudioChunk(audioChunks, combined.getPacket(), i, session));
       //      logger.info("\tStop - 2 combine " + combined);
     }
@@ -731,7 +731,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     // ordering check...
     {
-     // int packet = combined.getPacket();
+      // int packet = combined.getPacket();
       int nextPacketID = next.getPacket();
       if (packet != nextPacketID - 1) {
         logger.warn("getNextAudioChunk : session " + session +
@@ -1490,7 +1490,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       relativeImagePath = relativeImagePath.substring(1);
     }
     String imageURL = relativeImagePath;
-    double duration = new AudioCheck(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange()).getDurationInSeconds(wavAudioFile);
+
+    double duration;
+    try {
+      duration = new AudioCheck(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange()).getDurationInSeconds(wavAudioFile);
+    } catch (UnsupportedAudioFileException e) {
+      logger.warn("not a wav file " + wavAudioFile, e);
+      return new ImageResponse();
+    }
     if (duration == 0) {
       logger.error("huh? " + wavAudioFile + " has zero duration???");
     }

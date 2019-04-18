@@ -232,10 +232,16 @@ public class AudioConversion extends AudioBase {
    */
   public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix, long uniqueTimestamp) throws UnsupportedAudioFileException {
     String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + WAV;
-    File wavFile = convertTo16Khz(new File(pathname), uniqueTimestamp);
-    boolean b = wavFile.setReadable(true, false);
-    if (!b) logger.warn("couldn't make " + wavFile + " readable?");
-    return removeSuffix(wavFile.getName());
+    File originalWavFile = new File(pathname);
+
+    if (originalWavFile.length() < AudioCheck.WAV_HEADER_LENGTH) {
+      return originalWavFile.getName();
+    } else {
+      File wavFile = convertTo16Khz(originalWavFile, uniqueTimestamp);
+      boolean b = wavFile.setReadable(true, false);
+      if (!b) logger.warn("couldn't make " + wavFile + " readable?");
+      return removeSuffix(wavFile.getName());
+    }
   }
 
 
@@ -307,9 +313,9 @@ public class AudioConversion extends AudioBase {
 
   /**
    * @param pathToAudioFile
+   * @return temp file that is at 16K
    * @throws IOException
    * @see #convertTo16Khz
-   * @return temp file that is at 16K
    */
   private String convertTo16KHZ(String pathToAudioFile) throws IOException {
     return sampleAt16KHZ(pathToAudioFile, makeTempFile("convertTo16KHZ"));

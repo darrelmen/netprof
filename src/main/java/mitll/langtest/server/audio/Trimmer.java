@@ -32,6 +32,7 @@ package mitll.langtest.server.audio;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
 
@@ -92,8 +93,8 @@ public class Trimmer extends AudioBase {
 
         return new TrimInfo(durationInSeconds, false);
       }
-    } catch (IOException e) {
-      logger.error("trimSilence on " + wavFile.getAbsolutePath() + " got " + e, e);
+    } catch (UnsupportedAudioFileException | IOException uae) {
+      logger.error("trimSilence on " + wavFile.getAbsolutePath() + " got " + uae, uae);
       return new TrimInfo();
     }
   }

@@ -242,7 +242,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         new HashSet<>(),
 
         new Group(),
-        new HashSet<Group>(),
+        new HashSet<>(),
         null,
         new HashSet<>());
   }
@@ -293,7 +293,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (attribute != null) {
       delegate = (IUserServiceDelegate) attribute;
       pool = (Mongo) servletContext.getAttribute(MONGO_ATT_NAME);
-      logger.info("DominoUserDAOImpl got pool reference " + pool);
+      logger.info("DominoUserDAOImpl got " +
+          "\n\tpool reference " + pool+
+          "\n\tdelegate       " + delegate.getClass()
+      );
       serializer = (JSONSerializer) servletContext.getAttribute(JSON_SERIALIZER);
 
       makeUserService(database, props);
@@ -1758,6 +1761,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     Set<Integer> toAskFor = getMissingOrStale(userDBIds, now);
     if (!toAskFor.isEmpty()) {
       long then = System.currentTimeMillis();
+
       Map<Integer, UserDescriptor> idToUserD = delegate.lookupUserDescriptors(toAskFor);
 //      Map<Integer, DBUser> idToUserD = delegate.lookupDBUsers(toAskFor);
       long now2 = System.currentTimeMillis();
