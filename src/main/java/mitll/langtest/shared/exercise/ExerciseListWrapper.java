@@ -31,6 +31,7 @@ package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -45,6 +46,7 @@ public class ExerciseListWrapper<T extends HasID> implements IsSerializable {
   private List<T> exercises;
   private Map<Integer, CorrectAndScore> scoreHistoryPerExercise;
   private Map<Integer, Float> idToScore = new HashMap<>();
+  private Map<Integer, AlignmentAndScore> cachedAlignments;
 
   /**
    * @param reqID
@@ -52,7 +54,7 @@ public class ExerciseListWrapper<T extends HasID> implements IsSerializable {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExerciseIds
    */
   public ExerciseListWrapper(int reqID, List<T> ids) {
-    this(reqID, ids, new HashMap<>());
+    this(reqID, ids, new HashMap<>(), new HashMap<>());
   }
 
   /**
@@ -63,11 +65,13 @@ public class ExerciseListWrapper<T extends HasID> implements IsSerializable {
    */
   public ExerciseListWrapper(int reqID,
                              List<T> ids,
-                             Map<Integer, CorrectAndScore> scoreHistoryPerExercise
+                             Map<Integer, CorrectAndScore> scoreHistoryPerExercise,
+                             Map<Integer, AlignmentAndScore> cachedAlignments
   ) {
     this.reqID = reqID;
     this.exercises = ids;
     this.scoreHistoryPerExercise = scoreHistoryPerExercise;
+    this.cachedAlignments = cachedAlignments;
   }
 
   public int getReqID() {
@@ -100,6 +104,10 @@ public class ExerciseListWrapper<T extends HasID> implements IsSerializable {
    */
   public void setIdToScore(Map<Integer, Float> idToScore) {
     this.idToScore = idToScore;
+  }
+
+  public Map<Integer, AlignmentAndScore> getCachedAlignments() {
+    return cachedAlignments;
   }
 
   public String toString() {

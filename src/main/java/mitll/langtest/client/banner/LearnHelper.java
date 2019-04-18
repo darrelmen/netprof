@@ -45,6 +45,7 @@ import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
 import java.util.HashMap;
@@ -100,12 +101,17 @@ public class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleC
 
   /**
    * All exercise panels share same alignment cache!
+   *
    * @param exerciseList
    * @return
    */
   protected ExercisePanelFactory<T, ClientExercise> getFactory(final PagingExerciseList<T, ClientExercise> exerciseList) {
     return new ExercisePanelFactory<T, ClientExercise>(controller, exerciseList) {
       private final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
+
+      @Override public void addToCache(Map<Integer, AlignmentAndScore> toAdd) {
+        alignments.putAll(toAdd);
+      }
 
       @Override
       public Panel getExercisePanel(ClientExercise e) {

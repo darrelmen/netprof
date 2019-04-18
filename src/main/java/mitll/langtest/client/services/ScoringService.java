@@ -57,7 +57,7 @@ public interface ScoringService extends RemoteService {
 
   Map<Integer, AlignmentAndScore> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException;
 
-  Map<Integer, AlignmentAndScore> getCachedAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException;
+ // Map<Integer, AlignmentAndScore> getCachedAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException;
 
   AlignmentAndScore getStudentAlignment(int projid, int resultID) throws DominoSessionException;
 

@@ -48,7 +48,7 @@ import java.util.logging.Logger;
 public class AlignmentFetcher {
   private final Logger logger = Logger.getLogger("AlignmentFetcher");
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    *
@@ -140,8 +140,13 @@ public class AlignmentFetcher {
 
       if (hasProject && (needToShowRef || needToShowContextRef)) {
         tellListenersAboutAlignment(needToShowRef, refID, currentAudioAttr, needToShowContextRef, contextRefID, contextAudioAttr);
-        req.remove(refID);
-        req.remove(contextRefID);
+
+        if (needToShowRef) {  // means it was already shown just now
+          req.remove(refID);
+        }
+        if (needToShowContextRef) { // means it was already shown just now
+          req.remove(contextRefID);
+        }
         if (DEBUG) logger.info("getRefAudio for " + exerciseID + " now " + req.size());
       }
       req.removeAll(knownIDs);
@@ -302,9 +307,11 @@ public class AlignmentFetcher {
    * @see #addToRequest
    */
   void rememberAlignment(int refID, AlignmentOutput alignmentOutput) {
-    if (alignments.containsKey(refID)) {
-      logger.info("rememberAlignment : already has alignment for " + refID);
-    }
+   if (DEBUG) {
+     if (alignments.containsKey(refID)) {
+       logger.info("rememberAlignment : already has alignment for " + refID);
+     }
+   }
     alignments.put(refID, alignmentOutput);
   }
 
@@ -319,6 +326,7 @@ public class AlignmentFetcher {
 
   /**
    * TODO : how can we not know what to show? -- how can needToShowContextRef = false???
+   *
    * @param listener
    * @param currentAudioAttr
    * @param refID
@@ -334,13 +342,18 @@ public class AlignmentFetcher {
                              int contextRefID,
                              Set<Integer> req,
                              int projectid) {
+
+    final boolean needToShowRef = req.contains(refID);
+    final boolean needToShowContextRef = req.contains(contextRefID);
+
     if (DEBUG) {
       logger.info("getAlignments asking scoring service for exid " + exerciseID +
           "\n\tfor " + req.size() + " : " + req +
-          " alignments for " + refID + " and context " + contextRefID);
+          "\n\talignments for " + refID + " and context " + contextRefID +
+          "\n\tneedToShowRef        " + needToShowRef +
+          "\n\tneedToShowContextRef " + needToShowContextRef
+      );
     }
-    final boolean needToShowRef = req.contains(refID);
-    final boolean needToShowContextRef = req.contains(contextRefID);
 
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
     if (projectStartupInfo != null && projectStartupInfo.isHasModel()) {
@@ -371,11 +384,11 @@ public class AlignmentFetcher {
 
   private void tellListenersAboutAlignment(boolean needToShowRef, int refID, AudioAttribute currentAudioAttr, boolean needToShowContextRef, int contextRefID, AudioAttribute contextAudioAttr) {
     if (needToShowRef) {
-      logger.info("tellListenersAboutAlignment 1 register " + refID );
+      if (DEBUG) logger.info("tellListenersAboutAlignment 1 register " + refID);
       audioChangeListener.audioChanged(refID, currentAudioAttr.getDurationInMillis());
     }
     if (needToShowContextRef) {
-      logger.info("tellListenersAboutAlignment 2 register context " + contextRefID);
+      if (DEBUG) logger.info("tellListenersAboutAlignment 2 register context " + contextRefID);
       contextChangeListener.audioChanged(contextRefID, contextAudioAttr.getDurationInMillis());
     }
   }
@@ -388,6 +401,11 @@ public class AlignmentFetcher {
    */
   private void cacheOthers(RefAudioListener listener) {
     Set<Integer> req = getAllReqAudioIDs();
+
+    Set<Integer> knownIDs = getKnownIDs(req);
+    if (DEBUG) logger.info("cacheOthers : From " + req.size() + " : known " + knownIDs.size());
+
+    req.removeAll(knownIDs);
 
     if (req.isEmpty()) {
       listener.refAudioComplete();
@@ -418,20 +436,28 @@ public class AlignmentFetcher {
 
       @Override
       public void onSuccess(Map<Integer, AlignmentAndScore> result) {
-        logger.info("getOnComplete " + result.size() + " : " + result.keySet());
+        if (DEBUG) logger.info("getOnComplete " + result.size() + " : " + result.keySet());
+
         alignments.putAll(result);
         listener.refAudioComplete();
       }
     };
   }
 
-  void getAndRememberCachedAlignents(RefAudioListener listener, Set<Integer> req) {
-    ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
-    if (projectStartupInfo != null) {
-      controller.getScoringService().getCachedAlignments(projectStartupInfo.getProjectid(),
-          req, getOnComplete(listener));
+/*  void getAndRememberCachedAlignents(RefAudioListener listener, Set<Integer> req) {
+    Set<Integer> knownIDs = getKnownIDs(req);
+    if (DEBUG) logger.info("getAndRememberCachedAlignents : From " + req.size() + " : known " + knownIDs.size());
+
+    req.removeAll(knownIDs);
+
+    if (!req.isEmpty()) {
+      ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
+      if (projectStartupInfo != null) {
+        controller.getScoringService().getCachedAlignments(projectStartupInfo.getProjectid(),
+            req, getOnComplete(listener));
+      }
     }
-  }
+  }*/
 
   private ProjectStartupInfo getProjectStartupInfo() {
     return controller.getProjectStartupInfo();
@@ -455,7 +481,7 @@ public class AlignmentFetcher {
   }
 
   private Set<Integer> getKnownIDs(Set<Integer> req) {
-    int before = req.size();
+    //int before = req.size();
 
     Set<Integer> known = new HashSet<>();
 

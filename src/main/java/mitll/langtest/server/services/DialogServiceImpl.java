@@ -105,7 +105,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
 
         setDialogScores(dialogList, scoreHistoryPerExercise);
 
-        return new ExerciseListWrapper<>(request.getReqID(), dialogList, scoreHistoryPerExercise);
+        return new ExerciseListWrapper<>(request.getReqID(), dialogList, scoreHistoryPerExercise, new HashMap<>());
       } else {
         logger.info("getDialogs no user?");
         return new ExerciseListWrapper<>();

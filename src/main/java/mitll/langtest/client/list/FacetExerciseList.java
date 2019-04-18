@@ -95,7 +95,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   /**
    *
    */
-  static final boolean DEBUG_STALE = true;
+  static final boolean DEBUG_STALE = false;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_CHOICES = false;
@@ -1683,6 +1683,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     alreadyFetched.forEach(exercise -> idToEx.put(exercise.getID(), exercise));
 
     result.getExercises().forEach(clientEx -> addExerciseToCached((U) clientEx));
+    factory.addToCache(result.getCachedAlignments());
     return idToEx;
   }
 
@@ -1839,26 +1840,32 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     List<RefAudioGetter> getters = makeExercisePanels(result, exerciseContainer, reqID);
     long now = System.currentTimeMillis();
 
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("populatePanels made " + getters.size() + " panels in " + (now - then) + " millis for req " + getCurrentExerciseReq() + " ");
     }
 
     // get existing alignment info in one call!
-    {
-      Set<Integer> audioIDs = new HashSet<>();
-      getters.forEach(refAudioGetter -> audioIDs.addAll(refAudioGetter.getReqAudioIDs()));
+ //   {
 
-      logger.info("populatePanels asking for " + audioIDs.size() + " to fill cache...");
-      long then2 = System.currentTimeMillis();
-      getters.iterator().next().getAndRememberCachedAlignents(
-          () -> {
-            logger.info("got answer back for request for " + audioIDs.size() + " audio ids in " +
-                (System.currentTimeMillis() - then2));
-           // if (!getters.isEmpty()) {
-              getRefAudio(getters.iterator());
-          //  }
-          }, audioIDs);
-    }
+//      if (DEBUG) {
+        //   Set<Integer> audioIDs = new HashSet<>();
+        //   getters.forEach(refAudioGetter -> audioIDs.addAll(refAudioGetter.getReqAudioIDs()));
+  //      logger.info("populatePanels asking for " + audioIDs.size() + " to fill cache...");
+    //  }
+     // long then2 = System.currentTimeMillis();
+//      getters.iterator().next().getAndRememberCachedAlignents(
+//          () -> {
+//            logger.info("got answer back for request for " + audioIDs.size() + " audio ids in " +
+//                (System.currentTimeMillis() - then2));
+//           // if (!getters.isEmpty()) {
+//              getRefAudio(getters.iterator());
+//          //  }
+//          }, audioIDs);
+
+
+      getRefAudio(getters.iterator());
+
+   // }
   }
 
   /**

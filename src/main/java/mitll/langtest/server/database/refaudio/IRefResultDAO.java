@@ -35,6 +35,9 @@ import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
+import mitll.langtest.server.scoring.PrecalcScores;
+import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 
 import java.util.Collection;
 import java.util.List;
@@ -103,4 +106,8 @@ public interface IRefResultDAO extends IDAO {
   List<Integer> getAllAudioIDsForProject(int projid);
 
   void deleteForProject(int projid);
+
+  Map<Integer, AlignmentAndScore> getCachedAlignments(int projid, Set<Integer> audioIDs);
+
+  PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult, Language language);
 }

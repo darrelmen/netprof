@@ -90,7 +90,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   HeadlessPlayAudio playAudio;
 
   static final boolean DEBUG = false;
-  static final boolean DEBUG_SHOW_ALIGNMENT = true;
+  static final boolean DEBUG_SHOW_ALIGNMENT = false;
   private static final boolean DEBUG_PLAY_PAUSE = false;
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
@@ -223,6 +223,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 //    }
   }
 
+  /**
+   * @see
+   * @param next
+   */
   void rememberAudio(AudioAttribute next) {
     //  logger.info("rememberAudio audio for " + this + "  " + next);
     playAudio.rememberAudio(next);
@@ -230,6 +234,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   /**
+   * @see #rememberAudio
    * @param next
    */
   private void maybeShowAlignment(AudioAttribute next) {
@@ -283,10 +288,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return alignmentFetcher.getAllReqAudioIDs();
   }
 
-  @Override
+/*  @Override
   public void getAndRememberCachedAlignents(RefAudioListener listener, Set<Integer> req) {
     alignmentFetcher.getAndRememberCachedAlignents(listener, req);
-  }
+  }*/
 
   /**
    * @param req
@@ -1091,7 +1096,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   void contextAudioChanged(int id, long duration) {
-    logger.info("contextAudioChanged : audio changed for " + id + " - " + duration);
+    if (DEBUG_SHOW_ALIGNMENT) logger.info("contextAudioChanged : audio changed for " + id + " - " + duration);
+
     audioChanged(id, duration);
   }
 

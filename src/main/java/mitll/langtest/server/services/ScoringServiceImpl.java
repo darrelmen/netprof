@@ -311,24 +311,24 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     }
   }
 
-  @Override
+/*  @Override
   public Map<Integer, AlignmentAndScore> getCachedAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException {
     getUserIDFromSessionOrDB();
-
+    return db.getRefResultDAO().getCachedAlignments(projid,audioIDs);
 //    logger.info("getAlignments project " + projid + " asking for " + audioIDs);
-    Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
-
-    Project project = getProject(projid);
-    ensureAudio(projid, audioIDMap, project);
-
-    //  logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
-    Map<Integer, AlignmentAndScore> audioIDToAlignment =
-        // recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
-        project == null ? Collections.emptyMap() : getCached(projid, audioIDs, audioIDMap);
-
-    return audioIDToAlignment;
+//    Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(db.getRefResultDAO().getAllSlimForProjectIn(projid, audioIDs));
+//
+//    Project project = getProject(projid);
+//    ensureAudio(projid, audioIDMap, project);
+//
+//    //  logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
+//    Map<Integer, AlignmentAndScore> audioIDToAlignment =
+//        // recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
+//        project == null ? Collections.emptyMap() : getCached(projid, audioIDs, audioIDMap);
+//
+//    return audioIDToAlignment;
     //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
-  }
+  }*/
 
   public AlignmentAndScore getStudentAlignment(int projid, int resultID) {
     CorrectAndScore correctAndScoreForResult = db.getResultDAO().getCorrectAndScoreForResult(resultID, getProject(projid).getLanguageEnum());
@@ -376,6 +376,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
     return idToAlignment;
   }
 
+/*
   private Map<Integer, AlignmentAndScore> getCached(int projid,
                                                     Collection<Integer> audioIDs,
 
@@ -398,6 +399,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
     return idToAlignment;
   }
+*/
 
 
   /**
@@ -698,12 +700,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   @NotNull
   private PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult, Language language) {
-    return new PrecalcScores(serverProps, cachedResult, shouldUsePhoneDisplay(usePhoneToDisplay, language), language);
+    return db.getRefResultDAO().getPrecalcScores(usePhoneToDisplay,cachedResult,language);
+//    return new PrecalcScores(serverProps, cachedResult, shouldUsePhoneDisplay(usePhoneToDisplay, language), language);
   }
 
-  private boolean shouldUsePhoneDisplay(boolean usePhoneToDisplay, Language language) {
-    return usePhoneToDisplay || serverProps.usePhoneToDisplay(language);
-  }
+//  private boolean shouldUsePhoneDisplay(boolean usePhoneToDisplay, Language language) {
+//    return usePhoneToDisplay || serverProps.usePhoneToDisplay(language);
+//  }
 
   /**
    * Doesn't really need to be on the scoring service...

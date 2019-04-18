@@ -785,7 +785,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   }
 
   public void contextAudioChanged(int id, long duration) {
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("contextAudioChanged  id " + id);
     }
 

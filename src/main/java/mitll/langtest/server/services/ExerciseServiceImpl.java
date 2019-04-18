@@ -46,6 +46,7 @@ import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -116,7 +117,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     if (projectID == -1) { // not sure how this can happen now that we throw DominoSessionException
       logger.warn("getExerciseIds project id is -1?  It should probably have a real value.");
       List<T> ts = new ArrayList<>();
-      return new ExerciseListWrapper<>(request.getReqID(), ts, null);
+      return new ExerciseListWrapper<>(request.getReqID(), ts);
     }
 
     logger.info("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
@@ -1120,8 +1121,17 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     maybeAddPlayedMarkings(request, exercises, userID);
 
+    Set<Integer> audioIDs = new HashSet<>();
+    for (ClientExercise exercise : exercises) {
+      for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
+        audioIDs.add(audioAttribute.getUniqueID());
+      }
+      exercise.getDirectlyRelated().forEach(exercise1 -> exercise1.getAudioAttributes().forEach(audioAttribute -> audioIDs.add(audioAttribute.getUniqueID())));
+    }
+    Map<Integer, AlignmentAndScore> cachedAlignments = db.getRefResultDAO().getCachedAlignments(projectID, audioIDs);
+
     // for (CommonExercise exercise : exercises) logger.info("\treturning " + exercise.getID());
-    return new ExerciseListWrapper<>(request.getReqID(), exercises, scoreHistoryPerExercise);
+    return new ExerciseListWrapper<>(request.getReqID(), exercises, scoreHistoryPerExercise,cachedAlignments);
   }
 
   private void maybeAddPlayedMarkings(ExerciseListRequest request, List<ClientExercise> exercises, int userID) {

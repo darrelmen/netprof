@@ -29,23 +29,36 @@
 
 package mitll.langtest.server.database.refaudio;
 
+import com.google.gson.JsonObject;
 import mitll.langtest.server.audio.DecodeAlignOutput;
+import mitll.langtest.server.audio.image.ImageType;
+import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
+import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.result.SlimResult;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.decoder.RefResultDecoder;
+import mitll.langtest.server.scoring.ParseResultJson;
+import mitll.langtest.server.scoring.PrecalcScores;
+import mitll.langtest.server.scoring.TranscriptSegmentGenerator;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.instrumentation.TranscriptSegment;
+import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
+import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickRefResult;
 import mitll.npdata.dao.SlickRefResultJson;
 import mitll.npdata.dao.refaudio.RefResultDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
 import java.util.*;
@@ -55,12 +68,16 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   private static final Logger logger = LogManager.getLogger(SlickRefResultDAO.class);
   private static final int WARN_THRESHOLD = 50;
   private static final String WORDS = "{\"words\":[]}";
+  private static final boolean USE_PHONE_TO_DISPLAY = true;
 
   private final RefResultDAOWrapper dao;
+  private TranscriptSegmentGenerator transcriptSegmentGenerator;
 
   public SlickRefResultDAO(Database database, DBConnection dbConnection) {
     super(database);
     dao = new RefResultDAOWrapper(dbConnection);
+    this.transcriptSegmentGenerator = new TranscriptSegmentGenerator(database.getServerProps());
+
   }
 
   public void createTable() {
@@ -142,7 +159,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   }
 
   public SlickRefResult toSlick(int projid, Result result, int audioID) {
-    DecodeAlignOutput alignOutput  = result.getAlignOutput();
+    DecodeAlignOutput alignOutput = result.getAlignOutput();
     DecodeAlignOutput decodeOutput = result.getDecodeOutput();
     String model = result.getModel();
     if (model == null) model = "";
@@ -184,7 +201,6 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   }
 
   /**
-   *
    * @param projid
    * @return
    */
@@ -290,5 +306,91 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
    * @see RefResultDecoder#writeRefDecode
    */
   @Override
-  public void deleteForProject(int projid) {  dao.deleteForProject(projid);  }
+  public void deleteForProject(int projid) {
+    dao.deleteForProject(projid);
+  }
+
+  @Override
+  public Map<Integer, AlignmentAndScore> getCachedAlignments(int projid, Set<Integer> audioIDs) {
+//    logger.info("getAlignments project " + projid + " asking for " + audioIDs);
+    Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(getAllSlimForProjectIn(projid, audioIDs));
+
+    Project project = database.getProject(projid);
+    // ensureAudio(projid, audioIDMap, project);
+
+    //  logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
+    Map<Integer, AlignmentAndScore> audioIDToAlignment =
+        // recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
+        project == null ? Collections.emptyMap() : getCached(projid, project, audioIDs, audioIDMap);
+
+    return audioIDToAlignment;
+    //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
+  }
+
+  @NotNull
+  private Map<Integer, ISlimResult> getAudioIDMap(Collection<ISlimResult> jsonResultsForProject) {
+    Map<Integer, ISlimResult> audioToResult = new HashMap<>(jsonResultsForProject.size());
+    jsonResultsForProject.forEach(iSlimResult -> audioToResult.put(iSlimResult.getAudioID(), iSlimResult));
+    return audioToResult;
+  }
+
+  private Map<Integer, AlignmentAndScore> getCached(int projid,
+                                                    Project project,
+                                                    Collection<Integer> audioIDs,
+
+                                                    Map<Integer, ISlimResult> audioToResult) {
+    Map<Integer, AlignmentAndScore> idToAlignment = new HashMap<>();
+
+    // if (hasModel) {
+//      logger.info("recalcAlignments recalc " + audioIDs.size() + " audio ids for project #" + projid);
+    if (audioIDs.isEmpty()) logger.error("recalcAlignments huh? no audio for " + projid);
+
+    //Set<Integer> completed = new HashSet<>(audioToResult.size());
+//      audioIDs.forEach(audioID ->
+//          recalcOneOrGetCached(projid, audioID, audioFileHelper, userIDFromSession, audioToResult.get(audioID), idToAlignment, completed, audioIDs.size()));
+    Language languageEnum = project.getLanguageEnum();
+
+    audioIDs.forEach(audioID ->
+    {
+      getCachedAudioRef(idToAlignment, audioID, audioToResult.get(audioID), languageEnum);
+    });  // OK, let's translate the db info into the alignment output
+
+//    } else {
+//      logger.info("recalcAlignments : no scoring engine for project " + projid + " so not recalculating alignments.");
+//    }
+
+    return idToAlignment;
+  }
+
+  private void getCachedAudioRef(Map<Integer, AlignmentAndScore> idToAlignment,
+                                 Integer audioID, ISlimResult cachedResult, Language language) {
+    PrecalcScores precalcScores = getPrecalcScores(USE_PHONE_TO_DISPLAY, cachedResult, language);
+    JsonObject jsonObject = precalcScores.getJsonObject();
+
+    if (jsonObject != null) {
+      Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
+          getTypeToTranscriptEvents(jsonObject, USE_PHONE_TO_DISPLAY, language);
+      Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = transcriptSegmentGenerator.getTypeToSegments(typeToTranscriptEvents, language);
+//    logger.info("getCachedAudioRef : cache HIT for " + audioID + " returning " + typeToSegments);
+      idToAlignment.put(audioID, new AlignmentAndScore(typeToSegments, cachedResult.getPronScore(), true));
+    }
+  }
+
+  @NotNull
+  public PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult, Language language) {
+    return new PrecalcScores(database.getServerProps(), cachedResult, shouldUsePhoneDisplay(usePhoneToDisplay, language), language);
+  }
+
+  private boolean shouldUsePhoneDisplay(boolean usePhoneToDisplay, Language language) {
+    return usePhoneToDisplay || database.getServerProps().usePhoneToDisplay(language);
+  }
+
+  private Map<ImageType, Map<Float, TranscriptEvent>> getTypeToTranscriptEvents(JsonObject object,
+                                                                                boolean usePhoneToDisplay,
+                                                                                Language language) {
+    return
+        new ParseResultJson(database.getServerProps(), language)
+            .readFromJSON(object, "words", "w", usePhoneToDisplay, null, false);
+  }
+
 }
