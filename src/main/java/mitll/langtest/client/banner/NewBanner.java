@@ -131,6 +131,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private ComplexWidget recnav, defectnav, dialognav;
   private Dropdown dialogPracticeNav;
 
+  /**
+   *
+   */
   private Nav lnav;
   /**
    * @see #setCogVisible(boolean)
@@ -317,7 +320,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private UserMenu userMenu;
-  List<LinkAndTitle> allChoices = new ArrayList<>();
+  private List<LinkAndTitle> allChoices = new ArrayList<>();
 
   /**
    * @param userMenu
@@ -327,6 +330,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @NotNull
   private Nav getRightSideChoices(UserMenu userMenu) {
     this.userMenu = userMenu;
+
     Nav rnav = new Nav();
     rnav.setAlignment(Alignment.RIGHT);
     addSubtitle(rnav);
@@ -339,9 +343,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
       cog.setIcon(IconType.COG);
 
       allChoices.clear();
+
       List<LinkAndTitle> cogMenuChoicesForAdmin = userMenu.getCogMenuChoicesForAdmin();
       cogMenuChoicesForAdmin.forEach(lt -> cog.add(lt.makeNewLink()));
       allChoices.addAll(cogMenuChoicesForAdmin);
+
       List<LinkAndTitle> hasProjectChoices = userMenu.getProjectSpecificChoices();
       hasProjectChoices.forEach(lt -> cog.add(lt.makeNewLink()));
       allChoices.addAll(hasProjectChoices);
@@ -350,6 +356,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     }
 
     getInfoMenu(userMenu, rnav);
+
     return rnav;
   }
 
@@ -357,7 +364,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see #setUserName(String)
    */
   public void setCogTitle() {
-    logger.info("setCogTitle  project " + controller.getProjectID());
+//    logger.info("setCogTitle  project " + controller.getProjectID());
     if (controller.getProjectID() > -1) {
       controller.getUserService().getPendingUsers(controller.getProjectID(), new AsyncCallback<List<ActiveUser>>() {
         @Override
@@ -372,7 +379,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
         }
       });
     } else {
-      logger.warning("setCogTitle no project");
+      logger.info("setCogTitle : no project");
+      setChoicesVisibility(isAdmin(), isTeacher());
+      setVisibleChoices(false);
     }
   }
 
@@ -458,11 +467,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     String viewName = views.toString();
 
     NavLink learn = getLink(nav, viewName);
+
     learn.addClickHandler(event -> {
       //   logger.info("getChoice got click on " + viewName);
       controller.logEvent(viewName, "NavLink", "N/A", "click on view");
       gotClickOnChoice(viewName, learn, true);
     });
+
     return learn;
   }
 
@@ -593,18 +604,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     boolean admin = isAdmin();
     boolean teacher = isTeacher();
     cog.setVisible(admin || teacher);
-    boolean hasProject = controller.getProjectStartupInfo() != null;
 
-//    if (admin) {
-//      //  if (DEBUG) logger.info("setCogVisible " + val + " has project " + hasProject + " for " + hasProjectChoices.size());
-//
-//      hasProjectChoices.forEach(linkAndTitle -> {
-//        linkAndTitle.setVisible(hasProject && );
-//        // logger.info("setCogVisible " + hasProject + " for " + linkAndTitle);
-//      });
-//    }
-    allChoices
-        .forEach(linkAndTitle -> linkAndTitle.setVisible(admin, teacher, hasProject));
+    setChoicesVisibility(admin, teacher);
+  }
+
+  private void setChoicesVisibility(boolean admin, boolean teacher) {
+    boolean hasProject = controller.getProjectStartupInfo() != null;
+    allChoices.forEach(linkAndTitle -> linkAndTitle.setVisible(admin, teacher, hasProject));
   }
 
   private boolean isTeacher() {
@@ -628,30 +634,33 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   @Override
   public void setUserName(String name) {
-
     userDrop.setText(name);
     User current = controller.getUserManager().getCurrent();
 
     if (current != null) {
-      List<String> perms = new ArrayList<>();
-      logger.info("setUserName " + name + " kind " + current.getUserKind());
-      logger.info("setUserName perms " + current.getPermissions());
-      String suffix = "";//current.getUserKind() != Kind.STUDENT ? "( " + current.getUserKind().getName() + ")" : "";
-
-      current.getPermissions().forEach(permission -> perms.add(permission.getKind().getName()));
-      if (!perms.isEmpty()) {
-        suffix += " " + perms;
-      }
-      String tip = current.getFullName() + " (" +current.getUserID()+
-          ") "+ suffix;
+      String tip = current.getFullName() + " (" + current.getUserID() + ") " + getUserSuffix(current);
       userDrop.setTitle(tip);
-      logger.info("setUserName suffix " + suffix);
+//      logger.info("setUserName suffix " + suffix);
       new TooltipHelper().createAddTooltip(userDrop, tip, Placement.LEFT);
     }
 
     recordMenuVisible();
 
     setCogTitle();
+  }
+
+  @NotNull
+  private String getUserSuffix(User current) {
+    List<String> perms = new ArrayList<>();
+//      logger.info("setUserName " + name + " kind " + current.getUserKind());
+//      logger.info("setUserName perms " + current.getPermissions());
+    String suffix = "";//current.getUserKind() != Kind.STUDENT ? "( " + current.getUserKind().getName() + ")" : "";
+
+    current.getPermissions().forEach(permission -> perms.add(permission.getKind().getName()));
+    if (!perms.isEmpty()) {
+      suffix += " " + perms;
+    }
+    return suffix;
   }
 
   private boolean hasProjectChoice() {
@@ -684,10 +693,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
-   * @see UILifecycle#showInitialState
+   * @see InitialUI#showInitialState
    */
   @Override
   public void checkProjectSelected() {
+    // logger.info("checkProjectSelected ");
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     setVisibleChoices(projectStartupInfo != null);
 
@@ -717,7 +727,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   public void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
-    //logger.info("setVisibleChoices " +show);
+    // logger.info("setVisibleChoices " + show);
     reflectPermissions(controller.getPermissions());
   }
 

@@ -63,7 +63,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   private static final String LEARN = "learn";
 
   @Override
-  public List<MonitorResult> getMonitorResultsKnownExercises(int projid, int limit) {
+  public List<MonitorResult> getMonitorResultsKnownExercises(int projid) {
     return null;
   }
 
@@ -114,6 +114,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   @Override
   public long getFirstTime(int projid) {
     return 0;
+  }
+
+  @Override
+  public List<MonitorResult> getMonitorResultsKnownExercisesWithLimit(int projid, int limit) {
+    return null;
   }
 
   /**
@@ -178,7 +183,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   /**
    * @param projid
    * @return
-   * @see DatabaseServices#getMonitorResults(int, int)
+   * @see DatabaseServices#getMonitorResults(int)
    */
   @Override
   public List<MonitorResult> getMonitorResults(int projid) {

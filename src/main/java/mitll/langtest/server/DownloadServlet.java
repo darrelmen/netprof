@@ -37,6 +37,7 @@ import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.server.database.excel.UserPerfToExcel;
 import mitll.langtest.server.database.project.Project;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
@@ -44,6 +45,7 @@ import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.result.MonitorResult;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -61,8 +63,6 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static mitll.langtest.server.services.ResultServiceImpl.LIMIT;
 
 @SuppressWarnings("serial")
 public class DownloadServlet extends DatabaseServlet {
@@ -202,10 +202,8 @@ public class DownloadServlet extends DatabaseServlet {
   private void writeStudentAudio(HttpServletRequest request, HttpServletResponse response, DatabaseImpl db, int projid) throws DominoSessionException {
     ParamParser invoke = new ParamParser(request.getQueryString().split("&")).invoke(false);
 
-    logger.info("Got " + invoke.getSelection());
-    Collection<String> userid = invoke.getSelection().get(USERID);
-
-    int user = getInt(userid);
+    logger.info("writeStudentAudio Got " + invoke.getSelection());
+    int user = getInt(invoke.getSelection().get(USERID));
 
     Collection<String> sessionid = invoke.getSelection().get("sessionid");
 //            logger.info("writeStudentAudioZip " + requestURI);
@@ -460,32 +458,48 @@ public class DownloadServlet extends DatabaseServlet {
       Project project = db.getProject(projectid);
 
       String suffix = getTimestamp(sessionID, from1);
-      User userWhere = db.getUserDAO().getUserWhere(userID);
-      User caller = db.getUserDAO().getUserWhere(callingUser);
 
-      logger.info("for user " + userWhere);
-      logger.info("Caller   " + caller + " is admin " + caller.isAdmin());
+      IUserDAO userDAO = db.getUserDAO();
 
-      String base = userWhere.getFirstInitialName() + suffix;
-      String baseName = base
-          .replaceAll("\\s++", "_")
-          .replaceAll("\\.", "_");
+      User subjectWithAudio = userDAO.getUserWhere(userID);
 
       new AudioExport(db.getServerProps(), project.getPathHelper().getContext())
           .writeResultsToStream(
               project,
               resultsBySession,
-              baseName,
+              getBasename(suffix, subjectWithAudio),
               project.getTypeOrder(),
               project.getLanguage(),
               response.getOutputStream(),
               options.setIncludeAudio(true),
               project.isEnglish(),
-              userWhere, caller.isAdmin());
+              subjectWithAudio,
+              isAdmin(callingUser, subjectWithAudio));
 
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
+  }
+
+  @NotNull
+  private String getBasename(String suffix, User subjectWithAudio) {
+    String base = subjectWithAudio.getFirstInitialName() + suffix;
+    return base
+        .replaceAll("\\s++", "_")
+        .replaceAll("\\.", "_");
+  }
+
+  private boolean isAdmin(int callingUser, User subjectWithAudio) {
+    IUserDAO userDAO = db.getUserDAO();
+    userDAO.refreshCacheFor(callingUser);
+    User caller = userDAO.getUserWhere(callingUser);
+
+    boolean admin = caller.isAdmin() || caller.getPermissions().contains(Permission.QUALITY_CONTROL) || caller.getPermissions().contains(Permission.DEVELOP_CONTENT);
+    logger.info("writeStudentZip for" +
+        "\n\tuser        " + subjectWithAudio + "" +
+        "\n\tCaller      " + caller +
+        "\n\tcan get wav " + admin);
+    return admin;
   }
 
   @NotNull
@@ -693,7 +707,7 @@ public class DownloadServlet extends DatabaseServlet {
       new UserPerfToExcel().writeExcelToStream(userInfo, userListNoExercises, outputStream);
     } else if (encodedFileName.toLowerCase().contains(RESULTS)) {
       setFilenameHeader(response, prefix + RESULTS_XLSX);
-      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid, LIMIT), db.getTypeOrder(projectid), outputStream);
+      new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid), db.getTypeOrder(projectid), outputStream);
     } else if (encodedFileName.toLowerCase().contains(EVENTS)) {
       setFilenameHeader(response, prefix + EVENTS_XLSX);
       new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAllWithLimit(projectid, 50000), outputStream);

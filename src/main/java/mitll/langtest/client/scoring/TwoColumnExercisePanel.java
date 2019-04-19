@@ -216,8 +216,11 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     if (alignmentOutput != null) {
       if (currentAudioDisplayed != id) {
         currentAudioDisplayed = id;
-        if (DEBUG)
+
+        if (DEBUG_SHOW_ALIGNMENT) {
           logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
+        }
+
         List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
         DivWidget flClickableRow = this.getFlClickableRow() == null ? altFLClickableRow : this.getFlClickableRow();
         DivWidget flClickablePhoneRow = this.flClickableRowPhones == null ? altFLClickableRowPhones : this.flClickableRowPhones;
@@ -226,8 +229,9 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
         return null;
       }
     } else {
-      if (DEBUG)
+      if (DEBUG_SHOW_ALIGNMENT) {
         logger.info("showAlignment no alignment info for ex " + exercise.getID() + " " + id + " dur " + duration);
+      }
       return null;
     }
   }
@@ -437,10 +441,11 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
           if (DEBUG) logger.info("audioChangedWithAlignment audio " + currentAudioAttr.getUniqueID());
 
+          //   AlignmentOutput alignmentOutput;
           audioChangedWithAlignment(
               currentAudioAttr.getUniqueID(),
-              currentAudioAttr.getDurationInMillis(),
-              currentAudioAttr.getAlignmentOutput());
+              currentAudioAttr.getDurationInMillis()
+          );
         }
       }
 
@@ -859,9 +864,14 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
       if (contextPlay != null && contextPlay.getCurrentAudioAttr() != null) {
         AudioAttribute currentAudioAttr = contextPlay.getCurrentAudioAttr();
-        contextAudioChangedWithAlignment(currentAudioAttr.getUniqueID(),
-            currentAudioAttr.getDurationInMillis(),
-            currentAudioAttr.getAlignmentOutput());
+
+        int uniqueID = currentAudioAttr.getUniqueID();
+        //AlignmentOutput alignmentOutput = alignmentFetcher.getAlignment(uniqueID);
+
+        contextAudioChangedWithAlignment(uniqueID,
+            currentAudioAttr.getDurationInMillis()//,
+ //           alignmentFetcher.getAlignment(uniqueID)
+        );
       }
 
       return hp;
@@ -889,13 +899,13 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       }
 
       @Override
-      public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
+      public void audioChangedWithAlignment(int id, long duration) {
         if (DEBUG) {
           logger.info("getContextPlay audioChangedWithAlignment for ex " + exercise.getID() + "/" + contextExercise.getID() +
               " RECORD_CONTEXT audio id "
           );
         }
-        contextAudioChangedWithAlignment(id, duration, alignmentOutputFromAudio);
+        contextAudioChangedWithAlignment(id, duration);//, alignmentOutputFromAudio);
       }
     };
     contextPlay = new ChoicePlayAudioPanel<>(contextExercise, controller, true, contextAudioChanged);
@@ -906,15 +916,16 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     return contextPlay;
   }
 
-  private void contextAudioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
+  private void contextAudioChangedWithAlignment(int id, long duration) {//}, AlignmentOutput alignmentOutputFromAudio) {
     if (DEBUG) {
-      logger.info("contextAudioChangedWithAlignment audioChanged for ex " + exercise.getID() + " RECORD_CONTEXT audio id " + id +
-          " alignment " + alignmentOutputFromAudio);
+      logger.info("contextAudioChangedWithAlignment audioChanged for ex " + exercise.getID() + " RECORD_CONTEXT audio id " + id);// +
+  //        " alignment " + alignmentOutputFromAudio);
     }
 
-    if (alignmentOutputFromAudio != null) {
-      alignmentFetcher.rememberAlignment(id, alignmentOutputFromAudio);
-    }
+//
+//    if (alignmentOutputFromAudio != null) {
+//      alignmentFetcher.rememberAlignment(id, alignmentOutputFromAudio);
+//    }
     contextAudioChanged(id, duration);
   }
 

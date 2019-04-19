@@ -416,6 +416,9 @@ public class ProjectManagement implements IProjectManagement {
       if (projectDAO.maybeSetDominoIDs(project)) {
         logger.info("configureProject : updated domino ids on " + project);
       }
+      // remember to put the audio back on the exercises after a reload or else json export will
+      // filter them out since they have no audio!
+      db.getAudioDAO().attachAudioToExercises(project.getRawExercises(), project.getLanguageEnum(), projectID);
     }
 
     if (project.getExerciseDAO() == null) {
@@ -986,6 +989,7 @@ public class ProjectManagement implements IProjectManagement {
    * @param projectid
    * @param onlyOne   if false loads all the projects
    * @return
+   * @see #getProject(int, boolean)
    */
   private Project lazyGetProject(int projectid, boolean onlyOne) {
     logger.info("lazyGetProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +

@@ -46,6 +46,7 @@ import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -116,7 +117,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     if (projectID == -1) { // not sure how this can happen now that we throw DominoSessionException
       logger.warn("getExerciseIds project id is -1?  It should probably have a real value.");
       List<T> ts = new ArrayList<>();
-      return new ExerciseListWrapper<>(request.getReqID(), ts, null);
+      return new ExerciseListWrapper<>(request.getReqID(), ts);
     }
 
     logger.info("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
@@ -179,17 +180,20 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see #getExerciseIds
    */
   private ExerciseListWrapper<T> getDialogResponse(ExerciseListRequest request, int projectID) throws DominoSessionException {
-    IDialog dialog = getDialog(request.getDialogID());
     List<CommonExercise> commonExercises = Collections.emptyList();
-    if (dialog != null) {
-      commonExercises = getCommonExercises(dialog.getCoreVocabulary());
-      commonExercises.addAll(getCommonExercises(dialog.getExercises()));
 
-      // logger.info("request " + request.getPrefix());
-      {
-        String prefix = request.getPrefix();
-        if (!prefix.isEmpty()) {
-          commonExercises = new ArrayList<>(getSearchMatches(commonExercises, prefix, projectID));
+    {
+      IDialog dialog = getDialog(request.getDialogID());
+      if (dialog != null) {
+        commonExercises = getCommonExercises(dialog.getCoreVocabulary());
+        commonExercises.addAll(getCommonExercises(dialog.getExercises()));
+
+        // logger.info("request " + request.getPrefix());
+        {
+          String prefix = request.getPrefix();
+          if (!prefix.isEmpty()) {
+            commonExercises = new ArrayList<>(getSearchMatches(commonExercises, prefix, projectID));
+          }
         }
       }
     }
@@ -201,8 +205,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     }
 
     //logger.info("getDialogResponse returning exercises for " + request.getDialogID() + " " + collect.size());
-    ExerciseListWrapper<T> exerciseListWrapper = makeExerciseListWrapper(request, commonExercises, projectID);
-    return exerciseListWrapper;
+    return makeExerciseListWrapper(request, commonExercises, projectID);
   }
 
   @NotNull
@@ -270,7 +273,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
       logger.info("getExerciseWhenNoUnitChapter OK only return context " + commonExercises.size());
     } else {
-      commonExercises = getSortedExercises(request, exercisesForSearch, predefExercises, request.getUserID(), projectID);
+      commonExercises = getSortedExercises(request, exercisesForSearch, predefExercises, projectID);
     }
 
     long now = System.currentTimeMillis();
@@ -300,14 +303,12 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @param request
    * @param tripleExercises
    * @param predefExercises
-   * @param userID
    * @return
    * @see #getExerciseWhenNoUnitChapter
    */
   private List<CommonExercise> getSortedExercises(ExerciseListRequest request,
                                                   TripleExercises<CommonExercise> tripleExercises,
                                                   boolean predefExercises,
-                                                  int userID,
                                                   int projID) {
     Project projectForUser = getProject(projID);
 
@@ -315,13 +316,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     if (commonExercises.isEmpty()) {
       commonExercises = tripleExercises.getByID();
     }
-  /*  if (request.isIncorrectFirstOrder()) {
-      if (DEBUG)
-        logger.info("getSortedExercises adding isIncorrectFirstOrder " + tripleExercises.getByExercise().size() + " basicExercises");
-      commonExercises =
-          db.getResultDAO().getExercisesSortedIncorrectFirst(tripleExercises.getByExercise(), userID,
-              getAudioFileHelper(projID).getCollator(), getLanguageEnum(projectForUser));
-    } else {*/
     if (predefExercises) {
       commonExercises = new ArrayList<>(tripleExercises.getByID());
       List<CommonExercise> basicExercises = new ArrayList<>(tripleExercises.getByExercise());
@@ -401,8 +395,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @return
    */
   @NotNull
-  private List<CommonExercise> getFirstFew(String prefix, ExerciseListRequest
-      request, List<CommonExercise> exercises,
+  private List<CommonExercise> getFirstFew(String prefix, ExerciseListRequest request, List<CommonExercise> exercises,
                                            int projid) {
     //logger.info("getFirstFew only taking " + request.getLimit() + " from " + exercises.size() + " that match " + prefix);
     Collator collator = getAudioFileHelper(projid).getCollator();
@@ -415,7 +408,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
       if (hasSearch1 && !hasSearch2) return -1;
       else if (hasSearch2 && !hasSearch1) return +1;
-      else if (hasSearch1 && hasSearch2) {
+      else if (hasSearch1) {
         int i = Integer.compare(foreignLanguage.length(), foreignLanguage1.length());
         return i == 0 ? collator.compare(foreignLanguage, foreignLanguage1) : i;
       } else {
@@ -452,47 +445,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     return exercises;
   }
-
-  /**
-   * Marks each exercise - first state - with whether this user has recorded audio for this item
-   * Defective audio is not included.
-   * Also if just one of regular or slow is recorded it's not "recorded".
-   * <p>
-   * What you want to see in the record audio tab.  One bit of info - recorded or not recorded.
-   *
-   * @param userID
-   * @param activityType
-   * @param exercises
-   * @param onlyExample
-   * @return
-   * @see #getExerciseIds
-   */
- /* private int markRecordedState(int userID,
-                                ActivityType activityType,
-                                Collection<? extends Shell> exercises,
-                                boolean onlyExample) {
-    int c = 0;
-    if (activityType == ActivityType.RECORDER) {
-      IAudioDAO audioDAO = db.getAudioDAO();
-      Collection<Integer> recordedForUser = onlyExample ?
-          audioDAO.getRecordedExampleForUser(userID) :
-          audioDAO.getRecordedExForUser(userID);
-      logger.info("\tmarkRecordedState found " + recordedForUser.size() + " recordings by " + userID + " only example " + onlyExample);
-      for (Shell shell : exercises) {
-        if (recordedForUser.contains(shell.getID())) {
-          shell.setState(STATE.RECORDED);
-          c++;
-        }
-      }
-    }
-    //else {
-    //logger.debug("\tnot marking recorded for '" + role + "' and user " + userID);
-    //}
-    if (!activityType.equals(ActivityType.UNSET)) {
-      logger.info("\tmarkRecordedState marked " + c + "  recorded for activity '" + activityType + "' and user " + userID + " on " + exercises.size());
-    }
-    return c;
-  }*/
 
   /**
    * Copies the exercises....?
@@ -563,16 +515,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       if (exercise != null) exercisesForState = Collections.singletonList(exercise);
     }
     // why copy???
-    List<CommonExercise> copy;
-
-//    if (incorrectFirst) {
-//      copy = db.getResultDAO().getExercisesSortedIncorrectFirst(exercisesForState, userID, getAudioFileHelper(projID).getCollator(), getLanguageEnum(projID));
-//    } else {
-    copy = new ArrayList<>(exercisesForState);
-//      if (!request.isQuiz()) {
+    List<CommonExercise> copy = new ArrayList<>(exercisesForState);
     sortExercises(copy, false, request.getPrefix());
-    //    }
-//    }
     logger.info("getExerciseListWrapperForPrefix returning " + copy.size());
 
     return makeExerciseListWrapper(request, copy, projID);
@@ -674,32 +618,10 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
                                                          Collection<CommonExercise> exercises,
                                                          int projID) {
     long then = System.currentTimeMillis();
-    CommonExercise firstExercise = exercises.isEmpty() ? null : request.isAddFirst() ? exercises.iterator().next() : null;
-
     int userID = request.getUserID();
-
-    if (firstExercise != null) {
-      addAnnotationsAndAudio(userID, firstExercise, request.isQC(), projID);
-      // NOTE : not ensuring MP3s or OGG versions of WAV file.
-      // ensureMP3s(firstExercise, pathHelper.getInstallPath());
-      if (request.shouldAddContext()) { // add the context exercises
-        logger.info("\n\n\n makeExerciseListWrapper adding context exercises - parent/child pairs\n\n\n");
-        exercises = getParentChildPairs(exercises);
-      }
-    }
     List<T> exerciseShells = getExerciseShells(exercises, request.isQC());
 
-//    logger.debug("makeExerciseListWrapper : userID " + userID + " Role is " + request.getActivityType());
-    // markStateForActivity(request.isOnlyExamples(), userID, exerciseShells, request.getActivityType());
-
-    // TODO : do this the right way vis-a-vis type safe collection...
-
-    //List<T> exerciseShells1 = (List<T>) exerciseShells;
-    if (exerciseShells.isEmpty() && firstExercise != null) {
-      logger.error("makeExerciseListWrapper huh? no exercises");
-    }
-
-    ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<T>(request.getReqID(), exerciseShells, firstExercise);
+    ExerciseListWrapper<T> exerciseListWrapper = new ExerciseListWrapper<T>(request.getReqID(), exerciseShells);
 
     if (!request.isQC()) {
       // should be consistent with getScoreHistoryPerExercise
@@ -716,27 +638,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     logger.debug("makeExerciseListWrapper returning " + exerciseListWrapper + " in " + (System.currentTimeMillis() - then) + " millis");
     return exerciseListWrapper;
-  }
-
-  /**
-   * Make pairs of parent exercise to child context sentence exercise
-   *
-   * @param exercises
-   * @return
-   * @see #makeExerciseListWrapper
-   */
-  @NotNull
-  private List<CommonExercise> getParentChildPairs(Collection<CommonExercise> exercises) {
-    List<CommonExercise> withContext = new ArrayList<>();
-    exercises.forEach(commonExercise -> {
-      commonExercise.getDirectlyRelated().forEach(clientExercise -> {
-        Exercise copy = new Exercise(commonExercise);
-        withContext.add(copy);
-        copy.getDirectlyRelated().clear();
-        copy.getDirectlyRelated().add(clientExercise.asCommon());
-      });
-    });
-    return withContext;
   }
 
   /**
@@ -825,14 +726,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     userListManager.addAnnotations(byID);
     byID.getDirectlyRelated().forEach(userListManager::addAnnotations);
   }
-
-  /**
-   * @param firstExercise
-   * @see #addAnnotationsAndAudio(int, CommonExercise, boolean, int)
-   */
-//  private int attachAudio(CommonExercise firstExercise) {
-//    return db.getAudioDAO().attachAudioToExercise(firstExercise, getLanguageEnum(firstExercise), new HashMap<>());
-//  }
 
   /**
    * Only add the played markings if doing QC.
@@ -997,9 +890,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     Set<Integer> checkDups = new HashSet<>();
     exercises.forEach(ex -> {
-//      if (ex.getNumPhones() == 0 && warn++ < 100) {
-//        logger.warn("getExerciseShells : no phones for exercise " + ex.getID());
-//      }
       if (skipDups && checkDups.contains(ex.getID())) {
         //   logger.info("skip dup " + ex.getID());
       } else {
@@ -1142,8 +1032,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see mitll.langtest.client.list.FacetExerciseList#getExercises
    */
   @Override
-  public ExerciseListWrapper<ClientExercise> getFullExercises(ExerciseListRequest
-                                                                  request, Collection<Integer> ids) throws DominoSessionException {
+  public ExerciseListWrapper<ClientExercise> getFullExercises(ExerciseListRequest request, Collection<Integer> ids) throws DominoSessionException {
     List<ClientExercise> exercises = new ArrayList<>();
 
     int userID = getUserIDFromSessionOrDB();
@@ -1155,10 +1044,10 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     Language language = getLanguageEnum(projectID);
 
     long then = System.currentTimeMillis();
-    Set<ClientExercise> toAddAudioTo = getCommonExercisesWithoutAudio(ids, exercises, projectID);
+    Set<ClientExercise> toAddAudioTo = getCommonExercisesWithAnnotationsAdded(ids, exercises, projectID);
     long now = System.currentTimeMillis();
 
-    if (now - then > 10 || DEBUG_FULL)
+    if (now - then > 20 || DEBUG_FULL)
       logger.info("getFullExercises took " + (now - then) + " to get " + exercises.size() + " exercises" +
           "\n\tfor req = " + ids);
 
@@ -1172,15 +1061,17 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
 //    if (!toAddAudioTo.isEmpty()) {
     then = System.currentTimeMillis();
+    // TODO : sigh - super expensive...?
     db.getAudioDAO().attachAudioToExercises(toAddAudioTo, language, projectID);
     now = System.currentTimeMillis();
 
     if (now - then > 10 || DEBUG_FULL)
       logger.info("getFullExercises took " + (now - then) + " to attach audio to " + toAddAudioTo.size() + " exercises");
 
-    then = System.currentTimeMillis();
-    new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(projectID, getProject(projectID), toAddAudioTo);
-    now = System.currentTimeMillis();
+//    then = System.currentTimeMillis();
+//    new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(getProject(projectID), toAddAudioTo);
+//    now = System.currentTimeMillis();
+
     if (now - then > 20 || DEBUG_FULL)
       logger.info("getFullExercises took " + (now - then) + " to attach alignment output to " + toAddAudioTo.size() + " exercises");
 
@@ -1203,18 +1094,33 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     sorted.forEach(exid -> logger.info("correct & score : exids #" + exid+" -> " + scoreHistoryPerExercise.get(exid)));
 */
 
-    if (request.isOnlyUninspected()) {
-      exercises.forEach(firstExercise -> {
-        addAnnotations(firstExercise); // todo do this in a better way
+    maybeAddPlayedMarkings(request, exercises, userID);
 
-        if (request.isQC()) {
-          addPlayedMarkings(userID, firstExercise.asCommon());
-        }
-      });
+    then = System.currentTimeMillis();
+
+    Set<Integer> audioIDs = new HashSet<>();
+    for (ClientExercise exercise : exercises) {
+      for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
+        audioIDs.add(audioAttribute.getUniqueID());
+      }
+      exercise.getDirectlyRelated().forEach(exercise1 -> exercise1.getAudioAttributes().forEach(audioAttribute -> audioIDs.add(audioAttribute.getUniqueID())));
     }
+    Map<Integer, AlignmentAndScore> cachedAlignments = db.getRefResultDAO().getCachedAlignments(projectID, audioIDs);
+
+    now = System.currentTimeMillis();
+    if (now - then > 30 || DEBUG_FULL)
+      logger.info("getFullExercises took " + (now - then) + " to get cached scores for " + exercises.size() + " exercises");
 
     // for (CommonExercise exercise : exercises) logger.info("\treturning " + exercise.getID());
-    return new ExerciseListWrapper<>(request.getReqID(), exercises, null, scoreHistoryPerExercise);
+    return new ExerciseListWrapper<>(request.getReqID(), exercises, scoreHistoryPerExercise, cachedAlignments);
+  }
+
+  private void maybeAddPlayedMarkings(ExerciseListRequest request, List<ClientExercise> exercises, int userID) {
+    if (request.isOnlyUninspected() && request.isQC()) {
+      exercises.forEach(firstExercise -> {
+        addPlayedMarkings(userID, firstExercise.asCommon());
+      });
+    }
   }
 
   /**
@@ -1330,7 +1236,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     Map<Integer, CorrectAndScore> scoreHistories = getScoreHistories(contextIDs, exercises.isEmpty(), userID, language);
 
     long now = System.currentTimeMillis();
-    if (now - then > 0) {
+    if (now - then > 20) {
       logger.info("getScoreHistoryPerExercise took " + (now - then) + " to get score histories for " + exercises.size() +
           "\n\t exercises: " + scoreHistories.keySet());
     }
@@ -1349,18 +1255,20 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see #getFullExercises
    */
   @NotNull
-  private Set<ClientExercise> getCommonExercisesWithoutAudio(Collection<Integer> ids,
-                                                             List<ClientExercise> exercises,
-                                                             int projectID) {
+  private Set<ClientExercise> getCommonExercisesWithAnnotationsAdded(Collection<Integer> ids,
+                                                                     List<ClientExercise> exercises,
+                                                                     int projectID) {
     Set<ClientExercise> toAddAudioTo = new HashSet<>();
-    logger.info("getCommonExercisesWithoutAudio " + ids);
+
+    if (DEBUG) logger.info("getCommonExercisesWithAnnotationsAdded " + ids);
+
     for (int exid : ids) {
       CommonExercise byID = db.getCustomOrPredefExercise(projectID, exid);
 //      logger.info("ex " + byID.getID() + " eng " + byID.getEnglish() + " fl " + byID.getForeignLanguage() + " " + byID.getMeaning());
       addAnnotations(byID); // todo do this in a better way
       //if (true || byID.getAudioAttributes().isEmpty()) {
       toAddAudioTo.add(byID);
-      //  logger.info("getCommonExercisesWithoutAudio exercise " + exid + " has no audio...");
+      //  logger.info("getCommonExercisesWithAnnotationsAdded exercise " + exid + " has no audio...");
       //}
       exercises.add(byID);
 //      logger.info("\tgetCommonExercisesWithoutAudio " + byID.getID());

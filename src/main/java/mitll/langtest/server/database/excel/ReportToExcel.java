@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.Report.EARLIEST_YEAR;
 import static mitll.langtest.server.database.Report.WEEKLY_FORMAT;
@@ -121,7 +122,7 @@ public class ReportToExcel {
     {
       boolean byLanguage = false;
       Map<String, Map<Integer, ReportStats>> nameToYearToStats = getLangToYearToStats(copy, byLanguage);
-      writeYTDAndHistorical(copy, wb, nameToYearToStats, !byLanguage, deviceRecordings);
+      writeYTDAndHistorical(copy, wb, nameToYearToStats, true, deviceRecordings);
     }
   }
 
@@ -400,7 +401,9 @@ public class ReportToExcel {
                                       boolean perProject,
                                       INFO recordingType,
                                       int yearToReport) {
-    logger.info("writeWeeklySheetForYear per project " + perProject + " type " + recordingType + " for year " + yearToReport);
+    logger.info("writeWeeklySheetForYear per project " + perProject +
+        "\n\ttype     " + recordingType +
+        "\n\tfor year " + yearToReport);
 
     int rownum = 0;
 
@@ -411,7 +414,7 @@ public class ReportToExcel {
     if (langToYearToStats.isEmpty()) {
       logger.error("huh? no data in " + langToYearToStats);
     }
-    Map<String, Integer> weekToCountFirstLang = getWeektoCountFirstLang(langToYearToStats, yearToReport);
+    Map<String, Integer> weekToCountFirstLang = getWeektoCountFirstLangWithYear(langToYearToStats, yearToReport);
 
     Map<String, Integer> langToLastWeek = new HashMap<>();
     Map<String, Integer> langToCurrent = new HashMap<>();
@@ -536,9 +539,34 @@ public class ReportToExcel {
     for (int i = 0; i < maxCol; i++) sheet.autoSizeColumn(i);
   }
 
-  private Map<String, Integer> getWeektoCountFirstLang(Map<String, Map<Integer, ReportStats>> langToYearToStats, int thisYear) {
-    Map<Integer, ReportStats> firstLanguage = langToYearToStats.values().iterator().next();
-    return firstLanguage.get(thisYear).getKeyToValue(INFO.ALL_RECORDINGS_WEEKLY);
+  /**
+   * Need to find a project that has the week->count filled in for that year.
+   * If the project is too new, it won't go back to the desired year.
+   * @param langToYearToStats
+   * @param thisYear
+   * @return
+   */
+  private Map<String, Integer> getWeektoCountFirstLangWithYear(Map<String, Map<Integer, ReportStats>> langToYearToStats, int thisYear) {
+    List<Map<Integer, ReportStats>> collect =
+        langToYearToStats.values().stream().filter(yearToStats -> yearToStats.containsKey(thisYear)).collect(Collectors.toList());
+
+    if (collect.isEmpty()) {
+      logger.warn("getWeektoCountFirstLang : in " + langToYearToStats + "\n\tno year " + thisYear);
+      return new HashMap<>();
+    } else {
+      Map<Integer, ReportStats> yearToStats = collect.get(0);
+      ReportStats reportStats = yearToStats.get(thisYear);
+      return reportStats.getKeyToValue(INFO.ALL_RECORDINGS_WEEKLY);
+    }
+ /*   Map<Integer, ReportStats> firstLanguage = iterator.next();
+    ReportStats reportStats = firstLanguage.get(thisYear);
+    if (reportStats == null) {
+      logger.warn("getWeektoCountFirstLang : in " + langToYearToStats + "\n\tno year " + thisYear);
+      return new HashMap<>();
+    }
+    else {
+      return reportStats.getKeyToValue(INFO.ALL_RECORDINGS_WEEKLY);
+    }*/
   }
 
   private int addFooterRow(XSSFWorkbook workbook, Sheet sheet, int rownum, Set<String> sortedLang, XSSFCellStyle greenStyle, boolean perProject) {

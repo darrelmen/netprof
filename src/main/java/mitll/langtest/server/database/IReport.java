@@ -41,6 +41,16 @@ import java.util.Collection;
 import java.util.List;
 
 public interface IReport {
+  /**
+   * @see mitll.langtest.server.database.report.ReportHelper#getReportStats(IReport, boolean, List)
+   * @param projid
+   * @param language
+   * @param site
+   * @param pathHelper
+   * @param forceSend
+   * @param getAllYears
+   * @return
+   */
   List<ReportStats> doReport(int projid,
                              String language,
                              String site,
@@ -48,6 +58,14 @@ public interface IReport {
                              boolean forceSend,
                              boolean getAllYears);
 
+  /**
+   * @see mitll.langtest.server.database.report.ReportHelper#doReportForYear(IReport, int)
+   * @param stats
+   * @param pathHelper
+   * @param allReports
+   * @return
+   * @throws IOException
+   */
   JsonObject writeReportToFile(ReportStats stats, PathHelper pathHelper, List<ReportStats> allReports) throws IOException;
 
   /**
@@ -56,15 +74,31 @@ public interface IReport {
    * @param year
    * @param allReports
    * @return
+   * @see DatabaseImpl#getReport(int, JsonObject)
    */
   String getAllReports(Collection<SlickProject> projects, JsonObject jsonObject, int year, List<ReportStats> allReports);
 
+  /**
+   * @see mitll.langtest.server.database.report.ReportHelper#sendReports(IReport, boolean, int)
+   * @param mailSupport
+   * @param reportEmails
+   * @param receiverNames
+   * @param reportStats
+   * @param pathHelper
+   */
   void sendExcelViaEmail(MailSupport mailSupport,
                          List<String> reportEmails,
                          List<String> receiverNames,
-                         List<ReportStats> reportStats, PathHelper pathHelper);
+                         List<ReportStats> reportStats,
+                         PathHelper pathHelper);
 
   File getSummaryReport(List<ReportStats> allReports, PathHelper pathHelper);
 
-  File getReportPathDLI(PathHelper pathHelper, String suffix);
+  /**
+   * @see Report#getSummaryReport(List, PathHelper)
+   * @param pathHelper
+   * @param suffix
+   * @return
+   */
+//  File getReportPathDLI(PathHelper pathHelper, String suffix);
 }

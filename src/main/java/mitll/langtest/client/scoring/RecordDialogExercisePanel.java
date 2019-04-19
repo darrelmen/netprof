@@ -92,6 +92,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   private float studentSpeechDur = 0F;
 
   private AudioAttribute studentAudioAttribute;
+  private AlignmentOutput studentAudioAlignmentOutput;
   private boolean gotStreamStop;
   private TreeMap<TranscriptSegment, IHighlightSegment> transcriptToHighlight = null;
   private final boolean doPushToTalk;
@@ -156,7 +157,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       TranscriptSegment last = transcriptSegments.get(transcriptSegments.size() - 1);
       float end = last.getEnd();
       float dur = end - start;
-     // logger.info("getSpeechDur (" + getExID() + ") : " + first.getEvent() + " - " + last.getEvent() + " = " + dur);
+      // logger.info("getSpeechDur (" + getExID() + ") : " + first.getEvent() + " - " + last.getEvent() + " = " + dur);
       return dur;
     }
   }
@@ -200,7 +201,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
     if (transcriptToHighlight == null) {
       if (studentAudioAttribute != null) {
-        AlignmentOutput alignmentOutput = studentAudioAttribute.getAlignmentOutput();
+        AlignmentOutput alignmentOutput = studentAudioAlignmentOutput;//studentAudioAttribute.getAlignmentOutput();
         alignmentOutput.setShowPhoneScores(true);
 
         transcriptToHighlight = showAlignment(0, studentAudioAttribute.getDurationInMillis(), alignmentOutput);
@@ -356,7 +357,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
     studentAudioAttribute = new AudioAttribute();
     studentAudioAttribute.setAudioRef(result.getPath());
-    studentAudioAttribute.setAlignmentOutput(result.getPretestScore());
+//    studentAudioAttribute.setAlignmentOutput(result.getPretestScore());
+    studentAudioAlignmentOutput = result.getPretestScore();
     studentAudioAttribute.setDurationInMillis(result.getDurationInMillis());
 
     emoticon.setEmoticon(result.getScore(), controller.getLanguageInfo());
@@ -529,7 +531,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     super.removeMarkCurrent();
 
     if (doPushToTalk) {
-    //  logger.info("removeMarkCurrent");
+      //  logger.info("removeMarkCurrent");
       PostAudioRecordButton recordButton = getRecordButton();
       if (recordButton.isRecording()) {
         cancelRecording();

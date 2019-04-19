@@ -136,11 +136,11 @@ class LinkAndTitle {
     return this;
   }
 
-  public boolean isMustHaveProject() {
+  private boolean isMustHaveProject() {
     return mustHaveProject;
   }
 
-  public LinkAndTitle setMustHaveProject(boolean mustHaveProject) {
+   LinkAndTitle setMustHaveProject(boolean mustHaveProject) {
     this.mustHaveProject = mustHaveProject;
     return this;
   }

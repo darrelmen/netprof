@@ -190,9 +190,9 @@ public class Trie<T> {
       if (moreThanMax || (size > WINDOW_SIZE && Character.isWhitespace(c))) {
 
         if (moreThanMax) {
-          if (DEBUG) logger.warn("max vs " + length + " : '" + getWindow(slidingWindow) + "'");
+          if (DEBUG) logger.warn("getChars max vs " + length + " : '" + getWindow(slidingWindow) + "'");
         } else if (DEBUG && (size > WINDOW_SIZE && Character.isWhitespace(c)))
-          logger.warn("break '" + getWindow(slidingWindow) + "'");
+          logger.warn("getChars break '" + getWindow(slidingWindow) + "'");
 
         Character first = slidingWindow.peekFirst();
         while (
@@ -214,7 +214,7 @@ public class Trie<T> {
     return toAdd;
   }
 
-  String getWindow(Deque<?> window) {
+  private String getWindow(Deque<?> window) {
     StringBuilder sb = new StringBuilder();
     window.forEach(sb::append);
     return sb.toString();

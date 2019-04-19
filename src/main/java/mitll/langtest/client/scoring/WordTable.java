@@ -398,7 +398,7 @@ public class WordTable {
     new TooltipHelper().addTooltip(header, CLICK_TO_HEAR_WORD);
 
     {
-      DivWidget phones = getPhoneDivBelowWord(audioControl, phonesForWord, false, null, /*isRTL*/true, wordHighlight);
+      DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, phonesForWord, false, null, /*isRTL*/true, wordHighlight);
       phones.addStyleName("inlineFlex");
 
       header.setSouthScore(phones);
@@ -432,6 +432,7 @@ public class WordTable {
 
   /**
    * @param audioControl  so when clicked, we can play audio
+   * @param phoneMap
    * @param phoneSegments
    * @param simpleLayout
    * @param wordSegment
@@ -443,6 +444,7 @@ public class WordTable {
    */
   @NotNull
   DivWidget getPhoneDivBelowWord(AudioControl audioControl,
+                                 TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                  List<TranscriptSegment> phoneSegments,
                                  boolean simpleLayout,
                                  TranscriptSegment wordSegment,
@@ -454,7 +456,7 @@ public class WordTable {
       phones.addStyleName("simplePhoneContainer");
     }
 
-    addPhonesBelowWord2(phoneSegments, phones, audioControl, simpleLayout, wordSegment, wordHighlight);
+    addPhonesBelowWord2(phoneSegments, phones, audioControl, phoneMap, simpleLayout, wordSegment,wordHighlight);
     return phones;
   }
 
@@ -561,6 +563,7 @@ public class WordTable {
    * @param phoneSegments
    * @param scoreRow
    * @param audioControl
+   * @param phoneMap
    * @param simpleLayout
    * @param wordSegment
    * @param wordHighlight
@@ -570,6 +573,7 @@ public class WordTable {
   private void addPhonesBelowWord2(List<TranscriptSegment> phoneSegments,
                                    DivWidget scoreRow,
                                    AudioControl audioControl,
+                                   TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                    boolean simpleLayout,
                                    TranscriptSegment wordSegment,
                                    IHighlightSegment wordHighlight) {
@@ -589,24 +593,24 @@ public class WordTable {
       String phoneLabel = getPhoneEvent(phoneSegment);
       if (!shouldSkipPhone(phoneLabel)) {
         boolean hasNext = iterator.hasNext();
-        String phoneLabel1 = phoneLabel;
-        String displayEvent = phoneSegment.getDisplayEvent();
-        if (!phoneLabel1.equals(displayEvent)) {
-          phoneLabel1 = displayEvent;
-        }
+        String phoneLabel1 = getPhoneLabel(phoneSegment, phoneLabel);
         SimpleHighlightSegment h = new SimpleHighlightSegment(phoneLabel1 + (hasNext ? NBSP : ""), BLUE);
         //  logger.info("\taddPhonesBelowWord2 word " + wordSegment + " phone " + phoneLabel + " : " + h.getContent());
 //        if (phoneSegment.isIn(wordSegment)) {
-        HTML clickable = h.getClickable();
+        {
+          HTML clickable = h.getClickable();
 
-        addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, clickable);
+          addClickHandler(audioControl, wordSegment == null ? phoneSegment : wordSegment, clickable);
 
-        clickable.addMouseOverHandler(event -> wordHighlight.asWidget().addStyleName("underline"));
-        clickable.addMouseOutHandler(event -> wordHighlight.asWidget().removeStyleName("underline"));
+          if (wordHighlight != null) {
+            clickable.addMouseOverHandler(event -> wordHighlight.asWidget().addStyleName("underline"));
+            clickable.addMouseOutHandler(event -> wordHighlight.asWidget().removeStyleName("underline"));
+          }
+        }
 
         //      }
-//        IHighlightSegment put = phoneMap.put(phoneSegment, h);
-//        if (put != null) logger.info("prev for " + phoneSegment + " was " + put);
+        IHighlightSegment put = phoneMap.put(phoneSegment, h);
+        if (put != null) logger.info("prev for " + phoneSegment + " was " + put);
 
         if (simpleLayout) {
           if (hasNext) {
@@ -627,6 +631,15 @@ public class WordTable {
     }
   }
 
+  private String getPhoneLabel(TranscriptSegment phoneSegment, String phoneLabel) {
+    String phoneLabel1 = phoneLabel;
+    String displayEvent = phoneSegment.getDisplayEvent();
+    if (!phoneLabel1.equals(displayEvent)) {
+      phoneLabel1 = displayEvent;
+    }
+    return phoneLabel1;
+  }
+
   /**
    * When clicked, tell audioControl to play segment
    *
@@ -638,7 +651,7 @@ public class WordTable {
    */
   private void addClickHandler(AudioControl audioControl, TranscriptSegment segmentToPlay, Label header) {
     if (audioControl != null) {
-      if (false) logger.info("addClickHandler add handler for " + segmentToPlay + " when click on " + header.getText());
+    //  if (false) logger.info("addClickHandler add handler for " + segmentToPlay + " when click on " + header.getText());
       header.addClickHandler(event -> {
 
       //  logger.info("addClickHandler click on " + segmentToPlay + " header " + header.getText());

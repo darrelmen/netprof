@@ -48,6 +48,8 @@ import static mitll.langtest.shared.user.Permission.*;
  * Created by go22670 on 4/10/17.
  */
 public interface INavigation extends IViewContaner {
+  List<Permission> QC_PERMISSIONS = Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN);
+
   enum VIEWS {
     NONE("", EITHER),
 
@@ -91,12 +93,12 @@ public interface INavigation extends IViewContaner {
     RECORD_SENTENCES("Record Sentences", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
 
 
-    QC_ENTRIES("QC Entries", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, false),
-    FIX_ENTRIES("Fix Entries", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, false),
-    QC_SENTENCES("QC Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, true),
-    FIX_SENTENCES("Fix Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, true),
+    QC_ENTRIES("QC Entries", QC_PERMISSIONS, true, false, false),
+    FIX_ENTRIES("Fix Entries", QC_PERMISSIONS, false, true, false),
+    QC_SENTENCES("QC Sentences", QC_PERMISSIONS, true, false, true),
+    FIX_SENTENCES("Fix Sentences", QC_PERMISSIONS, false, true, true),
 
-    OOV_EDITOR("Missing In Dictionary", VOCABULARY),
+    OOV_EDITOR("Missing In Dictionary", VOCABULARY, QC_PERMISSIONS),
     DIALOG_EDITOR("Dialog Editor", ProjectMode.DIALOG);
 
     private final List<Permission> perms;
@@ -127,6 +129,12 @@ public interface INavigation extends IViewContaner {
       this.display = display;
       this.perms = Collections.emptyList();
       this.mode = mode;
+    }
+
+    VIEWS(String display, ProjectMode mode, List<Permission> perms) {
+      this.display = display;
+      this.mode = mode;
+      this.perms = perms;
     }
 
     VIEWS(String display, ProjectMode mode, boolean isPressAndHold) {

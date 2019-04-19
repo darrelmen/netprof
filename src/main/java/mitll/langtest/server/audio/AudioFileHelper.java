@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.audio;
 
+import com.sun.management.UnixOperatingSystemMXBean;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.server.*;
@@ -68,6 +69,8 @@ import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.sql.Timestamp;
 import java.text.Collator;
 import java.util.*;
@@ -102,7 +105,10 @@ public class AudioFileHelper implements AlignDecode {
   private static final String DEFAULT_EXID = "2";
 
   private static final boolean DEBUG_EDIT = false;
-  public static final String OOV = "oov";
+  //public static final String OOV = "oov";
+
+  private static final int LOG_THRESHOLD = 1000;
+  private static final int WARN_THRESHOLD = 2000;
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -775,6 +781,9 @@ public class AudioFileHelper implements AlignDecode {
                                     AnswerInfo.RecordingInfo recordingInfoInitial,
 
                                     DecoderOptions options) {
+    //  dumpFD("writeAudioFile");
+    long before = getFD();
+
     String wavPath = fileInstead == null ? pathHelper.getAbsoluteToAnswer(audioContext) : fileInstead.getAbsolutePath();
     String relPath = pathHelper.getRelToAnswer(wavPath);
 
@@ -787,6 +796,7 @@ public class AudioFileHelper implements AlignDecode {
     AudioCheck.ValidityAndDur validity = fileInstead == null ?
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, wavFile, options.isRefRecording(), isQuietAudioOK()) :
         audioConversion.getValidityAndDur(fileInstead, options.isRefRecording(), isQuietAudioOK(), then);
+    //  dumpFD("writeAudioFile_afterValidity");
 
     if (logger.isInfoEnabled()) {
       logger.info("writeAudioFile writing" +
@@ -811,8 +821,9 @@ public class AudioFileHelper implements AlignDecode {
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo(recordingInfoInitial, path);
 
     //  logger.info("writeAudioFile recordingInfo " + recordingInfo);
+    //  dumpFD("Before decode");
 
-    return getAudioAnswerDecoding(exercise1,
+    AudioAnswer audioAnswerDecoding = getAudioAnswerDecoding(exercise1,
         audioContext,
         recordingInfo,
 
@@ -822,6 +833,45 @@ public class AudioFileHelper implements AlignDecode {
         validity,
         options
     );
+
+    checkFD(before);
+
+    return audioAnswerDecoding;
+  }
+
+  /**
+   * Fred stress test discovered lots of FD left open...
+   * @param before
+   */
+  private void checkFD(long before) {
+    long after = getFD();
+
+    if (after > before) {
+      String message = "writeAudioFile : hmmm  now " + after + " open files?";
+      if (after > WARN_THRESHOLD) {
+        logger.warn(message);
+      } else if (after > LOG_THRESHOLD) {
+        logger.info(message);
+      }
+    }
+  }
+
+  private void dumpFD(String message) {
+    OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
+    if (os instanceof UnixOperatingSystemMXBean) {
+      logger.info("writeAudioFile (" + message +
+          ") Number of open fd: " + ((UnixOperatingSystemMXBean) os).getOpenFileDescriptorCount());
+    }
+  }
+
+  private long getFD() {
+    OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
+
+    if (os instanceof UnixOperatingSystemMXBean) {
+      return ((UnixOperatingSystemMXBean) os).getOpenFileDescriptorCount();
+    } else {
+      return 0L;
+    }
   }
 
   /**

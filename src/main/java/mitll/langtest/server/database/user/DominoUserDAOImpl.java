@@ -248,7 +248,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         new HashSet<>(),
 
         new Group(),
-        new HashSet<Group>(),
+        new HashSet<>(),
         null,
         new HashSet<>());
   }
@@ -301,7 +301,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (attribute != null) {
       delegate = (IUserServiceDelegate) attribute;
       pool = (Mongo) servletContext.getAttribute(MONGO_ATT_NAME);
-      logger.info("DominoUserDAOImpl got pool reference " + pool);
+      logger.info("DominoUserDAOImpl got " +
+          "\n\tpool reference " + pool+
+          "\n\tdelegate       " + delegate.getClass()
+      );
       serializer = (JSONSerializer) servletContext.getAttribute(JSON_SERIALIZER);
 
       makeUserService(database, props);
@@ -1718,20 +1721,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @deprecated
    */
   public List<DBUser> getAll() {
-    long then = System.currentTimeMillis();
     logger.info("getAll calling get all users");
-    FindOptions<UserColumn> opts = getUserColumnFindOptions();
-    List<DBUser> users = Collections.emptyList();
-
     if (delegate == null) {
-      logger.warn("getAll delegate is null?");
-      return users;
-    } else {
-      users = delegate.getUsers(-1, opts);
-      long now = System.currentTimeMillis();
-      if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
-      return users;
+      logger.warn("\n\ngetAll delegate is null?\n\n");
     }
+
+    long then = System.currentTimeMillis();
+    List<DBUser> users = delegate == null ? Collections.emptyList() : delegate.getUsers(-1, getUserColumnFindOptions());
+    long now = System.currentTimeMillis();
+    if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
+    return users;
   }
 
   @NotNull
@@ -1775,6 +1774,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     Set<Integer> toAskFor = getMissingOrStale(userDBIds, now);
     if (!toAskFor.isEmpty()) {
       long then = System.currentTimeMillis();
+
       Map<Integer, UserDescriptor> idToUserD = delegate.lookupUserDescriptors(toAskFor);
 //      Map<Integer, DBUser> idToUserD = delegate.lookupDBUsers(toAskFor);
       long now2 = System.currentTimeMillis();

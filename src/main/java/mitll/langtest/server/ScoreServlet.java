@@ -31,6 +31,7 @@ package mitll.langtest.server;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.Project;
@@ -1209,22 +1210,30 @@ public class ScoreServlet extends DatabaseServlet {
         requestType = ALIGN;
       }
 
-      return jsonScoring.getJsonForAudioForUser(
-          reqid,
-          projid,
-          realExID,
+      if (fileToScore.length() < AudioCheck.WAV_HEADER_LENGTH) {
+        JsonObject jsonObject = new JsonObject();
+        new JsonScoring(getDatabase()).addValidity(realExID, jsonObject, Validity.TOO_SHORT, "" + reqid);
+        return jsonObject;
+      } else {
+        JsonObject jsonForAudioForUser = jsonScoring.getJsonForAudioForUser(
+            reqid,
+            projid,
+            realExID,
 
-          postedWordOrPhrase,
+            postedWordOrPhrase,
 
-          userid,
-          requestType,
-          fileToScore,
-          deviceType,
-          device,
-          new DecoderOptions()
-              .setAllowAlternates(getAllowAlternates(request))
-              .setUsePhoneToDisplay(getUsePhoneToDisplay(request)),
-          fullJSON);
+            userid,
+            requestType,
+            fileToScore,
+            deviceType,
+            device,
+            new DecoderOptions()
+                .setAllowAlternates(getAllowAlternates(request))
+                .setUsePhoneToDisplay(getUsePhoneToDisplay(request)),
+            fullJSON);
+        jsonForAudioForUser.addProperty("scoring", getIsKaldi(request) ? "Kaldi" : "Hydra");
+        return jsonForAudioForUser;
+      }
     } else {
       JsonObject jsonObject = new JsonObject();
       new JsonScoring(getDatabase()).addValidity(realExID, jsonObject, Validity.TOO_LONG, "" + reqid);
@@ -1376,7 +1385,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (projid > 0) {
       Project project1 = getProject(projid);
       String flText = getHeader(request, HeaderValue.EXERCISE_TEXT);
-      if (flText == null) {
+      if (flText == null || flText.isEmpty()) {
         logger.info("getExerciseIDFromText no optional header " + HeaderValue.EXERCISE_TEXT);
         return new ExAndText(realExID, decoded);
       } else {

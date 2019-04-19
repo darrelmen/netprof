@@ -30,17 +30,13 @@
 package mitll.langtest.server.database.custom;
 
 import com.google.gson.JsonObject;
-import mitll.langtest.server.PathHelper;
-import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.result.Result;
-import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.user.User;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.BufferedWriter;
@@ -50,38 +46,38 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class ReportTest {
-  //private static final String CHANGED = "changed";
-  private static final String ENGLISH = "english";
+public class ReportTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(ReportTest.class);
+
+  private static final String ENGLISH = "english";
   private static DatabaseImpl database;
-  //private static String dbName;
 
-  @BeforeClass
-  public static void setup() {
-    getDatabase("spanish");
-  }
+//  @BeforeClass
+//  public static void setup() {
+//    getDatabase("spanish");
+//  }
 
-  private static void getDatabase(String config) {
-    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
-    String parent = file.getParent();
-    logger.debug("config dir " + parent);
-    logger.debug("config     " + file.getName());
-    //  dbName = "npfEnglish";//"mandarin";// "mandarin";
-    ServerProperties serverProps = new ServerProperties(parent, file.getName());
-    database = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null, null);
-    logger.debug("made " + database);
-    String media = parent + File.separator + "media";
-    logger.debug("media " + media);
-    database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan());
-    Collection<CommonExercise> exercises = database.getExercises();
-  }
+//  private static void getDatabase(String config) {
+//    File file = new File("war" + File.separator + "config" + File.separator + config + File.separator + "quizlet.properties");
+//    String parent = file.getParent();
+//    logger.debug("config dir " + parent);
+//    logger.debug("config     " + file.getName());
+//    //  dbName = "npfEnglish";//"mandarin";// "mandarin";
+//    ServerProperties serverProps = new ServerProperties(parent, file.getName());
+//    database = new DatabaseImpl(serverProps, new PathHelper("war", serverProps), null, null);
+//    logger.debug("made " + database);
+//    String media = parent + File.separator + "media";
+//    logger.debug("media " + media);
+//    database.setInstallPath(parent + File.separator + database.getServerProps().getLessonPlan());
+//    Collection<CommonExercise> exercises = database.getExercises();
+//  }
 
   @Test
-  public void splitTest(){
-
-
-
+  public void splitTest() {
+    String s = "request=setPassword&token=XqnJ6kbepecSMz4zfaLTpodMhx8gww&pass=PASSword1234!@";
+    String t = "request=setPassword&token=oaNLq6fnjnrfoVhstj6XtWdWY4iwsU&pass=domino22&userid=14480";
+    String[] split = t.split("&");
+    logger.info("len " + split.length);
   }
 
 
@@ -113,11 +109,21 @@ public class ReportTest {
   @Test
   public void testReport() {
     //database.doReportForYear(new PathHelper("war"), "", 2016);
-   // database.doReportForYear(new PathHelper("war"));
+    // database.doReportForYear(new PathHelper("war"));
+
+    DatabaseImpl database = getDatabase().setInstallPath("");
+
+    //IProjectManagement projectManagement = database.getProjectManagement();
+
+    database.waitForDefaultUser();
+    database.populateProjects(-1);
+   // projectManagement.populateProjects(-1);
 
     JsonObject jsonObject = new JsonObject();
-    database.getReport(-1, jsonObject);
-    logger.info("got " +jsonObject);
+   // database.getReport();
+    database.getReportHelper().doReportAllYears(database.getReport());
+   // database.getReport(-1, jsonObject);
+    logger.info("got " + jsonObject);
   }
 
 //  @Test
@@ -503,7 +509,7 @@ public class ReportTest {
     assertTrue(!listsForUser3.contains(test));
   }*/
 
- // @Test
+  // @Test
 /*  public void testAddVisitor2() {
     List<User> users = database.getUsers();
     logger.debug("1 users size " + users.size());

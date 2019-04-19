@@ -44,7 +44,6 @@ public class SegmentHighlightAudioControl implements AudioControl {
   private final SegmentAudioControl wordSegments;
   private SegmentAudioControl phoneSegments = null;
 
-
   /**
    * @param typeToSegmentToWidget
    * @param exID
@@ -56,8 +55,10 @@ public class SegmentHighlightAudioControl implements AudioControl {
     TreeMap<TranscriptSegment, IHighlightSegment> phones = typeToSegmentToWidget.get(NetPronImageType.PHONE_TRANSCRIPT);
     if (phones != null && !phones.isEmpty()) {
       phoneSegments = new SegmentAudioControl(exID, phones);
-     /* logger.info("phoneSegments now has " + phones.size());
-      logger.info("wordSegments  now has " + typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT).size());*/
+//      logger.info("phoneSegments now has " + phones.size());
+//      logger.info("wordSegments  now has " + typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT).size());
+    } else {
+      logger.warning("phoneSegments now has " + phones + " : " + typeToSegmentToWidget.keySet());
     }
   }
 
@@ -83,9 +84,12 @@ public class SegmentHighlightAudioControl implements AudioControl {
 
   @Override
   public void update(double position) {
+
     wordSegments.update(position);
     if (phoneSegments != null) {
       phoneSegments.update(position);
+    } else {
+      logger.info("no phone segments? update " + position);
     }
   }
 
@@ -102,6 +106,7 @@ public class SegmentHighlightAudioControl implements AudioControl {
     private final Logger logger = Logger.getLogger("SegmentAudioControl");
     private TranscriptSegment currentSegment;
     private final TreeMap<TranscriptSegment, IHighlightSegment> transcriptToHighlight;
+
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_DETAIL = false;
 
