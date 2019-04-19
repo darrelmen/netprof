@@ -37,7 +37,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 
 public class FileSaver {
-  private static final Logger logger = LogManager.getLogger(ScoreServlet.class);
+  private static final Logger logger = LogManager.getLogger(FileSaver.class);
 
   private static final int BUFFER_SIZE = 4096;
   // about 30 seconds at 16K and sample rate...

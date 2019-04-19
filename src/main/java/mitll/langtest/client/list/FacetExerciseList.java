@@ -81,6 +81,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     extends HistoryExerciseList<T, U>
     implements ShowEventListener, ChoicesContainer {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
+  private static final int PAGER_WIDTH = 299;
 
   private static final String RECORDED = "Recorded";
 
@@ -295,7 +296,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       tableWithPager.addStyleName("floatLeft");
       tableWithPager.setWidth("100%");
 
-      tableWithPager.getElement().getStyle().setProperty("minWidth", "250px");
+      tableWithPager.getElement().getStyle().setProperty("minWidth",  PAGER_WIDTH +
+          "px");
     }
 
     {

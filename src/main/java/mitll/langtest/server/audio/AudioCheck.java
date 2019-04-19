@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.audio;
 
+import com.sun.management.UnixOperatingSystemMXBean;
 import mitll.langtest.shared.answer.Validity;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
@@ -39,8 +40,12 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 
 public class AudioCheck {
   private static final Logger logger = LogManager.getLogger(AudioCheck.class);
@@ -204,13 +209,24 @@ public class AudioCheck {
   }
 
   private void addDynamicRange(File file, ValidityAndDur validityAndDur) {
+   // dumpFD("addDynamicRange before ");
     DynamicRange.RMSInfo dynamicRange = getDynamicRange(file);
+   // dumpFD("addDynamicRange after  ");
     if (dynamicRange.dnr < minDynamicRange) {
       logger.warn("addDynamicRange file " + file.getName() + " doesn't meet dynamic range threshold (" + minDynamicRange +
           "):\n" + dynamicRange);
       validityAndDur.validity = Validity.SNR_TOO_LOW;
     }
     validityAndDur.setMaxMinRange(dynamicRange.dnr);
+  }
+
+
+  private void dumpFD(String message) {
+    OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
+    if (os instanceof UnixOperatingSystemMXBean) {
+      logger.info("writeAudioFile (" + message +
+          ") Number of open fd: " + ((UnixOperatingSystemMXBean) os).getOpenFileDescriptorCount());
+    }
   }
 
   /**
@@ -220,14 +236,20 @@ public class AudioCheck {
    * @see #getDNR
    */
   private DynamicRange.RMSInfo getDynamicRange(File file) {
+  //  dumpFD("getDynamicRange before 1");
     String highPassFilterFile =
         new AudioConversion(trimAudio, minDynamicRange)
             .getHighPassFilterFile(file.getAbsolutePath());
+  //  dumpFD("getDynamicRange before 2");
 
-    if (highPassFilterFile == null) return new DynamicRange.RMSInfo();
-    else {
+    if (highPassFilterFile == null) {
+      return new DynamicRange.RMSInfo();
+    } else {
       File highPass = new File(highPassFilterFile);
       DynamicRange.RMSInfo dynamicRange = new DynamicRange().getDynamicRange(highPass);
+      if (!highPass.delete()) {
+        logger.warn("getDynamicRange : didn't delete " + highPass);
+      }
       deleteParentTempDir(highPass);
       return dynamicRange;
     }
@@ -258,22 +280,23 @@ public class AudioCheck {
    * @see AudioConversion#isValid(File, boolean, boolean)
    */
   private ValidityAndDur checkWavFileWithClipThreshold(File wavFile, boolean allowMoreClipping, boolean quietAudioOK) {
-    AudioInputStream ais = null;
+//    dumpFD("checkWavFileWithClipThreshold before");
     try {
-      ais = getAudioInputStream(wavFile);
-      return getValidityAndDur(wavFile.getName(), wavFile.getAbsoluteFile().toString(), allowMoreClipping, quietAudioOK, ais, false);
-    } catch (Exception e) {
-      logger.error("Got " + e, e);
-    } finally {
-      try {
-        if (ais != null) ais.close();
-      } catch (IOException e) {
-        logger.error("Got " + e, e);
+      try (AudioInputStream ais = getAudioInputStream(wavFile)) {
+        ValidityAndDur validityAndDur = getValidityAndDur(wavFile.getName(), wavFile.getAbsoluteFile().toString(), allowMoreClipping, quietAudioOK, ais, false);
+//        dumpFD("checkWavFileWithClipThreshold after");
+        return validityAndDur;
       }
+    } catch (IOException | UnsupportedAudioFileException e) {
+      logger.error("checkWavFileWithClipThreshold on " +wavFile+ " Got " + e, e);
+      return INVALID_AUDIO;
     }
-
-    return INVALID_AUDIO;
   }
+
+  public AudioInputStream getAudioInputStream(File wavFile) throws UnsupportedAudioFileException, IOException {
+    return AudioSystem.getAudioInputStream(new BufferedInputStream(new FileInputStream(wavFile)));
+  }
+
 
   @NotNull
   private ValidityAndDur getValidityAndDur(String name,
@@ -424,12 +447,12 @@ public class AudioCheck {
     return 20.0 * Math.log(power < 0.0001f ? 0.0001f : power) / LOG_OF_TEN;
   }
 
-  private AudioInputStream getAudioInputStream(File wavFile) throws UnsupportedAudioFileException, IOException {
-    //logger.info("getAudioInputStream : getting audio input stream for " + wavFile.getAbsolutePath());
-    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(wavFile);
-    //logger.info("getAudioInputStream : got stream " + audioInputStream + " for " + wavFile.getAbsolutePath());
-    return audioInputStream;
-  }
+//  private AudioInputStream getAudioInputStream(File wavFile) throws UnsupportedAudioFileException, IOException {
+//    //logger.info("getAudioInputStream : getting audio input stream for " + wavFile.getAbsolutePath());
+//    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(wavFile);
+//    //logger.info("getAudioInputStream : got stream " + audioInputStream + " for " + wavFile.getAbsolutePath());
+//    return audioInputStream;
+//  }
 
   /**
    * @return
