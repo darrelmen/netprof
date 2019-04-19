@@ -96,6 +96,10 @@ public class PretestScore extends AlignmentAndScore {
     this.ranNormally = true;
   }
 
+  public AlignmentAndScore getSkinny() {
+    return new AlignmentAndScore(getTypeToSegments(), getHydecScore(), isFullMatch());
+  }
+
   /**
    * @return
    * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, int, String, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)

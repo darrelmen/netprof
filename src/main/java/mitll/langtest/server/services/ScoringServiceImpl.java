@@ -433,7 +433,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
       PretestScore pretestScore = recalcRefAudioWithHelper(projid, audioID, audioFileHelper, userIDFromSession);
       if (pretestScore != null) {
-        idToAlignment.put(audioID, pretestScore);
+        idToAlignment.put(audioID, pretestScore.getSkinny());
       }
     } else {
       logger.info("recalcOneOrGetCached : found cached result for projid " + projid + " audio id " + audioID);
