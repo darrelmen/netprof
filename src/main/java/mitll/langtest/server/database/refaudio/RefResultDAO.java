@@ -37,7 +37,10 @@ import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
 import mitll.langtest.server.decoder.RefResultDecoder;
+import mitll.langtest.server.scoring.PrecalcScores;
 import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -703,6 +706,15 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
   @NotNull
   @Override
   public Map<Integer, ISlimResult> getAudioIDMap(int id) {
+    return null;
+  }
+
+  public Map<Integer, AlignmentAndScore> getCachedAlignments(int projid, Set<Integer> audioIDs) {
+    return null;
+  }
+
+  @Override
+  public PrecalcScores getPrecalcScores(boolean usePhoneToDisplay, ISlimResult cachedResult, Language language) {
     return null;
   }
 }

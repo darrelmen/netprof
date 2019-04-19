@@ -82,7 +82,7 @@ public class SlickEventImpl implements IEventDAO {
    * @param exToInt
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyOneConfig
    */
-  private void copyTableOnlyOnce(IEventDAO other,
+ /* private void copyTableOnlyOnce(IEventDAO other,
                                 int projid,
                                 Map<Integer, Integer> oldToNewUserID,
                                 Map<String, Integer> exToInt) {
@@ -138,7 +138,7 @@ public class SlickEventImpl implements IEventDAO {
 
     }
   }
-
+*/
 /*
   private void logMemory() {
     int MB = (1024 * 1024);

@@ -30,6 +30,7 @@
 package mitll.langtest.server.audio.tools;
 
 import javax.sound.sampled.*;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -68,18 +69,11 @@ public class AudioFile {
     AudioInputStream fwav;
     int len;
     this.name = f.getName();
-    //System.out.println("opening " + f.getAbsolutePath());
     AudioFileFormat format;
     try {
-      fwav = AudioSystem.getAudioInputStream(f);
-      //System.out.println("opening " + f.getName() + " got " + fwav);
-
+      fwav = getAudioInputStream(f);
       format = AudioSystem.getAudioFileFormat(f);
-      //System.out.println("opening " + f.getName() + " format " + format);
-
       len = format.getFrameLength();
-      //System.out.println("opening " + f.getName() + " len " + len);
-
     } catch (UnsupportedAudioFileException e) {
       if (!f.getName().endsWith("raw")) {
         logger.warning("WARNING: Opening file using default RAW parameters '" + e.getMessage() + "'\n");
@@ -95,6 +89,10 @@ public class AudioFile {
     buffer = readAudioFile(len, wav);
 
     end = (float) getBuffer().length / audioFormat.getFrameRate(); //format.getFormat().getFrameRate();
+  }
+
+  private AudioInputStream getAudioInputStream(File wavFile) throws UnsupportedAudioFileException, IOException {
+    return AudioSystem.getAudioInputStream(new BufferedInputStream(new FileInputStream(wavFile)));
   }
 
   private short[] readAudioFile(int len, AudioInputStream wav) throws IOException {
@@ -113,9 +111,11 @@ public class AudioFile {
   public short[] getBuffer() {
     return buffer;
   }
+
   public float getFPS() {
     return (float) buffer.length / end;
   }
+
   public String getName() {
     return name;
   }

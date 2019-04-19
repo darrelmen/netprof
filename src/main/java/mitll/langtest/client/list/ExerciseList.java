@@ -332,20 +332,20 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
         lastSuccessfulRequest = request;
         if (DEBUG) logger.info("onSuccess last req now " + lastSuccessfulRequest);
         setScores(result);
-        gotExercisesResponse(exerciseID, selectionID, searchIfAny, result.getExercises(), result.getFirstExercise());
+        gotExercisesResponse(selectionID, searchIfAny, exerciseID, result.getExercises());
       }
     }
   }
 
-  private void gotExercisesResponse(int exerciseID, String selectionID, String searchIfAny,
-                                    List<T> exercises, ClientExercise firstExercise) {
+  private void gotExercisesResponse(String selectionID, String searchIfAny, int exerciseID,
+                                    List<T> exercises) {
     checkForEmptyExerciseList(exercises.isEmpty());
-    int idToUse = exerciseID == -1 ? firstExercise == null ? -1 : firstExercise.getID() : exerciseID;
+ //   int idToUse = exerciseID == -1 ? firstExercise == null ? -1 : firstExercise.getID() : exerciseID;
 
 
     // TODO : check the current list of exercise ids - if it's not different than the result set, don't blink the UI.
 
-    rememberAndLoadFirst(exercises, selectionID, searchIfAny, idToUse);
+    rememberAndLoadFirst(exercises, selectionID, searchIfAny, exerciseID);
   }
 
   /**

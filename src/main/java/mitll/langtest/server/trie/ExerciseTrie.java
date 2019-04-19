@@ -245,9 +245,8 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private void addSuffixes(T exercise, String trimmed) {
     Collection<String> tokens = smallVocabDecoder.getTokens(trimmed, false);
 
-    trimmed = trimmed.toLowerCase();
-
     if (tokens.size() > 1) {
+      trimmed = trimmed.toLowerCase();
       for (String token : tokens) {
         if (token.length() > trimmed.length()) {
           logger.error("token   " + token);

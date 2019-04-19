@@ -80,6 +80,7 @@ public interface ScoringService extends RemoteService {
                                    ImageOptions imageOptions,
                                    int exerciseID,
                                    boolean usePhonemeMap) throws DominoSessionException, RestrictedOperationException;
+
   /**
    * @param resultid
    * @param roundTrip
@@ -103,10 +104,14 @@ public interface ScoringService extends RemoteService {
   void recalcAlignments(int projid) throws DominoSessionException, RestrictedOperationException;
 
   /**
+<<<<<<< HEAD
    * @see Services#tellOtherServerToRefreshProject
+=======
+>>>>>>> topicFixSerialization
    * @param projID
    * @throws DominoSessionException
    * @throws RestrictedOperationException
+   * @see mitll.langtest.client.LangTest#tellHydraServerToRefreshProject
    */
   void configureAndRefresh(int projID) throws DominoSessionException, RestrictedOperationException;
 

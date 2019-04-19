@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.audio;
 
+import com.sun.management.UnixOperatingSystemMXBean;
 import mitll.langtest.server.ServerProperties;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
@@ -40,6 +41,8 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -133,7 +136,7 @@ public class AudioConversion extends AudioBase {
    * @see #convertBase64ToAudioFiles(String, File, boolean, boolean)
    */
   @NotNull
-  public AudioCheck.ValidityAndDur getValidityAndDur(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK, long then) {
+  AudioCheck.ValidityAndDur getValidityAndDur(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK, long then) {
     if (DEBUG) logger.debug("getValidityAndDur: wrote wav file " + file.getAbsolutePath());
     boolean b;
     b = file.setReadable(true, false);
@@ -144,10 +147,13 @@ public class AudioConversion extends AudioBase {
     if (!file.exists()) {
       logger.error("getValidityAndDur : after writing, can't find file at " + file.getAbsolutePath());
     }
+ //   dumpFD("getValidityAndDur_before");
+
     AudioCheck.ValidityAndDur valid = isValid(file, useSensitiveTooLoudCheck, quietAudioOK);
     if (valid.isValid() && trimAudio) {
       valid.setDuration(trimSilence(file).getDuration());
     }
+  //  dumpFD("getValidityAndDur_after");
 
     long now = System.currentTimeMillis();
     long diff = now - then;
@@ -156,6 +162,14 @@ public class AudioConversion extends AudioBase {
           ") " + valid.getDurationInMillis() + " millis long");
     }
     return valid;
+  }
+
+  private void dumpFD(String message) {
+    OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
+    if (os instanceof UnixOperatingSystemMXBean) {
+      logger.info("writeAudioFile (" + message +
+          ") Number of open fd: " + ((UnixOperatingSystemMXBean) os).getOpenFileDescriptorCount());
+    }
   }
 
 /*  @NotNull
@@ -241,10 +255,16 @@ public class AudioConversion extends AudioBase {
    */
   public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix, long uniqueTimestamp) throws UnsupportedAudioFileException {
     String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + WAV;
-    File wavFile = convertTo16Khz(new File(pathname), uniqueTimestamp);
-    boolean b = wavFile.setReadable(true, false);
-    if (!b) logger.warn("couldn't make " + wavFile + " readable?");
-    return removeSuffix(wavFile.getName());
+    File originalWavFile = new File(pathname);
+
+    if (originalWavFile.length() < AudioCheck.WAV_HEADER_LENGTH) {
+      return originalWavFile.getName();
+    } else {
+      File wavFile = convertTo16Khz(originalWavFile, uniqueTimestamp);
+      boolean b = wavFile.setReadable(true, false);
+      if (!b) logger.warn("couldn't make " + wavFile + " readable?");
+      return removeSuffix(wavFile.getName());
+    }
   }
 
 
@@ -410,7 +430,7 @@ public class AudioConversion extends AudioBase {
       logger.info("wav2raw Reading from " + sourceFile + " exists " + sourceFile.exists() + " at " + sourceFile.getAbsolutePath());
 
     try {
-      sourceStream = AudioSystem.getAudioInputStream(sourceFile);
+      sourceStream = getAudioInputStream(sourceFile);
 
       String absolutePath = outputFile.getAbsolutePath();
       if (DEBUG) logger.info("wav2raw Writing to " + absolutePath);
@@ -453,6 +473,18 @@ public class AudioConversion extends AudioBase {
         logger.error("Got " + e, e);
       }
     }
+  }
+
+  /**
+   * Have to do this or else leaves an open file handle - gah!
+   *
+   * @param wavFile
+   * @return
+   * @throws UnsupportedAudioFileException
+   * @throws IOException
+   */
+  private static AudioInputStream getAudioInputStream(File wavFile) throws UnsupportedAudioFileException, IOException {
+    return AudioSystem.getAudioInputStream(new BufferedInputStream(new FileInputStream(wavFile)));
   }
 
   private static void makeOutputReadable(File outputFile, String absolutePath) {

@@ -88,7 +88,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   /**
    * Don't send to client - just server side
    */
-  private transient String transcript = "";
+  private String transcript = "";
 
   // 9/24/14 : setting it here may stop intermittent gwt rpc exceptions
   private Map<String, String> attributes = new HashMap<String, String>();
@@ -343,17 +343,19 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
    * @return
    * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#makeFirstRow
    */
+/*
   public AlignmentOutput getAlignmentOutput() {
     return alignmentOutput;
   }
+*/
 
   /**
    * @param alignmentOutput
    * @seex mitll.langtest.server.services.ExerciseServiceImpl#setAlignmentInfo
    */
-  public void setAlignmentOutput(AlignmentOutput alignmentOutput) {
+/*  public void setAlignmentOutput(AlignmentOutput alignmentOutput) {
     this.alignmentOutput = alignmentOutput;
-  }
+  }*/
 
   public MiniUser.Gender getRealGender() {
     return realGender;

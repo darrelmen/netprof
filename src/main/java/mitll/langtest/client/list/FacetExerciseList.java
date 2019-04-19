@@ -84,11 +84,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     extends HistoryExerciseList<T, U>
     implements ShowEventListener, ChoicesContainer {
   private final Logger logger = Logger.getLogger("FacetExerciseList");
-
   /**
    * Try to avoid wrap on the pager text
    */
-  private static final int MIN_WIDTH_PAGER = 262;
+  private static final int PAGER_WIDTH = 299;
 
   private static final String RECORDED = "Recorded";
 
@@ -103,7 +102,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   /**
    *
    */
-  static final boolean DEBUG_STALE = true;
+  static final boolean DEBUG_STALE = false;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_CHOICES = false;
@@ -304,9 +303,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     {
       tableWithPager.addStyleName("floatLeft");
       tableWithPager.setWidth("100%");
-
-      tableWithPager.getElement().getStyle().setProperty("minWidth", MIN_WIDTH_PAGER +
-          "px");
+      tableWithPager.getElement().getStyle().setProperty("minWidth", PAGER_WIDTH + "px");
     }
 
     {
@@ -1727,6 +1724,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     alreadyFetched.forEach(exercise -> idToEx.put(exercise.getID(), exercise));
 
     result.getExercises().forEach(clientEx -> addExerciseToCached((U) clientEx));
+    factory.addToCache(result.getCachedAlignments());
     return idToEx;
   }
 
@@ -1809,7 +1807,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   @NotNull
   Set<Integer> getNextPageIDs() {
-    CommonShell currentSelection = pagingContainer.getCurrentSelection();
+    T currentSelection = pagingContainer.getCurrentSelection();
     List<T> items = pagingContainer.getItems();
     int i = items.indexOf(currentSelection);
 
@@ -1870,17 +1868,45 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 //    logger.info("logException stack:\n" + exceptionAsString);
   }
 
+  /**
+   * TODO : don't do this - add the cached alignments as a separate return field in ExerciseListWrapper.
+   * That way we don't wait for the second request to return.
+   *
+   * @param result
+   * @param reqID
+   * @param exerciseContainer
+   */
   protected void populatePanels(Collection<U> result, int reqID, DivWidget exerciseContainer) {
     long then = System.currentTimeMillis();
     List<RefAudioGetter> getters = makeExercisePanels(result, exerciseContainer, reqID);
     long now = System.currentTimeMillis();
 
-    if (DEBUG)
-      logger.info("reallyShowExercises made " + getters.size() + " panels in " + (now - then) + " millis for req " + getCurrentExerciseReq() + " ");
-
-    if (!getters.isEmpty()) {
-      getRefAudio(getters.iterator());
+    if (DEBUG) {
+      logger.info("populatePanels made " + getters.size() + " panels in " + (now - then) + " millis for req " + getCurrentExerciseReq() + " ");
     }
+
+    // get existing alignment info in one call!
+    //   {
+
+//      if (DEBUG) {
+    //   Set<Integer> audioIDs = new HashSet<>();
+    //   getters.forEach(refAudioGetter -> audioIDs.addAll(refAudioGetter.getReqAudioIDs()));
+    //      logger.info("populatePanels asking for " + audioIDs.size() + " to fill cache...");
+    //  }
+    // long then2 = System.currentTimeMillis();
+//      getters.iterator().next().getAndRememberCachedAlignents(
+//          () -> {
+//            logger.info("got answer back for request for " + audioIDs.size() + " audio ids in " +
+//                (System.currentTimeMillis() - then2));
+//           // if (!getters.isEmpty()) {
+//              getRefAudio(getters.iterator());
+//          //  }
+//          }, audioIDs);
+
+
+    getRefAudio(getters.iterator());
+
+    // }
   }
 
   /**
@@ -1973,7 +1999,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
    * Don't recurse...
    *
    * @param iterator
-   * @see #showExercises(Collection, int)
+   * @see #populatePanels(Collection, int, DivWidget)
    */
   private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
     if (iterator.hasNext()) {
@@ -1989,6 +2015,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
             final int reqid = next.getReq();
             if (isCurrentReq(reqid)) {
               Scheduler.get().scheduleDeferred(() -> {
+                logger.info("schedule later...");
                 if (isCurrentReq(reqid)) {
                   getRefAudio(iterator);
                 } else {
@@ -1996,6 +2023,10 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
                       ") for panel vs " + getCurrentExerciseReq());
                 }
               });
+
+//              if (isCurrentReq(reqid)) {
+//                getRefAudio(iterator);
+//              }
             }
           } else {
             //   logger.info("\tgetRefAudio all panels complete...");

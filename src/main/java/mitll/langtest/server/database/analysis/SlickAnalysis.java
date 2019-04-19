@@ -616,14 +616,14 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = now;
     Map<Integer, UserInfo> best = getBest(perfForUser, minRecordings, false);
     now = System.currentTimeMillis();
-    if (now - then > 100)
-      logger.info("getUserInfo took " + (now - then) + " to get best for " + perfForUser.size() + " for project #" + projid);
+    if (now - then > 10)
+      logger.info("getUserInfos took " + (now - then) + " to get best for " + perfForUser.size() + " for project #" + projid);
 
     then = now;
     List<UserInfo> userInfos = getSortedUserInfos(userDAO, best, sortByPolyScore);
     now = System.currentTimeMillis();
-    if (now - then > 100)
-      logger.info("getUserInfo took " + (now - then) + " to get user infos for " + userInfos.size() + " users for project #" + projid);
+    if (now - then > 10)
+      logger.info("getUserInfos took " + (now - then) + " to get user infos for " + userInfos.size() + " users for project #" + projid);
 
     return userInfos;
   }

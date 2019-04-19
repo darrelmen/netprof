@@ -64,6 +64,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.project.ProjectManagement.logMemory;
@@ -113,7 +114,7 @@ public class Project implements IPronunciationLookup, IProject {
   private DatabaseImpl db;
   private ServerProperties serverProps;
   private boolean isRTL;
-  private final Map<Integer, AlignmentOutput> audioToAlignment = new HashMap<>();
+  private final ConcurrentMap<Integer, AlignmentOutput> audioToAlignment = new ConcurrentHashMap<>();
 
   private Map<String, Integer> fileToRecorder = new ConcurrentHashMap<>();
   private Map<String, Boolean> unknownFiles = new ConcurrentHashMap<>();
@@ -725,10 +726,12 @@ public class Project implements IPronunciationLookup, IProject {
   }
 
   /**
+   * ConcurrentHashMap!
+   *
    * @return
-   * @see AlignmentHelper#addAlignmentOutput(int, Project, Collection)
+   * @see AlignmentHelper#addAlignmentOutput(Project, Collection)
    */
-  public Map<Integer, AlignmentOutput> getAudioToAlignment() {
+  public ConcurrentMap<Integer, AlignmentOutput> getAudioToAlignment() {
     return audioToAlignment;
   }
 

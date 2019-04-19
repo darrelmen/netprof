@@ -165,6 +165,7 @@ public abstract class BaseAudioDAO extends DAO {
   final Map<Integer, MiniUser> idToMini = new ConcurrentHashMap<>();
 
   /**
+   * Super expensive - hitting the database over and over only to most of the time do nothing!
    * TODO : consider why doing this all the time
    * TODO : this could be a lot smarter...
    *
@@ -260,23 +261,23 @@ public abstract class BaseAudioDAO extends DAO {
   /**
    * @param language
    * @param audioAttributesForExercises
-   * @param exercise
+   * @param parentExercise
    * @param smallVocabDecoder
    * @see #attachAudioToExercises(Collection, Language, int)
    */
   private void addContextAudio(Language language,
                                Map<Integer, List<AudioAttribute>> audioAttributesForExercises,
-                               ClientExercise exercise, SmallVocabDecoder smallVocabDecoder) {
-    int id = exercise.getID();
+                               ClientExercise parentExercise, SmallVocabDecoder smallVocabDecoder) {
+    int id = parentExercise.getID();
     boolean doDEBUG = DEBUG_ATTACH;
 
-    Collection<AudioAttribute> onlyContextFromParent = exercise.getContextAudio();
+    Collection<AudioAttribute> onlyContextFromParent = parentExercise.getContextAudio();
 
     if (doDEBUG) {
       logger.info("addContextAudio for ex " + id + " found " + onlyContextFromParent.size() + " to attach ");
     }
 
-    for (ClientExercise contextSentence : exercise.getDirectlyRelated()) {
+    for (ClientExercise contextSentence : parentExercise.getDirectlyRelated()) {
       int contextID = contextSentence.getID();
       List<AudioAttribute> audioAttributes = audioAttributesForExercises.get(contextID);
 
