@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.services;
 
+import com.sun.mail.imap.protocol.ID;
 import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.services.DialogService;
 import mitll.langtest.server.database.exercise.ISection;
@@ -271,5 +272,10 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   @Override
   public IDialog addDialog(IDialog dialog) throws DominoSessionException {
     return db.getDialogDAO().add(dialog);
+  }
+
+  public void update(IDialog dialog) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    db.getDialogDAO().update(dialog);
   }
 }

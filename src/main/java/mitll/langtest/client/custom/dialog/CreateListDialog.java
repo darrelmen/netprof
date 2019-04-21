@@ -39,18 +39,17 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
-import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.KeyPressHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.custom.QuizSpec;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.Permission;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Set;
 import java.util.logging.Logger;
 
 public class CreateListDialog<T extends UserList> extends CreateDialog<T> {
@@ -99,7 +98,6 @@ public class CreateListDialog<T extends UserList> extends CreateDialog<T> {
 
   private static final String CLASS = "Course Info";
   //  private static final String TITLE = "Title";
-  private final CreateComplete<T> listView;
   private FormField classBox;
   private RadioButton sentenceChoice;
   private RadioButton bothChoice;
@@ -122,7 +120,7 @@ public class CreateListDialog<T extends UserList> extends CreateDialog<T> {
    * @param isEdit
    * @see ListView#doEdit
    */
-  public CreateListDialog(CreateComplete listView, ExerciseController controller, T current, boolean isEdit, Set<String> names) {
+  public CreateListDialog(CreateComplete<T> listView, ExerciseController controller, T current, boolean isEdit, Set<String> names) {
     this(listView, controller, names, current, isEdit);
 
     this.isQuiz = current.getListType() == UserList.LIST_TYPE.QUIZ;
@@ -137,14 +135,12 @@ public class CreateListDialog<T extends UserList> extends CreateDialog<T> {
    * @param names
    * @see ListView#doAdd
    */
-  public CreateListDialog(CreateComplete listView, ExerciseController controller, Set<String> names) {
-    super(null, names, false, controller);
-    this.listView = listView;
+  public CreateListDialog(CreateComplete<T> listView, ExerciseController controller, Set<String> names) {
+    super(null, names, false, controller, listView);
   }
 
-  private CreateListDialog(CreateComplete listView, ExerciseController controller, Set<String> names, T current, boolean isEdit) {
-    super(current, names, isEdit, controller);
-    this.listView = listView;
+  private CreateListDialog(CreateComplete<T> listView, ExerciseController controller, Set<String> names, T current, boolean isEdit) {
+    super(current, names, isEdit, controller, listView);
   }
 
   public CreateListDialog setIsQuiz(boolean isQuiz) {
@@ -238,7 +234,7 @@ public class CreateListDialog<T extends UserList> extends CreateDialog<T> {
     int row = 0;
 
     if (isCreate) {
-      RowAndCol rowAndCol = new RowAndCol(grid, col, row).invoke();
+      RowAndCol rowAndCol = new RowAndCol(grid, col, row).invoke(true, null, null);
       col = rowAndCol.getCol();
       row = rowAndCol.getRow();
 
@@ -464,11 +460,12 @@ public class CreateListDialog<T extends UserList> extends CreateDialog<T> {
    * @param area
    * @param classBox
    * @param publicRadio
+   * @see #doCreate()
    */
-  protected void gotCreate(KeyPressHelper enterKeyButtonHelper,
-                           TextArea area,
-                           FormField classBox,
-                           RadioButton publicRadio) {
+  private void gotCreate(KeyPressHelper enterKeyButtonHelper,
+                         TextArea area,
+                         FormField classBox,
+                         RadioButton publicRadio) {
     enterKeyButtonHelper.removeKeyHandler();
     addUserList(titleBox, area, classBox, publicRadio.getValue(), getListType());
   }

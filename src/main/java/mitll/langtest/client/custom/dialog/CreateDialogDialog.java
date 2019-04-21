@@ -42,6 +42,7 @@ import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
+import mitll.langtest.shared.dialog.IMutableDialog;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -55,14 +56,23 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
 
   private FormField entitleBox;
 
-  public CreateDialogDialog(T current, Set<String> names, boolean isEdit, ExerciseController controller) {
-    super(current, names, isEdit, controller);
+  CreateDialogDialog(T current,
+                     Set<String> names,
+                     boolean isEdit,
+                     ExerciseController controller, CreateComplete<T> listView) {
+    super(current, names, isEdit, controller, listView);
   }
 
-  CreateDialogDialog(Set<String> names, ExerciseController controller) {
-    super(null, names, false, controller);
+  /**
+   * @param names
+   * @param controller
+   * @see DialogEditorView#getCreateDialog()
+   */
+  CreateDialogDialog(Set<String> names, ExerciseController controller, CreateComplete<T> listView) {
+    super(null, names, false, controller, listView);
   }
 
+  ListBox dialogType;
   /**
    * TODO : add en title
    * TODO : add unit/chapter drop downs
@@ -80,7 +90,10 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     int col = 0;
     int row = 0;
 
-    RowAndCol rowAndCol = new RowAndCol(grid, col, row).invoke();
+    String unit = isEdit ? getCurrent().getUnit() : null;
+    String chapter = isEdit ? getCurrent().getChapter() : null;
+
+    new RowAndCol(grid, col, row).invoke(false, unit, chapter);
 
     grid.addStyleName("leftFiveMargin");
 
@@ -92,7 +105,16 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
       listBox.addItem("-- Choose type of dialog --");
       listBox.addItem(DialogType.DIALOG.toString());
       listBox.addItem(DialogType.INTERPRETER.toString());
+      dialogType=listBox;
       child.add(listBox);
+
+      if (isEdit) {
+        if (getCurrent().getKind() == DialogType.DIALOG) {
+          listBox.setSelectedValue(DialogType.DIALOG.toString());
+        } else if (getCurrent().getKind() == DialogType.INTERPRETER) {
+          listBox.setSelectedValue(DialogType.INTERPRETER.toString());
+        }
+      }
     }
     {
       ListBox listBox = getListBox(200);
@@ -103,7 +125,6 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
       child.add(listBox);
     }
     //listBox.addChangeHandler(event -> gotChangeOn);
-
 
     child.add(getPrivacyChoices());
     moveFocusToTitleLater();
@@ -129,13 +150,13 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     box.addBlurHandler(event -> controller.logEvent(box, TEXT_BOX, CREATE_NEW_LIST, "English Title = " + box.getValue()));
   }
 
-
   /**
    * TODO figure out image upload...
    * TODO :add dialog type drop down
    */
   @Override
   protected void doCreate() {
+
     enterKeyButtonHelper.removeKeyHandler();
 
     List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
@@ -182,6 +203,8 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
           @Override
           public void onSuccess(IDialog result) {
             logger.info("Got " + result);
+            listView.madeIt((T)result);
+
           }
         });
   }
@@ -215,6 +238,22 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
 
   @Override
   public void doEdit(T currentSelection, ButtonMemoryItemContainer<T> container) {
+    IMutableDialog mutable = currentSelection.getMutable();
+    mutable.setForeignLanguage(titleBox.getSafeText());
+    mutable.setEnglish(entitleBox.getSafeText());
+    mutable.setOrientation(theDescription.getText());
+    mutable.setDialogType(DialogType.valueOf(dialogType.getSelectedValue()));
 
+    controller.getDialogService().update(currentSelection, new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("changing a list", caught);
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+        container.redraw();
+      }
+    });
   }
 }

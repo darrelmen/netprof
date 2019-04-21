@@ -29,6 +29,7 @@
 
 package mitll.langtest.client.services;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.dialog.RehearseViewHelper;
@@ -61,6 +62,8 @@ public interface DialogService extends RemoteService {
    * @throws DominoSessionException
    */
   ExerciseListWrapper<IDialog> getDialogs(ExerciseListRequest request) throws DominoSessionException;
+
+  void update(IDialog dialog) throws DominoSessionException;
 
   IDialog addDialog(IDialog dialog) throws DominoSessionException;
   /**

@@ -65,15 +65,15 @@ import java.util.logging.Logger;
  * Created by go22670 on 7/3/17.
  */
 public class ListView<T extends UserList<CommonShell>> extends ContentEditorView<T> {
-  private final Logger logger = Logger.getLogger("ListView");
+  //private final Logger logger = Logger.getLogger("ListView");
 
-  public static final String FORGET_VISITED_LIST = "Forget visited list.";
+  private static final String FORGET_VISITED_LIST = "Forget visited list.";
 
   private static final String QUIZ = "Quiz";
   private static final String DO_QUIZ = "Do quiz";
-  private static final String DELETE_LIST = "Delete list.";
+//  private static final String DELETE_LIST = "Delete list.";
 
-  private static final String MAKE_A_NEW_LIST = "Make a new list.";
+ // private static final String MAKE_A_NEW_LIST = "Make a new list.";
   private static final String CAN_T_IMPORT_INTO_FAVORITES = "Can't import into favorites...";
 
   private static final String PRACTICE_THE_LIST = "Practice the list.";
@@ -81,37 +81,37 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
   /**
    * @see #getImport
    */
-  private static final String IMPORT = "Import";
+//  private static final String IMPORT = "Import";
   /**
    * With quiz button
    */
-  private static final int MIN_WIDTH = 659;//599;
+//  private static final int MIN_WIDTH = 659;//599;
 
-  private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
+//  private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
   private static final String MY_LISTS = "myLists";
 
   /**
    * @see #getEdit
    */
-  private static final String EDIT_THE_LIST = "Edit the list, make it public.";
+//  private static final String EDIT_THE_LIST = "Edit the list, make it public.";
   /**
    *
    */
-  private static final String EDIT_THE_LIST_OR_QUIZ = "Edit the list, make it public, or make it a quiz.";
-  private static final String SHARE = "Share";
-  private static final String SHARE_THE_LIST = "Share the list with someone.";
+ // private static final String EDIT_THE_LIST_OR_QUIZ = "Edit the list, make it public, or make it a quiz.";
+ // private static final String SHARE = "Share";
+//  private static final String SHARE_THE_LIST = "Share the list with someone.";
   private static final String VISITED = "Visited";
-  private static final String SAVE = "Save";
+//  private static final String SAVE = "Save";
 
 
   /**
    * @see #getAddItems
    */
-  private static final String ITEMS = "Items";
-  private static final String ADD = "Add";
-  private static final String CANCEL = "Cancel";
+//  private static final String ITEMS = "Items";
+//  private static final String ADD = "Add";
+//  private static final String CANCEL = "Cancel";
   private static final String LEARN_THE_LIST = "Learn the list.";
-  private static final String EDIT_TITLE = "";
+//  private static final String EDIT_TITLE = "";
 
   private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to view a list or quiz";
 
@@ -140,9 +140,9 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
   private static final int BROWSE_PAGE_SIZE = 6;// 7;
   private static final int BROWSE_SHORT_PAGE_SIZE = 6;
 
-  private static final String CREATE_NEW_LIST = "Create New List";
-  private static final String EDIT1 = "Edit";
-  private static final String EDIT = EDIT1;
+//  private static final String CREATE_NEW_LIST = "Create New List";
+//  private static final String EDIT1 = "Edit";
+//  private static final String EDIT = EDIT1;
 
   /**
    * @see #editList()
@@ -155,8 +155,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
   private static final int VISITED_HEIGHT = (MY_LIST_HEIGHT / 2) - MARGIN_FOR_BUTTON - browseBigger;
   private static final int BROWSE_HEIGHT = (MY_LIST_HEIGHT / 2) - MARGIN_FOR_BUTTON + browseBigger;
 
-  // private ListContainer<T> myLists;
-  //  private final Set<String> names = new HashSet<>();
   private Button quizButton;
 
   /**
@@ -354,23 +352,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
   @NotNull
   @Override
   protected DivWidget getButtons(ButtonMemoryItemContainer<T> container) {
-//    DivWidget buttons = new DivWidget();
-//    buttons.addStyleName("inlineFlex");
-//    buttons.addStyleName("topFiveMargin");
-//    buttons.getElement().getStyle().setProperty("minWidth", MIN_WIDTH + "px");
-//    buttons.add(getAddButton());
-//
-//    if (canMakeQuiz()) {
-//      buttons.add(getAddQuizButton());
-//    }
-//
-//    buttons.add(removeButton = getRemoveButton());
-//
-//    buttons.add(editButton = getEdit());
-//    buttons.add(getAddItems());
-//    buttons.add(getImport());
-//    buttons.add(share = getShare());
-
     DivWidget buttons = super.getButtons(container);
     addDrillAndLearn(buttons, container);
     if (canMakeQuiz()) {
@@ -378,25 +359,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     }
     return buttons;
   }
-/*
-
-  private Button getEdit() {
-    Button successButton = getSuccessButton(EDIT_TITLE);
-    successButton.setIcon(IconType.PENCIL);
-    successButton.addClickHandler(event -> doEdit());
-    addTooltip(successButton, canMakeQuiz() ? EDIT_THE_LIST_OR_QUIZ : EDIT_THE_LIST);
-    // successButton.setEnabled(!myLists.isEmpty());
-    return successButton;
-  }
-
-  private Button getShare() {
-    Button successButton = getSuccessButton(SHARE);
-    successButton.setIcon(IconType.SHARE);
-    addTooltip(successButton, SHARE_THE_LIST);
-    //  successButton.setEnabled(!myLists.isEmpty());
-    return successButton;
-  }
-*/
 
 /*
   private Button getPublic() {
@@ -407,51 +369,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
   }
 */
 
-
-  /* private void doImport() {
-     UserList<CommonShell> currentSelection = getCurrentSelection(myLists);
-     doImport(currentSelection, currentSelection.isFavorite());
-   }
- */
- /* private void doImport(UserList<CommonShell> currentSelection, boolean favorite) {
-    ImportBulk importBulk = new ImportBulk();
-    DivWidget contents = importBulk.showImportItem(controller.getLanguage());
-
-//    int numItems = currentSelection.getNumItems();
-//    logger.info("editList : on " + currentSelection.getName() + " now " + numItems);
-
-    DialogHelper dialogHelper = new DialogHelper(false);
-    Button closeButton = dialogHelper.show(
-        "Import Bulk from Text",
-        Collections.emptyList(),
-        contents,
-        "Import",
-        "Cancel",
-        new DialogHelper.CloseListener() {
-          @Override
-          public boolean gotYes() {
-            if (favorite) {
-              Window.alert(CAN_T_IMPORT_INTO_FAVORITES);
-              return false;
-            } else {
-              importBulk.doBulk(controller, currentSelection, myLists);
-              return true;
-            }
-          }
-
-          @Override
-          public void gotNo() {
-          }
-
-          @Override
-          public void gotHidden() {
-
-          }
-        }, 550);
-
-    closeButton.setType(ButtonType.SUCCESS);
-  }
-*/
   @Override
   protected boolean gotYesOnImport(T currentSelection, ImportBulk importBulk) {
     boolean favorite = getCurrentSelection(myLists).isFavorite();
@@ -464,17 +381,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     }
   }
 
-  /**
-   * @return
-   * @see #getButtons
-   */
-//  private IsWidget getAddItems() {
-//    Button successButton = getSuccessButton(ITEMS);
-//    successButton.setIcon(IconType.PENCIL);
-//    successButton.addClickHandler(event -> editList());
-//    addTooltip(successButton, EDIT_THE_ITEMS_ON_LIST);
-//    return successButton;
-//  }
   @Override
   protected void editList() {
     EditItem editItem = new EditItem(controller);
@@ -564,19 +470,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     }
   }
 
-
-  /**
-   * @return
-   * @see #getButtons
-   */
-//  @NotNull
-//  private Button getAddButton() {
-//    final Button add = new Button("", IconType.PLUS);
-//    add.addClickHandler(event -> dialogHelper = doAdd());
-//    add.setType(ButtonType.SUCCESS);
-//    addTooltip(add, MAKE_A_NEW_LIST);
-//    return add;
-//  }
   @Override
   @NotNull
   protected Button getAddQuizButton() {
@@ -588,21 +481,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     return add;
   }
 
- /* @NotNull
-  private Button getRemoveButton() {
-    final Button add = new Button("", IconType.MINUS);
-    add.addStyleName("leftFiveMargin");
-    add.addClickHandler(event -> gotDelete(add, getCurrentSelectionFromMyLists()));
-    add.setType(ButtonType.DANGER);
-    addTooltip(add, DELETE_LIST);
-    myLists.addButton(add);
-    return add;
-  }
-*/
-/*  private T getCurrentSelectionFromMyLists() {
-    return getCurrentSelection(myLists);
-  }*/
-
   @NotNull
   private Button getRemoveVisitorButton(ListContainer<T> visited) {
     final Button add = new Button("", IconType.MINUS);
@@ -613,17 +491,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     visited.addButton(add);
     return add;
   }
-
-  //  private void gotDelete(Button delete, UserList<CommonShell> currentSelection) {
-//    if (currentSelection != null) {
-//      if (currentSelection.getListType() == UserList.LIST_TYPE.QUIZ) {
-//        warnFirst(delete, currentSelection);
-//      } else {
-//        doDelete(delete, currentSelection);
-//      }
-//    }
-//  }
-
   @Override
   protected void doDelete(UIObject delete, T currentSelection) {
     final int uniqueID = currentSelection.getID();
@@ -641,11 +508,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
 
         @Override
         public void onSuccess(Boolean result) {
-          if (result) {
-            removeFromLists(myLists, currentSelection);
-          } else {
-            logger.warning("deleteList ---> did not do deleteList " + uniqueID);
-          }
+          gotDeleteResponse(result, currentSelection, uniqueID);
         }
       });
     }
@@ -671,16 +534,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     });
   }
 
-  /**
-   * @return
-   * @see #getAddButton
-   */
-//  private DialogHelper doAdd() {
-//    DivWidget contents = new DivWidget();
-//    CreateListDialog<UserList<CommonShell>> createListDialog = new CreateListDialog<UserList<CommonShell>>(this, controller, names);
-//    createListDialog.doCreate(contents);
-//    return getNewListButton(contents, createListDialog, CREATE_NEW_LIST);
-//  }
   @NotNull
   protected CreateDialog<T> getCreateDialog() {
     return new CreateListDialog<T>(this, controller, names);
@@ -692,89 +545,44 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
    */
   private DialogHelper doAddQuiz() {
     DivWidget contents = new DivWidget();
-    CreateListDialog<UserList<CommonShell>> createListDialog = new CreateListDialog<UserList<CommonShell>>(this, controller, names).setIsQuiz(true);
+//    ListView<T> lv=this;
+    CreateListDialog<T> createListDialog =
+        new CreateListDialog<>(this, controller, names).setIsQuiz(true);
     createListDialog.doCreate(contents);
 
     return getNewListButton(contents, createListDialog, "Create New Quiz");
   }
 
-  @NotNull
-  private DialogHelper getNewListButton(DivWidget contents, CreateListDialog createListDialog, String title) {
-    DialogHelper dialogHelper = new DialogHelper(true);
-    createListDialog.setDialogHelper(dialogHelper);
-    Button closeButton = dialogHelper.show(
-        title,
-        Collections.emptyList(),
-        contents,
-        ADD,
-        CANCEL,
-        new DialogHelper.CloseListener() {
-          @Override
-          public boolean gotYes() {
-            return createListDialog.isOKToCreate();
-          }
-
-          @Override
-          public void gotNo() {
-          }
-
-          @Override
-          public void gotHidden() {
-
-          }
-        }, 580);
-
-    closeButton.setType(ButtonType.SUCCESS);
-    closeButton.setIcon(IconType.PLUS);
-    return dialogHelper;
-  }
-
-//  private CreateDialog<T> editDialog;
-
-/*  @Override
-  protected CreateDialog<T> doEdit() {
-    DivWidget contents = new DivWidget();
-    CreateDialog<T> editDialog = getEditDialog();
-    editDialog.doCreate(contents);
-
-    DialogHelper dialogHelper = new DialogHelper(true);
-    Button closeButton = dialogHelper.show(
-        EDIT,
-        Collections.emptyList(),
-        contents,
-        SAVE,
-        CANCEL,
-        new DialogHelper.CloseListener() {
-          @Override
-          public boolean gotYes() {
-            boolean okToCreate = editDialog.isValidName();
-            if (okToCreate) {
-              editDialog.doEdit(myLists.getCurrentSelection(), myLists);
-
-
-              myLists.flush();
-              myLists.redraw();
-              enableQuizButton(quizButton);
-            }
-            return okToCreate;
-          }
-
-          @Override
-          public void gotNo() {
-          }
-
-          @Override
-          public void gotHidden() {
-
-          }
-
-
-        }, 550);
-
-    closeButton.setType(ButtonType.SUCCESS);
-
-    return editDialog;
-  }*/
+//  @NotNull
+//  private DialogHelper getNewListButton(DivWidget contents, CreateListDialog createListDialog, String title) {
+//    DialogHelper dialogHelper = new DialogHelper(true);
+//    createListDialog.setDialogHelper(dialogHelper);
+//    Button closeButton = dialogHelper.show(
+//        title,
+//        Collections.emptyList(),
+//        contents,
+//        ADD,
+//        CANCEL,
+//        new DialogHelper.CloseListener() {
+//          @Override
+//          public boolean gotYes() {
+//            return createListDialog.isOKToCreate();
+//          }
+//
+//          @Override
+//          public void gotNo() {
+//          }
+//
+//          @Override
+//          public void gotHidden() {
+//
+//          }
+//        }, 580);
+//
+//    closeButton.setType(ButtonType.SUCCESS);
+//    closeButton.setIcon(IconType.PLUS);
+//    return dialogHelper;
+//  }
 
   @Override
   protected void afterGotYesOnEdit() {
@@ -786,25 +594,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
   protected CreateDialog<T> getEditDialog() {
     return new CreateListDialog<T>(this, controller, myLists.getCurrentSelection(), true, names);
   }
-
-  /**
-   * @param userList
-   * @see CreateListDialog#addUserList
-   */
-/*  @Override
-  public void madeIt(T userList) {
-    // logger.info("madeIt made it " + userList.getName());
-    try {
-      dialogHelper.hide();
-      myLists.addExerciseAfter(null, userList);
-      myLists.enableAll();
-      names.add(userList.getName());
-      editButton.setEnabled(true);
-    } catch (Exception e) {
-      logger.warning("got " + e);
-    }
-    Scheduler.get().scheduleDeferred(() -> myLists.markCurrentExercise(userList.getID()));
-  }*/
 
   /**
    * @seex CreateListDialog#makeCreateButton
@@ -850,7 +639,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
       //showLearnOrQuiz(selected);
       editList();
     }
-
   }
 
   @NotNull

@@ -122,11 +122,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
   /**
    * join with attributes = meta data from domino
-   *
+   * <p>
    * join with exercises, in order
-   *
+   * <p>
    * TODO : join with aggregate score
-   *
+   * <p>
    * join with images
    *
    * @param projid
@@ -237,7 +237,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
         slickDialog.lesson(),
         slickDialog.orientation(),
         "",
-        "",
+        "",  // set by attribute
         slickDialog.entitle(),
         new ArrayList<>(),
         new ArrayList<>(),
@@ -451,6 +451,26 @@ public class DialogDAO extends DAO implements IDialogDAO {
       toAdd.getMutable().setID(add);
     }
     return toAdd;
+  }
+
+  @Override
+  public boolean update(IDialog dialog) {
+    long modified = System.currentTimeMillis();
+    return dao.update(new SlickDialog(
+        -1,
+        dialog.getUserid(),
+        dialog.getProjid(),
+        dialog.getDominoid(),
+        dialog.getImageID(),
+        new Timestamp(modified),
+        new Timestamp(modified),
+        dialog.getUnit(), dialog.getChapter(),
+        dialog.getKind().toString(),
+        DialogStatus.DEFAULT.toString(),
+        dialog.getEnglish(),
+        dialog.getOrientation(),
+        dialog.isPrivate()
+    )) > 0;
   }
 
   /**

@@ -29,7 +29,6 @@
 
 package mitll.langtest.server.database.dialog;
 
-import com.sun.mail.imap.protocol.ID;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.dialog.DialogStatus;
@@ -41,6 +40,7 @@ import java.util.List;
 public interface IDialogDAO extends IDAO {
 
   IDialog add(IDialog toAdd);
+  boolean update(IDialog toAdd);
 
   int add(int userid,
           int projid,

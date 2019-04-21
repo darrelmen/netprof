@@ -183,7 +183,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     DialogContainer<T> myLists = new MyDialogContainer();
     Panel tableWithPager = (this.myLists = myLists).getTableWithPager(result);
 
-    new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.RIGHT);
+    new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.BOTTOM);
     addPagerAndHeader(tableWithPager, YOUR_LISTS1, left);
     tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
     tableWithPager.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
@@ -196,15 +196,19 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     result.forEach(list -> {
       // if (list.getUserID() == controller.getUser()) {
       names.add(list.getName());
-      logger.info("names now " + names);
+    //  logger.info("names now " + names);
       // }
     });
   }
 
+  /**
+   * @return
+   * @see ContentEditorView#doAdd
+   */
   @NotNull
   @Override
   protected CreateDialog<T> getCreateDialog() {
-    return new CreateDialogDialog<T>(names, controller);
+    return new CreateDialogDialog<T>(names, controller,this);
   }
 
   @Override
@@ -214,7 +218,20 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
   @Override
   protected void doDelete(UIObject delete, T currentSelection) {
+    final int uniqueID = currentSelection.getID();
 
+    controller.getDialogService().delete(uniqueID, new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(Boolean result) {
+        gotDeleteResponse(result, currentSelection, uniqueID);
+
+      }
+    });
   }
 
 //  @Override
@@ -375,7 +392,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   @NotNull
   @Override
   protected CreateDialog<T> getEditDialog() {
-    return null;
+    return new CreateDialogDialog<T>(getCurrentSelectionFromMyLists(), names, true, controller,this);
   }
 
   private class MyShownCloseListener implements DialogHelper.ShownCloseListener {

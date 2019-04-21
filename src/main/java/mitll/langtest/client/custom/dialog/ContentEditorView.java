@@ -128,7 +128,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 
   protected abstract void populateUniqueListNames(Collection<T> result);
 
-
   /**
    * @param container
    * @return
@@ -274,6 +273,14 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     return getNewListButton(contents, createDialog, CREATE_NEW_LIST + getItemName());
   }
 
+  protected void gotDeleteResponse(Boolean result, T currentSelection, int uniqueID) {
+    if (result) {
+      removeFromLists(myLists, currentSelection);
+    } else {
+      logger.warning("doDelete ---> did not do delete of " + uniqueID);
+    }
+  }
+
   @NotNull
   protected abstract CreateDialog<T> getCreateDialog();
 
@@ -283,7 +290,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   protected abstract CreateDialog<T> getEditDialog();
 
   @NotNull
-  private DialogHelper getNewListButton(DivWidget contents, CreateDialog createListDialog, String title) {
+  protected DialogHelper getNewListButton(DivWidget contents, CreateDialog createListDialog, String title) {
     DialogHelper dialogHelper = new DialogHelper(true);
     createListDialog.setDialogHelper(dialogHelper);
     Button closeButton = dialogHelper.show(
@@ -403,7 +410,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 //    return container.getCurrentSelection();
 //  }
 
-  protected void gotDelete(Button delete, T currentSelection) {
+  private void gotDelete(Button delete, T currentSelection) {
     if (currentSelection != null) {
       warnFirst(delete, currentSelection);
     }
@@ -433,12 +440,16 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
         500, -1);
   }
 
+  /**
+   * @see #warnFirst(Button, INameable)
+   * @param delete
+   * @param currentSelection
+   */
   protected abstract void doDelete(UIObject delete, T currentSelection);
 
 //  protected abstract CreateDialog<T> doEdit();
 
-
-  protected CreateDialog<T> doEdit() {
+   CreateDialog<T> doEdit() {
     DivWidget contents = new DivWidget();
     CreateDialog<T> editDialog = getEditDialog();
     editDialog.doCreate(contents);
@@ -456,7 +467,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
             boolean okToCreate = editDialog.isValidName();
             if (okToCreate) {
               editDialog.doEdit(myLists.getCurrentSelection(), myLists);
-
 
               myLists.flush();
               myLists.redraw();

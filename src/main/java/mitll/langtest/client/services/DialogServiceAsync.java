@@ -55,5 +55,6 @@ public interface DialogServiceAsync {
 
   void addDialog(IDialog dialog, AsyncCallback<IDialog> async);
 
+  void update(IDialog dialog,AsyncCallback<Void> async);
   // void getLatestDialogSessionID(int dialogid, AsyncCallback<Integer> async);
 }

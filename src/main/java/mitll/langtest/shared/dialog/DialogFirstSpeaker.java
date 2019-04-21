@@ -29,11 +29,13 @@
 
 package mitll.langtest.shared.dialog;
 
-import mitll.langtest.shared.exercise.MutableShell;
+import com.google.gwt.user.client.rpc.IsSerializable;
 
-public interface IMutableDialog extends MutableShell {
-  void setID(int id);
-  void setOrientation(String orientation);
-  void setDialogType(DialogType type);
-  void setIsPrivate(boolean val);
+/**
+ * @seex mitll.langtest.server.database.project.ProjectDAO#add(int, long, String, String, String, mitll.langtest.server.database.project.ProjectType, ProjectStatus, String, String, String, int, int)
+ */
+public enum DialogFirstSpeaker implements IsSerializable {
+  LEFT,
+  RIGHT;
+
 }

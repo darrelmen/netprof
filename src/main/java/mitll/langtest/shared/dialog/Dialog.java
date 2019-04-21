@@ -443,8 +443,13 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     this.id = id;
   }
 
+  public void setDialogType(DialogType dialogType) {
+    this.kind = dialogType;
+  }
+
   public String toString() {
     return "Dialog #" + id +
+        "\n\tkind        " + kind +
         "\n\tunit        " + unit +
         "\n\tchapter     " + chapter +
         "\n\ttitle       " + entitle +
