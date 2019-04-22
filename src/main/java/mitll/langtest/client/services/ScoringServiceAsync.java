@@ -53,12 +53,14 @@ public interface ScoringServiceAsync {
                            AsyncCallback<PretestScore> async);
 
   /**
+   *
+   * @param projid
    * @param resultid
    * @param roundTrip
    * @param async
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT
    */
-  void addRoundTrip(int resultid, int roundTrip, AsyncCallback<Void> async);
+  void addRoundTrip(int projid, int resultid, int roundTrip, AsyncCallback<Void> async);
 
   void getResultASRInfo(int resultID, ImageOptions imageOptions, AsyncCallback<PretestScore> async);
 
