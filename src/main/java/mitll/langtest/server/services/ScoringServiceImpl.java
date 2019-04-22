@@ -658,27 +658,30 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    *
    * Send email if it's slow.
    *
+   * @param projid
    * @param resultID
    * @param roundTrip
    */
   @Override
-  public void addRoundTrip(int resultID, int roundTrip) {
+  public void addRoundTrip(int projid, int resultID, int roundTrip) {
     db.getAnswerDAO().addRoundTrip(resultID, roundTrip);
-    warnWhenSlow(resultID, roundTrip);
+    warnWhenSlow(projid, resultID, roundTrip);
   }
 
-  private void warnWhenSlow(int resultID, int roundTrip) {
+  private void warnWhenSlow(int projid, int resultID, int roundTrip) {
     if (roundTrip > SLOW_ROUND_TRIP) {
       try {
         int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-        int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
-        Project project = getProject(projectIDFromUser);
-        if (project.getModelType() == ModelType.KALDI) {
-          if (roundTrip > 5000) {
-            sendSlowEmail(resultID, roundTrip, userIDFromSessionOrDB);
-          }
-        } else {
+        //  int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+        if (projid > 0) {
+          Project project = getProject(projid);
+//          if (project.getModelType() == ModelType.KALDI) {
+//            if (roundTrip > 5000) {
+//              sendSlowEmail(resultID, roundTrip, userIDFromSessionOrDB);
+//            }
+//          } else {
           sendSlowEmail(resultID, roundTrip, userIDFromSessionOrDB);
+          //     }
         }
       } catch (Exception e) {
         logger.warn("addRoundTrip got " + e, e);

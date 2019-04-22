@@ -33,7 +33,6 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.scoring.PretestScore;
 
 public class SimpleAudioAnswer implements IsSerializable {
-
   protected String path = null;
   protected PretestScore pretestScore;
 
