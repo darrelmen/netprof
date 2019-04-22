@@ -486,10 +486,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private void populateBelowHeader(DivWidget verticalContainer) {
     RootPanel.get().add(verticalContainer);
 
-    /**
-     */
-    //  contentRow.add(lifecycleSupport.getFlashRecordPanel());
-
     {
       child = new Heading(3, PLEASE_ALLOW_RECORDING);
       child.setVisible(false);
@@ -639,10 +635,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     return false;
   }
 
-  public void showCogMenu() {
-    banner.setCogVisible(true);
-  }
-
   private void showLogin(EventRegistration eventRegistration) {
     contentRow.add(new UserPassLogin(props, userManager, eventRegistration, lifecycleSupport.getStartupInfo()).getContent());
     contentRow.getElement().getStyle().setPosition(Style.Position.RELATIVE);
@@ -652,6 +644,9 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     hideCogMenu();
   }
 
+  public void showCogMenu() {
+    banner.setCogVisible(true);
+  }
   private void hideCogMenu() {
     banner.setCogVisible(false);
   }
@@ -792,7 +787,9 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private void addProjectChoices(int level, SlimProject parent) {
     clearContent();
 
-    if (DEBUG) logger.info("addProjectChoices level " + level + " parent " + parent);
+    if (DEBUG) {
+      logger.info("addProjectChoices level " + level + " parent " + parent);
+    }
 
     breadcrumbHelper.addCrumbs(level == 0);
 
@@ -826,9 +823,15 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    */
   @Override
   public void clickOnParentCrumb(SlimProject parent) {
+    if (DEBUG) {
+      logger.info("clickOnParentCrumb click on parent : " +parent);
+    }
+
     pushClearHistory(); // clear history!
     breadcrumbHelper.removeLastCrumb();
     addProjectChoices(1, parent);
+
+    banner.reset();
   }
 
   /**

@@ -196,7 +196,9 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
     }
 
     lang.addClickHandler(clickEvent -> {
-      // logger.info("getLangBreadcrumb got click on " + project.getName());
+      if (DEBUG) {
+        logger.info("getLangBreadcrumb got click on " + project.getName());
+      }
       removeUntilCrumb(2);
       breadcrumbPartner.resetLanguageSelection(2, project);
       //choices.showProject(project);

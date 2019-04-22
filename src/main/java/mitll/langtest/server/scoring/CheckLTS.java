@@ -107,9 +107,9 @@ public class CheckLTS {
 //    if (removeAllAccents) logger.info("checkLTS " +foreignLanguagePhrase);
 
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
-    Collection<String> translitTokens = transliteration.isEmpty() ? Collections.emptyList() : smallVocabDecoder.getTokens(transliteration);
+  //  Collection<String> translitTokens = transliteration.isEmpty() ? Collections.emptyList() : smallVocabDecoder.getTokens(transliteration);
 
-    boolean translitOk = isTranslitOk(lts, transliteration, tokens, translitTokens);
+    boolean translitOk = false;//isTranslitOk(lts, transliteration, tokens, translitTokens);
 
     //   String language = isAsianLanguage ? " MANDARIN " : "";
 
