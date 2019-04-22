@@ -402,7 +402,7 @@ public class WordTable {
     new TooltipHelper().addTooltip(header, CLICK_TO_HEAR_WORD);
 
     {
-      DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, phonesForWord, false, null, true, wordHighlight, isRTL);
+      DivWidget phones = getPhoneDivBelowWord(audioControl, phoneMap, phonesForWord, false, null, !isRTL, wordHighlight, isRTL);
       phones.addStyleName("inlineFlex");
 
       header.setSouthScore(phones);
@@ -629,12 +629,19 @@ public class WordTable {
             h.addStyleName("lastPhoneStyle");
           }
         } else {
-          if (hasAudioControl) addHandStyle(h);
+          if (hasAudioControl) {
+            addHandStyle(h);
+          }
           alignCenter(h);
           setColorClickable(phoneSegment, h);
           setForegroundColor(phoneSegment, h);
 
-          h.addStyleName("phoneWidth");
+//          if (isRTL) {
+//            h.addStyleName("rtlphoneWidth");
+//          }
+//          else {
+            h.addStyleName("phoneWidth");
+        //  }
         }
 
         if (isRTL) {

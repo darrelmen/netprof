@@ -1917,6 +1917,8 @@ h1, h2, h3, h4, h5, h6 {
 .phoneWidth {
     width: 25px;
     font-size: 14pt;
+    padding-left: 4px;
+    padding-right: 4px;
 }
 
 .navbar-inner .breadcrumb {
