@@ -82,11 +82,13 @@ public interface ScoringService extends RemoteService {
                                    boolean usePhonemeMap) throws DominoSessionException, RestrictedOperationException;
 
   /**
+   *
+   * @param projid
    * @param resultid
    * @param roundTrip
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#addRT
    */
-  void addRoundTrip(int resultid, int roundTrip);
+  void addRoundTrip(int projid, int resultid, int roundTrip);
 
   boolean isHydraRunning(int projid) throws DominoSessionException, RestrictedOperationException;
 
