@@ -49,11 +49,6 @@ public interface RefAudioGetter {
   Set<Integer> getReqAudioIDs();
 
   /**
-   * @see mitll.langtest.client.list.FacetExerciseList#populatePanels(Collection, int, DivWidget)
-   */
- // void getAndRememberCachedAlignents(RefAudioListener listener, Set<Integer> req);
-
-  /**
    * @param req
    * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels(Collection, DivWidget, int)
    */

@@ -1241,7 +1241,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   private void gotFilterResponse(FilterResponse response, long then, Map<String, String> typeToSelection) {
     long diff = System.currentTimeMillis() - then;
-    if (DEBUG || diff > 30) {
+    if (DEBUG || diff > 60) {
       logger.info("getTypeToValues took " + diff + " to get" +
               "\n\ttype to selection " + typeToSelection +
               "\n\ttype to include   " + response.getTypesToInclude() +

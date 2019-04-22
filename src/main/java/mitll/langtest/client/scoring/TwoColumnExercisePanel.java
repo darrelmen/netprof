@@ -58,6 +58,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static com.google.gwt.dom.client.Style.Unit.PX;
 import static mitll.langtest.client.qc.QCNPFExercise.ENGLISH;
 import static mitll.langtest.client.qc.QCNPFExercise.FOREIGN_LANGUAGE;
 import static mitll.langtest.client.scoring.PhonesChoices.SHOW;
@@ -378,6 +379,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
   /**
    * Cheesy hack to make it just show the fl term in OOVViewHelper
+   *
    * @see mitll.langtest.client.banner.OOVViewHelper
    */
   public void hideRecordButton() {
@@ -504,7 +506,11 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   }
 
   protected void stylePhoneRow(UIObject phoneRow) {
-    if (isRTL) phoneRow.addStyleName("floatRight");
+    if (isRTL) {
+      phoneRow.addStyleName("floatRight");
+      //  phoneRow.addStyleName("topFiveMargin");
+      phoneRow.getElement().getStyle().setMarginTop(7, PX);
+    }
   }
 
   /**
@@ -764,7 +770,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
           showInitially, annotationHelper, isRTL, contentWidget, e.getID());
 
       if (addTopMargin) {
-        contentWidget.getElement().getStyle().setMarginTop(5, Style.Unit.PX);
+        contentWidget.getElement().getStyle().setMarginTop(5, PX);
       }
       if (isRTL) {
         clickableWords.setDirectionToRTL(flEntry);
@@ -870,7 +876,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
         contextAudioChangedWithAlignment(uniqueID,
             currentAudioAttr.getDurationInMillis()//,
- //           alignmentFetcher.getAlignment(uniqueID)
+            //           alignmentFetcher.getAlignment(uniqueID)
         );
       }
 
@@ -919,7 +925,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   private void contextAudioChangedWithAlignment(int id, long duration) {//}, AlignmentOutput alignmentOutputFromAudio) {
     if (DEBUG) {
       logger.info("contextAudioChangedWithAlignment audioChanged for ex " + exercise.getID() + " RECORD_CONTEXT audio id " + id);// +
-  //        " alignment " + alignmentOutputFromAudio);
+      //        " alignment " + alignmentOutputFromAudio);
     }
 
 //

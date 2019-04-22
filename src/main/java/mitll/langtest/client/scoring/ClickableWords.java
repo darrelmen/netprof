@@ -514,8 +514,8 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> {
     if (isChineseCharacter) {
       if (dictTokens == null) {
         for (int i = 0, n = value.length(); i < n; i++) {
-          Character character = value.charAt(i);
-          tokens.add(character.toString());
+          char character = value.charAt(i);
+          tokens.add(Character.toString(character));
         }
       } else {
         tokens = getChineseMatches(value, dictTokens);
@@ -631,7 +631,7 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> {
 
   private Character getFullCharacter(char c) {
     int full = FULL_WIDTH_ZERO + (c - ZERO);
-    return Character.valueOf((char) full);
+    return (char) full;
   }
 
   private boolean isNumber(char c) {
