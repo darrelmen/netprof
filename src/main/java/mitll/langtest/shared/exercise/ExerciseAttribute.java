@@ -36,6 +36,8 @@ import java.util.Arrays;
 public class ExerciseAttribute extends Pair implements Comparable<ExerciseAttribute> {
   private boolean isFacet = true;
 
+  private int id;
+
   public ExerciseAttribute() {
   }
 
@@ -85,6 +87,15 @@ public class ExerciseAttribute extends Pair implements Comparable<ExerciseAttrib
 
   public boolean isFacet() {
     return isFacet;
+  }
+
+  public int getId() {
+    return id;
+  }
+
+  public ExerciseAttribute setId(int id) {
+    this.id = id;
+    return this;
   }
 
 /*  @Override

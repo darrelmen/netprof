@@ -35,7 +35,7 @@ import mitll.langtest.shared.exercise.ExerciseAttribute;
 import java.util.Collection;
 import java.util.Map;
 
-public interface IAttribute extends IDAO {
+public interface IAttributeDAO extends IDAO {
   int findOrAddAttribute(int projid, long now, int userid, ExerciseAttribute attribute, boolean checkExists);
 
   Collection<String> getAttributeTypes(int projid);
@@ -46,4 +46,6 @@ public interface IAttribute extends IDAO {
    * @return
    */
   Map<Integer, ExerciseAttribute> getIDToPair(int projid);
+
+  boolean update(int id, String value);
 }

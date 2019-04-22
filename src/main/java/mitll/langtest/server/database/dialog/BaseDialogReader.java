@@ -52,7 +52,7 @@ public class BaseDialogReader {
   private static final String OPT_NETPROF_DIALOG = "/opt/netprof/dialog/";
   private static final List<String> SPEAKER_LABELS = Arrays.asList("A", "B", "C", "D", "E", "F", "I");
   private static final String IMAGES = "images/";
- // private static final String JPG = ".jpg";
+  // private static final String JPG = ".jpg";
 
   /**
    * @param defaultUser
@@ -138,17 +138,18 @@ public class BaseDialogReader {
   }
 
   @NotNull
-   String getImageRef(String imageBaseDir, String image) {
-    return imageBaseDir +  image + ".png";
+  String getImageRef(String imageBaseDir, String image) {
+    return imageBaseDir + image + ".png";
   }
 
   /**
    * images/russian/
+   *
    * @param project
    * @return
    */
   @NotNull
-   String getImageBaseDir(Project project) {
+  String getImageBaseDir(Project project) {
     return IMAGES + project.getLanguage().toLowerCase() + File.separator;
   }
 }

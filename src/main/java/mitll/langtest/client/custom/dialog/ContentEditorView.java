@@ -75,7 +75,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   private static final String SHARE_THE_LIST = "Share the ";// + LIST + " with someone.";
   private static final String SAVE = "Save";
 
-  private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
+  private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on ";
   /**
    * @see #getAddItems
    */
@@ -148,11 +148,15 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 
     buttons.add(editButton = getEdit());
     buttons.add(getAddItems());
-    buttons.add(getImport());
+    addImportButton(buttons);
     buttons.add(share = getShare());
     // addDrillAndLearn(buttons, container);
 
     return buttons;
+  }
+
+  protected void addImportButton(DivWidget buttons) {
+    buttons.add(getImport());
   }
 
   protected boolean canMakeQuiz() {
@@ -166,7 +170,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   private IsWidget getImport() {
     Button successButton = getSuccessButton(IMPORT);
     successButton.setIcon(IconType.UPLOAD);
-    // successButton.setSize(ButtonSize.LARGE);
     successButton.addClickHandler(event -> doImport());
     return successButton;
   }
@@ -346,9 +349,11 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     Button successButton = getSuccessButton(EDIT_TITLE);
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> editDialog = doEdit());
-    addTooltip(successButton, EDIT_THE_LIST);
+    addTooltip(successButton, EDIT_THE_LIST + getSuffix());
     return successButton;
   }
+
+  protected abstract String getName();
 
   /**
    * @return
@@ -358,29 +363,22 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     Button successButton = getSuccessButton(ITEMS);
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> editList());
-    addTooltip(successButton, EDIT_THE_ITEMS_ON_LIST);
+    addTooltip(successButton, EDIT_THE_ITEMS_ON_LIST + getSuffix());
     return successButton;
+  }
+
+  @NotNull
+  private String getSuffix() {
+    return " " + getName();
   }
 
   private Button getShare() {
     Button successButton = getSuccessButton(SHARE);
     successButton.setIcon(IconType.SHARE);
-    addTooltip(successButton, SHARE_THE_LIST);
+    addTooltip(successButton, SHARE_THE_LIST + getSuffix());
     return successButton;
   }
 
-  /**
-   * @return
-   * @see #getButtons
-   */
-//  private IsWidget getAddItems() {
-//    Button successButton = getSuccessButton(ITEMS);
-//    successButton.setIcon(IconType.PENCIL);
-//    successButton.addClickHandler(event -> editList());
-//    addTooltip(successButton, EDIT_THE_ITEMS_ON_LIST);
-//    //  successButton.setEnabled(!myLists.isEmpty());
-//    return successButton;
-//  }
   protected abstract void editList();
 
   @NotNull
@@ -405,10 +403,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   protected T getCurrentSelectionFromMyLists() {
     return getCurrentSelection(myLists);
   }
-
-//  private T getCurrentSelection(DialogContainer<T> container) {
-//    return container.getCurrentSelection();
-//  }
 
   private void gotDelete(Button delete, T currentSelection) {
     if (currentSelection != null) {
@@ -441,15 +435,13 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   }
 
   /**
-   * @see #warnFirst(Button, INameable)
    * @param delete
    * @param currentSelection
+   * @see #warnFirst(Button, INameable)
    */
   protected abstract void doDelete(UIObject delete, T currentSelection);
 
-//  protected abstract CreateDialog<T> doEdit();
-
-   CreateDialog<T> doEdit() {
+  CreateDialog<T> doEdit() {
     DivWidget contents = new DivWidget();
     CreateDialog<T> editDialog = getEditDialog();
     editDialog.doCreate(contents);

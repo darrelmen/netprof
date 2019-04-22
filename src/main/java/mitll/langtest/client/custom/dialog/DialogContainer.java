@@ -49,6 +49,10 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
         20, 10);
   }
 
+  protected String getHeaderColumnTitle() {
+    return "Title";
+  }
+
   @Override
   protected void addColumnsToTable() {
     List<T> list = getList();

@@ -802,7 +802,7 @@ public class ProjectSync implements IProjectSync {
   ) {
     int failed = 0;
 
-    Map<Integer, ExerciseAttribute> allByProject = slickUEDAO.getExerciseAttribute().getIDToPair(projectid);
+    Map<Integer, ExerciseAttribute> allByProject = slickUEDAO.getExerciseAttributeDAO().getIDToPair(projectid);
     Map<ExerciseAttribute, Integer> attrToID = getAttributeToID(allByProject);
 
     Map<String, Map<String, ExerciseAttribute>> propToValueToAttr = populatePropToValue(allByProject.values());
@@ -1063,7 +1063,7 @@ public class ProjectSync implements IProjectSync {
                                           List<ExerciseAttribute> newAttributes) {
     for (ExerciseAttribute newAttr : newAttributes) {
       //  int i = slickUEDAO.findOrAddAttribute(projectid, now, importUser, newAttr);
-      attrToID.put(newAttr, slickUEDAO.getExerciseAttribute().findOrAddAttribute(projectid, now, importUser, newAttr, false));
+      attrToID.put(newAttr, slickUEDAO.getExerciseAttributeDAO().findOrAddAttribute(projectid, now, importUser, newAttr, false));
       //   logger.info("doUpdate remember new import attribute " + i + " = " + newAttr);
     }
   }

@@ -200,6 +200,11 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
 
   protected abstract void doCreate();
 
+  /**
+   * @see ContentEditorView#doEdit
+   * @param currentSelection
+   * @param container
+   */
   public abstract void doEdit(T currentSelection, ButtonMemoryItemContainer<T> container);
 
   /**

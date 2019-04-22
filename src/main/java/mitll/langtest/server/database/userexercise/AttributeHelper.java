@@ -38,7 +38,7 @@ import org.jetbrains.annotations.NotNull;
 import java.sql.Timestamp;
 import java.util.*;
 
-public class AttributeHelper implements IAttribute {
+public class AttributeHelper implements IAttributeDAO {
   private final ExerciseAttributeDAOWrapper attributeDAOWrapper;
 
   AttributeHelper(ExerciseAttributeDAOWrapper attributeDAOWrapper) {
@@ -48,23 +48,26 @@ public class AttributeHelper implements IAttribute {
   public void createTable() {
     attributeDAOWrapper.createTable();
   }
+
   public String getName() {
     return attributeDAOWrapper.getName();
   }
 
   @Override
-  public boolean updateProject(int oldID, int newprojid) { return attributeDAOWrapper.updateProject(oldID, newprojid) > 0; }
+  public boolean updateProject(int oldID, int newprojid) {
+    return attributeDAOWrapper.updateProject(oldID, newprojid) > 0;
+  }
 
   /**
    * If the attribute already exists, just return it's ID.
    *
-   * @see mitll.langtest.server.database.copy.ExerciseCopy#addAttributes
    * @param projid
    * @param now
    * @param userid
    * @param attribute
    * @param checkExists
    * @return
+   * @see mitll.langtest.server.database.copy.ExerciseCopy#addAttributes
    */
   public int findOrAddAttribute(int projid,
                                 long now,
@@ -76,7 +79,7 @@ public class AttributeHelper implements IAttribute {
           projid,
           userid,
           new Timestamp(now),
-          attribute.getProperty(), attribute.getValue(),attribute.isFacet()));
+          attribute.getProperty(), attribute.getValue(), attribute.isFacet()));
       if (exists.isEmpty()) {
         return insertAttribute(projid, now, userid, attribute.getProperty(), attribute.getValue(), attribute.isFacet());
       } else {
@@ -103,8 +106,9 @@ public class AttributeHelper implements IAttribute {
 
   /**
    * E.g. grammar or topic or sub-topic
-   *
+   * <p>
    * Make sure the
+   *
    * @param projid
    * @return
    * @see DBExerciseDAO#getAttributeTypes
@@ -126,6 +130,18 @@ public class AttributeHelper implements IAttribute {
     return pairMap;
   }
 
+  @Override
+  public boolean update(int id, String value) {
+    return attributeDAOWrapper.update(id, value) > 0;
+  }
+
+
+  /**
+   * @param known
+   * @param p
+   * @return
+   * @see #getIDToPair
+   */
   @NotNull
   private ExerciseAttribute makeOrGet(Map<String, ExerciseAttribute> known, SlickExerciseAttribute p) {
     String property = p.property();
@@ -136,7 +152,7 @@ public class AttributeHelper implements IAttribute {
     if (known.containsKey(key)) {
       attribute = known.get(key);
     } else {
-      attribute = new ExerciseAttribute(property, value, p.facet());
+      attribute = new ExerciseAttribute(property, value, p.facet()).setId(p.id());
       known.put(key, attribute);
     }
     return attribute;

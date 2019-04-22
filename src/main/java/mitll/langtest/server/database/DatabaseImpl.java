@@ -1311,7 +1311,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
           userExerciseDAO,
           userExerciseDAO.getRelatedExercise(),
           userExerciseDAO.getRelatedCoreExercise(),
-          userExerciseDAO.getExerciseAttribute(),
+          userExerciseDAO.getExerciseAttributeDAO(),
           userExerciseDAO.getExerciseAttributeJoin(),
           getEventDAO(),
           getResultDAO(),

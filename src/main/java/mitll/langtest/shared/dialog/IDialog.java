@@ -64,9 +64,10 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable,
   String getUnit();
   String getChapter();
 
-  String getCountryCode();
+ // String getCountryCode();
 
   String getAttributeValue(DialogMetadata metadata);
+  ExerciseAttribute getAttribute(DialogMetadata metadata);
 
   /**
    * Attributes/meta-data of a dialog

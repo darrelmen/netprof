@@ -328,7 +328,7 @@ public class DialogPopulate {
 
   @NotNull
   private Map<ExerciseAttribute, Integer> getExerciseAttributeToID(int projid, int defaultUser, Set<Dialog> dialogs, long now) {
-    Map<Integer, ExerciseAttribute> idToPair = db.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
+    Map<Integer, ExerciseAttribute> idToPair = db.getUserExerciseDAO().getExerciseAttributeDAO().getIDToPair(projid);
 
     Map<ExerciseAttribute, Integer> attrToInt = new HashMap<>();
 
@@ -501,7 +501,7 @@ public class DialogPopulate {
       logger.info("addNewAttributes adding new exercise attribute " + exerciseAttribute);
 
       attrToInt
-          .put(exerciseAttribute, db.getUserExerciseDAO().getExerciseAttribute()
+          .put(exerciseAttribute, db.getUserExerciseDAO().getExerciseAttributeDAO()
               .findOrAddAttribute(projid,
                   now, defaultUser, exerciseAttribute, true));
     });

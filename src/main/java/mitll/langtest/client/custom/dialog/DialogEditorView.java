@@ -60,32 +60,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   private final Logger logger = Logger.getLogger("DialogEditorView");
 
   private static final String LIST = "dialog";
-  private static final String DELETE_LIST = "Delete " + LIST + ".";
 
-  //private static final int MAX_HEIGHT = 710;
-
-  /**
-   * With quiz button
-   */
-  private static final int MIN_WIDTH = 659;//599;
-
-  private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items in the " + LIST + ".";
-  // private static final String MY_LISTS = "myLists";
-
-  /**
-   *
-   */
-  private static final String SHARE = "Share";
-  private static final String SHARE_THE_LIST = "Share the " + LIST + " with someone.";
-  private static final String SAVE = "Save";
-
-
-  /**
-   * @see #getAddItems
-   */
-  private static final String ITEMS = "Items";
-  private static final String ADD = "Add";
-  private static final String CANCEL = "Cancel";
 
   private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to view a " + LIST;
 
@@ -96,17 +71,9 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
 
   public static final String DIALOG = "Dialog";
-  private static final String EDIT1 = "Edit";
-//  private static final String EDIT = EDIT1;
 
-  /**
-   * @see #editList()
-   */
-  private static final String ADD_EDIT_ITEMS = "Add/Edit Items";
 
   private static final int MY_LIST_HEIGHT = 500;//530;//560;
-
-  private Button editButton, removeButton;
 
   /**
    * @param controller
@@ -193,12 +160,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
   @Override
   protected void populateUniqueListNames(Collection<T> result) {
-    result.forEach(list -> {
-      // if (list.getUserID() == controller.getUser()) {
-      names.add(list.getName());
-    //  logger.info("names now " + names);
-      // }
-    });
+    result.forEach(list -> names.add(list.getName()));
   }
 
   /**
@@ -208,9 +170,12 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   @NotNull
   @Override
   protected CreateDialog<T> getCreateDialog() {
-    return new CreateDialogDialog<T>(names, controller,this);
+    return new CreateDialogDialog<T>(names, controller, this);
   }
 
+  /**
+   * TODO : fill in with fancy editor
+   */
   @Override
   protected void editList() {
 
@@ -234,92 +199,6 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     });
   }
 
-//  @Override
-//  protected void doEdit() {
-//
-//  }
-
-
-  /*  @NotNull
-  private String getListName() {
-    IDialog originalList = getCurrentSelectionFromMyLists();
-    boolean hasDescrip = !originalList.getOrientation().isEmpty();
-    return originalList.getForeignLanguage() +
-        (hasDescrip ? " (" + originalList.getOrientation() + ")" : "");
-  }*/
-
-
-/*
-  private void doDelete(UIObject delete, T currentSelection) {
-    final int uniqueID = currentSelection.getID();
-    controller.logEvent(delete, "Button", currentSelection.getEnglish(), "Delete");
-    controller.getDialogService().delete(uniqueID, new AsyncCallback<Boolean>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        //   logger.warning("delete list call failed?");
-        controller.handleNonFatalError("deleting a " + LIST, caught);
-      }
-
-      @Override
-      public void onSuccess(Boolean result) {
-        if (result) {
-          removeFromLists(myLists, currentSelection);
-        } else {
-          logger.warning("deleteList ---> did not do deleteList " + uniqueID);
-        }
-      }
-    });
-  }
-*/
-
- /* private void warnFirst(Button delete, T currentSelection) {
-    new DialogHelper(true).show(
-        "Delete " + currentSelection.getForeignLanguage() + " forever?",
-        new Heading(2, "Are you sure?"),
-        new DialogHelper.CloseListener() {
-          @Override
-          public boolean gotYes() {
-            doDelete(delete, currentSelection);
-            return true;
-          }
-
-          @Override
-          public void gotNo() {
-
-          }
-
-          @Override
-          public void gotHidden() {
-
-          }
-        },
-        500, -1);
-  }*/
-
-/*  private void removeFromLists(DialogContainer<T> listContainer, T currentSelection) {
-    if (listContainer == myLists) {
-      String name = currentSelection.getForeignLanguage();
-      names.remove(name);
-    }
-
-    int index = listContainer.getIndex(currentSelection);
-    //logger.info("deleteList ---> did do deleteList " + uniqueID + " index " + index);
-    listContainer.forgetItem(currentSelection);
-    int numItems = listContainer.getNumItems();
-    if (numItems == 0) {
-      //delete.setEnabled(false);
-      listContainer.disableAll();
-    } else {
-      if (index == numItems) index = numItems - 1;
-      HasID at = listContainer.getAt(index);
-      //logger.info("next is " + at.getName());
-      int id = at.getID();
-//      listContainer.markCurrentExercise(id);
-      Scheduler.get().scheduleDeferred(() -> listContainer.markCurrentExercise(id));
-
-    }
-  }*/
-
   @NotNull
   @Override
   protected String getMailTo() {
@@ -329,28 +208,8 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
         .getMailToDialog(currentSelection.getID(), currentSelection.getForeignLanguage());
   }
 
-
   /**
-   * @param userList
-   * @see CreateListDialog#addUserList
-   */
- /* @Override
-  public void madeIt(T userList) {
-    // logger.info("madeIt made it " + userList.getName());
-    try {
-      dialogHelper.hide();
-      myLists.addExerciseAfter(null, userList);
-      myLists.enableAll();
-      names.add(userList.getForeignLanguage());
-      editButton.setEnabled(true);
-    } catch (Exception e) {
-      logger.warning("got " + e);
-    }
-    Scheduler.get().scheduleDeferred(() -> myLists.markCurrentExercise(userList.getID()));
-  }
-*/
-
-  /**
+   * TODO: get rid of?
    * @seex CreateListDialog#makeCreateButton
    */
   @Override
@@ -367,7 +226,6 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     public void gotClickOnItem(final T user) {
       super.gotClickOnItem(user);
       setShareHREF(user);
-      // enableQuizButton(quizButton);
     }
 
     @Override
@@ -377,22 +235,25 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
     @Override
     protected void gotDoubleClickOn(T selected) {
-      logger.info("gotDoubleClickOn got double click on " + selected);
-      //showLearnOrQuiz(selected);
+//      logger.info("gotDoubleClickOn got double click on " + selected);
       editList();
     }
   }
 
-/*
-  private void setShareButtonHREF() {
-    share.setHref(getMailTo());
+  @Override
+  protected void addImportButton(DivWidget buttons) {
   }
-*/
+
 
   @NotNull
   @Override
   protected CreateDialog<T> getEditDialog() {
-    return new CreateDialogDialog<T>(getCurrentSelectionFromMyLists(), names, true, controller,this);
+    return new CreateDialogDialog<T>(getCurrentSelectionFromMyLists(), names, true, controller, this);
+  }
+
+  @Override
+  protected String getName() {
+    return "Dialog";
   }
 
   private class MyShownCloseListener implements DialogHelper.ShownCloseListener {

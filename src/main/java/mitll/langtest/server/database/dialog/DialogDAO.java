@@ -35,10 +35,8 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.project.IProject;
 import mitll.langtest.server.database.project.Project;
-import mitll.langtest.shared.dialog.Dialog;
-import mitll.langtest.shared.dialog.DialogStatus;
-import mitll.langtest.shared.dialog.DialogType;
-import mitll.langtest.shared.dialog.IDialog;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.shared.dialog.*;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
@@ -61,7 +59,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
 //  private static final long HOUR = 60 * MIN;
 //  private static final long DAY = 24 * HOUR;
 //  public static final long YEAR = 365 * DAY;
-  private static final String FLTITLE = "fltitle";
+  /**
+   * @see #configureDialog
+   */
+  private static final String FLTITLE = DialogMetadata.FLTITLE.toString().toLowerCase();//"fltitle";
 
   private final DialogDAOWrapper dao;
 
@@ -144,15 +145,17 @@ public class DialogDAO extends DAO implements IDialogDAO {
     });
 
     // add dialog attributes
-    Map<Integer, ExerciseAttribute> idToPair = databaseImpl.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid);
+    IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
+
+    Map<Integer, ExerciseAttribute> idToPair = userExerciseDAO.getExerciseAttributeDAO().getIDToPair(projid);
 
     logger.info("getDialogs got " + idToPair.size() + " attributes for project #" + projid);
 
     Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated =
-        databaseImpl.getUserExerciseDAO().getRelatedExercise().getDialogIDToRelated(projid);
+        userExerciseDAO.getRelatedExercise().getDialogIDToRelated(projid);
 
     Map<Integer, List<SlickRelatedExercise>> dialogIDToCoreRelated =
-        databaseImpl.getUserExerciseDAO().getRelatedCoreExercise().getDialogIDToRelated(projid);
+        userExerciseDAO.getRelatedCoreExercise().getDialogIDToRelated(projid);
 
     {
       IProject project = databaseImpl.getIProject(projid);
@@ -181,7 +184,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
           dialog.getAttributes()
               .stream()
               .filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(FLTITLE)).collect(Collectors.toList());
-      if (!fltitle.isEmpty()) dialog.getMutableShell().setForeignLanguage(fltitle.iterator().next().getValue());
+
+      if (!fltitle.isEmpty()) {
+        dialog.getMutableShell().setForeignLanguage(fltitle.iterator().next().getValue());
+      }
     }
 
     //add exercises
@@ -428,12 +434,15 @@ public class DialogDAO extends DAO implements IDialogDAO {
    *
    * @param toAdd
    * @return
+   * @see mitll.langtest.server.services.DialogServiceImpl#addDialog
    */
   @Override
   public IDialog add(IDialog toAdd) {
+    int projid = toAdd.getProjid();
+    int userid = toAdd.getUserid();
     int add = add(
-        toAdd.getUserid(),
-        toAdd.getProjid(),
+        userid,
+        projid,
         -1,
         toAdd.getImageID(),
         toAdd.getModified(),
@@ -450,16 +459,41 @@ public class DialogDAO extends DAO implements IDialogDAO {
     if (add > -1) {
       toAdd.getMutable().setID(add);
     }
+
+    IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
+
+    long now = System.currentTimeMillis();
+    ExerciseAttribute attribute = new ExerciseAttribute(FLTITLE, toAdd.getForeignLanguage(), false);
+    int orAddAttribute = userExerciseDAO.getExerciseAttributeDAO()
+        .findOrAddAttribute(projid, now, userid, attribute, false);
+    dialogAttributeJoinHelper.addBulkAttributeJoins(Collections.singletonList(new SlickDialogAttributeJoin(-1, userid, new Timestamp(now), add, orAddAttribute)));
+    toAdd.getAttributes().add(attribute.setId(orAddAttribute));
     return toAdd;
   }
 
   @Override
   public boolean update(IDialog dialog) {
     long modified = System.currentTimeMillis();
+
+    int projid = dialog.getProjid();
+
+    ExerciseAttribute attribute = dialog.getAttribute(DialogMetadata.FLTITLE);
+
+    if (attribute == null) {
+      logger.warn("can't find the fl title attribute in " + dialog.getAttributes());
+    } else {
+      logger.info("update : fl title attr " + attribute + " : " + attribute.getId() + " old " + attribute.getValue() + " new " + dialog.getForeignLanguage());
+      if (!dialog.getForeignLanguage().equals(attribute.getValue())) {
+        IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
+        if (!userExerciseDAO.getExerciseAttributeDAO().update(attribute.getId(), dialog.getForeignLanguage())) {
+          logger.warn("didn't update fltitle?");
+        }
+      }
+    }
     return dao.update(new SlickDialog(
         -1,
         dialog.getUserid(),
-        dialog.getProjid(),
+        projid,
         dialog.getDominoid(),
         dialog.getImageID(),
         new Timestamp(modified),

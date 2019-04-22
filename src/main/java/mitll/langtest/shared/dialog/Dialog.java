@@ -164,12 +164,22 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
    */
   @Override
   public String getAttributeValue(DialogMetadata metadata) {
-    List<ExerciseAttribute> collect1 = getAttributes().stream().filter(
-        exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(metadata.toString())
-    ).collect(Collectors.toList());
+    List<ExerciseAttribute> collect1 = getExerciseAttributes(metadata);
     return collect1.isEmpty() ? "" : collect1.iterator().next().getValue();
   }
 
+  @NotNull
+  private List<ExerciseAttribute> getExerciseAttributes(DialogMetadata metadata) {
+    return getAttributes()
+        .stream()
+        .filter(attr -> attr.getProperty().equalsIgnoreCase(metadata.toString()))
+        .collect(Collectors.toList());
+  }
+
+  public ExerciseAttribute getAttribute(DialogMetadata metadata) {
+    List<ExerciseAttribute> exerciseAttributes = getExerciseAttributes(metadata);
+    return (exerciseAttributes.isEmpty()) ? null : exerciseAttributes.iterator().next();
+  }
 
   @Override
   public int getUserid() {
@@ -399,7 +409,12 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     return both;
   }
 
-  @Override
+  /**
+   * TODO :remove?
+   *
+   * @return
+   */
+  // @Override
   public String getCountryCode() {
     return countryCode;
   }

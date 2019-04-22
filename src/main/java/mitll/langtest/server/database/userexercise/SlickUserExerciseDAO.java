@@ -85,7 +85,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private final long lastModified = System.currentTimeMillis();
   private final ExerciseDAOWrapper dao;
 
-  private final IAttribute attributeHelper;
+  private final IAttributeDAO attributeHelper;
   private final IAttributeJoin attributeJoinHelper;
   private final IRelatedExercise relatedExerciseHelper, relatedCoreExerciseHelper;
   //  private Map<Integer, ExercisePhoneInfo> exToPhones;
@@ -1209,7 +1209,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return attributeJoinHelper;
   }
 
-  public IAttribute getExerciseAttribute() {
+  public IAttributeDAO getExerciseAttributeDAO() {
     return attributeHelper;
   }
 

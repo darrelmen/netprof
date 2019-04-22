@@ -30,7 +30,6 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.DatabaseServices;
-import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.IDialog;
@@ -219,7 +218,7 @@ public class FilterResponseHelper implements IResponseFilter {
                         boolean includeLanguageFacets) {
     populate(all, typeOrder, sectionHelper,
         databaseServices.getProject(projid).getBaseTypeOrder(),
-        databaseServices.getUserExerciseDAO().getExerciseAttribute().getIDToPair(projid),
+        databaseServices.getUserExerciseDAO().getExerciseAttributeDAO().getIDToPair(projid),
         includeLanguageFacets);
   }
 

@@ -582,7 +582,7 @@ public class ExerciseCopy {
       if (attrToID.containsKey(attribute)) {
         id = attrToID.get(attribute);
       } else {
-        id = slickUEDAO.getExerciseAttribute().findOrAddAttribute(projectid, now, importUser, attribute, checkExists);
+        id = slickUEDAO.getExerciseAttributeDAO().findOrAddAttribute(projectid, now, importUser, attribute, checkExists);
         attrToID.put(attribute, id);
 //        logger.info("addPredef " + attribute + " = " + id);
       }

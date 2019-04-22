@@ -30,6 +30,7 @@
 package mitll.langtest.server.services;
 
 import com.sun.mail.imap.protocol.ID;
+import mitll.langtest.client.custom.dialog.CreateDialogDialog;
 import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.services.DialogService;
 import mitll.langtest.server.database.exercise.ISection;
@@ -269,6 +270,12 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     return db.getDialogDAO().delete(id);
   }
 
+  /**
+   * @see CreateDialogDialog#doCreate
+   * @param dialog
+   * @return
+   * @throws DominoSessionException
+   */
   @Override
   public IDialog addDialog(IDialog dialog) throws DominoSessionException {
     return db.getDialogDAO().add(dialog);

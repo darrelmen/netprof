@@ -151,7 +151,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   private static final String UNIT = "unit";
 
   @Override
-  public IAttribute getExerciseAttribute() {
+  public IAttributeDAO getExerciseAttributeDAO() {
     return null;
   }
 

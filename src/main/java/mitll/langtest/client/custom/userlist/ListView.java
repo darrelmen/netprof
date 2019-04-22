@@ -595,6 +595,11 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     return new CreateListDialog<T>(this, controller, myLists.getCurrentSelection(), true, names);
   }
 
+  @Override
+  protected String getName() {
+    return "list";
+  }
+
   /**
    * @seex CreateListDialog#makeCreateButton
    */

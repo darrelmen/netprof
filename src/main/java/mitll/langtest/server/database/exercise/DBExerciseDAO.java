@@ -220,7 +220,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 //      Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
 //          userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
 
-      Map<Integer, ExerciseAttribute> allAttributesByProject = userExerciseDAO.getExerciseAttribute().getIDToPair(projid);
+      Map<Integer, ExerciseAttribute> allAttributesByProject = userExerciseDAO.getExerciseAttributeDAO().getIDToPair(projid);
       logger.info("readExercises" +
           //      "\n\tread           " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
           "\n\ttype order     " + typeOrder +
@@ -543,7 +543,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * @see #setRootTypes
    */
   private Collection<String> getAttributeTypes() {
-    return userExerciseDAO.getExerciseAttribute().getAttributeTypes(project.id());
+    return userExerciseDAO.getExerciseAttributeDAO().getAttributeTypes(project.id());
   }
 
   private Map<Integer, CommonExercise> getIDToExercise(Collection<CommonExercise> allExercises) {

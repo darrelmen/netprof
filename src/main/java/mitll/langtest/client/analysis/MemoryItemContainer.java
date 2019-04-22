@@ -188,8 +188,12 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   protected void addItemID(List<T> list, int maxLength) {
     Column<T, SafeHtml> userCol = getItemColumn(maxLength);
     table.setColumnWidth(userCol, getIdWidth() + "px");
-    addColumn(userCol, new TextHeader(header));
+    addColumn(userCol, new TextHeader(getHeaderColumnTitle()));
     table.addColumnSortHandler(getUserSorter(userCol, list));
+  }
+
+  protected String getHeaderColumnTitle() {
+    return header;
   }
 
   protected Column<T, SafeHtml> addDateCol(List<T> list) {

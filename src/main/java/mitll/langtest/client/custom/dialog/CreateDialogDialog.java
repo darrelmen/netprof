@@ -72,7 +72,8 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     super(null, names, false, controller, listView);
   }
 
-  ListBox dialogType;
+  private ListBox dialogType;
+
   /**
    * TODO : add en title
    * TODO : add unit/chapter drop downs
@@ -105,7 +106,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
       listBox.addItem("-- Choose type of dialog --");
       listBox.addItem(DialogType.DIALOG.toString());
       listBox.addItem(DialogType.INTERPRETER.toString());
-      dialogType=listBox;
+      dialogType = listBox;
       child.add(listBox);
 
       if (isEdit) {
@@ -156,7 +157,6 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
    */
   @Override
   protected void doCreate() {
-
     enterKeyButtonHelper.removeKeyHandler();
 
     List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
@@ -184,7 +184,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
         sanitize(theDescription.getText()),
         imageRef,
         titleBox.getSafeText(),
-        "",
+        entitleBox.getSafeText(),
         new ArrayList<>(),
         new ArrayList<>(),
         new ArrayList<>(),
@@ -203,7 +203,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
           @Override
           public void onSuccess(IDialog result) {
             logger.info("Got " + result);
-            listView.madeIt((T)result);
+            listView.madeIt((T) result);
 
           }
         });
@@ -247,7 +247,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     controller.getDialogService().update(currentSelection, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("changing a list", caught);
+        controller.handleNonFatalError("changing a dialog", caught);
       }
 
       @Override

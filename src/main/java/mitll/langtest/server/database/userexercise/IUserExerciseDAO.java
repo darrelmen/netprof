@@ -244,7 +244,7 @@ public interface IUserExerciseDAO extends IDAO {
 
   IAttributeJoin getExerciseAttributeJoin();
 
-  IAttribute getExerciseAttribute();
+  IAttributeDAO getExerciseAttributeDAO();
 
   boolean isProjectEmpty(int projectid);
 

@@ -230,12 +230,13 @@ public class ReportListManager {
   private Button getRemoveButton() {
     final Button add = new Button("", IconType.MINUS);
     add.setSize(ButtonSize.LARGE);
-
-    delete = add;
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> gotDelete(add));
     add.setType(ButtonType.DANGER);
     addTooltip(add, "Remove recipient.");
+
+    delete = add;
+
     return add;
   }
 
