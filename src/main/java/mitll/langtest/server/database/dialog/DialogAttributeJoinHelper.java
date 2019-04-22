@@ -46,8 +46,8 @@ public class DialogAttributeJoinHelper implements IDialogAttributeJoin {
   private final DialogAttributeJoinDAOWrapper attributeJoinDAOWrapper;
 
   /**
-   * @see DialogDAO#DialogDAO(Database, DBConnection, DatabaseImpl)
    * @param attributeJoinDAOWrapper
+   * @see DialogDAO#DialogDAO(Database, DBConnection, DatabaseImpl)
    */
   DialogAttributeJoinHelper(DialogAttributeJoinDAOWrapper attributeJoinDAOWrapper) {
     this.attributeJoinDAOWrapper = attributeJoinDAOWrapper;
@@ -63,6 +63,7 @@ public class DialogAttributeJoinHelper implements IDialogAttributeJoin {
 
   /**
    * Exercise attribute join table is independent of project - makes no reference to project - nothing to update
+   *
    * @param oldID
    * @param newprojid
    * @return
@@ -73,9 +74,9 @@ public class DialogAttributeJoinHelper implements IDialogAttributeJoin {
   }
 
   /**
-   * @see DialogDAO#getDialogs
    * @param projid
    * @return
+   * @see DialogDAO#getDialogs
    */
   @Override
   public Map<Integer, Collection<SlickDialogAttributeJoin>> getAllJoinByProject(int projid) {
@@ -83,12 +84,17 @@ public class DialogAttributeJoinHelper implements IDialogAttributeJoin {
   }
 
   /**
-   * @see mitll.langtest.server.database.project.DialogPopulate#addDialogAttributes(IDialogDAO, int, Timestamp, Map, Dialog, int)
    * @param joins
+   * @see mitll.langtest.server.database.project.DialogPopulate#addDialogAttributes(IDialogDAO, int, Timestamp, Map, Dialog, int)
    */
   @Override
   public void addBulkAttributeJoins(List<SlickDialogAttributeJoin> joins) {
     attributeJoinDAOWrapper.addBulk(joins);
+  }
+
+  @Override
+  public int insert(SlickDialogAttributeJoin join) {
+    return attributeJoinDAOWrapper.insert(join);
   }
 
   /**

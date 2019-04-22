@@ -40,5 +40,7 @@ public interface IDialogAttributeJoin extends IDAO {
   Map<Integer, Collection<SlickDialogAttributeJoin>> getAllJoinByProject(int projid);
 
   void addBulkAttributeJoins(List<SlickDialogAttributeJoin> joins);
+
+  int insert(SlickDialogAttributeJoin join);
   //void removeBulkAttributeJoins(List<SlickDialogAttributeJoin> joins);
 }

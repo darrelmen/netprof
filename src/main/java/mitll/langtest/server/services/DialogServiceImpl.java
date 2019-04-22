@@ -278,7 +278,9 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    */
   @Override
   public IDialog addDialog(IDialog dialog) throws DominoSessionException {
-    return db.getDialogDAO().add(dialog);
+    IDialog add = db.getDialogDAO().add(dialog);
+
+    return add;
   }
 
   public void update(IDialog dialog) throws DominoSessionException {

@@ -71,47 +71,18 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
 
   private static final String QUIZ = "Quiz";
   private static final String DO_QUIZ = "Do quiz";
-//  private static final String DELETE_LIST = "Delete list.";
 
- // private static final String MAKE_A_NEW_LIST = "Make a new list.";
   private static final String CAN_T_IMPORT_INTO_FAVORITES = "Can't import into favorites...";
 
   private static final String PRACTICE_THE_LIST = "Practice the list.";
   private static final int MAX_HEIGHT = 710;
-  /**
-   * @see #getImport
-   */
-//  private static final String IMPORT = "Import";
-  /**
-   * With quiz button
-   */
-//  private static final int MIN_WIDTH = 659;//599;
 
-//  private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on list.";
   private static final String MY_LISTS = "myLists";
 
-  /**
-   * @see #getEdit
-   */
-//  private static final String EDIT_THE_LIST = "Edit the list, make it public.";
-  /**
-   *
-   */
- // private static final String EDIT_THE_LIST_OR_QUIZ = "Edit the list, make it public, or make it a quiz.";
- // private static final String SHARE = "Share";
-//  private static final String SHARE_THE_LIST = "Share the list with someone.";
   private static final String VISITED = "Visited";
-//  private static final String SAVE = "Save";
 
-
-  /**
-   * @see #getAddItems
-   */
-//  private static final String ITEMS = "Items";
-//  private static final String ADD = "Add";
-//  private static final String CANCEL = "Cancel";
   private static final String LEARN_THE_LIST = "Learn the list.";
-//  private static final String EDIT_TITLE = "";
+
 
   private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to view a list or quiz";
 
@@ -139,10 +110,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
 
   private static final int BROWSE_PAGE_SIZE = 6;// 7;
   private static final int BROWSE_SHORT_PAGE_SIZE = 6;
-
-//  private static final String CREATE_NEW_LIST = "Create New List";
-//  private static final String EDIT1 = "Edit";
-//  private static final String EDIT = EDIT1;
 
   /**
    * @see #editList()

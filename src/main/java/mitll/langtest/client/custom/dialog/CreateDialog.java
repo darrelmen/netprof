@@ -78,19 +78,15 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
 
   private static final String PLEASE_MARK_EITHER_PUBLIC_OR_PRIVATE = "Please mark either public or private.";
   private static final String NAME_ALREADY_USED = "Name already used. Please choose another.";
+  /**
+   * @see #getPrivacyChoices
+   */
   private static final String PUBLIC = "Public";
   private static final String PRIVATE = "Private";
   private static final String KEEP_LIST_PUBLIC_PRIVATE = "Keep Public/Private?";
   private static final String PUBLIC_PRIVATE_GROUP = "Public_Private_Group";
 
-  //  private static final String CREATE_NEW_LIST = "Create New List";
-//  private static final String TEXT_BOX = "TextBox";
-//  private static final String CONTENT_GROUP = "Content_Group";
-//
-//  private static final String CLASS = "Course Info";
   private static final String TITLE = "Title";
-//  private static final String DESCRIPTION_OPTIONAL = "Description";
-
 
   protected final ExerciseController<?> controller;
 
@@ -104,7 +100,8 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
   /**
    * @see #getUnitAndChapterSelections()
    */
-  private List<ListBox> allUnitChapter;
+  List<ListBox> allUnitChapter;
+  List<ControlGroup> allUnitChapterGroup;
   TextArea theDescription;
   private final T current;
   final CreateComplete<T> listView;
@@ -201,9 +198,9 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
   protected abstract void doCreate();
 
   /**
-   * @see ContentEditorView#doEdit
    * @param currentSelection
    * @param container
+   * @see ContentEditorView#doEdit
    */
   public abstract void doEdit(T currentSelection, ButtonMemoryItemContainer<T> container);
 
@@ -223,10 +220,11 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     zeroPadding(child);
     child.addStyleName("userListContainer");
 
-    FluidRow row = new FluidRow();
-    child.add(row);
-
-    addTitle(row);
+    {
+      FluidRow row = new FluidRow();
+      child.add(row);
+      addTitle(row);
+    }
 
     addDescription(child);
 
@@ -242,7 +240,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
    * @return
    * @see ListView#doAdd
    */
-  private boolean isOKToCreate(Set<String> names) {
+  protected boolean isOKToCreate(Set<String> names) {
     boolean ret = true;
 
     if (!isValidName()) {
@@ -258,6 +256,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
           Placement.TOP, true);
       ret = false;
     }
+
     return ret;
   }
 
@@ -312,7 +311,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
    * @return
    * @see #isOKToCreate
    */
-  public boolean isValidName() {
+  boolean isValidName() {
     return validateCreateList(titleBox);
   }
 
@@ -407,7 +406,14 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
 
   private boolean getDefaultPrivacy() {
     boolean isPrivate = true;
-    if (isEditing()) isPrivate = getCurrent().isPrivate();
+    if (isEditing()) {
+      T current = getCurrent();
+
+      logger.info("current " + current);
+      logger.info("priv    " + current.isPrivate());
+
+      isPrivate = current.isPrivate();
+    }
     return isPrivate;
   }
 
@@ -482,14 +488,27 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
       col = 0;
       List<ListBox> all = new ArrayList<>();
       allUnitChapter = all;
+      allUnitChapterGroup = new ArrayList<>();
+
       boolean first = true;
       int width = 150;
       for (String type : typeOrder) {
         ListBox listBox = getListBox(width);
         listBox.addChangeHandler(event -> gotChangeFor(type, listBox, all, addAll));
         all.add(listBox);
-        grid.setWidget(row, col++, listBox);
-        if (addAll) listBox.addItem(ALL);
+
+        ControlGroup e = new ControlGroup();
+        e.add(listBox);
+
+        allUnitChapterGroup.add(e);
+
+        grid.setWidget(row, col++, e);
+
+        if (addAll) {
+          listBox.addItem(ALL);
+        } else {
+          listBox.addItem("-- Please Choose a " + type + " --");
+        }
 
         if (first) {
           addSorted(projectStartupInfo, listBox);
@@ -497,9 +516,11 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
         }
         int i1 = typeOrder.indexOf(type);
         logger.info("For " + type + " : " + i1);
+
         if (unit != null && i1 == 0) {
           listBox.setSelectedValue(unit);
         }
+
         if (chapter != null && i1 == 1) {
           listBox.setSelectedValue(chapter);
           String selectedValue = listBox.getSelectedValue();

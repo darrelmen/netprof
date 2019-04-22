@@ -486,6 +486,10 @@ public class ProjectManagement implements IProjectManagement {
     }
   }
 
+  @Override public void addDialogInfo(int projID) {
+    addDialogInfo(getProject(projID, false));
+  }
+
   private void addDialogInfo(Project project) {
     if (new DialogPopulate(db, pathHelper).addDialogInfo(project)) {
       logger.info("add dialog info to " + project.getID() + " " + project.getName());
@@ -1232,7 +1236,7 @@ public class ProjectManagement implements IProjectManagement {
           DialogType kind = iDialog.getKind();
           if (kind == DialogType.INTERPRETER) {
             name = INTERPRETER;
-            cc = INTERPRETER1;
+            cc = INTERPRETER;
             // logger.info("addModeChoices : found first interpreter dialog : " + iDialog);
           } else {
             logger.info("dialog kind is " + kind);

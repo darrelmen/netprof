@@ -53,17 +53,22 @@ import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.ListOptions;
+import mitll.langtest.shared.custom.IPublicPrivate;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
-public abstract class ButtonMemoryItemContainer<T extends HasID> extends MemoryItemContainer<T> {
-  private final Logger logger = Logger.getLogger("ButtonMemoryItemContainer");
+public abstract class ButtonMemoryItemContainer<T extends HasID & IPublicPrivate> extends MemoryItemContainer<T> {
+  /**
+   * @see #addIsPublic
+   */
+  protected static final String PUBLIC = "Public?";
+  protected static final String NO = "No";
+  protected static final String YES = "Yes";
+  //private final Logger logger = Logger.getLogger("ButtonMemoryItemContainer");
   private final List<Button> buttons = new ArrayList<>();
 
 
@@ -94,5 +99,36 @@ public abstract class ButtonMemoryItemContainer<T extends HasID> extends MemoryI
 
   public void disableAll() {
     buttons.forEach(button -> button.setEnabled(false));
+  }
+
+
+  protected void addIsPublic() {
+    Column<T, SafeHtml> diff = getPublic();
+    diff.setSortable(true);
+    addColumn(diff, new TextHeader(PUBLIC));
+    table.addColumnSortHandler(getPublicSorted(diff, getList()));
+    table.setColumnWidth(diff, 50 + "px");
+  }
+
+  private Column<T, SafeHtml> getPublic() {
+    return new Column<T, SafeHtml>(new ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(T shell) {
+        return getSafeHtml(shell.isPrivate() ? NO : YES);
+      }
+    };
+  }
+
+  private ColumnSortEvent.ListHandler<T> getPublicSorted(Column<T, SafeHtml> englishCol,
+                                                         List<T> dataList) {
+    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, Comparator.comparing(T::isPrivate));
+    return columnSortHandler;
   }
 }

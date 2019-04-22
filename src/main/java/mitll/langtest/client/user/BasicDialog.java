@@ -287,7 +287,7 @@ public class BasicDialog {
     markError(dialectGroup, dialect, focusable, header, message, Placement.RIGHT);
   }
 
-  protected void markError(ControlGroup dialectGroup, Widget dialect, Focusable focusable, String header, String message, Placement right) {
+  private void markError(ControlGroup dialectGroup, Widget dialect, Focusable focusable, String header, String message, Placement right) {
     markErrorOnGroup(dialectGroup);
     focusable.setFocus(true);
     setupPopoverThatHidesItself(dialect, header, message, right, true);
@@ -357,7 +357,8 @@ public class BasicDialog {
    */
   private void markError(ControlGroup dialectGroup, String header, String message, Placement placement) {
     markErrorOnGroup(dialectGroup);
-    setupPopoverThatHidesItself(dialectGroup.getWidget(1), header, message, placement, true);
+    Widget widget = dialectGroup.getWidgetCount() > 1 ? dialectGroup.getWidget(1) : dialectGroup;
+    setupPopoverThatHidesItself(widget, header, message, placement, true);
   }
 
 

@@ -38,6 +38,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.UIObject;
+import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.Emoticon;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -174,7 +175,7 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     {
       final Container flags = new Container();
       flags.setWidth(CHOICES_WIDTH + "px");
- //     flags.getElement().getStyle().setProperty("minWidth", "800px");
+      //     flags.getElement().getStyle().setProperty("minWidth", "800px");
       flags.add(addFlags(result));
       section.add(flags);
     }
@@ -198,11 +199,21 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     return current;
   }
 
+  /**
+   * Use default image if none is associated...
+   *
+   * @param dialog
+   * @return
+   */
   private Panel getImageAnchor(IDialog dialog) {
     Thumbnail thumbnail = thumbnailChoices.getThumbnail();
 
     // logger.info("show image " + imageRef);
-    PushButton button = new PushButton(getFlag(dialog.getImageRef()));
+    String imageRef = dialog.getImageRef();
+    if (imageRef == null || imageRef.isEmpty()) {
+      imageRef = "langtest/cc/" + "dialog.png";
+    }
+    PushButton button = new PushButton(getFlag(imageRef));
     button.addClickHandler(clickEvent -> gotClickOnDialog(dialog));
     thumbnail.add(button);
 

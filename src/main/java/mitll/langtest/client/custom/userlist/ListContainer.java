@@ -29,7 +29,6 @@
 
 package mitll.langtest.client.custom.userlist;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.google.gwt.cell.client.Cell;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
@@ -38,7 +37,6 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
-import mitll.langtest.client.analysis.MemoryItemContainer;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.custom.UserList;
@@ -46,7 +44,6 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.user.Permission;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
@@ -62,13 +59,7 @@ public class ListContainer<T extends UserList<CommonShell>> extends ButtonMemory
   private static final String DESCRIPTION = "Description";
   private static final String CLASS = "Class";
   private static final String CREATOR = "Creator";
-  /**
-   * @see #addIsPublic
-   */
-  private static final String PUBLIC = "Public?";
   private static final String NUM_ITEMS = "#";
-  private static final String NO = "No";
-  private static final String YES = "Yes";
   private static final int DESC_WIDTH = 180;
   private static final int DESC_MAX_LENGTH = 25;//30;
   private final boolean slim;
@@ -224,13 +215,13 @@ public class ListContainer<T extends UserList<CommonShell>> extends ButtonMemory
     table.setColumnWidth(diff, 100 + "px");
   }
 
-  private void addIsPublic() {
-    Column<T, SafeHtml> diff = getPublic();
-    diff.setSortable(true);
-    addColumn(diff, new TextHeader(PUBLIC));
-    table.addColumnSortHandler(getPublicSorted(diff, getList()));
-    table.setColumnWidth(diff, 50 + "px");
-  }
+//  private void addIsPublic() {
+//    Column<T, SafeHtml> diff = getPublic();
+//    diff.setSortable(true);
+//    addColumn(diff, new TextHeader(PUBLIC));
+//    table.addColumnSortHandler(getPublicSorted(diff, getList()));
+//    table.setColumnWidth(diff, 50 + "px");
+//  }
 
   private void addIsTeacher() {
     Column<T, SafeHtml> diff = getTeacher();
@@ -315,21 +306,6 @@ public class ListContainer<T extends UserList<CommonShell>> extends ButtonMemory
     };
   }
 
-  private Column<T, SafeHtml> getPublic() {
-    return new Column<T, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public SafeHtml getValue(T shell) {
-        return getSafeHtml(shell.isPrivate() ? NO : YES);
-      }
-    };
-  }
-
   private Column<T, SafeHtml> getTeacher() {
     return new Column<T, SafeHtml>(new ClickablePagingContainer.ClickableCell()) {
       @Override
@@ -378,13 +354,6 @@ public class ListContainer<T extends UserList<CommonShell>> extends ButtonMemory
                                                         List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, Comparator.comparing(UserList::getFirstInitialName));
-    return columnSortHandler;
-  }
-
-  private ColumnSortEvent.ListHandler<T> getPublicSorted(Column<T, SafeHtml> englishCol,
-                                                         List<T> dataList) {
-    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol, Comparator.comparing(UserList::isPrivate));
     return columnSortHandler;
   }
 

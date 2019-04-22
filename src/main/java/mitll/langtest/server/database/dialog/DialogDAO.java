@@ -463,11 +463,30 @@ public class DialogDAO extends DAO implements IDialogDAO {
     IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
 
     long now = System.currentTimeMillis();
+
     ExerciseAttribute attribute = new ExerciseAttribute(FLTITLE, toAdd.getForeignLanguage(), false);
+
     int orAddAttribute = userExerciseDAO.getExerciseAttributeDAO()
         .findOrAddAttribute(projid, now, userid, attribute, false);
-    dialogAttributeJoinHelper.addBulkAttributeJoins(Collections.singletonList(new SlickDialogAttributeJoin(-1, userid, new Timestamp(now), add, orAddAttribute)));
+
+    SlickDialogAttributeJoin e = new SlickDialogAttributeJoin(-1, userid, new Timestamp(now), add, orAddAttribute);
+
+    logger.info("add dialog " +
+        "\n\t#         " + add +
+        "\n\tattr id   " + orAddAttribute +
+        "\n\tattribute " + attribute +
+        "\n\tjoins     " + e
+    );
+
+    int insert = dialogAttributeJoinHelper.insert(e);
+
+    logger.info("new id " + insert);
+
     toAdd.getAttributes().add(attribute.setId(orAddAttribute));
+
+    // refresh list on project
+    databaseImpl.getProjectManagement().addDialogInfo(projid);
+
     return toAdd;
   }
 
@@ -490,7 +509,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
         }
       }
     }
-    return dao.update(new SlickDialog(
+    boolean b = dao.update(new SlickDialog(
         -1,
         dialog.getUserid(),
         projid,
@@ -505,6 +524,12 @@ public class DialogDAO extends DAO implements IDialogDAO {
         dialog.getOrientation(),
         dialog.isPrivate()
     )) > 0;
+
+    if (b) {
+      databaseImpl.getProjectManagement().addDialogInfo(projid);
+    }
+
+    return b;
   }
 
   /**
@@ -550,9 +575,22 @@ public class DialogDAO extends DAO implements IDialogDAO {
     ));
   }
 
+  /**
+   * TODO : pass in project id -
+   * TODO : what if two people are updating the set of dialogs at the same time???
+   *
+   * @param id
+   * @return
+   */
   @Override
   public boolean delete(int id) {
-    return dao.delete(id) > 0;
+    boolean b = dao.delete(id) > 0;
+
+//    if (b) {
+//      databaseImpl.getProjectManagement().addDialogInfo(projid);
+//    }
+
+    return b;
   }
 
   @Override

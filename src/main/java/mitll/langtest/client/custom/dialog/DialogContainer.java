@@ -38,12 +38,16 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.dialog.IDialog;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 /**
  * TODO : add public/private column, and to dialog itself!
+ *
  * @param <T>
  */
 public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContainer<T> {
+  private final Logger logger = Logger.getLogger("DialogContainer");
+
   DialogContainer(ExerciseController<?> controller) {
     super(controller, "netprof" + ":" + controller.getUser() + ":" + "dialogs", "Dialogs",
         20, 10);
@@ -65,6 +69,8 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
     addOrientation(list, 50);
 
     addDateCol(list);
+
+    addIsPublic();
   }
 
   /**
@@ -214,7 +220,13 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
 
   @Override
   protected String getItemLabel(IDialog shell) {
-    return shell.getForeignLanguage();
+    //  logger.info("shell is " + shell);
+    String foreignLanguage = shell.getForeignLanguage();
+    logger.info("fl    is '" + foreignLanguage + "'");
+    if (foreignLanguage.isEmpty()) {
+      logger.warning("got " + shell);
+    }
+    return foreignLanguage;
   }
 
   @Override

@@ -98,6 +98,9 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   protected Button share;
   private static final int MIN_WIDTH = 659;//599;
   protected DialogHelper dialogHelper;
+  /**
+   *
+   */
   protected ButtonMemoryItemContainer<T> myLists;
 
   protected Button editButton, removeButton;
@@ -105,7 +108,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   public ContentEditorView(ExerciseController controller) {
     this.controller = controller;
   }
-
 
   public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
     names.clear();
@@ -485,7 +487,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     return editDialog;
   }
 
-
   protected void afterGotYesOnEdit() {
   }
 
@@ -496,11 +497,9 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     }
   }
 
-
   private void setShareButtonHREF() {
     share.setHref(getMailTo());
   }
-
 
   protected abstract String getMailTo();
 

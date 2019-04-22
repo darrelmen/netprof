@@ -29,10 +29,10 @@
 
 package mitll.langtest.client.custom.dialog;
 
+import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Panel;
@@ -73,6 +73,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
   }
 
   private ListBox dialogType;
+  private ControlGroup dialogTypeContainer;
 
   /**
    * TODO : add en title
@@ -82,11 +83,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
    */
   @Override
   protected void addFieldsBelowDescription(Panel child) {
-//    FluidRow row = new FluidRow();
-//    child.add(row);
-
     Grid grid = new Grid(2, 4);
-
 
     int col = 0;
     int row = 0;
@@ -106,8 +103,10 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
       listBox.addItem("-- Choose type of dialog --");
       listBox.addItem(DialogType.DIALOG.toString());
       listBox.addItem(DialogType.INTERPRETER.toString());
+      dialogTypeContainer = new ControlGroup();
+      dialogTypeContainer.add(listBox);
       dialogType = listBox;
-      child.add(listBox);
+      child.add(dialogTypeContainer);
 
       if (isEdit) {
         if (getCurrent().getKind() == DialogType.DIALOG) {
@@ -145,15 +144,57 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
 
     final TextBoxBase box = entitleBox.box;
     entitleBox.setHint("English Title (optional)");
-    if (isEditing()) box.setText(getCurrent().getName());
+    if (isEditing()) {
+      box.setText(getCurrent().getEnglish());
+    }
     box.getElement().setId("En_Title");
     box.addKeyUpHandler(this::checkEnter);
     box.addBlurHandler(event -> controller.logEvent(box, TEXT_BOX, CREATE_NEW_LIST, "English Title = " + box.getValue()));
   }
 
+  @Override
+  protected boolean isOKToCreate(Set<String> names) {
+    boolean okToCreate = super.isOKToCreate(names);
+    if (okToCreate) {
+      List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
+
+      boolean validUnit = true;
+      for (int i = 0; i < allUnitChapter.size(); i++) {
+        ListBox listBox = allUnitChapter.get(i);
+        if (listBox.getSelectedValue().startsWith("--")) {
+          markError(allUnitChapterGroup.get(i), listBox, listBox, "Please choose.", "Please choose a " + typeOrder.get(i));
+          validUnit = false;
+          break;
+        }
+      }
+
+      if (validUnit) {
+        boolean valid = false;
+        try {
+          DialogType.valueOf(this.dialogType.getSelectedValue());
+          valid = true;
+        } catch (IllegalArgumentException e) {
+          // e.printStackTrace();
+        }
+
+        if (!valid) {
+          markError(dialogTypeContainer, dialogType, dialogType, "Please choose.", "Please choose a dialog type");
+        }
+
+        logger.info("isValid " + valid);
+        return valid;
+      } else {
+        return false;
+      }
+    } else {
+      return false;
+    }
+  }
+
   /**
    * TODO figure out image upload...
-   * TODO :add dialog type drop down
+   *
+   * @see #isOKToCreate()
    */
   @Override
   protected void doCreate() {
@@ -170,7 +211,9 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
 
     String imageRef = "";
 
-    DialogType dialogType = DialogType.DIALOG;
+    // DialogType dialogType = DialogType.DIALOG;
+
+//    DialogType dialogType = DialogType.valueOf(this.dialogType.getSelectedValue());
 
     IDialog newDialog = new Dialog(-1,
         controller.getUser(),
@@ -188,7 +231,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
         new ArrayList<>(),
         new ArrayList<>(),
         new ArrayList<>(),
-        dialogType,
+        DialogType.valueOf(this.dialogType.getSelectedValue()),
         "",
         publicChoice.getValue()
     );
@@ -202,9 +245,8 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
 
           @Override
           public void onSuccess(IDialog result) {
-            logger.info("Got " + result);
+            // logger.info("Got " + result);
             listView.madeIt((T) result);
-
           }
         });
   }
@@ -213,12 +255,6 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
   protected void setDescription(T current) {
     if (isEditing()) theDescription.setText(getCurrent().getOrientation());
   }
-
-
-//  @Override
-//  protected void setDescription(T current) {
-//    current.getMutable().setOrientation(theDescription.getText());
-//  }
 
   @NotNull
   @Override
