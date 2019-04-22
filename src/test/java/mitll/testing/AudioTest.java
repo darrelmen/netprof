@@ -38,6 +38,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
+import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.File;
 import java.io.IOException;
 
@@ -166,7 +167,12 @@ public class AudioTest {
 
     double v2 = new AudioConversion(false,26).trimSilence(destFile).getDuration();
 
-    double v3 = audioCheck.getDurationInSeconds(destFile);
+    double v3 = 0;
+    try {
+      v3 = audioCheck.getDurationInSeconds(destFile);
+    } catch (UnsupportedAudioFileException e) {
+      e.printStackTrace();
+    }
 
     System.out.println("got " + v2 + " : " + v3);
 
