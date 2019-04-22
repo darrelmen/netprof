@@ -224,8 +224,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   /**
-   * @see
    * @param next
+   * @see
    */
   void rememberAudio(AudioAttribute next) {
     //  logger.info("rememberAudio audio for " + this + "  " + next);
@@ -234,8 +234,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   /**
-   * @see #rememberAudio
    * @param next
+   * @see #rememberAudio
    */
   private void maybeShowAlignment(AudioAttribute next) {
 //    AlignmentOutput alignmentOutput = alignmentFetcher.getAlignment(next.getUniqueID());
@@ -602,7 +602,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                 }
 //                String event = wordSegment.getEvent();
 //                phonesInWordAll.forEach(ph -> logger.info(event + " " + ph.toString()));
-                showPhones(combinedTranscriptSegment, phonesInWordAll, audioControl,phoneMap,  clickablePhones, simpleLayout, current);
+                showPhones(combinedTranscriptSegment, phonesInWordAll, audioControl, phoneMap, clickablePhones, simpleLayout, current);
               }
 
               if (DEBUG_MATCH) {
@@ -867,7 +867,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                           DivWidget clickablePhones,
                           boolean simpleLayout,
                           IHighlightSegment wordHighlight) {
-    addSouthClickable(clickablePhones, getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl,phoneMap, simpleLayout, wordHighlight));
+    addSouthClickable(clickablePhones, getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap, simpleLayout, wordHighlight));
   }
 
   private void addSouthClickable(DivWidget clickablePhones, DivWidget phoneDivBelowWord) {
@@ -881,7 +881,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param audioControl
    * @param simpleLayout
    * @param wordHighlight
-   * @return
+   * @return DivWidget "phoneContainer"
    * @see #doOneToManyMatch
    */
   @NotNull
@@ -890,7 +890,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                                            AudioControl audioControl,
                                            TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                                            boolean simpleLayout, IHighlightSegment wordHighlight) {
-    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, true, wordHighlight);
+    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, !isRTL, wordHighlight, isRTL);
   }
 
   /**

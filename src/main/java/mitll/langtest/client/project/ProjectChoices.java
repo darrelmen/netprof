@@ -65,6 +65,7 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.shared.project.ProjectProperty.MODEL_TYPE;
 import static mitll.langtest.shared.user.Permission.*;
 
 /**
@@ -129,6 +130,9 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private static final int NORMAL_MIN_HEIGHT = 91;
 
+  /**
+   * @see #getCreateNewButton
+   */
   private static final String NEW_PROJECT = "New Project";
 
   private static final int LANGUAGE_SIZE = 3;
@@ -306,7 +310,9 @@ public class ProjectChoices extends ThumbnailChoices {
    * @see #showProject(SlimProject)
    */
   private Section showProjectChoices(List<SlimProject> result, int nest) {
-    if (DEBUG) logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
+    if (DEBUG) {
+      logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
+    }
 
     final Section section = getScrollingSection();
     section.add(getHeader(result, nest));
@@ -381,13 +387,14 @@ public class ProjectChoices extends ThumbnailChoices {
    * @param result
    * @param nest
    * @return
-   * @see #showProjectChoices
+   * @see #showProjectChoices(List, int)
    */
   @NotNull
   private DivWidget getHeader(List<SlimProject> result, int nest) {
     DivWidget header = new DivWidget();
     header.addStyleName("container");
 
+ //   logger.info("getHeader " + result.size() + " : " + nest);
     {
       DivWidget left = new DivWidget();
       left.addStyleName("floatLeftAndClear");
@@ -399,23 +406,26 @@ public class ProjectChoices extends ThumbnailChoices {
       header.add(left);
     }
 
-    {
+    if (nest == 0) {
       DivWidget topBottom = new DivWidget();
       topBottom.addStyleName("floatRight");
+      topBottom.getElement().getStyle().setMarginBottom(18, Style.Unit.PX);
       header.add(topBottom);
 
-      DivWidget right = new DivWidget();
-      right.addStyleName("floatRight");
-      right.addStyleName("inlineFlex");
-      right.addStyleName("topMargin");
+      {
+        DivWidget right = new DivWidget();
+        right.addStyleName("floatRight");
+        right.addStyleName("inlineFlex");
+        right.addStyleName("topMargin");
 
-      topBottom.add(right);
-      if (isQC()) {
-        right.add(getCreateNewButton());
-      }
+        topBottom.add(right);
+        if (isQC()) {
+          right.add(getCreateNewButton());
+        }
 
-      if (controller.getUserState().isAdmin()) {
-        topBottom.add(addAdminControls(right));
+        if (controller.getUserState().isAdmin()) {
+          topBottom.add(addAdminControls(right));
+        }
       }
     }
 
@@ -464,6 +474,10 @@ public class ProjectChoices extends ThumbnailChoices {
     return status;
   }
 
+  /**
+   * @return
+   * @see #getHeader
+   */
   private DivWidget getCreateNewButton() {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button(NEW_PROJECT);
 
@@ -723,8 +737,12 @@ public class ProjectChoices extends ThumbnailChoices {
    * @see #getImageAnchor
    */
   private void addPopover(FocusWidget button, SlimProject projectForLang) {
-    //logger.info("addPopover " + projectForLang);
-    addPopover(button, getProps(projectForLang), Placement.RIGHT);
+    Map<String, String> props = getProps(projectForLang);
+
+    props.remove(MODEL_TYPE.toString());
+
+    //logger.info("addPopover " + projectForLang + " : " + props);
+    addPopover(button, props, Placement.RIGHT);
   }
 
   private Map<String, String> getProps(SlimProject projectForLang) {
@@ -938,8 +956,8 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private void showImportDialog(SlimProject projectForLang, Button button, boolean doChange) {
     //  logger.info("showImport " + doChange);
- //   String s = getProps(projectForLang).get(NUM_ITEMS);
- //   logger.info("showImportDialog # items = " + s);
+    //   String s = getProps(projectForLang).get(NUM_ITEMS);
+    //   logger.info("showImportDialog # items = " + s);
     final Object waitToken = messageHelper.startWaiting(PLEASE_WAIT);
 
     int id = projectForLang.getID();
@@ -1137,7 +1155,7 @@ public class ProjectChoices extends ThumbnailChoices {
    * @see #gotClickOnFlag
    */
   private void setProjectForUser(int projectid, ProjectMode mode) {
-    logger.info("setProjectForUser set project for " + projectid + " mode " + mode);
+    //   logger.info("setProjectForUser set project for " + projectid + " mode " + mode);
     uiLifecycle.clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override

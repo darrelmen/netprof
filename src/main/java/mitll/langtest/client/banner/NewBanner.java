@@ -157,7 +157,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   /**
    * @see #setCogVisible
    */
-  // private List<LinkAndTitle> hasProjectChoices;
   private static final boolean DEBUG = false;
 
   /**
@@ -589,6 +588,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     else logger.warning("no dialog editor choice yet");
   }
 
+  /**
+   * @see #addWidgets(UserManager, UserMenu, Breadcrumbs)
+   * @see #reset
+   * @param val
+   */
   @Override
   public void setCogVisible(boolean val) {
     userDrop.setVisible(val);
@@ -623,6 +627,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @Override
   public void reset() {
     setCogVisible(false);
+
     setRecNavVisible(false);
     setDefectNavVisible(false);
     setDialogNavVisible(false);
@@ -697,8 +702,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   @Override
   public void checkProjectSelected() {
-    // logger.info("checkProjectSelected ");
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+
+ //   logger.info("checkProjectSelected " + projectStartupInfo);
+
     setVisibleChoices(projectStartupInfo != null);
 
     VIEWS currentView = navigation.getCurrentView();
@@ -727,7 +734,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   public void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
-    // logger.info("setVisibleChoices " + show);
+    if (DEBUG) logger.info("setVisibleChoices " + show);
     reflectPermissions(controller.getPermissions());
   }
 

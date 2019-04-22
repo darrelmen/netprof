@@ -1037,7 +1037,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   public void setScore(int id, float hydecScore) {
     T t = byID(id);
     if (t == null) {
-      logger.warning("setScore no exercise found for id " + id + " score " + hydecScore);
+      logger.info("setScore no exercise found for id " + id + " score " + hydecScore);
     } else {
       t.getMutableShell().setScore(hydecScore);
     }

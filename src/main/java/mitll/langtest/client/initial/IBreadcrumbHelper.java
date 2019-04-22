@@ -31,6 +31,7 @@ package mitll.langtest.client.initial;
 
 import com.github.gwtbootstrap.client.ui.Breadcrumbs;
 import com.github.gwtbootstrap.client.ui.NavLink;
+import mitll.langtest.shared.project.SlimProject;
 import org.jetbrains.annotations.NotNull;
 
 interface IBreadcrumbHelper {
@@ -45,5 +46,8 @@ interface IBreadcrumbHelper {
   @NotNull
   NavLink makeBreadcrumb(String name);
 
+  /**
+   * @see InitialUI#clickOnParentCrumb
+   */
   void removeLastCrumb();
 }

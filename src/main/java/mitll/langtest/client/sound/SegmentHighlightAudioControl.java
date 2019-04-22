@@ -58,7 +58,7 @@ public class SegmentHighlightAudioControl implements AudioControl {
 //      logger.info("phoneSegments now has " + phones.size());
 //      logger.info("wordSegments  now has " + typeToSegmentToWidget.get(NetPronImageType.WORD_TRANSCRIPT).size());
     } else {
-      logger.warning("phoneSegments now has " + phones + " : " + typeToSegmentToWidget.keySet());
+     // logger.warning("phoneSegments now has " + phones + " : " + typeToSegmentToWidget.keySet());
     }
   }
 
@@ -97,131 +97,6 @@ public class SegmentHighlightAudioControl implements AudioControl {
   public void songFinished() {
     wordSegments.songFinished();
     if (phoneSegments != null) phoneSegments.songFinished();
-  }
-
-  /**
-   * @see #SegmentHighlightAudioControl
-   */
-  private static class SegmentAudioControl implements AudioControl {
-    private final Logger logger = Logger.getLogger("SegmentAudioControl");
-    private TranscriptSegment currentSegment;
-    private final TreeMap<TranscriptSegment, IHighlightSegment> transcriptToHighlight;
-
-    private static final boolean DEBUG = false;
-    private static final boolean DEBUG_DETAIL = false;
-
-    /**
-     * @param words
-     * @see SegmentHighlightAudioControl#SegmentHighlightAudioControl
-     */
-    SegmentAudioControl(int exid, TreeMap<TranscriptSegment, IHighlightSegment> words) {
-      this.transcriptToHighlight = words;
-      if (DEBUG) {
-        words.forEach((k, v) -> logger.info(exid + " : " + k + "->" + v));
-//        logger.info("transcript-> word " + transcriptToHighlight);
-      }
-      initialize();
-    }
-
-    private void initialize() {
-      if (transcriptToHighlight != null && !transcriptToHighlight.isEmpty()) {
-        currentSegment = transcriptToHighlight.keySet().iterator().next();
-        if (DEBUG) logger.info("initialize current word " + currentSegment);
-      }
-    }
-
-    @Override
-    public void reinitialize() {
-      songFinished();
-    }
-
-    @Override
-    public void songFirstLoaded(double durationEstimate) {
-    }
-
-    @Override
-    public void loadAndPlaySegment(float startInSeconds, float endInSeconds) {
-    }
-
-    @Override
-    public void songLoaded(double duration) {
-      if (isHighlighted()) removeHighlight();
-    }
-
-    @Override
-    public void update(double positionInSec2) {
-      double posInMillis = positionInSec2 / 1000;
-      //   logger.info("update " +positionInSec);
-      if (currentSegment == null) {
-        if (DEBUG) logger.info("update no current word - update ignore : " + posInMillis);
-      } else {
-        if (posInMillis < currentSegment.getStart()) { // before
-          if (DEBUG) logger.info("update before current word - update ignore : " + posInMillis);
-        } else if (posInMillis >= currentSegment.getEnd()) { // after
-          if (DEBUG) logger.info(currentSegment + " remove highlight at " + posInMillis);
-          removeHighlight();
-
-          // get next segment
-          while (currentSegment != null && posInMillis >= currentSegment.getEnd()) {
-            currentSegment = transcriptToHighlight.higherKey(currentSegment);  // next word
-          }
-
-          if (currentSegment != null) {
-            if (currentSegment.contains(posInMillis)) {
-              if (DEBUG) logger.info(currentSegment + " (1) highlighted at " + posInMillis);
-              showHighlight();
-            }
-          } else {
-            if (DEBUG) logger.info("no current word " + posInMillis);
-          }
-          //else {
-          //  isWordHighlighted = false;
-          // }
-        } else { // contains
-          if (!isHighlighted()) {
-            if (currentSegment.contains(posInMillis)) {
-              if (DEBUG) logger.info(currentSegment + " (2) highlighted at " + posInMillis);
-              showHighlight();
-            } else {
-              if (DEBUG) logger.info(currentSegment + " doesn't contain " + posInMillis);
-            }
-          } else {
-            if (DEBUG_DETAIL) logger.info(currentSegment + " is already highlighted.");
-          }
-        }
-      }
-    }
-
-    private void showHighlight() {
-      transcriptToHighlight.get(currentSegment).showHighlight();
-    }
-
-    @Override
-    public void songFinished() {
-      if (DEBUG_DETAIL) logger.info("songFinished..." + transcriptToHighlight.values().size() + " segments...");
-      clearHighlights();
-      initialize();
-    }
-
-    private void clearHighlights() {
-      transcriptToHighlight.values().forEach(IHighlightSegment::checkClearHighlight);
-    }
-
-    private boolean isHighlighted() {
-      return currentSegment != null && transcriptToHighlight.get(currentSegment).isHighlighted();
-    }
-
-    /**
-     * @see #update(double)
-     * @see #songLoaded(double)
-     */
-    private void removeHighlight() {
-      if (currentSegment != null) {
-        transcriptToHighlight.get(currentSegment).clearHighlight();
-      } else {
-        logger.warning("removeHighlight no current word....");
-      }
-    }
   }
 
   public String toString() {
