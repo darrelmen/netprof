@@ -33,6 +33,8 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.scoring.IObscurable;
+import mitll.langtest.client.scoring.ObscureRecordDialogExercisePanel;
 import mitll.langtest.client.scoring.RecordDialogExercisePanel;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -41,11 +43,16 @@ import org.jetbrains.annotations.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel> extends RehearseViewHelper<T> {
+public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscurable> extends RehearseViewHelper<T> {
   //private final Logger logger = Logger.getLogger("CoreRehearseViewHelper");
 
   private Map<String, ClientExercise> exidToShell = new HashMap<>();
 
+  /**
+   * @see mitll.langtest.client.custom.INavigation.VIEWS.CORE_REHEARSE
+   * @param controller
+   * @param thisView
+   */
   public CoreRehearseViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     super(controller, thisView);
     rehearsalKey = "CoreRehearseViewKey";
@@ -68,6 +75,12 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel> extends
     return turns;
   }
 
+  @Override
+  protected T makeRecordingTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
+    return (T) new ObscureRecordDialogExercisePanel(clientExercise, controller,
+        null, alignments, this, this, columns);
+  }
+
   /**
    * OK, let's go - hide everything!
    *
@@ -86,7 +99,7 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel> extends
         turnPanel.maybeSetObscure(exidToShell);
       }
     } else {
-      turnPanel.reallyObscure();
+      turnPanel.obscureTextAndPhones();
     }
     return turnPanel;
   }
@@ -107,6 +120,6 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel> extends
   }
 
   private void obscureRespTurns() {
-    allTurns.forEach(RecordDialogExercisePanel::obscureText);
+    allTurns.forEach(T::obscureText);
   }
 }

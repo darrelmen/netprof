@@ -64,7 +64,11 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   private static final SafeUri firstRed = UriUtils.fromSafeConstant(FIRST_RED);
   private static final String HEIGHT = 19 + "px";
   private static final String BORDER_RADIUS = 18 + "px";
+
   public static final String RED_ACTIVE_COLOR = "#da4f49";
+  /**
+   * @see RecordDialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
+   */
   public static final String BLUE_INACTIVE_COLOR = "#0171bc";
 
   /**
@@ -88,13 +92,11 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   RecorderPlayAudioPanel(final Button postAudioRecordButton1, ExerciseController controller, HasID exercise, boolean useMicrophoneIcon) {
     super(new PlayListener() {
             public void playStarted() {
-//          goodwaveExercisePanel.setBusy(true);
               // TODO put back busy thing?
               postAudioRecordButton1.setEnabled(false);
             }
 
             public void playStopped() {
-              //  goodwaveExercisePanel.setBusy(false);
               postAudioRecordButton1.setEnabled(true);
             }
           },
@@ -120,7 +122,6 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   void showPlayButton() {
     playButton.setVisible(true);
   }
-
   void hidePlayButton() {
     playButton.setVisible(false);
   }
@@ -243,12 +244,15 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     container.setWidth(HEIGHT);
 
     Style style1 = container.getElement().getStyle();
-    style1.setPadding(8, Style.Unit.PX);
-    style1.setProperty("borderRadius", BORDER_RADIUS);
-    style1.setMarginTop(-5, Style.Unit.PX);
-    style1.setMarginLeft(2, Style.Unit.PX);
-    style1.setMarginRight(5, Style.Unit.PX);
-    style1.setMarginBottom(5, Style.Unit.PX);
+
+    {
+      style1.setPadding(8, Style.Unit.PX);
+      style1.setProperty("borderRadius", BORDER_RADIUS);
+      style1.setMarginTop(-5, Style.Unit.PX);
+      style1.setMarginLeft(2, Style.Unit.PX);
+      style1.setMarginRight(5, Style.Unit.PX);
+      style1.setMarginBottom(5, Style.Unit.PX);
+    }
 
     container.add(icon);
     style1.setBackgroundColor("lightBlue");

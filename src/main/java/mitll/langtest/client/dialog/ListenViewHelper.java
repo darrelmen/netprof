@@ -41,6 +41,8 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -51,10 +53,7 @@ import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.client.scoring.EnglishDisplayChoices;
-import mitll.langtest.client.scoring.PhonesChoices;
-import mitll.langtest.client.scoring.RefAudioGetter;
-import mitll.langtest.client.scoring.TurnPanel;
+import mitll.langtest.client.scoring.*;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.dialog.DialogMetadata;
@@ -64,6 +63,7 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -74,8 +74,9 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 /**
  * Created by go22670 on 4/5/17.
  */
-public class ListenViewHelper<T extends TurnPanel>
-    extends DialogView implements ContentView, PlayListener, IListenView {
+public class ListenViewHelper<T extends ITurnPanel>
+    extends DialogView
+    implements ContentView, PlayListener, IListenView {
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   private static final String INTERPRETER = "Interpreter";
@@ -180,21 +181,22 @@ public class ListenViewHelper<T extends TurnPanel>
    * @param dialogID can be -1 if we just jump into a rehearse view without choosing a dialog first...
    * @param dialog
    * @param child
+   * @see #showContent
    */
   void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
     if (dialog != null) {
       this.dialogID = dialog.getID();
       isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
 
-      INavigation.VIEWS currentView = controller.getNavigation().getCurrentView();
+//      INavigation.VIEWS currentView = controller.getNavigation().getCurrentView();
 
-      SelectionState selectionState = new SelectionState();
-      INavigation.VIEWS view = selectionState.getView();
+//      SelectionState selectionState = new SelectionState();
+      //     INavigation.VIEWS view = selectionState.getView();
 
 //      if (view != getView()) {
 //        logger.warning("skipping doing this view since out of sync! " + currentView + " vs " + getView() + " vs url view " +view);
 //      } else {
-        showDialog(dialogID, dialog, child);
+      showDialog(dialogID, dialog, child);
 //      }
 
       getRefAudio(new ArrayList<RefAudioGetter>(allTurns).iterator());
@@ -217,11 +219,10 @@ public class ListenViewHelper<T extends TurnPanel>
     if (dialog == null) {
       child.add(new HTML("hmmm can't find dialog #" + dialogID + " in database"));
     } else {
-     child.clear();  // dangerous???
+      child.clear();  // dangerous???
 
       child.add(dialogHeader = new DialogHeader(controller, thisView, getPrevView(), getNextView()).getHeader(dialog));
 
-      //boolean firstIsEnglish = dialog.getExercises().isEmpty() || dialog.getExercises().get(0).hasEnglishAttr();
       DivWidget controlAndSpeakers = new DivWidget();
       styleControlRow(controlAndSpeakers);
       child.add(controlAndSpeakers);
@@ -230,34 +231,11 @@ public class ListenViewHelper<T extends TurnPanel>
       outer.addStyleName("inlineFlex");
       outer.setWidth("100%");
 
-/*      {
-        Widget w = getFlag(firstIsEnglish ? "us" : dialog.getCountryCode());
-        DivWidget flagContainer = new DivWidget();
-        flagContainer.setWidth("100px");
-        flagContainer.add(w);
-        flagContainer.getElement().getStyle().setMarginLeft(10,PX);
-        flagContainer.addStyleName("floatLeft");
-        outer.add(flagContainer);
-      }*/
-
       DivWidget controls = getControls();
       controls.setWidth("100%");
 
       // only if flags
-      //   controls.getElement().getStyle().setMarginTop(50, PX);
       outer.add(controls);
-
- /*     {
-        Widget w1 = getFlag(firstIsEnglish ? dialog.getCountryCode() : "us");
-
-        DivWidget flagContainer = new DivWidget();
-        flagContainer.add(w1);
-        flagContainer.setWidth("100px");
-        flagContainer.getElement().getStyle().setMarginRight(10,PX);
-        flagContainer.addStyleName("floatRight");
-
-        outer.add(flagContainer);
-      }*/
 
       controlAndSpeakers.add(outer);
       controlAndSpeakers.add(getSpeakerRow(dialog));
@@ -265,11 +243,6 @@ public class ListenViewHelper<T extends TurnPanel>
       child.add(getTurns(dialog));
     }
   }
-/*
-  @NotNull
-  private com.google.gwt.user.client.ui.Image getFlag(String cc) {
-    return new com.google.gwt.user.client.ui.Image("langtest/cc/" + cc + ".png");
-  }*/
 
   @NotNull
   private DivWidget getSpeakerRow(IDialog dialog) {
@@ -278,100 +251,143 @@ public class ListenViewHelper<T extends TurnPanel>
     rowOne.getElement().getStyle().setMarginTop(5, PX);
 
     {
-      String firstSpeaker = dialog.getSpeakers().get(0);
-      if (!dialog.getExercises().isEmpty()) {
-        ClientExercise next = dialog.getExercises().iterator().next();
-        boolean hasEnglishAttr = next.hasEnglishAttr();
-
-        if (hasEnglishAttr && getExerciseSpeaker(next).equalsIgnoreCase(firstSpeaker)) {
-          firstSpeaker = ENGLISH_SPEAKER;
-        }
-      }
-      if (firstSpeaker == null) firstSpeaker = "A";
+      String firstSpeaker = getFirstSpeakerLabel(dialog);
 
       if (isInterpreter) {
-        Heading w = new Heading(4, firstSpeaker);
-
-        DivWidget left = new DivWidget();
-        left.add(w);
-        // left.setWidth(SPEAKER_WIDTH +            "px");
-
-        styleLeftSpeaker(w);
-
-        left.addStyleName("floatLeft");
-        left.addStyleName("bubble");
-        left.addStyleName("leftbubble");
-        setPadding(left);
-
-        //left.addStyleName("leftFiveMargin");
-        left.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
-
-        rowOne.add(left);
+        rowOne.add(getLeftSpeaker(firstSpeaker));
       } else {
         leftSpeakerBox = addLeftSpeaker(rowOne, firstSpeaker);
       }
     }
 
-    {
-      if (isInterpreter) {
-        String secondSpeaker = dialog.getSpeakers().get(2);
-
-        if (!dialog.getExercises().isEmpty()) {
-          ClientExercise next = dialog.getExercises().iterator().next();
-          boolean hasEnglishAttr = next.hasEnglishAttr();
-
-          if (hasEnglishAttr && !getExerciseSpeaker(next).equalsIgnoreCase(secondSpeaker)) {
-            secondSpeaker = controller.getLanguageInfo().toDisplay() + " Speaker";
-          }
-        }
-
-        if (secondSpeaker == null) secondSpeaker = SPEAKER_B;
-
-        Heading w = new Heading(4, secondSpeaker);
-
-        DivWidget right = new DivWidget();
-        // right.setWidth(SPEAKER_WIDTH +            "px");
-        right.add(w);
-        right.addStyleName("bubble");
-        right.addStyleName("rightbubble");
-        right.addStyleName("floatRight");
-        setPadding(right);
-        //left.addStyleName("leftFiveMargin");
-        right.getElement().getStyle().setBackgroundColor(RIGHT_BKG_COLOR);
-        styleRightSpeaker(w);
-        rowOne.add(right);
-      }
+    if (isInterpreter) {
+      rowOne.add(getRightSpeaker(getSecondSpeakerLabel(dialog)));
     }
 
     {
-      String interpreterSpeaker = dialog.getSpeakers().get(1);
-      if (interpreterSpeaker == null) interpreterSpeaker = INTERPRETER;
-
       if (isInterpreter) {
-        Heading w = new Heading(4, INTERPRETER);
-
-        DivWidget middle = new DivWidget();
-        middle.addStyleName("bubble");
-        middle.setWidth(INTERPRETER_WIDTH + "px");
-        middle.setHeight("44px");
-        middle.getElement().getStyle().setMarginTop(0, PX);
-        middle.getElement().getStyle().setMarginBottom(0, PX);
-        middle.getElement().getStyle().setProperty("marginLeft", "auto");
-        middle.getElement().getStyle().setProperty("marginRight", "auto");
-        setPadding(middle);
-        middle.add(w);
-        styleLabel(w);
-        //  w.getElement().getStyle().setMarginLeft(43, PX);
-
-        middle.getElement().getStyle().setBackgroundColor(MIDDLE_COLOR);
-        rowOne.add(middle);
+        rowOne.add(getMiddleSpeaker());
       } else {
-        rightSpeakerBox = addRightSpeaker(rowOne, interpreterSpeaker);
+        rightSpeakerBox = addRightSpeaker(rowOne, getInterpreterSpeakerLabel(dialog));
       }
     }
 
 
     return rowOne;
+  }
+
+  @NotNull
+  private String getInterpreterSpeakerLabel(IDialog dialog) {
+    String interpreterSpeaker = dialog.getSpeakers().size() > 1 ? dialog.getSpeakers().get(1) : null;
+    if (interpreterSpeaker == null) interpreterSpeaker = INTERPRETER;
+    return interpreterSpeaker;
+  }
+
+  /**
+   * TODO : allow english speaker to go second
+   * @param dialog
+   * @return
+   */
+  @Nullable
+  private String getSecondSpeakerLabel(IDialog dialog) {
+    String secondSpeaker = dialog.getSpeakers().size() > 2 ? dialog.getSpeakers().get(2) : null;
+
+    // OK guess from the language of the first turn
+    if (!dialog.getExercises().isEmpty()) {
+      ClientExercise next = dialog.getExercises().iterator().next();
+      boolean hasEnglishAttr = next.hasEnglishAttr();
+
+      if (hasEnglishAttr && !getExerciseSpeaker(next).equalsIgnoreCase(secondSpeaker)) {
+        secondSpeaker = controller.getLanguageInfo().toDisplay() + " Speaker";
+      }
+    } else if (dialog.getKind() == DialogType.INTERPRETER) {
+      secondSpeaker = controller.getLanguageInfo().toDisplay() + " Speaker";
+    }
+
+    if (secondSpeaker == null) secondSpeaker = SPEAKER_B;
+    return secondSpeaker;
+  }
+
+  /**
+   * TODO : allow english speaker to go second
+   * @param dialog
+   * @return
+   */
+  @NotNull
+  private String getFirstSpeakerLabel(IDialog dialog) {
+    String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
+
+    if (!dialog.getExercises().isEmpty()) {
+      ClientExercise next = dialog.getExercises().iterator().next();
+      boolean hasEnglishAttr = next.hasEnglishAttr();
+
+      if (hasEnglishAttr && getExerciseSpeaker(next).equalsIgnoreCase(firstSpeaker)) {
+        firstSpeaker = ENGLISH_SPEAKER;
+      }
+    } else if (dialog.getKind() == DialogType.INTERPRETER) {
+      firstSpeaker = ENGLISH_SPEAKER;
+    }
+
+    if (firstSpeaker == null) firstSpeaker = "A";
+    return firstSpeaker;
+  }
+
+  @NotNull
+  private DivWidget getMiddleSpeaker() {
+    Heading w = new Heading(4, INTERPRETER);
+
+    DivWidget middle = new DivWidget();
+    middle.addStyleName("bubble");
+    middle.setWidth(INTERPRETER_WIDTH + "px");
+    middle.setHeight("44px");
+    middle.getElement().getStyle().setMarginTop(0, PX);
+    middle.getElement().getStyle().setMarginBottom(0, PX);
+    middle.getElement().getStyle().setProperty("marginLeft", "auto");
+    middle.getElement().getStyle().setProperty("marginRight", "auto");
+    setPadding(middle);
+    middle.add(w);
+    styleLabel(w);
+    //  w.getElement().getStyle().setMarginLeft(43, PX);
+
+    middle.getElement().getStyle().setBackgroundColor(MIDDLE_COLOR);
+    return middle;
+  }
+
+  @NotNull
+  private DivWidget getRightSpeaker(String secondSpeaker) {
+    Heading w = new Heading(4, secondSpeaker);
+
+    DivWidget right = new DivWidget();
+    // right.setWidth(SPEAKER_WIDTH +            "px");
+    right.add(w);
+    right.addStyleName("bubble");
+    right.addStyleName("rightbubble");
+    right.addStyleName("floatRight");
+    setPadding(right);
+    //left.addStyleName("leftFiveMargin");
+    right.getElement().getStyle().setBackgroundColor(RIGHT_BKG_COLOR);
+    styleRightSpeaker(w);
+    return right;
+  }
+
+  @NotNull
+  private DivWidget getLeftSpeaker(String firstSpeaker) {
+    Heading w = new Heading(4, firstSpeaker);
+
+    DivWidget left = new DivWidget();
+    left.add(w);
+    // left.setWidth(SPEAKER_WIDTH +            "px");
+
+    styleLeftSpeaker(w);
+
+    left.addStyleName("floatLeft");
+    left.addStyleName("bubble");
+    left.addStyleName("leftbubble");
+    setPadding(left);
+
+    //left.addStyleName("leftFiveMargin");
+    left.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
+    return left;
   }
 
   private void setPadding(DivWidget right) {
@@ -394,16 +410,6 @@ public class ListenViewHelper<T extends TurnPanel>
     style.setZIndex(1000);
   }
 
-/*
-  void setControlRowHeight(DivWidget rowOne) {
-    rowOne.setHeight(getControlRowHeight() + "px");
-  }
-
-  private int getControlRowHeight() {
-    return 105;
-  }
-*/
-
   private CheckBox addLeftSpeaker(DivWidget rowOne, String label) {
     CheckBox checkBox = new CheckBox(label, true);
     setLeftTurnSpeakerInitial(checkBox);
@@ -416,14 +422,6 @@ public class ListenViewHelper<T extends TurnPanel>
   }
 
   private void styleLeftSpeaker(UIObject checkBox) {
-//    checkBox.addStyleName("floatLeft");
-//    checkBox.addStyleName("leftFiveMargin");
-//    checkBox.addStyleName("leftSpeaker");
-//
-//    checkBox.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
-//    checkBox.getElement().getStyle().setMarginLeft(43,PX);
-//    checkBox.getElement().getStyle().setFontSize(32,PX);
-
     styleLabel(checkBox);
   }
 
@@ -447,18 +445,10 @@ public class ListenViewHelper<T extends TurnPanel>
   }
 
   private void styleRightSpeaker(UIObject checkBox) {
-    // Style style = checkBox.getElement().getStyle();
-    //  style.setBackgroundColor(RIGHT_BKG_COLOR);
-
-//    checkBox.addStyleName("rightSpeaker");
-//    checkBox.addStyleName("rightAlign");
-//    checkBox.addStyleName("floatRight");
-//    checkBox.addStyleName("rightFiveMargin");
     styleLabel(checkBox);
   }
 
   private void styleLabel(UIObject checkBox) {
-    // checkBox.getElement().getStyle().setMarginLeft(43, PX);
     checkBox.getElement().getStyle().setFontSize(32, PX);
   }
 
@@ -537,17 +527,17 @@ public class ListenViewHelper<T extends TurnPanel>
 //    String middle = speakers.get(1);
     // List<ClientExercise> middleTurns = speakerToEx.get(middle);
 
-    String left = speakers.get(0);
-    String right = speakers.get(2);
+    String left = getFirstSpeakerLabel(dialog); //speakers.get(0);
+    String right = getSecondSpeakerLabel(dialog);//speakers.get(2);
 /*    logger.info("for speaker " + left + " got " + speakerToEx.get(left).size());
     logger.info("for speaker " + middle + " got " + middleTurns.size());
     logger.info("for speaker " + right + " got " + speakerToEx.get(right).size());*/
 
     dialog.getExercises().forEach(clientExercise -> {
-      COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
+      // COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
       //    logger.info("ex " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage() + " : " + columnForEx);
 
-      addTurn(rowOne, columnForEx, clientExercise);
+      addTurn(rowOne, getColumnForEx(left, right, clientExercise), clientExercise);
     });
 
     markFirstTurn();
@@ -587,7 +577,6 @@ public class ListenViewHelper<T extends TurnPanel>
   private List<ExerciseAttribute> getSpeakerAttributes(ClientExercise clientExercise) {
     return clientExercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(DialogMetadata.SPEAKER.name())).collect(Collectors.toList());
   }
-
 
   /**
    * @param rowOne
@@ -634,8 +623,13 @@ public class ListenViewHelper<T extends TurnPanel>
     return currentTurn;
   }
 
+  private void makeVisible(T currentTurn) {
+    currentTurn.makeVisible();
+  }
+
   void makeVisible(UIObject currentTurn) {
-    currentTurn.getElement().scrollIntoView();
+    Element element = currentTurn.getElement();
+    element.scrollIntoView();
   }
 
   private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
@@ -680,7 +674,7 @@ public class ListenViewHelper<T extends TurnPanel>
     T turn = reallyGetTurnPanel(clientExercise, columns);
     turn.addWidgets(true, false, PhonesChoices.HIDE, EnglishDisplayChoices.SHOW);
     turn.addPlayListener(this);
-    turn.addDomHandler(event -> gotTurnClick(turn), ClickEvent.getType());
+    turn.addClickHandler(event -> gotTurnClick(turn));
     return turn;
   }
 

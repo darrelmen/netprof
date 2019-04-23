@@ -31,23 +31,16 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.dialog.ListenViewHelper;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.AllHighlight;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 /**
  * Does left, right, or middle justify
@@ -55,16 +48,18 @@ import java.util.stream.Collectors;
  * @param <T>
  * @see ListenViewHelper#reallyGetTurnPanel
  */
-public class TurnPanel extends DialogExercisePanel<ClientExercise> implements ITurnPanel {
+public class TurnPanelDelegate implements ITurnMarking {
   //private final Logger logger = Logger.getLogger("TurnPanel");
 
-//  private static final String FLOAT_LEFT = "floatLeft";
+  private static final String FLOAT_LEFT = "floatLeft";
 
-  // private DivWidget bubble;
-  // private static final String HIGHLIGHT_COLOR = "green";
-  // private boolean rightJustify;
+  private final ListenViewHelper.COLUMNS columns;
+  private DivWidget bubble;
+  private static final String HIGHLIGHT_COLOR = "green";
+  private boolean rightJustify;
 
-  TurnPanelDelegate turnPanelDelegate;
+  private ClientExercise exercise;
+  private DivWidget widget;
 
   /**
    * @param clientExercise
@@ -76,18 +71,23 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
    * @param rightJustify
    * @see ListenViewHelper#reallyGetTurnPanel
    */
-  public TurnPanel(final ClientExercise clientExercise,
-                   final ExerciseController<ClientExercise> controller,
-                   final ListInterface<?, ?> listContainer,
-                   Map<Integer, AlignmentOutput> alignments,
-                   IListenView listenView,
-                   ListenViewHelper.COLUMNS columns, boolean rightJustify) {
-    super(clientExercise, controller, listContainer, alignments, listenView);
+  public TurnPanelDelegate(final ClientExercise clientExercise,
+                           DivWidget widget,
+                           ListenViewHelper.COLUMNS columns, boolean rightJustify) {
+    //  super(clientExercise, controller, listContainer, alignments, listenView);
+    this.exercise = clientExercise;
+    this.columns = columns;
+    this.rightJustify = rightJustify;
+    this.widget = widget;
+    Style style = widget.getElement().getStyle();
+    style.setOverflow(Style.Overflow.HIDDEN);
+    style.setClear(Style.Clear.BOTH);
 
-    turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify);
+    if (columns == ListenViewHelper.COLUMNS.RIGHT) widget.addStyleName("floatRight");
+    else if (columns == ListenViewHelper.COLUMNS.LEFT) widget.addStyleName(FLOAT_LEFT);
   }
 
-  @Override
+/*  //  @Override
   boolean shouldShowPhones() {
     List<ExerciseAttribute> speaker = exercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equals("SPEAKER")).collect(Collectors.toList());
     boolean hasEnglishAttr = exercise.hasEnglishAttr();
@@ -105,72 +105,118 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
     }
 
     return isInterpreterTurn;
-  }
+  }*/
+
+/*  @Override
+  @NotNull
+  protected DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
+                                           List<TranscriptSegment> phonesInWord,
+                                           AudioControl audioControl,
+                                           TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
+                                           boolean simpleLayout, IHighlightSegment wordHighlight) {
+    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, false, wordHighlight, isRTL);
+  }*/
 
   /**
    * @param wrapper
    * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
   public void styleMe(DivWidget wrapper) {
-    super.styleMe(wrapper);
-    turnPanelDelegate.styleMe(wrapper);
-    flClickableRow.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+    this.bubble = wrapper;
+    wrapper.getElement().setId("bubble_" + exercise.getID());
+    wrapper.addStyleName("bubble");
+
+    // decide on left right or middle justify
+    {
+      if (columns == ListenViewHelper.COLUMNS.LEFT) wrapper.addStyleName("leftbubble");
+      else if (columns == ListenViewHelper.COLUMNS.RIGHT) wrapper.addStyleName("rightbubble");
+      else if (columns == ListenViewHelper.COLUMNS.MIDDLE) {
+        Style style = wrapper.getElement().getStyle();
+
+        String middlebubble2 = "middlebubble2";
+        if (exercise.hasEnglishAttr()) {
+          middlebubble2 = "middlebubbleRight";
+          if (rightJustify) style.setProperty("marginLeft", "auto");
+        }
+
+        wrapper.addStyleName(middlebubble2);
+        style.setTextAlign(Style.TextAlign.CENTER);
+      }
+    }
+
+    // flClickableRow.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+    addMarginStyle(widget.getElement().getStyle());
   }
 
+  private void addMarginStyle(Style style2) {
+    style2.setMarginLeft(15, Style.Unit.PX);
+    style2.setMarginRight(10, Style.Unit.PX);
+    style2.setMarginTop(7, Style.Unit.PX);
+    style2.setMarginBottom(0, Style.Unit.PX);
+  }
+
+  //@Override
   @Override
   public void addFloatLeft(Widget w) {
-    turnPanelDelegate.addFloatLeft(w);
+    if (shouldAddFloatLeft()) {
+      w.addStyleName(FLOAT_LEFT);
+    }
   }
 
+  //@Override
   @Override
   public boolean shouldAddFloatLeft() {
-    return turnPanelDelegate.shouldAddFloatLeft();
+    return (columns != ListenViewHelper.COLUMNS.MIDDLE);
   }
 
   @NotNull
   protected AllHighlight getAllHighlight(Collection<IHighlightSegment> flclickables) {
-    return new AllHighlight(flclickables, !turnPanelDelegate.isMiddle());
+    return new AllHighlight(flclickables, columns != ListenViewHelper.COLUMNS.MIDDLE);
   }
 
   @Override
   public boolean isMiddle() {
-    return turnPanelDelegate.isMiddle();
+    return columns == ListenViewHelper.COLUMNS.MIDDLE;
   }
 
   @Override
   public boolean isLeft() {
-    return turnPanelDelegate.isLeft();
+    return columns == ListenViewHelper.COLUMNS.LEFT;
   }
 
   @Override
   public boolean isRight() {
-    return turnPanelDelegate.isRight();
+    return columns == ListenViewHelper.COLUMNS.RIGHT;
   }
 
   /**
    * @see ListenViewHelper#removeMarkCurrent
    */
   public void removeMarkCurrent() {
-    turnPanelDelegate.removeMarkCurrent();
+    setBorderColor("white");
   }
 
   /**
    * @see ListenViewHelper#markCurrent
    */
   public void markCurrent() {
-    turnPanelDelegate.markCurrent();
+    setBorderColor(HIGHLIGHT_COLOR);
   }
 
   public boolean hasCurrentMark() {
-    return turnPanelDelegate.hasCurrentMark();// bubble.getElement().getStyle().getBorderColor().equalsIgnoreCase(HIGHLIGHT_COLOR);
+    return bubble.getElement().getStyle().getBorderColor().equalsIgnoreCase(HIGHLIGHT_COLOR);
+  }
+
+  private void setBorderColor(String white) {
+    bubble.getElement().getStyle().setBorderColor(white);
   }
 
   public void makeVisible() {
-    turnPanelDelegate.makeVisible();
+    widget.getElement().scrollIntoView();
   }
 
   @Override
   public void addClickHandler(ClickHandler clickHandler) {
-    turnPanelDelegate.addClickHandler(clickHandler);
+    widget.addDomHandler(clickHandler, ClickEvent.getType());
   }
 }

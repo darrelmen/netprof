@@ -46,7 +46,7 @@ public interface RefAudioGetter {
    * @see mitll.langtest.client.list.FacetExerciseList#populatePanels(Collection, int, DivWidget)
    * @return
    */
-  Set<Integer> getReqAudioIDs();
+//  Set<Integer> getReqAudioIDs();
 
   /**
    * @param req

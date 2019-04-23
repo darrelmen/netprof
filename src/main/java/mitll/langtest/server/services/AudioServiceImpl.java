@@ -188,16 +188,16 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    *
    * @throws ServletException
    * @throws IOException
-   * @paramx request
-   * @paramx response
+   * @param request
+   * @param response
    */
   @Override
   protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     ServletRequestContext ctx = new ServletRequestContext(request);
-    String contentType = ctx.getContentType();
+  //  String contentType = ctx.getContentType();
     //  String requestType = getRequestType(request);
 //    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
-    if (contentType != null && contentType.equalsIgnoreCase(APPLICATION_WAV)) {
+    if (ctx.getContentType() != null && ctx.getContentType().equalsIgnoreCase(APPLICATION_WAV)) {
       //reportOnHeaders(request);
 
       try {

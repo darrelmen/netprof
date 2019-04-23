@@ -74,8 +74,9 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     extends ListenViewHelper<T>
     implements SessionManager, IRehearseView, KeyPressDelegate {
-  public static final double HUNDRED = 100.0D;
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
+
+  private static final double HUNDRED = 100.0D;
 
   private static final String DIALOG_INTRO_SHOWN_REHEARSAL = "dialogIntroShownRehearsal";
   private static final String HOLD_THE_RED_RECORD_BUTTON = "When it's your turn, press and hold the red record button or space bar.";
@@ -201,7 +202,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
         helper.removeListener();
 
         safeStopRecording();
-
       }
 
       @Override
@@ -216,6 +216,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     };
 
     helper.setWidget(breadRow);
+
     breadRow.getElement().setId("overallFeedbackRow");
 
     Style style = breadRow.getElement().getStyle();
@@ -234,18 +235,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
     return breadRow;
   }
-
-//  @NotNull
-//  @Override
-//  protected INavigation.VIEWS getPrevView() {
-//    return INavigation.VIEWS.LISTEN;
-//  }
-//
-//  @NotNull
-//  @Override
-//  protected INavigation.VIEWS getNextView() {
-//    return INavigation.VIEWS.CORE_REHEARSE;
-//  }
 
   @NotNull
   @Override
@@ -392,7 +381,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private String getRightHint() {
     return isRightSpeakerSet() ? THEY_SPEAK : YOU_SPEAK;
   }
-
 
   @Override
   protected void gotTurnClick(T turn) {
@@ -581,12 +569,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     currentTurnPlayEnded(true);
   }
 
-/*
-  private boolean isNextTurnAResp(T currentTurn) {
-    return !isNextTurnAPrompt(currentTurn);
-  }
-*/
-
   private boolean isNextTurnAPrompt(T currentTurn) {
     int i2 = allTurns.indexOf(currentTurn);
     int nextOtherSide = i2 + 1;
@@ -752,9 +734,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     return turnPanel;
   }
 
-  private T getRecordingTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
-    T widgets = (T) new RecordDialogExercisePanel(clientExercise, controller,
-        null, alignments, this, this, columns);
+  protected T getRecordingTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
+    T widgets = makeRecordingTurnPanel(clientExercise, columns);
 
     if (columns == COLUMNS.MIDDLE) {
       widgets.addStyleName("inlineFlex");
@@ -762,6 +743,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
     widgets.setWidth("100%");
     return widgets;
+  }
+
+  protected T makeRecordingTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
+    return (T) new RecordDialogExercisePanel(clientExercise, controller,
+        null, alignments, this, this, columns);
   }
 
   /**
@@ -1323,9 +1309,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     }
   }*/
 
+/*
   private boolean shouldShowScoreNow() {
     return false;
   }
+*/
 
   private T getTurnForID(int exid) {
     return exToTurn.get(exid);

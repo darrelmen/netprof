@@ -41,7 +41,6 @@ import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.SimpleColumnChart;
 import mitll.langtest.client.list.ListInterface;
-import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
@@ -57,7 +56,6 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.LangTest.RED_X_URL;
-import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.*;
 import static mitll.langtest.client.scoring.RecorderPlayAudioPanel.BLUE_INACTIVE_COLOR;
 
 public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialogTurn {
@@ -251,40 +249,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     }
   }
 
-/*  @Nullable
-  private IHighlightSegment getObscureCandidate(Collection<String> coreVocab, boolean useExact) {
-    IHighlightSegment candidate = null;
-
-    String coreMatch = null;
-
-    for (IHighlightSegment segment : flclickables) {
-      String content = segment.getContent();
-
-      if (!content.isEmpty()) {
-        for (String core : coreVocab) {
-          if (useExact) {
-            if (clickableWords.isExactMatch(content, core)) {
-              coreMatch = core;
-              candidate = segment;
-            }
-          } else if (clickableWords.isSearchMatch(content, core)) {
-            coreMatch = core;
-            candidate = segment;
-          }
-          if (coreMatch != null) break;
-        }
-        if (coreMatch != null) break;
-      }
-    }
-
-    if (coreMatch != null) {
-      logger.info("OK, used " + coreMatch);
-      //coreVocab.remove(coreMatch);
-    }
-
-    return candidate;
-  }*/
-
   private Collection<IHighlightSegment> getObscureCandidates(Collection<String> coreVocab) {
     Collection<IHighlightSegment> candidates = new ArrayList<>();
 
@@ -325,26 +289,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     }
 
     return candidates;
-  }
-
-  public void reallyObscure() {
-    //  logger.info("reallyObscure For " + exercise.getID() + " obscure " + flclickables.size() + " clickables");
-    flclickables.forEach(iHighlightSegment -> {
-      iHighlightSegment.setObscurable();
-      boolean b = iHighlightSegment.obscureText();
-      if (!b) logger.info("huh? didn't obscure");
-    });
-    flClickableRowPhones.setVisible(false);
-  }
-
-  public void obscureText() {
-//    logger.info("obscureText For " + exercise.getID() + " obscure " + flclickables.size() + " clickables");
-    flclickables.forEach(IHighlightSegment::obscureText);
-  }
-
-  public void restoreText() {
-    flclickables.forEach(IHighlightSegment::restoreText);
-    flClickableRowPhones.setVisible(true);
   }
 
   /**
@@ -394,8 +338,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    */
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
-//    boolean isPressAndHold = rehearseView instanceof PerformViewHelper;
-    // logger.info("is perform " + isPressAndHold);
     NoFeedbackRecordAudioPanel<ClientExercise> recordPanel =
         new ContinuousDialogRecordAudioPanel(exercise, controller, sessionManager, rehearseView, this);
 
@@ -404,29 +346,22 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     recordPanel.addWidgets();
 
     DivWidget flContainer = getHorizDiv();
-    if (columns == RIGHT) {
+    if (turnPanelDelegate.isRight()) {
       addStyleName("floatRight");
-    } else if (columns == LEFT) {
+    } else if (turnPanelDelegate.isLeft()) {
       flContainer.addStyleName("floatLeft");
     }
 
     PostAudioRecordButton postAudioRecordButton = null;
-    DivWidget buttonContainer = null;
+    DivWidget buttonContainer = new DivWidget();
+    buttonContainer.setId("recordButtonContainer_" + getExID());
+
     // add  button
-    if (columns == MIDDLE) {
+    if (isMiddle()) {
       {
-        postAudioRecordButton = getPostAudioRecordButton(recordPanel);
-        //postAudioRecordButton.setVisible(false);
-        buttonContainer = new DivWidget();
-        buttonContainer.setId("recordButtonContainer_" + getExID());
+        postAudioRecordButton = getPostAudioWidget(recordPanel);
         buttonContainer.add(postAudioRecordButton);
-        postAudioRecordButton.setEnabled(false);
-        postAudioRecordButton.getElement().getStyle().setBackgroundColor(BLUE_INACTIVE_COLOR);
-        // flContainer.add(buttonContainer);
       }
-
-      // flContainer.add(recordPanel.getScoreFeedback());
-
       {
         Emoticon w = getEmoticonPlaceholder();
         emoticon = w;
@@ -435,30 +370,44 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     }
 
     add(flContainer);
+
     super.addWidgets(showFL, showALTFL, phonesChoices, englishDisplayChoices);
 
-    if (columns == MIDDLE) {
+    if (isMiddle()) {
       flClickableRow.addStyleName("inlineFlex");
 
       if (exercise.hasEnglishAttr()) {
-        int widgetCount = flClickableRow.getWidgetCount();
-        for (int i = 0; i < widgetCount; i++) {
+        for (int i = 0; i < flClickableRow.getWidgetCount(); i++) {
           flClickableRow.getWidget(i).addStyleName("eightMarginTop");
         }
       }
 
       if (rehearseView.isPressAndHold()) {
         flClickableRow.insert(buttonContainer, 0);
-        Style style = postAudioRecordButton.getElement().getStyle();
-        style.setProperty("borderRadius", "18px");
-        style.setPadding(8, Style.Unit.PX);
-        style.setWidth(19, Style.Unit.PX);
-        style.setMarginRight(5, Style.Unit.PX);
-        style.setHeight(19, Style.Unit.PX);
+        if (postAudioRecordButton != null) {
+          addPressAndHoldStyle(postAudioRecordButton);
+        }
       } else {
         flClickableRow.insert(recordPanel.getScoreFeedback(), 0);
       }
     }
+  }
+
+  @NotNull
+  private PostAudioRecordButton getPostAudioWidget(NoFeedbackRecordAudioPanel<?> recordPanel) {
+    PostAudioRecordButton postAudioRecordButton = recordPanel.getPostAudioRecordButton();
+    postAudioRecordButton.setEnabled(false);
+    postAudioRecordButton.getElement().getStyle().setBackgroundColor(BLUE_INACTIVE_COLOR);
+    return postAudioRecordButton;
+  }
+
+  private void addPressAndHoldStyle(PostAudioRecordButton postAudioRecordButton) {
+    Style style = postAudioRecordButton.getElement().getStyle();
+    style.setProperty("borderRadius", "18px");
+    style.setPadding(8, Style.Unit.PX);
+    style.setWidth(19, Style.Unit.PX);
+    style.setMarginRight(5, Style.Unit.PX);
+    style.setHeight(19, Style.Unit.PX);
   }
 
   private PostAudioRecordButton getPostAudioRecordButton(NoFeedbackRecordAudioPanel<ClientExercise> recordPanel) {
@@ -512,7 +461,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     super.markCurrent();
 
     if (doPushToTalk) {
-      if (columns == MIDDLE) {
+      if (turnPanelDelegate.isMiddle()) {
         enableRecordButton();
       }
     }
@@ -544,8 +493,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   @Override
   public void disableRecordButton() {
 //    logger.info("disableRecordButton");
-//
-//
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("disableRecordButton " +getExID()));
 //    logger.info("logException stack " + exceptionAsString);
 
@@ -583,20 +530,15 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     Style style = flContainer.getElement().getStyle();
     style.setMarginTop(15, Style.Unit.PX);
 
-    if (columns == MIDDLE && exercise.hasEnglishAttr()) {
+    if (isMiddle() && exercise.hasEnglishAttr()) {
       style.setProperty("marginLeft", "auto");
     }
 //    else {
 //      logger.info("setmargin NOT left  auto on " + getExID());
 //    }
 
-
     flContainer.getElement().setId("RecordDialogExercisePanel_horiz");
     return flContainer;
-  }
-
-  protected void addMarginLeft(Style style2) {
-    style2.setMarginLeft(15, Style.Unit.PX);
   }
 
   /**
@@ -623,7 +565,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   }
 
   public boolean isPushToTalk() {
-    return columns == MIDDLE && doPushToTalk;
+    return isMiddle() && doPushToTalk;
   }
 
   private PostAudioRecordButton getRecordButton() {
@@ -690,106 +632,4 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     return studentSpeechDur;
   }
 
-  private static class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel<ClientExercise> {
-    IRehearseView rehearseView;
-    IRecordDialogTurn recordDialogTurn;
-    private final Logger logger = Logger.getLogger("ContinuousDialogRecordAudioPanel");
-
-    ContinuousDialogRecordAudioPanel(ClientExercise exercise,
-                                     ExerciseController controller,
-                                     SessionManager sessionManager,
-                                     IRehearseView rehearseView,
-                                     IRecordDialogTurn recordDialogTurn) {
-      super(exercise, controller, sessionManager);
-      this.rehearseView = rehearseView;
-      this.recordDialogTurn = recordDialogTurn;
-    }
-
-    @Override
-    protected boolean useMicrophoneIcon() {
-      return true;
-    }
-
-    /**
-     * SO in an async world, this result may not be for this exercise panel!
-     *
-     * @param result
-     * @see PostAudioRecordButton#onPostSuccess(AudioAnswer, long)
-     * @see FeedbackPostAudioRecordButton#useResult
-     */
-    @Override
-    public void useResult(AudioAnswer result) {
-      super.useResult(result);
-      // getPostAudioRecordButton().setVisible(false);
-//      if (result.getExid() == exercise.getID()) {
-//        logger.i
-//        recordDialogTurn.disableRecordButton();
-//      }
-
-      rehearseView.useResult(result);
-
-      if (DEBUG) {
-        logger.info("useResult got for ex " + result.getExid() + " vs local " + exercise.getID() +
-            " = " + result.getValidity() + " " + result.getPretestScore());
-      }
-      // logger.info("useResult got words " + result.getPretestScore().getWordScores());
-    }
-
-    @Override
-    Widget getPopupTargetWidget() {
-      Widget widget = recordDialogTurn.myGetPopupTargetWidget();
-      logger.info("getPopupTargetWidget " + widget.getElement().getId());
-
-      return widget;
-    }
-
-    /**
-     * @param response
-     * @see PostAudioRecordButton#usePartial
-     */
-    @Override
-    public void usePartial(StreamResponse response) {
-      recordDialogTurn.usePartial(response);
-    }
-
-    /**
-     *
-     */
-    @Override
-    public void onPostFailure() {
-      logger.info("onPostFailure exid " + exercise.getID());
-      stopRecording();
-    }
-
-    /**
-     * TODO : do something smarter here on invalid state????
-     *
-     * @param exid
-     * @param isValid
-     * @see PostAudioRecordButton#useInvalidResult
-     */
-    @Override
-    public void useInvalidResult(int exid, boolean isValid) {
-      super.useInvalidResult(exid, isValid);
-      rehearseView.useInvalidResult(exid);
-      //getPostAudioRecordButton().setVisible(false);
-
-      logger.info("useInvalidResult got valid = " + isValid);
-    }
-
-    /**
-     * @see RecordButton.RecordingListener#stopRecording(long, boolean)
-     */
-    @Override
-    public void stopRecording() {
-      // logger.info("stopRecording for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage());
-      super.stopRecording();
-      rehearseView.stopRecording();
-    }
-
-    @Override
-    public int getDialogSessionID() {
-      return rehearseView.getDialogSessionID();
-    }
-  }
 }

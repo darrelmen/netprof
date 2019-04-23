@@ -108,8 +108,12 @@ public class DialogHeader {
       row.setWidth(ROW_WIDTH + "%");
       row.addStyleName("inlineFlex");
 
-      row.add(getLeftArrow());
-      row.add(getRightArrow());
+      if (getPrevView() != null) {
+        row.add(getLeftArrow());
+      }
+      if (getNextView() != null) {
+        row.add(getRightArrow());
+      }
 
       {
         com.google.gwt.user.client.ui.Image flag = getFlag(dialog.getImageRef());
@@ -277,7 +281,6 @@ public class DialogHeader {
     return getNextView() == null ? "" : "Go ahead to " + getNextView().toString();
   }
 
-  @NotNull
   private INavigation.VIEWS getPrevView() {
     return prev;
   }

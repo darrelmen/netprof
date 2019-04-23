@@ -77,11 +77,16 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
     scoreFeedback.getElement().setId("scoreFeedback_" + exercise.getID());
-    recordFeedback = makePlayAudioPanel().getRecordFeedback(null);
-    Style style = recordFeedback.getElement().getStyle();
-    style.setMarginTop(7, Style.Unit.PX);
-    style.setProperty("minWidth", CONTEXT_INDENT + "px");
-    scoreFeedback.add(recordFeedback);
+
+    // add record feedback
+    {
+      recordFeedback = makePlayAudioPanel().getRecordFeedback(null);
+      Style style = recordFeedback.getElement().getStyle();
+      style.setMarginTop(7, Style.Unit.PX);
+      style.setProperty("minWidth", CONTEXT_INDENT + "px");
+
+      scoreFeedback.add(recordFeedback);
+    }
 
     add(col);
     // long now = System.currentTimeMillis();

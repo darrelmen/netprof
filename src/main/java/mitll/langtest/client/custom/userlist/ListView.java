@@ -348,6 +348,11 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     }
   }
 
+  /**
+   * @see
+   * @see ListView.MyListContainer#gotDoubleClickOn
+   * @see ContentEditorView#getAddItems
+   */
   @Override
   protected void editList() {
     EditItem editItem = new EditItem(controller);
@@ -643,7 +648,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
       //   logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
       myLists.flush();
       myLists.redraw();
-
       return true;
     }
 
@@ -664,7 +668,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     @Override
     public void gotShown() {
       // logger.info("editList : edit view shown!");
-
       editItem.reload();
       editItem.grabFocus();
     }

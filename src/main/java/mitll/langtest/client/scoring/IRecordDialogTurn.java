@@ -33,7 +33,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.shared.answer.AudioAnswer;
 
-public interface IRecordDialogTurn {
+public interface IRecordDialogTurn extends IRecordResponseListener{
   /**
    * @see RehearseViewHelper#showScores()
    */
@@ -54,10 +54,6 @@ public interface IRecordDialogTurn {
   void switchAudioToReference();
 
   void revealScore();
-
-  void usePartial(StreamResponse response);
-
-  Widget myGetPopupTargetWidget();
 
   void enableRecordButton();
 

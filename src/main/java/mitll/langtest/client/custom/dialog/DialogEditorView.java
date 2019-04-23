@@ -29,8 +29,6 @@
 
 package mitll.langtest.client.custom.dialog;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
@@ -41,26 +39,29 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.custom.userlist.ListView;
+import mitll.langtest.client.dialog.DialogEditor;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.dialog.EditorTurn;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.UserListSupport;
+import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.IDialog;
+import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.Collection;
+import java.util.Collections;
 
 /**
  * Created by go22670 on 7/3/17.
  */
 public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
-  private final Logger logger = Logger.getLogger("DialogEditorView");
+  // private final Logger logger = Logger.getLogger("DialogEditorView");
 
   private static final String LIST = "dialog";
-
 
   private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to view a " + LIST;
 
@@ -178,7 +179,65 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
    */
   @Override
   protected void editList() {
+    DivWidget listContent = new DivWidget();
 
+    DialogEditor<EditorTurn> editorTurnDialogEditor = new DialogEditor<>(controller, INavigation.VIEWS.DIALOG_EDITOR);
+    editorTurnDialogEditor.showContent(listContent, INavigation.VIEWS.DIALOG_EDITOR);
+
+    new DialogHelper(true).show(
+        "Add/Edit Turns" + " : " + getListName(),
+        Collections.emptyList(),
+        listContent,
+        "Done",
+        null,
+        new MyShownCloseListener(editorTurnDialogEditor), 710, -1, true);
+
+  }
+
+  private class MyShownCloseListener implements DialogHelper.ShownCloseListener {
+    DialogEditor<EditorTurn> editItem;
+
+    MyShownCloseListener(DialogEditor<EditorTurn> editItem) {
+      this.editItem = editItem;
+    }
+
+    @Override
+    public boolean gotYes() {
+//            int numItems = currentSelectionFromMyLists.getNumItems();
+      //   logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
+      myLists.flush();
+      myLists.redraw();
+      return true;
+    }
+
+    /**
+     * CRITICAL TO REMOVE LISTENER!
+     */
+    @Override
+    public void gotHidden() {
+      // logger.info("Got hidden ");
+      // editItem.removeHistoryListener();
+      // History.newItem("");
+    }
+
+    @Override
+    public void gotNo() {
+    }
+
+    @Override
+    public void gotShown() {
+      // logger.info("editList : edit view shown!");
+      //editItem.reload();
+      editItem.grabFocus();
+    }
+  }
+
+  @NotNull
+  private String getListName() {
+    T originalList = getCurrentSelectionFromMyLists();
+    boolean hasDescrip = !originalList.getEnglish().isEmpty();
+    return originalList.getName() +
+        (hasDescrip ? " (" + originalList.getEnglish() + ")" : "");
   }
 
   @Override
@@ -210,6 +269,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
   /**
    * TODO: get rid of?
+   *
    * @seex CreateListDialog#makeCreateButton
    */
   @Override
@@ -256,7 +316,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     return "Dialog";
   }
 
-  private class MyShownCloseListener implements DialogHelper.ShownCloseListener {
+/*  private class MyShownCloseListener implements DialogHelper.ShownCloseListener {
     EditItem editItem;
 
     MyShownCloseListener(EditItem editItem) {
@@ -273,9 +333,9 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
       return true;
     }
 
-    /**
+    *//**
      * CRITICAL TO REMOVE LISTENER!
-     */
+     *//*
     @Override
     public void gotHidden() {
       // logger.info("Got hidden ");
@@ -294,5 +354,5 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
       editItem.reload();
       editItem.grabFocus();
     }
-  }
+  }*/
 }

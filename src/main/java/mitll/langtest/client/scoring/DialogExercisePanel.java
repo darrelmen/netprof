@@ -87,7 +87,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    */
   HeadlessPlayAudio playAudio;
 
-  static final boolean DEBUG = false;
+  private static final boolean DEBUG = false;
   static final boolean DEBUG_SHOW_ALIGNMENT = false;
   private static final boolean DEBUG_PLAY_PAUSE = false;
   private static final boolean DEBUG_DETAIL = false;
@@ -195,18 +195,22 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     addMarginStyle();
   }
 
-  void addMarginStyle() {
-    Style style2 = getFlClickableRow().getElement().getStyle();
-    addMarginLeft(style2);
+  private void addMarginStyle() {
+    addMarginStyle(getFlClickableRow().getElement().getStyle());
+  }
+
+  private void addMarginStyle(Style style2) {
+    style2.setMarginLeft(15, Style.Unit.PX);
     style2.setMarginRight(10, Style.Unit.PX);
     style2.setMarginTop(7, Style.Unit.PX);
-
     style2.setMarginBottom(0, Style.Unit.PX);
   }
 
+/*
   void addMarginLeft(Style style2) {
     style2.setMarginLeft(15, Style.Unit.PX);
   }
+*/
 
   /**
    * @param e
@@ -238,11 +242,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see #rememberAudio
    */
   private void maybeShowAlignment(AudioAttribute next) {
-//    AlignmentOutput alignmentOutput = alignmentFetcher.getAlignment(next.getUniqueID());
-//    if (next != null && next.getAlignmentOutput() != null) {
-//      //   logger.info("maybeShowAlignment audio for " + this + "  " + next);
-//      showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
-//    }
     if (next != null) {
       AlignmentOutput alignmentOutput = alignmentFetcher.getAlignment(next.getUniqueID());
       if (alignmentOutput != null) {
@@ -279,19 +278,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     alignmentFetcher.getRefAudio(listener);
   }
 
-  @Override
-  public Set<Integer> getReqAudioIDs() {
-    return alignmentFetcher.getReqAudioIDs();
-  }
-
   Set<Integer> getReqAudio() {
     return alignmentFetcher.getAllReqAudioIDs();
   }
-
-/*  @Override
-  public void getAndRememberCachedAlignents(RefAudioListener listener, Set<Integer> req) {
-    alignmentFetcher.getAndRememberCachedAlignents(listener, req);
-  }*/
 
   /**
    * @param req
@@ -885,7 +874,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see #doOneToManyMatch
    */
   @NotNull
-  protected DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
+  DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
                                            List<TranscriptSegment> phonesInWord,
                                            AudioControl audioControl,
                                            TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,

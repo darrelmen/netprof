@@ -29,33 +29,32 @@
 
 package mitll.langtest.client.dialog;
 
-import mitll.langtest.client.scoring.EnglishDisplayChoices;
-import mitll.langtest.client.scoring.PhonesChoices;
-import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.Validity;
+import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.scoring.ITurnPanel;
+import org.jetbrains.annotations.NotNull;
 
-/**
- * @see mitll.langtest.client.scoring.RecordDialogExercisePanel
- */
-public interface IRehearseView extends IListenView {
-  void useResult(AudioAnswer audioAnswer);
+import java.util.logging.Logger;
 
-  /**
-   * @see
-   * @param exid
-   */
-  void useInvalidResult(int exid);
+public class DialogEditor<T extends ITurnPanel> extends ListenViewHelper<T> {
+  private final Logger logger = Logger.getLogger("DialogEditor");
+  public DialogEditor(ExerciseController controller, INavigation.VIEWS thisView) {
+    super(controller, thisView);
+  }
 
-  void addPacketValidity(Validity validity);
 
-  void stopRecording();
+  @NotNull
+  protected INavigation.VIEWS getPrevView() {
+    return null;
+  }
 
-  int getNumValidities();
+  @NotNull
+  protected INavigation.VIEWS getNextView() {
+    return null;
+  }
 
-  /**
-   * @see RehearseViewHelper#useInvalidResult(int)
-   * @see mitll.langtest.client.scoring.RecordDialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
-   * @return
-   */
-  boolean isPressAndHold();
+
+  public void grabFocus() {
+    logger.info("OK grab focus...");
+  }
 }

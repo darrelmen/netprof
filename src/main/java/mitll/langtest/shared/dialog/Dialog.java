@@ -214,9 +214,19 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     return orientation;
   }
 
+  /**
+   * Default is default dialog.
+   * @return
+   */
   @Override
   public String getImageRef() {
-    return imageRef;
+    String refToUse = imageRef;
+
+    if (refToUse == null || refToUse.isEmpty()) {
+      refToUse = "langtest/cc/" + "dialog.png";
+    }
+
+    return refToUse;
   }
 
   @Override

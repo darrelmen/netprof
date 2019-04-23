@@ -31,20 +31,25 @@ package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
+import mitll.langtest.client.banner.IBanner;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.scoring.RecordDialogExercisePanel;
+import mitll.langtest.client.scoring.ObscureRecordDialogExercisePanel;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
-public class PerformViewHelper<T extends RecordDialogExercisePanel> extends RehearseViewHelper<T> {
+public class PerformViewHelper<T extends ObscureRecordDialogExercisePanel> extends RehearseViewHelper<T> {
   // private final Logger logger = Logger.getLogger("PerformViewHelper");
 
+  /**
+   * @see mitll.langtest.client.banner.NewContentChooser#NewContentChooser(ExerciseController, IBanner)
+   * @param controller
+   * @param thisView
+   */
   public PerformViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     super(controller, thisView);
     rehearsalKey = "PerformViewKey";
-   // rehearsalPrompt = RED_RECORD_BUTTON;
   }
 
   /**
@@ -72,8 +77,13 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
   @Override
   protected T getTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
     T turnPanel = super.getTurnPanel(clientExercise, columns);
-    turnPanel.reallyObscure();
+    turnPanel.obscureTextAndPhones();
     return turnPanel;
+  }
+
+  protected T makeRecordingTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
+    return (T) new ObscureRecordDialogExercisePanel(clientExercise, controller,
+        null, alignments, this, this, columns);
   }
 
   /**
@@ -92,6 +102,6 @@ public class PerformViewHelper<T extends RecordDialogExercisePanel> extends Rehe
   }
 
   private void obscureRespTurns() {
-    allTurns.forEach(RecordDialogExercisePanel::obscureText);
+    allTurns.forEach(ObscureRecordDialogExercisePanel::obscureText);
   }
 }

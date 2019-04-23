@@ -27,35 +27,31 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.client.dialog;
+package mitll.langtest.client.scoring;
 
-import mitll.langtest.client.scoring.EnglishDisplayChoices;
-import mitll.langtest.client.scoring.PhonesChoices;
-import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.Validity;
+import com.google.gwt.user.client.ui.IsWidget;
+import mitll.langtest.client.sound.PlayListener;
 
 /**
- * @see mitll.langtest.client.scoring.RecordDialogExercisePanel
+ * A turn in a dialog.
  */
-public interface IRehearseView extends IListenView {
-  void useResult(AudioAnswer audioAnswer);
-
+public interface ITurnPanel extends IsWidget, ITurnMarking, RefAudioGetter {
   /**
-   * @see
-   * @param exid
-   */
-  void useInvalidResult(int exid);
-
-  void addPacketValidity(Validity validity);
-
-  void stopRecording();
-
-  int getNumValidities();
-
-  /**
-   * @see RehearseViewHelper#useInvalidResult(int)
-   * @see mitll.langtest.client.scoring.RecordDialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
+   * JUST FOR DEBUGGING
+   *
    * @return
    */
-  boolean isPressAndHold();
+  int getExID();
+
+  void addPlayListener(PlayListener playListener);
+
+  boolean doPause();
+
+  void resetAudio();
+
+  boolean isPlaying();
+
+  void clearHighlight();
+
+  boolean doPlayPauseToggle();
 }

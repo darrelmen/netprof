@@ -99,17 +99,12 @@ public class EditItem {
    */
   private PagingExerciseList<CommonShell, ClientExercise> makeExerciseList(Panel right, UserList<CommonShell> originalList) {
     // logger.info("EditItem.makeExerciseList - ul = " + originalList);// + " " + includeAddItem);
-
     userListID = originalList.getID();
     userListName = originalList.getName();
     this.exerciseList = new EditableExerciseList(controller, right, INavigation.VIEWS.LISTS, originalList);
     setFactory(this.exerciseList);
     this.exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
     // logger.info("setting vertical on " +exerciseList.getElement().getExID());
-/*
-    Scheduler.get().scheduleDeferred(() -> this.exerciseList.onResize());
-*/
-    //  Scheduler.get().scheduleDeferred(() -> exerciseList.getTypeAheadGrabFocus());
     return this.exerciseList;
   }
 

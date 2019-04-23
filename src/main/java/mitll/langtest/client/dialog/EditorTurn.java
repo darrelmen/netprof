@@ -27,84 +27,83 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.client.scoring;
+package mitll.langtest.client.dialog;
 
+import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.dialog.IListenView;
-import mitll.langtest.client.dialog.ListenViewHelper;
-import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.scoring.*;
 import mitll.langtest.client.sound.AllHighlight;
 import mitll.langtest.client.sound.IHighlightSegment;
+import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-/**
- * Does left, right, or middle justify
- *
- * @param <T>
- * @see ListenViewHelper#reallyGetTurnPanel
- */
-public class TurnPanel extends DialogExercisePanel<ClientExercise> implements ITurnPanel {
-  //private final Logger logger = Logger.getLogger("TurnPanel");
+public class EditorTurn extends DivWidget implements ITurnPanel {
+  private TurnPanelDelegate turnPanelDelegate;
+  private ClientExercise clientExercise;
 
-//  private static final String FLOAT_LEFT = "floatLeft";
-
-  // private DivWidget bubble;
-  // private static final String HIGHLIGHT_COLOR = "green";
-  // private boolean rightJustify;
-
-  TurnPanelDelegate turnPanelDelegate;
-
-  /**
-   * @param clientExercise
-   * @param controller
-   * @param listContainer
-   * @param alignments
-   * @param listenView
-   * @param columns
-   * @param rightJustify
-   * @see ListenViewHelper#reallyGetTurnPanel
-   */
-  public TurnPanel(final ClientExercise clientExercise,
-                   final ExerciseController<ClientExercise> controller,
-                   final ListInterface<?, ?> listContainer,
-                   Map<Integer, AlignmentOutput> alignments,
-                   IListenView listenView,
-                   ListenViewHelper.COLUMNS columns, boolean rightJustify) {
-    super(clientExercise, controller, listContainer, alignments, listenView);
-
+  public EditorTurn(final ClientExercise clientExercise, ListenViewHelper.COLUMNS columns, boolean rightJustify) {
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify);
+    this.clientExercise=clientExercise;
   }
 
   @Override
-  boolean shouldShowPhones() {
-    List<ExerciseAttribute> speaker = exercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equals("SPEAKER")).collect(Collectors.toList());
-    boolean hasEnglishAttr = exercise.hasEnglishAttr();
-    boolean b = !hasEnglishAttr && isInterpreterTurn(speaker);
-//    if (b)
-//      logger.info("ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " Got show phones " + b);
-    return b;
+  public int getExID() {
+    return clientExercise.getID();
   }
 
-  private boolean isInterpreterTurn(List<ExerciseAttribute> speaker) {
-    boolean isInterpreterTurn = false;
+  @Override
+  public void addPlayListener(PlayListener playListener) {
 
-    if (!speaker.isEmpty()) {
-      isInterpreterTurn = speaker.get(0).getValue().equals("I");
-    }
+  }
 
-    return isInterpreterTurn;
+  @Override
+  public boolean doPause() {
+    return false;
+  }
+
+  @Override
+  public void resetAudio() {
+
+  }
+
+  @Override
+  public boolean isPlaying() {
+    return false;
+  }
+
+  @Override
+  public void clearHighlight() {
+
+  }
+
+  @Override
+  public boolean doPlayPauseToggle() {
+    return false;
+  }
+
+  @Override
+  public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
+    add(new TextBox());
+  }
+
+  @Override
+  public void getRefAudio(RefAudioListener listener) {
+
+  }
+
+  @Override
+  public void setReq(int req) {
+
+  }
+
+  @Override
+  public int getReq() {
+    return 0;
   }
 
   /**
@@ -112,9 +111,9 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
    * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
   public void styleMe(DivWidget wrapper) {
-    super.styleMe(wrapper);
+    //super.styleMe(wrapper);
     turnPanelDelegate.styleMe(wrapper);
-    flClickableRow.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+    //flClickableRow.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
   }
 
   @Override
