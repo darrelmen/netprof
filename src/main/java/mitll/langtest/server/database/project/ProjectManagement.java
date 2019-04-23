@@ -114,8 +114,8 @@ public class ProjectManagement implements IProjectManagement {
   //public static final String ANSWERS1 = "^.*answers\\/(.+)\\/.+";
   private static final String ANSWERS1 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
   private static final Pattern pattern = Pattern.compile(ANSWERS1);
-  public static final boolean DEBUG_USER_FOR_FILE = false;
-  public static final boolean CHECK_FOR_OOV_ON_STARTUP = false;
+  private static final boolean DEBUG_USER_FOR_FILE = false;
+  private static final boolean CHECK_FOR_OOV_ON_STARTUP = false;
 
   /**
    * JUST FOR TESTING

@@ -58,7 +58,7 @@ public abstract class Scoring {
 
   private static final float SCORE_SCALAR = 1.0f;
   private static final String SCORING = "scoring";
-  private static final String MANDARIN = "mandarin";
+  //private static final String MANDARIN = "mandarin";
   private static final String PHONES_LAB = ".phones.lab";
   // private static final String WORDS_LAB = ".words.lab";
 
@@ -67,8 +67,8 @@ public abstract class Scoring {
   private static final String SIL = "sil";
   private static final String CAP_SIL = "SIL";
 
-  private static final String JAPANESE = "Japanese";
-  public static final String KOREAN = "Korean";
+  //private static final String JAPANESE = "Japanese";
+  //public static final String KOREAN = "Korean";
 
   final Collection<String> toSkip = new HashSet<>(Arrays.asList(START_SIL, END_SIL, SIL, CAP_SIL));
 

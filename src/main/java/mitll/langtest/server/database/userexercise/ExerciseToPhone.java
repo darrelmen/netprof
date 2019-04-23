@@ -125,7 +125,7 @@ public class ExerciseToPhone {
     return getExToPhonePerProject(inProject, jsonResults, language);
   }
 
-  Map<Integer, ExercisePhoneInfo> getExToPhonePerProject(Set<Integer> inProject, List<SlickRefResultJson> jsonResults, Language language) {
+ private Map<Integer, ExercisePhoneInfo> getExToPhonePerProject(Set<Integer> inProject, List<SlickRefResultJson> jsonResults, Language language) {
     long then = System.currentTimeMillis();
     Map<Integer, ExercisePhoneInfo> exToPhones = new HashMap<>();
 

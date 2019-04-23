@@ -679,13 +679,13 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return n2;
   }
 */
-  @NotNull
+/*  @NotNull
   private ExercisePhoneInfo getExercisePhoneInfo(IPronunciationLookup lookup, String foreignlanguage, String transliteration) {
     ExercisePhoneInfo exercisePhoneInfo;
     String pronunciations = foreignlanguage.isEmpty() ? "" : lookup.getPronunciationsFromDictOrLTS(foreignlanguage, transliteration);
     exercisePhoneInfo = pronunciations.isEmpty() ? new ExercisePhoneInfo() : new ExercisePhoneInfo(pronunciations);
     return exercisePhoneInfo;
-  }
+  }*/
 
   /**
    * Adds exercise attributes to type hierarchy for facets.

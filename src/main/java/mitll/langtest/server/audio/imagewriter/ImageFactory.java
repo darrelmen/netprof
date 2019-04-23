@@ -42,14 +42,15 @@ import java.util.Map;
 class ImageFactory {
   private static final Logger logger = LogManager.getLogger(mitll.langtest.server.audio.imagewriter.ImageFactory.class);
 
-  public static void loadFont() {
+/*  public static void loadFont() {
     try {
       GraphicsEnvironment ge =  GraphicsEnvironment.getLocalGraphicsEnvironment();
       ge.registerFont(Font.createFont(Font.TRUETYPE_FONT, new File("NotoSans-Regular.ttf")));
     } catch (IOException |FontFormatException e) {
       //Handle exception
     }
-  }
+  }*/
+
   /**
    * @param type
    * @param audioFile
@@ -100,7 +101,7 @@ class ImageFactory {
    * @return
    * @see mitll.langtest.server.audio.imagewriter.TranscriptWriter#getFileForTranscriptImageType
    */
-  public static AudioImage makeTranscriptImage(ImageType type, AudioFile audioFile, int x, int y,
+  static AudioImage makeTranscriptImage(ImageType type, AudioFile audioFile, int x, int y,
                                                Map<Float, TranscriptEvent> events, float scoreScalar,
                                                boolean useScoreToColorBkg) {
     int displayEnd = audioFile.getBuffer().length;

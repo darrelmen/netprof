@@ -42,8 +42,6 @@ import java.util.Set;
 public interface IOOVDAO extends IDAO {
   void insertBulk(Collection<OOV> oovs, int userid, Language language);
 
-//  boolean insert(int userid, String oov, Language language);
-
   /**
    * @see
    */

@@ -46,7 +46,6 @@ import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.ReportUser;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickSlimEvent;
-import net.sf.uadetector.ReadableUserAgent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -62,7 +61,7 @@ public class Report implements IReport {
 
   private static final int MIN_MILLIS = (1000 * 60);
   private static final int TEN_SECONDS = 1000 * 10;
-  private static final boolean WRITE_RESULTS_TO_FILE = false;
+  //private static final boolean WRITE_RESULTS_TO_FILE = false;
   private static final String ACTIVE_USERS = "Active Users";
   private static final String TIME_ON_TASK_MINUTES = "Time on Task Minutes ";
   private static final String TOTAL_TIME_ON_TASK_HOURS = "Total time on task (hours)";

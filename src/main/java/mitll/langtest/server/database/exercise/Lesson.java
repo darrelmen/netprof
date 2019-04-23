@@ -35,7 +35,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 class Lesson<T extends HasID> {
-  private final Logger logger = Logger.getLogger("Lesson");
+  //private final Logger logger = Logger.getLogger("Lesson");
   private final List<T> exerciseList = new ArrayList<>();
   private final String unit;
 //  Set<Integer> unique = new HashSet<>();

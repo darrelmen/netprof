@@ -38,11 +38,11 @@ import java.util.*;
  class ChineseMapping {
   private static final Logger logger = LogManager.getLogger(ChineseMapping.class);
 
-  private static final boolean DEBUG = false;
-  public static final String INTEGRATED_CHINESE_2 = "Integrated Chinese 2";
-  public static final String UNIT = "Unit";
-  public static final String LESSON = "Lesson";
-  public static final String CUSTOM = "Custom";
+  //private static final boolean DEBUG = false;
+  private static final String INTEGRATED_CHINESE_2 = "Integrated Chinese 2";
+  private static final String UNIT = "Unit";
+  private static final String LESSON = "Lesson";
+  private static final String CUSTOM = "Custom";
 
 
    void doConversion(List<Exercise> customExercises, List<Exercise> converted) {
@@ -446,7 +446,7 @@ import java.util.*;
       "Custom_463\n" +
       "Custom_464";
 
-  final String mandarinAlt = "今天天气比昨天好，不下雪了。\n" +
+  private final String mandarinAlt = "今天天气比昨天好，不下雪了。\n" +
       "我约了朋友明天去滑冰，不知道天气会怎么样，冷不冷？\n" +
       "我刚才看了网上的天气预报，明天天气比今天更好。\n" +
       "不但不会下雪，而且会暖和一点。\n" +
@@ -833,7 +833,7 @@ import java.util.*;
       "爷爷、奶奶在烤鸭店等我们呢！\n" +
       "烤鸭店";
 
-  final String altLesson = "L11\n" +
+  private final String altLesson = "L11\n" +
       "L11\n" +
       "L11\n" +
       "L11\n" +

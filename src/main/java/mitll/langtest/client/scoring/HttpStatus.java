@@ -68,7 +68,7 @@ class HttpStatus {
     return statusText;
   }
 
-  public Map<String, String> getKv() {
+  Map<String, String> getKv() {
     return kv;
   }
 

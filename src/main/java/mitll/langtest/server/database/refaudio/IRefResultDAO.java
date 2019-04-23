@@ -87,7 +87,7 @@ public interface IRefResultDAO extends IDAO {
    */
   List<Result> getResults();
 
-  Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid);
+//  Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid);
   int getNumPhonesForEx(int exid);
 
   Map<Integer, ISlimResult> getAudioIDMap(int projid, Set<Integer> audioIDs);

@@ -46,7 +46,7 @@ import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.*;
 class TestSync {
   private static final Logger logger = LogManager.getLogger(TestSync.class);
 
-  final DatabaseImpl db;
+  /*final DatabaseImpl db;
 
    TestSync(DatabaseImpl db) {
     this.db = db;
@@ -389,5 +389,5 @@ class TestSync {
       }
     }
   }
-
+*/
 }

@@ -54,6 +54,7 @@ public class ExercisePhoneInfo {
    * @see SlickUserExerciseDAO#getExercisePhoneInfo
    * @param phoneString
    */
+/*
   public ExercisePhoneInfo(String phoneString) {
     String[] split = phoneString.split("[,;]");
     for (String forWord : split) {
@@ -72,6 +73,7 @@ public class ExercisePhoneInfo {
     if (numPhones == 0) logger.warn("ExercisePhoneInfo no phones for " + phoneString);
  //   logger.info("from " + phoneString + " " + phones);
   }
+*/
 
   /**
    * @see SlickUserExerciseDAO#addExerciseToSectionHelper

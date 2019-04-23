@@ -38,15 +38,11 @@ import mitll.langtest.client.scoring.PostAudioRecordButton;
 
 public class WebAudioRecorder {
 //  private static final Logger logger = Logger.getLogger("WebAudioRecorder");
- // private static final int DELAY_MILLIS = 4000;
 
   private static boolean webAudioMicAvailable;
- // private static boolean tried = false;
   private static boolean gotResponse = false;
-  //private static boolean USE_STREAMS = true;
 
   private Timer theTimer = null;
-
 
   /**
    * The valid responses to this are : webAudioMicAvailable, webAudioMicNotAvailable, webAudioPermissionDenied

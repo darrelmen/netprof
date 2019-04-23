@@ -33,20 +33,12 @@ import java.util.Map;
 
 public class UserToCount {
   private final Map<Integer, Integer> idToCount;
-//  private final Map<Integer, Set<Integer>> idToUniqueCount;
 
-  UserToCount(Map<Integer, Integer> idToCount
-  //    , Map<Integer, Set<Integer>> idToUniqueCount
-  ) {
+  UserToCount(Map<Integer, Integer> idToCount) {
     this.idToCount = idToCount;
-//    this.idToUniqueCount = idToUniqueCount;
   }
 
   public Map<Integer, Integer> getIdToCount() {
     return idToCount;
   }
-//
-//  public Map<Integer, Set<Integer>> getIdToUniqueCount() {
-//    return idToUniqueCount;
-//  }
 }

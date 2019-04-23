@@ -46,8 +46,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 class DefectsExerciseList<T extends CommonShell & ScoredExercise> extends RecordingFacetExerciseList<T> {
-  private final Logger logger = Logger.getLogger("DefectsExerciseList");
-
+ // private final Logger logger = Logger.getLogger("DefectsExerciseList");
   // private final boolean isContext;
 
   DefectsExerciseList(ExerciseController controller,

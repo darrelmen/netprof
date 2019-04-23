@@ -31,7 +31,6 @@ package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
-import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.project.Project;
@@ -46,8 +45,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 
 /**
  * @deprecated
@@ -679,8 +678,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
     return exercises;
   }
-
-  private VocabFactory factory = new VocabFactory();
 
   private Exercise getUserExercise(ResultSet rs, List<String> typeOrder) throws SQLException {
     Map<String, String> unitToValue = getUnitToValue(rs, typeOrder);

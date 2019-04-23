@@ -48,7 +48,5 @@ public interface IUserList extends INameable, IPublicPrivate {
 
   boolean shouldShowAudio();
 
-//  boolean isPrivate();
-
   void setNumItems(int numItems);
 }

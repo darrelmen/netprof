@@ -79,7 +79,7 @@ public class AttachSecurityFilter implements Filter {
   public void init(FilterConfig filterConfig) {
     this.servletContext = filterConfig.getServletContext();
 
-    String contextPath = servletContext.getContextPath();
+    //String contextPath = servletContext.getContextPath();
 
    // log.info("context        '" + contextPath + "'");
     String realContextPath = servletContext == null ? "" : servletContext.getRealPath(servletContext.getContextPath());

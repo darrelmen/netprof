@@ -55,12 +55,6 @@ public enum Facet implements Comparator<Facet> {
     this.order = order;
   }
 
-//  Facet(String name, int order, boolean alsoProjectType) {
-//    this.name = name;
-//    this.order = order;
-//    this.alsoProjectType = alsoProjectType;
-//  }
-
   Facet(String name, String alt, int order) {
     this.name = name;
     this.alt = alt;
@@ -79,18 +73,8 @@ public enum Facet implements Comparator<Facet> {
     return alt;
   }
 
-/*
-  public int getOrder() {
-    return order;
-  }
-*/
-
   @Override
   public int compare(Facet o1, Facet o2) {
     return Integer.compare(o1.order, o2.order);
   }
-
-//  public boolean isAlsoProjectType() {
-//    return alsoProjectType;
-//  }
 }

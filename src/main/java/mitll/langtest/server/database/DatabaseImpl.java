@@ -308,10 +308,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     } else {
       projectManagement.populateProjects(projID);
    //   setProjectManagement();
-
-      if (TEST_SYNC) {  // right now I can't run the test since I need mongo.. etc.
-        new TestSync(this);
-      }
+//
+//      if (TEST_SYNC) {  // right now I can't run the test since I need mongo.. etc.
+//        new TestSync(this);
+//      }
     }
     return this;
   }

@@ -31,5 +31,4 @@ package mitll.langtest.shared.custom;
 
 public interface IPublicPrivate {
   boolean isPrivate();
-//  String getName();
 }

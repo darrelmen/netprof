@@ -177,10 +177,6 @@ public class DecoratedFields {
 			((FileUpload)control).setErrorLabel(messageLocation);
 		} else if (control instanceof ValueBoxBase) {
 			((ValueBoxBase<?>)control).setErrorLabel(messageLocation);
-		} else if (control instanceof ValueBoxBase) {
-			((ValueBoxBase<?>)control).setErrorLabel(messageLocation);
-//		} else {
-//			log.info("Can not set error label for " + control.getClass());
 		}
 	}
 		

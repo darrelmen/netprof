@@ -43,7 +43,7 @@ public class SimpleSorter<T extends CommonShell> extends ExerciseComparator {
     this(false);
   }
 
-   SimpleSorter(boolean sortByEnglishOnly) {
+  private SimpleSorter(boolean sortByEnglishOnly) {
     this.sortByEnglishOnly = sortByEnglishOnly;
   }
 

@@ -30,7 +30,6 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.hlt.domino.shared.model.document.*;
-import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.domino.DominoImport;
@@ -46,6 +45,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * Read export from domino!
@@ -66,6 +66,11 @@ public class DominoExerciseDAO {
   public static final String UNKNOWN = "unknown";
   private boolean shouldSwap;
   private final IUserExerciseDAO userExerciseDAO;
+
+  public static final String HTML_TAG_PATTERN = "<(\"[^\"]*\"|'[^']*'|[^'\">])*>";
+
+  private final Pattern pattern = Pattern.compile(HTML_TAG_PATTERN);
+
 
   public DominoExerciseDAO(IUserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
@@ -381,7 +386,7 @@ public class DominoExerciseDAO {
   }
 
   private String removeMarkup(String termVal) {
-    return termVal.replaceAll(VocabFactory.HTML_TAG_PATTERN, "").replaceAll("&#xa0;", "").trim();
+    return termVal.replaceAll(HTML_TAG_PATTERN, "").replaceAll("&#xa0;", "").trim();
   }
 
   /**

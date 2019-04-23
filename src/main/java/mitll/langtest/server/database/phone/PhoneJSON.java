@@ -71,7 +71,7 @@ public class PhoneJSON {
   private static final String W = "w";
   private static final String S = "s";
   private static final String RESULT1 = "result";
-  public static final String ORDER_SCORES = "orderScores";
+  private static final String ORDER_SCORES = "orderScores";
 
   private ServerProperties serverProperties;
 

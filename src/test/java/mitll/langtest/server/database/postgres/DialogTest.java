@@ -38,7 +38,9 @@ import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.shared.analysis.AnalysisReport;
 import mitll.langtest.shared.analysis.AnalysisRequest;
 import mitll.langtest.shared.analysis.PhoneSession;
+import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.DialogMetadata;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
@@ -81,6 +83,34 @@ public class DialogTest extends BaseTest {
   }*/
 
   @Test
+  public void testNewDialog() {
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = andPopulate.getProject(21, true);
+    Dialog toAdd = new Dialog(-1,
+        6,
+        21,
+        -1,
+        -1,
+        System.currentTimeMillis(),
+        "1","1","orient","","fl","en",
+        new ArrayList<>(),
+        new ArrayList<>(),
+        new ArrayList<>(),
+        DialogType.DIALOG,
+        "us",true
+        );
+    andPopulate.getDialogDAO().add(toAdd);
+  }
+
+  @Test
+  public void testGetNewDialog() {
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = andPopulate.getProject(21, true);
+
+    project.getDialogs().forEach(d->logger.info(d));
+  }
+
+  @Test
   public void testInterpreterStored() {
     DatabaseImpl andPopulate = getDatabase();
     Project project = andPopulate.getProject(12);
@@ -90,7 +120,7 @@ public class DialogTest extends BaseTest {
   @Test
   public void testSessions() {
     DatabaseImpl andPopulate = getDatabase();
-    Project project = andPopulate.getProject(21,true);
+    Project project = andPopulate.getProject(21, true);
     try {
       Thread.sleep(2000);
     } catch (InterruptedException e) {
@@ -99,18 +129,17 @@ public class DialogTest extends BaseTest {
 
     AnalysisReport performanceReportForUser = project.getAnalysis().getPerformanceReportForUser(new AnalysisRequest().setUserid(6));
 
-    logger.info("Got " +performanceReportForUser);
+    logger.info("Got " + performanceReportForUser);
     Map<Long, List<PhoneSession>> granularityToSessions = performanceReportForUser.getUserPerformance().getGranularityToSessions();
     logger.info("keys " + granularityToSessions.keySet());
 
-    granularityToSessions.forEach((k,v)->logger.info(" " + k + " = " + v));
+    granularityToSessions.forEach((k, v) -> logger.info(" " + k + " = " + v));
 //    List<PhoneSession> phoneSessions = granularityToSessions.get(-1);
 
-  //  phoneSessions.forEach(phoneSession -> logger.info("Got " +phoneSession));
+    //  phoneSessions.forEach(phoneSession -> logger.info("Got " +phoneSession));
 
     //  report(andPopulate, project);
   }
-
 
 
   @Test
@@ -142,7 +171,7 @@ public class DialogTest extends BaseTest {
 
   }
 
-    @Test
+  @Test
   public void testInterpreterFrench() {
     DatabaseImpl andPopulate = getDatabase();
     andPopulate.getProject(12);
@@ -156,9 +185,9 @@ public class DialogTest extends BaseTest {
     // project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
 
     request.addPair(new Pair("Book", ANY1));
-    request.addPair(new Pair("Module",  ANY1));
-    request.addPair(new Pair("LANGUAGE",  ANY1));
-    request.addPair(new Pair("SPEAKER",  ANY1));
+    request.addPair(new Pair("Module", ANY1));
+    request.addPair(new Pair("LANGUAGE", ANY1));
+    request.addPair(new Pair("SPEAKER", ANY1));
     //request.addPair(new Pair("SPEAKER","A"));
 
     logger.info("types " + request + " for " + project.getTypeOrder());

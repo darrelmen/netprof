@@ -55,7 +55,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   private static final String DEFAULT_PROJECT = "DEFAULT_PROJECT";
   private static final long MIN = 60 * 1000L;
   private static final long HOUR = 60 * MIN;
-  public static final long DAY = 24 * HOUR;
+  private static final long DAY = 24 * HOUR;
   private static final long YEAR = 365 * DAY;
 
   private final ProjectDAOWrapper dao;

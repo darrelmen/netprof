@@ -69,7 +69,7 @@ public class SimpleExerciseComparator implements IExerciseComparator {
    * @param id2
    * @return
    */
-  public int compareStrings(String id1, String id2) {
+  private int compareStrings(String id1, String id2) {
     String t = id1.toLowerCase();
     if (ignoreFirst(t)) t = t.substring(2);
     t = dropPunct(t);
@@ -89,7 +89,7 @@ public class SimpleExerciseComparator implements IExerciseComparator {
     return t.replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "");
   }
 
-  protected  <T extends CommonShell> int compareByFL(T o1, T o2, String searchTerm) {
+  <T extends CommonShell> int compareByFL(T o1, T o2, String searchTerm) {
     String fl1 = o1.getForeignLanguage();
     String fl2 = o2.getForeignLanguage();
     if (fl1.equalsIgnoreCase(searchTerm) && !fl2.equalsIgnoreCase(searchTerm)) {

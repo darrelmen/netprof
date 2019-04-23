@@ -45,7 +45,7 @@ public class AudioTag {
    * @param result
    * @return
    */
-  public SafeHtml getAudioTag(String result) {
+  SafeHtml getAudioTag(String result) {
     return getAudioTag(result, true);
   }
 

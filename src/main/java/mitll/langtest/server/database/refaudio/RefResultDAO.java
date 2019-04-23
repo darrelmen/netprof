@@ -318,10 +318,10 @@ public class RefResultDAO extends BaseRefResultDAO implements IRefResultDAO {
     return new ArrayList<>();
   }
 
-  @Override
-  public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid) {
-    return null;
-  }
+//  @Override
+//  public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid) {
+//    return null;
+//  }
 
   @Override
   public Collection<ISlimResult> getAllSlimForProject(int projid) {

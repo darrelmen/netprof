@@ -40,7 +40,6 @@ public class KeyStorage {
   private final Logger logger = Logger.getLogger("KeyStorage");
 
   private ExerciseController controller = null;
-  // private String language;
   private int user;
   private boolean showedAlert = false;
 

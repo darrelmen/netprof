@@ -41,9 +41,6 @@ import org.apache.logging.log4j.Logger;
 import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 
-import static mitll.hlt.domino.server.util.DominoLog.TIMING;
-import static mitll.hlt.domino.server.util.DominoLog.elapsedMS;
-
 public class SecureXSRFPServiceServlet extends XsrfProtectedServiceServlet {
   private static final long serialVersionUID = -3315801260055188323L;
   private static final Logger log = LogManager.getLogger();
@@ -65,18 +62,20 @@ public class SecureXSRFPServiceServlet extends XsrfProtectedServiceServlet {
 
     long startMS = System.currentTimeMillis();
     try {
-      int userIDFromSessionOrDB = getUserIDFromSessionOrDB(getThreadLocalRequest());
+      /*int userIDFromSessionOrDB =*/ getUserIDFromSessionOrDB(getThreadLocalRequest());
     } catch (Exception e) {
       return failCall(payload);
     }
 
     //log.debug("Checking current user {}", () -> currentUser);
     // getThreadLocalRequest().setAttribute(SecurityManager.USER_REQUEST_ATT, currentUser);
-    log.debug(TIMING, "User check for " +
+
+/*    log.debug(TIMING, "User check for " +
             "{} " +
             "took {} ms",
         //() -> currentUser,
         () -> elapsedMS(startMS));
+    */
     return super.processCall(payload);
 
   }

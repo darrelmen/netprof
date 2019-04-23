@@ -46,6 +46,9 @@ import java.util.*;
 
 import static mitll.langtest.server.database.excel.ExcelExport.WORD_EXPRESSION;
 
+/**
+ * Convert a pasted block of text into new exercises - e.g. taken from a Quizlet export.
+ */
 public class BulkImport {
   private static final Logger logger = LogManager.getLogger(BulkImport.class);
   private static final boolean DEBUG = false;

@@ -30,10 +30,6 @@
 package mitll.langtest.shared.flashcard;
 
 public interface SetScore {
- // int getCorrect();
-
   float getAvgScore();
   float getCorrectPercent();
-
- // int getUserid();
 }

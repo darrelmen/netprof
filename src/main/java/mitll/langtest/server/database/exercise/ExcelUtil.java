@@ -53,7 +53,7 @@ public class ExcelUtil {
    * @return
    * @see #readExercises
    */
-  public long getExcelLastModified(File file) {
+  long getExcelLastModified(File file) {
     if (!file.exists()) return 0;
 /*    try {
       BasicFileAttributes attr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
@@ -142,7 +142,7 @@ public class ExcelUtil {
     }
   }
 
-  public String cleanTics(String foreignLanguagePhrase) {
+  String cleanTics(String foreignLanguagePhrase) {
     if (foreignLanguagePhrase.startsWith("\'")) {
       foreignLanguagePhrase = foreignLanguagePhrase.substring(1);
     }

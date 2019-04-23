@@ -58,7 +58,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   private static final String QID = "qid";
   public static final String ANSWER = "answer";
   public static final String SCORE_JSON = "scoreJson";
-  public static final String WITH_FLASH = "withFlash";
+  static final String WITH_FLASH = "withFlash";
   private static final String VALID = "valid";
   private static final String LEARN = "learn";
 
@@ -83,15 +83,15 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   public static final String PRON_SCORE = "pronscore";
   private static final String STIMULUS = "stimulus";
   public static final String DEVICE_TYPE = "deviceType";  // iPad, iPhone, browser, etc.
-  public static final String DEVICE = "device"; // device id, or browser type
-  public static final String PROCESS_DUR = "processDur";
-  public static final String ROUND_TRIP_DUR = "roundTripDur";
+  static final String DEVICE = "device"; // device id, or browser type
+  static final String PROCESS_DUR = "processDur";
+  static final String ROUND_TRIP_DUR = "roundTripDur";
   // public static final int FIVE_MINUTES = 5 * 60 * 1000;
   // public static final int HOUR = 60 * 60 * 1000;
   // public static final int DAY = 24 * HOUR;
   private static final String DEVICETYPE = "devicetype";
-  public static final String VALIDITY = "validity";
-  public static final String SNR = "SNR";
+  static final String VALIDITY = "validity";
+  static final String SNR = "SNR";
   private static final String SESSION = "session"; // from ODA
 
   public static final String USER_SCORE = "userscore";
@@ -320,7 +320,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     try {
       String list = getInList(ids);
 
-      String sessionClause ="";// session != null && !session.isEmpty() ? SESSION + "='" + session + "' AND " : "";
+      String sessionClause = "";// session != null && !session.isEmpty() ? SESSION + "='" + session + "' AND " : "";
       String sql = getCSSelect() + " FROM " + RESULTS + " WHERE " +
           USERID + "=? AND " +
           sessionClause +
@@ -461,11 +461,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     return 0;
   }
 
- /* @Override
-  public int getDefaultResult() {
-    return 0;
-  }
-*/
+  /* @Override
+   public int getDefaultResult() {
+     return 0;
+   }
+ */
   @Override
   public int getStudentForPath(int projid, String path) {
     return 0;
@@ -592,8 +592,8 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     } else if (type.startsWith("avp")) {
       type = practice;
     } else if (type.startsWith("learn_")) {
-      type = LEARN;    }
-      else if (type.startsWith("classroom")) {
+      type = LEARN;
+    } else if (type.startsWith("classroom")) {
       type = LEARN;
     } else {
       type = type.replaceAll("=", "_");
@@ -990,9 +990,9 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   /**
    * Just for import
    *
+   * @return
    * @paramx isRegular
    * @paramx userDAO
-   * @return
    */
 /*  public Map<Integer, Map<String, Result>> getUserToResults(boolean isRegular, IUserDAO userDAO) {
     AudioType typeToUse = isRegular ? AudioType.REGULAR : AudioType.SLOW;
@@ -1021,7 +1021,6 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     }
     return userToResult;
   }*/
-
   @Override
   public Map<Integer, String> getResultIDToJSON(int projid) {
     return null;

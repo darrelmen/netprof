@@ -37,7 +37,6 @@ public class SemesterTest extends BaseTest {
       logger.info("replaced " + fl + " with " + fl1);
     }
     return fl1;
-
   }
 
   @Test

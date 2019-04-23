@@ -30,7 +30,6 @@
 package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.database.user.DominoUserDAOImpl;
 
 /**
  * Closely related to {@link mitll.langtest.client.custom.INavigation.VIEWS}
@@ -42,20 +41,11 @@ public enum Permission implements IsSerializable {
   DEVELOP_CONTENT("Develop Content", Kind.CONTENT_DEVELOPER), // not sure how different from Record Audio
   PROJECT_ADMIN("Project Admin", Kind.PROJECT_ADMIN);         // make new projects, edit via domino
 
-  /**
-   * @see DominoUserDAOImpl#toUser
-   */
-//  POLYGLOT("Polyglot");     // only see polyglot projects
-
   private String name;
   private Kind kind;
 
   Permission() {
   }
-
-/*  Permission(String name) {
-    this.name = name;
-  }*/
 
   Permission(String name, Kind kind) {
     this.name = name;
@@ -65,6 +55,7 @@ public enum Permission implements IsSerializable {
   public String getName() {
     return name;
   }
+
   public Kind getKind() {
     return kind;
   }

@@ -31,7 +31,6 @@ package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -314,7 +313,7 @@ public abstract class BaseResultDAO extends DAO {
    * @param idToEx
    * @param language
    * @return
-   * @see mitll.langtest.server.database.JsonSupport#getJsonScoreHistory(int, Map, ExerciseSorter)
+   * @see mitll.langtest.server.database.JsonSupport#getJsonScoreHistory
    */
   public List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
                                                                            List<Integer> allIds,
