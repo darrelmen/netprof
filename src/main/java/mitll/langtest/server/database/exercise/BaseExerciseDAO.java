@@ -516,7 +516,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private boolean isKnownExercise(int id) {
     return idToExercise.containsKey(id);
   }
-
   private boolean isKnownExercise(String id) {
     return oldidToExercise.containsKey(id);
   }

@@ -102,7 +102,6 @@ public abstract class ButtonMemoryItemContainer<T extends HasID & IPublicPrivate
     buttons.forEach(button -> button.setEnabled(false));
   }
 
-
   protected void addIsPublic() {
     Column<T, SafeHtml> diff = getPublic();
     diff.setSortable(true);
@@ -121,9 +120,7 @@ public abstract class ButtonMemoryItemContainer<T extends HasID & IPublicPrivate
 
       @Override
       public SafeHtml getValue(T shell) {
-
-        logger.info("shell " + shell);
-
+        // logger.info("shell " + shell);
         return getSafeHtml(shell.isPrivate() ? NO : YES);
       }
     };

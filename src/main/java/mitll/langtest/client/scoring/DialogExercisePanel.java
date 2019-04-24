@@ -166,6 +166,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
         stylePhoneRow(flClickableRowPhones);
 
         styleMe(wrapper);
+
         add(wrapper);
       }
 
@@ -191,6 +192,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return !language.isEmpty() && language.get(0).getValue().equalsIgnoreCase(Language.ENGLISH.toString());
   }
 
+  /**
+   * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
+   * @param widget
+   */
   void styleMe(DivWidget widget) {
     addMarginStyle();
   }

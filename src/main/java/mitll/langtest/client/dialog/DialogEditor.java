@@ -31,6 +31,7 @@ package mitll.langtest.client.dialog;
 
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.ITurnPanel;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
@@ -40,8 +41,11 @@ import java.util.logging.Logger;
 public class DialogEditor<T extends ITurnPanel> extends ListenViewHelper<T> {
   private final Logger logger = Logger.getLogger("DialogEditor");
 
-  public DialogEditor(ExerciseController controller, INavigation.VIEWS thisView) {
+  private int dialogID;
+
+  public DialogEditor(ExerciseController controller, INavigation.VIEWS thisView, int dialogID) {
     super(controller, thisView);
+    this.dialogID = dialogID;
   }
 
 
@@ -54,6 +58,10 @@ public class DialogEditor<T extends ITurnPanel> extends ListenViewHelper<T> {
         rightJustify);
   }
 
+  @Override
+  protected int getDialogFromURL() {
+    return dialogID;
+  }
 
 /*
   @Override protected void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {

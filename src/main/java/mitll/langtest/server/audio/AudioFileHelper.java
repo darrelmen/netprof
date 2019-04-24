@@ -105,6 +105,7 @@ public class AudioFileHelper implements AlignDecode {
   private static final String DEFAULT_EXID = "2";
 
   private static final boolean DEBUG_EDIT = false;
+  private static final boolean DEBUG_EDIT2 = true;
   //public static final String OOV = "oov";
 
   private static final int LOG_THRESHOLD = 1000;
@@ -2139,14 +2140,19 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
-  public void makeOneEditMap() {
+  public Map<String, Set<String>> makeOneEditMap(int maxLen) {
     scala.collection.Set<String> words = htkDictionary.keySet();
     //Iterable<scala.collection.immutable.List<String[]>> prons = htkDictionary.values();
     Iterator<String> iterator = words.iterator();
     java.util.Set<String> wset = new HashSet<>();
-    while (iterator.hasNext()) wset.add(iterator.next());
+    boolean b = language == Language.ENGLISH;
+    while (iterator.hasNext()) {
+      String next = iterator.next();
+      if (b) next = next.toLowerCase();
+      wset.add(next);
+    }
 
-    Map<List<String>, List<WP>> pronsToWords = new HashMap();
+    Map<List<String>, List<WP>> pronsToWords = new HashMap<>();
     wset.forEach(w -> {
       Option<scala.collection.immutable.List<String[]>> listOption = htkDictionary.get(w);
       if (listOption.isDefined()) {
@@ -2162,41 +2168,20 @@ public class AudioFileHelper implements AlignDecode {
     });
     Map<Integer, List<List<String>>> lengthToProns = pronsToWords.keySet().stream().collect(Collectors.groupingBy(List::size));
 
+    Map<String, Map<Integer, List<WP>>> wordToPosToMatches = new HashMap<>();
+    Map<String, Set<String>> wordToNeighbors = new HashMap<>();
 
 //    Set<Integer> inOrder = new TreeSet<>(lengthToProns.keySet());
-    List<Integer> integers = Arrays.asList(2, 3, 4);
-    integers.forEach(len -> {
+    List<Integer> numPhones = new ArrayList<>();// Arrays.asList(2, 3, 4);
+
+    for (int i = 2; i <= maxLen; i++) numPhones.add(i);
+
+    numPhones.forEach(len -> {
       logger.info("len " + len);
       List<List<String>> pronsOfLength = lengthToProns.get(len);
 
-      Trie<WP> trie = new Trie<>();
-      trie.startMakingNodes();
-
-      pronsOfLength.forEach(pron -> {
-        List<WP> wps = pronsToWords.get(pron);
-        wps.forEach(wp -> trie.addEntryToTrie(new Wrapper<WP>(wp.getEntry(), wp)));
-//        WP wp = new WP(word, pron);
-        // trie.addEntryToTrie(new Wrapper<WP>(wp.getEntry(), wp));
-      });
-      trie.endMakingNodes();
-
-      Trie<WP> rtrie = new Trie<>();
-      rtrie.startMakingNodes();
-
-      pronsOfLength.forEach(pron -> {
-        List<WP> wps = pronsToWords.get(pron);
-        wps.forEach(wp1 -> {
-          List<String> strings = new ArrayList<>(pron);
-          // logger.info("\t" + word + " " + pron);
-          Collections.reverse(strings);
-          WP wp = new WP(wp1.getWord(), strings);
-          rtrie.addEntryToTrie(new Wrapper<>(wp.getEntry(), wp));
-        });
-
-
-      });
-      rtrie.endMakingNodes();
-
+      Trie<WP> trie = getWpTrie(pronsToWords, pronsOfLength);
+      Trie<WP> rtrie = getReverseTrie(pronsToWords, pronsOfLength);
 
       if (len > 1) {
         Map<Integer, List<WP>> posToMatches = new HashMap<>();
@@ -2249,12 +2234,13 @@ public class AudioFileHelper implements AlignDecode {
               List<WP> back = new ArrayList<>();
 
               List<String> pron1 = wp2.getPron(); //??? todo : correct???
+
               matchesNotSelf(rtrie, wp2, pron1).forEach(ww -> {
                 List<String> copy = new ArrayList<>(ww.getPron());
                 Collections.reverse(copy);
                 back.add(new WP(ww.getWord(), copy));
               });
-              if (DEBUG_EDIT) logger.info("r for " + wp2 + " (" + back.size() + ") " + back);
+              if (DEBUG_EDIT2) logger.info("r for " + wp2 + " (" + back.size() + ") " + back);
 
               List<WP> copy = new ArrayList<>();
               back.forEach(f -> copy.add(new WP(f.getWord(), f.getPron())));
@@ -2263,13 +2249,54 @@ public class AudioFileHelper implements AlignDecode {
 
             logger.info("for " + word + " " + pron);// + " : " + posToMatches);
             posToMatches.forEach((k, v) -> logger.info("\t" + k + " (" + v.size() + ") " + v));
+
+            Set<String> value = new HashSet<>();
+            wordToNeighbors.put(word, value);
+            posToMatches.values().forEach(wps1 -> wps1.forEach(wp -> value.add(wp.word)));
+            logger.info("neighbors of " + word + " has " + value.size());// + " : " + posToMatches);
+
           });
 
 
         });
       }
     });
+    return wordToNeighbors;
+  }
 
+  @NotNull
+  private Trie<WP> getReverseTrie(Map<List<String>, List<WP>> pronsToWords, List<List<String>> pronsOfLength) {
+    Trie<WP> rtrie = new Trie<>();
+    rtrie.startMakingNodes();
+
+    pronsOfLength.forEach(pron -> {
+      List<WP> wps = pronsToWords.get(pron);
+      wps.forEach(wp1 -> {
+        List<String> strings = new ArrayList<>(pron);
+        // logger.info("\t" + word + " " + pron);
+        Collections.reverse(strings);
+        WP wp = new WP(wp1.getWord(), strings);
+        rtrie.addEntryToTrie(new Wrapper<>(wp.getEntry(), wp));
+      });
+
+
+    });
+    rtrie.endMakingNodes();
+    return rtrie;
+  }
+
+  @NotNull
+  private Trie<WP> getWpTrie(Map<List<String>, List<WP>> pronsToWords, List<List<String>> pronsOfLength) {
+    Trie<WP> trie = new Trie<>();
+    trie.startMakingNodes();
+
+    pronsOfLength.forEach(pron -> {
+      pronsToWords.get(pron).forEach(wp -> trie.addEntryToTrie(new Wrapper<WP>(wp.getEntry(), wp)));
+//        WP wp = new WP(word, pron);
+      // trie.addEntryToTrie(new Wrapper<WP>(wp.getEntry(), wp));
+    });
+    trie.endMakingNodes();
+    return trie;
   }
 
   @NotNull

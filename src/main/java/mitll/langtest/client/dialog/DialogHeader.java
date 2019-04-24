@@ -80,6 +80,7 @@ public class DialogHeader {
     this.next = next;
 
     String s = thisView.isPressAndHold() ? SPACE_PRESS_AND_HOLD : SPEAK_HINT;
+
     ARROW_KEY_TIP =
         "<i>" +
             "<b>Rehearse</b> the dialog at your own speed.<br/><br/>" +
@@ -87,6 +88,7 @@ public class DialogHeader {
             "<br/>" +
             "<b>Arrow keys</b> to advance to next turn or go back." +
             "</i>";
+
     ARROW_KEY_TIP_CORE =
         "<i>" +
             "<b>Remember</b> the core words.<br/><br/>" +

@@ -610,6 +610,9 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
       if (iDialog == null) {
         logger.warn("\n\n\nno dialog for " + dialogID + " From " + iDialogs.size());
       }
+      else {
+        logger.info("getOneDialog for " +dialogID + " = " +iDialog);
+      }
       return iDialog;
     }
   }

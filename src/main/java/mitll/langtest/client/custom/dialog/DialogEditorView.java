@@ -33,22 +33,18 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.DialogEditor;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.EditorTurn;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.scoring.UserListSupport;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import org.jetbrains.annotations.NotNull;
@@ -178,15 +174,18 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
   /**
    * TODO : fill in with fancy editor
+   *
+   * @param selectedItem
    */
   @Override
-  protected void editList() {
+  protected void editList(T selectedItem) {
     DivWidget listContent = new DivWidget();
 
-    DialogEditor<EditorTurn> editorTurnDialogEditor = new DialogEditor<>(controller, INavigation.VIEWS.DIALOG_EDITOR);
+    DialogEditor<EditorTurn> editorTurnDialogEditor = new DialogEditor<>(controller, INavigation.VIEWS.DIALOG_EDITOR, selectedItem.getID());
     editorTurnDialogEditor.showContent(listContent, INavigation.VIEWS.DIALOG_EDITOR);
 
-    logger.info("ist content " + listContent);
+    logger.info("list content " + listContent);
+
     new DialogHelper(true).show(
         "Add/Edit Turns" + " : " + getListName(),
         Collections.emptyList(),
@@ -264,7 +263,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   @NotNull
   @Override
   protected String getMailTo() {
-    IDialog currentSelection = myLists.getCurrentSelection();
+    IDialog currentSelection = getCurrentSelection();
 
     return new UserListSupport(controller)
         .getMailToDialog(currentSelection.getID(), currentSelection.getForeignLanguage());
@@ -297,13 +296,13 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     }
 
     /**
-     * @see SimplePagingContainer#addDoubleClick
      * @param selected
+     * @see SimplePagingContainer#addDoubleClick
      */
     @Override
     protected void gotDoubleClickOn(T selected) {
-     logger.info("gotDoubleClickOn got double click on " + selected);
-      editList();
+      logger.info("gotDoubleClickOn got double click on " + selected);
+      editList(getCurrentSelection());
     }
   }
 
@@ -341,8 +340,8 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     }
 
     *//**
-     * CRITICAL TO REMOVE LISTENER!
-     *//*
+   * CRITICAL TO REMOVE LISTENER!
+   *//*
     @Override
     public void gotHidden() {
       // logger.info("Got hidden ");

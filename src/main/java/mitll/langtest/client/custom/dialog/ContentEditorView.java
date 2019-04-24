@@ -49,6 +49,7 @@ import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.custom.INameable;
 import mitll.langtest.shared.custom.IPublicPrivate;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
@@ -155,6 +156,10 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     // addDrillAndLearn(buttons, container);
 
     return buttons;
+  }
+
+  protected T getCurrentSelection() {
+    return myLists.getCurrentSelection();
   }
 
   protected void addImportButton(DivWidget buttons) {
@@ -364,7 +369,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   private IsWidget getAddItems() {
     Button successButton = getSuccessButton(ITEMS);
     successButton.setIcon(IconType.PENCIL);
-    successButton.addClickHandler(event -> editList());
+    successButton.addClickHandler(event -> editList(getCurrentSelection()));
     addTooltip(successButton, EDIT_THE_ITEMS_ON_LIST + getSuffix());
     return successButton;
   }
@@ -381,7 +386,11 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     return successButton;
   }
 
-  protected abstract void editList();
+  /**
+   * @see DialogEditorView#editList(IDialog)
+   * @param selectedItem
+   */
+  protected abstract void editList(T selectedItem);
 
   @NotNull
   protected Button getSuccessButton(String learn1) {
@@ -443,11 +452,18 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    */
   protected abstract void doDelete(UIObject delete, T currentSelection);
 
+  /**
+   * @return
+   * @see #getEdit
+   */
   CreateDialog<T> doEdit() {
     DivWidget contents = new DivWidget();
     CreateDialog<T> editDialog = getEditDialog();
     editDialog.doCreate(contents);
 
+    T currentSelection = myLists.getCurrentSelection();
+
+    logger.info("doEdit current selection " + currentSelection);
     DialogHelper dialogHelper = new DialogHelper(true);
     Button closeButton = dialogHelper.show(
         EDIT,
@@ -460,7 +476,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
           public boolean gotYes() {
             boolean okToCreate = editDialog.isValidName();
             if (okToCreate) {
-              editDialog.doEdit(myLists.getCurrentSelection(), myLists);
+              editDialog.doEdit(currentSelection, myLists);
 
               myLists.flush();
               myLists.redraw();

@@ -168,12 +168,13 @@ public class ListenViewHelper<T extends ITurnPanel>
 
       @Override
       public void onSuccess(IDialog dialog) {
+        logger.info("showContent Got back dialog " + dialog);
         showDialogGetRef(dialogFromURL, dialog, listContent);
       }
     });
   }
 
-  private int getDialogFromURL() {
+  protected int getDialogFromURL() {
     return new SelectionState().getDialog();
   }
 
@@ -184,7 +185,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #showContent
    */
   void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
-    logger.info("showDialogGetRef : show dialog " +dialogID);
+    logger.info("showDialogGetRef : show dialog " + dialogID);
     if (dialog != null) {
       this.dialogID = dialog.getID();
       isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
@@ -324,11 +325,13 @@ public class ListenViewHelper<T extends ITurnPanel>
   private String getFirstSpeakerLabel(IDialog dialog) {
     String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
 
+    logger.info("getFirstSpeakerLabel first speaker " + firstSpeaker);
     if (!dialog.getExercises().isEmpty()) {
       ClientExercise next = dialog.getExercises().iterator().next();
       boolean hasEnglishAttr = next.hasEnglishAttr();
 
-      if (hasEnglishAttr && getExerciseSpeaker(next).equalsIgnoreCase(firstSpeaker)) {
+      if (hasEnglishAttr &&
+          (firstSpeaker == null || getExerciseSpeaker(next).equalsIgnoreCase(firstSpeaker))) {
         firstSpeaker = ENGLISH_SPEAKER;
       }
     } else if (dialog.getKind() == DialogType.INTERPRETER) {
@@ -403,7 +406,10 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   private String getExerciseSpeaker(ClientExercise next) {
-    List<ExerciseAttribute> speaker = next.getAttributes().stream().filter(attr -> attr.getProperty().equalsIgnoreCase("Speaker")).collect(Collectors.toList());
+    List<ExerciseAttribute> speaker = next
+        .getAttributes()
+        .stream()
+        .filter(attr -> attr.getProperty().equalsIgnoreCase(DialogMetadata.SPEAKER.toString())).collect(Collectors.toList());
     return speaker.isEmpty() ? "" : speaker.get(0).getValue();
   }
 
@@ -522,8 +528,8 @@ public class ListenViewHelper<T extends ITurnPanel>
   DivWidget getTurns(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
 
-    logger.info("dialog " +dialog);
-    logger.info("exercises  " +dialog.getExercises());
+    logger.info("dialog " + dialog);
+    logger.info("getTurns : exercises  " + dialog.getExercises());
 
     {
       rowOne.getElement().setId("turnContainer");
@@ -533,7 +539,7 @@ public class ListenViewHelper<T extends ITurnPanel>
       rowOne.getElement().getStyle().setMarginBottom(10, PX);
     }
 
-  //  List<String> speakers = dialog.getSpeakers();
+    //  List<String> speakers = dialog.getSpeakers();
     //logger.info("speakers " + speakers);
 
 //    Map<String, List<ClientExercise>> speakerToEx = dialog.groupBySpeaker();
@@ -553,7 +559,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     return rowOne;
   }
 
-  protected void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
+  private void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
     dialog.getExercises().forEach(clientExercise -> {
       // COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
       //    logger.info("ex " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage() + " : " + columnForEx);
@@ -696,10 +702,10 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   /**
-   * @see #getTurnPanel
    * @param clientExercise
    * @param columns
    * @return
+   * @see #getTurnPanel
    */
   @NotNull
   T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns) {

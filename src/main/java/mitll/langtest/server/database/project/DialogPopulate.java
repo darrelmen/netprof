@@ -287,6 +287,11 @@ public class DialogPopulate {
 
     importExToID.forEach((k, v) -> k.getMutable().setID(v));
 
+
+    logger.info("addExercises made "+importExToID.size());
+
+    importExToID.keySet().forEach(logger::info);
+
     db.getUserExerciseDAO().getRelatedExercise().addBulkRelated(
         getSlickRelatedExercises(projid, modified, dialog.getExercises(), dialogID, importExToID));
   }

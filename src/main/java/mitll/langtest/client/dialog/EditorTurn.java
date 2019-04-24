@@ -88,7 +88,10 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
-    add(new TextBox());
+    DivWidget wrapper = new DivWidget();
+    wrapper.add(new TextBox());
+    styleMe(wrapper);
+    add(wrapper);
   }
 
   @Override

@@ -59,7 +59,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 7/3/17.
@@ -112,7 +111,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
   private static final int BROWSE_SHORT_PAGE_SIZE = 6;
 
   /**
-   * @see #editList()
+   * @see ContentEditorView#editList(mitll.langtest.shared.custom.INameable)
    */
   private static final String ADD_EDIT_ITEMS = "Add/Edit Items";
 
@@ -352,9 +351,10 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
    * @see
    * @see ListView.MyListContainer#gotDoubleClickOn
    * @see ContentEditorView#getAddItems
+   * @param selectedItem ignored here...?
    */
   @Override
-  protected void editList() {
+  protected void editList(T selectedItem) {
     EditItem editItem = new EditItem(controller);
     new DialogHelper(true).show(
         ADD_EDIT_ITEMS + " : " + getListName(),
@@ -614,7 +614,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     protected void gotDoubleClickOn(T selected) {
       //    logger.info("gotDoubleClickOn got double click on " + selected);
       //showLearnOrQuiz(selected);
-      editList();
+      editList(getCurrentSelection());
     }
   }
 

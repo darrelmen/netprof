@@ -33,6 +33,7 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
+import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.project.DialogPopulate;
 import mitll.langtest.server.database.project.IProject;
 import mitll.langtest.server.database.project.Project;
@@ -168,7 +169,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
         Dialog dialog = idToDialog.get(dialogID);
 
         if (dialog == null) {
-          logger.info("getDialogs skip deleted dialog" + dialogID);
+//          logger.info("getDialogs skip deleted dialog #" + dialogID);
         } else {
           configureDialog(projid, dialog, idToPair, dialogIDToRelated, dialogIDToCoreRelated, project, dialogID, slickDialogAttributeJoins);
         }
@@ -243,7 +244,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
    */
   private Dialog makeDialog(SlickDialog slickDialog) {
     boolean isprivate = slickDialog.isprivate();
-    logger.info("makeDialog : " + isprivate + " " + slickDialog.id());
+    //  logger.info("makeDialog : " + isprivate + " " + slickDialog.id());
 
     Dialog dialog = new Dialog(
         slickDialog.id(),
@@ -342,6 +343,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @param dialogIDToRelated
    * @param dialogID
    * @param dialog
+   * @see #configureDialog(int, Dialog, Map, Map, Map, IProject, Integer, Collection)
    */
   private void addExercises(int projid,
                             Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated,
@@ -394,7 +396,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
             }
           }
         } else {
-          logger.warn("can't find related ex " + exid);
+          logger.warn("addExercises : on dialog #" + dialogID + " can't find related ex " + exid);
         }
       });
 
@@ -409,7 +411,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
         int size = exercises.size();
         if (size == 0) {
-          logger.error("huh no exercises?");
+          logger.warn("addExercises huh no exercises on dialog #" + dialog.getID());
         }
 //      else if (size == 1) {
         //   } else if (size == 2) logger.warn("not expecting multiple parents " + firstEx);
@@ -516,15 +518,24 @@ public class DialogDAO extends DAO implements IDialogDAO {
       defaultUnitAndChapter.put(typeOrder.get(1), toAdd.getChapter());
     }
 
-    {
-      Exercise exercise = baseDialogReader.getExercise("", "", "", BaseDialogReader.ENGLISH_SPEAKER, Language.ENGLISH, "E-0", defaultUnitAndChapter);
-      //   logger.info("readFromSheet add " + turnID + " " + exercise.getFLToShow() + " " + exercise.getEnglish());
-      //exercises.add(exercise);
-      toAdd.getExercises().add(exercise);
-    }
-    {
-      Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.INTERPRETERSPEAKER, databaseImpl.getLanguageEnum(projid),
-          "I-0", defaultUnitAndChapter);
+    if (toAdd.getKind() == DialogType.INTERPRETER) {
+      {
+        Exercise exercise = baseDialogReader.getExercise("", "", "", BaseDialogReader.ENGLISH_SPEAKER, Language.ENGLISH, "E-0", defaultUnitAndChapter);
+        //   logger.info("readFromSheet add " + turnID + " " + exercise.getFLToShow() + " " + exercise.getEnglish());
+        //exercises.add(exercise);
+
+        toAdd.getExercises().add(exercise);
+      }
+
+      {
+        Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.INTERPRETERSPEAKER, databaseImpl.getLanguageEnum(projid),
+            "I-0", defaultUnitAndChapter);
+        //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
+        toAdd.getExercises().add(exercise1);
+      }
+    } else {
+      Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.SPEAKER_A, databaseImpl.getLanguageEnum(projid),
+          "A-0", defaultUnitAndChapter);
       //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
       toAdd.getExercises().add(exercise1);
     }
@@ -532,9 +543,23 @@ public class DialogDAO extends DAO implements IDialogDAO {
     new DialogPopulate(databaseImpl, project.getPathHelper()).addExercises(projid, userid, typeOrder, new Timestamp(now),
         new HashMap<>(), toAdd, add);
 
+
+    ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
+
+    toAdd.getExercises().forEach(exercise -> {
+      boolean refresh = exerciseDAO.refresh(exercise.getID());
+      if (!refresh) logger.warn("didn't refresh " + exercise.getID());
+      CommonExercise exerciseByID = project.getExerciseByID(exercise.getID());
+      if (exerciseByID == null) logger.warn("huh? couldn't find it again?");
+//      logger.info("found " + exerciseByID);
+    });
+
+
     // refresh list on project
     databaseImpl.getProjectManagement().addDialogInfo(projid);
 
+//    toAdd.getExercises().forEach(ex -> exerciseDAO.addUserExercise(ex.asCommon()));
+//    project.getExerciseDAO().addUserExercise();
     return toAdd;
   }
 

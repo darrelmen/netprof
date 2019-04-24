@@ -52,11 +52,15 @@ import java.util.*;
 import static mitll.langtest.shared.dialog.DialogMetadata.FLTITLE;
 
 public class BaseDialogReader {
+  private static final Logger logger = LogManager.getLogger(BaseDialogReader.class);
+
   public static final String ENGLISH_SPEAKER = "English Speaker";
   protected static final String INTERPRETERSPEAKER = "Interpreter";
-  private static final Logger logger = LogManager.getLogger(BaseDialogReader.class);
+  public static final String SPEAKER_A = "A";
+
   private static final String OPT_NETPROF_DIALOG = "/opt/netprof/dialog/";
-  private static final List<String> SPEAKER_LABELS = Arrays.asList("A", "B", "C", "D", "E", "F", "I");
+
+  private static final List<String> SPEAKER_LABELS = Arrays.asList(SPEAKER_A, "B", "C", "D", "E", "F", "I");
   private static final String IMAGES = "images/";
   protected String unit;
   protected String chapter;
@@ -167,7 +171,7 @@ public class BaseDialogReader {
   }
 
   /**
-   * @param speakers  - modified maybe!
+   * @param speakers         - modified maybe!
    * @param text
    * @param speakerID
    * @param lang
@@ -209,7 +213,7 @@ public class BaseDialogReader {
   }
 
   @NotNull
-  protected Map<String, String> getDefaultUnitAndChapter(List<String> typeOrder) {
+  Map<String, String> getDefaultUnitAndChapter(List<String> typeOrder) {
     Map<String, String> unitToValue = new HashMap<>();
     unitToValue.put(typeOrder.get(0), unit);
     unitToValue.put(typeOrder.get(1), chapter);

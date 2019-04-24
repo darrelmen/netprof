@@ -518,7 +518,7 @@ public class ExerciseCopy {
     if (replacements > 0 || converted > 0) {
       logger.info("addPredefExercises " + replacements + " replaced, " + converted + " converted");
     }
-    logger.info("addPredefExercises will add " + exToJoins.size() + " attributes");
+    logger.info("addPredefExercises will add " + exToJoins.size() + " attributes, new exercise ids: " + exToInt.values());
     return exToJoins;
   }
 

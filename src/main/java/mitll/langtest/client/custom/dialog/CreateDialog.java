@@ -499,7 +499,9 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
       allUnitChapterGroup = new ArrayList<>();
 
       boolean first = true;
+
       int width = TYPE_AND_VALUE_WIDTH;
+
       for (String type : typeOrder) {
         ListBox listBox = getListBox(width);
         listBox.addChangeHandler(event -> gotChangeFor(type, listBox, all, addAll, () -> logger.info("OK, type->values done for " + type)));
@@ -523,7 +525,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
           first = false;
         }
         int i1 = typeOrder.indexOf(type);
-        logger.info("For " + type + " : " + i1);
+       // logger.info("For " + type + " : " + i1);
 
         if (unit != null && i1 == 0) {
           listBox.setSelectedValue(unit);
@@ -534,7 +536,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
       if (chapter != null && typeOrder.size() > 1) {
         String type = typeOrder.get(0);
         gotChangeFor(type, allUnitChapter.get(0), all, addAll, () -> {
-          logger.info("OK, type->values done for " + type);
+        //  logger.info("OK, type->values done for " + type);
           setChapter(chapter, allUnitChapter.get(1));
         });
       }

@@ -34,7 +34,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -57,7 +56,7 @@ public class EditItem {
 
   /**
    * @param controller
-   * @see ListView#editList
+   * @see ContentEditorView#editList
    */
   public EditItem(ExerciseController controller) {
     this.controller = controller;
@@ -66,7 +65,7 @@ public class EditItem {
   /**
    * @param originalList
    * @return
-   * @see ListView#editList
+   * @see ContentEditorView#editList
    */
   public Panel editItem(UserList<CommonShell> originalList) {
     Panel hp = new DivWidget();

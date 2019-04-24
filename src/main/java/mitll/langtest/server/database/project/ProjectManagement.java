@@ -492,7 +492,7 @@ public class ProjectManagement implements IProjectManagement {
 
   private void addDialogInfo(Project project) {
     if (new DialogPopulate(db, pathHelper).addDialogInfo(project)) {
-      logger.info("add dialog info to " + project.getID() + " " + project.getName());
+      logger.info("addDialogInfo : add dialog info to " + project.getID() + " " + project.getName() + " now " +project.getDialogs().size() + " dialogs...");
     }
   }
 

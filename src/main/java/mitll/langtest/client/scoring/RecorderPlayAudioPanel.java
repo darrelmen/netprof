@@ -65,11 +65,11 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   private static final String HEIGHT = 19 + "px";
   private static final String BORDER_RADIUS = 18 + "px";
 
-  public static final String RED_ACTIVE_COLOR = "#da4f49";
+  private static final String RED_ACTIVE_COLOR = "#da4f49";
   /**
    * @see RecordDialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
-  public static final String BLUE_INACTIVE_COLOR = "#0171bc";
+  static final String BLUE_INACTIVE_COLOR = "#0171bc";
 
   /**
    * TODO make better relationship with ASRRecordAudioPanel
