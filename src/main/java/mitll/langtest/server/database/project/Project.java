@@ -444,14 +444,14 @@ public class Project implements IPronunciationLookup, IProject {
 
   public ModelType getModelType() {
     String prop = getProp(MODEL_TYPE);
-    logger.info("getModelType (" + getID() + ") " + MODEL_TYPE + " : " + prop);
+  //  logger.info("getModelType (" + getID() + ") " + MODEL_TYPE + " : " + prop);
 
     if (prop == null || prop.isEmpty()) {
       return ModelType.HYDRA;
     } else {
       try {
         ModelType modelType = ModelType.valueOf(prop);
-        logger.info("\tgetModelType (" + getID() + ") " + MODEL_TYPE + " : " + prop + " : " + modelType);
+    //    logger.info("\tgetModelType (" + getID() + ") " + MODEL_TYPE + " : " + prop + " : " + modelType);
         return modelType;
       } catch (IllegalArgumentException e) {
         logger.error("couldn't parse '" + prop + "' as model type enum?");
