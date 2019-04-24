@@ -47,6 +47,7 @@ import mitll.langtest.shared.project.Language;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.*;
@@ -92,13 +93,13 @@ public class DialogTest extends BaseTest {
         -1,
         -1,
         System.currentTimeMillis(),
-        "1","1","orient","","fl","en",
+        "1", "1", "orient", "", "fl", "en",
         new ArrayList<>(),
         new ArrayList<>(),
         new ArrayList<>(),
         DialogType.DIALOG,
-        "us",true
-        );
+        "us", true
+    );
     andPopulate.getDialogDAO().add(toAdd);
   }
 
@@ -107,7 +108,49 @@ public class DialogTest extends BaseTest {
     DatabaseImpl andPopulate = getDatabase();
     Project project = andPopulate.getProject(21, true);
 
-    project.getDialogs().forEach(d->logger.info(d));
+    project.getDialogs().forEach(logger::info);
+  }
+
+  @Test
+  public void testChangeDialog() {
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = andPopulate.getProject(21, true);
+
+    List<IDialog> collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == 60).collect(Collectors.toList());
+
+    collect.forEach(logger::info);
+
+    IDialog iDialog = collect.get(0);
+    {
+      logger.info("before dialog " + iDialog.getID() + " : " + iDialog.isPrivate());
+      iDialog.getMutable().setIsPrivate(false);
+    }
+
+    {
+      andPopulate.getDialogDAO().update(iDialog);
+
+      collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == 60).collect(Collectors.toList());
+      iDialog = collect.get(0);
+      logger.info("after dialog " + iDialog.getID() + " : " + iDialog.isPrivate());
+    }
+
+    Assert.assertFalse(iDialog.isPrivate());
+
+    {
+      logger.info("2 before dialog " + iDialog.getID() + " : " + iDialog.isPrivate());
+      iDialog.getMutable().setIsPrivate(true);
+    }
+
+
+    {
+      andPopulate.getDialogDAO().update(iDialog);
+
+      collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == 60).collect(Collectors.toList());
+      iDialog = collect.get(0);
+      logger.info("2 after dialog " + iDialog.getID() + " : " + iDialog.isPrivate());
+    }
+
+    Assert.assertTrue(iDialog.isPrivate());
   }
 
   @Test
