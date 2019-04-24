@@ -33,6 +33,7 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
+import mitll.langtest.server.database.project.DialogPopulate;
 import mitll.langtest.server.database.project.IProject;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
@@ -41,6 +42,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.*;
 import mitll.npdata.dao.dialog.DialogAttributeJoinDAOWrapper;
 import mitll.npdata.dao.dialog.DialogDAOWrapper;
@@ -160,8 +162,16 @@ public class DialogDAO extends DAO implements IDialogDAO {
     {
       IProject project = databaseImpl.getIProject(projid);
 
+      logger.info("getDialogs found " + idToDialog.size() + " dialogs for " + project);
+
       dialogAttributeJoinHelper.getAllJoinByProject(projid).forEach((dialogID, slickDialogAttributeJoins) -> {
-        configureDialog(projid, idToDialog.get(dialogID), idToPair, dialogIDToRelated, dialogIDToCoreRelated, project, dialogID, slickDialogAttributeJoins);
+        Dialog dialog = idToDialog.get(dialogID);
+
+        if (dialog == null) {
+          logger.info("getDialogs skip deleted dialog" + dialogID);
+        } else {
+          configureDialog(projid, dialog, idToPair, dialogIDToRelated, dialogIDToCoreRelated, project, dialogID, slickDialogAttributeJoins);
+        }
       });
     }
 
@@ -232,7 +242,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @see #getDialogs(int)
    */
   private Dialog makeDialog(SlickDialog slickDialog) {
-    return new Dialog(
+    boolean isprivate = slickDialog.isprivate();
+    logger.info("makeDialog : " + isprivate + " " + slickDialog.id());
+
+    Dialog dialog = new Dialog(
         slickDialog.id(),
         slickDialog.userid(),
         slickDialog.projid(),
@@ -249,7 +262,12 @@ public class DialogDAO extends DAO implements IDialogDAO {
         new ArrayList<>(),
         new ArrayList<>(),
         getDialogType(slickDialog),
-        database.getProject(slickDialog.projid()).getProject().countrycode(), slickDialog.isprivate());
+        database.getProject(slickDialog.projid()).getProject().countrycode(),
+        isprivate);
+
+//    logger.info("makeDialog : " + dialog);
+
+    return dialog;
   }
 
   /**
@@ -306,12 +324,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
     //  logger.warn("idToImageRef got " + idToImageRef.size());
     int imageid = dialog.getImageid();//dialog.getSlickDialog().imageid();
     if (imageid < 1) {
-      logger.warn("no image for dialog " + dialog);
+      logger.warn("addImage no image for dialog " + dialog.getID() + " : " + dialog.getForeignLanguage());
     } else {
       String s = idToImageRef.get(imageid);
       if (s == null) {
-        logger.warn("no image by " + imageid +
-            "for dialog " + dialog);
+        logger.warn("addImage no image by " + imageid + "for dialog " + dialog);
       } else {
         dialog.setImageRef(s);
       }
@@ -434,6 +451,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
    *
    * @param toAdd
    * @return
+   * @see CreateDialogDialog#doCreate
    * @see mitll.langtest.server.services.DialogServiceImpl#addDialog
    */
   @Override
@@ -480,9 +498,39 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     int insert = dialogAttributeJoinHelper.insert(e);
 
-    logger.info("new id " + insert);
+    logger.info("add new id " + insert);
 
     toAdd.getAttributes().add(attribute.setId(orAddAttribute));
+
+
+    BaseDialogReader baseDialogReader = new BaseDialogReader(null, null);
+
+    Map<String, String> defaultUnitAndChapter = new HashMap<>();
+    Project project = databaseImpl.getProject(projid);
+    List<String> typeOrder = project.getTypeOrder();
+
+    if (!typeOrder.isEmpty()) {
+      defaultUnitAndChapter.put(typeOrder.get(0), toAdd.getUnit());
+    }
+    if (typeOrder.size() > 1) {
+      defaultUnitAndChapter.put(typeOrder.get(1), toAdd.getChapter());
+    }
+
+    {
+      Exercise exercise = baseDialogReader.getExercise("", "", "", BaseDialogReader.ENGLISH_SPEAKER, Language.ENGLISH, "E-0", defaultUnitAndChapter);
+      //   logger.info("readFromSheet add " + turnID + " " + exercise.getFLToShow() + " " + exercise.getEnglish());
+      //exercises.add(exercise);
+      toAdd.getExercises().add(exercise);
+    }
+    {
+      Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.INTERPRETERSPEAKER, databaseImpl.getLanguageEnum(projid),
+          "I-0", defaultUnitAndChapter);
+      //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
+      toAdd.getExercises().add(exercise1);
+    }
+
+    new DialogPopulate(databaseImpl, project.getPathHelper()).addExercises(projid, userid, typeOrder, new Timestamp(now),
+        new HashMap<>(), toAdd, add);
 
     // refresh list on project
     databaseImpl.getProjectManagement().addDialogInfo(projid);
@@ -509,8 +557,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
         }
       }
     }
+
     boolean b = dao.update(new SlickDialog(
-        -1,
+        dialog.getID(),
         dialog.getUserid(),
         projid,
         dialog.getDominoid(),
@@ -527,6 +576,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     if (b) {
       databaseImpl.getProjectManagement().addDialogInfo(projid);
+    } else {
+      logger.warn("update : didn't alter the dialog " + dialog);
     }
 
     return b;
@@ -580,15 +631,17 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * TODO : what if two people are updating the set of dialogs at the same time???
    *
    * @param id
+   * @param projid
    * @return
    */
   @Override
-  public boolean delete(int id) {
+  public boolean delete(int id, int projid) {
     boolean b = dao.delete(id) > 0;
 
-//    if (b) {
-//      databaseImpl.getProjectManagement().addDialogInfo(projid);
-//    }
+    if (b) {
+
+      databaseImpl.getProjectManagement().addDialogInfo(projid);
+    }
 
     return b;
   }

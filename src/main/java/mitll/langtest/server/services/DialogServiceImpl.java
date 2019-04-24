@@ -29,7 +29,6 @@
 
 package mitll.langtest.server.services;
 
-import com.sun.mail.imap.protocol.ID;
 import mitll.langtest.client.custom.dialog.CreateDialogDialog;
 import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.services.DialogService;
@@ -44,7 +43,6 @@ import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.exercise.FilterResponse;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.npdata.dao.SlickRelatedResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -267,7 +265,8 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   @Override
   public boolean delete(int id) throws DominoSessionException {
     getUserIDFromSessionOrDB();
-    return db.getDialogDAO().delete(id);
+    int projectIDFromUser = getProjectIDFromUser(getUserIDFromSessionOrDB());
+    return db.getDialogDAO().delete(id, projectIDFromUser);
   }
 
   /**

@@ -56,14 +56,6 @@ import java.util.stream.Collectors;
  * @see ListenViewHelper#reallyGetTurnPanel
  */
 public class TurnPanel extends DialogExercisePanel<ClientExercise> implements ITurnPanel {
-  //private final Logger logger = Logger.getLogger("TurnPanel");
-
-//  private static final String FLOAT_LEFT = "floatLeft";
-
-  // private DivWidget bubble;
-  // private static final String HIGHLIGHT_COLOR = "green";
-  // private boolean rightJustify;
-
   TurnPanelDelegate turnPanelDelegate;
 
   /**
@@ -81,7 +73,8 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
                    final ListInterface<?, ?> listContainer,
                    Map<Integer, AlignmentOutput> alignments,
                    IListenView listenView,
-                   ListenViewHelper.COLUMNS columns, boolean rightJustify) {
+                   ListenViewHelper.COLUMNS columns,
+                   boolean rightJustify) {
     super(clientExercise, controller, listContainer, alignments, listenView);
 
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify);

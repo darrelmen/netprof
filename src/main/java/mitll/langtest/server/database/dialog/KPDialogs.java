@@ -271,6 +271,10 @@ public class KPDialogs extends DialogReader implements IDialogReader {
 
   private final DialogProps dialogProps = new DialogProps(docIDS, title, fltitle, dir, unit, chapter, page, pres);
 
+  public KPDialogs(String unit, String chapter) {
+    super(unit, chapter);
+  }
+
   /**
    * @param defaultUser
    * @param exToAudio

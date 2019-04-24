@@ -48,7 +48,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 
   public EditorTurn(final ClientExercise clientExercise, ListenViewHelper.COLUMNS columns, boolean rightJustify) {
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify);
-    this.clientExercise=clientExercise;
+    this.clientExercise = clientExercise;
   }
 
   @Override

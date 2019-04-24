@@ -196,7 +196,8 @@ public class NPUserSecurityManager implements IUserSecurityManager {
    */
   public void setSessionUser(HttpSession session, User loggedInUser, boolean madeNewSession) {
     log.info("setSessionUser - made session - " + session + "\n\tnewSession " + madeNewSession +
-        "\n\tuser - " + loggedInUser);
+        "\n\tuser - " + loggedInUser.getID() + " : " + loggedInUser.getUserID() + " : " + loggedInUser.getPermissions());
+
     try {
       long then = System.currentTimeMillis();
       setSessionUserAndRemember(session, loggedInUser.getID());
@@ -433,7 +434,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
       }
 
     } else {
-      if (DEBUG_FAILURE) {
+      if (DEBUG) {
         log.info("lookupUserFromSessionOrDB User found in HTTP session. User: {}. SID: {}", sessUserID, request.getRequestedSessionId());
       }
     }
@@ -757,7 +758,11 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     } else {
       User byID = userDAO.getByID(userForSession);
       long now = System.currentTimeMillis();
-      log.warn("lookupUserFromDBSession took " + (now - then) + " millis to get user ");
+
+      if (now - then > 10) {
+        log.info("lookupUsrFromDBSession took " + (now - then) + " millis to get user ");
+      }
+
       return byID;
     }
   }

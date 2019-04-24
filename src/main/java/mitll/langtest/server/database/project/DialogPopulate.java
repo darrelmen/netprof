@@ -72,7 +72,7 @@ import static mitll.langtest.shared.answer.AudioType.REGULAR;
  */
 public class DialogPopulate {
   private static final Logger logger = LogManager.getLogger(DialogPopulate.class);
- // private static final boolean DO_AUDIO_COPY = false;
+  // private static final boolean DO_AUDIO_COPY = false;
 
   private final DatabaseImpl db;
   /**
@@ -160,18 +160,22 @@ public class DialogPopulate {
         logger.error("maybeDoInterpreterImport huh? default user is -1?");
       }
 
-      String aShort = excel.startsWith("short") ? "Short Interpreter" : InterpreterReader.DEFAULT_CHAPTER;
-
-      logger.info("chapter is " + aShort);
-
-      Map<Dialog, SlickDialog> dialogToSlick = new InterpreterReader(InterpreterReader.DEFAULT_UNIT,
-          aShort).getInterpreterDialogs(defaultUser, project, engProject, excel);
+      Map<Dialog, SlickDialog> dialogToSlick =
+          new InterpreterReader(InterpreterReader.DEFAULT_UNIT, getDefaultChapter(excel))
+              .getInterpreterDialogs(defaultUser, project, engProject, excel);
 
       if (!dialogToSlick.isEmpty()) {
         logger.info("maybeDoInterpreterImport (" + project.getName() + ") read " + dialogToSlick.size());
         addDialogs(project, englishProject, dialogDAO, Collections.emptyMap(), defaultUser, DialogType.INTERPRETER, dialogToSlick, keepAudio);
       }
     }
+  }
+
+  @NotNull
+  private String getDefaultChapter(String excel) {
+    String aShort = excel.startsWith("short") ? "Short Interpreter" : InterpreterReader.DEFAULT_CHAPTER;
+    logger.info("chapter is " + aShort);
+    return aShort;
   }
 
   /**
@@ -268,13 +272,13 @@ public class DialogPopulate {
    * @param dialogID
    * @see #addDialogs
    */
-  private void addExercises(int projid,
-                            int defaultUser,
-                            List<String> typeOrder,
-                            Timestamp modified,
-                            Map<ClientExercise, Integer> allImportExToID,
-                            Dialog dialog,
-                            int dialogID) {
+  public void addExercises(int projid,
+                           int defaultUser,
+                           List<String> typeOrder,
+                           Timestamp modified,
+                           Map<ClientExercise, Integer> allImportExToID,
+                           IDialog dialog,
+                           int dialogID) {
     List<CommonExercise> commonExercisesFromDialog = getCommonExercisesFromDialog(dialog);
 
     Map<CommonExercise, Integer> importExToID = addExercises(projid, defaultUser, typeOrder, commonExercisesFromDialog);
@@ -284,10 +288,12 @@ public class DialogPopulate {
     importExToID.forEach((k, v) -> k.getMutable().setID(v));
 
     db.getUserExerciseDAO().getRelatedExercise().addBulkRelated(
-        getSlickRelatedExercises(projid, modified, dialog, dialogID, importExToID));
+        getSlickRelatedExercises(projid, modified, dialog.getExercises(), dialogID, importExToID));
   }
 
-  private Map<CommonExercise, Integer> addExercises(int projid, int defaultUser, List<String> typeOrder,
+  private Map<CommonExercise, Integer> addExercises(int projid,
+                                                    int defaultUser,
+                                                    List<String> typeOrder,
                                                     List<CommonExercise> commonExercisesFromDialog) {
 //    commonExercisesFromDialog
 //        .forEach(ex -> logger.info("ex fl " + ex.getForeignLanguage() + " = " + ex.getEnglish() + " " + ex.hasEnglishAttr()));
@@ -303,7 +309,7 @@ public class DialogPopulate {
   }
 
   @NotNull
-  private List<CommonExercise> getCommonExercisesFromDialog(Dialog dialog) {
+  private List<CommonExercise> getCommonExercisesFromDialog(IDialog dialog) {
     return toCommon(dialog.getExercises());
   }
 
@@ -339,7 +345,7 @@ public class DialogPopulate {
 
   @NotNull
   private IDialogReader getDialogReader(Language languageEnum) {
-    return languageEnum == Language.KOREAN ? new KPDialogs() : new EnglishDialog();
+    return languageEnum == Language.KOREAN ? new KPDialogs("1","1") : new EnglishDialog();
   }
 
   /**
@@ -414,12 +420,13 @@ public class DialogPopulate {
   @NotNull
   private List<SlickRelatedExercise> getSlickRelatedExercises(int projid,
                                                               Timestamp modified,
-                                                              Dialog dialog,
+                                                              List<ClientExercise> exercises,
                                                               int dialogID,
                                                               Map<CommonExercise, Integer> importExToID) {
     ClientExercise prev = null;
     List<SlickRelatedExercise> relatedExercises = new ArrayList<>();
-    for (ClientExercise ex : dialog.getExercises()) {
+
+    for (ClientExercise ex : exercises) {
       if (prev != null) {
         int prevID = importExToID.get(prev.asCommon());
         int currID = importExToID.get(ex.asCommon());

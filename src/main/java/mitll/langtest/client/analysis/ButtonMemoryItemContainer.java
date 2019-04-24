@@ -62,13 +62,14 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class ButtonMemoryItemContainer<T extends HasID & IPublicPrivate> extends MemoryItemContainer<T> {
+  private final Logger logger = Logger.getLogger("ButtonMemoryItemContainer");
+
   /**
    * @see #addIsPublic
    */
   protected static final String PUBLIC = "Public?";
   protected static final String NO = "No";
   protected static final String YES = "Yes";
-  //private final Logger logger = Logger.getLogger("ButtonMemoryItemContainer");
   private final List<Button> buttons = new ArrayList<>();
 
 
@@ -120,6 +121,9 @@ public abstract class ButtonMemoryItemContainer<T extends HasID & IPublicPrivate
 
       @Override
       public SafeHtml getValue(T shell) {
+
+        logger.info("shell " + shell);
+
         return getSafeHtml(shell.isPrivate() ? NO : YES);
       }
     };

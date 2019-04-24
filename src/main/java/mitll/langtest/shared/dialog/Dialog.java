@@ -73,6 +73,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
   private List<ExerciseAttribute> attributes = new ArrayList<>();
   private List<ClientExercise> exercises = new ArrayList<>();
   private List<ClientExercise> coreVocabulary = new ArrayList<>();
+
   private boolean isPrivate;
 
   private float score = -1;

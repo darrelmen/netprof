@@ -32,6 +32,7 @@ package mitll.langtest.server.database.project;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.ProjectType;
 import mitll.npdata.dao.SlickProject;
 
 import java.util.List;
@@ -44,9 +45,15 @@ public interface IProject {
    */
   String WEBSERVICE_HOST_DEFAULT = "127.0.0.1";
 
-  Language getLanguageEnum();
+  int getID();
+
+  String getLanguage();
+
+  abstract Language getLanguageEnum();
 
   SlickProject getProject();
+
+  ProjectType getKind();
 
   List<String> getTypeOrder();
 

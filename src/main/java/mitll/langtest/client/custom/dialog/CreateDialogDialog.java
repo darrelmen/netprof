@@ -211,10 +211,6 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
 
     String imageRef = "";
 
-    // DialogType dialogType = DialogType.DIALOG;
-
-//    DialogType dialogType = DialogType.valueOf(this.dialogType.getSelectedValue());
-
     IDialog newDialog = new Dialog(-1,
         controller.getUser(),
         controller.getProjectID(),

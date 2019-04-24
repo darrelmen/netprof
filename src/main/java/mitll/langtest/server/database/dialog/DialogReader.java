@@ -59,6 +59,10 @@ class DialogReader extends BaseDialogReader {
 
   private static final String DIALOG = "dialog";
 
+  DialogReader(String unit, String chapter) {
+    super(unit, chapter);
+  }
+
   public Map<Dialog, SlickDialog> getInterpreterDialogs(int defaultUser, Project project, Project englishProject, String excelFile) {
     return Collections.emptyMap();
   }

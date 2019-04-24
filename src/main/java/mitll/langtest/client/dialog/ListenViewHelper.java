@@ -184,6 +184,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #showContent
    */
   void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
+    logger.info("showDialogGetRef : show dialog " +dialogID);
     if (dialog != null) {
       this.dialogID = dialog.getID();
       isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
@@ -272,7 +273,6 @@ public class ListenViewHelper<T extends ITurnPanel>
       }
     }
 
-
     return rowOne;
   }
 
@@ -285,6 +285,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   /**
    * TODO : allow english speaker to go second
+   *
    * @param dialog
    * @return
    */
@@ -298,18 +299,24 @@ public class ListenViewHelper<T extends ITurnPanel>
       boolean hasEnglishAttr = next.hasEnglishAttr();
 
       if (hasEnglishAttr && !getExerciseSpeaker(next).equalsIgnoreCase(secondSpeaker)) {
-        secondSpeaker = controller.getLanguageInfo().toDisplay() + " Speaker";
+        secondSpeaker = getProjectLangSpeaker();
       }
     } else if (dialog.getKind() == DialogType.INTERPRETER) {
-      secondSpeaker = controller.getLanguageInfo().toDisplay() + " Speaker";
+      secondSpeaker = getProjectLangSpeaker();
     }
 
     if (secondSpeaker == null) secondSpeaker = SPEAKER_B;
     return secondSpeaker;
   }
 
+  @NotNull
+  private String getProjectLangSpeaker() {
+    return controller.getLanguageInfo().toDisplay() + " Speaker";
+  }
+
   /**
    * TODO : allow english speaker to go second
+   *
    * @param dialog
    * @return
    */
@@ -514,13 +521,19 @@ public class ListenViewHelper<T extends ITurnPanel>
   @NotNull
   DivWidget getTurns(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
-    rowOne.getElement().setId("turnContainer");
-    rowOne.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
-    rowOne.getElement().getStyle().setMarginTop(10, PX);
-    rowOne.addStyleName("cardBorderShadow");
-    rowOne.getElement().getStyle().setMarginBottom(10, PX);
 
-    List<String> speakers = dialog.getSpeakers();
+    logger.info("dialog " +dialog);
+    logger.info("exercises  " +dialog.getExercises());
+
+    {
+      rowOne.getElement().setId("turnContainer");
+      rowOne.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+      rowOne.getElement().getStyle().setMarginTop(10, PX);
+      rowOne.addStyleName("cardBorderShadow");
+      rowOne.getElement().getStyle().setMarginBottom(10, PX);
+    }
+
+  //  List<String> speakers = dialog.getSpeakers();
     //logger.info("speakers " + speakers);
 
 //    Map<String, List<ClientExercise>> speakerToEx = dialog.groupBySpeaker();
@@ -533,16 +546,19 @@ public class ListenViewHelper<T extends ITurnPanel>
     logger.info("for speaker " + middle + " got " + middleTurns.size());
     logger.info("for speaker " + right + " got " + speakerToEx.get(right).size());*/
 
-    dialog.getExercises().forEach(clientExercise -> {
-      // COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
-      //    logger.info("ex " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage() + " : " + columnForEx);
-
-      addTurn(rowOne, getColumnForEx(left, right, clientExercise), clientExercise);
-    });
+    addTurnPerExercise(dialog, rowOne, left, right);
 
     markFirstTurn();
 
     return rowOne;
+  }
+
+  protected void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
+    dialog.getExercises().forEach(clientExercise -> {
+      // COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
+      //    logger.info("ex " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage() + " : " + columnForEx);
+      addTurn(rowOne, getColumnForEx(left, right, clientExercise), clientExercise);
+    });
   }
 
   private COLUMNS getColumnForEx(String left, String right, ClientExercise clientExercise) {
@@ -668,6 +684,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @param clientExercise
    * @param isRight
    * @return
+   * @see #addTurn
    */
   @NotNull
   T getTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
@@ -678,6 +695,12 @@ public class ListenViewHelper<T extends ITurnPanel>
     return turn;
   }
 
+  /**
+   * @see #getTurnPanel
+   * @param clientExercise
+   * @param columns
+   * @return
+   */
   @NotNull
   T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
     boolean isInterpreter = columns == COLUMNS.MIDDLE;
@@ -685,18 +708,14 @@ public class ListenViewHelper<T extends ITurnPanel>
     boolean rightJustify = isInterpreter &&
         thisView == INavigation.VIEWS.LISTEN && clientExercise.hasEnglishAttr();
 
-    TurnPanel widgets = new TurnPanel(
-        clientExercise,
-        controller,
-        null,
-        alignments,
-        this,
-        columns,
-        rightJustify);
+    T widgets = makeTurnPanel(clientExercise, columns, rightJustify);
 
     if (isInterpreter) {
-      widgets.addStyleName("inlineFlex");
-      widgets.setWidth("100%");
+      if (widgets instanceof UIObject) {
+        UIObject wid = (UIObject) widgets;
+        wid.addStyleName("inlineFlex");
+        wid.setWidth("100%");
+      }
     }
 
 //    logger.info("reallyGetTurnPanel this view " + thisView);
@@ -712,6 +731,26 @@ public class ListenViewHelper<T extends ITurnPanel>
 //      }
 //    }
     return (T) widgets;
+  }
+
+  /**
+   * TODO how to do this without casting????
+   *
+   * @param clientExercise
+   * @param columns
+   * @param rightJustify
+   * @return
+   */
+  @NotNull
+  protected T makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, boolean rightJustify) {
+    return (T) new TurnPanel(
+        clientExercise,
+        controller,
+        null,
+        alignments,
+        this,
+        columns,
+        rightJustify);
   }
 
   private boolean gotTurnClick = false;

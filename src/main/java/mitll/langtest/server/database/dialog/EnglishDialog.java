@@ -102,6 +102,10 @@ public class EnglishDialog extends DialogReader implements IDialogReader {
 
   private final DialogProps dialogProps = new DialogProps(docIDS, title, fltitle, dir, unit, chapter, page, pres);
 
+  public EnglishDialog() {
+    super("1", "1");
+  }
+
   /**
    * @param defaultUser
    * @param exToAudio

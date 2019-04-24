@@ -68,10 +68,9 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    */
   public void addAlignmentOutput(Project project, Collection<ClientExercise> toAddAudioTo) {
-    if (project != null) {
+    if (project != null && !toAddAudioTo.isEmpty()) {
       int projectID = project.getID();
       Map<Integer, AlignmentOutput> audioToAlignment = project.getAudioToAlignment();
-//      Map<Integer, AudioAttribute> idToAudio = new HashMap<>();
 
       logger.info("addAlignmentOutput : For project " + projectID + " found " + audioToAlignment.size() +
           " audio->alignment entries, trying to marry to " + toAddAudioTo.size() + " exercises");
@@ -79,15 +78,12 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
       Set<Integer> ids = new HashSet<>();
 
       for (ClientExercise exercise : toAddAudioTo) {
-        //  setAlignmentInfo(audioToAlignment, idToAudio, exercise);
         addAudioIDs(exercise, ids);
-        //  exercise.getDirectlyRelated().forEach(context -> setAlignmentInfo(audioToAlignment, idToAudio, context));
         exercise.getDirectlyRelated().forEach(context -> addAudioIDs(context, ids));
       }
 
       ids.removeAll(audioToAlignment.keySet());
 
-      // Map<Integer, AlignmentAndScore> alignments = getAlignmentsFromDB(projectID, idToAudio, project.getLanguageEnum());
       Map<Integer, AlignmentAndScore> alignments = getAlignmentsFromDB(projectID, ids, project.getLanguageEnum());
 
       // synchronized (audioToAlignment) {

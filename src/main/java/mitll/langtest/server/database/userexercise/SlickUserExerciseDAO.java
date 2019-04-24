@@ -796,7 +796,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 //    logger.info("ExToPhones " + exToPhones.size());
       //  logger.info("examining  " + all.size() + " exercises...");
 
-      int n;
+      //int n;
       boolean shouldSwap = lookup.shouldSwapPrimaryAndAlt();
 
       for (SlickExercise slickExercise : all) {

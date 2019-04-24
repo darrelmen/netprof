@@ -44,6 +44,7 @@ import mitll.langtest.client.dialog.DialogEditor;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.EditorTurn;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.IDialog;
@@ -54,12 +55,13 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 7/3/17.
  */
 public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
-  // private final Logger logger = Logger.getLogger("DialogEditorView");
+  private final Logger logger = Logger.getLogger("DialogEditorView");
 
   private static final String LIST = "dialog";
 
@@ -184,6 +186,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     DialogEditor<EditorTurn> editorTurnDialogEditor = new DialogEditor<>(controller, INavigation.VIEWS.DIALOG_EDITOR);
     editorTurnDialogEditor.showContent(listContent, INavigation.VIEWS.DIALOG_EDITOR);
 
+    logger.info("ist content " + listContent);
     new DialogHelper(true).show(
         "Add/Edit Turns" + " : " + getListName(),
         Collections.emptyList(),
@@ -293,9 +296,13 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
       return true;
     }
 
+    /**
+     * @see SimplePagingContainer#addDoubleClick
+     * @param selected
+     */
     @Override
     protected void gotDoubleClickOn(T selected) {
-//      logger.info("gotDoubleClickOn got double click on " + selected);
+     logger.info("gotDoubleClickOn got double click on " + selected);
       editList();
     }
   }

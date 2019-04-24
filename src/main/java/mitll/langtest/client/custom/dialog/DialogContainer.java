@@ -222,7 +222,7 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
   protected String getItemLabel(IDialog shell) {
     //  logger.info("shell is " + shell);
     String foreignLanguage = shell.getForeignLanguage();
-    logger.info("fl    is '" + foreignLanguage + "'");
+   // logger.info("fl    is '" + foreignLanguage + "'");
 
 /*    if (foreignLanguage.isEmpty()) {
       logger.warning("got " + shell);

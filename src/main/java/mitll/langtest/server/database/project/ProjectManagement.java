@@ -1239,7 +1239,7 @@ public class ProjectManagement implements IProjectManagement {
             cc = INTERPRETER;
             // logger.info("addModeChoices : found first interpreter dialog : " + iDialog);
           } else {
-            logger.info("dialog kind is " + kind);
+            logger.info("addModeChoices : dialog kind is " + kind + " for " +iDialog.getID());
           }
         }
         dialog.setName(name);

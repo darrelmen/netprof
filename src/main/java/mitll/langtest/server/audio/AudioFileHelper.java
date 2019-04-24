@@ -841,6 +841,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * Fred stress test discovered lots of FD left open...
+   *
    * @param before
    */
   private void checkFD(long before) {
@@ -2452,8 +2453,10 @@ public class AudioFileHelper implements AlignDecode {
       File file = new File(dictFile);
       this.dictModified = file.lastModified();
 
-      logger.info("makeDict (" + project.getID() + " " + project.getName() + " " + project.getLanguageEnum().toDisplay() +
-          ") read " + file.getAbsolutePath() + " with mod date " + new Date(dictModified));
+      if (DEBUG) {
+        logger.info("makeDict (" + project.getID() + " " + project.getName() + " " + project.getLanguageEnum().toDisplay() +
+            ") read " + file.getAbsolutePath() + " with mod date " + new Date(dictModified));
+      }
 
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
       long now = System.currentTimeMillis();

@@ -35,10 +35,14 @@ import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.DialogStatus;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.langtest.shared.exercise.MutableExercise;
+import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.SlickDialog;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.poi.ss.usermodel.Sheet;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -48,10 +52,19 @@ import java.util.*;
 import static mitll.langtest.shared.dialog.DialogMetadata.FLTITLE;
 
 public class BaseDialogReader {
+  public static final String ENGLISH_SPEAKER = "English Speaker";
+  protected static final String INTERPRETERSPEAKER = "Interpreter";
   private static final Logger logger = LogManager.getLogger(BaseDialogReader.class);
   private static final String OPT_NETPROF_DIALOG = "/opt/netprof/dialog/";
   private static final List<String> SPEAKER_LABELS = Arrays.asList("A", "B", "C", "D", "E", "F", "I");
   private static final String IMAGES = "images/";
+  protected String unit;
+  protected String chapter;
+
+  BaseDialogReader(String unit, String chapter) {
+    this.unit = unit;
+    this.chapter = chapter;
+  }
   // private static final String JPG = ".jpg";
 
   /**
@@ -151,5 +164,55 @@ public class BaseDialogReader {
   @NotNull
   String getImageBaseDir(Project project) {
     return IMAGES + project.getLanguage().toLowerCase() + File.separator;
+  }
+
+  /**
+   * @param speakers  - modified maybe!
+   * @param text
+   * @param speakerID
+   * @param lang
+   * @param unitChapterPairs
+   * @return
+   * @see #readFromSheet(int, Sheet, Project, Project)
+   */
+  protected Exercise getExercise(String text,
+                                 String english,
+                                 String transliteration,
+
+                                 String speakerID,
+                                 Language lang,
+                                 String turnID,
+                                 Map<String, String> unitChapterPairs) {
+    Exercise exercise = new Exercise();
+
+    MutableExercise mutable = exercise.getMutable();
+    if (!turnID.isEmpty()) {
+      mutable.setOldID(turnID);
+    }
+
+    exercise.setUnitToValue(unitChapterPairs);
+
+    addAttributes(speakerID, lang, exercise);
+
+    mutable.setForeignLanguage(text);
+    mutable.setEnglish(english);
+    mutable.setTransliteration(transliteration);
+
+    return exercise;
+  }
+
+  private void addAttributes(String speakerID, Language lang, Exercise exercise) {
+    if (!speakerID.isEmpty()) {
+      exercise.addAttribute(new ExerciseAttribute(DialogMetadata.SPEAKER.getCap(), speakerID, false));
+    }
+    exercise.addAttribute(new ExerciseAttribute(DialogMetadata.LANGUAGE.getCap(), lang.name(), false));
+  }
+
+  @NotNull
+  protected Map<String, String> getDefaultUnitAndChapter(List<String> typeOrder) {
+    Map<String, String> unitToValue = new HashMap<>();
+    unitToValue.put(typeOrder.get(0), unit);
+    unitToValue.put(typeOrder.get(1), chapter);
+    return unitToValue;
   }
 }

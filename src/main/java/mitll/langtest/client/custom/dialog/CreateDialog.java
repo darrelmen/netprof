@@ -65,6 +65,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends BasicDialog {
+  public static final int TYPE_AND_VALUE_WIDTH = 200;
   private final Logger logger = Logger.getLogger("CreateDialog");
 
   static final String CREATE_NEW_LIST = "Create New List";
@@ -147,18 +148,24 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     }
   }
 
-  private void gotChangeFor(String type, ListBox listBox, List<ListBox> all,
-                            boolean addAll) {
+  private interface TypeToValuesCompleted {
+    void completed();
+  }
+
+  private void gotChangeFor(String type,
+                            ListBox listBox,
+                            List<ListBox> all,
+                            boolean addAll,
+                            TypeToValuesCompleted completed) {
     int i = all.indexOf(listBox);
     int nextIndex = i + 1;
     if (nextIndex < all.size()) {
       ListBox nextBox = all.get(nextIndex);
 
-      String current = listBox.getSelectedValue();
-      Pair pair = new Pair(type, current);
-
+      Pair pair = new Pair(type, listBox.getSelectedValue());
       List<Pair> pairs = new ArrayList<>();
       pairs.add(pair);
+
       controller.getExerciseService().getTypeToValues(new FilterRequest(0, pairs, -1),
           new AsyncCallback<FilterResponse>() {
             @Override
@@ -167,6 +174,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
                 logger.info("getTypeToValues : got " + caught);
               }
               controller.handleNonFatalError("no type to values", caught);
+              completed.completed();
             }
 
             /**
@@ -189,9 +197,9 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
               if (matchInfos != null) {
                 matchInfos.forEach(matchInfo -> nextBox.addItem(matchInfo.getValue()));
               }
+              completed.completed();
             }
           });
-
     }
   }
 
@@ -491,10 +499,10 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
       allUnitChapterGroup = new ArrayList<>();
 
       boolean first = true;
-      int width = 150;
+      int width = TYPE_AND_VALUE_WIDTH;
       for (String type : typeOrder) {
         ListBox listBox = getListBox(width);
-        listBox.addChangeHandler(event -> gotChangeFor(type, listBox, all, addAll));
+        listBox.addChangeHandler(event -> gotChangeFor(type, listBox, all, addAll, () -> logger.info("OK, type->values done for " + type)));
         all.add(listBox);
 
         ControlGroup e = new ControlGroup();
@@ -520,26 +528,40 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
         if (unit != null && i1 == 0) {
           listBox.setSelectedValue(unit);
         }
+      }
 
-        if (chapter != null && i1 == 1) {
-          listBox.setSelectedValue(chapter);
-          String selectedValue = listBox.getSelectedValue();
 
-          if (selectedValue == null) {
-            int itemCount = listBox.getItemCount();
-            logger.info("no " + chapter + " in " + selectedValue + " " + itemCount);
-            for (int i = 0; i < itemCount; i++) {
-              String value = listBox.getValue(i);
-              logger.info("no " + chapter + " in " + value);
-            }
-          } else {
-            logger.info("no " + chapter + " selected is " + selectedValue);
-
-          }
-        }
+      if (chapter != null && typeOrder.size() > 1) {
+        String type = typeOrder.get(0);
+        gotChangeFor(type, allUnitChapter.get(0), all, addAll, () -> {
+          logger.info("OK, type->values done for " + type);
+          setChapter(chapter, allUnitChapter.get(1));
+        });
       }
 
       return this;
+    }
+  }
+
+  /**
+   * Gotta wait until type->values has come back.
+   * @param chapter
+   * @param listBox
+   */
+  private void setChapter(String chapter, ListBox listBox) {
+    logger.info("setChapter chapter has " + listBox.getVisibleItemCount() + " choices...");
+    listBox.setSelectedValue(chapter);
+    String selectedValue = listBox.getSelectedValue();
+
+    if (selectedValue == null) {
+      int itemCount = listBox.getItemCount();
+      logger.info("invoke no " + chapter + " in " + selectedValue + " : " + itemCount);
+      for (int i = 0; i < itemCount; i++) {
+        String value = listBox.getValue(i);
+        logger.info("invoke (" + i + ") no " + chapter + " in " + value);
+      }
+    } else {
+      logger.info("invoke no " + chapter + " selected is " + selectedValue);
     }
   }
 }

@@ -123,11 +123,10 @@ public class Project implements IPronunciationLookup, IProject {
    * @see #setDialogs
    */
   private List<IDialog> dialogs = new ArrayList<>();
+//  private Map<Integer, IDialog> idToDialog = new ConcurrentHashMap<>();
+
   private final ISection<IDialog> dialogSectionHelper = new SectionHelper<>();
   private JsonExport jsonExport;
-
-  //private ExerciseTrie<CommonExercise> phoneTrie;
-  //private Map<Integer, ExercisePhoneInfo> exToPhone;
 
   /**
    * @param exerciseDAO
@@ -157,6 +156,7 @@ public class Project implements IPronunciationLookup, IProject {
     this.pathHelper = pathHelper;
   }
 
+  @Override
   public int getID() {
     return project == null ? -1 : project.id();
   }
@@ -165,6 +165,7 @@ public class Project implements IPronunciationLookup, IProject {
     this.project = project;
   }
 
+  @Override
   public String getLanguage() {
     return project == null ? "No project yet" : project.language();
   }
@@ -212,11 +213,12 @@ public class Project implements IPronunciationLookup, IProject {
     return project;
   }
 
+  @Override
   public ProjectType getKind() {
     return ProjectType.valueOf(project.kind());
   }
 
-  public boolean shouldLoad() {
+  boolean shouldLoad() {
     return project != null && !toSkip.contains(ProjectStatus.valueOf(project.status()));
   }
 
@@ -472,7 +474,7 @@ public class Project implements IPronunciationLookup, IProject {
     putAllProps();
   }
 
-  public String getProp(ProjectProperty projectProperty) {
+  String getProp(ProjectProperty projectProperty) {
     return getProp(projectProperty.getName());
   }
 
@@ -660,20 +662,6 @@ public class Project implements IPronunciationLookup, IProject {
     return first.orElse(null);
   }
 
-/*  public void setPhoneTrie(ExerciseTrie<CommonExercise> phoneTrie) {
-    this.phoneTrie = phoneTrie;
-  }
-
-  public ExerciseTrie<CommonExercise> getPhoneTrie() {
-    return phoneTrie;
-  }*/
-
-/*
-  public void setExToPhone(Map<Integer, ExercisePhoneInfo> exToPhone) {
-    this.exToPhone = exToPhone;
-  }
-*/
-
   /**
    * @param transcript
    * @param transliteration
@@ -740,7 +728,7 @@ public class Project implements IPronunciationLookup, IProject {
    *
    * @return true if this server handles this project.
    */
-  public boolean isMyProject() {
+  boolean isMyProject() {
     String hostName = serverProps.getHostName();
 
     boolean myProject = true;
@@ -776,7 +764,7 @@ public class Project implements IPronunciationLookup, IProject {
     this.fileToRecorder = fileToRecorder;
   }
 
-  public Integer getUserForFile(String requestURI) {
+  Integer getUserForFile(String requestURI) {
     Integer user = fileToRecorder.get(requestURI);
 
     if (user == null) {
@@ -817,7 +805,7 @@ public class Project implements IPronunciationLookup, IProject {
     //logger.info("addAnswerToUser project " + getProject().id() + " now has " + fileToRecorder.size());
   }
 
-  public int getPort() {
+  int getPort() {
     try {
       String prop = getProp(WEBSERVICE_HOST_PORT);
       if (prop == null || prop.isEmpty()) return -1;
@@ -835,7 +823,7 @@ public class Project implements IPronunciationLookup, IProject {
   /**
    * @return
    */
-  public List<IDialog> getDialogs() {
+  public synchronized List<IDialog> getDialogs() {
     return dialogs;
   }
 
@@ -855,9 +843,12 @@ public class Project implements IPronunciationLookup, IProject {
    * @param dialogs
    * @see DialogPopulate#addDialogInfo
    */
-  public void setDialogs(List<IDialog> dialogs) {
+  public synchronized void setDialogs(List<IDialog> dialogs) {
     this.dialogs = dialogs;
+    createDialogSectionHelper(dialogs);
+  }
 
+  private void createDialogSectionHelper(List<IDialog> dialogs) {
     List<List<Pair>> seen = new ArrayList<>();
     List<String> typeOrder = getTypeOrder();
 
@@ -869,14 +860,17 @@ public class Project implements IPronunciationLookup, IProject {
 
     dialogs.forEach(dialog -> {
       List<Pair> pairs = new ArrayList<>();
-      String unit = dialog.getUnit();
-      if (!unit.isEmpty() && hasUnitType) {
-        pairs.add(new Pair(unitType, unit));
+      {
+        String unit = dialog.getUnit();
+        if (!unit.isEmpty() && hasUnitType) {
+          pairs.add(new Pair(unitType, unit));
+        }
       }
-
-      String chapter = dialog.getChapter();
-      if (!chapter.isEmpty() && hasChapterType) {
-        pairs.add(new Pair(chapterType, chapter));
+      {
+        String chapter = dialog.getChapter();
+        if (!chapter.isEmpty() && hasChapterType) {
+          pairs.add(new Pair(chapterType, chapter));
+        }
       }
 
       pairs.addAll(dialog.getAttributes());
@@ -901,11 +895,11 @@ public class Project implements IPronunciationLookup, IProject {
     this.jsonExport = jsonExport;
   }
 
-  public String toString() {
-    return "Project\n\t(" + getTypeOrder() + ") : project " + project;// + "\n\ttypes " + getTypeOrder() + " exercise dao " + exerciseDAO;
-  }
-
   public PathHelper getPathHelper() {
     return pathHelper;
+  }
+
+  public String toString() {
+    return "Project\n\t(" + getTypeOrder() + ") : project " + project;// + "\n\ttypes " + getTypeOrder() + " exercise dao " + exerciseDAO;
   }
 }
