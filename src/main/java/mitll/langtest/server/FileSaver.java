@@ -42,6 +42,7 @@ public class FileSaver {
   private static final int BUFFER_SIZE = 4096;
   // about 30 seconds at 16K and sample rate...
   private static final int ONE_MG = 1048576;  // 1 M
+  private static final boolean DEBUG = false;
 
   /**
    * After writing the file, it shouldn't be modified any more.
@@ -74,7 +75,9 @@ public class FileSaver {
 
     FileSaveResponse fileSaveResponse = writeToFile(inputStream, saveFile);
 
-    logger.info("writeAudioFile : wrote file " + saveFile.getAbsolutePath() + " exid " + realExID + " by " + userid);
+    if (DEBUG) {
+      logger.info("writeAudioFile : wrote file " + saveFile.getAbsolutePath() + " exid " + realExID + " by " + userid);
+    }
     if (!saveFile.setReadOnly()) {
       logger.warn("writeAudioFile huh? can't mark file read only?");
     }

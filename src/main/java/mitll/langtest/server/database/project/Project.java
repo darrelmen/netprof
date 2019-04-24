@@ -127,6 +127,10 @@ public class Project implements IPronunciationLookup, IProject {
 
   private final ISection<IDialog> dialogSectionHelper = new SectionHelper<>();
   private JsonExport jsonExport;
+  /**
+   *
+   */
+  private final Map<String, String> propCache = new ConcurrentHashMap<>();
 
   /**
    * @param exerciseDAO
@@ -297,7 +301,7 @@ public class Project implements IPronunciationLookup, IProject {
     return dialogSectionHelper;
   }
 
-  public void setJsonSupport(JsonSupport jsonSupport) {
+  void setJsonSupport(JsonSupport jsonSupport) {
     this.jsonSupport = jsonSupport;
   }
 
@@ -442,12 +446,15 @@ public class Project implements IPronunciationLookup, IProject {
 
   public ModelType getModelType() {
     String prop = getProp(MODEL_TYPE);
+  //  logger.info("getModelType (" + getID() + ") " + MODEL_TYPE + " : " + prop);
 
     if (prop == null || prop.isEmpty()) {
       return ModelType.HYDRA;
     } else {
       try {
-        return ModelType.valueOf(prop);
+        ModelType modelType = ModelType.valueOf(prop);
+    //    logger.info("\tgetModelType (" + getID() + ") " + MODEL_TYPE + " : " + prop + " : " + modelType);
+        return modelType;
       } catch (IllegalArgumentException e) {
         logger.error("couldn't parse '" + prop + "' as model type enum?");
         return ModelType.HYDRA;
@@ -463,7 +470,6 @@ public class Project implements IPronunciationLookup, IProject {
     return getProp(SWAP_PRIMARY_AND_ALT).equalsIgnoreCase(TRUE);
   }
 
-  private final Map<String, String> propCache = new HashMap<>();
 
   /**
    * Re populate cache really.
@@ -490,7 +496,7 @@ public class Project implements IPronunciationLookup, IProject {
       putAllProps();
 
       String propValue = db.getProjectDAO().getPropValue(getID(), prop);  // blank if miss, not null
-      //   logger.info("getProp : project " + getID() + " prop " + prop + " = " + propValue);
+    //  logger.info("getProp : project " + getID() + " prop " + prop + " = " + propValue);
 
       if (propValue == null) {
         logger.warn("huh? no prop value for " + prop);
@@ -500,12 +506,16 @@ public class Project implements IPronunciationLookup, IProject {
       }
       return propValue;
     } else {
+    //  logger.info("getProp : project #" + getID() + " : '" + prop + "' = '" + s + "'");
       return s;
     }
   }
 
   private void putAllProps() {
-    propCache.putAll(db.getProjectDAO().getProps(getID()));
+    int id = getID();
+    propCache.putAll(db.getProjectDAO().getProps(id));
+
+  //  logger.info("getProp : project #" + getID() + " props " + propCache);
   }
 
   private int spew = 0;

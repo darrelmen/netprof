@@ -195,48 +195,6 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
   }
 
   /**
-   * @param testAudioDir
-   * @param testAudioFileNoSuffix
-   * @param sentence              that should be what the test audio contains
-   * @param imageOutDir
-   * @param useCache
-   * @param prefix
-   * @param precalcScores
-   * @param usePhoneToDisplay
-   * @param kaldi
-   * @return PretestScore object
-   * @see AudioFileHelper#getASRScoreForAudio
-   */
-  /*public PretestScore scoreRepeat(String testAudioDir,
-                                  String testAudioFileNoSuffix,
-                                  String sentence,
-                                  Collection<String> lmSentences,
-                                  String transliteration,
-
-                                  String imageOutDir,
-                                  ImageOptions imageOptions,
-
-                                  boolean decode,
-                                  boolean useCache,
-
-                                  String prefix,
-
-                                  PrecalcScores precalcScores,
-                                  boolean usePhoneToDisplay,
-                                  boolean kaldi) {
-    return scoreRepeatExercise(testAudioDir,
-        testAudioFileNoSuffix,
-        sentence,
-        lmSentences,
-        transliteration,
-        imageOutDir,
-        imageOptions,
-        decode,
-
-        useCache, prefix, precalcScores, usePhoneToDisplay, kaldi);
-  }*/
-
-  /**
    * Use hydra to do scoring<br></br>
    * <p>
    * Some magic happens in {@link Scoring#writeTranscripts } where .lab files are
@@ -267,22 +225,22 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
    */
   @Override
   public PretestScore scoreRepeat(String testAudioDir,
-                                           String testAudioFileNoSuffix,
-                                           String sentence,
-                                           Collection<String> lmSentences, // TODO make two params, transcript and lm (null if no slf)
-                                           String transliteration,
-                                           String imageOutDir,
-                                           ImageOptions imageOptions,
+                                  String testAudioFileNoSuffix,
+                                  String sentence,
+                                  Collection<String> lmSentences, // TODO make two params, transcript and lm (null if no slf)
+                                  String transliteration,
+                                  String imageOutDir,
+                                  ImageOptions imageOptions,
 
-                                           boolean decode,
-                                           boolean useCache,
-                                           String prefix,
-                                           PrecalcScores precalcScores,
-                                           boolean usePhoneToDisplay,
-                                           boolean useKaldi) {
+                                  boolean decode,
+                                  boolean useCache,
+                                  String prefix,
+                                  PrecalcScores precalcScores,
+                                  boolean usePhoneToDisplay,
+                                  boolean useKaldi) {
     long then = System.currentTimeMillis();
 
-    logger.info("scoreRepeatExercise " + (decode ? "decode" : "align") + " '" + sentence + "'");
+    logger.info("scoreRepeatExercise " + (decode ? "decode" : "align") + " '" + sentence + "' scoring with " + (useKaldi ? KALDI : HYDRA));
 
     String noSuffix = testAudioDir + File.separator + testAudioFileNoSuffix;
     String pathname = noSuffix + WAV;
@@ -606,7 +564,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
       }
 
       Map<String, Float> phoneToScore = getPhoneToScore(scores.getEventScores(), phoneToDisplay);
- //     logger.info("getPretestScore phone " + phoneToScore);
+      //     logger.info("getPretestScore phone " + phoneToScore);
       Map<String, Float> wordToScore = getWordToScore(scores.getEventScores());
 //      logger.info("getPretestScore word  " + wordToScore);
 

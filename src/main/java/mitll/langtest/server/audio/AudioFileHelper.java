@@ -1615,13 +1615,20 @@ public class AudioFileHelper implements AlignDecode {
                                           String transliteration,
                                           DecoderOptions options,
                                           PrecalcScores precalcScores) {
-    String prefix = options.isUsePhoneToDisplay() ? "phoneToDisplay" : "";
-    //String path = testAudioFile.getPath();
     String firstSentence = lmSentences.iterator().next();
-//      logger.info("getASRScoreForAudio audio file path is " + path + " " + firstSentence);
+
+    boolean kaldi = isKaldi();
+    logger.info("getASRScoreForAudio audio file " +
+        "\n\tpath       " + testAudioFile.getPath() +
+        "\n\ttext       " + firstSentence +
+        "\n\tproject    " + project.getID() +
+        "\n\tmodel type " + project.getModelType() +
+        "\n\tisKaldi    " + kaldi
+
+    );
     return getASRScoreForAudio(reqid, testAudioFile.getPath(), firstSentence, lmSentences, transliteration,
-        DEFAULT, prefix, precalcScores,
-        options, isKaldi());
+        DEFAULT, options.isUsePhoneToDisplay() ? "phoneToDisplay" : "", precalcScores,
+        options, kaldi);
   }
 
   private boolean noted = false;
@@ -1837,45 +1844,6 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
-   *
-   * @param reqid
-   * @param testAudioFile
-   * @param sentence        empty string when using lmSentences non empty and vice-versa
-   * @param transliteration for languages we can't do normal LTS on (Kanji characters or similar)
-   * @param prefix
-   * @param options
-   * @param kaldi
-   * @return PretestScore
-   * @paramx precalcResult
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getResultASRInfo
-   * @see AlignDecode#getASRScoreForAudio
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio
-   **/
-/*  public PretestScore getASRScoreForAudio(int reqid,
-                                          String testAudioFile,
-                                          String sentence,
-                                          String transliteration,
-
-                                          ImageOptions imageOptions,
-
-                                          String prefix,
-                                          PrecalcScores precalcScores,
-
-                                          DecoderOptions options, boolean kaldi) {
-    return getASRScoreForAudio(reqid,
-        testAudioFile,
-        sentence,
-        null,
-        transliteration,
-        imageOptions,
-        prefix,
-        precalcScores,
-        options, kaldi);
-  }*/
-
-  /**
    * If trying asr webservice and it doesn't work, falls back to using hydec - {@link PretestScore#isRanNormally()}
    * `
    *
@@ -1906,9 +1874,9 @@ public class AudioFileHelper implements AlignDecode {
     long then = System.currentTimeMillis();
 
     boolean shouldDoDecoding = options.shouldDoDecoding() && !options.shouldDoAlignment();
-    String method = shouldDoDecoding ? "\n\t" + (shouldDoDecoding ? "Decoding " : "Aligning ") : "";
+
     logger.info("getASRScoreForAudio (" + getLanguage() + ")" +
-            method +
+            (shouldDoDecoding ? "\n\t" + "Decoding " : "") +
             (kaldi ? "\n\tKALDI : " : "") +
             "" + testAudioFile +
             "\n\twith sentence '" + sentence + "'" +
@@ -1986,7 +1954,8 @@ public class AudioFileHelper implements AlignDecode {
         shouldDoDecoding,
         options.isCanUseCache(), prefix,
         precalcScores,
-        options.isUsePhoneToDisplay(), kaldi);
+        options.isUsePhoneToDisplay(),
+        kaldi);
 
     pretestScore.setReqid(reqid);
 
@@ -2051,9 +2020,9 @@ public class AudioFileHelper implements AlignDecode {
     }
 
     AudioAnswer audioAnswer = getAudioAnswer(exercise, reqid, validity, url);
-    boolean b = exercise.asCommon().hasEnglishAttr();
+    boolean hasEnglishAttr = exercise.asCommon().hasEnglishAttr();
 
-    Language language = b ? Language.ENGLISH : this.language;
+    Language language = hasEnglishAttr ? Language.ENGLISH : this.language;
     //logger.info("getAudioAnswer Ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " language " + language);
     String phraseToDecode = getPhraseToDecode(exercise, language);
 
@@ -2069,7 +2038,8 @@ public class AudioFileHelper implements AlignDecode {
               language);
 
 
-      AudioFileHelper toUse = language == Language.ENGLISH ? getEnglishAudioFileHelper(language) : this;
+      // if the item is marked english but this is not an english project - so we can do interpreter english turns in a korean dialog for instance
+      AudioFileHelper toUse = (hasEnglishAttr && this.language != Language.ENGLISH) ? getEnglishProductionAudioFileHelper(language) : this;
 
       PretestScore asrScoreForAudio = toUse.getASRScoreForAudio(reqid,
           file,
@@ -2133,7 +2103,7 @@ public class AudioFileHelper implements AlignDecode {
     return phraseToDecode;
   }
 
-  private AudioFileHelper getEnglishAudioFileHelper(Language language) {
+  private AudioFileHelper getEnglishProductionAudioFileHelper(Language language) {
     List<Project> matchingProjects = db.getProjectManagement().getMatchingProjects(language, false);
     return matchingProjects.isEmpty() ? this : matchingProjects.get(0).getAudioFileHelper();
   }
