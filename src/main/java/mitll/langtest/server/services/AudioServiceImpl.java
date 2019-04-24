@@ -1113,6 +1113,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                      File fileInstead,
                                      int projectID) {
     Project project = db.getProject(projectID);
+   // logger.info("getAudioAnswer : project " +project);
     boolean hasProjectSpecificAudio = project.hasProjectSpecificAudio();
     AudioFileHelper audioFileHelper = getAudioFileHelper(project);
 

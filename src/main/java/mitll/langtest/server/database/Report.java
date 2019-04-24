@@ -46,7 +46,7 @@ import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.ReportUser;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickSlimEvent;
-import net.sf.uadetector.ReadableUserAgent;
+//import net.sf.uadetector.ReadableUserAgent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
