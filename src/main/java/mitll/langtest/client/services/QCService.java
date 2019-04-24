@@ -54,7 +54,6 @@ public interface QCService extends RemoteService {
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#addAnnotation
    */
   void addAnnotation(int exerciseID, String field, String status, String comment) throws DominoSessionException;
-
   // QC State changes
 
   /**
@@ -63,15 +62,6 @@ public interface QCService extends RemoteService {
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getDeleteButton
    */
   void markAudioDefect(AudioAttribute audioAttribute, HasID exid) throws DominoSessionException, RestrictedOperationException;
-
-  /**
-   * @param attr
-   * @param isMale
-   * @see mitll.langtest.client.qc.QCNPFExercise#markGender(MiniUser, Button, AudioAttribute, RememberTabAndContent, List, Button, boolean)
-   */
-/*
-  void markGender(AudioAttribute attr, boolean isMale) throws DominoSessionException, RestrictedOperationException;
-*/
 
   /**
    * @param exid

@@ -27,33 +27,8 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.client.scoring;
+package mitll.langtest.client.dialog;
 
-import com.google.gwt.user.client.ui.IsWidget;
-import mitll.langtest.client.sound.PlayListener;
-
-/**
- * A turn in a dialog.
- */
-public interface ITurnPanel extends IsWidget, ITurnMarking, RefAudioGetter {
-  /**
-   * JUST FOR DEBUGGING
-   *
-   * @return
-   */
-  int getExID();
-
-  void addPlayListener(PlayListener playListener);
-
-  boolean doPause();
-
-  void resetAudio();
-
-  boolean isPlaying();
-
-  void clearHighlight();
-
-  boolean doPlayPauseToggle();
-
-  void grabFocus();
+public interface ITurnContainer {
+  void gotForward();
 }

@@ -50,7 +50,6 @@ import java.util.Collection;
  */
 public class TurnPanelDelegate implements ITurnMarking {
   //private final Logger logger = Logger.getLogger("TurnPanel");
-
   private static final String FLOAT_LEFT = "floatLeft";
 
   private final ListenViewHelper.COLUMNS columns;
@@ -86,36 +85,6 @@ public class TurnPanelDelegate implements ITurnMarking {
     if (columns == ListenViewHelper.COLUMNS.RIGHT) widget.addStyleName("floatRight");
     else if (columns == ListenViewHelper.COLUMNS.LEFT) widget.addStyleName(FLOAT_LEFT);
   }
-
-/*  //  @Override
-  boolean shouldShowPhones() {
-    List<ExerciseAttribute> speaker = exercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equals("SPEAKER")).collect(Collectors.toList());
-    boolean hasEnglishAttr = exercise.hasEnglishAttr();
-    boolean b = !hasEnglishAttr && isInterpreterTurn(speaker);
-//    if (b)
-//      logger.info("ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " Got show phones " + b);
-    return b;
-  }
-
-  private boolean isInterpreterTurn(List<ExerciseAttribute> speaker) {
-    boolean isInterpreterTurn = false;
-
-    if (!speaker.isEmpty()) {
-      isInterpreterTurn = speaker.get(0).getValue().equals("I");
-    }
-
-    return isInterpreterTurn;
-  }*/
-
-/*  @Override
-  @NotNull
-  protected DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
-                                           List<TranscriptSegment> phonesInWord,
-                                           AudioControl audioControl,
-                                           TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
-                                           boolean simpleLayout, IHighlightSegment wordHighlight) {
-    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, false, wordHighlight, isRTL);
-  }*/
 
   /**
    * @param wrapper

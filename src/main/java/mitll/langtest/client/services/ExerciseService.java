@@ -73,9 +73,11 @@ public interface ExerciseService<T extends CommonShell & ScoredExercise> extends
   Pair getLatestScoreAudioPath(int userID, int exid, long nearTime) throws DominoSessionException;
 
   /**
-   * @see mitll.langtest.client.banner.OOVViewHelper#showUnsafeAgain(OOVInfo, int)
    * @param projid
    * @throws DominoSessionException
+   * @see mitll.langtest.client.banner.OOVViewHelper#showUnsafeAgain(OOVInfo, int)
    */
   void reload(int projid) throws DominoSessionException;
+
+  boolean updateText(int exid, String content) throws DominoSessionException;
 }

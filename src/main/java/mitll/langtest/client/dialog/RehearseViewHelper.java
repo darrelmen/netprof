@@ -701,7 +701,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   @Override
-  void gotForward() {
+  public void gotForward() {
     super.gotForward();
     safeStopRecording();
   }

@@ -30,8 +30,8 @@
 package mitll.langtest.client.dialog;
 
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.dialog.DialogEditorView;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.ITurnPanel;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
@@ -48,14 +48,28 @@ public class DialogEditor<T extends ITurnPanel> extends ListenViewHelper<T> {
     this.dialogID = dialogID;
   }
 
-
   @Override
   @NotNull
   protected T makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, boolean rightJustify) {
     return (T) new EditorTurn(
         clientExercise,
         columns,
-        rightJustify);
+        rightJustify, controller.getLanguageInfo(), controller,
+        this);
+  }
+
+  /**
+   * If on the last turn, either make a new pair of exercises for interpreter, or just a new exercise
+   * for a simple dialog.
+   */
+  @Override
+  public void gotForward() {
+    if (onLastTurn()) {
+
+    }
+    else {
+      super.gotForward();
+    }
   }
 
   @Override
@@ -85,7 +99,11 @@ public class DialogEditor<T extends ITurnPanel> extends ListenViewHelper<T> {
     return null;
   }
 
+  /**
+   * @see DialogEditorView.MyShownCloseListener#gotShown
+   */
   public void grabFocus() {
     logger.info("OK grab focus...");
+    getCurrentTurn().grabFocus();
   }
 }

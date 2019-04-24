@@ -88,4 +88,11 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   int getParentFor(int exid);
 
   boolean refresh(int exid);
+
+  /**
+   *
+   * @param toChange
+   * @return
+   */
+  boolean update(CommonExercise toChange);
 }

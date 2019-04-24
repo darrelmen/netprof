@@ -41,7 +41,6 @@ import org.jetbrains.annotations.NotNull;
 
 public class PerformViewHelper<T extends ObscureRecordDialogExercisePanel> extends RehearseViewHelper<T> {
   // private final Logger logger = Logger.getLogger("PerformViewHelper");
-
   /**
    * @see mitll.langtest.client.banner.NewContentChooser#NewContentChooser(ExerciseController, IBanner)
    * @param controller

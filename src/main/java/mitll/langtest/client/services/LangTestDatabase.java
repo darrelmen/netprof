@@ -59,18 +59,6 @@ public interface LangTestDatabase extends RemoteService {
    */
   Map<String, Float> getMaleFemaleProgress() throws DominoSessionException;
 
-  /**
-   * @param ids
-   * @param latestResultID
-   * @param typeToSection
-   * @param userListID
-   * @return
-   * @see mitll.langtest.client.flashcard.StatsFlashcardFactory.StatsPracticePanel#onSetComplete
-   */
-/*
-  AVPScoreReport getUserHistoryForList(Collection<Integer> ids, long latestResultID,
-                                       Map<String, Collection<String>> typeToSection, int userListID) throws DominoSessionException;
-                                       */
   // Telemetry ---
 
   /**

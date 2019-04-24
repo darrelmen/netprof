@@ -108,10 +108,6 @@ public interface IUserExerciseDAO extends IDAO {
                         int importUserIfNotSpecified,
                         boolean isContext,
                         Collection<String> typeOrder);
-/*
-  int getAndRememberNumPhones(IPronunciationLookup lookup,
-                              int exid,
-                              String foreignlanguage, String transliteration);*/
 
   void addBulk(List<SlickExercise> bulk);
 

@@ -47,6 +47,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /**
@@ -56,6 +57,8 @@ import java.util.stream.Collectors;
  * @see ListenViewHelper#reallyGetTurnPanel
  */
 public class TurnPanel extends DialogExercisePanel<ClientExercise> implements ITurnPanel {
+  private final Logger logger = Logger.getLogger("TurnPanel");
+
   TurnPanelDelegate turnPanelDelegate;
 
   /**
@@ -156,6 +159,11 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
 
   public boolean hasCurrentMark() {
     return turnPanelDelegate.hasCurrentMark();// bubble.getElement().getStyle().getBorderColor().equalsIgnoreCase(HIGHLIGHT_COLOR);
+  }
+
+  @Override
+  public void grabFocus() {
+    logger.info("grabFocus : OK " +getId() + " got the focus...");
   }
 
   public void makeVisible() {

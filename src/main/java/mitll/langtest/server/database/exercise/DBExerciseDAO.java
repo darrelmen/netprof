@@ -209,7 +209,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     try {
       List<String> typeOrder = getTypeOrderFromProject();
 
-     // logger.info("readExercises vfor  " + project + " " + typeOrder);
+      // logger.info("readExercises vfor  " + project + " " + typeOrder);
       setRootTypes(typeOrder);
 
       int projid = project.id();
@@ -616,6 +616,15 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @Override
   public int getParentFor(int exid) {
     return userExerciseDAO.getRelatedExercise().getParentForContextID(exid);
+  }
+
+  @Override
+  public boolean update(CommonExercise toChange) {
+    boolean update = userExerciseDAO.update(toChange, false, getTypeOrder());
+    if (update) {
+      refresh(toChange.getID());
+    }
+    return update;
   }
 
   /**

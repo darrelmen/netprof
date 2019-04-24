@@ -41,8 +41,9 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class KeyPressHelper {
-  private static final String OBJECT_KEYBOARD_EVENT = "[object KeyboardEvent]";
   private final Logger logger = Logger.getLogger("KeyPressHelper");
+
+  private static final String OBJECT_KEYBOARD_EVENT = "[object KeyboardEvent]";
 
   private final boolean removeOnEnter;
   private HandlerRegistration keyHandler;

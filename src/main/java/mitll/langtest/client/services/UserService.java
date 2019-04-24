@@ -58,10 +58,6 @@ public interface UserService extends RemoteService {
 
   List<ActiveUser> getPendingUsers(int projid) throws DominoSessionException;
 
-//  void approve(int toApproveUser) throws DominoSessionException;
-//  void disapprove(int toApproveUser) throws DominoSessionException;
-//
-
   void logout() throws DominoSessionException;
 
   /**

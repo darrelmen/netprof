@@ -1344,4 +1344,18 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private SmallVocabDecoder getSmallVocabDecoder(int projectID) {
     return getAudioFileHelper(projectID).getSmallVocabDecoder();
   }
+
+  @Override
+  public boolean updateText(int exid, String content) throws DominoSessionException {
+    int projectIDFromUser = getProjectIDFromUser();
+    Project project = getProject(projectIDFromUser);
+    CommonExercise exerciseByID = project.getExerciseByID(exid);
+    if (exerciseByID == null) {
+      logger.warn("can't find " + exid);
+      return false;
+    } else {
+      exerciseByID.getMutable().setForeignLanguage(content);
+      return project.getExerciseDAO().update(exerciseByID);
+    }
+  }
 }

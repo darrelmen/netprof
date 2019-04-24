@@ -76,7 +76,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  */
 public class ListenViewHelper<T extends ITurnPanel>
     extends DialogView
-    implements ContentView, PlayListener, IListenView {
+    implements ContentView, PlayListener, IListenView, ITurnContainer {
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   private static final String INTERPRETER = "Interpreter";
@@ -889,7 +889,8 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
   }
 
-  void gotForward() {
+  @Override
+  public void gotForward() {
     setPlayButtonToPlay();
 
     List<T> seq = getAllTurns();
