@@ -46,7 +46,7 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
 
   private static final String STOP = "Stop";
   private static final String RECORD_BUTTON = "RecordButton";
-  private static final int DEFAULT_INDEX = 1;
+ // private static final int DEFAULT_INDEX = 1;
 
   private final RecordingAudioListener simpleRecordAudioPanel;
 

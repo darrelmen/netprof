@@ -185,7 +185,7 @@ public class RecordButton extends Button {
 
       addMouseOutHandler(event -> gotMouseOut());
     } else {
-      addClickHandler(event -> doClick(event));
+      addClickHandler(this::doClick);
     }
   }
 
@@ -197,7 +197,7 @@ public class RecordButton extends Button {
   }
 
   /**
-   * NOTE : Can't be private - IDEA mistake...
+   * NOTE : Can't be private or package private - IDEA mistake...
    *
    * @param clickEvent
    * @see #setupRecordButton

@@ -29,14 +29,18 @@
 
 package mitll.langtest.client.dialog;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.FocusWidget;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.*;
@@ -81,6 +85,8 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     logger.info("turn " + dialogID + " : " + clientExercise.getID() + " : '" + clientExercise.getForeignLanguage() + "' has english " + clientExercise.hasEnglishAttr());
 
     this.columns = columns;
+
+    //addStyleName("flfont");
 
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify) {
       @Override
@@ -151,11 +157,6 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   public ListenViewHelper.COLUMNS getColumns() {
     return columns;
   }
-//  private DivWidget spanContainer;
-//  private FlowPanel hiddenPartner;
-
-  class MyFocus extends FocusWidget {
-  }
 
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices,
@@ -165,7 +166,6 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     tryOne(wrapper);
 
 /*
-
     //DivWidget w = new DivWidget();
     FocusWidget w = new MyFocus(){};
 
@@ -197,33 +197,61 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 
     styleMe(wrapper);
     add(wrapper);
+
+    if (columns == ListenViewHelper.COLUMNS.MIDDLE) {
+      addStyleName("inlineFlex");
+
+      {
+        Button w = new Button();
+        addPressAndHoldStyle(w);
+        w.setIcon(IconType.PLUS);
+        w.addStyleName("topFiveMargin");
+        w.addStyleName("leftFiveMargin");
+        w.setType(ButtonType.SUCCESS);
+     //   w.getElement().getStyle().setBackgroundColor("#0171bc");
+        add(w);
+      }
+
+      {
+        Button w = new Button();
+        addPressAndHoldStyle(w);
+        w.setIcon(IconType.MINUS);
+        w.addStyleName("topFiveMargin");
+        w.addStyleName("leftFiveMargin");
+      //  w.getElement().getStyle().setBackgroundColor("#0171bc");
+        add(w);
+      }
+
+      {
+        Button w = new Button();
+        addPressAndHoldStyle(w);
+        w.setIcon(IconType.ARROW_RIGHT);
+        w.addStyleName("topFiveMargin");
+        w.addStyleName("leftFiveMargin");
+      //  w.getElement().getStyle().setBackgroundColor("#0171bc");
+        add(w);
+      }
+    }
+
+  }
+
+  private void addPressAndHoldStyle(UIObject postAudioRecordButton) {
+    Style style = postAudioRecordButton.getElement().getStyle();
+    style.setProperty("borderRadius", "18px");
+    style.setPadding(8, Style.Unit.PX);
+    style.setWidth(19, Style.Unit.PX);
+    style.setMarginRight(5, Style.Unit.PX);
+    style.setHeight(19, Style.Unit.PX);
   }
 
   private void tryOne(DivWidget wrapper) {
     // TODO : instead, make this a div contenteditable!
     TextBox w = new TextBox();
 
+    w.getElement().getStyle().setFontSize(16, Style.Unit.PX);
+
     w.setId("TextBox_" + getExID());
     w.setWidth("92%");
-
-/*    {
-      @Override
-      protected void onLoad() {
-        super.onLoad();
-        if (spanContainer != null) {
-          logger.info("spanContainer width " + spanContainer.getOffsetWidth());
-        }
-      }
-
-      @Override
-      protected void onAttach() {
-        super.onAttach();
-
-        if (spanContainer != null) {
-          logger.info("onAttach spanContainer width " + spanContainer.getOffsetWidth());
-        }
-      }
-    };*/
     this.content = w;
 
     String foreignLanguage = clientExercise.getForeignLanguage();
