@@ -73,7 +73,6 @@ public class TurnPanelDelegate implements ITurnMarking {
   public TurnPanelDelegate(final ClientExercise clientExercise,
                            DivWidget widget,
                            ListenViewHelper.COLUMNS columns, boolean rightJustify) {
-    //  super(clientExercise, controller, listContainer, alignments, listenView);
     this.exercise = clientExercise;
     this.columns = columns;
     this.rightJustify = rightJustify;
@@ -105,7 +104,9 @@ public class TurnPanelDelegate implements ITurnMarking {
         String middlebubble2 = "middlebubble2";
         if (exercise.hasEnglishAttr()) {
           middlebubble2 = "middlebubbleRight";
-          if (rightJustify) style.setProperty("marginLeft", "auto");
+          if (rightJustify) {
+            style.setProperty("marginLeft", "auto");
+          }
         }
 
         wrapper.addStyleName(middlebubble2);
@@ -117,7 +118,7 @@ public class TurnPanelDelegate implements ITurnMarking {
     addMarginStyle(widget.getElement().getStyle());
   }
 
-  private void addMarginStyle(Style style2) {
+  protected void addMarginStyle(Style style2) {
     style2.setMarginLeft(15, Style.Unit.PX);
     style2.setMarginRight(10, Style.Unit.PX);
     style2.setMarginTop(7, Style.Unit.PX);

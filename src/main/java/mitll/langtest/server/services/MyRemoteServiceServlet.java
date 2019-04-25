@@ -612,6 +612,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
       }
       else {
         logger.info("getOneDialog for " +dialogID + " = " +iDialog);
+        iDialog.getExercises().forEach(exercise -> logger.info("\t"+exercise));
       }
       return iDialog;
     }

@@ -29,16 +29,20 @@
 
 package mitll.langtest.client.dialog;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.dialog.DialogEditorView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.ITurnPanel;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
-public class DialogEditor<T extends ITurnPanel> extends ListenViewHelper<T> {
+public class DialogEditor extends ListenViewHelper<EditorTurn> {
   private final Logger logger = Logger.getLogger("DialogEditor");
 
   private int dialogID;
@@ -50,12 +54,31 @@ public class DialogEditor<T extends ITurnPanel> extends ListenViewHelper<T> {
 
   @Override
   @NotNull
-  protected T makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, boolean rightJustify) {
-    return (T) new EditorTurn(
+  protected EditorTurn makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, boolean rightJustify) {
+    return   new EditorTurn(
         clientExercise,
         columns,
         rightJustify, controller.getLanguageInfo(), controller,
-        this);
+        this,
+        dialogID);
+  }
+
+  @Override
+  protected void gotTurnClick(EditorTurn turn) {
+    super.gotTurnClick(turn);
+    markCurrent();
+  }
+
+  public int getDialogID() { return dialogID;}
+
+  @Override
+  protected void styleTurnContainer(DivWidget rowOne) {
+    super.styleTurnContainer(rowOne);
+    rowOne.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
+    rowOne.setHeight("390px");
+  }
+
+  @Override protected void addDialogHeader(IDialog dialog, Panel child) {
   }
 
   /**
@@ -77,18 +100,6 @@ public class DialogEditor<T extends ITurnPanel> extends ListenViewHelper<T> {
     return dialogID;
   }
 
-/*
-  @Override protected void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
-    List<ClientExercise> exercises = dialog.getExercises();
-    exercises.forEach(clientExercise -> {
-      // COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
-      //    logger.info("ex " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage() + " : " + columnForEx);
-      addTurn(rowOne, getColumnForEx(left, right, clientExercise), clientExercise);
-    });
-
-  }
-*/
-
   @NotNull
   protected INavigation.VIEWS getPrevView() {
     return null;
@@ -103,7 +114,7 @@ public class DialogEditor<T extends ITurnPanel> extends ListenViewHelper<T> {
    * @see DialogEditorView.MyShownCloseListener#gotShown
    */
   public void grabFocus() {
-    logger.info("OK grab focus...");
+    logger.info("give focus to turn for ex #" + getCurrentTurn().getExID());
     getCurrentTurn().grabFocus();
   }
 }

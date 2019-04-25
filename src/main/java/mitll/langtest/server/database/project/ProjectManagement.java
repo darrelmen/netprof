@@ -110,7 +110,7 @@ public class ProjectManagement implements IProjectManagement {
   private static final String DIALOG1 = "dialog";
   private static final String NO_PROJECT_FOR_ID = "NO_PROJECT_FOR_ID";
   private static final String INTERPRETER = "Interpreter";
-  private static final String INTERPRETER1 = "interpreter";
+ // private static final String INTERPRETER1 = "interpreter";
   //public static final String ANSWERS1 = "^.*answers\\/(.+)\\/.+";
   private static final String ANSWERS1 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
   private static final Pattern pattern = Pattern.compile(ANSWERS1);
@@ -1236,7 +1236,7 @@ public class ProjectManagement implements IProjectManagement {
           DialogType kind = iDialog.getKind();
           if (kind == DialogType.INTERPRETER) {
             name = INTERPRETER;
-            cc = INTERPRETER;
+            cc = INTERPRETER.toLowerCase();
             // logger.info("addModeChoices : found first interpreter dialog : " + iDialog);
           } else {
             logger.info("addModeChoices : dialog kind is " + kind + " for " +iDialog.getID());

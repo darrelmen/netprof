@@ -76,7 +76,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
  */
 public class ListenViewHelper<T extends ITurnPanel>
     extends DialogView
-    implements ContentView, PlayListener, IListenView, ITurnContainer {
+    implements ContentView, PlayListener, IListenView, ITurnContainer<T> {
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   private static final String INTERPRETER = "Interpreter";
@@ -223,7 +223,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     } else {
       child.clear();  // dangerous???
 
-      child.add(dialogHeader = new DialogHeader(controller, thisView, getPrevView(), getNextView()).getHeader(dialog));
+      addDialogHeader(dialog, child);
 
       DivWidget controlAndSpeakers = new DivWidget();
       styleControlRow(controlAndSpeakers);
@@ -244,6 +244,10 @@ public class ListenViewHelper<T extends ITurnPanel>
 
       child.add(getTurns(dialog));
     }
+  }
+
+  protected void addDialogHeader(IDialog dialog, Panel child) {
+    child.add(dialogHeader = new DialogHeader(controller, thisView, getPrevView(), getNextView()).getHeader(dialog));
   }
 
   @NotNull
@@ -529,15 +533,9 @@ public class ListenViewHelper<T extends ITurnPanel>
     DivWidget rowOne = new DivWidget();
 
     logger.info("dialog " + dialog);
-    logger.info("getTurns : exercises  " + dialog.getExercises());
+    logger.info("getTurns : exercises  " + dialog.getExercises().size());
 
-    {
-      rowOne.getElement().setId("turnContainer");
-      rowOne.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
-      rowOne.getElement().getStyle().setMarginTop(10, PX);
-      rowOne.addStyleName("cardBorderShadow");
-      rowOne.getElement().getStyle().setMarginBottom(10, PX);
-    }
+    styleTurnContainer(rowOne);
 
     //  List<String> speakers = dialog.getSpeakers();
     //logger.info("speakers " + speakers);
@@ -557,6 +555,14 @@ public class ListenViewHelper<T extends ITurnPanel>
     markFirstTurn();
 
     return rowOne;
+  }
+
+  protected void styleTurnContainer(DivWidget rowOne) {
+    rowOne.getElement().setId("turnContainer");
+    rowOne.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+    rowOne.getElement().getStyle().setMarginTop(10, PX);
+    rowOne.addStyleName("cardBorderShadow");
+    rowOne.getElement().getStyle().setMarginBottom(10, PX);
   }
 
   private void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
@@ -650,8 +656,12 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   void makeVisible(UIObject currentTurn) {
-    Element element = currentTurn.getElement();
-    element.scrollIntoView();
+    if (currentTurn == null) {
+      logger.warning("no current turn...");
+    } else {
+      Element element = currentTurn.getElement();
+      element.scrollIntoView();
+    }
   }
 
   private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
@@ -716,13 +726,13 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     T widgets = makeTurnPanel(clientExercise, columns, rightJustify);
 
-    if (isInterpreter) {
-      if (widgets instanceof UIObject) {
-        UIObject wid = (UIObject) widgets;
-        wid.addStyleName("inlineFlex");
-        wid.setWidth("100%");
-      }
-    }
+//    if (isInterpreter) {
+//      if (widgets instanceof UIObject) {
+//        UIObject wid = (UIObject) widgets;
+//     wid.addStyleName("inlineFlex");
+//        wid.setWidth("100%");
+//      }
+//    }
 
 //    logger.info("reallyGetTurnPanel this view " + thisView);
 //    logger.info("reallyGetTurnPanel clientExercise " + clientExercise);
@@ -749,7 +759,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   @NotNull
   protected T makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, boolean rightJustify) {
-    return (T) new TurnPanel(
+    T t = (T) new TurnPanel(
         clientExercise,
         controller,
         null,
@@ -757,6 +767,9 @@ public class ListenViewHelper<T extends ITurnPanel>
         this,
         columns,
         rightJustify);
+
+
+    return t;
   }
 
   private boolean gotTurnClick = false;
@@ -891,31 +904,52 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   @Override
   public void gotForward() {
+    boolean isPlaying = currentTurn.doPause();
+
+    int i = beforeChangeTurns();
+
+    // maybe do wrap
+    {
+      int i1 = i + 1;
+      List<T> seq = getAllTurns();
+      if (i1 > seq.size() - 1) {
+        setCurrentTurn(seq.get(0));
+      } else {
+        setCurrentTurn(seq.get(i1));
+      }
+    }
+
+    afterChangeTurns(isPlaying);
+  }
+
+  //@Override
+  public void setCurrentTurnTo(T newTurn) {
+    boolean isPlaying = currentTurn.doPause();
+    int i = beforeChangeTurns();
+    setCurrentTurn(newTurn);
+    logger.info("setCurrentTurnTo " + currentTurn);
+    afterChangeTurns(isPlaying);
+  }
+
+  private void afterChangeTurns(boolean isPlaying) {
+    markCurrent();
+    if (isPlaying) playCurrentTurn();
+  }
+
+  private int beforeChangeTurns() {
     setPlayButtonToPlay();
 
-    List<T> seq = getAllTurns();
+    int i = getAllTurns().indexOf(currentTurn);
 
-    int i = seq.indexOf(currentTurn);
-    int i1 = i + 1;
-
-    boolean isPlaying = currentTurn.doPause();
+    logger.info("beforeChangeTurns " + i + " : " + currentTurn);
 
     clearHighlightAndRemoveMark();
 
-    // makeVisible(currentTurn);
     if (!makeNextVisible()) {
       //  logger.info("gotForward : make current turn visible!");
       makeVisible(dialogHeader);  // make the top header visible...
     }
-
-    if (i1 > seq.size() - 1) {
-      setCurrentTurn(seq.get(0));
-    } else {
-      setCurrentTurn(seq.get(i1));
-    }
-
-    markCurrent();
-    if (isPlaying) playCurrentTurn();
+    return i;
   }
 
   /**
@@ -923,7 +957,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #gotBackward()
    */
   private void clearHighlightAndRemoveMark() {
-    // logger.info("clearHighlight on " + currentTurn);
+    logger.info("clearHighlight on " + currentTurn);
     currentTurn.resetAudio();
     currentTurn.clearHighlight();
     removeMarkCurrent();
@@ -1206,11 +1240,17 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   void removeMarkCurrent() {
-    //   logger.info("removeMarkCurrent on " + currentTurn.getExID());
+    logger.info("removeMarkCurrent on " + currentTurn.getExID());
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
+//    logger.info("logException stack:\n" + exceptionAsString);
+
+
     currentTurn.removeMarkCurrent();
   }
 
   void markCurrent() {
+    logger.info("markCurrent on " + currentTurn.getExID());
     currentTurn.markCurrent();
   }
 

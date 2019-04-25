@@ -376,6 +376,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
         .collect(Collectors.toSet()).isEmpty();
   }
 
+  /**
+   * @see mitll.langtest.server.database.dialog.DialogReader#getExercise(List, Set, Path, String, String, String, List)
+   * @param attribute
+   */
   public void addAttribute(ExerciseAttribute attribute) {
     attributes.add(attribute);
   }

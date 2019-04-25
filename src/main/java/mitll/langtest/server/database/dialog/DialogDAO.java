@@ -325,7 +325,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     //  logger.warn("idToImageRef got " + idToImageRef.size());
     int imageid = dialog.getImageid();//dialog.getSlickDialog().imageid();
     if (imageid < 1) {
-      logger.warn("addImage no image for dialog " + dialog.getID() + " : " + dialog.getForeignLanguage());
+      // logger.warn("addImage no image for dialog " + dialog.getID() + " : " + dialog.getForeignLanguage());
     } else {
       String s = idToImageRef.get(imageid);
       if (s == null) {
@@ -480,37 +480,54 @@ public class DialogDAO extends DAO implements IDialogDAO {
       toAdd.getMutable().setID(add);
     }
 
-    IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
-
-    long now = System.currentTimeMillis();
-
-    ExerciseAttribute attribute = new ExerciseAttribute(FLTITLE, toAdd.getForeignLanguage(), false);
-
-    int orAddAttribute = userExerciseDAO.getExerciseAttributeDAO()
-        .findOrAddAttribute(projid, now, userid, attribute, false);
-
-    SlickDialogAttributeJoin e = new SlickDialogAttributeJoin(-1, userid, new Timestamp(now), add, orAddAttribute);
-
-    logger.info("add dialog " +
-        "\n\t#         " + add +
-        "\n\tattr id   " + orAddAttribute +
-        "\n\tattribute " + attribute +
-        "\n\tjoins     " + e
-    );
-
-    int insert = dialogAttributeJoinHelper.insert(e);
-
-    logger.info("add new id " + insert);
-
-    toAdd.getAttributes().add(attribute.setId(orAddAttribute));
-
+    long now = addFLAttribute(toAdd, projid, userid);
 
     BaseDialogReader baseDialogReader = new BaseDialogReader(null, null);
 
-    Map<String, String> defaultUnitAndChapter = new HashMap<>();
     Project project = databaseImpl.getProject(projid);
     List<String> typeOrder = project.getTypeOrder();
 
+    addExercisesToDialog(toAdd, projid, baseDialogReader, typeOrder);
+
+    new DialogPopulate(databaseImpl, project.getPathHelper()).addExercises(projid, userid, typeOrder, new Timestamp(now),
+        new HashMap<>(), toAdd, add);
+
+
+    refreshExercises(toAdd, project);
+
+    // refresh list on project
+    databaseImpl.getProjectManagement().addDialogInfo(projid);
+
+
+    toAdd.getExercises().forEach(ex -> {
+      if (ex.getAttributes().stream()
+          .anyMatch(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(DialogMetadata.SPEAKER.toString()))) {
+        logger.info("add : found speaker on " + ex.getID());
+      } else {
+        logger.warn("\n\n\nadd : no speaker on " + ex.getID() + " : " + ex);
+      }
+    });
+//    project.getExerciseDAO().addUserExercise();
+    return toAdd;
+  }
+
+  private void refreshExercises(IDialog toAdd, Project project) {
+    ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
+
+    toAdd.getExercises().forEach(exercise -> {
+      boolean refresh = exerciseDAO.refresh(exercise.getID());
+      if (!refresh) logger.warn("didn't refresh " + exercise.getID());
+      CommonExercise exerciseByID = project.getExerciseByID(exercise.getID());
+      if (exerciseByID == null) {
+        logger.warn("huh? couldn't find it again?");
+      } else {
+        logger.info("refreshExercises : found " + exerciseByID);
+      }
+    });
+  }
+
+  private void addExercisesToDialog(IDialog toAdd, int projid, BaseDialogReader baseDialogReader, List<String> typeOrder) {
+    Map<String, String> defaultUnitAndChapter = new HashMap<>();
     if (!typeOrder.isEmpty()) {
       defaultUnitAndChapter.put(typeOrder.get(0), toAdd.getUnit());
     }
@@ -539,28 +556,34 @@ public class DialogDAO extends DAO implements IDialogDAO {
       //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
       toAdd.getExercises().add(exercise1);
     }
+  }
 
-    new DialogPopulate(databaseImpl, project.getPathHelper()).addExercises(projid, userid, typeOrder, new Timestamp(now),
-        new HashMap<>(), toAdd, add);
+  private long addFLAttribute(IDialog toAdd, int projid, int userid) {
+    IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
 
+    long now = System.currentTimeMillis();
 
-    ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
+    ExerciseAttribute attribute = new ExerciseAttribute(FLTITLE, toAdd.getForeignLanguage(), false);
 
-    toAdd.getExercises().forEach(exercise -> {
-      boolean refresh = exerciseDAO.refresh(exercise.getID());
-      if (!refresh) logger.warn("didn't refresh " + exercise.getID());
-      CommonExercise exerciseByID = project.getExerciseByID(exercise.getID());
-      if (exerciseByID == null) logger.warn("huh? couldn't find it again?");
-//      logger.info("found " + exerciseByID);
-    });
+    int orAddAttribute = userExerciseDAO.getExerciseAttributeDAO()
+        .findOrAddAttribute(projid, now, userid, attribute, false);
 
+    int add = toAdd.getID();
+    SlickDialogAttributeJoin e = new SlickDialogAttributeJoin(-1, userid, new Timestamp(now), add, orAddAttribute);
 
-    // refresh list on project
-    databaseImpl.getProjectManagement().addDialogInfo(projid);
+    logger.info("add dialog " +
+        "\n\t#         " + add +
+        "\n\tattr id   " + orAddAttribute +
+        "\n\tattribute " + attribute +
+        "\n\tjoins     " + e
+    );
 
-//    toAdd.getExercises().forEach(ex -> exerciseDAO.addUserExercise(ex.asCommon()));
-//    project.getExerciseDAO().addUserExercise();
-    return toAdd;
+    int insert = dialogAttributeJoinHelper.insert(e);
+
+    logger.info("add new id " + insert);
+
+    toAdd.getAttributes().add(attribute.setId(orAddAttribute));
+    return now;
   }
 
   @Override

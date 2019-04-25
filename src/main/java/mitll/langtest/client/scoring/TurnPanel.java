@@ -32,6 +32,7 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.dialog.ListenViewHelper;
@@ -80,6 +81,12 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
                    boolean rightJustify) {
     super(clientExercise, controller, listContainer, alignments, listenView);
 
+    if (columns == ListenViewHelper.COLUMNS.MIDDLE) {
+      addStyleName("inlineFlex");
+      setWidth("100%");
+      // TODO : why?
+      getElement().getStyle().setMarginRight(29, Style.Unit.PX);
+    }
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify);
   }
 
@@ -163,7 +170,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
 
   @Override
   public void grabFocus() {
-    logger.info("grabFocus : OK " +getId() + " got the focus...");
+    logger.info("grabFocus : OK " + getId() + " got the focus...");
   }
 
   public void makeVisible() {

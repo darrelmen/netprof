@@ -79,5 +79,5 @@ public interface ExerciseService<T extends CommonShell & ScoredExercise> extends
    */
   void reload(int projid) throws DominoSessionException;
 
-  boolean updateText(int exid, String content) throws DominoSessionException;
+  boolean updateText(int dialogID, int exid, String content) throws DominoSessionException;
 }

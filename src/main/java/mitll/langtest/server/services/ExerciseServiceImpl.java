@@ -35,7 +35,6 @@ import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.exercise.Search;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.exercise.TripleExercises;
-import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
@@ -1345,17 +1344,45 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     return getAudioFileHelper(projectID).getSmallVocabDecoder();
   }
 
+  /**
+   * TODO : update exercise inside the dialog...
+   *
+   * @param dialogID
+   * @param exid
+   * @param content
+   * @return
+   * @throws DominoSessionException
+   */
   @Override
-  public boolean updateText(int exid, String content) throws DominoSessionException {
+  public boolean updateText(int dialogID, int exid, String content) throws DominoSessionException {
     int projectIDFromUser = getProjectIDFromUser();
     Project project = getProject(projectIDFromUser);
     CommonExercise exerciseByID = project.getExerciseByID(exid);
     if (exerciseByID == null) {
-      logger.warn("can't find " + exid);
+      logger.warn("updateText " +
+          "can't find " + exid);
       return false;
     } else {
       exerciseByID.getMutable().setForeignLanguage(content);
-      return project.getExerciseDAO().update(exerciseByID);
+
+      boolean update = project.getExerciseDAO().update(exerciseByID);
+
+      if (update) {
+        logger.info("updateText now " + project.getExerciseByID(exid).getForeignLanguage());
+
+        List<IDialog> collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == dialogID).collect(Collectors.toList());
+        if (collect.isEmpty()) logger.warn("updateText can't find dialog ID " + dialogID);
+        else {
+          List<ClientExercise> collect1 = collect.get(0).getExercises().stream().filter(exercise -> exercise.getID() == exid).collect(Collectors.toList());
+          if (collect1.isEmpty()) {
+            logger.warn("updateText can't find ex id  " + exid);
+          } else {
+            collect1.get(0).asCommon().getMutable().setForeignLanguage(content);
+          }
+        }
+      }
+
+      return update;
     }
   }
 }

@@ -287,7 +287,7 @@ public class ExerciseCopy {
 
     List<SlickExerciseAttributeJoin> joins = getSlickExerciseAttributeJoins(importUser, exToJoins);
 
-    logger.info("addExercisesAndAttributes adding " + joins.size() + " attribute joins");
+    logger.info("addExercisesAndAttributes adding " + joins.size() + " attribute joins : ");
     slickUEDAO.getExerciseAttributeJoin().addBulkAttributeJoins(joins);
     return exToInt;
   }

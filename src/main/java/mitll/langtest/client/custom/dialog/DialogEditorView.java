@@ -181,7 +181,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   protected void editList(T selectedItem) {
     DivWidget listContent = new DivWidget();
 
-    DialogEditor<EditorTurn> editorTurnDialogEditor = new DialogEditor<>(controller, INavigation.VIEWS.DIALOG_EDITOR, selectedItem.getID());
+    DialogEditor editorTurnDialogEditor = new DialogEditor(controller, INavigation.VIEWS.DIALOG_EDITOR, selectedItem.getID());
     editorTurnDialogEditor.showContent(listContent, INavigation.VIEWS.DIALOG_EDITOR);
 
     logger.info("list content " + listContent);
@@ -197,9 +197,9 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   }
 
   private class MyShownCloseListener implements DialogHelper.ShownCloseListener {
-    DialogEditor<EditorTurn> editItem;
+    DialogEditor editItem;
 
-    MyShownCloseListener(DialogEditor<EditorTurn> editItem) {
+    MyShownCloseListener(DialogEditor editItem) {
       this.editItem = editItem;
     }
 
