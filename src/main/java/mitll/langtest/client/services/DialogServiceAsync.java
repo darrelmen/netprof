@@ -33,10 +33,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.dialog.IDialogSession;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.FilterRequest;
-import mitll.langtest.shared.exercise.FilterResponse;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.List;
 
@@ -56,5 +53,7 @@ public interface DialogServiceAsync {
   void addDialog(IDialog dialog, AsyncCallback<IDialog> async);
 
   void update(IDialog dialog,AsyncCallback<Void> async);
+
+  void addEmptyExercises(boolean isLeftSpeaker, int dialogID, AsyncCallback<List<ClientExercise>> async);
   // void getLatestDialogSessionID(int dialogid, AsyncCallback<Integer> async);
 }

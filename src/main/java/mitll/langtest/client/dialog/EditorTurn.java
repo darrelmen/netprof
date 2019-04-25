@@ -61,7 +61,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   private ITurnContainer<EditorTurn> turnContainer;
   private int dialogID;
   private String prev = "";
-
+  private ListenViewHelper.COLUMNS columns;
 
   /**
    * @param clientExercise
@@ -71,16 +71,16 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
    * @param controller
    * @see DialogEditor#makeTurnPanel(ClientExercise, ListenViewHelper.COLUMNS, boolean)
    */
-  public EditorTurn(final ClientExercise clientExercise,
-                    ListenViewHelper.COLUMNS columns,
-                    boolean rightJustify,
-                    Language language,
-                    ExerciseController<?> controller,
-                    ITurnContainer<EditorTurn> turnContainer,
-                    int dialogID) {
-
+  EditorTurn(final ClientExercise clientExercise,
+             ListenViewHelper.COLUMNS columns,
+             boolean rightJustify,
+             Language language,
+             ExerciseController<?> controller,
+             ITurnContainer<EditorTurn> turnContainer,
+             int dialogID) {
     logger.info("turn " + dialogID + " : " + clientExercise.getID() + " : '" + clientExercise.getForeignLanguage() + "' has english " + clientExercise.hasEnglishAttr());
 
+    this.columns = columns;
 
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify) {
       @Override
@@ -147,6 +147,10 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   }
 
   private TextBox content;
+
+  public ListenViewHelper.COLUMNS getColumns() {
+    return columns;
+  }
 //  private DivWidget spanContainer;
 //  private FlowPanel hiddenPartner;
 
@@ -333,8 +337,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   public void grabFocus() {
     if (content == null) {
       logger.info("grabFocus no content yet for " + getExID());
-    }
-    else {
+    } else {
       content.setFocus(true);
     }
 //    logger.info("hiddenPartner " + hiddenPartner.getOffsetWidth());

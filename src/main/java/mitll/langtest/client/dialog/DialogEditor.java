@@ -31,15 +31,16 @@ package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.dialog.DialogEditorView;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.scoring.ITurnPanel;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.List;
 import java.util.logging.Logger;
 
 public class DialogEditor extends ListenViewHelper<EditorTurn> {
@@ -55,7 +56,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
   @Override
   @NotNull
   protected EditorTurn makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, boolean rightJustify) {
-    return   new EditorTurn(
+    return new EditorTurn(
         clientExercise,
         columns,
         rightJustify, controller.getLanguageInfo(), controller,
@@ -69,7 +70,9 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
     markCurrent();
   }
 
-  public int getDialogID() { return dialogID;}
+  public int getDialogID() {
+    return dialogID;
+  }
 
   @Override
   protected void styleTurnContainer(DivWidget rowOne) {
@@ -78,7 +81,8 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
     rowOne.setHeight("390px");
   }
 
-  @Override protected void addDialogHeader(IDialog dialog, Panel child) {
+  @Override
+  protected void addDialogHeader(IDialog dialog, Panel child) {
   }
 
   /**
@@ -88,10 +92,25 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
   @Override
   public void gotForward() {
     if (onLastTurn()) {
+      // make either one or two more turns and add to end of dialog
+      boolean isLeftSpeaker = isInterpreter ? getPrevTurn().getColumns() == COLUMNS.LEFT : getCurrentTurn().getColumns() == COLUMNS.LEFT;
 
-    }
-    else {
+      controller.getDialogService().addEmptyExercises(isLeftSpeaker, dialogID, new AsyncCallback<List<ClientExercise>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(List<ClientExercise> result) {
+          addTurns(result);
+          gotForward();
+          getCurrentTurn().grabFocus();
+        }
+      });
+    } else {
       super.gotForward();
+      getCurrentTurn().grabFocus();
     }
   }
 

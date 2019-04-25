@@ -49,7 +49,7 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
    * @see mitll.langtest.server.sorter.ExerciseSorter#phoneCompFirst(CommonExercise, CommonExercise, Map)
    * @deprecated - can't guarantee we'll have this on the znetprof instance
    */
-  List<String> getFirstPron();
+ // List<String> getFirstPron();
 
   /**
    * SERVER

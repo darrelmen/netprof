@@ -586,7 +586,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   }
 
 
-  private IDialog getOneDialog(int id) throws DominoSessionException {
+  protected IDialog getOneDialog(int id) throws DominoSessionException {
     return getOneDialog(getUserIDFromSessionOrDB(), id);
   }
 

@@ -38,10 +38,7 @@ import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.dialog.IDialogSession;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.FilterRequest;
-import mitll.langtest.shared.exercise.FilterResponse;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -270,20 +267,24 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   }
 
   /**
-   * @see CreateDialogDialog#doCreate
    * @param dialog
    * @return
    * @throws DominoSessionException
+   * @see CreateDialogDialog#doCreate
    */
   @Override
   public IDialog addDialog(IDialog dialog) throws DominoSessionException {
-    IDialog add = db.getDialogDAO().add(dialog);
-
-    return add;
+    getUserIDFromSessionOrDB();
+    return db.getDialogDAO().add(dialog);
   }
 
   public void update(IDialog dialog) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     db.getDialogDAO().update(dialog);
+  }
+
+  public List<ClientExercise> addEmptyExercises(boolean isLeftSpeaker, int dialogID) throws DominoSessionException {
+    IDialog oneDialog = getOneDialog(dialogID);
+    return db.getDialogDAO().addEmptyExercises(oneDialog, oneDialog.getProjid(), getUserIDFromSessionOrDB(), System.currentTimeMillis());
   }
 }

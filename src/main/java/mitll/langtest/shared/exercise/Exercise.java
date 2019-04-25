@@ -413,15 +413,14 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.english = englishSentence;
   }
 
-
   /**
    * @return
    * @see mitll.langtest.server.sorter.ExerciseSorter#phoneCompFirst
    */
-  @Override
-  public List<String> getFirstPron() {
-    return firstPron;
-  }
+//  @Override
+//  public List<String> getFirstPron() {
+//    return firstPron;
+//  }
 
   @Override
   public List<String> getTokens() {

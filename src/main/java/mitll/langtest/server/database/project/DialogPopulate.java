@@ -228,7 +228,7 @@ public class DialogPopulate {
       addDialogAttributes(dialogDAO, defaultUser, modified, attrToInt, dialog, dialogID);
 
       // add the exercises
-      addExercises(projid, defaultUser, typeOrder, modified, allImportExToID, dialog, dialogID);
+      allImportExToID.putAll(addExercises(projid, defaultUser, typeOrder, modified, dialog, dialogID));
 
       // add core vocab
       allNewInDatabase.addAll(addCoreVocab(projid, defaultUser, typeOrder, modified, dialog, dialogID));
@@ -272,28 +272,33 @@ public class DialogPopulate {
    * @param dialogID
    * @see #addDialogs
    */
-  public void addExercises(int projid,
-                           int defaultUser,
-                           List<String> typeOrder,
-                           Timestamp modified,
-                           Map<ClientExercise, Integer> allImportExToID,
-                           IDialog dialog,
-                           int dialogID) {
-    List<CommonExercise> commonExercisesFromDialog = getCommonExercisesFromDialog(dialog);
+  public Map<CommonExercise, Integer> addExercises(int projid,
+                                                   int defaultUser,
+                                                   List<String> typeOrder,
+                                                   Timestamp modified,
+                                                   //  Map<ClientExercise, Integer> allImportExToID,
+                                                   IDialog dialog,
+                                                   int dialogID) {
+    return addExercises2(projid, defaultUser, typeOrder, modified, dialogID, dialog.getExercises());
+  }
+
+  public Map<CommonExercise, Integer> addExercises2(int projid, int defaultUser, List<String> typeOrder, Timestamp modified,
+                                                     int dialogID,
+                                                     List<ClientExercise> exercises) {
+    List<CommonExercise> commonExercisesFromDialog = toCommon(exercises);
 
     Map<CommonExercise, Integer> importExToID = addExercises(projid, defaultUser, typeOrder, commonExercisesFromDialog);
 
-    allImportExToID.putAll(importExToID);
-
     importExToID.forEach((k, v) -> k.getMutable().setID(v));
 
-
-    logger.info("addExercises made "+importExToID.size());
+    logger.info("addExercises made " + importExToID.size());
 
     importExToID.keySet().forEach(logger::info);
 
     db.getUserExerciseDAO().getRelatedExercise().addBulkRelated(
-        getSlickRelatedExercises(projid, modified, dialog.getExercises(), dialogID, importExToID));
+        getSlickRelatedExercises(projid, modified, exercises, dialogID, importExToID));
+
+    return importExToID;
   }
 
   private Map<CommonExercise, Integer> addExercises(int projid,
@@ -350,7 +355,7 @@ public class DialogPopulate {
 
   @NotNull
   private IDialogReader getDialogReader(Language languageEnum) {
-    return languageEnum == Language.KOREAN ? new KPDialogs("1","1") : new EnglishDialog();
+    return languageEnum == Language.KOREAN ? new KPDialogs("1", "1") : new EnglishDialog();
   }
 
   /**

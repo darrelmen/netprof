@@ -128,6 +128,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    *
    */
   protected int dialogID;
+  IDialog dialog;
   boolean isInterpreter = false;
 
   private INavigation.VIEWS prev, next;
@@ -168,6 +169,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
       @Override
       public void onSuccess(IDialog dialog) {
+
         logger.info("showContent Got back dialog " + dialog);
         showDialogGetRef(dialogFromURL, dialog, listContent);
       }
@@ -185,6 +187,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #showContent
    */
   void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
+    this.dialog = dialog;
     logger.info("showDialogGetRef : show dialog " + dialogID);
     if (dialog != null) {
       this.dialogID = dialog.getID();
@@ -523,6 +526,8 @@ public class ListenViewHelper<T extends ITurnPanel>
     return rightSpeakerBox == null || rightSpeakerBox.getValue();
   }
 
+  DivWidget turnContainer;
+
   /**
    * @param dialog
    * @return
@@ -532,8 +537,10 @@ public class ListenViewHelper<T extends ITurnPanel>
   DivWidget getTurns(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
 
-    logger.info("dialog " + dialog);
-    logger.info("getTurns : exercises  " + dialog.getExercises().size());
+    this.turnContainer = rowOne;
+
+    logger.info("getTurns : dialog    " + dialog);
+    logger.info("getTurns : exercises " + dialog.getExercises().size());
 
     styleTurnContainer(rowOne);
 
@@ -566,7 +573,15 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   private void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
-    dialog.getExercises().forEach(clientExercise -> {
+    addTurnForEachExercise(rowOne, left, right, dialog.getExercises());
+  }
+
+  protected void addTurns(List<ClientExercise> exercises) {
+    addTurnForEachExercise(turnContainer, getFirstSpeakerLabel(dialog), getSecondSpeakerLabel(dialog), exercises);
+  }
+
+  protected void addTurnForEachExercise(DivWidget rowOne, String left, String right, List<ClientExercise> exercises) {
+    exercises.forEach(clientExercise -> {
       // COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
       //    logger.info("ex " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage() + " : " + columnForEx);
       addTurn(rowOne, getColumnForEx(left, right, clientExercise), clientExercise);
@@ -902,6 +917,14 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
   }
 
+  protected T getPrevTurn() {
+    List<T> seq = getAllTurns();
+
+    int i = seq.indexOf(currentTurn);
+    int i1 = i - 1;
+    return seq.get(i1);
+  }
+
   @Override
   public void gotForward() {
     boolean isPlaying = currentTurn.doPause();
@@ -927,13 +950,8 @@ public class ListenViewHelper<T extends ITurnPanel>
     boolean isPlaying = currentTurn.doPause();
     int i = beforeChangeTurns();
     setCurrentTurn(newTurn);
-    logger.info("setCurrentTurnTo " + currentTurn);
+    logger.info("setCurrentTurnTo ex #" + currentTurn.getExID());
     afterChangeTurns(isPlaying);
-  }
-
-  private void afterChangeTurns(boolean isPlaying) {
-    markCurrent();
-    if (isPlaying) playCurrentTurn();
   }
 
   private int beforeChangeTurns() {
@@ -941,7 +959,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     int i = getAllTurns().indexOf(currentTurn);
 
-    logger.info("beforeChangeTurns " + i + " : " + currentTurn);
+    logger.info("beforeChangeTurns " + i + " : " + currentTurn.getExID());
 
     clearHighlightAndRemoveMark();
 
@@ -950,6 +968,11 @@ public class ListenViewHelper<T extends ITurnPanel>
       makeVisible(dialogHeader);  // make the top header visible...
     }
     return i;
+  }
+
+  private void afterChangeTurns(boolean isPlaying) {
+    markCurrent();
+    if (isPlaying) playCurrentTurn();
   }
 
   /**

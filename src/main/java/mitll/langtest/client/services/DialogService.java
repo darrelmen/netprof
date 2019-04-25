@@ -29,7 +29,6 @@
 
 package mitll.langtest.client.services;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.dialog.RehearseViewHelper;
@@ -37,10 +36,7 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.dialog.IDialogSession;
-import mitll.langtest.shared.exercise.ExerciseListRequest;
-import mitll.langtest.shared.exercise.ExerciseListWrapper;
-import mitll.langtest.shared.exercise.FilterRequest;
-import mitll.langtest.shared.exercise.FilterResponse;
+import mitll.langtest.shared.exercise.*;
 
 import java.util.List;
 import java.util.Map;
@@ -64,6 +60,7 @@ public interface DialogService extends RemoteService {
   ExerciseListWrapper<IDialog> getDialogs(ExerciseListRequest request) throws DominoSessionException;
 
   void update(IDialog dialog) throws DominoSessionException;
+  List<ClientExercise> addEmptyExercises(boolean isLeftSpeaker, int dialogID) throws DominoSessionException;
 
   IDialog addDialog(IDialog dialog) throws DominoSessionException;
   /**

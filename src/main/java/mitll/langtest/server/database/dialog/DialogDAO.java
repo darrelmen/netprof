@@ -39,10 +39,7 @@ import mitll.langtest.server.database.project.IProject;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.dialog.*;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
-import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.*;
 import mitll.npdata.dao.dialog.DialogAttributeJoinDAOWrapper;
@@ -482,22 +479,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     long now = addFLAttribute(toAdd, projid, userid);
 
-    BaseDialogReader baseDialogReader = new BaseDialogReader(null, null);
-
-    Project project = databaseImpl.getProject(projid);
-    List<String> typeOrder = project.getTypeOrder();
-
-    addExercisesToDialog(toAdd, projid, baseDialogReader, typeOrder);
-
-    new DialogPopulate(databaseImpl, project.getPathHelper()).addExercises(projid, userid, typeOrder, new Timestamp(now),
-        new HashMap<>(), toAdd, add);
-
-
-    refreshExercises(toAdd, project);
+    addEmptyExercises(toAdd, projid, userid, now);
 
     // refresh list on project
     databaseImpl.getProjectManagement().addDialogInfo(projid);
-
 
     toAdd.getExercises().forEach(ex -> {
       if (ex.getAttributes().stream()
@@ -507,14 +492,35 @@ public class DialogDAO extends DAO implements IDialogDAO {
         logger.warn("\n\n\nadd : no speaker on " + ex.getID() + " : " + ex);
       }
     });
-//    project.getExerciseDAO().addUserExercise();
+
     return toAdd;
   }
 
-  private void refreshExercises(IDialog toAdd, Project project) {
+  public List<ClientExercise> addEmptyExercises(IDialog toAdd, int projid, int userid, long now) {
+    Project project = databaseImpl.getProject(projid);
+    List<String> typeOrder = project.getTypeOrder();
+
+    List<ClientExercise> clientExercises = addExercisesToDialog(toAdd, projid, typeOrder);
+    //   int add = toAdd.getID();
+
+    new DialogPopulate(databaseImpl, project.getPathHelper()).addExercises2(projid,
+        userid,
+        typeOrder,
+        new Timestamp(now),
+        toAdd.getID(),
+        clientExercises);
+
+
+    refreshExercises(clientExercises, project);
+
+    return clientExercises;
+  }
+
+  private void refreshExercises(List<ClientExercise> exercises, Project project) {
     ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
 
-    toAdd.getExercises().forEach(exercise -> {
+    //List<ClientExercise> exercises = toAdd.getExercises();
+    exercises.forEach(exercise -> {
       boolean refresh = exerciseDAO.refresh(exercise.getID());
       if (!refresh) logger.warn("didn't refresh " + exercise.getID());
       CommonExercise exerciseByID = project.getExerciseByID(exercise.getID());
@@ -526,7 +532,16 @@ public class DialogDAO extends DAO implements IDialogDAO {
     });
   }
 
-  private void addExercisesToDialog(IDialog toAdd, int projid, BaseDialogReader baseDialogReader, List<String> typeOrder) {
+  /**
+   * @param toAdd
+   * @param projid
+   * @param baseDialogReader
+   * @param typeOrder
+   * @see #add(IDialog)
+   */
+  private List<ClientExercise> addExercisesToDialog(IDialog toAdd, int projid, List<String> typeOrder) {
+    BaseDialogReader baseDialogReader = new BaseDialogReader(null, null);
+
     Map<String, String> defaultUnitAndChapter = new HashMap<>();
     if (!typeOrder.isEmpty()) {
       defaultUnitAndChapter.put(typeOrder.get(0), toAdd.getUnit());
@@ -535,6 +550,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
       defaultUnitAndChapter.put(typeOrder.get(1), toAdd.getChapter());
     }
 
+    List<ClientExercise> newEx = new ArrayList<>();
+
     if (toAdd.getKind() == DialogType.INTERPRETER) {
       {
         Exercise exercise = baseDialogReader.getExercise("", "", "", BaseDialogReader.ENGLISH_SPEAKER, Language.ENGLISH, "E-0", defaultUnitAndChapter);
@@ -542,6 +559,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
         //exercises.add(exercise);
 
         toAdd.getExercises().add(exercise);
+        newEx.add(exercise);
       }
 
       {
@@ -549,13 +567,18 @@ public class DialogDAO extends DAO implements IDialogDAO {
             "I-0", defaultUnitAndChapter);
         //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
         toAdd.getExercises().add(exercise1);
+        newEx.add(exercise1);
+
       }
     } else {
       Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.SPEAKER_A, databaseImpl.getLanguageEnum(projid),
           "A-0", defaultUnitAndChapter);
       //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
       toAdd.getExercises().add(exercise1);
+      newEx.add(exercise1);
     }
+
+    return newEx;
   }
 
   private long addFLAttribute(IDialog toAdd, int projid, int userid) {

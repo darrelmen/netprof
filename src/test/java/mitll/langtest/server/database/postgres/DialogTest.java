@@ -93,14 +93,29 @@ public class DialogTest extends BaseTest {
         -1,
         -1,
         System.currentTimeMillis(),
-        "1", "1", "orient", "", "fl", "en",
+        "1", "1", "orient", "", "fl Wednesday", "en",
         new ArrayList<>(),
         new ArrayList<>(),
         new ArrayList<>(),
         DialogType.DIALOG,
         "us", true
     );
+
+    andPopulate.waitForDefaultUser();
+//    try {
+//      Thread.sleep(3000);
+//    } catch (InterruptedException e) {
+//      e.printStackTrace();
+//    }
+
     andPopulate.getDialogDAO().add(toAdd);
+
+    for (ClientExercise exercise : toAdd.getExercises()) {
+      logger.info("new " + exercise);
+      CommonExercise lookup = project.getExerciseByID(exercise.getID());
+      logger.info("lookup " + lookup);
+    }
+
   }
 
   @Test
