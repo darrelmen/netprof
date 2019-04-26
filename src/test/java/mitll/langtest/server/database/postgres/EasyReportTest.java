@@ -468,7 +468,7 @@ public class EasyReportTest extends BaseTest {
       FilterResponse typeToValues = db.getTypeToValues(request, project.getID(), 6);
       logger.info("\n\n\nGot " + typeToValues);
 
-      ExerciseListRequest request1 = new ExerciseListRequest(-1, 6);
+      ExerciseListRequest request1 = new ExerciseListRequest(-1, 6, projID);
       request1.setOnlyUnrecordedByMe(true);
       {
         Map<String, Collection<String>> typeToSelection = new HashMap<>();
@@ -560,7 +560,7 @@ public class EasyReportTest extends BaseTest {
       FilterResponse typeToValues = db.getTypeToValues(request, project.getID(), 6);
       logger.info("\n\n\nGot " + typeToValues);
 
-      ExerciseListRequest request1 = new ExerciseListRequest(-1, 6);
+      ExerciseListRequest request1 = new ExerciseListRequest(-1, 6, projID);
 
       request1.setOnlyWithAnno(true);
       {
@@ -608,7 +608,7 @@ public class EasyReportTest extends BaseTest {
       FilterResponse typeToValues = db.getTypeToValues(request, project.getID(), 6);
       logger.info("\n\n\nGot " + typeToValues);
 
-      ExerciseListRequest request1 = new ExerciseListRequest(-1, 6);
+      ExerciseListRequest request1 = new ExerciseListRequest(-1, 6, projID);
 
       {
         Map<String, Collection<String>> typeToSelection = new HashMap<>();
