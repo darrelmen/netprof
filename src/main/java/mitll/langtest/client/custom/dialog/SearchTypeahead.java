@@ -90,7 +90,7 @@ public class SearchTypeahead {
       @Override
       public void requestSuggestions(final Request request, final Callback callback) {
         // logger.info("getTypeaheadUsing make request for '" + request.getQuery() + "'");
-        ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser())
+        ExerciseListRequest exerciseListRequest = new ExerciseListRequest(req++, controller.getUser(), controller.getProjectID())
             .setPrefix(textBox.getText())
             .setLimit(DISPLAY_ITEMS)
             .setAddFirst(false);

@@ -31,17 +31,22 @@ package mitll.langtest.server.scoring;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.shared.project.Language;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PrecalcScores {
-  //  private static final Logger logger = LogManager.getLogger(PrecalcScores.class);
+  private static final Logger logger = LogManager.getLogger(PrecalcScores.class);
+  public static final String SCORE = "score";
+
   private ISlimResult precalcResult;
   private Scores scores;
   private JsonObject jsonObject;
@@ -63,7 +68,7 @@ public class PrecalcScores {
    * @see mitll.langtest.server.services.ScoringServiceImpl#getPrecalcScores
    */
   public PrecalcScores(ServerProperties serverProperties, ISlimResult precalcResult, boolean usePhoneToDisplay, Language language) {
-    this(serverProperties,language);
+    this(serverProperties, language);
     this.precalcResult = precalcResult;
 
     this.didRunNormally = true;
@@ -76,7 +81,7 @@ public class PrecalcScores {
   }
 
   public PrecalcScores(ServerProperties serverProperties, String json, Language language) {
-    this(serverProperties,language);
+    this(serverProperties, language);
     this.didRunNormally = true;
     parseJSON(false, -100, json);
   }
@@ -86,19 +91,25 @@ public class PrecalcScores {
   }
 
   /**
-   * @see #parseJSON(ISlimResult, boolean, float)
    * @param usePhoneToDisplay
    * @param pronScore
    * @param jsonScore
+   * @see #parseJSON(ISlimResult, boolean, float)
    */
   private void parseJSON(boolean usePhoneToDisplay, float pronScore, String jsonScore) {
-    JsonParser parser = new JsonParser();
-    jsonObject = parser.parse(jsonScore).getAsJsonObject();
-    if (pronScore == -100) {
-      pronScore = jsonObject != null && jsonObject.get("score") != null ? jsonObject.get("score").getAsFloat() : -1;
+    try {
+      JsonParser parser = new JsonParser();
+      jsonObject = parser.parse(jsonScore).getAsJsonObject();
+      if (pronScore == -100) {
+        pronScore = jsonObject != null && jsonObject.get(SCORE) != null ? jsonObject.get(SCORE).getAsFloat() : -1;
+      }
+      scores = getCachedScores(pronScore, jsonObject, usePhoneToDisplay);
+      isValid = isPrecalcValidCheck();
+    } catch (Exception e) {
+      logger.warn("parsing " + jsonScore + " got " + e, e);
+      isValid = false;
+      // e.printStackTrace();
     }
-    scores = getCachedScores(pronScore, jsonObject, usePhoneToDisplay);
-    isValid = isPrecalcValidCheck();
   }
 
   /**
@@ -132,7 +143,7 @@ public class PrecalcScores {
    */
   private Scores getCachedScores(float pronScore, JsonObject jsonObject, boolean usePhones) {
     Map<ImageType, Map<Float, TranscriptEvent>> imageTypeMapMap =
-        parseResultJson.readFromJSON(jsonObject, "words", "w", usePhones, null,false);
+        parseResultJson.readFromJSON(jsonObject, "words", "w", usePhones, null, false);
     Map<String, Map<String, Float>> eventScores = getEventAverages(imageTypeMapMap);
     return new Scores(pronScore, eventScores, 0);
   }

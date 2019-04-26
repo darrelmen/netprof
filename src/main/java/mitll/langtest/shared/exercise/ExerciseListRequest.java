@@ -40,7 +40,6 @@ import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.server.services.ExerciseServiceImpl;
 import mitll.langtest.shared.answer.ActivityType;
 import mitll.langtest.shared.project.ProjectMode;
-import mitll.langtest.shared.project.ProjectType;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -69,16 +68,17 @@ public class ExerciseListRequest implements IsSerializable, IRequest {
   private boolean plainVocab = false;
   private boolean isOnlyFL = false;
   private boolean exactMatch = false;
-
+  private int projID;
   private int dialogID = -1;
   private ProjectMode mode = ProjectMode.VOCABULARY;
 
   public ExerciseListRequest() {
   }
 
-  public ExerciseListRequest(int reqID, int userID) {
+  public ExerciseListRequest(int reqID, int userID, int projID) {
     this.reqID = reqID;
     this.userID = userID;
+    this.projID = projID;
   }
 
   public boolean isNoFilter() {
@@ -341,18 +341,6 @@ public class ExerciseListRequest implements IsSerializable, IRequest {
     return this;
   }
 
-  /**
-   * @return
-   * @see mitll.langtest.server.database.exercise.FilterResponseHelper#getSectionHelperFromFiltered
-   */
-//  public ProjectType getProjectType() {
-//    return projectType;
-//  }
-
-//  public ExerciseListRequest setProjectType(ProjectType projectType) {
-//    this.projectType = projectType;
-//    return this;
-//  }
   @Override
   public ProjectMode getMode() {
     return mode;
@@ -361,6 +349,18 @@ public class ExerciseListRequest implements IsSerializable, IRequest {
   public ExerciseListRequest setMode(ProjectMode mode) {
     this.mode = mode;
     return this;
+  }
+
+  public boolean isExactMatch() {
+    return exactMatch;
+  }
+
+  public void setExactMatch(boolean exactMatch) {
+    this.exactMatch = exactMatch;
+  }
+
+  public int getProjID() {
+    return projID;
   }
 
   /**
@@ -389,13 +389,5 @@ public class ExerciseListRequest implements IsSerializable, IRequest {
             (addFirst ? "\n\tadd first ex    " : "\n\tdon't add first") +
             (QC ? "\n\tqc request    " : "")
         ;
-  }
-
-  public boolean isExactMatch() {
-    return exactMatch;
-  }
-
-  public void setExactMatch(boolean exactMatch) {
-    this.exactMatch = exactMatch;
   }
 }
