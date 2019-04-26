@@ -455,13 +455,11 @@ public class DownloadServlet extends DatabaseServlet {
           "\n\tsess  " + sessionID +
           "\n\tfound " + resultsBySession.size());
 
-      Project project = db.getProject(projectid);
+      Project project = checkTranscripts(projectid, resultsBySession);
 
       String suffix = getTimestamp(sessionID, from1);
 
-      IUserDAO userDAO = db.getUserDAO();
-
-      User subjectWithAudio = userDAO.getUserWhere(userID);
+      User subjectWithAudio = db.getUserDAO().getUserWhere(userID);
 
       new AudioExport(db.getServerProps(), project.getPathHelper().getContext())
           .writeResultsToStream(
@@ -479,6 +477,29 @@ public class DownloadServlet extends DatabaseServlet {
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
+  }
+
+  private Project checkTranscripts(int projectid, List<MonitorResult> resultsBySession) {
+    List<MonitorResult> collect = resultsBySession.stream().filter(monitorResult -> monitorResult.getForeignText().isEmpty()).collect(Collectors.toList());
+
+    if (!collect.isEmpty()) {
+      logger.info("writeStudentZip found " + collect.size() + " without transcripts");
+    }
+
+    Project project = db.getProject(projectid);
+    collect.forEach(monitorResult -> {
+      CommonExercise exerciseByID = project.getExerciseByID(monitorResult.getExID());
+      if (exerciseByID != null) {
+        monitorResult.setForeignText(exerciseByID.getForeignLanguage());
+      }
+    });
+
+    collect = resultsBySession.stream().filter(monitorResult -> monitorResult.getForeignText().isEmpty()).collect(Collectors.toList());
+
+    if (!collect.isEmpty()) {
+      logger.info("writeStudentZip after marrying with exercises, stilll found " + collect.size() + " without transcripts");
+    }
+    return project;
   }
 
   @NotNull

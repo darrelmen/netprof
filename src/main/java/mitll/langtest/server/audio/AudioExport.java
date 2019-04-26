@@ -366,7 +366,8 @@ public class AudioExport {
     new ExcelExport(props).writeExcelToStream(toWrite, zOut, typeOrder, language1, isDefectList);
   }
 
-  private void addResultSpreadsheetToZip(Collection<MonitorResult> toWrite, Collection<String> typeOrder,
+  private void addResultSpreadsheetToZip(Collection<MonitorResult> toWrite,
+                                         Collection<String> typeOrder,
                                          ZipOutputStream zOut, String overallName) throws IOException {
     zOut.putNextEntry(new ZipEntry(overallName + File.separator + overallName + ".xlsx"));
     new ResultDAOToExcel().writeExcelToStream(toWrite, typeOrder, zOut);
