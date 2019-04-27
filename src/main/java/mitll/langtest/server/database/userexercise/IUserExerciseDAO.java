@@ -69,7 +69,6 @@ public interface IUserExerciseDAO extends IDAO {
    */
   Map<Integer, String> getIDToFL(int projid);
 
-
   /**
    * @see mitll.langtest.server.ScoreServlet#getJsonForAudio(HttpServletRequest, ScoreServlet.PostRequest, String, String)
    * @return

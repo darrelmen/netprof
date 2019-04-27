@@ -285,10 +285,11 @@ public class ExerciseCopy {
         addPredefExercises(projectid, slickUEDAO, importUser, exercises, typeOrder, idToCandidateOverride, exToInt, checkExists);
     exToInt.forEach((commonExercise, exid) -> dominoToExID.put(commonExercise.getDominoID(), exid));
 
-    List<SlickExerciseAttributeJoin> joins = getSlickExerciseAttributeJoins(importUser, exToJoins);
-
-    logger.info("addExercisesAndAttributes adding " + joins.size() + " attribute joins : ");
-    slickUEDAO.getExerciseAttributeJoin().addBulkAttributeJoins(joins);
+    {
+      List<SlickExerciseAttributeJoin> joins = getSlickExerciseAttributeJoins(importUser, exToJoins);
+      logger.info("addExercisesAndAttributes adding " + joins.size() + " attribute joins : ");
+      slickUEDAO.getExerciseAttributeJoin().addBulkAttributeJoins(joins);
+    }
     return exToInt;
   }
 

@@ -46,15 +46,6 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
    * SERVER
    *
    * @return
-   * @see mitll.langtest.server.sorter.ExerciseSorter#phoneCompFirst(CommonExercise, CommonExercise, Map)
-   * @deprecated - can't guarantee we'll have this on the znetprof instance
-   */
- // List<String> getFirstPron();
-
-  /**
-   * SERVER
-   *
-   * @return
    * @seex mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem
    */
   int getCreator();

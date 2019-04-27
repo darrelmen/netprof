@@ -50,9 +50,9 @@ public interface IRelatedExercise extends IDAO {
 
   int deleteRelated(int related);
 
+  boolean deleteAndFixForEx(int exid);
+
   int deleteRelatedForDialog(int dialog);
 
   Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(int projid);
-
- // boolean updateProject(int oldID, int newprojid);
 }

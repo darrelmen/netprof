@@ -29,22 +29,25 @@
 
 package mitll.langtest.server.database.userexercise;
 
+import mitll.langtest.server.database.dialog.DialogDAO;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickRelatedExercise;
 import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RelatedExerciseHelper implements IRelatedExercise {
+
+  private static final Logger logger = LogManager.getLogger(RelatedExerciseHelper.class);
+
   private final RelatedExerciseDAOWrapper daoWrapper;
 
   /**
-   *
    * @param daoWrapper
    */
-  RelatedExerciseHelper(RelatedExerciseDAOWrapper daoWrapper ) {
+  RelatedExerciseHelper(RelatedExerciseDAOWrapper daoWrapper) {
     this.daoWrapper = daoWrapper;
   }
 
@@ -83,11 +86,28 @@ public class RelatedExerciseHelper implements IRelatedExercise {
   }
 
   @Override
-  public void deleteForProject(int projID) {    daoWrapper.deleteForProject(projID);  }
+  public void deleteForProject(int projID) {
+    daoWrapper.deleteForProject(projID);
+  }
 
+  /**
+   * @param related
+   * @return
+   * @see mitll.langtest.server.domino.ProjectSync#doContextDeletes
+   */
   @Override
   public int deleteRelated(int related) {
     return daoWrapper.deleteRelated(related);
+  }
+
+  @Override
+  public boolean deleteAndFixForEx(int exid) {
+    return daoWrapper.deleteAndFix(exid) > 0;
+  }
+
+  //  @Override
+  public boolean insertAfter(int after, int exid) {
+    return daoWrapper.insertAfter(after, exid) > 0;
   }
 
   @Override
@@ -96,12 +116,83 @@ public class RelatedExerciseHelper implements IRelatedExercise {
   }
 
   /**
-   * @see mitll.langtest.server.database.dialog.DialogDAO#getDialogs
+   * Final link could either be one with two pointers to same node or with a next pointer to which there are no prev pointers.
+   *
    * @param projid
    * @return
+   * @see mitll.langtest.server.database.dialog.DialogDAO#getDialogs
    */
   @Override
   public Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(int projid) {
-    return daoWrapper.byProjectForDialog(projid);
+    Map<Integer, List<SlickRelatedExercise>> dialogToRelations = daoWrapper.byProjectForDialog(projid);
+
+    Map<Integer, List<SlickRelatedExercise>> orderedDialogToRelations = new HashMap<>();
+
+    dialogToRelations.forEach((k, v) -> {
+      //Map<Integer, SlickRelatedExercise> exToRelation = new HashMap<>();
+
+      Map<Integer, SlickRelatedExercise> contextExToRelation = new HashMap<>();
+
+      List<SlickRelatedExercise> finalOneList = new ArrayList<>();
+
+      Set<Integer> prevPointers = new HashSet<>();
+
+      v.forEach(slickRelatedExercise -> {
+        logger.info("for dialog " + k + " : " + slickRelatedExercise);
+
+        boolean isLast = slickRelatedExercise.exid() == slickRelatedExercise.contextexid();
+        if (isLast) {
+          finalOneList.add(slickRelatedExercise);
+        }
+
+        prevPointers.add(slickRelatedExercise.exid());
+
+//        exToRelation.put(slickRelatedExercise.exid(), slickRelatedExercise);
+        if (!isLast) {
+          contextExToRelation.put(slickRelatedExercise.contextexid(), slickRelatedExercise);
+        }
+      });
+
+      SlickRelatedExercise prev = null;
+      if (finalOneList.isEmpty()) {
+        Set<Integer> nextPointers = new HashSet<>(contextExToRelation.keySet());
+        nextPointers.removeAll(prevPointers);
+
+        if (!nextPointers.isEmpty()) {
+          prev = contextExToRelation.get(nextPointers.iterator().next());
+        }
+        logger.info("1 final link is " + prev);
+      } else {
+        prev = finalOneList.get(0);
+        logger.info("2 final link is " + prev);
+      }
+
+      {
+        List<SlickRelatedExercise> inOrder = new ArrayList<>(v.size());
+
+        if (contextExToRelation.isEmpty()) {
+          if (prev != null) {
+            inOrder.add(prev);
+            logger.info(k + " : 1 add link " + prev);
+          }
+        } else {
+//        SlickRelatedExercise prev = contextExToRelation.get(-1);
+          while (prev != null) {
+            inOrder.add(prev);
+            logger.info(k + " : 2 add link " + prev);
+            // int exid = slickRelatedExercise.exid();
+            prev = contextExToRelation.get(prev.exid());
+            // inOrder.add(prev);
+          }
+
+          Collections.reverse(inOrder);
+          for (int i = 0; i < inOrder.size(); i++) logger.info("\t#" + i + " : " + inOrder.get(i));
+        }
+
+        orderedDialogToRelations.put(k, inOrder);
+      }
+    });
+
+    return orderedDialogToRelations;
   }
 }

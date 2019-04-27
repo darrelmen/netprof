@@ -351,7 +351,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     if (slickRelatedExercises != null) {
       List<CommonExercise> exercises = new ArrayList<>();
       Set<Integer> candidate = new HashSet<>();
-//      logger.info("addExercises got " + slickRelatedExercises.size() + " relations for " + dialogID);
+      logger.info("addExercises got " + slickRelatedExercises.size() + " relations for " + dialogID);
       Map<Integer, CommonExercise> idToEx = new HashMap<>();
 
       slickRelatedExercises.forEach(slickRelatedExercise -> {
@@ -378,7 +378,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
           }
 
           if (childEx == null || childid == exid) {
-            logger.info("Skip relation " + childid + " on " + exercise);
+            logger.info("addExercises : Skip relation " + childid + " on " + exercise);
+            exercises.add(exercise);
           } else {
             exercise.getDirectlyRelated().add(childEx);
             childEx.getMutable().setParentExerciseID(exercise.getParentExerciseID());
@@ -415,6 +416,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
         exercises.forEach(current -> dialog.getExercises().add(current));
       }
+    } else {
+      logger.warn("no exercises for " + dialogID);
     }
 
     String message = "dialog " + dialog.getID() + " " + dialog.getUnit() + " " + dialog.getChapter() +
@@ -533,11 +536,15 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }
 
   /**
+   * TODO: add insert exercise
+   * TODO: add exercise to other side of conversation
+   * TODO: remove exercise
+   *
    * @param toAdd
    * @param projid
    * @param baseDialogReader
    * @param typeOrder
-   * @see #add(IDialog)
+   * @see #addEmptyExercises
    */
   private List<ClientExercise> addExercisesToDialog(IDialog toAdd, int projid, List<String> typeOrder) {
     BaseDialogReader baseDialogReader = new BaseDialogReader(null, null);

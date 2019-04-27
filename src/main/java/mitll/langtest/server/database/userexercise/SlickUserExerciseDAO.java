@@ -67,14 +67,14 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   private static final String NEW_USER_EXERCISE = "NEW_USER_EXERCISE";
   private static final String UNKNOWN = "UNKNOWN";
-  private static final String ANY = "Any";
-  private static final String HYDRA = "hydra";
+//  private static final String ANY = "Any";
+//  private static final String HYDRA = "hydra";
   private static final int DEFAULT_PROJECT = 1;
-  private static final boolean WARN_ABOUT_MISSING_PHONES = false;
+//  private static final boolean WARN_ABOUT_MISSING_PHONES = false;
   private static final String QUOT = "&quot;";
   private static final int MAX_LENGTH = 250;
   private static final String UNKNOWN1 = "unknown";
-  private static final String MITLL = "MITLL";
+  //private static final String MITLL = "MITLL";
   public static final boolean WARN_ABOUT_NO_TYPES = false;
   /**
    * If we don't have a value for a facet, it's value is "Blank" as opposed to "Any"
@@ -90,10 +90,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private final IRelatedExercise relatedExerciseHelper, relatedCoreExerciseHelper;
   //  private Map<Integer, ExercisePhoneInfo> exToPhones;
   private final IUserDAO userDAO;
-  private final IRefResultDAO refResultDAO;
+//  private final IRefResultDAO refResultDAO;
   private SlickExercise unknownExercise;
-  private final boolean hasMediaDir;
-  private final String hostName;
+ // private final boolean hasMediaDir;
+  //private final String hostName;
 
   private CommonExercise templateExercise;
   private int unknownExerciseID;
@@ -113,15 +113,15 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     relatedCoreExerciseHelper = new RelatedCoreExerciseHelper(new RelatedCoreExerciseDAOWrapper(dbConnection));
 
     userDAO = database.getUserDAO();
-    refResultDAO = database.getRefResultDAO();
+   // refResultDAO = database.getRefResultDAO();
     this.database = database;
 
-    String mediaDir = database.getServerProps().getMediaDir();
-    hasMediaDir = new File(mediaDir).exists();
-    if (!hasMediaDir) {
-      logger.info("SlickUserExerciseDAO : no media dir at " + mediaDir + " - this is OK on netprof host.");
-    }
-    hostName = database.getServerProps().getHostName();
+   // String mediaDir = database.getServerProps().getMediaDir();
+//    hasMediaDir = new File(mediaDir).exists();
+//    if (!hasMediaDir) {
+//      logger.info("SlickUserExerciseDAO : no media dir at " + mediaDir + " - this is OK on netprof host.");
+//    }
+  //  hostName = database.getServerProps().getHostName();
   }
 
   public void createTable() {
@@ -873,7 +873,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
           .forEach(slickExerciseAttributeJoin -> attributes.add(allByProject.get(slickExerciseAttributeJoin.attrid())));
       exercise.setAttributes(attributes);
 
-      logger.info("addAttributeToExercise ex " + exercise.getID() + " : " + exercise.getAttributes());
+//      logger.info("addAttributeToExercise ex " + exercise.getID() + " : " + exercise.getAttributes());
     }
   }
 

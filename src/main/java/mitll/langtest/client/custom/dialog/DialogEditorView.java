@@ -122,7 +122,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   private void addYours(DivWidget left) {
     showYours(Collections.emptyList(), left);
 
-    ExerciseListRequest request = new ExerciseListRequest(0, controller.getUser());
+    ExerciseListRequest request = new ExerciseListRequest(0, controller.getUser(), controller.getProjectID());
     controller.getDialogService().getDialogs(request,
         new AsyncCallback<ExerciseListWrapper<T>>() {
           @Override

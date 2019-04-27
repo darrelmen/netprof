@@ -103,4 +103,9 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
   public Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(int projid) {
     return daoWrapper.byProjectForDialog(projid);
   }
+
+  @Override
+  public boolean deleteAndFixForEx(int exid) {
+    return false;
+  }
 }

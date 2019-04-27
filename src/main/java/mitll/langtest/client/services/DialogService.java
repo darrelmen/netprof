@@ -88,14 +88,6 @@ public interface DialogService extends RemoteService {
   int addSession(DialogSession dialogSession) throws DominoSessionException;
 
   /**
-   * JUST FOR NOW. to show we can get one session worth of analysis data
-   * @param dialogid
-   * @return
-   * @throws DominoSessionException
-   */
- // int getLatestDialogSessionID(int dialogid) throws DominoSessionException;
-
-  /**
    * @see mitll.langtest.client.analysis.SessionAnalysis#SessionAnalysis
    * @param userid
    * @param dialogid

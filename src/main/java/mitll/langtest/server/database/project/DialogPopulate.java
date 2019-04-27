@@ -272,26 +272,26 @@ public class DialogPopulate {
    * @param dialogID
    * @see #addDialogs
    */
-  public Map<CommonExercise, Integer> addExercises(int projid,
-                                                   int defaultUser,
-                                                   List<String> typeOrder,
-                                                   Timestamp modified,
-                                                   //  Map<ClientExercise, Integer> allImportExToID,
-                                                   IDialog dialog,
-                                                   int dialogID) {
+  private Map<CommonExercise, Integer> addExercises(int projid,
+                                                    int defaultUser,
+                                                    List<String> typeOrder,
+                                                    Timestamp modified,
+                                                    //  Map<ClientExercise, Integer> allImportExToID,
+                                                    IDialog dialog,
+                                                    int dialogID) {
     return addExercises2(projid, defaultUser, typeOrder, modified, dialogID, dialog.getExercises());
   }
 
   public Map<CommonExercise, Integer> addExercises2(int projid, int defaultUser, List<String> typeOrder, Timestamp modified,
-                                                     int dialogID,
-                                                     List<ClientExercise> exercises) {
+                                                    int dialogID,
+                                                    List<ClientExercise> exercises) {
     List<CommonExercise> commonExercisesFromDialog = toCommon(exercises);
 
     Map<CommonExercise, Integer> importExToID = addExercises(projid, defaultUser, typeOrder, commonExercisesFromDialog);
 
     importExToID.forEach((k, v) -> k.getMutable().setID(v));
 
-    logger.info("addExercises made " + importExToID.size());
+    logger.info("addExercises made " + importExToID.size() + " exercises for " + dialogID);
 
     importExToID.keySet().forEach(logger::info);
 
@@ -433,18 +433,23 @@ public class DialogPopulate {
                                                               List<ClientExercise> exercises,
                                                               int dialogID,
                                                               Map<CommonExercise, Integer> importExToID) {
-    ClientExercise prev = null;
     List<SlickRelatedExercise> relatedExercises = new ArrayList<>();
 
-    for (ClientExercise ex : exercises) {
-      if (prev != null) {
-        int prevID = importExToID.get(prev.asCommon());
-        int currID = importExToID.get(ex.asCommon());
-
-        relatedExercises.add(new SlickRelatedExercise(-1, prevID, currID, projid, dialogID, modified));
+    if (exercises.size() == 1) {
+      int id = exercises.get(0).getID();
+      relatedExercises.add(new SlickRelatedExercise(-1, id, id, projid, dialogID, modified));
+    } else {
+      ClientExercise prev = null;
+      for (ClientExercise ex : exercises) {
+        if (prev != null) {
+          int prevID = importExToID.get(prev.asCommon());
+          int currID = importExToID.get(ex.asCommon());
+          relatedExercises.add(new SlickRelatedExercise(-1, prevID, currID, projid, dialogID, modified));
+        }
+        prev = ex;
       }
-      prev = ex;
     }
+
     return relatedExercises;
   }
 
