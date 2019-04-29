@@ -56,10 +56,6 @@ import java.util.stream.Collectors;
 public class DialogDAO extends DAO implements IDialogDAO {
   private static final Logger logger = LogManager.getLogger(DialogDAO.class);
 
-  //  private static final long MIN = 60 * 1000L;
-//  private static final long HOUR = 60 * MIN;
-//  private static final long DAY = 24 * HOUR;
-//  public static final long YEAR = 365 * DAY;
   /**
    * @see #configureDialog
    */
@@ -68,6 +64,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
   public static final String INTERPRETER_FIRST_TURN = "I-0";
   public static final String SPEAKER_A_TURN = "A-0";
   public static final String SPEAKER_A = BaseDialogReader.SPEAKER_A;
+  public static final String SPEAKER_B = BaseDialogReader.SPEAKER_B;
   public static final String SPEAKER_PREFIX = "S-";
   public static final boolean DEBUG = false;
 
@@ -696,8 +693,13 @@ public class DialogDAO extends DAO implements IDialogDAO {
     List<ClientExercise> exercises = toAdd.getExercises();
     Language languageEnum = databaseImpl.getLanguageEnum(projid);
     boolean interpreter = toAdd.getKind() == DialogType.INTERPRETER;
+
     String prefix = interpreter ? isLeft ? "E-" : SPEAKER_PREFIX : SPEAKER_PREFIX;
-    String speaker = interpreter ? isLeft ? BaseDialogReader.ENGLISH_SPEAKER : SPEAKER_A : SPEAKER_A;
+
+    String speaker = interpreter ?
+        isLeft ? BaseDialogReader.ENGLISH_SPEAKER : SPEAKER_A :
+        (isLeft ? SPEAKER_A : SPEAKER_B);
+
     String interpreterPrefix = "I-";
     int index = getIndexOfEx(exidAfter, exercises);
     String speakerTurn = prefix + index;

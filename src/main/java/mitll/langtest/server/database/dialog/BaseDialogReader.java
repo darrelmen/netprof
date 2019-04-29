@@ -60,7 +60,8 @@ public class BaseDialogReader {
 
   private static final String OPT_NETPROF_DIALOG = "/opt/netprof/dialog/";
 
-  private static final List<String> SPEAKER_LABELS = Arrays.asList(SPEAKER_A, "B", "C", "D", "E", "F", "I");
+  public static final String SPEAKER_B = "B";
+  private static final List<String> SPEAKER_LABELS = Arrays.asList(SPEAKER_A, SPEAKER_B, "C", "D", "E", "F", "I");
   private static final String IMAGES = "images/";
   protected String unit;
   protected String chapter;
