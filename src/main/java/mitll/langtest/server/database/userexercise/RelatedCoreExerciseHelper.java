@@ -113,4 +113,9 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
   public boolean insertAfter(int after, int exid) {
     return false;
   }
+
+  @Override
+  public boolean insertPair(int after, int first, int second) {
+    return false;
+  }
 }

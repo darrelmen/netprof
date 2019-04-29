@@ -30,6 +30,7 @@
 package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.dialog.DialogDAO;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickRelatedExercise;
 import mitll.npdata.dao.userexercise.RelatedExerciseDAOWrapper;
@@ -105,9 +106,20 @@ public class RelatedExerciseHelper implements IRelatedExercise {
     return daoWrapper.deleteAndFix(exid) > 0;
   }
 
+  /**
+   * @see DialogDAO#addEmptyExercises(IDialog, int, int, boolean, long)
+   * @param after
+   * @param exid
+   * @return
+   */
   @Override
   public boolean insertAfter(int after, int exid) {
     return daoWrapper.insertAfter(after, exid) > 0;
+  }
+
+  @Override
+  public boolean insertPair(int after, int first, int second) {
+    return daoWrapper.insertPair(after, first, second) > 0;
   }
 
   @Override

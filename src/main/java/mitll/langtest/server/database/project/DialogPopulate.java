@@ -95,15 +95,16 @@ public class DialogPopulate {
    *
    * @param project
    * @see ProjectManagement#addDialogInfo
+   * @return true if added any
    */
   boolean addDialogInfo(Project project) {
     List<IDialog> dialogs1 = db.getDialogDAO().getDialogs(project.getID());
     if (dialogs1.isEmpty()) {
       logger.info("addDialogInfo no dialog info yet loaded for " + project);
-      return true;
+      return false;
     } else {
       project.setDialogs(dialogs1);
-      return false;
+      return true;
     }
   }
 

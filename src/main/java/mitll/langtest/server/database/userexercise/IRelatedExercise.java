@@ -58,6 +58,8 @@ public interface IRelatedExercise extends IDAO {
 
   boolean insertAfter(int after, int exid);
 
+  boolean insertPair(int after, int first, int second);
+
   int deleteRelatedForDialog(int dialog);
 
   Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(int projid);
