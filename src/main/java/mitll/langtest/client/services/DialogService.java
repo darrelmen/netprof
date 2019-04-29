@@ -60,7 +60,7 @@ public interface DialogService extends RemoteService {
   ExerciseListWrapper<IDialog> getDialogs(ExerciseListRequest request) throws DominoSessionException;
 
   void update(IDialog dialog) throws DominoSessionException;
-  List<ClientExercise> addEmptyExercises(boolean isLeftSpeaker, int dialogID) throws DominoSessionException;
+  List<ClientExercise> addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException;
 
   IDialog addDialog(IDialog dialog) throws DominoSessionException;
   /**

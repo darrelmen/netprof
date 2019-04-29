@@ -63,6 +63,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @see #configureDialog
    */
   private static final String FLTITLE = DialogMetadata.FLTITLE.toString().toLowerCase();//"fltitle";
+  public static final String ENGLISH_FIRST_TURN = "E-0";
+  public static final String INTERPRETER_FIRST_TURN = "I-0";
+  public static final String SPEAKER_A_TURN = "A-0";
+  public static final String SPEAKER_A = BaseDialogReader.SPEAKER_A;
+  public static final String SPEAKER_PREFIX = "S-";
 
   private final DialogDAOWrapper dao;
 
@@ -378,7 +383,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
           }
 
           if (childEx == null || childid == exid) {
-            logger.info("addExercises : Skip relation " + childid + " on " + exercise);
+            logger.info("addExercises : no childid relation " + childid + " on " + exercise);
             exercises.add(exercise);
           } else {
             exercise.getDirectlyRelated().add(childEx);
@@ -460,6 +465,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
   public IDialog add(IDialog toAdd) {
     int projid = toAdd.getProjid();
     int userid = toAdd.getUserid();
+
     int add = add(
         userid,
         projid,
@@ -482,10 +488,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     long now = addFLAttribute(toAdd, projid, userid);
 
-    addEmptyExercises(toAdd, projid, userid, now);
+    addEmptyExercises(toAdd, projid, userid, -1, true, now);
 
-    // refresh list on project
-    databaseImpl.getProjectManagement().addDialogInfo(projid);
 
     toAdd.getExercises().forEach(ex -> {
       if (ex.getAttributes().stream()
@@ -499,12 +503,21 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return toAdd;
   }
 
-  public List<ClientExercise> addEmptyExercises(IDialog toAdd, int projid, int userid, long now) {
+  /**
+   * @param toAdd
+   * @param projid
+   * @param userid
+   * @param afterExid
+   * @param isLeft
+   * @param now
+   * @return
+   * @see #add(IDialog)
+   */
+  public List<ClientExercise> addEmptyExercises(IDialog toAdd, int projid, int userid, int afterExid, boolean isLeft, long now) {
     Project project = databaseImpl.getProject(projid);
     List<String> typeOrder = project.getTypeOrder();
 
-    List<ClientExercise> clientExercises = addExercisesToDialog(toAdd, projid, typeOrder);
-    //   int add = toAdd.getID();
+    List<ClientExercise> clientExercises = addExercisesToDialog(toAdd, projid, typeOrder, afterExid, isLeft);
 
     new DialogPopulate(databaseImpl, project.getPathHelper()).addExercises2(projid,
         userid,
@@ -515,6 +528,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
 
     refreshExercises(clientExercises, project);
+
+    // refresh dialogs on project
+    databaseImpl.getProjectManagement().addDialogInfo(projid);
 
     return clientExercises;
   }
@@ -535,6 +551,14 @@ public class DialogDAO extends DAO implements IDialogDAO {
     });
   }
 
+  public boolean deleteExercise(int projid, int exid) {
+    boolean b = databaseImpl.getUserExerciseDAO().getRelatedExercise().deleteAndFixForEx(exid);
+    // refresh dialogs on project
+    databaseImpl.getProjectManagement().addDialogInfo(projid);
+
+    return b;
+  }
+
   /**
    * TODO: add insert exercise
    * TODO: add exercise to other side of conversation
@@ -546,7 +570,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @param typeOrder
    * @see #addEmptyExercises
    */
-  private List<ClientExercise> addExercisesToDialog(IDialog toAdd, int projid, List<String> typeOrder) {
+  private List<ClientExercise> addExercisesToDialog(IDialog toAdd, int projid, List<String> typeOrder, int exidAfter, boolean isLeft) {
     BaseDialogReader baseDialogReader = new BaseDialogReader(null, null);
 
     Map<String, String> defaultUnitAndChapter = new HashMap<>();
@@ -559,33 +583,47 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     List<ClientExercise> newEx = new ArrayList<>();
 
-    if (toAdd.getKind() == DialogType.INTERPRETER) {
-      {
-        Exercise exercise = baseDialogReader.getExercise("", "", "", BaseDialogReader.ENGLISH_SPEAKER, Language.ENGLISH, "E-0", defaultUnitAndChapter);
-        //   logger.info("readFromSheet add " + turnID + " " + exercise.getFLToShow() + " " + exercise.getEnglish());
-        //exercises.add(exercise);
+    List<ClientExercise> exercises = toAdd.getExercises();
+    Language languageEnum = databaseImpl.getLanguageEnum(projid);
+    boolean interpreter = toAdd.getKind() == DialogType.INTERPRETER;
+    String prefix = interpreter ? isLeft ? "E-" : SPEAKER_PREFIX : SPEAKER_PREFIX;
+    String speaker = interpreter ? isLeft ? BaseDialogReader.ENGLISH_SPEAKER : SPEAKER_A : SPEAKER_A;
+    String interpreterPrefix = "I-";
+    int index = getIndexOfEx(exidAfter, exercises);
+    String speakerTurn = prefix + index;
 
-        toAdd.getExercises().add(exercise);
+    if (interpreter) {
+      {
+        Exercise exercise = baseDialogReader.getExercise("", "", "", speaker, Language.ENGLISH, speakerTurn, defaultUnitAndChapter);
+        exercises.add(exercise);
         newEx.add(exercise);
       }
 
       {
-        Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.INTERPRETERSPEAKER, databaseImpl.getLanguageEnum(projid),
-            "I-0", defaultUnitAndChapter);
-        //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
-        toAdd.getExercises().add(exercise1);
+        Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.INTERPRETERSPEAKER, languageEnum,
+            interpreterPrefix + index, defaultUnitAndChapter);
+        exercises.add(exercise1);
         newEx.add(exercise1);
-
       }
+
     } else {
-      Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.SPEAKER_A, databaseImpl.getLanguageEnum(projid),
-          "A-0", defaultUnitAndChapter);
-      //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
-      toAdd.getExercises().add(exercise1);
+      Exercise exercise1 = baseDialogReader.getExercise("", "", "", speaker, languageEnum, speakerTurn, defaultUnitAndChapter);
+      exercises.add(exercise1);
       newEx.add(exercise1);
     }
 
     return newEx;
+  }
+
+  private int getIndexOfEx(int exidAfter, List<ClientExercise> exercises) {
+    int found = 0;
+    for (int i = 0; i < exercises.size(); i++) {
+      if (exercises.get(i).getID() == exidAfter) {
+        found = i;
+        break;
+      }
+    }
+    return found;
   }
 
   private long addFLAttribute(IDialog toAdd, int projid, int userid) {
@@ -705,7 +743,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }
 
   /**
-   * TODO : pass in project id -
+   * TODOx : pass in project id -
    * TODO : what if two people are updating the set of dialogs at the same time???
    *
    * @param id
@@ -717,7 +755,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
     boolean b = dao.delete(id) > 0;
 
     if (b) {
-
       databaseImpl.getProjectManagement().addDialogInfo(projid);
     }
 

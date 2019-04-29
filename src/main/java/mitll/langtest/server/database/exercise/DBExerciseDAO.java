@@ -131,21 +131,21 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
   }
 
-  private CommonExercise maybeRefresh(int id) {
-    CommonExercise commonExercise = null;
-    if (userExerciseDAO.getByID(id) != null) {  // is it in the database by this id at all?
-      boolean refresh = refresh(id);
-      if (refresh) {
-        commonExercise = getExercise(id);
-        logger.info("getExercise : refresh " + id);
-      } else {
-        logger.warn("getExercise : really couldn't find... " + id);
-      }
-    } else {
-      logger.warn("getExercise : no known exercise with id " + id);
-    }
-    return commonExercise;
-  }
+//  private CommonExercise maybeRefresh(int id) {
+//    CommonExercise commonExercise = null;
+//    if (userExerciseDAO.getByID(id) != null) {  // is it in the database by this id at all?
+//      boolean refresh = refresh(id);
+//      if (refresh) {
+//        commonExercise = getExercise(id);
+//        logger.info("getExercise : refresh " + id);
+//      } else {
+//        logger.warn("getExercise : really couldn't find... " + id);
+//      }
+//    } else {
+//      logger.warn("getExercise : no known exercise with id " + id);
+//    }
+//    return commonExercise;
+//  }
 
   @Override
   public List<CommonExercise> getUserDefinedByProjectExactMatch(String fl, int userIDFromSession) {
