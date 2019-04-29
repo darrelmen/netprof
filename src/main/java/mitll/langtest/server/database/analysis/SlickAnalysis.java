@@ -32,8 +32,8 @@ package mitll.langtest.server.database.analysis;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.audio.NativeAudioResult;
-import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -589,7 +589,7 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
     long then = System.currentTimeMillis();
     float minAnalysisScore = database.getServerProps().getMinAnalysisScore();
     Collection<SlickPerfResult> perfForUser = listid == -1 ?
-        resultDAO.getPerf(projid, minAnalysisScore) :
+        resultDAO.getPerf(projid) :
         resultDAO.getPerfOnList(listid, minAnalysisScore);
 
     long now = System.currentTimeMillis();
@@ -690,7 +690,9 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
       List<BestScore> results = userToBest.computeIfAbsent(userid, k -> new ArrayList<>());
 
-      if (pronScore < 0) logger.warn("huh? got " + pronScore + " for " + exid + " and " + id);
+      if (pronScore < 0) {
+        logger.warn("getUserToResults huh? got " + pronScore + " for " + exid + " and " + id);
+      }
 
       String json = perf.scorejson();
       if (json != null && json.equals(EMPTY_JSON)) {

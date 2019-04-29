@@ -32,6 +32,7 @@ package mitll.langtest.server.database.result;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
@@ -624,11 +625,11 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   /**
    * @param projid
-   * @param minScore
    * @return
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getUserInfo(IUserDAO, int, int)
    */
-  public Collection<SlickPerfResult> getPerf(int projid, float minScore) {
-    return dao.perf(projid, minScore);
+  public Collection<SlickPerfResult> getPerf(int projid) {
+    return dao.perf(projid);
   }
 
   public Collection<SlickPerfResult> getPerfOnList(int listid, float minScore) {
