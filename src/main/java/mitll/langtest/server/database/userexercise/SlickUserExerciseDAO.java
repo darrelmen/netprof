@@ -1399,6 +1399,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     dao.deleteForProject(projID);
   }
 
+//  @Override
+//  public void deleteAndFixForEx(int exid) {
+//    relatedExerciseHelper.deleteAndFixForEx(exid);
+//  }
+
   @Override
   public SlickExercise getByDominoID(int projID, int docID) {
     Collection<SlickExercise> byExid = dao.byDominoID(projID, docID);

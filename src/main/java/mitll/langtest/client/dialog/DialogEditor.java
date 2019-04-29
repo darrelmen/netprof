@@ -95,7 +95,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
       // make either one or two more turns and add to end of dialog
       boolean isLeftSpeaker = isInterpreter ? getPrevTurn().getColumns() == COLUMNS.LEFT : getCurrentTurn().getColumns() == COLUMNS.LEFT;
 
-      controller.getDialogService().addEmptyExercises(isLeftSpeaker, dialogID, new AsyncCallback<List<ClientExercise>>() {
+      controller.getDialogService().addEmptyExercises(dialogID, -1, isLeftSpeaker, new AsyncCallback<List<ClientExercise>>() {
         @Override
         public void onFailure(Throwable caught) {
 

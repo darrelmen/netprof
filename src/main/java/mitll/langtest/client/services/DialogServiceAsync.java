@@ -54,6 +54,6 @@ public interface DialogServiceAsync {
 
   void update(IDialog dialog,AsyncCallback<Void> async);
 
-  void addEmptyExercises(boolean isLeftSpeaker, int dialogID, AsyncCallback<List<ClientExercise>> async);
+  void addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker, AsyncCallback<List<ClientExercise>> async);
   // void getLatestDialogSessionID(int dialogid, AsyncCallback<Integer> async);
 }

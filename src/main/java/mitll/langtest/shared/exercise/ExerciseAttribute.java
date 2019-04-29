@@ -29,9 +29,11 @@
 
 package mitll.langtest.shared.exercise;
 
+import mitll.npdata.dao.SlickExerciseAttribute;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Map;
 
 public class ExerciseAttribute extends Pair implements Comparable<ExerciseAttribute> {
   private boolean isFacet = true;
@@ -50,6 +52,12 @@ public class ExerciseAttribute extends Pair implements Comparable<ExerciseAttrib
     super(status, value);
   }
 
+  /**
+   * @see mitll.langtest.server.database.userexercise.AttributeHelper#makeOrGet(Map, SlickExerciseAttribute)
+   * @param status
+   * @param value
+   * @param isFacet
+   */
   public ExerciseAttribute(String status, String value, boolean isFacet) {
     super(status, value);
     this.isFacet = isFacet;

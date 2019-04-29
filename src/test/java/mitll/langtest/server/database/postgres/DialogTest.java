@@ -32,6 +32,7 @@ package mitll.langtest.server.database.postgres;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.dialog.IDialogDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
@@ -72,6 +73,7 @@ public class DialogTest extends BaseTest {
   private static final String C17 = "" + 17;
   private static final String PAGE = "page";
   private static final String KOREAN = "Korean";
+  public static final int USERID = 6;
 
 /*  @Test
   public void testDict() {
@@ -86,10 +88,11 @@ public class DialogTest extends BaseTest {
   @Test
   public void testNewDialog() {
     DatabaseImpl andPopulate = getDatabase();
-    Project project = andPopulate.getProject(21, true);
+    int projectid = 5;
+    Project project = andPopulate.getProject(projectid, true);
     Dialog toAdd = new Dialog(-1,
-        6,
-        21,
+        USERID,
+        projectid,
         -1,
         -1,
         System.currentTimeMillis(),
@@ -102,12 +105,6 @@ public class DialogTest extends BaseTest {
     );
 
     andPopulate.waitForDefaultUser();
-//    try {
-//      Thread.sleep(3000);
-//    } catch (InterruptedException e) {
-//      e.printStackTrace();
-//    }
-
     andPopulate.getDialogDAO().add(toAdd);
 
     for (ClientExercise exercise : toAdd.getExercises()) {
@@ -116,22 +113,59 @@ public class DialogTest extends BaseTest {
       logger.info("lookup " + lookup);
     }
 
+
   }
 
   @Test
   public void testGetNewDialog() {
     DatabaseImpl andPopulate = getDatabase();
-    Project project = andPopulate.getProject(21, true);
+    Project project = andPopulate.getProject(5, true);
 
     project.getDialogs().forEach(logger::info);
   }
 
   @Test
+  public void testGetExercisesDialog() {
+    DatabaseImpl andPopulate = getDatabase();
+    int projectid = 5;
+    int i = 32;
+
+    Project project = andPopulate.getProject(projectid, true);
+
+    andPopulate.getProject(projectid, true);
+
+    andPopulate.waitForDefaultUser();
+
+    IDialog iDialog = getiDialog(andPopulate, projectid, i);
+    logger.info("before has " + iDialog.getExercises().size());
+    iDialog.getExercises().forEach(logger::info);
+  }
+
+  @Test
+  public void testGetExercisesDialog2() {
+    DatabaseImpl andPopulate = getDatabase();
+    int projectid = 5;
+    int i = 33;
+
+    Project project = andPopulate.getProject(projectid, true);
+
+    andPopulate.getProject(projectid, true);
+
+    andPopulate.waitForDefaultUser();
+
+    IDialog iDialog = getiDialog(andPopulate, projectid, i);
+    logger.info("before has " + iDialog.getExercises().size());
+    iDialog.getExercises().forEach(logger::info);
+  }
+
+  @Test
   public void testChangeDialog() {
     DatabaseImpl andPopulate = getDatabase();
-    Project project = andPopulate.getProject(21, true);
+    int projectid = 5;
+    Project project = andPopulate.getProject(projectid, true);
 
-    List<IDialog> collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == 60).collect(Collectors.toList());
+    int i = 32;
+    List<IDialog> collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == i).collect(Collectors.toList());
 
     collect.forEach(logger::info);
 
@@ -144,7 +178,7 @@ public class DialogTest extends BaseTest {
     {
       andPopulate.getDialogDAO().update(iDialog);
 
-      collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == 60).collect(Collectors.toList());
+      collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == i).collect(Collectors.toList());
       iDialog = collect.get(0);
       logger.info("after dialog " + iDialog.getID() + " : " + iDialog.isPrivate());
     }
@@ -160,13 +194,110 @@ public class DialogTest extends BaseTest {
     {
       andPopulate.getDialogDAO().update(iDialog);
 
-      collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == 60).collect(Collectors.toList());
+      collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == i).collect(Collectors.toList());
       iDialog = collect.get(0);
       logger.info("2 after dialog " + iDialog.getID() + " : " + iDialog.isPrivate());
     }
 
     Assert.assertTrue(iDialog.isPrivate());
   }
+
+  @Test
+  public void testInsertAtFrontDialog() {
+    DatabaseImpl andPopulate = getDatabase();
+    int projectid = 5;
+    int i = 32;
+    andPopulate.getProject(projectid, true);
+
+    andPopulate.waitForDefaultUser();
+
+    try {
+      Thread.sleep(3000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
+    IDialog iDialog = getiDialog(andPopulate, projectid, i);
+
+    doInsert(andPopulate, projectid, i, iDialog);
+  }
+
+  @Test
+  public void testInsertAtFrontDialog2() {
+    DatabaseImpl andPopulate = getDatabase();
+    int projectid = 5;
+    int i = 32;
+    andPopulate.getProject(projectid, true);
+
+    andPopulate.waitForDefaultUser();
+
+    try {
+      Thread.sleep(3000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
+    IDialog iDialog = getiDialog(andPopulate, projectid, i);
+
+    doInsert(andPopulate, projectid, i, iDialog);
+  }
+
+  private void doInsert(DatabaseImpl andPopulate, int projectid, int i, IDialog iDialog) {
+    logger.info("before has " + iDialog.getExercises().size());
+    iDialog.getExercises().forEach(logger::info);
+
+    andPopulate.getDialogDAO().addEmptyExercises(iDialog, projectid, USERID, -1, true, System.currentTimeMillis());
+
+    logger.info("after  has " + iDialog.getExercises().size());
+    iDialog.getExercises().forEach(logger::info);
+
+    IDialog iDialog2 = getiDialog(andPopulate, projectid, i);
+    logger.info("after2  has " + iDialog2.getExercises().size());
+    iDialog2.getExercises().forEach(logger::info);
+  }
+
+  private IDialog getiDialog(DatabaseImpl andPopulate, int projectid, int i) {
+    Project project = andPopulate.getProject(projectid, true);
+
+    List<IDialog> collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == i).collect(Collectors.toList());
+
+    collect.forEach(logger::info);
+
+    return collect.get(0);
+  }
+
+  @Test
+  public void testDeleteEx() {
+    DatabaseImpl andPopulate = getDatabase();
+    int projectid = 5;
+    andPopulate.getProject(projectid, true);
+
+    andPopulate.waitForDefaultUser();
+
+    IDialog iDialog = getiDialog(andPopulate, projectid, 32);
+
+    List<ClientExercise> exercises = iDialog.getExercises();
+    logger.info("before has " + exercises.size());
+    exercises.forEach(logger::info);
+
+    IDialogDAO dialogDAO = andPopulate.getDialogDAO();
+    int id = exercises.get(exercises.size() - 1).getID();
+    boolean b = dialogDAO.deleteExercise(projectid, id);
+    if (!b) logger.error("didn't delete the exercise " + id);
+
+
+    //dialogDAO.addEmptyExercises(iDialog, projectid, USERID, -1, true, System.currentTimeMillis());
+
+    logger.info("after  has " + exercises.size());
+    exercises.forEach(logger::info);
+
+    iDialog = getiDialog(andPopulate, projectid, 32);
+
+    exercises = iDialog.getExercises();
+    logger.info("after 2 has " + exercises.size());
+    exercises.forEach(logger::info);
+  }
+
 
   @Test
   public void testInterpreterStored() {
@@ -185,7 +316,7 @@ public class DialogTest extends BaseTest {
       e.printStackTrace();
     }
 
-    AnalysisReport performanceReportForUser = project.getAnalysis().getPerformanceReportForUser(new AnalysisRequest().setUserid(6));
+    AnalysisReport performanceReportForUser = project.getAnalysis().getPerformanceReportForUser(new AnalysisRequest().setUserid(USERID));
 
     logger.info("Got " + performanceReportForUser);
     Map<Long, List<PhoneSession>> granularityToSessions = performanceReportForUser.getUserPerformance().getGranularityToSessions();
@@ -329,7 +460,7 @@ public class DialogTest extends BaseTest {
   }
 
   private FilterResponse getTypeToValues(DatabaseImpl andPopulate, int projectid, FilterRequest request) {
-    return andPopulate.getFilterResponseHelper().getTypeToValues(request, projectid, 6);
+    return andPopulate.getFilterResponseHelper().getTypeToValues(request, projectid, USERID);
   }
 
   @Test
@@ -345,7 +476,7 @@ public class DialogTest extends BaseTest {
 
     logger.info("typeToValues " + typeToValues);
 
-    ExerciseListRequest request1 = new ExerciseListRequest(1, 6, projID).setMode(DIALOG);
+    ExerciseListRequest request1 = new ExerciseListRequest(1, USERID, projectid).setMode(DIALOG);
     request1.setOnlyUnrecordedByMe(true);
     HashMap<String, Collection<String>> typeToSelection = new HashMap<>();
     typeToSelection.put(UNIT1, Collections.singleton("1"));

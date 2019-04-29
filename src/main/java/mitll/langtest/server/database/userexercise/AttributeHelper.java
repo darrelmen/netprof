@@ -122,6 +122,11 @@ public class AttributeHelper implements IAttributeDAO {
     return unique;
   }
 
+  /**
+   * @see DBExerciseDAO#readExercises
+   * @param projid
+   * @return
+   */
   @Override
   public Map<Integer, ExerciseAttribute> getIDToPair(int projid) {
     Map<Integer, ExerciseAttribute> pairMap = new HashMap<>();
