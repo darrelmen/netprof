@@ -258,7 +258,7 @@ public class DialogTest extends BaseTest {
 
     logger.info("typeToValues " + typeToValues);
 
-    ExerciseListRequest request1 = new ExerciseListRequest(1, 6, projID).setMode(DIALOG);
+    ExerciseListRequest request1 = new ExerciseListRequest(1, 6, projectid).setMode(DIALOG);
     request1.setOnlyUnrecordedByMe(true);
     HashMap<String, Collection<String>> typeToSelection = new HashMap<>();
     typeToSelection.put(UNIT1, Collections.singleton("1"));
