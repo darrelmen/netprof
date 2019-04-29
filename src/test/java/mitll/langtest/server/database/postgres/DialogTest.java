@@ -76,8 +76,8 @@ public class DialogTest extends BaseTest {
   private static final String PAGE = "page";
   private static final String KOREAN = "Korean";
 
-  public static final int USERID = 6;
-  public static final int PROJECTID = 21;
+  private static final int USERID = 6;
+  private static final int PROJECTID = 21;
 
   @Test
   public void testNewDialog() {
@@ -228,6 +228,125 @@ public class DialogTest extends BaseTest {
       toAdd = getiDialog(andPopulate, PROJECTID, id);
       exercises = toAdd.getExercises();
       Assert.assertEquals(exercises.size(), 3);
+
+      // deleted shouldn't be there
+      Assert.assertEquals(toAdd.getExercises().indexOf(toDelete), -1);
+      // next should be in place of deleted
+      Assert.assertEquals(toAdd.getExercises().indexOf(next), 1);
+
+      toAdd.getExercises().forEach(logger::info);
+    }
+  }
+
+  @Test
+  public void testNewDialogOpsAlternate() {
+    DatabaseImpl andPopulate = getDatabase();
+
+    Project project = andPopulate.getProject(PROJECTID, true);
+    andPopulate.waitForDefaultUser();
+
+    waitTillLoad();
+
+    // do create!
+    IDialog toAdd = addDialog(andPopulate, PROJECTID, DialogType.DIALOG);
+    int id = toAdd.getID();
+    logger.info("new dialog " + toAdd);
+    IDialogDAO dialogDAO = andPopulate.getDialogDAO();
+
+    List<ClientExercise> exercises = toAdd.getExercises();
+
+    // now should have one exercise
+    Assert.assertEquals(1, exercises.size());
+
+    for (ClientExercise exercise : exercises) {
+      logger.info("new " + exercise);
+      CommonExercise lookup = project.getExerciseByID(exercise.getID());
+      logger.info("lookup " + lookup);
+    }
+
+    {
+      List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, exercises.get(0).getID(), false, System.currentTimeMillis());
+      Assert.assertEquals(clientExercises.size(), 1);
+
+      // speaker attrbute (why?) and language
+      Assert.assertEquals(clientExercises.get(0).getAttributes().size(), 2);
+
+      toAdd = getiDialog(andPopulate, PROJECTID, id);
+      exercises = toAdd.getExercises();
+
+      Assert.assertEquals(2, exercises.size());
+      Assert.assertEquals(exercises.get(0).getAttributes().size(), 2);
+    }
+
+    // insert after first again
+    {
+      int exid = exercises.get(0).getID();
+      logger.info("first exid is " + exid);
+      List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, exid, true, System.currentTimeMillis());
+      Assert.assertEquals(clientExercises.size(), 1);
+      Assert.assertEquals(clientExercises.get(0).getAttributes().size(), 2);
+
+      toAdd = getiDialog(andPopulate, PROJECTID, id);
+      exercises = toAdd.getExercises();
+      Assert.assertEquals(3, exercises.size());
+
+      ClientExercise added = clientExercises.get(0);
+
+      // newly added exercise should be after the first one
+      Assert.assertEquals(toAdd.getExercises().indexOf(added), 1);
+
+      toAdd.getExercises().forEach(exercise -> Assert.assertEquals(exercise.getAttributes().size(), 2));
+
+      toAdd.getExercises().forEach(logger::info);
+    }
+
+    // insert after first again
+    {
+      int exid = exercises.get(0).getID();
+      List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, exid, true, System.currentTimeMillis());
+      Assert.assertEquals(clientExercises.size(), 1);
+
+      toAdd = getiDialog(andPopulate, PROJECTID, id);
+      exercises = toAdd.getExercises();
+      Assert.assertEquals(4, exercises.size());
+
+      ClientExercise added = clientExercises.get(0);
+
+      // newly added exercise should be after the first one
+      Assert.assertEquals(toAdd.getExercises().indexOf(added), 1);
+
+      toAdd.getExercises().forEach(logger::info);
+    }
+
+    // insert at end
+    {
+      int exid = exercises.get(exercises.size() - 1).getID();
+      List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, exid, true, System.currentTimeMillis());
+      Assert.assertEquals(clientExercises.size(), 1);
+
+      toAdd = getiDialog(andPopulate, PROJECTID, id);
+      exercises = toAdd.getExercises();
+      Assert.assertEquals(exercises.size(), 5);
+
+      ClientExercise added = clientExercises.get(0);
+
+      // newly added exercise should be after the first one
+      Assert.assertEquals(toAdd.getExercises().indexOf(added), toAdd.getExercises().size() - 1);
+
+      toAdd.getExercises().forEach(logger::info);
+    }
+
+    // delete in the middle
+    {
+      ClientExercise toDelete = exercises.get(1);
+      ClientExercise next = exercises.get(2);
+      int exid = toDelete.getID();
+
+      dialogDAO.deleteExercise(PROJECTID, toAdd.getID(), exid);
+
+      toAdd = getiDialog(andPopulate, PROJECTID, id);
+      exercises = toAdd.getExercises();
+      Assert.assertEquals(exercises.size(), 4);
 
       // deleted shouldn't be there
       Assert.assertEquals(toAdd.getExercises().indexOf(toDelete), -1);
