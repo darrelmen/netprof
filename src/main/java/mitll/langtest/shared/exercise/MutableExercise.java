@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface MutableExercise extends CommonShell, MutableShell {
-  void setFirstPron(List<String> phones);
+  //void setFirstPron(List<String> phones);
 
   void setTransliteration(String transliteration);
 

@@ -108,4 +108,9 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
   public boolean deleteAndFixForEx(int exid) {
     return false;
   }
+
+  @Override
+  public boolean insertAfter(int after, int exid) {
+    return false;
+  }
 }

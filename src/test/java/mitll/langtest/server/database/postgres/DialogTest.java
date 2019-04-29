@@ -58,6 +58,8 @@ import static mitll.langtest.shared.project.ProjectMode.DIALOG;
 
 public class DialogTest extends BaseTest {
   private static final Logger logger = LogManager.getLogger(DialogTest.class);
+
+
   public static final int MAX = 200;
   public static final int KOREAN_ID = 46;
   private static final String TOPIC_PRESENTATION_C = "Topic Presentation C";
@@ -73,23 +75,134 @@ public class DialogTest extends BaseTest {
   private static final String C17 = "" + 17;
   private static final String PAGE = "page";
   private static final String KOREAN = "Korean";
+
   public static final int USERID = 6;
-
-/*  @Test
-  public void testDict() {
-    testDialogPopulate(KOREAN);
-  }
-
-  @Test
-  public void testInterpreter() {
-    testDialogPopulate("Chinese");
-  }*/
+  public static final int PROJECTID = 21;
 
   @Test
   public void testNewDialog() {
     DatabaseImpl andPopulate = getDatabase();
-    int projectid = 5;
-    Project project = andPopulate.getProject(projectid, true);
+
+    Project project = andPopulate.getProject(PROJECTID, true);
+    andPopulate.waitForDefaultUser();
+
+    Dialog toAdd = addDialog(andPopulate, PROJECTID);
+
+    for (ClientExercise exercise : toAdd.getExercises()) {
+      logger.info("new " + exercise);
+      CommonExercise lookup = project.getExerciseByID(exercise.getID());
+      logger.info("lookup " + lookup);
+    }
+  }
+
+  @Test
+  public void testNewDialogOps() {
+    DatabaseImpl andPopulate = getDatabase();
+
+    Project project = andPopulate.getProject(PROJECTID, true);
+    andPopulate.waitForDefaultUser();
+
+    waitTillLoad();
+
+    // do create!
+    IDialog toAdd = addDialog(andPopulate, PROJECTID);
+    int id = toAdd.getID();
+    logger.info("new dialog " + toAdd);
+    IDialogDAO dialogDAO = andPopulate.getDialogDAO();
+
+    List<ClientExercise> exercises = toAdd.getExercises();
+
+    // now should have one exercise
+    Assert.assertEquals(exercises.size(), 1);
+
+    for (ClientExercise exercise : exercises) {
+      logger.info("new " + exercise);
+      CommonExercise lookup = project.getExerciseByID(exercise.getID());
+      logger.info("lookup " + lookup);
+    }
+
+    // do delete!
+    {
+      int exid = exercises.get(exercises.size() - 1).getID();
+      boolean b = dialogDAO.deleteExercise(PROJECTID, exid);
+      if (!b) {
+        logger.error("didn't delete the exercise " + exid);
+      } else {
+        logger.info("says it did delete " + exid);
+
+      }
+
+      toAdd = getiDialog(andPopulate, PROJECTID, id);
+      exercises = toAdd.getExercises();
+    }
+
+    logger.info("\n\n\nafter  has " + exercises.size());
+
+    // after delete should have 0
+    Assert.assertEquals(exercises.size(), 0);
+
+    exercises.forEach(logger::info);
+
+    // insert into empty list
+    {
+      //    int exid = exercises.get(exercises.size() - 1).getID();
+      List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, -1, true, System.currentTimeMillis());
+      Assert.assertEquals(clientExercises.size(), 1);
+
+      // speaker attrbute (why?) and language
+      Assert.assertEquals(clientExercises.get(0).getAttributes().size(), 2);
+
+      toAdd = getiDialog(andPopulate, PROJECTID, id);
+      exercises = toAdd.getExercises();
+
+      Assert.assertEquals(exercises.size(), 1);
+      Assert.assertEquals(exercises.get(0).getAttributes().size(), 2);
+    }
+
+    // insert after first
+    {
+      int exid = exercises.get(0).getID();
+      logger.info("first exid is " + exid);
+      List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, exid, true, System.currentTimeMillis());
+      Assert.assertEquals(clientExercises.size(), 1);
+      Assert.assertEquals(clientExercises.get(0).getAttributes().size(), 2);
+
+      toAdd = getiDialog(andPopulate, PROJECTID, id);
+      exercises = toAdd.getExercises();
+      Assert.assertEquals(exercises.size(), 2);
+
+      ClientExercise added = clientExercises.get(0);
+
+      // newly added exercise should be after the first one
+      Assert.assertEquals(toAdd.getExercises().indexOf(added), 1);
+
+      toAdd.getExercises().forEach(exercise -> Assert.assertEquals(exercise.getAttributes().size(), 2));
+
+      toAdd.getExercises().forEach(logger::info);
+    }
+
+    // insert after first again
+    {
+      int exid = exercises.get(0).getID();
+      List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, exid, true, System.currentTimeMillis());
+      Assert.assertEquals(clientExercises.size(), 1);
+
+      toAdd = getiDialog(andPopulate, PROJECTID, id);
+      exercises = toAdd.getExercises();
+      Assert.assertEquals(exercises.size(), 3);
+
+      ClientExercise added = clientExercises.get(0);
+
+      // newly added exercise should be after the first one
+      Assert.assertEquals(toAdd.getExercises().indexOf(added), 1);
+
+      toAdd.getExercises().forEach(logger::info);
+    }
+
+  }
+
+  @NotNull
+  private Dialog addDialog(DatabaseImpl andPopulate, int projectid) {
     Dialog toAdd = new Dialog(-1,
         USERID,
         projectid,
@@ -104,14 +217,8 @@ public class DialogTest extends BaseTest {
         "us", true
     );
 
-    andPopulate.waitForDefaultUser();
     andPopulate.getDialogDAO().add(toAdd);
-
-    for (ClientExercise exercise : toAdd.getExercises()) {
-      logger.info("new " + exercise);
-      CommonExercise lookup = project.getExerciseByID(exercise.getID());
-      logger.info("lookup " + lookup);
-    }
+    return toAdd;
   }
 
   @Test
@@ -146,16 +253,16 @@ public class DialogTest extends BaseTest {
   @Test
   public void testGetNewDialog() {
     DatabaseImpl andPopulate = getDatabase();
-    Project project = andPopulate.getProject(5, true);
+    Project project = andPopulate.getProject(PROJECTID, true);
     project.getDialogs().forEach(logger::info);
   }
 
   @Test
   public void testGetDialog() {
     DatabaseImpl andPopulate = getDatabase();
-    Project project = andPopulate.getProject(21, true);
+    Project project = andPopulate.getProject(PROJECTID, true);
 
-    List<IDialog> collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == 82).collect(Collectors.toList());
+    List<IDialog> collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == 83).collect(Collectors.toList());
 
     IDialog iDialog = collect.get(0);
 
@@ -166,7 +273,7 @@ public class DialogTest extends BaseTest {
 
   public void testGetExercisesDialog() {
     DatabaseImpl andPopulate = getDatabase();
-    int projectid = 5;
+    int projectid = PROJECTID;
     int i = 32;
 
     Project project = andPopulate.getProject(projectid, true);
@@ -183,7 +290,7 @@ public class DialogTest extends BaseTest {
   @Test
   public void testGetExercisesDialog2() {
     DatabaseImpl andPopulate = getDatabase();
-    int projectid = 5;
+    int projectid = PROJECTID;
     int i = 33;
 
     Project project = andPopulate.getProject(projectid, true);
@@ -200,7 +307,7 @@ public class DialogTest extends BaseTest {
   @Test
   public void testChangeDialog() {
     DatabaseImpl andPopulate = getDatabase();
-    int projectid = 5;
+    int projectid = PROJECTID;
     Project project = andPopulate.getProject(projectid, true);
 
     int i = 32;
@@ -244,37 +351,37 @@ public class DialogTest extends BaseTest {
   @Test
   public void testInsertAtFrontDialog() {
     DatabaseImpl andPopulate = getDatabase();
-    int projectid = 5;
+    int projectid = PROJECTID;
     int i = 32;
     andPopulate.getProject(projectid, true);
 
     andPopulate.waitForDefaultUser();
 
-    try {
-      Thread.sleep(3000);
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+    waitTillLoad();
 
     IDialog iDialog = getiDialog(andPopulate, projectid, i);
 
     doInsert(andPopulate, projectid, i, iDialog);
   }
 
-  @Test
-  public void testInsertAtFrontDialog2() {
-    DatabaseImpl andPopulate = getDatabase();
-    int projectid = 5;
-    int i = 32;
-    andPopulate.getProject(projectid, true);
-
-    andPopulate.waitForDefaultUser();
-
+  private void waitTillLoad() {
     try {
       Thread.sleep(3000);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }
+  }
+
+  @Test
+  public void testInsertAtFrontDialog2() {
+    DatabaseImpl andPopulate = getDatabase();
+    int projectid = PROJECTID;
+    int i = 32;
+    andPopulate.getProject(projectid, true);
+
+    andPopulate.waitForDefaultUser();
+
+    waitTillLoad();
 
     IDialog iDialog = getiDialog(andPopulate, projectid, i);
 
@@ -285,7 +392,7 @@ public class DialogTest extends BaseTest {
     logger.info("before has " + iDialog.getExercises().size());
     iDialog.getExercises().forEach(logger::info);
 
-    andPopulate.getDialogDAO().addEmptyExercises(iDialog, projectid, USERID, -1, true, System.currentTimeMillis());
+    andPopulate.getDialogDAO().addEmptyExercises(iDialog, USERID, -1, true, System.currentTimeMillis());
 
     logger.info("after  has " + iDialog.getExercises().size());
     iDialog.getExercises().forEach(logger::info);
@@ -296,19 +403,13 @@ public class DialogTest extends BaseTest {
   }
 
   private IDialog getiDialog(DatabaseImpl andPopulate, int projectid, int i) {
-    Project project = andPopulate.getProject(projectid, true);
-
-    List<IDialog> collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == i).collect(Collectors.toList());
-
-    collect.forEach(logger::info);
-
-    return collect.get(0);
+    return andPopulate.getProject(projectid, true).getDialog(i);
   }
 
   @Test
   public void testDeleteEx() {
     DatabaseImpl andPopulate = getDatabase();
-    int projectid = 5;
+    int projectid = PROJECTID;
     andPopulate.getProject(projectid, true);
 
     andPopulate.waitForDefaultUser();
@@ -516,6 +617,7 @@ public class DialogTest extends BaseTest {
     logger.info("typeToValues " + typeToValues);
 
     ExerciseListRequest request1 = new ExerciseListRequest(1, USERID, projectid).setMode(DIALOG);
+
     request1.setOnlyUnrecordedByMe(true);
     HashMap<String, Collection<String>> typeToSelection = new HashMap<>();
     typeToSelection.put(UNIT1, Collections.singleton("1"));

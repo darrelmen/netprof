@@ -276,7 +276,6 @@ public class DialogPopulate {
                                                     int defaultUser,
                                                     List<String> typeOrder,
                                                     Timestamp modified,
-                                                    //  Map<ClientExercise, Integer> allImportExToID,
                                                     IDialog dialog,
                                                     int dialogID) {
     return addExercises2(projid, defaultUser, typeOrder, modified, dialogID, dialog.getExercises());
@@ -285,19 +284,25 @@ public class DialogPopulate {
   public Map<CommonExercise, Integer> addExercises2(int projid, int defaultUser, List<String> typeOrder, Timestamp modified,
                                                     int dialogID,
                                                     List<ClientExercise> exercises) {
+    Map<CommonExercise, Integer> importExToID = addExercisesAndSetID(projid, defaultUser, typeOrder, exercises);
+
+    logger.info("addExercises made " + importExToID.size() + " exercises for " + dialogID);
+
+    //importExToID.keySet().forEach(logger::info);
+
+    db.getUserExerciseDAO().getRelatedExercise().addBulkRelated(
+        getSlickRelatedExercises(projid, modified, exercises, dialogID, importExToID));
+
+    return importExToID;
+  }
+
+  @NotNull
+  public Map<CommonExercise, Integer> addExercisesAndSetID(int projid, int defaultUser, List<String> typeOrder, List<ClientExercise> exercises) {
     List<CommonExercise> commonExercisesFromDialog = toCommon(exercises);
 
     Map<CommonExercise, Integer> importExToID = addExercises(projid, defaultUser, typeOrder, commonExercisesFromDialog);
 
     importExToID.forEach((k, v) -> k.getMutable().setID(v));
-
-    logger.info("addExercises made " + importExToID.size() + " exercises for " + dialogID);
-
-    importExToID.keySet().forEach(logger::info);
-
-    db.getUserExerciseDAO().getRelatedExercise().addBulkRelated(
-        getSlickRelatedExercises(projid, modified, exercises, dialogID, importExToID));
-
     return importExToID;
   }
 

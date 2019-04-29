@@ -251,9 +251,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     return db.getDialogSessionDAO().add(dialogSession);
   }
 
-  private List<IDialog> getDialogs(ExerciseListRequest request,
-                                   ISection<IDialog> sectionHelper,
-                                   int userIDFromSessionOrDB) {
+  private List<IDialog> getDialogs(ExerciseListRequest request, ISection<IDialog> sectionHelper, int userIDFromSessionOrDB) {
     return (request.getTypeToSelection().isEmpty()) ?
         getDialogs(userIDFromSessionOrDB) :
         new ArrayList<>(sectionHelper.getExercisesForSelectionState(request.getTypeToSelection()));
@@ -284,8 +282,6 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   }
 
   public List<ClientExercise> addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException {
-    IDialog oneDialog = getOneDialog(dialogID);
-    List<ClientExercise> clientExercises = db.getDialogDAO().addEmptyExercises(oneDialog, oneDialog.getProjid(), getUserIDFromSessionOrDB(), afterExid, isLeftSpeaker, System.currentTimeMillis());
-    return clientExercises;
+    return db.getDialogDAO().addEmptyExercises(getOneDialog(dialogID), getUserIDFromSessionOrDB(), afterExid, isLeftSpeaker, System.currentTimeMillis());
   }
 }

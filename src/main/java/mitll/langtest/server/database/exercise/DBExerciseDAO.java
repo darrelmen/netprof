@@ -650,17 +650,35 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       logger.error("refresh huh? no known exid " + exid);
     } else {
       idToUserExercise.put(exid, byExID);
+
+      List<ExerciseAttribute> attributesFor = userExerciseDAO.getExerciseAttributeDAO().getAttributesFor(exid);
+
+      logger.info("refresh attributes for " + exid);
+      logger.info("refresh attributes got " + attributesFor);
+      byExID.setAttributes(attributesFor);
+      logger.info("refresh attributes after " + byExID.getAttributes());
+
+      CommonExercise exercise = getExercise(exid);
+      if (exercise.getAttributes().size() != attributesFor.size()) {
+        logger.error("refresh attributes after " + exercise.getAttributes());
+        logger.error("refresh attributes after " + attributesFor);
+      }
+
       added = true;
 
-      ClientExercise next = byExID.hasContext() ? byExID.getDirectlyRelated().iterator().next() : null;
+      {
+        ClientExercise next = byExID.hasContext() ? byExID.getDirectlyRelated().iterator().next() : null;
+        if (next != null) {
+          int id = next.getID();
+          idToUserExercise.put(id, next.asCommon());
+          next.asCommon().setAttributes(userExerciseDAO.getExerciseAttributeDAO().getAttributesFor(id));
+        }
 
-      if (next != null) {
-        idToUserExercise.put(next.getID(), next.asCommon());
-      }
-      if (DEBUG) {
-        String s1 = "refresh after " + byExID.getEnglish() + " " + byExID.getForeignLanguage();
-        String s = next == null ? "" : "\n\trefresh after context " + next.getEnglish() + " " + next.getForeignLanguage();
-        logger.info(s1 + s);
+        if (DEBUG) {
+          String s1 = "refresh after " + byExID.getEnglish() + " " + byExID.getForeignLanguage();
+          String s = next == null ? "" : "\n\trefresh after context " + next.getEnglish() + " " + next.getForeignLanguage();
+          logger.info(s1 + s);
+        }
       }
     }
 

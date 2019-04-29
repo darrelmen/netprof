@@ -105,7 +105,7 @@ public class RelatedExerciseHelper implements IRelatedExercise {
     return daoWrapper.deleteAndFix(exid) > 0;
   }
 
-  //  @Override
+  @Override
   public boolean insertAfter(int after, int exid) {
     return daoWrapper.insertAfter(after, exid) > 0;
   }

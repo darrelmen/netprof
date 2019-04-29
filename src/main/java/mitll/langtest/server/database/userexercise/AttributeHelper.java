@@ -37,6 +37,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class AttributeHelper implements IAttributeDAO {
   private final ExerciseAttributeDAOWrapper attributeDAOWrapper;
@@ -123,9 +124,9 @@ public class AttributeHelper implements IAttributeDAO {
   }
 
   /**
-   * @see DBExerciseDAO#readExercises
    * @param projid
    * @return
+   * @see DBExerciseDAO#readExercises
    */
   @Override
   public Map<Integer, ExerciseAttribute> getIDToPair(int projid) {
@@ -140,6 +141,14 @@ public class AttributeHelper implements IAttributeDAO {
     return attributeDAOWrapper.update(id, value) > 0;
   }
 
+  @Override
+  public List<ExerciseAttribute> getAttributesFor(int exid) {
+    return attributeDAOWrapper
+        .forExercise(exid)
+        .stream()
+        .map(this::getAttribute)
+        .collect(Collectors.toList());
+  }
 
   /**
    * @param known
@@ -157,10 +166,13 @@ public class AttributeHelper implements IAttributeDAO {
     if (known.containsKey(key)) {
       attribute = known.get(key);
     } else {
-      attribute = new ExerciseAttribute(property, value, p.facet()).setId(p.id());
-      known.put(key, attribute);
+      known.put(key, attribute = getAttribute(p));
     }
     return attribute;
+  }
+
+  private ExerciseAttribute getAttribute(SlickExerciseAttribute p) {
+    return new ExerciseAttribute(p.property(), p.value(), p.facet()).setId(p.id());
   }
 
   /**

@@ -33,6 +33,7 @@ import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 public interface IAttributeDAO extends IDAO {
@@ -48,4 +49,6 @@ public interface IAttributeDAO extends IDAO {
   Map<Integer, ExerciseAttribute> getIDToPair(int projid);
 
   boolean update(int id, String value);
+
+  List<ExerciseAttribute> getAttributesFor(int exid);
 }

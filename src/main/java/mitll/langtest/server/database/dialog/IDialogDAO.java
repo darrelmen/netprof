@@ -42,7 +42,8 @@ public interface IDialogDAO extends IDAO {
 
   IDialog add(IDialog toAdd);
   boolean update(IDialog toAdd);
-  List<ClientExercise> addEmptyExercises(IDialog toAdd, int projid, int userid, int afterExid, boolean isLeft, long now);
+  List<ClientExercise> addEmptyExercises(IDialog toAdd, int userid, int afterExid, boolean isLeft, long now);
+  List<ClientExercise> addEmptyExercises(IDialog toAdd, int userid, int afterExid, boolean isLeft);
 
   int add(int userid,
           int projid,
