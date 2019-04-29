@@ -102,11 +102,34 @@ public class DialogTest extends BaseTest {
     );
 
     andPopulate.waitForDefaultUser();
-//    try {
-//      Thread.sleep(3000);
-//    } catch (InterruptedException e) {
-//      e.printStackTrace();
-//    }
+    andPopulate.getDialogDAO().add(toAdd);
+
+    for (ClientExercise exercise : toAdd.getExercises()) {
+      logger.info("new " + exercise);
+      CommonExercise lookup = project.getExerciseByID(exercise.getID());
+      logger.info("lookup " + lookup);
+    }
+  }
+
+  @Test
+  public void testNewDialogAndInsert() {
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = andPopulate.getProject(21, true);
+    Dialog toAdd = new Dialog(-1,
+        6,
+        21,
+        -1,
+        -1,
+        System.currentTimeMillis(),
+        "1", "1", "orient", "", "fl Friday", "en",
+        new ArrayList<>(),
+        new ArrayList<>(),
+        new ArrayList<>(),
+        DialogType.DIALOG,
+        "us", true
+    );
+
+    andPopulate.waitForDefaultUser();
 
     andPopulate.getDialogDAO().add(toAdd);
 
@@ -116,14 +139,39 @@ public class DialogTest extends BaseTest {
       logger.info("lookup " + lookup);
     }
 
+    List<IDialog> collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == toAdd.getID()).collect(Collectors.toList());
+
+    IDialog iDialog = collect.get(0);
+
+    logger.info("new dialog " + iDialog);
+
+
+    Assert.assertEquals(iDialog.getExercises().size(), 1);
+
+    iDialog.getExercises().forEach(logger::info);
   }
 
   @Test
   public void testGetNewDialog() {
     DatabaseImpl andPopulate = getDatabase();
     Project project = andPopulate.getProject(21, true);
-
     project.getDialogs().forEach(logger::info);
+  }
+
+  @Test
+  public void testGetDialog() {
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = andPopulate.getProject(21, true);
+
+    List<IDialog> collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == 82).collect(Collectors.toList());
+
+    IDialog iDialog = collect.get(0);
+
+    logger.info("new dialog " + iDialog);
+
+    Assert.assertEquals(iDialog.getExercises().size(), 1);
+
+    iDialog.getExercises().forEach(logger::info);
   }
 
   @Test
@@ -345,7 +393,7 @@ public class DialogTest extends BaseTest {
 
     logger.info("typeToValues " + typeToValues);
 
-    ExerciseListRequest request1 = new ExerciseListRequest(1, 6, projID).setMode(DIALOG);
+    ExerciseListRequest request1 = new ExerciseListRequest(1, 6, projectid).setMode(DIALOG);
     request1.setOnlyUnrecordedByMe(true);
     HashMap<String, Collection<String>> typeToSelection = new HashMap<>();
     typeToSelection.put(UNIT1, Collections.singleton("1"));
