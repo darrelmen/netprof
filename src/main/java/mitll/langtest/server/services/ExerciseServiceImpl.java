@@ -106,6 +106,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * items at the front.
    *
    * Gets the project id from user->project table - this request might be stale...
+   *
    * @param request
    * @return
    */
@@ -1372,10 +1373,10 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       if (update) {
         logger.info("updateText now " + project.getExerciseByID(exid).getForeignLanguage());
 
-        List<IDialog> collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == dialogID).collect(Collectors.toList());
-        if (collect.isEmpty()) logger.warn("updateText can't find dialog ID " + dialogID);
+        IDialog collect = project.getDialog(dialogID);//.stream().filter(dialog -> dialog.getID() == dialogID).collect(Collectors.toList());
+        if (collect == null) logger.warn("updateText can't find dialog ID " + dialogID);
         else {
-          List<ClientExercise> collect1 = collect.get(0).getExercises().stream().filter(exercise -> exercise.getID() == exid).collect(Collectors.toList());
+          List<ClientExercise> collect1 = collect.getExercises().stream().filter(exercise -> exercise.getID() == exid).collect(Collectors.toList());
           if (collect1.isEmpty()) {
             logger.warn("updateText can't find ex id  " + exid);
           } else {

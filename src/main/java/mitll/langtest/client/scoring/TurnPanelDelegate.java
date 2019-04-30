@@ -70,7 +70,7 @@ public class TurnPanelDelegate implements ITurnMarking {
    * @param rightJustify
    * @see ListenViewHelper#reallyGetTurnPanel
    */
-  public TurnPanelDelegate(final ClientExercise clientExercise,
+  protected TurnPanelDelegate(final ClientExercise clientExercise,
                            DivWidget widget,
                            ListenViewHelper.COLUMNS columns, boolean rightJustify) {
     this.exercise = clientExercise;

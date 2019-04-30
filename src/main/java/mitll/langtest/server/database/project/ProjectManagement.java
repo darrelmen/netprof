@@ -110,7 +110,7 @@ public class ProjectManagement implements IProjectManagement {
   private static final String DIALOG1 = "dialog";
   private static final String NO_PROJECT_FOR_ID = "NO_PROJECT_FOR_ID";
   private static final String INTERPRETER = "Interpreter";
- // private static final String INTERPRETER1 = "interpreter";
+  // private static final String INTERPRETER1 = "interpreter";
   //public static final String ANSWERS1 = "^.*answers\\/(.+)\\/.+";
   private static final String ANSWERS1 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
   private static final Pattern pattern = Pattern.compile(ANSWERS1);
@@ -486,15 +486,28 @@ public class ProjectManagement implements IProjectManagement {
     }
   }
 
-  @Override public void addDialogInfo(int projID) {
+  @Override
+  public void addDialogInfo(int projID) {
     addDialogInfo(getProject(projID, false));
+  }
+
+  @Override
+  public void addDialogInfo(int projID, int dialogID) {
+    addDialogInfo(getProject(projID, false), dialogID);
   }
 
   private void addDialogInfo(Project project) {
     if (new DialogPopulate(db, pathHelper).addDialogInfo(project)) {
-      logger.info("addDialogInfo : add dialog info to " + project.getID() + " " + project.getName() + " now " +project.getDialogs().size() + " dialogs...");
+      logger.info("addDialogInfo : add dialog info to " + project.getID() + " " + project.getName() + " now " + project.getDialogs().size() + " dialogs...");
+    } else {
+      logger.warn("addDialogInfo didn't add dialog info for " + project.getID());
     }
-    else {
+  }
+
+  private void addDialogInfo(Project project, int dialogID) {
+    if (new DialogPopulate(db, pathHelper).addDialogInfo(project, dialogID)) {
+      logger.info("addDialogInfo : add dialog info to " + project.getID() + " " + project.getName() + " now " + project.getDialogs().size() + " dialogs...");
+    } else {
       logger.warn("addDialogInfo didn't add dialog info for " + project.getID());
     }
   }
@@ -1229,12 +1242,12 @@ public class ProjectManagement implements IProjectManagement {
       {
         SlimProject dialog = getProjectInfo(project);
 
-        List<IDialog> dialogs = project.getDialogs();
+//        Collection<IDialog> dialogs = project.getDialogs();
         String name = DIALOG;
         String cc = DIALOG1;
 
-        if (dialogs.isEmpty()) logger.warn("addModeChoices no dialogs in " + project);
-        else {
+        //      if (dialogs.isEmpty()) logger.warn("addModeChoices no dialogs in " + project);
+   /*     else {
           IDialog iDialog = dialogs.get(0);
           DialogType kind = iDialog.getKind();
           if (kind == DialogType.INTERPRETER) {
@@ -1242,9 +1255,9 @@ public class ProjectManagement implements IProjectManagement {
             cc = INTERPRETER.toLowerCase();
             // logger.info("addModeChoices : found first interpreter dialog : " + iDialog);
           } else {
-            logger.info("addModeChoices : dialog kind is " + kind + " for " +iDialog.getID());
+            logger.info("addModeChoices : dialog kind is " + kind + " for " + iDialog.getID());
           }
-        }
+        }*/
         dialog.setName(name);
 
         dialog.setProjectType(ProjectType.DIALOG);

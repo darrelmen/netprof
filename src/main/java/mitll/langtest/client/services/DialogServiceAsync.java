@@ -48,7 +48,7 @@ public interface DialogServiceAsync {
 
   void getDialogSessions(int userid, int dialogid, AsyncCallback<List<IDialogSession>> async);
 
-  void delete(int id, AsyncCallback<Boolean> async);
+  void delete(int projid, int id, AsyncCallback<Boolean> async);
 
   void addDialog(IDialog dialog, AsyncCallback<IDialog> async);
 

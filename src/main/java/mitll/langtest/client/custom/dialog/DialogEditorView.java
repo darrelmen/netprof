@@ -40,7 +40,6 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.DialogEditor;
 import mitll.langtest.client.dialog.DialogHelper;
-import mitll.langtest.client.dialog.EditorTurn;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.scoring.UserListSupport;
@@ -246,7 +245,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   protected void doDelete(UIObject delete, T currentSelection) {
     final int uniqueID = currentSelection.getID();
 
-    controller.getDialogService().delete(uniqueID, new AsyncCallback<Boolean>() {
+    controller.getDialogService().delete(controller.getProjectID(), uniqueID, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
 
@@ -264,7 +263,6 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   @Override
   protected String getMailTo() {
     IDialog currentSelection = getCurrentSelection();
-
     return new UserListSupport(controller)
         .getMailToDialog(currentSelection.getID(), currentSelection.getForeignLanguage());
   }

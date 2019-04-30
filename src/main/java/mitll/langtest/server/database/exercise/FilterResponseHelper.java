@@ -388,7 +388,7 @@ public class FilterResponseHelper implements IResponseFilter {
   @NotNull
   private List<CommonExercise> getDialogExercises(int projectID) {
     List<CommonExercise> filtered = new ArrayList<>();
-    List<IDialog> dialogs = getDialogs(projectID);
+    Collection<IDialog> dialogs = getDialogs(projectID);
     dialogs.forEach(iDialog -> filtered.addAll(toCommon(iDialog.getBothExercisesAndCore())));
     if (dialogs.isEmpty()) {
       logger.warn("getDialogExercises no dialogs in " + projectID);
@@ -407,7 +407,7 @@ public class FilterResponseHelper implements IResponseFilter {
     return toFilterDown.stream().filter(commonExercise -> ids.contains(commonExercise.getID())).collect(Collectors.toList());
   }
 
-  private List<IDialog> getDialogs(int projectID) {
+  private Collection<IDialog> getDialogs(int projectID) {
     Project project = databaseServices.getProject(projectID);
     return project == null ? new ArrayList<>() : project.getDialogs();
   }

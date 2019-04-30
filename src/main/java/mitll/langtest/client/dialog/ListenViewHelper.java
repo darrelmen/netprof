@@ -761,7 +761,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 //        }
 //      }
 //    }
-    return (T) widgets;
+    return widgets;
   }
 
   /**

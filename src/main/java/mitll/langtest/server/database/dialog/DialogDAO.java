@@ -47,6 +47,7 @@ import mitll.npdata.dao.dialog.DialogAttributeJoinDAOWrapper;
 import mitll.npdata.dao.dialog.DialogDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.sql.Timestamp;
@@ -139,10 +140,24 @@ public class DialogDAO extends DAO implements IDialogDAO {
    */
   @Override
   public List<IDialog> getDialogs(int projid) {
+    return getiDialogs(projid, getByProjID(projid));
+  }
+
+  @Override
+  public List<IDialog> getOneDialog(int id) {
+    Collection<SlickDialog> byID = getByID(id);
+    if (byID.isEmpty()) return null;
+    else {
+      return getiDialogs(byID.iterator().next().projid(), byID);
+    }
+  }
+
+  @NotNull
+  private List<IDialog> getiDialogs(int projid, Collection<SlickDialog> byProjID) {
     List<IDialog> dialogs = new ArrayList<>();
     Map<Integer, Dialog> idToDialog = new HashMap<>();
 
-    getByProjID(projid).forEach(slickDialog -> {
+    byProjID.forEach(slickDialog -> {
       Dialog e = makeDialog(slickDialog);
       dialogs.add(e);
       idToDialog.put(slickDialog.id(), e);
@@ -214,6 +229,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
   private Collection<SlickDialog> getByProjID(int projid) {
     return dao.byProjID(projid);
+  }
+
+  private Collection<SlickDialog> getByID(int id) {
+    return dao.byID(id);
   }
 
   /**
@@ -565,7 +584,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     refreshExercises(clientExercises, project);
 
     // refresh dialogs on project
-    databaseImpl.getProjectManagement().addDialogInfo(projid);
+    databaseImpl.getProjectManagement().addDialogInfo(projid, toAdd.getID());
 
     return clientExercises;
   }
@@ -636,7 +655,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
             //return true;
           }
           userExerciseDAO.deleteByExID(Arrays.asList(prev, exid));
-          databaseImpl.getProjectManagement().addDialogInfo(projid);
+          databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
           return true;
         } else {
           logger.error("deleteExercise did not delete prev ex " + prev + " in " + dialogID);
@@ -647,7 +666,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
       if (relatedExercise.deleteAndFixForEx(exid)) {
         userExerciseDAO.deleteByExID(Collections.singleton(exid));
         // refresh dialogs on project
-        databaseImpl.getProjectManagement().addDialogInfo(projid);
+        databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
         return true;
       } else {
         logger.error("did not delete ex " + exid + " in " + dialogID);
@@ -803,7 +822,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     )) > 0;
 
     if (b) {
-      databaseImpl.getProjectManagement().addDialogInfo(projid);
+      databaseImpl.getProjectManagement().addDialogInfo(projid, dialog.getID());
     } else {
       logger.warn("update : didn't alter the dialog " + dialog);
     }

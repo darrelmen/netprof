@@ -66,6 +66,8 @@ public interface IDialogDAO extends IDAO {
 
   List<IDialog> getDialogs(int projid);
 
+  List<IDialog> getOneDialog(int id);
+
   /**
    * @see DatabaseImpl#createTables
    * @return

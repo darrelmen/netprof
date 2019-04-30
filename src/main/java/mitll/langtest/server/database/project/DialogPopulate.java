@@ -94,11 +94,22 @@ public class DialogPopulate {
    * Take our canned data and put it in the database.
    *
    * @param project
-   * @see ProjectManagement#addDialogInfo
    * @return true if added any
+   * @see ProjectManagement#addDialogInfo
    */
   boolean addDialogInfo(Project project) {
     List<IDialog> dialogs1 = db.getDialogDAO().getDialogs(project.getID());
+    if (dialogs1.isEmpty()) {
+      logger.info("addDialogInfo no dialog info yet loaded for " + project);
+      return false;
+    } else {
+      project.setDialogs(dialogs1);
+      return true;
+    }
+  }
+
+  boolean addDialogInfo(Project project, int dialogID) {
+    List<IDialog> dialogs1 = db.getDialogDAO().getOneDialog(dialogID);
     if (dialogs1.isEmpty()) {
       logger.info("addDialogInfo no dialog info yet loaded for " + project);
       return false;

@@ -98,7 +98,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     }
 
     if (hasTeacherPerm) {
-    //  int projid = getProjectIDFromUser();
+      //  int projid = getProjectIDFromUser();
       logger.info("getUsersWithRecordings for project # " + projid);
       List<UserInfo> userInfo = db
           .getAnalysis(projid)
@@ -125,37 +125,39 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
       throws DominoSessionException, RestrictedOperationException {
     long then = System.currentTimeMillis();
     if (hasTeacherPerm()) {
-      int projectIDFromUser = getProjectIDFromUser();
-      logger.info("getUsersWithRecordingsForDialog for project # " + projectIDFromUser + " for dialog " + dialogID);
-
       if (dialogID == -1) {
-        dialogID = getFirstDialogID(projectIDFromUser);
-      }
+        // dialogID = getFirstDialogID(projectIDFromUser);
+        new ArrayList<>();
+      } else {
+        int projectIDFromUser = getProjectIDFromUser();
+        logger.info("getUsersWithRecordingsForDialog for project # " + projectIDFromUser + " for dialog " + dialogID);
 
-      List<UserInfo> userInfo = db
-          .getAnalysis(projectIDFromUser)
-          .getUserInfoForDialog(db.getUserDAO(), dialogID);
-      long now = System.currentTimeMillis();
-      if (now - then > 100) {
-        logger.info("took " + (now - then) + " millis to get " + userInfo.size() + " user infos.");
+        List<UserInfo> userInfo = db
+            .getAnalysis(projectIDFromUser)
+            .getUserInfoForDialog(db.getUserDAO(), dialogID);
+        long now = System.currentTimeMillis();
+        if (now - then > 100) {
+          logger.info("took " + (now - then) + " millis to get " + userInfo.size() + " user infos.");
+        }
+        return userInfo;
       }
-      return userInfo;
     } else {
       throw getRestricted("getUsersWithRecordings : performance report");
     }
+    return new ArrayList<>();
   }
 
-  private int getFirstDialogID(int projectIDFromUser) {
-    int dialogID = -1;
-    List<IDialog> dialogs = getDialogsForProject(projectIDFromUser);
-    if (dialogs != null && !dialogs.isEmpty()) {
-      dialogID = dialogs.get(0).getID();
-    }
-    logger.info("\tgetUsersWithRecordingsForDialog for project # " + projectIDFromUser + " (" +
-        dialogs.size() +
-        ") for dialog " + dialogID);
-    return dialogID;
-  }
+//  private int getFirstDialogID(int projectIDFromUser) {
+//    int dialogID = -1;
+//    List<IDialog> dialogs = getDialogsForProject(projectIDFromUser);
+//    if (dialogs != null && !dialogs.isEmpty()) {
+//      dialogID = dialogs.get(0).getID();
+//    }
+//    logger.info("\tgetUsersWithRecordingsForDialog for project # " + projectIDFromUser + " (" +
+//        dialogs.size() +
+//        ") for dialog " + dialogID);
+//    return dialogID;
+//  }
 
   /**
    * @param analysisRequest

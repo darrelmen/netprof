@@ -122,8 +122,8 @@ public class Project implements IPronunciationLookup, IProject {
   /**
    * @see #setDialogs
    */
-  private List<IDialog> dialogs = new ArrayList<>();
-//  private Map<Integer, IDialog> idToDialog = new ConcurrentHashMap<>();
+//  private List<IDialog> dialogs = new ArrayList<>();
+  private Map<Integer, IDialog> idToDialog = new ConcurrentHashMap<>();
 
   private final ISection<IDialog> dialogSectionHelper = new SectionHelper<>();
   private JsonExport jsonExport;
@@ -297,7 +297,7 @@ public class Project implements IPronunciationLookup, IProject {
     return exerciseDAO == null ? null : exerciseDAO.getSectionHelper();
   }
 
-  public ISection<IDialog> getDialogSectionHelper() {
+  public synchronized ISection<IDialog> getDialogSectionHelper() {
     return dialogSectionHelper;
   }
 
@@ -833,23 +833,24 @@ public class Project implements IPronunciationLookup, IProject {
   /**
    * @return
    */
-  public synchronized List<IDialog> getDialogs() {
-    return dialogs;
+  public Collection<IDialog> getDialogs() {
+    return idToDialog.values();
   }
 
   public IDialog getDialog(int id) {
-    List<IDialog> collect = dialogs.stream().filter(dialog -> dialog.getID() == id).collect(Collectors.toList());
-    collect.forEach(logger::info);
-    return collect.get(0);
+    return idToDialog.get(id);
+//    List<IDialog> collect = dialogs.stream().filter(dialog -> dialog.getID() == id).collect(Collectors.toList());
+//    collect.forEach(logger::info);
+//    return collect.get(0);
   }
 
   public Collection<Integer> getDialogExerciseIDs(int dialogID) {
     Set<Integer> dialogExercises = new HashSet<>();
     if (dialogID != -1) {
-      Optional<IDialog> first = getDialogs().stream().filter(iDialog -> iDialog.getID() == dialogID).findFirst();
-      if (first.isPresent()) {
-        first.get().getExercises().forEach(clientExercise -> dialogExercises.add(clientExercise.getID()));
-        first.get().getCoreVocabulary().forEach(clientExercise -> dialogExercises.add(clientExercise.getID()));
+      IDialog first = getDialog(dialogID);//.stream().filter(iDialog -> iDialog.getID() == dialogID).findFirst();
+      if (first != null) {
+        first.getExercises().forEach(clientExercise -> dialogExercises.add(clientExercise.getID()));
+        first.getCoreVocabulary().forEach(clientExercise -> dialogExercises.add(clientExercise.getID()));
       } else logger.warn("can't find dialog " + dialogID);
     }
     return dialogExercises;
@@ -859,13 +860,15 @@ public class Project implements IPronunciationLookup, IProject {
    * @param dialogs
    * @see DialogPopulate#addDialogInfo
    */
-  public synchronized void setDialogs(List<IDialog> dialogs) {
-    this.dialogs = dialogs;
-    createDialogSectionHelper(dialogs);
+  public void setDialogs(List<IDialog> dialogs) {
+    dialogs.forEach(dialog -> idToDialog.put(dialog.getID(), dialog));
+    // this.dialogs = dialogs;
+    createDialogSectionHelper(idToDialog.values());
   }
 
-  private void createDialogSectionHelper(List<IDialog> dialogs) {
-    List<List<Pair>> seen = new ArrayList<>();
+  private synchronized void createDialogSectionHelper(Collection<IDialog> dialogs) {
+    dialogSectionHelper.clear();
+
     List<String> typeOrder = getTypeOrder();
 
     String unitType = typeOrder.size() > 0 ? typeOrder.get(0) : "";
@@ -874,6 +877,7 @@ public class Project implements IPronunciationLookup, IProject {
     String chapterType = typeOrder.size() > 1 ? typeOrder.get(1) : "";
     boolean hasChapterType = !chapterType.isEmpty();
 
+    List<List<Pair>> seen = new ArrayList<>();
     dialogs.forEach(dialog -> {
       List<Pair> pairs = new ArrayList<>();
       {
@@ -917,5 +921,17 @@ public class Project implements IPronunciationLookup, IProject {
 
   public String toString() {
     return "Project\n\t(" + getTypeOrder() + ") : project " + project;// + "\n\ttypes " + getTypeOrder() + " exercise dao " + exerciseDAO;
+  }
+
+  /**
+   * @param id
+   * @return true if removed the dialog
+   */
+  public boolean forgetDialog(int id) {
+    boolean b = idToDialog.remove(id) != null;
+    if (b) {
+      createDialogSectionHelper(idToDialog.values());
+    }
+    return b;
   }
 }

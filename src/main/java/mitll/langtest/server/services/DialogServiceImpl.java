@@ -108,10 +108,11 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
 
   @NotNull
   private List<IDialog> getDialogsForRequest(ExerciseListRequest request, ISection<IDialog> sectionHelper, int userIDFromSessionOrDB) {
-    List<IDialog> dialogList = getDialogs(request, sectionHelper, userIDFromSessionOrDB);
+    List<IDialog> dialogList = new ArrayList<>(getDialogs(request, sectionHelper, userIDFromSessionOrDB));
 
     dialogList = getFilteredBySearchTerm(request, dialogList);
     dialogList.sort(this::getDialogComparator);
+
     return dialogList;
   }
 
@@ -220,21 +221,23 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     logger.info("getDialogSessions session user " + userIDFromSessionOrDB + " req user " + userid + " dialog " + dialogid);
 
     if (dialogid == -1) {
-      dialogid = getFirstDialog(userIDFromSessionOrDB);
+      // dialogid = getFirstDialog(userIDFromSessionOrDB);
+      return new ArrayList<>();
+    } else {
+      List<IDialogSession> dialogSessions = db.getDialogSessionDAO().getDialogSessions(userid, dialogid);
+      logger.info("getDialogSessions session user " + userIDFromSessionOrDB + " req user " + userid + " got " + dialogSessions.size());
+      return dialogSessions;
     }
-    List<IDialogSession> dialogSessions = db.getDialogSessionDAO().getDialogSessions(userid, dialogid);
-    logger.info("getDialogSessions session user " + userIDFromSessionOrDB + " req user " + userid + " got " + dialogSessions.size());
-    return dialogSessions;
   }
 
-  private int getFirstDialog(int userIDFromSessionOrDB) {
+/*  private int getFirstDialog(int userIDFromSessionOrDB) {
     int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
     if (projectIDFromUser != -1) {
       List<IDialog> dialogs = getProject(projectIDFromUser).getDialogs();
       if (!dialogs.isEmpty()) return dialogs.get(0).getID();
     }
     return -1;
-  }
+  }*/
 
   /**
    * @param dialogSession
@@ -251,17 +254,21 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     return db.getDialogSessionDAO().add(dialogSession);
   }
 
-  private List<IDialog> getDialogs(ExerciseListRequest request, ISection<IDialog> sectionHelper, int userIDFromSessionOrDB) {
+  private Collection<IDialog> getDialogs(ExerciseListRequest request, ISection<IDialog> sectionHelper, int userIDFromSessionOrDB) {
     return (request.getTypeToSelection().isEmpty()) ?
         getDialogs(userIDFromSessionOrDB) :
         new ArrayList<>(sectionHelper.getExercisesForSelectionState(request.getTypeToSelection()));
   }
 
   @Override
-  public boolean delete(int id) throws DominoSessionException {
+  public boolean delete(int projid, int id) throws DominoSessionException {
     getUserIDFromSessionOrDB();
-    int projectIDFromUser = getProjectIDFromUser(getUserIDFromSessionOrDB());
-    return db.getDialogDAO().delete(id, projectIDFromUser);
+    // int projectIDFromUser = getProjectIDFromUser(getUserIDFromSessionOrDB());
+    boolean delete = db.getDialogDAO().delete(id, projid);
+    if (delete) {
+      getProject(projid).forgetDialog(id);
+    }
+    return delete;
   }
 
   /**

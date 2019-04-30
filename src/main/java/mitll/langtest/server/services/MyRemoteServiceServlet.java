@@ -585,8 +585,13 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return iDialog;
   }
 
-
-  protected IDialog getOneDialog(int id) throws DominoSessionException {
+  /**
+   * @param id
+   * @return
+   * @throws DominoSessionException
+   * @see DialogServiceImpl#addEmptyExercises
+   */
+  IDialog getOneDialog(int id) throws DominoSessionException {
     return getOneDialog(getUserIDFromSessionOrDB(), id);
   }
 
@@ -601,38 +606,51 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    */
   @Nullable
   private IDialog getOneDialog(int userIDFromSessionOrDB, int dialogID) {
-    List<IDialog> iDialogs = getDialogs(userIDFromSessionOrDB);
-    if (dialogID == -1) {
-      return iDialogs.isEmpty() ? null : iDialogs.get(0);
+    int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+    Project project = projectIDFromUser == -1 ? null : getProject(projectIDFromUser);
+    if (project == null) {
+      return null;
     } else {
-      List<IDialog> collect = iDialogs.stream().filter(iDialog -> iDialog.getID() == dialogID).collect(Collectors.toList());
-      IDialog iDialog = collect.isEmpty() ? iDialogs.isEmpty() ? null : iDialogs.iterator().next() : collect.iterator().next();
-      if (iDialog == null) {
-        logger.warn("\n\n\nno dialog for " + dialogID + " From " + iDialogs.size());
+//      Collection<IDialog> iDialogs = getDialogs(userIDFromSessionOrDB);
+      if (dialogID == -1) {
+        logger.warn("getOneDialog asking for dialog " + dialogID);
+        return null;//iDialogs.isEmpty() ? null : iDialogs.get(0);
+      } else {
+        IDialog iDialog = project.getDialog(dialogID);
+//        List<IDialog> collect = iDialogs.stream().filter(iDialog -> iDialog.getID() == dialogID).collect(Collectors.toList());
+//        IDialog iDialog = collect.isEmpty() ? iDialogs.isEmpty() ? null : iDialogs.iterator().next() : collect.iterator().next();
+        if (iDialog == null) {
+          logger.warn("\n\n\n in project " + projectIDFromUser +
+              " no dialog for " + dialogID);// + " From " + iDialogs.size());
+        } else {
+          logger.info("getOneDialog for " + dialogID + " = " + iDialog);
+          iDialog.getExercises().forEach(exercise -> logger.info("\t" + exercise));
+        }
+        return iDialog;
       }
-      else {
-        logger.info("getOneDialog for " +dialogID + " = " +iDialog);
-        iDialog.getExercises().forEach(exercise -> logger.info("\t"+exercise));
-      }
-      return iDialog;
     }
   }
 
-  protected List<IDialog> getDialogs(int userIDFromSessionOrDB) {
+  /**
+   * @see DialogServiceImpl#getDialogs(int)
+   * @param userIDFromSessionOrDB
+   * @return
+   */
+  protected Collection<IDialog> getDialogs(int userIDFromSessionOrDB) {
     int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
     if (projectIDFromUser == -1) {
-      logger.warn("no project id?");
+      logger.warn("getDialogs: no project id?");
     }
     return getDialogsForProject(projectIDFromUser);
   }
 
-  List<IDialog> getDialogsForProject(int projectIDFromUser) {
-    List<IDialog> dialogList = new ArrayList<>();
+  private Collection<IDialog> getDialogsForProject(int projectIDFromUser) {
+    Collection<IDialog> dialogList = new ArrayList<>();
     {
       if (projectIDFromUser != -1) {
         dialogList = getProject(projectIDFromUser).getDialogs();
       } else {
-        logger.warn("no project id?");
+        logger.warn("getDialogsForProject : no project id?");
       }
     }
     return dialogList;

@@ -65,10 +65,12 @@ public interface DialogService extends RemoteService {
   IDialog addDialog(IDialog dialog) throws DominoSessionException;
   /**
    *
+   *
+   * @param projid
    * @param id
    * @throws DominoSessionException
    */
-  boolean delete(int id) throws DominoSessionException;
+  boolean delete(int projid, int id) throws DominoSessionException;
 
   /**
    * @see mitll.langtest.client.dialog.ListenViewHelper#showContent

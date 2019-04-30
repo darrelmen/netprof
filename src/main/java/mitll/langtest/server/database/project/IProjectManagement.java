@@ -49,8 +49,8 @@ import java.util.Map;
 
 public interface IProjectManagement {
   /**
-   * @see DatabaseImpl#populateProjects(int)
    * @param projID
+   * @see DatabaseImpl#populateProjects(int)
    */
   void populateProjects(int projID);
 
@@ -59,8 +59,8 @@ public interface IProjectManagement {
   ExerciseDAO<CommonExercise> setDependencies();
 
   /**
-   * @see ProjectServiceImpl#delete
    * @param projid
+   * @see ProjectServiceImpl#delete
    */
   void forgetProject(int projid);
 
@@ -76,6 +76,7 @@ public interface IProjectManagement {
 
   /**
    * Only for testing
+   *
    * @param id
    * @return
    */
@@ -84,11 +85,17 @@ public interface IProjectManagement {
   List<CommonExercise> getExercises(int projectid, boolean onlyOne);
 
   Project getProject(int projectid, boolean onlyOne);
+
   IProject getIProject(int projectid, boolean onlyOne);
+
   Project getProjectByName(String name);
+
   List<Project> getProjectByLanguage(Language name);
+
   Project getProductionByLanguage(Language language);
+
   List<Project> getMatchingProjects(Language languageMatchingGroup, boolean isPoly);
+
   boolean exists(int projectid);
 
   Collection<Project> getProjects();
@@ -100,54 +107,62 @@ public interface IProjectManagement {
   void setStartupInfo(User userWhere, int projid);
 
   /**
-   * @see ProjectServices#configureProject
    * @param project
    * @param configureEvenRetired
    * @param forceReload
    * @return number of exercises in the project
+   * @see ProjectServices#configureProject
    */
   int configureProject(Project project, boolean configureEvenRetired, boolean forceReload);
 
   int getProjectIDForLanguage(Language language);
 
   /**
-   * @see OpenUserServiceImpl#setProject
    * @param projid
+   * @see OpenUserServiceImpl#setProject
    */
   void configureProjectByID(int projid);
 
   void clearStartupInfo(User userWhere);
 
   /**
-   * @see LangTestDatabaseImpl#getStartupInfo
    * @return
+   * @see LangTestDatabaseImpl#getStartupInfo
    */
   List<SlimProject> getNestedProjectInfo();
 
   /**
    * Use file path to lookup in result table to get user id of who recorded it.
+   *
    * @param requestURI
    * @return
    */
   int getUserForFile(String requestURI);
 
   /**
-   * @see ProjectServiceImpl#addPending
    * @param projID
    * @return
+   * @see ProjectServiceImpl#addPending
    */
   ImportInfo getImportFromDomino(int projID);
 
   /**
-   * @see mitll.langtest.server.domino.ProjectSync#getDominoForLanguage
    * @return
+   * @see mitll.langtest.server.domino.ProjectSync#getDominoForLanguage
    */
   List<ImportProjectInfo> getVocabProjects();
 
-  Map<String,Integer> getNpToDomino(int dominoProjectID);
+  Map<String, Integer> getNpToDomino(int dominoProjectID);
 
   OOVInfo checkOOV(int id, int num, int offset);
 
   void updateOOV(List<OOV> updates, int user);
+
+  /**
+   *
+   * @param projID
+   */
   void addDialogInfo(int projID);
+
+  void addDialogInfo(int projID, int dialogID);
 }

@@ -835,9 +835,9 @@ public class DownloadServlet extends DatabaseServlet {
     try {
       final int fid = id == null ? -1 : id;
 
-      List<IDialog> collect = db.getProject(projectid).getDialogs().stream().filter(d -> d.getID() == fid).collect(Collectors.toList());
+      IDialog iDialog = db.getProject(projectid).getDialog(fid);//.stream().filter(d -> d.getID() == fid).collect(Collectors.toList());
 
-      String name = id == null | collect.isEmpty() ? "unknown" : collect.get(0).getEnglish();
+      String name = id == null | iDialog == null ? "unknown" : iDialog.getEnglish();
       name = name.replaceAll(",", "_").replaceAll(" ", "_");
       name += ".zip";
       setHeader(response, name);

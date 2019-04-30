@@ -221,7 +221,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     initializeDAOs(dominoUserDAO);
 
-   // dominoUserDAO.setUserProjectDAO(getUserProjectDAO());
+    // dominoUserDAO.setUserProjectDAO(getUserProjectDAO());
 
     {
       long now = System.currentTimeMillis();
@@ -307,7 +307,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       logger.info("populateProjects no project management yet...");
     } else {
       projectManagement.populateProjects(projID);
-   //   setProjectManagement();
+      //   setProjectManagement();
 //
 //      if (TEST_SYNC) {  // right now I can't run the test since I need mongo.. etc.
 //        new TestSync(this);
@@ -1639,7 +1639,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
             options,
             project.isEnglish());
   }*/
-
   @Override
   public String getLanguage(CommonExercise ex) {
     return getLanguage(ex.getProjectID());
@@ -1738,12 +1737,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Language language = getLanguageEnum(projectid);
     if (dialogID == -1) return language + "_Unknown";
     String name = "";
-    List<IDialog> collect = getProject(projectid).getDialogs().stream().filter(d -> d.getID() == dialogID).collect(Collectors.toList());
-    if (collect.isEmpty()) {
+//    List<IDialog> collect = getProject(projectid).getDialogs().stream().filter(d -> d.getID() == dialogID).collect(Collectors.toList());
+
+    IDialog iDialog = getProject(projectid).getDialog(dialogID);//.stream().filter(d -> d.getID() == fid).collect(Collectors.toList());
+    if (iDialog == null) {
       logger.error("huh? can't find user list " + dialogID);
       return language + "_Unknown";
     } else {
-      IDialog iDialog = collect.get(0);
+      //IDialog iDialog = collect.get(0);
       name = language + "_" + (iDialog.getEnglish().isEmpty() ? iDialog.getForeignLanguage() : iDialog.getEnglish());
       doAudioExport(out, false, projectid, options, language, name, iDialog.getBothExercisesAndCore());
     }
