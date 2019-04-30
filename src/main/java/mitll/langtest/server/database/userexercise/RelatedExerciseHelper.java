@@ -107,10 +107,10 @@ public class RelatedExerciseHelper implements IRelatedExercise {
   }
 
   /**
-   * @see DialogDAO#addEmptyExercises(IDialog, int, int, boolean, long)
    * @param after
    * @param exid
    * @return
+   * @see DialogDAO#addEmptyExercises(IDialog, int, int, boolean, long)
    */
   @Override
   public boolean insertAfter(int after, int exid) {
@@ -140,8 +140,10 @@ public class RelatedExerciseHelper implements IRelatedExercise {
 
     Map<Integer, List<SlickRelatedExercise>> orderedDialogToRelations = new HashMap<>();
 
-    dialogToRelations.forEach((k, v) -> {
-      //Map<Integer, SlickRelatedExercise> exToRelation = new HashMap<>();
+    Set<Integer> dialogIDs = new TreeSet<>(dialogToRelations.keySet());
+
+    dialogIDs.forEach(dialogID -> {
+      List<SlickRelatedExercise> slickRelatedExercises = dialogToRelations.get(dialogID);
 
       Map<Integer, SlickRelatedExercise> contextExToRelation = new HashMap<>();
 
@@ -149,8 +151,8 @@ public class RelatedExerciseHelper implements IRelatedExercise {
 
       Set<Integer> prevPointers = new HashSet<>();
 
-      v.forEach(slickRelatedExercise -> {
-        logger.info("for dialog " + k + " : " + slickRelatedExercise);
+      slickRelatedExercises.forEach(slickRelatedExercise -> {
+        logger.info("getDialogIDToRelated : for dialog " + dialogID + " : " + slickRelatedExercise);
 
         boolean isLast = slickRelatedExercise.exid() == slickRelatedExercise.contextexid();
         if (isLast) {
@@ -173,25 +175,25 @@ public class RelatedExerciseHelper implements IRelatedExercise {
         if (!nextPointers.isEmpty()) {
           prev = contextExToRelation.get(nextPointers.iterator().next());
         }
-        logger.info("1 final link is " + prev);
+        logger.info("getDialogIDToRelated 1 final link is " + prev);
       } else {
         prev = finalOneList.get(0);
-        logger.info("2 final link is " + prev);
+        logger.info("getDialogIDToRelated 2 final link is " + prev);
       }
 
       {
-        List<SlickRelatedExercise> inOrder = new ArrayList<>(v.size());
+        List<SlickRelatedExercise> inOrder = new ArrayList<>(slickRelatedExercises.size());
 
         if (contextExToRelation.isEmpty()) {
           if (prev != null) {
             inOrder.add(prev);
-            logger.info(k + " : 1 add link " + prev);
+            logger.info("getDialogIDToRelated " + dialogID + " : 1 add link " + prev);
           }
         } else {
 //        SlickRelatedExercise prev = contextExToRelation.get(-1);
           while (prev != null) {
             inOrder.add(prev);
-            logger.info(k + " : 2 add link " + prev);
+            logger.info("getDialogIDToRelated " + dialogID + " : 2 add link " + prev);
             // int exid = slickRelatedExercise.exid();
             prev = contextExToRelation.get(prev.exid());
             // inOrder.add(prev);
@@ -201,7 +203,7 @@ public class RelatedExerciseHelper implements IRelatedExercise {
           for (int i = 0; i < inOrder.size(); i++) logger.info("\t#" + i + " : " + inOrder.get(i));
         }
 
-        orderedDialogToRelations.put(k, inOrder);
+        orderedDialogToRelations.put(dialogID, inOrder);
       }
     });
 

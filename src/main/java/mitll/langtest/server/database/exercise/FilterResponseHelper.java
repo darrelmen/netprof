@@ -30,6 +30,7 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.DatabaseServices;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.IDialog;
@@ -407,7 +408,8 @@ public class FilterResponseHelper implements IResponseFilter {
   }
 
   private List<IDialog> getDialogs(int projectID) {
-    return databaseServices.getProject(projectID).getDialogs();
+    Project project = databaseServices.getProject(projectID);
+    return project == null ? new ArrayList<>() : project.getDialogs();
   }
 
   @NotNull

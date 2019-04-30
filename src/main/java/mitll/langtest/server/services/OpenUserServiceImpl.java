@@ -259,7 +259,14 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       if (exists) {
         createNewSession(userByID);
       }
-      return new ChoosePasswordResult(userByID, !exists ? NotExists : Success);
+      ChoosePasswordResult choosePasswordResult = new ChoosePasswordResult(userByID, !exists ? NotExists : Success);
+
+      if (exists) {
+        // record last login info for one time users
+        loginUser(userId, newPassword);
+      }
+
+      return choosePasswordResult;
     } else {
       //  log.info(TIMING, "[changePassword, {} ms, for {}", () -> elapsedMS(startMS), () -> success);
       return new ChoosePasswordResult(null, !exists ? NotExists : AlreadySet);

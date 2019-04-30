@@ -68,7 +68,7 @@ public class ExerciseListRequest implements IsSerializable, IRequest {
   private boolean plainVocab = false;
   private boolean isOnlyFL = false;
   private boolean exactMatch = false;
-  private int projID;
+  private int projID = -1;
   private int dialogID = -1;
   private ProjectMode mode = ProjectMode.VOCABULARY;
 
@@ -79,6 +79,11 @@ public class ExerciseListRequest implements IsSerializable, IRequest {
     this.reqID = reqID;
     this.userID = userID;
     this.projID = projID;
+  }
+
+  public ExerciseListRequest(int reqID, int userID) {
+    this.reqID = reqID;
+    this.userID = userID;
   }
 
   public boolean isNoFilter() {

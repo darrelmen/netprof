@@ -51,8 +51,10 @@ import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.ComplexPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.MemoryItemContainer;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
@@ -249,9 +251,21 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     });
   }
 
+  /**
+   * Weird compile error on jenkins when use setPercent call directly.
+   * @param oovInfoForBatch
+   */
   private void setProgressPercent(OOVInfo oovInfoForBatch) {
-    float percent = 100F * ((float) num / (float) oovInfoForBatch.getTotal());
-    progressBar.setPercent(percent);
+    double percent = 100D * ((double) num / (double) oovInfoForBatch.getTotal());
+   // progressBar.setPercent(percent);
+    cheesySetPercent(progressBar, percent);
+  }
+
+  @NotNull
+  private Widget cheesySetPercent(ComplexPanel practicedProgress, double percent1) {
+    Widget theBar = practicedProgress.getWidget(0);
+    theBar.getElement().getStyle().setWidth(Double.valueOf(percent1).intValue(), Style.Unit.PCT);
+    return theBar;
   }
 
   private void getOOVs(OOVInfo oovInfo, int projectID, DivWidget top) {
