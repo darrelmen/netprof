@@ -53,6 +53,7 @@ import mitll.langtest.client.banner.NewBanner;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -364,7 +365,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     style.setBottom(0, Style.Unit.PX);
     style.setOverflowY(Style.Overflow.AUTO);
     style.setPosition(Style.Position.FIXED);
- //   style.setPaddingRight(225, Style.Unit.PX);
+    //   style.setPaddingRight(225, Style.Unit.PX);
 
     return verticalContainer;
   }
@@ -385,29 +386,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       String implementationVersion = lifecycleSupport.getStartupInfo().getImplementationVersion();
       boolean teacher = isTeacher(userManager.getCurrent());
       if (projectStartupInfo == null) {
-        long then = System.currentTimeMillis();
-        Timer timer = getWifiTimer();
-
-        controller.getOpenUserService().checkHeartbeat(implementationVersion, teacher, new AsyncCallback<HeartbeatStatus>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            cancelHeartbeatTimer(timer);
-          }
-
-          @Override
-          public void onSuccess(HeartbeatStatus result) {
-            cancelHeartbeatTimer(timer);
-            long now = System.currentTimeMillis();
-            //logger.info("1 waited " + (now - then));
-            if (result.isCodeHasUpdated()) {
-              logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
-              Window.Location.reload();
-            } else if (result.isPermissionsChanged()) {
-              logger.info("confirmCurrentProject : 1  took " + (now - then) + " millis - perm changed!");
-              Window.Location.reload();
-            }
-          }
-        });
+        checkHearbeat(implementationVersion, teacher);
       } else {
         if (DO_HEARTBEAT) {
           long then = System.currentTimeMillis();
@@ -441,9 +420,64 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     }
   }
 
+  public void checkAndTell(CheckHeartbeatComplete complete) {
+    String implementationVersion = lifecycleSupport.getStartupInfo().getImplementationVersion();
+    boolean teacher = isTeacher(userManager.getCurrent());
+    long then = System.currentTimeMillis();
+    controller.getOpenUserService().checkHeartbeat(implementationVersion, teacher, new AsyncCallback<HeartbeatStatus>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(HeartbeatStatus result) {
+        if (result.isCodeHasUpdated()) {
+          long now = System.currentTimeMillis();
+          logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
+          Window.Location.reload();
+        }
+        complete.complete();
+      }
+    });
+  }
+
+  private void checkHearbeat(String implementationVersion, boolean teacher) {
+    long then = System.currentTimeMillis();
+    Timer timer = getWifiTimer();
+    checkHeartbeat(implementationVersion, teacher, then, timer);
+  }
+
+  private void checkHeartbeat(String implementationVersion, boolean teacher, long then, Timer timer) {
+    controller.getOpenUserService().checkHeartbeat(implementationVersion, teacher, new AsyncCallback<HeartbeatStatus>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        cancelHeartbeatTimer(timer);
+      }
+
+      @Override
+      public void onSuccess(HeartbeatStatus result) {
+        cancelHeartbeatTimer(timer);
+        long now = System.currentTimeMillis();
+        //logger.info("1 waited " + (now - then));
+        if (result.isCodeHasUpdated()) {
+          logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
+          Window.Location.reload();
+        } else if (result.isPermissionsChanged()) {
+          logger.info("confirmCurrentProject : 1  took " + (now - then) + " millis - perm changed!");
+          Window.Location.reload();
+        }
+      }
+    });
+  }
+
   private boolean isTeacher(User userWhere) {
-    Collection<Permission> permissions = userWhere.getPermissions();
-    return permissions.contains(Permission.TEACHER_PERM) || permissions.contains(Permission.PROJECT_ADMIN);
+    if (userWhere == null) {
+      return false;
+    } else {
+      Collection<Permission> permissions = userWhere.getPermissions();
+      return permissions.contains(Permission.TEACHER_PERM) || permissions.contains(Permission.PROJECT_ADMIN);
+    }
   }
 
   private void cancelHeartbeatTimer(Timer timer) {
@@ -647,6 +681,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   public void showCogMenu() {
     banner.setCogVisible(true);
   }
+
   private void hideCogMenu() {
     banner.setCogVisible(false);
   }
@@ -824,7 +859,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   @Override
   public void clickOnParentCrumb(SlimProject parent) {
     if (DEBUG) {
-      logger.info("clickOnParentCrumb click on parent : " +parent);
+      logger.info("clickOnParentCrumb click on parent : " + parent);
     }
 
     pushClearHistory(); // clear history!
@@ -850,5 +885,10 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   @Override
   public void setSplash(String message) {
     banner.setSubtitle(message);
+  }
+
+  @Override
+  public KeyStorage getStorage() {
+    return controller.getStorage();
   }
 }

@@ -29,67 +29,6 @@
 
 package mitll.langtest.client.initial;
 
-import com.github.gwtbootstrap.client.ui.NavLink;
-import mitll.langtest.client.LangTest;
-import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.KeyStorage;
-import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.project.SlimProject;
-import org.jetbrains.annotations.NotNull;
-
-public interface UILifecycle {
-  /**
-   * @see InitialUI#populateRootPanelIfLogin()
-   * @see LangTest#populateRootPanel()
-   * @see LangTest#showLogin()
-   */
-  void populateRootPanel();
-
-  int getHeightOfTopRows();
-
-  /**
-   * @see LangTest#gotUser
-   * @param user
-   */
-  void gotUser(HasID user);
-
-  void startOver();
-
-  void getUserPermissions();
-
-  /**
-   * @see
-   */
-  void showInitialState();
-
-
-  void addBreadcrumbs();
-
-  /**
-   * @see mitll.langtest.client.project.ProjectChoices#gotClickOnFlag
-   * @param name
-   * @return
-   */
-  @NotNull
-  NavLink makeBreadcrumb(String name);
-
-  void clickOnParentCrumb(SlimProject parent);
-
-  /**
-   * @see LangTest#makeFlashContainer()
-   * @param message
-   */
-  void setSplash(String message);
-
-  void logout();
-
-  void clearContent();
-
-  void chooseProjectAgain();
-
-  INavigation getNavigation();
-
-  void showCogMenu();
-
-  KeyStorage getStorage();
+public interface CheckHeartbeatComplete {
+  void complete();
 }

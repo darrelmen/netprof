@@ -714,13 +714,11 @@ public class ProjectChoices extends ThumbnailChoices {
   }
 
   private void addPopoverUsual(FocusWidget button, SlimProject projectForLang) {
-    logger.info("addPopoverUsual " + projectForLang);
-
+   // logger.info("addPopoverUsual " + projectForLang);
     Set<String> typeOrder = new HashSet<>(Collections.singletonList(COURSE));
     UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
     button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, ClientExerciseUnitChapterItemHelper));
   }
-
 
   private void showPopoverUsual(SlimProject projectForLang,
                                 Widget button,

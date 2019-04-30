@@ -97,18 +97,22 @@ public class PrecalcScores {
    * @see #parseJSON(ISlimResult, boolean, float)
    */
   private void parseJSON(boolean usePhoneToDisplay, float pronScore, String jsonScore) {
-    try {
-      JsonParser parser = new JsonParser();
-      jsonObject = parser.parse(jsonScore).getAsJsonObject();
-      if (pronScore == -100) {
-        pronScore = jsonObject != null && jsonObject.get(SCORE) != null ? jsonObject.get(SCORE).getAsFloat() : -1;
-      }
-      scores = getCachedScores(pronScore, jsonObject, usePhoneToDisplay);
-      isValid = isPrecalcValidCheck();
-    } catch (Exception e) {
-      logger.warn("parsing " + jsonScore + " got " + e, e);
+    if (jsonScore == null) {
       isValid = false;
-      // e.printStackTrace();
+    } else {
+      try {
+        JsonParser parser = new JsonParser();
+        jsonObject = parser.parse(jsonScore).getAsJsonObject();
+        if (pronScore == -100) {
+          pronScore = jsonObject != null && jsonObject.get(SCORE) != null ? jsonObject.get(SCORE).getAsFloat() : -1;
+        }
+        scores = getCachedScores(pronScore, jsonObject, usePhoneToDisplay);
+        isValid = isPrecalcValidCheck();
+      } catch (Exception e) {
+        logger.warn("parsing " + jsonScore + " got " + e, e);
+        isValid = false;
+        // e.printStackTrace();
+      }
     }
   }
 

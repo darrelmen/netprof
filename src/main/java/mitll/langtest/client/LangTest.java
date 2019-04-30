@@ -91,6 +91,7 @@ import static mitll.langtest.client.banner.NewContentChooser.MODE;
 
 public class LangTest implements
     EntryPoint, UserFeedback, ExerciseController<ClientExercise>, UserNotification, LifecycleSupport, UserState {
+  public static final String UNKNOWN1 = "Unknown";
   private final Logger logger = Logger.getLogger("LangTest");
 
   private static final String LOCALHOST = "127.0.0.1";
@@ -219,9 +220,7 @@ public class LangTest implements
           "\nIf you still see this message, clear your cache. (" + caught.getMessage() +
           ")");
     } else {
-      long now = System.currentTimeMillis();
-      String message = "onModuleLoad.getProperties : (failure) took " + (now - then) + " millis";
-
+      String message = "onModuleLoad.getProperties : (failure) took " + (System.currentTimeMillis() - then) + " millis";
       logger.info(message);
       if (!caught.getMessage().trim().equals("0")) {
         logger.info("Exception " + caught.getMessage() + " " + caught + " " + caught.getClass() + " " + caught.getCause());
@@ -424,36 +423,47 @@ public class LangTest implements
   }
 
   private boolean lastWasStackOverflow = false;
+  private boolean lastWasIncompat = false;
 
   public String logException(Throwable throwable) {
-    logger.info("logException got exception " + throwable.getMessage());
+//    if (throwable instanceof IncompatibleRemoteServiceException && !lastWasIncompat) {
+//      lastWasIncompat = true;
+//      logger.info("logException reload browser since " + throwable);
+//      int user = userManager != null ? userManager.getUser() : -1;
+//      String suffix = " browser " + browserCheck.getBrowserAndVersion() + " : " + "doing window reload";
+//      logMessageOnServer(GOT_BROWSER_EXCEPTION + "user #" + user + " exercise " + UNKNOWN1 + suffix, true);
+//      Window.Location.reload();
+//      return "";
+//    } else {
+      logger.info("logException got exception " + throwable.getMessage());
 
-    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(throwable);
-    logger.info("logException stack " + exceptionAsString);
-    boolean isStackOverflow = exceptionAsString.contains("Maximum call stack size exceeded");
-    if (isStackOverflow && lastWasStackOverflow) { // we get overwhelmed by repeated exceptions
-      return ""; // skip repeat exceptions
-    } else {
-      lastWasStackOverflow = isStackOverflow;
-    }
-    logMessageOnServer(exceptionAsString, GOT_BROWSER_EXCEPTION, true);
-    return exceptionAsString;
+      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(throwable);
+      logger.info("logException stack " + exceptionAsString);
+      boolean isStackOverflow = exceptionAsString.contains("Maximum call stack size exceeded");
+      if (isStackOverflow && lastWasStackOverflow) { // we get overwhelmed by repeated exceptions
+        return ""; // skip repeat exceptions
+      } else {
+        lastWasStackOverflow = isStackOverflow;
+      }
+      logMessageOnServer(exceptionAsString, GOT_BROWSER_EXCEPTION, true);
+      return exceptionAsString;
+//    }
   }
 
   public void logMessageOnServer(String message, String prefix, boolean sendEmail) {
     int user = userManager != null ? userManager.getUser() : -1;
-    String exerciseID = "Unknown";
     String suffix = " browser " + browserCheck.getBrowserAndVersion() + " : " + message;
-    logMessageOnServer(prefix + "user #" + user + " exercise " + exerciseID + suffix, sendEmail);
+    logMessageOnServer(prefix + "user #" + user + " exercise " + UNKNOWN1 + suffix, sendEmail);
 
     String toSend = prefix + suffix;
     if (toSend.length() > MAX_EXCEPTION_STRING) {
       toSend = toSend.substring(0, MAX_EXCEPTION_STRING) + "...";
     }
-    getButtonFactory().logEvent(UNKNOWN, UNKNOWN, new EventContext(exerciseID, toSend, user));
+    getButtonFactory().logEvent(UNKNOWN, UNKNOWN, new EventContext(UNKNOWN1, toSend, user));
   }
 
   private void logMessageOnServer(final String message, final boolean sendEmail) {
+
     Scheduler.get().scheduleDeferred(() -> service.logMessage(message, sendEmail,
         new AsyncCallback<Void>() {
           @Override
@@ -463,7 +473,7 @@ public class LangTest implements
 
           @Override
           public void onSuccess(Void result) {
-            logger.info("posted message to server, length " + message.length() + " send email " + sendEmail);
+            logger.info("logMessageOnServer : posted message to server, length " + message.length() + " send email " + sendEmail);
           }
         }
     ));
@@ -491,8 +501,6 @@ public class LangTest implements
     String key = path + DIVIDER + type + DIVIDER + toUse + DIVIDER + height + DIVIDER + exerciseID;
     getImage(reqid, key, client);
   }*/
-
-
   private void getImage(int reqid, String key, AsyncCallback<ImageResponse> client) {
     String[] split = key.split("\\|");
     String path = split[0];
