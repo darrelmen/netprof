@@ -2162,15 +2162,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return dominoAdminUser;
   }
 
-//
-//  public void setUserProjectDAO(IUserProjectDAO userProjectDAO) {
-//    IUserProjectDAO userProjectDAO1 = userProjectDAO;
-//  }
-//
-//  public void setProjectManagement(IProjectManagement projectManagement) {
-//    IProjectManagement projectManagement1 = projectManagement;
-//  }
-
   @Override
   public boolean updateProject(int oldID, int newprojid) {
     return false;
