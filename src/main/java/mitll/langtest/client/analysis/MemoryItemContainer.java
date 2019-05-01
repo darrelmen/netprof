@@ -282,7 +282,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #getTableWithPager
    */
   void makeInitialSelection(T firstUser, T userToSelect) {
-  //  logger.info("makeInitialSelection make initial selection : select " + userToSelect);
+    //  logger.info("makeInitialSelection make initial selection : select " + userToSelect);
     Scheduler.get().scheduleDeferred(() -> selectAndClick((userToSelect == null) ? firstUser : userToSelect));
   }
 
@@ -333,7 +333,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   protected ColumnSortEvent.ListHandler<T> getUserSorter(Column<T, SafeHtml> englishCol,
-                                                       List<T> dataList) {
+                                                         List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, this::getIDCompare);
     return columnSortHandler;
@@ -371,6 +371,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       String item = localStorageIfSupported.getItem(selectedUserKey);
       if (item != null) {
+        logger.info("getSelectedUser " + selectedUserKey + " = " + item);
         try {
           return Long.parseLong(item);
         } catch (NumberFormatException e) {
@@ -387,7 +388,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #gotClickOnItem
    */
   private void storeSelectedUser(long selectedUser) {
-    // logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
+
+    logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
+
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       localStorageIfSupported.setItem(selectedUserKey, "" + selectedUser);

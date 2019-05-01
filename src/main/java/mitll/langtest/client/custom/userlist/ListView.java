@@ -273,7 +273,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
 
       @Override
       public void onSuccess(Collection<T> result) {
-        myLists.populateTable(result);
+        getMyLists().populateTable(result);
         populateUniqueListNames(result);
         Scheduler.get().scheduleDeferred(() -> setShareHREF(getCurrentSelectionFromMyLists()));
       }
@@ -287,14 +287,15 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
    */
   private void showYourLists(Collection<T> result, DivWidget left) {
     ListContainer myLists = new MyListContainer();
-    Panel tableWithPager = (ListView.this.myLists = myLists).getTableWithPager(result);
+    setMyLists(myLists);
+    Panel tableWithPager = myLists.getTableWithPager(result);
 
     new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.RIGHT);
     addPagerAndHeader(tableWithPager, canMakeQuiz() ? YOUR_LISTS : YOUR_LISTS1, left);
     tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
     tableWithPager.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
 
-    left.add(getButtons(ListView.this.myLists));
+    left.add(getButtons(getMyLists()));
   }
 
   protected void populateUniqueListNames(Collection<T> result) {
@@ -321,7 +322,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     DivWidget buttons = super.getButtons(container);
     addDrillAndLearn(buttons, container);
     if (canMakeQuiz()) {
-      buttons.add(quizButton = getQuizButton(myLists));
+      buttons.add(quizButton = getQuizButton(getMyLists()));
     }
     return buttons;
   }
@@ -337,21 +338,21 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
 
   @Override
   protected boolean gotYesOnImport(T currentSelection, ImportBulk importBulk) {
-    boolean favorite = getCurrentSelection(myLists).isFavorite();
+    boolean favorite = getCurrentSelection(getMyLists()).isFavorite();
     if (favorite) {
       Window.alert(CAN_T_IMPORT_INTO_FAVORITES);
       return false;
     } else {
-      importBulk.doBulk(controller, currentSelection, myLists);
+      importBulk.doBulk(controller, currentSelection, getMyLists());
       return true;
     }
   }
 
   /**
+   * @param selectedItem ignored here...?
    * @see
    * @see ListView.MyListContainer#gotDoubleClickOn
    * @see ContentEditorView#getAddItems
-   * @param selectedItem ignored here...?
    */
   @Override
   protected void editList(T selectedItem) {
@@ -463,6 +464,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     visited.addButton(add);
     return add;
   }
+
   @Override
   protected void doDelete(UIObject delete, T currentSelection) {
     final int uniqueID = currentSelection.getID();
@@ -564,7 +566,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
   @NotNull
   @Override
   protected CreateDialog<T> getEditDialog() {
-    return new CreateListDialog<T>(this, controller, myLists.getCurrentSelection(), true, names);
+    return new CreateListDialog<T>(this, controller, getMyLists().getCurrentSelection(), true, names);
   }
 
   @Override
@@ -577,11 +579,11 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
    */
   @Override
   public void gotEdit() {
-    editDialog.doEdit(myLists.getCurrentSelection(), myLists);
+    editDialog.doEdit(getMyLists().getCurrentSelection(), getMyLists());
   }
 
   private void enableQuizButton(Button quizButton) {
-    UserList<CommonShell> currentSelection = getCurrentSelection(myLists);
+    UserList<CommonShell> currentSelection = getCurrentSelection(getMyLists());
     if (quizButton != null) {
       quizButton.setEnabled(currentSelection != null && currentSelection.getListType() == UserList.LIST_TYPE.QUIZ);
     }
@@ -621,7 +623,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
   @NotNull
   @Override
   protected String getMailTo() {
-    UserList<CommonShell> currentSelection = myLists.getCurrentSelection();
+    UserList<CommonShell> currentSelection = getMyLists().getCurrentSelection();
     boolean isQuiz = currentSelection.getListType() == UserList.LIST_TYPE.QUIZ;
     return new UserListSupport(controller)
         .getMailToList(currentSelection.getID(), currentSelection.getName(), isQuiz);
@@ -630,7 +632,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
   private void showQuiz(T selected) {
     if (selected != null) {
       if (selected.getListType() == UserList.LIST_TYPE.QUIZ) {
-        showQuiz(myLists);
+        showQuiz(getMyLists());
       }
     }
   }
@@ -646,8 +648,8 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     public boolean gotYes() {
 //            int numItems = currentSelectionFromMyLists.getNumItems();
       //   logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
-      myLists.flush();
-      myLists.redraw();
+      getMyLists().flush();
+      getMyLists().redraw();
       return true;
     }
 

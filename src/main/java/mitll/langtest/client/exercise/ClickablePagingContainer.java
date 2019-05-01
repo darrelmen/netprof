@@ -207,12 +207,8 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
           "\n\tnow has " + after + " after adding " + exercise.getID());
     }
 
-    if (before + 1 != after) logger.warning("didn't add " + exercise.getID());
+    if (before + 1 != after) logger.warning("addExerciseAfter didn't add " + exercise.getID());
   }
-
-/*  public Set<Integer> getKeys() {
-    return idToExercise.keySet();
-  }*/
 
   private void markCurrent(T currentExercise) {
     if (currentExercise != null) {

@@ -99,10 +99,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   protected Button share;
   private static final int MIN_WIDTH = 659;//599;
   protected DialogHelper dialogHelper;
-  /**
-   *
-   */
-  protected ButtonMemoryItemContainer<T> myLists;
+  private ButtonMemoryItemContainer<T> myLists;
 
   protected Button editButton, removeButton;
 
@@ -536,5 +533,13 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
       logger.warning("got " + e);
     }
     Scheduler.get().scheduleDeferred(() -> myLists.markCurrentExercise(userList.getID()));
+  }
+
+  public ButtonMemoryItemContainer<T> getMyLists() {
+    return myLists;
+  }
+
+  public void setMyLists(ButtonMemoryItemContainer<T> myLists) {
+    this.myLists = myLists;
   }
 }

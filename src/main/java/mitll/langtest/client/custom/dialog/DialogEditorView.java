@@ -131,7 +131,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
           @Override
           public void onSuccess(ExerciseListWrapper<T> result) {
-            myLists.populateTable(result.getExercises());
+            getMyLists().populateTable(result.getExercises());
             populateUniqueListNames(result.getExercises());
 
             Scheduler.get().scheduleDeferred(() -> setShareHREF(getCurrentSelectionFromMyLists()));
@@ -146,14 +146,15 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
    */
   private void showYours(Collection<T> result, DivWidget left) {
     DialogContainer<T> myLists = new MyDialogContainer();
-    Panel tableWithPager = (this.myLists = myLists).getTableWithPager(result);
+    setMyLists(myLists);
+    Panel tableWithPager = myLists.getTableWithPager(result);
 
     new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.BOTTOM);
     addPagerAndHeader(tableWithPager, YOUR_LISTS1, left);
     tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
     tableWithPager.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
 
-    left.add(getButtons(DialogEditorView.this.myLists));
+    left.add(getButtons(this.getMyLists()));
   }
 
   @Override
@@ -206,8 +207,8 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     public boolean gotYes() {
 //            int numItems = currentSelectionFromMyLists.getNumItems();
       //   logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
-      myLists.flush();
-      myLists.redraw();
+      getMyLists().flush();
+      getMyLists().redraw();
       return true;
     }
 

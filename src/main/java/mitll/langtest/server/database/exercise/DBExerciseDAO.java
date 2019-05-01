@@ -420,7 +420,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           "\n\ttypeOrder      " + typeOrder +
           "\n\tattributeTypes " + attributeTypes);
     }
-    
+
     if (attributeTypes.contains(SEMESTER.toString())) {
       //  logger.info("found semester ");
       List<String> copy = new ArrayList<>();
