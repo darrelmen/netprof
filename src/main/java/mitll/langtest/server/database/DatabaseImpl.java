@@ -173,6 +173,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private IPendingUserDAO pendingUserDAO;
   private IOOVDAO oovDAO;
 
+  boolean setupComplete=false;
+
   public DatabaseImpl() {
   }
 
@@ -390,6 +392,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
     afterDAOSetup(slickAudioDAO);
 
     logger.info("finalSetup : tables = " + getTables());
+
+    setupComplete=true;
   }
 
   public void waitForDefaultUser() {
@@ -397,6 +401,17 @@ public class DatabaseImpl implements Database, DatabaseServices {
       try {
         sleep(1000);
         logger.info("finalSetup ---> no default user yet.....");
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
+    }
+  }
+
+  public void waitForSetupComplete() {
+    while (!setupComplete) {
+      try {
+        sleep(1000);
+        logger.info("waitForSetupComplete setup not complete...");
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
@@ -413,6 +428,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
     relatedResultDAO = new RelatedResultDAO(this, dbConnection);
   }
 
+  /**
+   * @see #finalSetup
+   * @param slickAudioDAO
+   */
   private void afterDAOSetup(SlickAudioDAO slickAudioDAO) {
     if (userDAO instanceof UserDAO) {
       userDAO.ensureDefaultUsers();

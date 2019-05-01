@@ -108,6 +108,12 @@ public class DialogPopulate {
     }
   }
 
+  /**
+   * @see ProjectManagement#addDialogInfo(Project, int)
+   * @param project
+   * @param dialogID
+   * @return
+   */
   boolean addDialogInfo(Project project, int dialogID) {
     List<IDialog> dialogs1 = db.getDialogDAO().getOneDialog(dialogID);
     if (dialogs1.isEmpty()) {
@@ -310,10 +316,7 @@ public class DialogPopulate {
 
   @NotNull
   public Map<CommonExercise, Integer> addExercisesAndSetID(int projid, int defaultUser, List<String> typeOrder, List<ClientExercise> exercises) {
-    List<CommonExercise> commonExercisesFromDialog = toCommon(exercises);
-
-    Map<CommonExercise, Integer> importExToID = addExercises(projid, defaultUser, typeOrder, commonExercisesFromDialog);
-
+    Map<CommonExercise, Integer> importExToID = addExercises(projid, defaultUser, typeOrder, toCommon(exercises));
     importExToID.forEach((k, v) -> k.getMutable().setID(v));
     return importExToID;
   }

@@ -118,4 +118,9 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
   public boolean insertPair(int after, int first, int second) {
     return false;
   }
+
+  @Override
+  public Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelatedForDialog(int dialogID) {
+    return daoWrapper.byProjectForOneDialog(dialogID);
+  }
 }

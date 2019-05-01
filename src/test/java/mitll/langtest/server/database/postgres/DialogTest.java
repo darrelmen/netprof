@@ -93,6 +93,7 @@ public class DialogTest extends BaseTest {
       CommonExercise lookup = project.getExerciseByID(exercise.getID());
       logger.info("lookup " + lookup);
     }
+    andPopulate.close();
   }
 
   @Test
@@ -236,6 +237,9 @@ public class DialogTest extends BaseTest {
 
       toAdd.getExercises().forEach(logger::info);
     }
+
+    andPopulate.close();
+
   }
 
   @Test
@@ -355,6 +359,9 @@ public class DialogTest extends BaseTest {
 
       toAdd.getExercises().forEach(logger::info);
     }
+
+    andPopulate.close();
+
   }
 
   /**
@@ -516,6 +523,9 @@ public class DialogTest extends BaseTest {
 
       toAdd.getExercises().forEach(logger::info);
     }
+
+    andPopulate.close();
+
   }
 
   /**
@@ -579,7 +589,7 @@ public class DialogTest extends BaseTest {
 
     // insert a couple on right
     {
-      List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, -1, false, System.currentTimeMillis());
+      List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, toAdd.getLastID(), false, System.currentTimeMillis());
       Assert.assertEquals(clientExercises.size(), 2);
 
       // speaker attrbute (why?) and language
@@ -589,16 +599,16 @@ public class DialogTest extends BaseTest {
       exercises = toAdd.getExercises();
 
       Assert.assertEquals(4, exercises.size());
-      Assert.assertEquals(exercises.get(0).getAttributes().size(), 2);
+      Assert.assertEquals(2, exercises.get(0).getAttributes().size());
 
-      Assert.assertTrue(exercises.get(exercises.size() - 1).hasEnglishAttr());
+      exercises.forEach(logger::info);
+
+      Assert.assertTrue(toAdd.getLast().hasEnglishAttr());
     }
 
-    // insert after first
+    // insert a couple on left
     {
-      int exid = -1;// exercises.get(1).getID();
-      logger.info("first exid is " + exid);
-      List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, exid, true, System.currentTimeMillis());
+      List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, toAdd.getLastID(), true, System.currentTimeMillis());
       Assert.assertEquals(clientExercises.size(), 2);
       Assert.assertEquals(clientExercises.get(0).getAttributes().size(), 2);
 
@@ -615,7 +625,7 @@ public class DialogTest extends BaseTest {
 
       toAdd.getExercises().forEach(logger::info);
 
-      Assert.assertFalse(exercises.get(exercises.size() - 1).hasEnglishAttr());
+      Assert.assertFalse(toAdd.getLast().hasEnglishAttr());
     }
 
     // delete in the middle
@@ -628,16 +638,18 @@ public class DialogTest extends BaseTest {
       Assert.assertTrue(b);
 
       toAdd = getiDialog(andPopulate, PROJECTID, id);
-      exercises = toAdd.getExercises();
-      Assert.assertEquals(exercises.size(), 6);
+      Assert.assertEquals(4, toAdd.getExercises().size());
 
       // deleted shouldn't be there
-      Assert.assertEquals(toAdd.getExercises().indexOf(toDelete), -1);
+      Assert.assertEquals(-1, toAdd.getExercises().indexOf(toDelete));
       // next should be in place of deleted
-      Assert.assertEquals(toAdd.getExercises().indexOf(next), 2);
+      Assert.assertEquals(2, toAdd.getExercises().indexOf(next));
 
       toAdd.getExercises().forEach(logger::info);
     }
+
+    andPopulate.close();
+
   }
 
   @NotNull
@@ -806,7 +818,7 @@ public class DialogTest extends BaseTest {
 
   private void waitTillLoad() {
     try {
-      Thread.sleep(1000);
+      Thread.sleep(3000);
     } catch (InterruptedException e) {
       e.printStackTrace();
     }

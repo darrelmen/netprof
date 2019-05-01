@@ -291,10 +291,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     if (list == null) {
       String suffix = this.getClass() + " for " + " user " + controller.getUserState().getUser();
       if (table == null) {
-        controller.logMessageOnServer("no table for " + suffix, controller.getLanguage(), false);
+        controller.logMessageOnServer("no table for " + suffix, controller.getLanguageInfo().toDisplay(), false);
       } else {
         table.setRowCount(0);
-        controller.logMessageOnServer("no list for " + suffix, controller.getLanguage(), false);
+        controller.logMessageOnServer("no list for " + suffix, controller.getLanguageInfo().toDisplay(), false);
       }
     } else {
       list.clear();
@@ -419,8 +419,8 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   }
 
   /**
-   * @see ClickablePagingContainer#getVisibleIDs()
    * @return
+   * @see ClickablePagingContainer#getVisibleIDs()
    */
   Range getVisibleRange() {
     return table.getVisibleRange();

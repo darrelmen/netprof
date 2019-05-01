@@ -68,20 +68,22 @@ public interface ExerciseController<T extends CommonShell & HasUnitChapter> exte
   int getUser();
 
   /**
-   * @see PostAudioRecordButton#startRecording
    * @param clientAudioContext
    * @param wavStreamCallback
+   * @see PostAudioRecordButton#startRecording
    */
   void startStream(ClientAudioContext clientAudioContext, WavStreamCallback wavStreamCallback);
 
   /**
-   * @see RecordButton.RecordingListener#stopRecording
-   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    * @param useDelay
    * @param abort
+   * @see RecordButton.RecordingListener#stopRecording
+   * @see RecordButton.RecordingListener#stopRecording(long, boolean)
    */
   void stopRecording(boolean useDelay, boolean abort);
+
   void registerStopDetected(WavEndCallback wavEndCallback);
+
   int getRecordTimeout();
 
   SoundManagerAPI getSoundManager();
@@ -96,11 +98,6 @@ public interface ExerciseController<T extends CommonShell & HasUnitChapter> exte
 
   void getImage(int reqid, String path, String type, int toUse, int height, int exerciseID, AsyncCallback<ImageResponse> client);
 
-  /**
-   * @deprecated
-   * @return
-   */
-  String getLanguage();
   Language getLanguageInfo();
 
   boolean isRightAlignContent();
@@ -111,6 +108,7 @@ public interface ExerciseController<T extends CommonShell & HasUnitChapter> exte
 
 
   ProjectStartupInfo getProjectStartupInfo();
+
   int getProjectID();
 
   boolean hasModel();
@@ -144,5 +142,6 @@ public interface ExerciseController<T extends CommonShell & HasUnitChapter> exte
   MessageHelper getMessageHelper();
 
   boolean isHasNetworkProblem();
+
   void setHasNetworkProblem(boolean hasNetworkProblem);
 }

@@ -188,7 +188,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 
   private void doImport(T currentSelection) {
     ImportBulk importBulk = new ImportBulk();
-    DivWidget contents = importBulk.showImportItem(controller.getLanguage());
+    DivWidget contents = importBulk.showImportItem(controller.getLanguageInfo().toDisplay());
 
 //    int numItems = currentSelection.getNumItems();
 //    logger.info("editList : on " + currentSelection.getName() + " now " + numItems);

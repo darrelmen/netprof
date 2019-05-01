@@ -291,7 +291,7 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
     CellTable.Resources o;
     if (isRTL) {   // so when we truncate long entries, the ... appears on the correct end
       // logger.info("simplePaging : chooseResources RTL - content");
-      if (controller.getLanguage().equalsIgnoreCase("urdu")) {
+      if (controller.getLanguageInfo() == Language.URDU) {
         o = GWT.create(AudioExampleContainer.UrduTableResources.class);
       } else {
         o = GWT.create(NPExerciseListContainer.RTLTableResources.class);

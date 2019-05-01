@@ -217,6 +217,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
 
   /**
    * Default is default dialog.
+   *
    * @return
    */
   @Override
@@ -233,6 +234,15 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
   @Override
   public List<ClientExercise> getExercises() {
     return exercises;
+  }
+
+  @Override
+  public int getLastID() {
+    return getExercises().isEmpty() ? -1 : getExercises().get(getExercises().size() - 1).getID();
+  }
+
+  public ClientExercise getLast() {
+    return getExercises().isEmpty() ? null : getExercises().get(getExercises().size() - 1);
   }
 
   public void setImageRef(String imageRef) {

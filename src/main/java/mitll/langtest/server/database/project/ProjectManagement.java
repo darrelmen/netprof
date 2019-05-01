@@ -486,14 +486,8 @@ public class ProjectManagement implements IProjectManagement {
     }
   }
 
-  @Override
-  public void addDialogInfo(int projID) {
+  private void addDialogInfo(int projID) {
     addDialogInfo(getProject(projID, false));
-  }
-
-  @Override
-  public void addDialogInfo(int projID, int dialogID) {
-    addDialogInfo(getProject(projID, false), dialogID);
   }
 
   private void addDialogInfo(Project project) {
@@ -502,6 +496,11 @@ public class ProjectManagement implements IProjectManagement {
     } else {
       logger.warn("addDialogInfo didn't add dialog info for " + project.getID());
     }
+  }
+
+  @Override
+  public void addDialogInfo(int projID, int dialogID) {
+    addDialogInfo(getProject(projID, false), dialogID);
   }
 
   private void addDialogInfo(Project project, int dialogID) {

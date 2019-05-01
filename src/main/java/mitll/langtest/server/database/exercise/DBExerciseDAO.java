@@ -415,10 +415,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
     Collection<String> attributeTypes = getAttributeTypes();
 
-    logger.info("getTypeOrderFromProject " +
-        "\n\ttypeOrder      " + typeOrder +
-        "\n\tattributeTypes " + attributeTypes);
-
+    if (DEBUG) {
+      logger.info("getTypeOrderFromProject " +
+          "\n\ttypeOrder      " + typeOrder +
+          "\n\tattributeTypes " + attributeTypes);
+    }
+    
     if (attributeTypes.contains(SEMESTER.toString())) {
       //  logger.info("found semester ");
       List<String> copy = new ArrayList<>();
@@ -432,7 +434,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     List<String> withAttr = new ArrayList<>(typeOrder);
 
     List<String> sortedTypes = new ArrayList<>(attributeTypes);
-    logger.info("getTypeOrderFromProject sortedTypes " + sortedTypes);
+    if (DEBUG) logger.info("getTypeOrderFromProject sortedTypes " + sortedTypes);
 
     Map<String, Facet> nameToFacet = new HashMap<>();
 
@@ -455,7 +457,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         withAttr.add(type);
       }
     });
-    logger.info("getTypeOrderFromProject withAttr " + withAttr);
+    if (DEBUG) logger.info("getTypeOrderFromProject withAttr " + withAttr);
 
     //withAttr.addAll(attributeTypes);
     getSectionHelper().reorderTypes(withAttr);
@@ -653,8 +655,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       List<ExerciseAttribute> attributesFor = userExerciseDAO.getExerciseAttributeDAO().getAttributesFor(exid);
 
-      logger.info("refresh attributes for " + exid);
-      logger.info("refresh attributes got " + attributesFor);
+//      logger.info("refresh attributes for " + exid);
+//      logger.info("refresh attributes got " + attributesFor);
       byExID.setAttributes(attributesFor);
       logger.info("refresh attributes after " + byExID.getAttributes());
 

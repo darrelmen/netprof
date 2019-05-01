@@ -60,7 +60,7 @@ public interface IDialogDAO extends IDAO {
           String orientation,
           boolean isPrivate);
 
-  boolean delete(int id, int projid);
+  boolean delete(int projid, int id);
 
   int ensureDefault(int defaultUser);
 

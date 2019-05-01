@@ -54,6 +54,8 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.shared.project.Language.ENGLISH;
+
 public class DialogDAO extends DAO implements IDialogDAO {
   private static final Logger logger = LogManager.getLogger(DialogDAO.class);
 
@@ -143,15 +145,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return getiDialogs(projid, getByProjID(projid));
   }
 
-  @Override
-  public List<IDialog> getOneDialog(int id) {
-    Collection<SlickDialog> byID = getByID(id);
-    if (byID.isEmpty()) return null;
-    else {
-      return getiDialogs(byID.iterator().next().projid(), byID);
-    }
-  }
-
   @NotNull
   private List<IDialog> getiDialogs(int projid, Collection<SlickDialog> byProjID) {
     List<IDialog> dialogs = new ArrayList<>();
@@ -176,23 +169,63 @@ public class DialogDAO extends DAO implements IDialogDAO {
     Map<Integer, List<SlickRelatedExercise>> dialogIDToCoreRelated =
         userExerciseDAO.getRelatedCoreExercise().getDialogIDToRelated(projid);
 
-    {
-      IProject project = databaseImpl.getIProject(projid);
-
-      logger.info("getDialogs found " + idToDialog.size() + " dialogs for " + project);
-
-      dialogAttributeJoinHelper.getAllJoinByProject(projid).forEach((dialogID, slickDialogAttributeJoins) -> {
-        Dialog dialog = idToDialog.get(dialogID);
-
-        if (dialog == null) {
-//          logger.info("getDialogs skip deleted dialog #" + dialogID);
-        } else {
-          configureDialog(projid, dialog, idToPair, dialogIDToRelated, dialogIDToCoreRelated, project, dialogID, slickDialogAttributeJoins);
-        }
-      });
-    }
+    configureDialogs(projid, idToDialog, idToPair, dialogIDToRelated, dialogIDToCoreRelated);
 
     return dialogs;
+  }
+
+  @Override
+  public List<IDialog> getOneDialog(int id) {
+    Collection<SlickDialog> byID = getByID(id);
+    return (byID.isEmpty()) ? Collections.emptyList() : getOneDialog(byID.iterator().next().projid(), byID.iterator().next());
+  }
+
+  @NotNull
+  private List<IDialog> getOneDialog(int projid, SlickDialog theDialog) {
+    List<IDialog> dialogs = new ArrayList<>();
+    Map<Integer, Dialog> idToDialog = new HashMap<>();
+
+    Dialog e = makeDialog(theDialog);
+    dialogs.add(e);
+    int id = theDialog.id();
+    idToDialog.put(id, e);
+
+    // add dialog attributes
+    IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
+
+    Map<Integer, ExerciseAttribute> idToPair = userExerciseDAO.getExerciseAttributeDAO().getIDToPair(projid);
+
+    logger.info("getDialogs got " + idToPair.size() + " attributes for project #" + projid);
+
+    Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated =
+        userExerciseDAO.getRelatedExercise().getDialogIDToRelatedForDialog(id);
+
+    Map<Integer, List<SlickRelatedExercise>> dialogIDToCoreRelated =
+        userExerciseDAO.getRelatedCoreExercise().getDialogIDToRelatedForDialog(id);
+
+    configureDialogs(projid, idToDialog, idToPair, dialogIDToRelated, dialogIDToCoreRelated);
+
+    return dialogs;
+  }
+
+  private void configureDialogs(int projid,
+                                Map<Integer, Dialog> idToDialog,
+                                Map<Integer, ExerciseAttribute> idToPair,
+                                Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated,
+                                Map<Integer, List<SlickRelatedExercise>> dialogIDToCoreRelated) {
+    IProject project = databaseImpl.getIProject(projid);
+
+    logger.info("getDialogs found " + idToDialog.size() + " dialogs for " + project);
+
+    dialogAttributeJoinHelper.getAllJoinByProject(projid).forEach((dialogID, slickDialogAttributeJoins) -> {
+      Dialog dialog = idToDialog.get(dialogID);
+
+      if (dialog == null) {
+//          logger.info("getDialogs skip deleted dialog #" + dialogID);
+      } else {
+        configureDialog(projid, dialog, idToPair, dialogIDToRelated, dialogIDToCoreRelated, project, dialogID, slickDialogAttributeJoins);
+      }
+    });
   }
 
   private void configureDialog(int projid,
@@ -417,7 +450,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
           }
 
           if (childEx == null || childid == exid) {
-            logger.info("addExercises : (" + dialogID + ") no childid relation " + childid + " on " + exercise);
+//            logger.info("addExercises : (" + dialogID + ") no childid relation " + childid + " on " + exercise);
             if (!candidate.contains(exercise.getID())) {
               exercises.add(exercise);
             }
@@ -529,7 +562,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     toAdd.getExercises().forEach(ex -> {
       if (ex.getAttributes().stream()
           .anyMatch(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(DialogMetadata.SPEAKER.toString()))) {
-        logger.info("add : found speaker on " + ex.getID());
+        //  logger.info("add : found speaker on " + ex.getID());
       } else {
         logger.warn("\n\n\nadd : no speaker on " + ex.getID() + " : " + ex);
       }
@@ -561,6 +594,13 @@ public class DialogDAO extends DAO implements IDialogDAO {
     List<ClientExercise> clientExercises = addExercisesToDialog(toAdd, projid, typeOrder, afterExid, isLeft);
 
     DialogPopulate dialogPopulate = new DialogPopulate(databaseImpl, project.getPathHelper());
+
+    if (afterExid == -1) {
+      if (!toAdd.getExercises().isEmpty()) {
+        logger.warn("\n\n\naddEmptyExercises : after id is -1 but dialog has " + toAdd.getExercises().size() + " exercises");
+      }
+    }
+
     if (afterExid == -1) {
       dialogPopulate.addExercises2(projid,
           userid,
@@ -710,7 +750,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     List<ClientExercise> newEx = new ArrayList<>();
 
     List<ClientExercise> exercises = toAdd.getExercises();
-    Language languageEnum = databaseImpl.getLanguageEnum(projid);
+    Language projectLang = databaseImpl.getLanguageEnum(projid);
     boolean interpreter = toAdd.getKind() == DialogType.INTERPRETER;
 
     String prefix = interpreter ? isLeft ? "E-" : SPEAKER_PREFIX : SPEAKER_PREFIX;
@@ -725,20 +765,22 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     if (interpreter) {
       {
-        Exercise exercise = baseDialogReader.getExercise("", "", "", speaker, Language.ENGLISH, speakerTurn, defaultUnitAndChapter);
+        Language firstLang = isLeft ? ENGLISH : projectLang;
+        Exercise exercise = baseDialogReader.getExercise("", "", "", speaker, firstLang, speakerTurn, defaultUnitAndChapter);
         exercises.add(exercise);
         newEx.add(exercise);
       }
 
       {
-        Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.INTERPRETERSPEAKER, languageEnum,
+        Language secondLang = isLeft ? projectLang : ENGLISH;
+        Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.INTERPRETERSPEAKER, secondLang,
             interpreterPrefix + index, defaultUnitAndChapter);
         exercises.add(exercise1);
         newEx.add(exercise1);
       }
 
     } else {
-      Exercise exercise1 = baseDialogReader.getExercise("", "", "", speaker, languageEnum, speakerTurn, defaultUnitAndChapter);
+      Exercise exercise1 = baseDialogReader.getExercise("", "", "", speaker, projectLang, speakerTurn, defaultUnitAndChapter);
       exercises.add(exercise1);
       newEx.add(exercise1);
     }
@@ -877,16 +919,16 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * TODOx : pass in project id -
    * TODO : what if two people are updating the set of dialogs at the same time???
    *
-   * @param id
    * @param projid
+   * @param id
    * @return
    */
   @Override
-  public boolean delete(int id, int projid) {
+  public boolean delete(int projid, int id) {
     boolean b = dao.delete(id) > 0;
 
     if (b) {
-      databaseImpl.getProjectManagement().addDialogInfo(projid);
+      databaseImpl.getProjectManagement().addDialogInfo(projid, id);
     }
 
     return b;

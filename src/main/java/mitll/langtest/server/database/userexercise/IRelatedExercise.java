@@ -62,5 +62,12 @@ public interface IRelatedExercise extends IDAO {
 
   int deleteRelatedForDialog(int dialog);
 
+  /**
+   * @see mitll.langtest.server.database.dialog.DialogDAO#getiDialogs(int, Collection)
+   * @param projid
+   * @return
+   */
   Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(int projid);
+
+  Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelatedForDialog(int dialogID);
 }

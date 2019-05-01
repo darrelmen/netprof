@@ -264,7 +264,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   public boolean delete(int projid, int id) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     // int projectIDFromUser = getProjectIDFromUser(getUserIDFromSessionOrDB());
-    boolean delete = db.getDialogDAO().delete(id, projid);
+    boolean delete = db.getDialogDAO().delete(projid, id);
     if (delete) {
       getProject(projid).forgetDialog(id);
     }

@@ -162,7 +162,7 @@ public interface IProjectManagement {
    *
    * @param projID
    */
-  void addDialogInfo(int projID);
+  //void addDialogInfo(int projID);
 
   void addDialogInfo(int projID, int dialogID);
 }

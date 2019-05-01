@@ -78,6 +78,9 @@ import static mitll.langtest.shared.project.ProjectProperty.*;
 public class Project implements IPronunciationLookup, IProject {
   private static final Logger logger = LogManager.getLogger(Project.class);
 
+
+  private static final boolean BUILD_TRIE = false;
+
   private static final String HYDRA_2 = "hydra2";
   private static final String H_2 = "h2";
   private static final String HYDRA = "hydra";
@@ -315,7 +318,9 @@ public class Project implements IPronunciationLookup, IProject {
    */
   public void setAnalysis(SlickAnalysis analysis) {
     this.analysis = analysis;
-    buildExerciseTrie();
+    if (BUILD_TRIE) {
+      buildExerciseTrie();
+    }
     this.refResultDecoder = new RefResultDecoder(db, serverProps, pathHelper, getAudioFileHelper());
   }
 
@@ -835,6 +840,12 @@ public class Project implements IPronunciationLookup, IProject {
    */
   public Collection<IDialog> getDialogs() {
     return idToDialog.values();
+  }
+
+  public IDialog getLast() {
+     List<IDialog> iDialogs = new ArrayList<>(idToDialog.values());
+    iDialogs.sort((o1, o2) -> -1 * Long.compare(o1.getModified(), o2.getModified()));
+    return iDialogs.isEmpty() ? null : iDialogs.get(0);
   }
 
   public IDialog getDialog(int id) {

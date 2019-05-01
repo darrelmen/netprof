@@ -81,6 +81,9 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable,
    */
   List<ClientExercise> getExercises();
 
+  int getLastID();
+  ClientExercise getLast();
+
   List<ClientExercise> getCoreVocabulary();
 
   List<ClientExercise> getBothExercisesAndCore();

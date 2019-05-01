@@ -220,12 +220,16 @@ public class UserListSupport {
         "?" +
 
         "Subject=" +
-        SHARE_NETPROF + controller.getLanguage() + " item " + exercise.getEnglish() +
+        SHARE_NETPROF + getLanguage() + " item " + exercise.getEnglish() +
 
         "&body=" +
         getPrefix() + exercise.getEnglish() + "/" + exercise.getFLToShow() + " : " +
         encode +
         getSuffix();
+  }
+
+  private String getLanguage() {
+    return controller.getLanguageInfo().toDisplay();
   }
 
   private String getMailToList(IUserList ul) {
@@ -290,10 +294,7 @@ public class UserListSupport {
 
   @NotNull
   private String getSubject(String name, String type) {
-    return "Share netprof " + controller.getLanguage() +
-        " " +
-        type +
-        " " + name;
+    return "Share netprof " + getLanguage() + " " + type + " " + name;
   }
 
   private String getBody(String name, String encode, String type) {
@@ -338,7 +339,7 @@ public class UserListSupport {
     // logger.info("getMailToThese : encode " +encode);
     return "mailto:" +
         "?" +
-        "Subject=Share netprof " + controller.getLanguage() +
+        "Subject=Share netprof " + getLanguage() +
         " items " +
         "&body=" +
         getPrefix() +
