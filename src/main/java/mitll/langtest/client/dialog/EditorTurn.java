@@ -204,35 +204,53 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
       {
         Button w = new Button();
         addPressAndHoldStyle(w);
+        w.addClickHandler(event -> gotPlus());
         w.setIcon(IconType.PLUS);
         w.addStyleName("topFiveMargin");
         w.addStyleName("leftFiveMargin");
         w.setType(ButtonType.SUCCESS);
-     //   w.getElement().getStyle().setBackgroundColor("#0171bc");
+        //   w.getElement().getStyle().setBackgroundColor("#0171bc");
         add(w);
       }
 
       {
         Button w = new Button();
         addPressAndHoldStyle(w);
+        w.addClickHandler(event -> gotMinus());
+
         w.setIcon(IconType.MINUS);
         w.addStyleName("topFiveMargin");
         w.addStyleName("leftFiveMargin");
-      //  w.getElement().getStyle().setBackgroundColor("#0171bc");
+        //  w.getElement().getStyle().setBackgroundColor("#0171bc");
         add(w);
       }
 
       {
         Button w = new Button();
         addPressAndHoldStyle(w);
+
+        w.addClickHandler(event -> gotOtherSpeaker());
+
         w.setIcon(IconType.ARROW_RIGHT);
         w.addStyleName("topFiveMargin");
         w.addStyleName("leftFiveMargin");
-      //  w.getElement().getStyle().setBackgroundColor("#0171bc");
+        //  w.getElement().getStyle().setBackgroundColor("#0171bc");
         add(w);
       }
     }
 
+  }
+
+  private void gotPlus() {
+    turnContainer.addTurnForSameSpeaker();
+  }
+
+  private void gotMinus() {
+ //   turnContainer.deleteCurrentTurn();
+  }
+
+  private void gotOtherSpeaker() {
+   // turnContainer.addTurnForOtherSpeaker();
   }
 
   private void addPressAndHoldStyle(UIObject postAudioRecordButton) {

@@ -1306,4 +1306,12 @@ public class ListenViewHelper<T extends ITurnPanel>
       return null;
     }
   }
+
+  /**
+   * TODO : don't put this here
+   */
+  @Override
+  public void addTurnForSameSpeaker() {
+
+  }
 }

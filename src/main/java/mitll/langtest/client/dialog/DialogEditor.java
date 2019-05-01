@@ -48,9 +48,15 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
 
   private int dialogID;
 
-  public DialogEditor(ExerciseController controller, INavigation.VIEWS thisView, int dialogID) {
+  IDialog theDialog;
+
+  /**
+   * @see DialogEditorView#editList
+   **/
+  public DialogEditor(ExerciseController controller, INavigation.VIEWS thisView, IDialog theDialog) {
     super(controller, thisView);
-    this.dialogID = dialogID;
+    this.theDialog = theDialog;
+    this.dialogID = theDialog.getID();
   }
 
   @Override
@@ -93,25 +99,33 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
   public void gotForward() {
     if (onLastTurn()) {
       // make either one or two more turns and add to end of dialog
-      boolean isLeftSpeaker = isInterpreter ? getPrevTurn().getColumns() == COLUMNS.LEFT : getCurrentTurn().getColumns() == COLUMNS.LEFT;
-
-      controller.getDialogService().addEmptyExercises(dialogID, -1, isLeftSpeaker, new AsyncCallback<List<ClientExercise>>() {
-        @Override
-        public void onFailure(Throwable caught) {
-
-        }
-
-        @Override
-        public void onSuccess(List<ClientExercise> result) {
-          addTurns(result);
-          gotForward();
-          getCurrentTurn().grabFocus();
-        }
-      });
+      addTurnForSameSpeaker();
     } else {
       super.gotForward();
       getCurrentTurn().grabFocus();
     }
+  }
+
+  public void addTurnForSameSpeaker() {
+    EditorTurn currentTurn = getCurrentTurn();
+
+    logger.info("addTurnForSameSpeaker : current turn " +currentTurn);
+
+    boolean isLeftSpeaker = isInterpreter ? getPrevTurn().getColumns() == COLUMNS.LEFT : getCurrentTurn().getColumns() == COLUMNS.LEFT;
+
+    controller.getDialogService().addEmptyExercises(dialogID, dialog.getLastID(), isLeftSpeaker, new AsyncCallback<List<ClientExercise>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("adding new turns to dialog.", caught);
+      }
+
+      @Override
+      public void onSuccess(List<ClientExercise> result) {
+        addTurns(result);
+        gotForward();
+        getCurrentTurn().grabFocus();
+      }
+    });
   }
 
   @Override

@@ -181,7 +181,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   protected void editList(T selectedItem) {
     DivWidget listContent = new DivWidget();
 
-    DialogEditor editorTurnDialogEditor = new DialogEditor(controller, INavigation.VIEWS.DIALOG_EDITOR, selectedItem.getID());
+    DialogEditor editorTurnDialogEditor = new DialogEditor(controller, INavigation.VIEWS.DIALOG_EDITOR, selectedItem);
     editorTurnDialogEditor.showContent(listContent, INavigation.VIEWS.DIALOG_EDITOR);
 
     logger.info("list content " + listContent);

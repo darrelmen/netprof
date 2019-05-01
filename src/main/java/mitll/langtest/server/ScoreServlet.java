@@ -1304,7 +1304,12 @@ public class ScoreServlet extends DatabaseServlet {
   }
 
   private int getProjID(HttpServletRequest request) {
-    return request.getIntHeader(HeaderValue.PROJID.toString());
+    if (request.getHeader(HeaderValue.PROJID.toString()) == null) {
+      logger.warn("missing expected project id header");
+      return -1;
+    } else {
+      return request.getIntHeader(HeaderValue.PROJID.toString());
+    }
   }
 
   private String getExerciseHeader(HttpServletRequest request) {
