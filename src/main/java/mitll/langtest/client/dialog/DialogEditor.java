@@ -48,7 +48,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
 
   private int dialogID;
 
-  IDialog theDialog;
+  private IDialog theDialog;
 
   /**
    * @see DialogEditorView#editList
@@ -114,6 +114,23 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
     boolean isLeftSpeaker = isInterpreter ? getPrevTurn().getColumns() == COLUMNS.LEFT : getCurrentTurn().getColumns() == COLUMNS.LEFT;
 
     controller.getDialogService().addEmptyExercises(dialogID, dialog.getLastID(), isLeftSpeaker, new AsyncCallback<List<ClientExercise>>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("adding new turns to dialog.", caught);
+      }
+
+      @Override
+      public void onSuccess(List<ClientExercise> result) {
+        addTurns(result);
+        gotForward();
+        getCurrentTurn().grabFocus();
+      }
+    });
+  }
+
+  @Override
+  public void addTurnForOtherSpeaker() {
+    controller.getDialogService().addEmptyExercises(dialogID, dialog.getLastID(), false, new AsyncCallback<List<ClientExercise>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("adding new turns to dialog.", caught);

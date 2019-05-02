@@ -1314,4 +1314,9 @@ public class ListenViewHelper<T extends ITurnPanel>
   public void addTurnForSameSpeaker() {
 
   }
+
+  @Override
+  public void addTurnForOtherSpeaker() {
+
+  }
 }

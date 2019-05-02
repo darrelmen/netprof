@@ -34,5 +34,6 @@ import mitll.langtest.client.scoring.ITurnPanel;
 public interface ITurnContainer<T extends ITurnPanel> {
   void gotForward();
   void addTurnForSameSpeaker();
+  void addTurnForOtherSpeaker();
   void setCurrentTurnTo(T newTurn);
 }

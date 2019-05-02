@@ -221,6 +221,8 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
         w.setIcon(IconType.MINUS);
         w.addStyleName("topFiveMargin");
         w.addStyleName("leftFiveMargin");
+
+        //turnContainer.
         //  w.getElement().getStyle().setBackgroundColor("#0171bc");
         add(w);
       }
@@ -250,7 +252,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   }
 
   private void gotOtherSpeaker() {
-   // turnContainer.addTurnForOtherSpeaker();
+  turnContainer.addTurnForOtherSpeaker();
   }
 
   private void addPressAndHoldStyle(UIObject postAudioRecordButton) {
