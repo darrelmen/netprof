@@ -196,7 +196,9 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
    */
   @Override
   public void setFields(U newUserExercise) {
-    if (DEBUG) logger.info("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
+    if (DEBUG || true) {
+      logger.info("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
+    }
 
     // foreign lang
     setFL(newUserExercise);
@@ -213,8 +215,19 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
     setContextFLNorm(newUserExercise);
     setContextTrans(newUserExercise);
 
+
+    // make sure we check if recording should be allowed.
     if (rap != null) {
       addAudio(instance == INavigation.VIEWS.FIX_SENTENCES ? newUserExercise.getDirectlyRelated().iterator().next() : newUserExercise);
+      rap.setEnabled();
+    }
+
+    if (rapSlow != null) {
+      rapSlow.setEnabled();
+    }
+
+    if (rapContext != null) {
+      rapContext.setEnabled();
     }
   }
 
@@ -232,7 +245,7 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
     if (!directlyRelated.isEmpty()) {
       ClientExercise clientExercise = directlyRelated.get(0);
       String normalizedFL = clientExercise.getNormalizedFL();
-      logger.info("setContextFLNorm For " + clientExercise.getID() + " " + clientExercise.getFLToShow() + " = '" + clientExercise.getNormalizedFL() + "'");
+  //    logger.info("setContextFLNorm For " + clientExercise.getID() + " " + clientExercise.getFLToShow() + " = '" + clientExercise.getNormalizedFL() + "'");
       foreignLangContextNorm.setText(normalizedFL);
       boolean visible = !normalizedFL.isEmpty() && !normalizedFL.equals(newUserExercise.getFLToShow());
       if (visible)

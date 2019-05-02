@@ -690,7 +690,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             "\n\tfrom " + hydraScore);
       }
     } else {
-      if (transcriptSegments != null) {
+      if (DEBUG && transcriptSegments != null) {
         logger.info("maybeClampScore NOT doing change since " + filtered.size() + " word segments");
       }
     }

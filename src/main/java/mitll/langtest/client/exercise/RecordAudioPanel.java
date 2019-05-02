@@ -331,6 +331,10 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
     }
   }
 
+  public boolean isOKToEnable() {
+    return true;
+  }
+
   protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
 
 

@@ -29,6 +29,7 @@
 
 package mitll.langtest.client.exercise;
 
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.scoring.AudioPanel;
@@ -38,8 +39,10 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 
+import java.util.logging.Logger;
+
 public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
-  //private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
+  private final Logger logger = Logger.getLogger("WaveformPostAudioRecordButton");
 
   private static final String RECORD_BUTTON = "RecordButton";
   /**
@@ -132,6 +135,19 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     controller.logEvent(this, RECORD_BUTTON, getExerciseID(), "stopRecording, duration " + (System.currentTimeMillis() - then) + " millis");
 
     getWaveform().setUrl(WAIT_URL);
+
+
+    controller.getExerciseService().refreshAudio(getExerciseID(), new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+        logger.info("stopRecording : did refresh of " + getExerciseID());
+      }
+    });
     return super.stopRecording(duration, abort);
   }
 
@@ -159,7 +175,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
    */
   @Override
   public void useResult(AudioAnswer result) {
-   // logger.info("useResult -- " + result);
+    // logger.info("useResult -- " + result);
     recordAudioPanel.getImagesForPath(result.getPath());
     if (parentPanel instanceof ExercisePanel) {
       ((ExercisePanel) parentPanel).recordCompleted(recordAudioPanel);

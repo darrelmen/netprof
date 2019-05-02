@@ -316,10 +316,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return this;
   }
 
-//  private void setProjectManagement() {
-//    userDAO.setProjectManagement(getProjectManagement());
-//  }
-
   /**
    * Slick db connection.
    */
@@ -753,6 +749,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   @Override
   public DatabaseImpl setInstallPath(String lessonPlanFileOnlyForImport, ServletContext servletContext, boolean loadAll) {
     this.projectManagement = new ProjectManagement(pathHelper, serverProps, getLogAndNotify(), this, servletContext);
+    audioDAO.setProjectManagement(projectManagement);
     makeDAO(lessonPlanFileOnlyForImport, loadAll);
     return this;
   }
@@ -968,7 +965,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * TODO : make sure this works for AMAS?
+   *
    * <p>
    * Lazy, latchy instantiation of DAOs.
    * Not sure why it really has to be this way.
@@ -1795,12 +1792,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Collection<CommonExercise> exercises = getExercises(projectid, false);
 
     Project project = getProject(projectid);
-    String language = project.getLanguage();
 
     getAudioDAO().attachAudioToExercises(exercises, project.getLanguageEnum(), project.getID());
 
     {
-      logger.info("attachAllAudio " + project.getName() + "/" + language +
+      logger.info("attachAllAudio " + project.getName() + "/" + project.getLanguage() +
           " took " + (System.currentTimeMillis() - then) +
           " millis to attachAllAudio to " + exercises.size() + " exercises");
     }

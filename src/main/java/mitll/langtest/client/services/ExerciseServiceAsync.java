@@ -69,4 +69,8 @@ public interface ExerciseServiceAsync<T extends CommonShell & HasUnitChapter> {
   void refreshExercise(int projid, int exid, AsyncCallback<Void> async);
 
   void reload(int projid, AsyncCallback<Void> async);
+
+  void refreshAudio(int exid, AsyncCallback<Void> async);
+
+  void refreshAllAudio(int projid, AsyncCallback<Void> async);
 }

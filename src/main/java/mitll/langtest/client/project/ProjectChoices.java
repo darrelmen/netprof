@@ -521,6 +521,7 @@ public class ProjectChoices extends ThumbnailChoices {
     } else {
       ProjectInfo remove = projects.remove(0);
       status.setText("Checking " + remove.getName() + "...");
+
       controller.getAudioServiceAsyncForHost(remove.getHost())
           .checkAudio(remove.getID(), new AsyncCallback<Void>() {
             @Override
@@ -532,6 +533,19 @@ public class ProjectChoices extends ThumbnailChoices {
             @Override
             public void onSuccess(Void result) {
               status.setText(remove.getName() + " checked...");
+
+              controller.getExerciseService().refreshAllAudio(remove.getID(), new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                  logger.info("refreshAllAudio complete");
+                }
+              });
+
               checkAudio(projects, status);
             }
           });

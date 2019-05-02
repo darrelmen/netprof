@@ -878,6 +878,18 @@ public class ProjectEditForm extends UserDialog {
           public void onSuccess(Void result) {
             w.setEnabled(true);
             feedback.setText(CHECKING_AUDIO);
+
+            controller.getExerciseService().refreshAllAudio(info.getID(), new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable caught) {
+
+              }
+
+              @Override
+              public void onSuccess(Void result) {
+                logger.info("refreshAllAudio complete");
+              }
+            });
           }
         });
   }
@@ -889,7 +901,7 @@ public class ProjectEditForm extends UserDialog {
   }
 
   private int num = 0;
-  private  int offset = 100;
+  private int offset = 100;
 
   private void showCheckOOV(ProjectInfo info, Button w) {
     num = 0;

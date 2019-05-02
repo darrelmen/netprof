@@ -106,8 +106,6 @@ public abstract class BaseAudioDAO extends DAO {
 
   }
 
-
-
   /**
    * TODO : Seems really expensive - avoid doing this if we can.
    *
@@ -117,7 +115,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @seex mitll.langtest.server.services.ScoringServiceImpl#recalcAlignments(int, Project)
    * @see mitll.langtest.server.services.ScoringServiceImpl#getAllAudioIDs
    */
-  public Map<Integer, List<AudioAttribute>> getExToAudio(int projid, boolean hasProjectSpecificAudio) {
+  Map<Integer, List<AudioAttribute>> getExToAudio(int projid, boolean hasProjectSpecificAudio) {
     long then = System.currentTimeMillis();
     Map<Integer, List<AudioAttribute>> exToAudio = new HashMap<>();
     Map<Integer, Set<String>> idToPaths = new HashMap<>();
@@ -939,6 +937,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @return
    * @see mitll.langtest.server.services.QCServiceImpl#markGender
    */
+/*
   public void addOrUpdateUser(int userid, int projid, AudioAttribute attr) {
     long timestamp = attr.getTimestamp();
     if (timestamp == 0) timestamp = System.currentTimeMillis();
@@ -949,8 +948,11 @@ public abstract class BaseAudioDAO extends DAO {
         (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN, dnr, attr.getResultid(), attr.getRealGender(), hasProjectSpecificAudio)
     );
   }
+*/
 
+/*
   abstract void addOrUpdateUser(AudioInfo info);
+*/
 
   abstract int markDefect(int userid, int exerciseID, AudioType audioType);
 

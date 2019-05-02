@@ -1300,6 +1300,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @return AudioAttribute that represents the audio that has been added to the exercise
    * @paramx realGender
    * @see #writeAudioFile
+   * @see #getAudioAnswer(String, AudioContext, String, String, DecoderOptions, File, int)
+   * @see #getJsonObject(String, String, int, int, int, int, int, boolean, AudioType, JsonObject, AudioChunk)
    */
   private AudioAttribute addToAudioTable(int user,
                                          AudioType audioType,

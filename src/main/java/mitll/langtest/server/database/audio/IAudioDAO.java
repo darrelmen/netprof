@@ -32,6 +32,7 @@ package mitll.langtest.server.database.audio;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
@@ -62,7 +63,9 @@ public interface IAudioDAO extends IDAO {
    * @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#getAllAudioIDs
    */
+/*
   Map<Integer, List<AudioAttribute>> getExToAudio(int projectid, boolean hasProjectSpecificAudio);
+*/
 
   Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid, boolean hasProjectSpecificAudio);
 
@@ -115,15 +118,6 @@ public interface IAudioDAO extends IDAO {
 
   AudioAttribute getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript, AudioCopy audioCopy);
 
-  /**
-   * @deprecated
-   * @see mitll.langtest.server.services.QCServiceImpl#markGender
-   * @param userid
-   * @param projid
-   * @param attr
-   */
-  void addOrUpdateUser(int userid, int projid, AudioAttribute attr);
-
   int markDefect(AudioAttribute attribute);
 
   Set<AudioAttribute> getAndMarkDefects(AudioAttributeExercise userExercise, Map<String, ExerciseAnnotation> fieldToAnnotation);
@@ -165,8 +159,8 @@ public interface IAudioDAO extends IDAO {
   int markDefect(int id);
 
   /**
-   * @see mitll.langtest.server.domino.AudioCopy#addCopiesToDatabase
    * @param copies
+   * @see mitll.langtest.server.domino.AudioCopy#addCopiesToDatabase
    */
   void addBulk(List<SlickAudio> copies);
 
@@ -177,4 +171,8 @@ public interface IAudioDAO extends IDAO {
   void copyOne(AudioCopy audioCopy, int audioID, int exid, boolean isContext);
 
   void deleteForProject(int projID);
+
+  void clearAudioCacheForEx(int exid);
+
+  void setProjectManagement(IProjectManagement projectManagement);
 }

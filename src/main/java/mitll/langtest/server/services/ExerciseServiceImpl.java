@@ -30,6 +30,7 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ExerciseService;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.exercise.Search;
@@ -107,6 +108,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * items at the front.
    *
    * Gets the project id from user->project table - this request might be stale...
+   *
    * @param request
    * @return
    */
@@ -1162,6 +1164,19 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   public void reload(int projid) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     db.getExerciseDAO(projid).reload();
+  }
+
+  @Override
+  public void refreshAudio(int exid) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    db.getAudioDAO().clearAudioCacheForEx(exid);
+  }
+
+  @Override
+  public void refreshAllAudio(int projid) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    IAudioDAO audioDAO = db.getAudioDAO();
+    db.getProject(projid).getRawExercises().forEach(commonExercise -> audioDAO.clearAudioCacheForEx(commonExercise.getID()));
   }
 
   @Nullable
