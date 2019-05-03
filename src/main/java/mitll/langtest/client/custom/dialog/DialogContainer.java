@@ -29,14 +29,19 @@
 
 package mitll.langtest.client.custom.dialog;
 
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextHeader;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.dialog.IDialog;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -46,11 +51,11 @@ import java.util.logging.Logger;
  * @param <T>
  */
 public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContainer<T> {
-  private final Logger logger = Logger.getLogger("DialogContainer");
+  //private final Logger logger = Logger.getLogger("DialogContainer");
 
   DialogContainer(ExerciseController<?> controller) {
     super(controller, "netprof" + ":" + controller.getUser() + ":" + "dialogs", "Dialogs",
-        20, 10);
+        15, 10);
   }
 
   protected String getHeaderColumnTitle() {
@@ -61,6 +66,7 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
   protected void addColumnsToTable() {
     List<T> list = getList();
 
+    addID(list);
     addUnit(list, 10);
     addChapter(list, 10);
     addItemID(list, getMaxLengthId());
@@ -68,9 +74,77 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
     addEnglish(list, 50);
     addOrientation(list, 50);
 
-    addDateCol(list);
+    Column<T, SafeHtml> tSafeHtmlColumn = addDateCol(list);
 
+    addDialogType();
     addIsPublic();
+
+    table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tSafeHtmlColumn, true));
+
+  }
+
+  private void addID(List<T> list) {
+    Column<T, SafeHtml> userCol = getItemIDColumn();
+    table.setColumnWidth(userCol, getIdWidth() + "px");
+    addColumn(userCol, new TextHeader("ID"));
+    table.addColumnSortHandler(getUserSorter(userCol, list));
+  }
+
+  private Column<T, SafeHtml> getItemIDColumn() {
+    Column<T, SafeHtml> column = new Column<T, SafeHtml>(new ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(T shell) {
+        return getNoWrapContent("" + shell.getID());
+      }
+    };
+    column.setSortable(true);
+
+    return column;
+  }
+
+  protected ColumnSortEvent.ListHandler<T> getIDSorter(Column<T, SafeHtml> englishCol,
+                                                       List<T> dataList) {
+    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, this::getIDCompare);
+    return columnSortHandler;
+  }
+
+
+  protected void addDialogType() {
+    Column<T, SafeHtml> diff = getDialogType();
+    diff.setSortable(true);
+    addColumn(diff, new TextHeader("Type"));
+    table.addColumnSortHandler(getDialogTypeSorted(diff, getList()));
+    table.setColumnWidth(diff, 50 + "px");
+  }
+
+  private Column<T, SafeHtml> getDialogType() {
+    return new Column<T, SafeHtml>(new ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(T shell) {
+        // logger.info("shell " + shell);
+        return getSafeHtml(shell.getKind().toString());
+      }
+    };
+  }
+
+  private ColumnSortEvent.ListHandler<T> getDialogTypeSorted(Column<T, SafeHtml> englishCol,
+                                                             List<T> dataList) {
+    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+    columnSortHandler.setComparator(englishCol, (o1, o2) -> o1.getKind().compareTo(o2.getKind()));
+    return columnSortHandler;
   }
 
   /**
@@ -222,7 +296,7 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
   protected String getItemLabel(IDialog shell) {
     //  logger.info("shell is " + shell);
     String foreignLanguage = shell.getForeignLanguage();
-   // logger.info("fl    is '" + foreignLanguage + "'");
+    // logger.info("fl    is '" + foreignLanguage + "'");
 
 /*    if (foreignLanguage.isEmpty()) {
       logger.warning("got " + shell);

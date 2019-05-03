@@ -98,5 +98,8 @@ public interface DialogService extends RemoteService {
    */
   List<IDialogSession> getDialogSessions(int userid, int dialogid) throws DominoSessionException;
 
-  boolean deleteExerciseInDialog(int projid, int id, int exid) throws DominoSessionException;
+//  boolean deleteExerciseInDialog(int projid, int id, int exid) throws DominoSessionException;
+
+  List<Integer> deleteATurnOrPair(int projid, int dialogID, int exid) throws DominoSessionException;
+
 }

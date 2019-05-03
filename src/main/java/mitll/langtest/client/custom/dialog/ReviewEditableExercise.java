@@ -725,9 +725,9 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
       public void onSuccess(U result) {
         duplicate.setEnabled(true);
 
-        exerciseList.addExerciseAfter(newUserExercise, result);
+        exerciseList.addItemAfter(newUserExercise, result);
         exerciseList.redraw();
-        originalList.addExerciseAfter(newUserExercise, result);
+        originalList.addItemAfter(newUserExercise, result);
       }
     });
   }*/

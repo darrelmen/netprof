@@ -48,6 +48,8 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   private final Map<Integer, T> idToExercise = new HashMap<>();
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_MARK_CURRENT = true;
+  private static final boolean DEBUG_ADDING = true;
 
   public ClickablePagingContainer(ExerciseController controller) {
     super(controller);
@@ -96,7 +98,6 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     }
     redraw();
   }
-
 
   /**
    * @param v
@@ -185,29 +186,36 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   /**
-   * @param afterThisOne null means put at the start
-   * @param exercise
+   * @param afterThisOne null means put at the end
+   * @param item
    * @see mitll.langtest.client.custom.userlist.ListView#madeIt
    */
-  public void addExerciseAfter(T afterThisOne, T exercise) {
-    if (DEBUG) logger.info("addExerciseAfter adding " + exercise);
+  public void addItemAfter(T afterThisOne, T item) {
+    if (DEBUG_ADDING) {
+      logger.info("addItemAfter adding " + item + " current selection : " +getCurrentSelection());
+    }
     List<T> list = getList();
     int before = list.size();
 
-    idToExercise.put(exercise.getID(), exercise);
+    idToExercise.put(item.getID(), item);
     int toUse = Math.max(0, before - 1);
 
     int i = afterThisOne == null ? toUse : list.indexOf(afterThisOne);
-    list.add(i + 1, exercise);
+    list.add(i + 1, item);
     int after = list.size();
 
-    if (DEBUG) {
-      logger.info("addExerciseAfter" +
-          "\n\tbefore  " + before +
-          "\n\tnow has " + after + " after adding " + exercise.getID());
+    if (DEBUG_ADDING) {
+      logger.info("addItemAfter" +
+          "\n\tbefore       " + before +
+          "\n\tnow has      " + after +
+          "\n\tafter adding " + item.getID() +
+          "\n\tcurrent      " + getCurrentSelection()
+      );
     }
 
-    if (before + 1 != after) logger.warning("addExerciseAfter didn't add " + exercise.getID());
+    markCurrent(item);
+
+    if (before + 1 != after) logger.warning("addItemAfter didn't add " + item.getID());
   }
 
   private void markCurrent(T currentExercise) {
@@ -229,7 +237,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
       getList().forEach(item -> idToExercise.put(item.getID(), item));
     }
     T found = idToExercise.get(itemID);
-    if (DEBUG) {
+    if (DEBUG || DEBUG_MARK_CURRENT) {
       logger.info("markCurrentExercise for " + itemID + " in " + idToExercise.size() + " found " + found);
     }
     if (found == null) {
@@ -243,10 +251,14 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   private void markCurrent(int i, T itemToSelect) {
 //    if (DEBUG) logger.info(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID() + " at " +i);
     getSelectionModel().setSelected(itemToSelect, true);
-    if (DEBUG) {
+    if (DEBUG || DEBUG_MARK_CURRENT) {
       int pageEnd = table.getPageStart() + table.getPageSize();
-      logger.info("markCurrent marking " + i + " out of " + table.getRowCount() + " page start " + table.getPageStart() +
-          " end " + pageEnd + " item " + itemToSelect);
+      logger.info("markCurrent " +
+          "\n\tmarking    " + i +
+          "\n\tout of     " + table.getRowCount() +
+          "\n\tpage start " + table.getPageStart() +
+          "\n\tend        " + pageEnd +
+          "\n\titem       " + itemToSelect);
     }
 
     scrollToVisible(i);

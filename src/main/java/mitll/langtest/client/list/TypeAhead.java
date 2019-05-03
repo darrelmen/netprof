@@ -107,7 +107,7 @@ public abstract class TypeAhead implements ITypeAhead {
       String current = getTypeAheadBox().getText().trim();
 
       if (previous.equals(current) && !previous.isEmpty()) {
-        logger.info("makeTypeAhead prev = current '" + previous + "'");
+      //  logger.info("makeTypeAhead prev = current '" + previous + "'");
       } else {
         gotTypeAheadEntry(current);
         previous = current;

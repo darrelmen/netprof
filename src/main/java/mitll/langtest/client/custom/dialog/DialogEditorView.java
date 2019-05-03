@@ -59,19 +59,15 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   private final Logger logger = Logger.getLogger("DialogEditorView");
 
   private static final String LIST = "dialog";
-
   private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to view a " + LIST;
 
   /**
    *
    */
   private static final String YOUR_LISTS1 = "Your Dialogs";
-
-
   public static final String DIALOG = "Dialog";
 
-
-  private static final int MY_LIST_HEIGHT = 500;//530;//560;
+  private static final int MY_LIST_HEIGHT = 450;//500;//530;//560;
 
   /**
    * @param controller
@@ -88,40 +84,15 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
   public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
     super.showContent(listContent, instanceName);
-
-//    DivWidget right = new DivWidget();
-//    right.getElement().setId("right");
-
-//    leftRight.add(right);
-//
-//    right.setWidth("100%");
-//    DivWidget top = new DivWidget();
-//    top.getElement().setId("top");
-//    right.add(top);
-//
-//    styleTopAndBottom(top);
-//
-//    top.addStyleName("bottomFiveMargin");
-//
-//    DivWidget bottom = new DivWidget();
-//    right.add(bottom);
-//    bottom.getElement().setId("bottom");
-//
-//    styleTopAndBottom(bottom);
-
     addYours(left);
   }
-
-//  private void styleTopAndBottom(DivWidget bottom) {
-//    bottom.addStyleName("leftTenMargin");
-//    bottom.addStyleName("rightFiveMargin");
-//    bottom.addStyleName("cardBorderShadow");
-//  }
 
   private void addYours(DivWidget left) {
     showYours(Collections.emptyList(), left);
 
-    ExerciseListRequest request = new ExerciseListRequest(0, controller.getUser(), controller.getProjectID());
+    ExerciseListRequest request =
+        new ExerciseListRequest(0, controller.getUser(), controller.getProjectID()).setSortByDate(true);
+
     controller.getDialogService().getDialogs(request,
         new AsyncCallback<ExerciseListWrapper<T>>() {
           @Override
@@ -275,9 +246,11 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
    */
   @Override
   public void gotEdit() {
-    //  editDialog.doEdit(myLists.getCurrentSelection(), myLists);
   }
 
+  /**
+   * @see #showYours(Collection, DivWidget)
+   */
   private class MyDialogContainer extends DialogContainer<T> {
     MyDialogContainer() {
       super(DialogEditorView.this.controller);
@@ -320,44 +293,4 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   protected String getName() {
     return "Dialog";
   }
-
-/*  private class MyShownCloseListener implements DialogHelper.ShownCloseListener {
-    EditItem editItem;
-
-    MyShownCloseListener(EditItem editItem) {
-      this.editItem = editItem;
-    }
-
-    @Override
-    public boolean gotYes() {
-//            int numItems = currentSelectionFromMyLists.getNumItems();
-      //   logger.info("editList : on " + currentSelectionFromMyLists.getName() + " now " + numItems);
-      myLists.flush();
-      myLists.redraw();
-
-      return true;
-    }
-
-    *//**
-   * CRITICAL TO REMOVE LISTENER!
-   *//*
-    @Override
-    public void gotHidden() {
-      // logger.info("Got hidden ");
-      editItem.removeHistoryListener();
-      History.newItem("");
-    }
-
-    @Override
-    public void gotNo() {
-    }
-
-    @Override
-    public void gotShown() {
-      // logger.info("editList : edit view shown!");
-
-      editItem.reload();
-      editItem.grabFocus();
-    }
-  }*/
 }

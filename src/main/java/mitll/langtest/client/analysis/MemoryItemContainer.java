@@ -247,13 +247,13 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     T userToSelect = null;
     getList().clear();
 
-    Long selectedUser = getSelectedUser(selectedUserKey);
+    int selectedUser = getSelectedUser(selectedUserKey);
 
     // logger.info("populateTable for " +selectedUserKey+ " selected item is " + selectedUser);
     for (T user : users) {
       addItem(user);
 
-      if (selectedUser != null && user.getID() == selectedUser) {
+      if (selectedUser != -1 && user.getID() == selectedUser) {
         index = i;
         userToSelect = user;
         //   logger.info("populateTable Selected user found  " + selectedUser + " at " + index + " out of " + users.size());
@@ -363,40 +363,48 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   /**
    * @param selectedUserKey
    * @return
-   * @see #MemoryItemContainer
+   * @see #populateTable
+   * @see #storeSelectedUser
    */
-  private Long getSelectedUser(String selectedUserKey) {
-    if (selectedUserKey == null) return null;
+  private int getSelectedUser(String selectedUserKey) {
+    if (selectedUserKey == null) return -1;
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       String item = localStorageIfSupported.getItem(selectedUserKey);
       if (item != null) {
         logger.info("getSelectedUser " + selectedUserKey + " = " + item);
         try {
-          return Long.parseLong(item);
+          return Integer.parseInt(item);
         } catch (NumberFormatException e) {
           logger.warning("got " + e);
-          return null;
+          return -1;
         }
       }
     }
-    return null;
+    return -1;
+  }
+
+  @Override
+  public boolean markCurrentExercise(int itemID) {
+    boolean b = super.markCurrentExercise(itemID);
+    if (b) storeSelectedUser(itemID);
+    return b;
   }
 
   /**
    * @param selectedUser
    * @see #gotClickOnItem
    */
-  private void storeSelectedUser(long selectedUser) {
-
+  private void storeSelectedUser(int selectedUser) {
     logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
 
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       localStorageIfSupported.setItem(selectedUserKey, "" + selectedUser);
     }
+
     if (selectedUser != getSelectedUser(selectedUserKey)) {
-      logger.warning("huh? stored " + selectedUserKey + " but got " + getSelectedUser(selectedUserKey));
+      logger.warning("storeSelectedUser : huh? stored " + selectedUserKey + " but got " + getSelectedUser(selectedUserKey));
     }
   }
 

@@ -260,9 +260,9 @@ public class ListenViewHelper<T extends ITurnPanel>
     {
       String firstSpeaker = getFirstSpeakerLabel(dialog);
 
-      if (isInterpreter) {
-        rowOne.add(getLeftSpeaker(firstSpeaker));
-      }
+      //  if (isInterpreter) {
+      rowOne.add(getLeftSpeaker(firstSpeaker));
+      // }
 //      else {
 //        leftSpeakerBox = addLeftSpeaker(rowOne, firstSpeaker);
 //      }
@@ -273,9 +273,11 @@ public class ListenViewHelper<T extends ITurnPanel>
     //}
 
     {
-      if (isInterpreter) {
-        rowOne.add(getMiddleSpeaker());
-      }
+//      if (isInterpreter) {
+      DivWidget middleSpeaker = getMiddleSpeaker();
+      if (!isInterpreter) middleSpeaker.setHeight("5px");
+      rowOne.add(middleSpeaker);
+      //    }
 //      else {
 //        rightSpeakerBox = addRightSpeaker(rowOne, getInterpreterSpeakerLabel(dialog));
 //      }
@@ -284,12 +286,12 @@ public class ListenViewHelper<T extends ITurnPanel>
     return rowOne;
   }
 
-  @NotNull
-  private String getInterpreterSpeakerLabel(IDialog dialog) {
-    String interpreterSpeaker = dialog.getSpeakers().size() > 1 ? dialog.getSpeakers().get(1) : null;
-    if (interpreterSpeaker == null) interpreterSpeaker = INTERPRETER;
-    return interpreterSpeaker;
-  }
+//  @NotNull
+//  private String getInterpreterSpeakerLabel(IDialog dialog) {
+//    String interpreterSpeaker = dialog.getSpeakers().size() > 1 ? dialog.getSpeakers().get(1) : null;
+//    if (interpreterSpeaker == null) interpreterSpeaker = INTERPRETER;
+//    return interpreterSpeaker;
+//  }
 
   /**
    * TODO : allow english speaker to go second
@@ -526,7 +528,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 //    return rightSpeakerBox == null || rightSpeakerBox.getValue();
 //  }
 
-  DivWidget turnContainer;
+  private DivWidget turnContainer;
 
   /**
    * @param dialog
@@ -576,11 +578,15 @@ public class ListenViewHelper<T extends ITurnPanel>
     addTurnForEachExercise(rowOne, left, right, dialog.getExercises());
   }
 
-  protected void addTurns(List<ClientExercise> exercises) {
+  /**
+   * @param exercises
+   * @see DialogEditor#getAsyncForNewTurns()
+   */
+  void addTurns(List<ClientExercise> exercises) {
     addTurnForEachExercise(turnContainer, getFirstSpeakerLabel(dialog), getSecondSpeakerLabel(dialog), exercises);
   }
 
-  protected void addTurnForEachExercise(DivWidget rowOne, String left, String right, List<ClientExercise> exercises) {
+  private void addTurnForEachExercise(DivWidget rowOne, String left, String right, List<ClientExercise> exercises) {
     exercises.forEach(clientExercise -> {
       // COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
       //    logger.info("ex " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage() + " : " + columnForEx);
@@ -625,7 +631,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @param rowOne
    * @param columns
    * @param clientExercise
-   * @see
+   * @see #addTurnForEachExercise(DivWidget, String, String, List)
    */
   private void addTurn(DivWidget rowOne, COLUMNS columns, ClientExercise clientExercise) {
     T turn = getTurnPanel(clientExercise, columns);
@@ -643,6 +649,35 @@ public class ListenViewHelper<T extends ITurnPanel>
     allTurns.add(turn);
 
     rowOne.add(turn);
+  }
+
+  protected void deleteTurn(int exid) {
+    List<T> collect = allTurns.stream().filter(t -> t.getExID() == exid).limit(1).collect(Collectors.toList());
+    if (collect.isEmpty()) {
+      logger.warning("huh? can't find " + exid);
+    } else {
+      T toRemove = collect.get(0);
+
+      T currentTurn = getCurrentTurn();
+
+      if (toRemove == currentTurn) {
+        logger.info("deleteTurn removing current turn " + currentTurn);
+
+        T prev = getPrev();
+        setCurrentTurn(prev);
+
+        logger.info("deleteTurn now current turn " + currentTurn);
+      }
+
+      allTurns.remove(toRemove);
+      leftTurnPanels.remove(toRemove);
+      rightTurnPanels.remove(toRemove);
+      promptTurns.remove(toRemove);
+      middleTurnPanels.remove(toRemove);
+
+      boolean remove = turnContainer.remove(toRemove);
+      if (!remove) logger.warning("deleteTurn : didn't remove turn " + toRemove);
+    }
   }
 
   private void markFirstTurn() {
@@ -922,17 +957,6 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
   }
 
-  /**
-   * @return null if there is no previous turn
-   * @see
-   */
-  protected T getPrevTurn() {
-    List<T> seq = getAllTurns();
-
-    int i = seq.indexOf(currentTurn);
-    int i1 = i - 1;
-    return i1 < 0 ? null : seq.get(i1);
-  }
 
   @Override
   public void gotForward() {
@@ -1304,16 +1328,29 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
   }
 
-  private T getPrev() {
+//  private T getPrev() {
+//    List<T> seq = getAllTurns();
+//    int i = seq.indexOf(currentTurn);
+//    int i1 = i - 1;
+//
+//    if (i1 > -1) {
+//      return seq.get(i1);
+//    } else {
+//      return null;
+//    }
+//  }
+//
+
+  /**
+   * @return null if there is no previous turn
+   * @see
+   */
+  protected T getPrev() {
     List<T> seq = getAllTurns();
+
     int i = seq.indexOf(currentTurn);
     int i1 = i - 1;
-
-    if (i1 > -1) {
-      return seq.get(i1);
-    } else {
-      return null;
-    }
+    return i1 < 0 ? null : seq.get(i1);
   }
 
   /**
@@ -1326,6 +1363,11 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   @Override
   public void addTurnForOtherSpeaker() {
+
+  }
+
+  @Override
+  public void deleteCurrentTurnOrPair() {
 
   }
 }

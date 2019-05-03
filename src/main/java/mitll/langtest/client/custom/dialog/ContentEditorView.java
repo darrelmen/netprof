@@ -150,7 +150,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     buttons.add(getAddItems());
     addImportButton(buttons);
     buttons.add(share = getShare());
-    // addDrillAndLearn(buttons, container);
 
     return buttons;
   }
@@ -250,6 +249,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     }
 
     int index = listContainer.getIndex(currentSelection);
+    int origIndex = index;
     //logger.info("deleteList ---> did do deleteList " + uniqueID + " index " + index);
     listContainer.forgetItem(currentSelection);
     int numItems = listContainer.getNumItems();
@@ -257,12 +257,23 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
       //delete.setEnabled(false);
       listContainer.disableAll();
     } else {
-      if (index == numItems) index = numItems - 1;
+      if (index == numItems) {
+        index = numItems - 1;
+      }
       HasID at = listContainer.getAt(index);
-      //logger.info("next is " + at.getName());
+
       int id = at.getID();
+
+      logger.info("removeFromLists " +
+          "\n\torig index    " + origIndex +
+          "\n\tcurrent index " + index +
+          "\n\tnext is       " + at.getID());
+
 //      listContainer.markCurrentExercise(id);
-      Scheduler.get().scheduleDeferred(() -> listContainer.markCurrentExercise(id));
+    //  Scheduler.get().scheduleDeferred(() -> {
+        listContainer.markCurrentExercise(id);
+        listContainer.redraw();
+      //});
 
     }
   }
@@ -327,28 +338,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     return dialogHelper;
   }
 
-  /**
-   * @param container
-   * @return
-   */
-  /*@NotNull
-  private DivWidget getButtons(ButtonMemoryItemContainer<T> container) {
-    DivWidget buttons = new DivWidget();
-    buttons.addStyleName("inlineFlex");
-    buttons.addStyleName("topFiveMargin");
-    buttons.getElement().getStyle().setProperty("minWidth", MIN_WIDTH + "px");
-    buttons.add(getAddButton());
-
-    buttons.add(removeButton = getRemoveButton());
-
-    buttons.add(editButton = getEdit());
-    buttons.add(getAddItems());
-    // buttons.add(getImport());
-    buttons.add(share = getShare());
-    // addDrillAndLearn(buttons, container);
-
-    return buttons;
-  }*/
   private Button getEdit() {
     Button successButton = getSuccessButton(EDIT_TITLE);
     successButton.setIcon(IconType.PENCIL);
@@ -384,8 +373,8 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   }
 
   /**
-   * @see DialogEditorView#editList(IDialog)
    * @param selectedItem
+   * @see DialogEditorView#editList(IDialog)
    */
   protected abstract void editList(T selectedItem);
 
@@ -525,7 +514,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     // logger.info("madeIt made it " + userList.getName());
     try {
       dialogHelper.hide();
-      myLists.addExerciseAfter(null, userList);
+      myLists.addItemAfter(null, userList);
       myLists.enableAll();
       names.add(userList.getName());
       editButton.setEnabled(true);
@@ -539,6 +528,10 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     return myLists;
   }
 
+  /**
+   * @see DialogEditorView#showYours(Collection, DivWidget)
+   * @param myLists
+   */
   public void setMyLists(ButtonMemoryItemContainer<T> myLists) {
     this.myLists = myLists;
   }

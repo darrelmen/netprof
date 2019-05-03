@@ -115,8 +115,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
         "\n\tnext    turn " + nextTurn
     );
 
-
-    EditorTurn prevTurn = getPrevTurn();
+    EditorTurn prevTurn = getPrev();
     // if prev turn is null we're on the first turn
     boolean isLeftSpeaker = isInterpreter ?
         (prevTurn == null || prevTurn.getColumns() == COLUMNS.LEFT) :
@@ -133,8 +132,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
       if (currentTurn.getColumns() == COLUMNS.LEFT) {
         if (nextTurn == null) {
           logger.warning("no next turn?");
-        }
-        else {
+        } else {
           lastID = nextTurn.getExID();
         }
       }
@@ -151,8 +149,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
         "\n\tcurrent turn " + currentTurn +
         "\n\tnext    turn " + nextTurn
     );
-
-
 
     int lastID = getLastID(currentTurn, nextTurn);
 
@@ -171,21 +167,23 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
     int lastID = getLastID(currentTurn, nextTurn);
 
     // todo :return both turns
-    controller.getDialogService().deleteExerciseInDialog(
+    controller.getDialogService().deleteATurnOrPair(
         dialog.getProjid(),
         dialogID,
-        lastID, new AsyncCallback<Boolean>() {
+        lastID,
+        new AsyncCallback<List<Integer>>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("deleting turns in a dialog.", caught);
           }
 
-
           @Override
-          public void onSuccess(Boolean result) {
-           // addTurns(result);
+          public void onSuccess(List<Integer> ids) {
+
+            // addTurns(result);
             //gotForward();
 
+            ids.forEach(exid -> deleteTurn(exid));
             // TODO : remove one or two turns and change current turn to previous turn before deleted
             getCurrentTurn().grabFocus();
           }

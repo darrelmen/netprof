@@ -71,6 +71,7 @@ public class ExerciseListRequest implements IsSerializable, IRequest {
   private int projID = -1;
   private int dialogID = -1;
   private ProjectMode mode = ProjectMode.VOCABULARY;
+  private boolean sortByDate;
 
   public ExerciseListRequest() {
   }
@@ -368,6 +369,15 @@ public class ExerciseListRequest implements IsSerializable, IRequest {
     return projID;
   }
 
+  public boolean isSortByDate() {
+    return sortByDate;
+  }
+
+  public ExerciseListRequest setSortByDate(boolean sortByDate) {
+    this.sortByDate = sortByDate;
+    return this;
+  }
+
   /**
    * @return
    */
@@ -387,7 +397,8 @@ public class ExerciseListRequest implements IsSerializable, IRequest {
             (onlyWithAnno ? "\n\tonly with anno " : "") +
             (onlyForUser ? "\n\tonlyForUser     " : "") +
             (exactMatch ? "\n\texactMatch     " : "") +
-            //   (incorrectFirstOrder ? "\n\tincorrectFirstOrder     " : "") +
+            (sortByDate ? "\n\tsortByDate     " : "") +
+
             (onlyUninspected ? "\n\tonly uninspected    " : "") +
             (addContext ? "\n\tadd context    " : "") +
             "\n\tmode    " + mode +

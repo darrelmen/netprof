@@ -199,7 +199,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
             if (viewMode == ProjectMode.DIALOG && storedMode == ProjectMode.VOCABULARY) {
               // currentStoredView = LEARN;
-              logger.warning("force learn view?");
+              logger.warning("consider force learn view?");
             } else if (viewMode == VOCABULARY && storedMode == ProjectMode.DIALOG) {
               //currentStoredView = DIALOG;
               logger.warning("force dialog view?");

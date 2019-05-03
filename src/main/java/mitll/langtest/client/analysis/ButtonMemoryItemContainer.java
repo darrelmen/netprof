@@ -62,8 +62,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class ButtonMemoryItemContainer<T extends HasID & IPublicPrivate> extends MemoryItemContainer<T> {
-  private final Logger logger = Logger.getLogger("ButtonMemoryItemContainer");
-
+ // private final Logger logger = Logger.getLogger("ButtonMemoryItemContainer");
   /**
    * @see #addIsPublic
    */
