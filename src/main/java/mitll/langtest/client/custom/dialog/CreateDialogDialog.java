@@ -211,7 +211,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
 
     String imageRef = "";
 
-    boolean value = !publicChoice.getValue();
+    boolean isPrivate = !publicChoice.getValue();
 
     IDialog newDialog = new Dialog(-1,
         controller.getUser(),
@@ -231,7 +231,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
         new ArrayList<>(),
         DialogType.valueOf(this.dialogType.getSelectedValue()),
         "",
-        value
+        isPrivate
     );
 
     logger.info("doCreate new " +newDialog.getID() + " " + newDialog.isPrivate());

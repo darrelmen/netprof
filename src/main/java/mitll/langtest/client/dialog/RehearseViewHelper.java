@@ -653,20 +653,20 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    * @param value
    * @see #addLeftSpeaker
    */
-  protected void speakerOneCheck(Boolean value) {
-    setRightSpeaker(!value);
-    gotSpeakerChoice();
-  }
+//  protected void speakerOneCheck(Boolean value) {
+//    //setRightSpeaker(!value);
+//    gotSpeakerChoice();
+//  }
 
   /**
    * On user click of speaker.
    *
    * @param value
    */
-  protected void speakerTwoCheck(Boolean value) {
-    setLeftSpeaker(!value);
-    gotSpeakerChoice();
-  }
+//  protected void speakerTwoCheck(Boolean value) {
+//   // setLeftSpeaker(!value);
+//    gotSpeakerChoice();
+//  }
 
   /**
    * Move current turn to first turn when we switch who is the prompting speaker.

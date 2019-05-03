@@ -49,11 +49,11 @@ public interface DialogServiceAsync {
   void getDialogSessions(int userid, int dialogid, AsyncCallback<List<IDialogSession>> async);
 
   void delete(int projid, int id, AsyncCallback<Boolean> async);
+  void deleteExerciseInDialog(int projid, int id, int exid,AsyncCallback<Boolean> async);
 
   void addDialog(IDialog dialog, AsyncCallback<IDialog> async);
 
   void update(IDialog dialog,AsyncCallback<Void> async);
 
   void addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker, AsyncCallback<List<ClientExercise>> async);
-  // void getLatestDialogSessionID(int dialogid, AsyncCallback<Integer> async);
 }

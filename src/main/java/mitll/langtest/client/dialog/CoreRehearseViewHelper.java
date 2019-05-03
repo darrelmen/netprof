@@ -45,7 +45,6 @@ import java.util.Map;
 
 public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscurable> extends RehearseViewHelper<T> {
   //private final Logger logger = Logger.getLogger("CoreRehearseViewHelper");
-
   private Map<String, ClientExercise> exidToShell = new HashMap<>();
 
   /**
@@ -56,7 +55,6 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscu
   public CoreRehearseViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     super(controller, thisView);
     rehearsalKey = "CoreRehearseViewKey";
-//    rehearsalPrompt = RED_RECORD_BUTTON;
   }
 
   /**

@@ -109,28 +109,93 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
   public void addTurnForSameSpeaker() {
     EditorTurn currentTurn = getCurrentTurn();
 
-    logger.info("addTurnForSameSpeaker : current turn " +currentTurn);
+    EditorTurn nextTurn = getNextTurn();
+    logger.info("addTurnForSameSpeaker : " +
+        "\n\tcurrent turn " + currentTurn +
+        "\n\tnext    turn " + nextTurn
+    );
 
-    boolean isLeftSpeaker = isInterpreter ? getPrevTurn().getColumns() == COLUMNS.LEFT : getCurrentTurn().getColumns() == COLUMNS.LEFT;
 
-    controller.getDialogService().addEmptyExercises(dialogID, dialog.getLastID(), isLeftSpeaker, new AsyncCallback<List<ClientExercise>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("adding new turns to dialog.", caught);
+    EditorTurn prevTurn = getPrevTurn();
+    // if prev turn is null we're on the first turn
+    boolean isLeftSpeaker = isInterpreter ?
+        (prevTurn == null || prevTurn.getColumns() == COLUMNS.LEFT) :
+        getCurrentTurn().getColumns() == COLUMNS.LEFT;
+
+    int lastID = getLastID(currentTurn, nextTurn);
+    controller.getDialogService().addEmptyExercises(dialogID, lastID, isLeftSpeaker, getAsyncForNewTurns());
+  }
+
+  private int getLastID(EditorTurn currentTurn, EditorTurn nextTurn) {
+    int lastID = currentTurn.getExID();
+    if (isInterpreter) {
+      // can't append after a left turn - only after a middle interpreter
+      if (currentTurn.getColumns() == COLUMNS.LEFT) {
+        if (nextTurn == null) {
+          logger.warning("no next turn?");
+        }
+        else {
+          lastID = nextTurn.getExID();
+        }
       }
-
-      @Override
-      public void onSuccess(List<ClientExercise> result) {
-        addTurns(result);
-        gotForward();
-        getCurrentTurn().grabFocus();
-      }
-    });
+    }
+    return lastID;
   }
 
   @Override
   public void addTurnForOtherSpeaker() {
-    controller.getDialogService().addEmptyExercises(dialogID, dialog.getLastID(), false, new AsyncCallback<List<ClientExercise>>() {
+    EditorTurn currentTurn = getCurrentTurn();
+
+    EditorTurn nextTurn = getNextTurn();
+    logger.info("addTurnForOtherSpeaker : " +
+        "\n\tcurrent turn " + currentTurn +
+        "\n\tnext    turn " + nextTurn
+    );
+
+
+
+    int lastID = getLastID(currentTurn, nextTurn);
+
+    controller.getDialogService().addEmptyExercises(dialogID, lastID, false, getAsyncForNewTurns());
+  }
+
+  @Override
+  public void deleteCurrentTurnOrPair() {
+    EditorTurn currentTurn = getCurrentTurn();
+
+    EditorTurn nextTurn = getNextTurn();
+    logger.info("deleteCurrentTurnOrPair : " +
+        "\n\tcurrent turn " + currentTurn +
+        "\n\tnext    turn " + nextTurn
+    );
+    int lastID = getLastID(currentTurn, nextTurn);
+
+    // todo :return both turns
+    controller.getDialogService().deleteExerciseInDialog(
+        dialog.getProjid(),
+        dialogID,
+        lastID, new AsyncCallback<Boolean>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("deleting turns in a dialog.", caught);
+          }
+
+
+          @Override
+          public void onSuccess(Boolean result) {
+           // addTurns(result);
+            //gotForward();
+
+            // TODO : remove one or two turns and change current turn to previous turn before deleted
+            getCurrentTurn().grabFocus();
+          }
+        });
+
+  }
+
+  @NotNull
+  private AsyncCallback<List<ClientExercise>> getAsyncForNewTurns() {
+    return new AsyncCallback<List<ClientExercise>>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("adding new turns to dialog.", caught);
@@ -142,7 +207,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
         gotForward();
         getCurrentTurn().grabFocus();
       }
-    });
+    };
   }
 
   @Override

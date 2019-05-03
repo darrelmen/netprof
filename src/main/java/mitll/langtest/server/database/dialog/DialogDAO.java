@@ -571,10 +571,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return toAdd;
   }
 
-  @Override
-  public List<ClientExercise> addEmptyExercises(IDialog toAdd, int userid, int afterExid, boolean isLeft) {
-    return addEmptyExercises(toAdd, userid, afterExid, isLeft, System.currentTimeMillis());
-  }
+//  @Override
+//  public List<ClientExercise> addEmptyExercises(IDialog toAdd, int userid, int afterExid, boolean isLeft) {
+//    return addEmptyExercises(toAdd, userid, afterExid, isLeft, System.currentTimeMillis());
+//  }
 
   /**
    * @param toAdd
@@ -726,15 +726,16 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @param typeOrder
    * @see #addEmptyExercises
    */
-  private List<ClientExercise> addExercisesToDialog(IDialog toAdd, int projid, List<String> typeOrder, int exidAfter,
+  private List<ClientExercise> addExercisesToDialog(IDialog toAdd,
+                                                    int projid,
+                                                    List<String> typeOrder,
+                                                    int exidAfter,
                                                     boolean isLeft) {
     List<ClientExercise> collect = toAdd.getExercises().stream().filter(exercise -> exercise.getID() == exidAfter).collect(Collectors.toList());
 
     if (collect.isEmpty() && exidAfter != -1) {
       logger.error("addExercisesToDialog : can't find " + exidAfter);
       return Collections.emptyList();
-    } else {
-//      ClientExercise clientExercise = collect.get(0);
     }
 
     BaseDialogReader baseDialogReader = new BaseDialogReader(null, null);

@@ -248,7 +248,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   }
 
   private void gotMinus() {
- //   turnContainer.deleteCurrentTurn();
+    turnContainer.deleteCurrentTurnOrPair();
   }
 
   private void gotOtherSpeaker() {

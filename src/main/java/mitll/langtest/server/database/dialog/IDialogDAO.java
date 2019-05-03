@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.database.dialog;
 
+import mitll.langtest.client.custom.dialog.CreateDialogDialog;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.dialog.DialogStatus;
@@ -39,11 +40,18 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import java.util.List;
 
 public interface IDialogDAO extends IDAO {
-
+  /**
+   * @see CreateDialogDialog#doCreate
+   * @see mitll.langtest.server.services.DialogServiceImpl#addDialog
+   * @param toAdd
+   * @return
+   */
   IDialog add(IDialog toAdd);
+
   boolean update(IDialog toAdd);
+
   List<ClientExercise> addEmptyExercises(IDialog toAdd, int userid, int afterExid, boolean isLeft, long now);
-  List<ClientExercise> addEmptyExercises(IDialog toAdd, int userid, int afterExid, boolean isLeft);
+ // List<ClientExercise> addEmptyExercises(IDialog toAdd, int userid, int afterExid, boolean isLeft);
 
   int add(int userid,
           int projid,

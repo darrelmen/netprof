@@ -40,8 +40,6 @@ import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
@@ -114,8 +112,8 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   private T currentTurn;
 
-  private CheckBox leftSpeakerBox = null;
-  private CheckBox rightSpeakerBox = null;
+//  private CheckBox leftSpeakerBox = null;
+//  private CheckBox rightSpeakerBox = null;
 
   private ComplexWidget slider;
   private Button playButton;
@@ -212,7 +210,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   /**
    * Main method for showing the three sections
-   *
+   * <p>
    * NOTE: ASSUMES the english speaker goes first!
    *
    * @param dialogID
@@ -264,21 +262,23 @@ public class ListenViewHelper<T extends ITurnPanel>
 
       if (isInterpreter) {
         rowOne.add(getLeftSpeaker(firstSpeaker));
-      } else {
-        leftSpeakerBox = addLeftSpeaker(rowOne, firstSpeaker);
       }
+//      else {
+//        leftSpeakerBox = addLeftSpeaker(rowOne, firstSpeaker);
+//      }
     }
 
-    if (isInterpreter) {
-      rowOne.add(getRightSpeaker(getSecondSpeakerLabel(dialog)));
-    }
+    // if (isInterpreter) {
+    rowOne.add(getRightSpeaker(getSecondSpeakerLabel(dialog)));
+    //}
 
     {
       if (isInterpreter) {
         rowOne.add(getMiddleSpeaker());
-      } else {
-        rightSpeakerBox = addRightSpeaker(rowOne, getInterpreterSpeakerLabel(dialog));
       }
+//      else {
+//        rightSpeakerBox = addRightSpeaker(rowOne, getInterpreterSpeakerLabel(dialog));
+//      }
     }
 
     return rowOne;
@@ -432,10 +432,10 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   private CheckBox addLeftSpeaker(DivWidget rowOne, String label) {
     CheckBox checkBox = new CheckBox(label, true);
-    setLeftTurnSpeakerInitial(checkBox);
+    // setLeftTurnSpeakerInitial(checkBox);
     styleLeftSpeaker(checkBox);
 
-    checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
+//    checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
 
     rowOne.add(getLeftSpeakerDiv(checkBox));
     return checkBox;
@@ -455,10 +455,10 @@ public class ListenViewHelper<T extends ITurnPanel>
   CheckBox addRightSpeaker(DivWidget rowOne, String label) {
     CheckBox checkBox = new CheckBox(label, true);
 
-    setRightTurnInitialValue(checkBox);
+    // setRightTurnInitialValue(checkBox);
     styleRightSpeaker(checkBox);
 
-    checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
+    //   checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
 
     rowOne.add(getRightSpeakerDiv(checkBox));
     return checkBox;
@@ -479,52 +479,52 @@ public class ListenViewHelper<T extends ITurnPanel>
     return rightDiv;
   }
 
-  private void setLeftTurnSpeakerInitial(CheckBox checkBox) {
-    checkBox.setValue(true);
-  }
+//  private void setLeftTurnSpeakerInitial(CheckBox checkBox) {
+//    checkBox.setValue(true);
+//  }
+//
+//  void setRightTurnInitialValue(CheckBox checkBox) {
+//    checkBox.setValue(true);
+//  }
 
-  void setRightTurnInitialValue(CheckBox checkBox) {
-    checkBox.setValue(true);
-  }
+//  void speakerOneCheck(Boolean value) {
+//    if (!value && !isRightSpeakerSelected()) {
+//      setRightSpeaker();
+//    }
+//  }
 
-  void speakerOneCheck(Boolean value) {
-    if (!value && !isRightSpeakerSelected()) {
-      setRightSpeaker();
-    }
-  }
+//  private void setRightSpeaker() {
+//    setRightSpeaker(true);
+//  }
 
-  private void setRightSpeaker() {
-    setRightSpeaker(true);
-  }
+//  void setRightSpeaker(boolean value) {
+//    if (rightSpeakerBox != null) {
+//      rightSpeakerBox.setValue(value);
+//    }
+//  }
+//
+//  void speakerTwoCheck(Boolean value) {
+//    if (!value && !isLeftSpeakerSelected()) {
+//      selectLeftSpeaker();
+//    }
+//  }
+//
+//  private void selectLeftSpeaker() {
+//    setLeftSpeaker(true);
+//  }
 
-  void setRightSpeaker(boolean value) {
-    if (rightSpeakerBox != null) {
-      rightSpeakerBox.setValue(value);
-    }
-  }
-
-  void speakerTwoCheck(Boolean value) {
-    if (!value && !isLeftSpeakerSelected()) {
-      selectLeftSpeaker();
-    }
-  }
-
-  private void selectLeftSpeaker() {
-    setLeftSpeaker(true);
-  }
-
-  void setLeftSpeaker(boolean val) {
-    if (leftSpeakerBox != null)
-      leftSpeakerBox.setValue(val);
-  }
-
-  private Boolean isLeftSpeakerSelected() {
-    return leftSpeakerBox == null || leftSpeakerBox.getValue();
-  }
-
-  private Boolean isRightSpeakerSelected() {
-    return rightSpeakerBox == null || rightSpeakerBox.getValue();
-  }
+//  void setLeftSpeaker(boolean val) {
+//    if (leftSpeakerBox != null)
+//      leftSpeakerBox.setValue(val);
+//  }
+//
+//  private Boolean isLeftSpeakerSelected() {
+//    return leftSpeakerBox == null || leftSpeakerBox.getValue();
+//  }
+//
+//  private Boolean isRightSpeakerSelected() {
+//    return rightSpeakerBox == null || rightSpeakerBox.getValue();
+//  }
 
   DivWidget turnContainer;
 
@@ -666,6 +666,11 @@ public class ListenViewHelper<T extends ITurnPanel>
     return currentTurn;
   }
 
+  T getNextTurn() {
+    int i = getAllTurns().indexOf(currentTurn) + 1;
+    return i == getAllTurns().size() ? null : getAllTurns().get(i);
+  }
+
   private void makeVisible(T currentTurn) {
     currentTurn.makeVisible();
   }
@@ -798,7 +803,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   /**
    * TODO add playback rate
-   *
+   * <p>
    * Prev, play, next buttons
    *
    * @return
@@ -917,12 +922,16 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
   }
 
+  /**
+   * @return null if there is no previous turn
+   * @see
+   */
   protected T getPrevTurn() {
     List<T> seq = getAllTurns();
 
     int i = seq.indexOf(currentTurn);
     int i1 = i - 1;
-    return seq.get(i1);
+    return i1 < 0 ? null : seq.get(i1);
   }
 
   @Override
@@ -1012,8 +1021,8 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #gotPlay
    */
   boolean setTurnToPromptSide() {
-    Boolean leftSpeakerSet = isLeftSpeakerSet();
-    Boolean rightSpeakerSet = isRightSpeakerSet();
+    Boolean leftSpeakerSet = false;//isLeftSpeakerSet();
+    Boolean rightSpeakerSet = true;//isRightSpeakerSet();
     if (leftSpeakerSet && rightSpeakerSet) {
       if (DEBUG) logger.info("setTurnToPromptSide both speakers ");
       return false;
@@ -1120,11 +1129,11 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   Boolean isLeftSpeakerSet() {
-    return isLeftSpeakerSelected();
+    return true;//isLeftSpeakerSelected();
   }
 
   Boolean isRightSpeakerSet() {
-    return isRightSpeakerSelected();
+    return false;//sRightSpeakerSelected();
   }
 
   /**

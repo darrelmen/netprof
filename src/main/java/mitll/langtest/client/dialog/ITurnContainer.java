@@ -35,5 +35,6 @@ public interface ITurnContainer<T extends ITurnPanel> {
   void gotForward();
   void addTurnForSameSpeaker();
   void addTurnForOtherSpeaker();
+  void deleteCurrentTurnOrPair();
   void setCurrentTurnTo(T newTurn);
 }

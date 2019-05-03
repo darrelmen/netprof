@@ -34,10 +34,7 @@ import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.services.DialogService;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.shared.common.DominoSessionException;
-import mitll.langtest.shared.dialog.DialogMetadata;
-import mitll.langtest.shared.dialog.DialogSession;
-import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.dialog.IDialogSession;
+import mitll.langtest.shared.dialog.*;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.apache.logging.log4j.LogManager;
@@ -230,6 +227,12 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     }
   }
 
+  @Override
+  public boolean deleteExerciseInDialog(int projid, int id, int exid) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    return db.getDialogDAO().deleteExercise(projid, id, exid);
+  }
+
 /*  private int getFirstDialog(int userIDFromSessionOrDB) {
     int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
     if (projectIDFromUser != -1) {
@@ -260,6 +263,14 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
         new ArrayList<>(sectionHelper.getExercisesForSelectionState(request.getTypeToSelection()));
   }
 
+  /**
+   * Delete a dialog!
+   *
+   * @param projid
+   * @param id
+   * @return
+   * @throws DominoSessionException
+   */
   @Override
   public boolean delete(int projid, int id) throws DominoSessionException {
     getUserIDFromSessionOrDB();
@@ -267,6 +278,37 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     boolean delete = db.getDialogDAO().delete(projid, id);
     if (delete) {
       getProject(projid).forgetDialog(id);
+    }
+    return delete;
+  }
+
+  /**
+   * Delete one turn if normal dialog or a pair if interpreter
+   *
+   * @param projid
+   * @param dialogID
+   * @param exid
+   * @return
+   * @throws DominoSessionException
+   */
+  public boolean deleteATurnOrPair(int projid, int dialogID, int exid) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    IDialog dialog = db.getProject(projid).getDialog(dialogID);
+    boolean delete = true;
+    if (dialog.getKind() == DialogType.INTERPRETER) {
+      List<ClientExercise> exercises = dialog.getExercises();
+      List<ClientExercise> collect = exercises.stream().filter(clientExercise -> clientExercise.getID() == exid).collect(Collectors.toList());
+      ClientExercise clientExercise = collect.get(0);
+      int i = exercises.indexOf(clientExercise);
+      ClientExercise prev = exercises.get(i - 1);
+      logger.info("prev exercise " + prev.getID() + " " + prev.getForeignLanguage() + " " + prev.hasEnglishAttr());
+      delete = db.getDialogDAO().deleteExercise(projid, dialogID, prev.getID());
+    }
+    if (delete) {
+      delete = db.getDialogDAO().deleteExercise(projid, dialogID, exid);
+    }
+    if (delete) {
+      db.getProjectManagement().addDialogInfo(projid, dialogID);
     }
     return delete;
   }
