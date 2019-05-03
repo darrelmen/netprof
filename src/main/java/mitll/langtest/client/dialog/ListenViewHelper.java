@@ -76,6 +76,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 public class ListenViewHelper<T extends ITurnPanel>
     extends DialogView
     implements ContentView, PlayListener, IListenView, ITurnContainer<T> {
+  public static final String A = "A";
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   private static final String ENGLISH_SPEAKER = "English Speaker";
@@ -170,7 +171,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     });
   }
 
-  private void clearTurnLists() {
+  protected void clearTurnLists() {
     promptTurns.clear();
     allTurns.clear();
     leftTurnPanels.clear();
@@ -326,17 +327,16 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   @NotNull
   private String getFirstSpeakerLabel(IDialog dialog) {
+    logger.info("getFirstSpeakerLabel for dialog " + dialog.getID());
+//    dialog.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute.toString()));
 
-    logger.info("for " + dialog.getID());
-    dialog.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute.toString()));
+//    List<ExerciseAttribute> properties = dialog.getAttributes()
+//        .stream()
+//        .filter(exerciseAttribute -> (exerciseAttribute.getProperty() != null))
+//        .sorted(Comparator.comparing(Pair::getProperty))
+//        .collect(Collectors.toList());
 
-    List<ExerciseAttribute> properties = dialog.getAttributes()
-        .stream()
-        .filter(exerciseAttribute -> (exerciseAttribute.getProperty() != null))
-        .sorted(Comparator.comparing(Pair::getProperty))
-        .collect(Collectors.toList());
-
-    properties.forEach(p -> logger.info(p.toString()));
+   // properties.forEach(p -> logger.info(p.toString()));
 
     String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
 
@@ -353,7 +353,7 @@ public class ListenViewHelper<T extends ITurnPanel>
       firstSpeaker = ENGLISH_SPEAKER;
     }
 
-    if (firstSpeaker == null) firstSpeaker = "A";
+    if (firstSpeaker == null) firstSpeaker = A;
     return firstSpeaker;
   }
 
@@ -534,7 +534,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 //    return rightSpeakerBox == null || rightSpeakerBox.getValue();
 //  }
 
-  private DivWidget turnContainer;
+  protected DivWidget turnContainer;
 
   /**
    * @param dialog
@@ -566,7 +566,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     return rowOne;
   }
 
-  private void addAllTurns(IDialog dialog, DivWidget rowOne) {
+  protected void addAllTurns(IDialog dialog, DivWidget rowOne) {
     String left = getFirstSpeakerLabel(dialog); //speakers.get(0);
     String right = getSecondSpeakerLabel(dialog);//speakers.get(2);
 /*    logger.info("for speaker " + left + " got " + speakerToEx.get(left).size());
@@ -589,28 +589,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     addTurnForEachExercise(rowOne, left, right, dialog.getExercises());
   }
 
-  /**
-   * @param exercises
-   * @see DialogEditor#getAsyncForNewTurns
-   */
-  void addTurns(IDialog updated) {
-    this.dialog = updated;
-
-    T currentTurn = getCurrentTurn();
-    addAllTurns(dialog, turnContainer);
-    setCurrentTurn(currentTurn);
-
-    T next = getNext();
-
-    logger.info("focus will be on " +next);
-    setCurrentTurn(next);
-    markCurrent();
-    next.grabFocus();
-    //   addTurnForEachExercise(turnContainer, getFirstSpeakerLabel(dialog), getSecondSpeakerLabel(dialog), exercises);
-  }
-
   private void addTurnForEachExercise(DivWidget rowOne, String left, String right, List<ClientExercise> exercises) {
-
     ClientExercise prev = null;
     for (ClientExercise clientExercise : exercises) {
       addTurn(rowOne, getColumnForEx(left, right, clientExercise), clientExercise, getColumnForEx(left, right, prev));
@@ -646,7 +625,7 @@ public class ListenViewHelper<T extends ITurnPanel>
       columns = COLUMNS.MIDDLE;
     }
 
-  //  logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs " + speaker + " => " + columns);
+    //  logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs " + speaker + " => " + columns);
     return columns;
   }
 
@@ -723,7 +702,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   private void markFirstTurn() {
     if (!allTurns.isEmpty()) {
       setCurrentTurn(allTurns.get(0));
-      //   logger.info("getTurns : markCurrent ");
+      logger.info("markFirstTurn : markCurrent ");
       markCurrent();
       makeVisible(currentTurn);
     }
@@ -1043,6 +1022,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   private void afterChangeTurns(boolean isPlaying) {
+   // logger.info("afterChangeTurns isPlaying " + isPlaying);
     markCurrent();
     if (isPlaying) playCurrentTurn();
   }

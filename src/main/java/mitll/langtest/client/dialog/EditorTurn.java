@@ -294,7 +294,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
       ne.preventDefault();
       ne.stopPropagation();
 
-      logger.info("got enter!");
+      logger.info("got enter on " + this.getExID() + " : " + columns);
 
       turnContainer.gotForward(this);
     }
@@ -317,7 +317,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 
         @Override
         public void onSuccess(Boolean result) {
-          logger.info("OK, update was " + result);
+          //logger.info("OK, update was " + result);
         }
       });
     }
@@ -331,6 +331,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     if (content == null) {
       logger.info("grabFocus no content yet for " + getExID());
     } else {
+      logger.info("grabFocus on " + getExID());
       content.setFocus(true);
     }
 //    logger.info("hiddenPartner " + hiddenPartner.getOffsetWidth());

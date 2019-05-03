@@ -33,6 +33,7 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeUri;
@@ -64,6 +65,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static com.google.gwt.dom.client.Style.Unit.PCT;
 import static com.google.gwt.dom.client.Style.Unit.PX;
@@ -1385,4 +1387,43 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   protected boolean mouseDown = false;
+
+  /**
+   * @param exercises
+   * @param afterThisTurn
+   * @see DialogEditor#getAsyncForNewTurns
+   */
+  void addTurns(IDialog updated, int exid) {
+    this.dialog = updated;
+
+    addAllTurns(dialog, turnContainer);
+
+    List<T> collect = allTurns.stream().filter(turn -> turn.getExID() == exid).collect(Collectors.toList());
+
+    T next = getCurrentTurn();
+    if (collect.isEmpty()) {
+      logger.warning("addTurns : can't find exid " + exid);
+    } else {
+      T current = collect.get(0);
+
+      int i = allTurns.indexOf(current) + 1;
+
+      next= allTurns.get(i);
+
+
+    }
+
+//    T next = getNext();
+    final T fnext = next;
+
+    Scheduler.get().scheduleDeferred(() -> {
+      logger.info("addTurns : focus will be on " + fnext);
+
+      setCurrentTurn(fnext);
+      markCurrent();
+      fnext.grabFocus();
+    });
+
+    //   addTurnForEachExercise(turnContainer, getFirstSpeakerLabel(dialog), getSecondSpeakerLabel(dialog), exercises);
+  }
 }

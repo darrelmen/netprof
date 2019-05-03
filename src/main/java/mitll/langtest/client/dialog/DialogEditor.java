@@ -30,6 +30,7 @@
 package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -42,6 +43,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class DialogEditor extends ListenViewHelper<EditorTurn> {
   private final Logger logger = Logger.getLogger("DialogEditor");
@@ -85,6 +87,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
   @Override
   protected void gotTurnClick(EditorTurn turn) {
     super.gotTurnClick(turn);
+    logger.info("gotClickOnTurn " + turn);
     markCurrent();
   }
 
@@ -140,7 +143,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
 //        columns == COLUMNS.LEFT;
 
     //int lastID = getLastID(currentTurn, nextTurn);
-    controller.getDialogService().addEmptyExercises(dialogID, turn.getExID(), isLeftSpeaker, getAsyncForNewTurns());
+    controller.getDialogService().addEmptyExercises(dialogID, turn.getExID(), isLeftSpeaker, getAsyncForNewTurns(turn.getExID()));
   }
 
   private boolean isLeftSpeaker(COLUMNS columns, EditorTurn prevTurn) {
@@ -181,7 +184,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
     );
 
     boolean isLeftSpeaker = isLeftSpeaker(columns, getPrev(editorTurn));
-    controller.getDialogService().addEmptyExercises(dialogID, editorTurn.getExID(), !isLeftSpeaker, getAsyncForNewTurns());
+    controller.getDialogService().addEmptyExercises(dialogID, editorTurn.getExID(), !isLeftSpeaker, getAsyncForNewTurns(editorTurn.getExID()));
   }
 
 //  private int getLastID(EditorTurn currentTurn, EditorTurn nextTurn) {
@@ -236,7 +239,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
   }
 
   @NotNull
-  private AsyncCallback<IDialog> getAsyncForNewTurns() {
+  private AsyncCallback<IDialog> getAsyncForNewTurns(int exid) {
     return new AsyncCallback<IDialog>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -245,7 +248,8 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
 
       @Override
       public void onSuccess(IDialog result) {
-        addTurns(result);
+
+        addTurns(result, exid);
 //        gotForward(this);
 //        getCurrentTurn().grabFocus();
       }
@@ -273,5 +277,48 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
   public void grabFocus() {
     logger.info("give focus to turn for ex #" + getCurrentTurn().getExID());
     getCurrentTurn().grabFocus();
+  }
+
+  /**
+   * @param exercises
+   * @param afterThisTurn
+   * @see DialogEditor#getAsyncForNewTurns
+   */
+  void addTurns(IDialog updated, int exid) {
+    this.dialog = updated;
+
+    clearTurnLists();
+    addAllTurns(dialog, turnContainer);
+
+    List<EditorTurn> collect = allTurns.stream().filter(turn -> turn.getExID() == exid).collect(Collectors.toList());
+
+    EditorTurn next = getCurrentTurn();
+    if (collect.isEmpty()) {
+      logger.warning("addTurns : can't find exid " + exid);
+    } else {
+      EditorTurn current = collect.get(0);
+
+      int i = allTurns.indexOf(current) + 1;
+      next = allTurns.get(i);
+
+      logger.info("addTurns : num turns " + allTurns.size() +
+          "\n\texid    " + exid +
+          "\n\tcurrent " + current.getExID() +
+          "\n\tnext    " + next.getExID()
+      );
+    }
+
+    final EditorTurn fnext = next;
+
+    setCurrentTurn(fnext);
+
+    Scheduler.get().scheduleDeferred(() -> {
+      logger.info("addTurns : focus will be on " + fnext);
+
+      markCurrent();
+      fnext.grabFocus();
+    });
+
+    //   addTurnForEachExercise(turnContainer, getFirstSpeakerLabel(dialog), getSecondSpeakerLabel(dialog), exercises);
   }
 }
