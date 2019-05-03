@@ -59,18 +59,27 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
     this.dialogID = theDialog.getID();
   }
 
+  /**
+   * @param clientExercise
+   * @param columns
+   * @param prevColumn
+   * @param rightJustify
+   * @return
+   * @see ListenViewHelper#reallyGetTurnPanel
+   */
   @Override
   @NotNull
-  protected EditorTurn makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, boolean rightJustify) {
+  protected EditorTurn makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, boolean rightJustify) {
     int i = theDialog.getExercises().indexOf(clientExercise);
     boolean isFirst = i == 0 && columns == COLUMNS.LEFT || i == 1 && columns == COLUMNS.MIDDLE;
     return new EditorTurn(
         clientExercise,
         columns,
-        rightJustify, controller.getLanguageInfo(), controller,
+        prevColumn,
+        rightJustify,
+        controller,
         this,
-        dialogID,
-        isFirst);
+        dialogID, isFirst);
   }
 
   @Override
@@ -97,95 +106,115 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
   /**
    * If on the last turn, either make a new pair of exercises for interpreter, or just a new exercise
    * for a simple dialog.
+   *
+   * @param editorTurn this is the turn after which we add the next turn or turn pair
    */
   @Override
-  public void gotForward() {
-    if (onLastTurn()) {
+  public void gotForward(EditorTurn editorTurn) {
+    if (isLast(editorTurn)) {
       // make either one or two more turns and add to end of dialog
-      addTurnForSameSpeaker();
+      addTurnForSameSpeaker(editorTurn);
     } else {
-      super.gotForward();
+      super.gotForward(editorTurn);
       getCurrentTurn().grabFocus();
     }
   }
 
-  public void addTurnForSameSpeaker() {
-    EditorTurn currentTurn = getCurrentTurn();
+  @Override
+  public void addTurnForSameSpeaker(EditorTurn turn) {
+    // EditorTurn currentTurn = getCurrentTurn();
 
-    EditorTurn nextTurn = getNext();
+    // EditorTurn nextTurn = getNext();
+    COLUMNS columns = turn.getColumn();
     logger.info("addTurnForSameSpeaker : " +
-        "\n\tcurrent turn " + currentTurn +
-        "\n\tnext    turn " + nextTurn
+        "\n\tcurrent turn " + turn +
+        "\n\tcolumns      " + columns
     );
 
-    EditorTurn prevTurn = getPrev();
+//    EditorTurn prevTurn = getPrev(turn);
     // if prev turn is null we're on the first turn
 
-    boolean isLeftSpeaker = false;
-    COLUMNS columns = getCurrentTurn().getColumns();
+    boolean isLeftSpeaker = isLeftSpeaker(columns, getPrev(turn));
+//    boolean isLeftSpeaker = isInterpreter ?
+//        (prevTurn == null || prevTurn.getColumns() == COLUMNS.LEFT) :
+//        columns == COLUMNS.LEFT;
+
+    //int lastID = getLastID(currentTurn, nextTurn);
+    controller.getDialogService().addEmptyExercises(dialogID, turn.getExID(), isLeftSpeaker, getAsyncForNewTurns());
+  }
+
+  private boolean isLeftSpeaker(COLUMNS columns, EditorTurn prevTurn) {
+    boolean isLeftSpeaker;
     if (isInterpreter) {
       if (columns == COLUMNS.MIDDLE) {
-        isLeftSpeaker = (prevTurn == null || prevTurn.getColumns() == COLUMNS.LEFT);
+        isLeftSpeaker = (prevTurn == null || prevTurn.getColumn() == COLUMNS.LEFT);
       } else {
         isLeftSpeaker = columns == COLUMNS.LEFT;//duh
       }
     } else {
       isLeftSpeaker = columns == COLUMNS.LEFT;//duh
     }
-//    boolean isLeftSpeaker = isInterpreter ?
-//        (prevTurn == null || prevTurn.getColumns() == COLUMNS.LEFT) :
-//        columns == COLUMNS.LEFT;
-
-    int lastID = getLastID(currentTurn, nextTurn);
-    controller.getDialogService().addEmptyExercises(dialogID, lastID, isLeftSpeaker, getAsyncForNewTurns());
+    return isLeftSpeaker;
   }
 
-  @Override
-  public void addTurnForOtherSpeaker() {
-    EditorTurn currentTurn = getCurrentTurn();
 
-    EditorTurn nextTurn = getNext();
+  /**
+   * @param widgets
+   * @return
+   * @see EditorTurn#addWidgets
+   */
+//  @Override
+//  public COLUMNS getColumnForPrev(EditorTurn widgets) {
+//    EditorTurn prev = getPrev(widgets);
+//    boolean noPrev = prev == null;
+//    if (noPrev) logger.warning("huh? no prev for " + widgets.getExID() + " " + widgets.getColumn());
+//    return noPrev ? widgets.getColumn() : prev.getColumn();
+//  }
+  @Override
+  public void addTurnForOtherSpeaker(EditorTurn editorTurn) {
+//    EditorTurn currentTurn = getCurrentTurn();
+//    EditorTurn nextTurn = getNext();
+    COLUMNS columns = editorTurn.getColumn();
     logger.info("addTurnForOtherSpeaker : " +
-        "\n\tcurrent turn " + currentTurn +
-        "\n\tnext    turn " + nextTurn
+        "\n\tcurrent turn " + editorTurn.getExID() +
+        "\n\tcolumns      " + columns
     );
 
-    int lastID = getLastID(currentTurn, nextTurn);
-
-    controller.getDialogService().addEmptyExercises(dialogID, lastID, false, getAsyncForNewTurns());
+    boolean isLeftSpeaker = isLeftSpeaker(columns, getPrev(editorTurn));
+    controller.getDialogService().addEmptyExercises(dialogID, editorTurn.getExID(), !isLeftSpeaker, getAsyncForNewTurns());
   }
 
-  private int getLastID(EditorTurn currentTurn, EditorTurn nextTurn) {
-    int lastID = currentTurn.getExID();
-    if (isInterpreter) {
-      // can't append after a left turn - only after a middle interpreter
-      if (currentTurn.getColumns() == COLUMNS.LEFT) {
-        if (nextTurn == null) {
-          logger.warning("no next turn?");
-        } else {
-          lastID = nextTurn.getExID();
-        }
-      }
-    }
-    return lastID;
-  }
+//  private int getLastID(EditorTurn currentTurn, EditorTurn nextTurn) {
+//    int lastID = currentTurn.getExID();
+//    if (isInterpreter) {
+//      // can't append after a left turn - only after a middle interpreter
+//      if (currentTurn.getColumns() == COLUMNS.LEFT) {
+//        if (nextTurn == null) {
+//          logger.warning("no next turn?");
+//        } else {
+//          lastID = nextTurn.getExID();
+//        }
+//      }
+//    }
+//    return lastID;
+//  }
 
   @Override
-  public void deleteCurrentTurnOrPair() {
-    EditorTurn currentTurn = getCurrentTurn();
-
-    EditorTurn nextTurn = getNext();
+  public void deleteCurrentTurnOrPair(EditorTurn currentTurn) {
+    //EditorTurn currentTurn = getCurrentTurn();
+    // EditorTurn nextTurn = getNext();
     logger.info("deleteCurrentTurnOrPair : " +
-        "\n\tcurrent turn " + currentTurn +
-        "\n\tnext    turn " + nextTurn
+            "\n\tcurrent turn " + currentTurn
+        //+
+        // "\n\tnext    turn " + nextTurn
     );
-    int lastID = getLastID(currentTurn, nextTurn);
+//    int lastID = getLastID(currentTurn, nextTurn);
 
     // todo :return both turns
     controller.getDialogService().deleteATurnOrPair(
         dialog.getProjid(),
         dialogID,
-        lastID,
+        currentTurn.getExID(),
         new AsyncCallback<List<Integer>>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -198,8 +227,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
             // TODO : remove one or two turns and change current turn to previous turn before deleted
             if (getCurrentTurn() == null) {
               logger.warning("huh? no current turn???");
-            }
-            else {
+            } else {
               getCurrentTurn().grabFocus();
             }
           }
@@ -218,9 +246,8 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
       @Override
       public void onSuccess(IDialog result) {
         addTurns(result);
-
-        gotForward();
-        getCurrentTurn().grabFocus();
+//        gotForward(this);
+//        getCurrentTurn().grabFocus();
       }
     };
   }

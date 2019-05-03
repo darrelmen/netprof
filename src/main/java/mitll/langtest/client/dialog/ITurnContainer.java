@@ -32,9 +32,11 @@ package mitll.langtest.client.dialog;
 import mitll.langtest.client.scoring.ITurnPanel;
 
 public interface ITurnContainer<T extends ITurnPanel> {
-  void gotForward();
-  void addTurnForSameSpeaker();
-  void addTurnForOtherSpeaker();
-  void deleteCurrentTurnOrPair();
+  void gotForward(EditorTurn editorTurn);
+  void addTurnForSameSpeaker(T editorTurn);
+  void addTurnForOtherSpeaker(T editorTurn);
+  void deleteCurrentTurnOrPair(T currentTurn);
   void setCurrentTurnTo(T newTurn);
+
+ // ListenViewHelper.COLUMNS getColumnForPrev(T widgets);
 }

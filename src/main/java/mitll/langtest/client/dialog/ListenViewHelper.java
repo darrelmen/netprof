@@ -591,7 +591,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   /**
    * @param exercises
-   * @see DialogEditor#getAsyncForNewTurns()
+   * @see DialogEditor#getAsyncForNewTurns
    */
   void addTurns(IDialog updated) {
     this.dialog = updated;
@@ -599,22 +599,35 @@ public class ListenViewHelper<T extends ITurnPanel>
     T currentTurn = getCurrentTurn();
     addAllTurns(dialog, turnContainer);
     setCurrentTurn(currentTurn);
+
+    T next = getNext();
+
+    logger.info("focus will be on " +next);
+    setCurrentTurn(next);
+    markCurrent();
+    next.grabFocus();
     //   addTurnForEachExercise(turnContainer, getFirstSpeakerLabel(dialog), getSecondSpeakerLabel(dialog), exercises);
   }
 
   private void addTurnForEachExercise(DivWidget rowOne, String left, String right, List<ClientExercise> exercises) {
-    exercises.forEach(clientExercise -> {
-      // COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
-      //    logger.info("ex " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage() + " : " + columnForEx);
-      addTurn(rowOne, getColumnForEx(left, right, clientExercise), clientExercise);
-    });
+
+    ClientExercise prev = null;
+    for (ClientExercise clientExercise : exercises) {
+      addTurn(rowOne, getColumnForEx(left, right, clientExercise), clientExercise, getColumnForEx(left, right, prev));
+      prev = clientExercise;
+    }
+//    exercises.forEach(clientExercise -> {
+//      // COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
+//      //    logger.info("ex " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage() + " : " + columnForEx);
+//      addTurn(rowOne, getColumnForEx(left, right, clientExercise), clientExercise);
+//    });
   }
 
   private COLUMNS getColumnForEx(String left, String right, ClientExercise clientExercise) {
-    String speaker = clientExercise.getSpeaker();
+    String speaker = clientExercise == null ? "" : clientExercise.getSpeaker();
     //List<ExerciseAttribute> collect = getSpeakerAttributes(clientExercise);
     if (speaker.isEmpty()) {
-      logger.warning("getColumnForEx : no speaker " + clientExercise);
+      logger.info("getColumnForEx : no speaker " + clientExercise);
       return COLUMNS.UNK;
     } else {
       return getColumnForSpeaker(left, right, speaker);
@@ -633,18 +646,19 @@ public class ListenViewHelper<T extends ITurnPanel>
       columns = COLUMNS.MIDDLE;
     }
 
-    logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs " + speaker + " => " + columns);
+  //  logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs " + speaker + " => " + columns);
     return columns;
   }
 
-  private String getSpeaker(List<ExerciseAttribute> collect) {
-    return collect.get(0).getValue();
-  }
-
-  @NotNull
-  private List<ExerciseAttribute> getSpeakerAttributes(ClientExercise clientExercise) {
-    return clientExercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(DialogMetadata.SPEAKER.name())).collect(Collectors.toList());
-  }
+  //
+//  private String getSpeaker(List<ExerciseAttribute> collect) {
+//    return collect.get(0).getValue();
+//  }
+//
+//  @NotNull
+//  private List<ExerciseAttribute> getSpeakerAttributes(ClientExercise clientExercise) {
+//    return clientExercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(DialogMetadata.SPEAKER.name())).collect(Collectors.toList());
+//  }
 
   /**
    * @param rowOne
@@ -652,8 +666,8 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @param clientExercise
    * @see #addTurnForEachExercise(DivWidget, String, String, List)
    */
-  private void addTurn(DivWidget rowOne, COLUMNS columns, ClientExercise clientExercise) {
-    T turn = getTurnPanel(clientExercise, columns);
+  private void addTurn(DivWidget rowOne, COLUMNS columns, ClientExercise clientExercise, COLUMNS prevColumn) {
+    T turn = getTurnPanel(clientExercise, columns, prevColumn);
 
     if (columns == COLUMNS.RIGHT) {
       rightTurnPanels.add(turn);
@@ -774,14 +788,15 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   /**
-   * @param clientExercise
    * @param isRight
+   * @param clientExercise
+   * @param prevColumn
    * @return
    * @see #addTurn
    */
   @NotNull
-  T getTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
-    T turn = reallyGetTurnPanel(clientExercise, columns);
+  T getTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn) {
+    T turn = reallyGetTurnPanel(clientExercise, columns, prevColumn);
     turn.addWidgets(true, false, PhonesChoices.HIDE, EnglishDisplayChoices.SHOW);
     turn.addPlayListener(this);
     turn.addClickHandler(event -> gotTurnClick(turn));
@@ -791,17 +806,18 @@ public class ListenViewHelper<T extends ITurnPanel>
   /**
    * @param clientExercise
    * @param columns
+   * @param prevColumn
    * @return
    * @see #getTurnPanel
    */
   @NotNull
-  T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
+  T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn) {
     boolean isInterpreter = columns == COLUMNS.MIDDLE;
 
     boolean rightJustify = isInterpreter &&
         thisView == INavigation.VIEWS.LISTEN && clientExercise.hasEnglishAttr();
 
-    T widgets = makeTurnPanel(clientExercise, columns, rightJustify);
+    T widgets = makeTurnPanel(clientExercise, columns, prevColumn, rightJustify);
 
 //    if (isInterpreter) {
 //      if (widgets instanceof UIObject) {
@@ -831,11 +847,12 @@ public class ListenViewHelper<T extends ITurnPanel>
    *
    * @param clientExercise
    * @param columns
+   * @param prevColumn
    * @param rightJustify
    * @return
    */
   @NotNull
-  protected T makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, boolean rightJustify) {
+  protected T makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, boolean rightJustify) {
     T t = (T) new TurnPanel(
         clientExercise,
         controller,
@@ -886,7 +903,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
 
     {
-      Button widgets2 = new Button("", IconType.FORWARD, event -> gotForward());
+      Button widgets2 = new Button("", IconType.FORWARD, event -> gotForward(null));
       widgets2.addStyleName("leftFiveMargin");
       rowOne.add(widgets2);
     }
@@ -981,7 +998,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
 
   @Override
-  public void gotForward() {
+  public void gotForward(EditorTurn editorTurn) {
     boolean isPlaying = currentTurn.doPause();
 
     int i = beforeChangeTurns();
@@ -1031,7 +1048,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   /**
-   * @see #gotForward()
+   * @see ITurnContainer#gotForward(EditorTurn)
    * @see #gotBackward()
    */
   private void clearHighlightAndRemoveMark() {
@@ -1111,7 +1128,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     return isLast(currentTurn);
   }
 
-  private boolean isLast(T currentTurn) {
+  protected boolean isLast(T currentTurn) {
     List<T> seq = getAllTurns();
     return seq.indexOf(currentTurn) == seq.size() - 1;
   }
@@ -1336,6 +1353,10 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @return null if on last turn
    */
   T getNext() {
+    return getNext(this.currentTurn);
+  }
+
+  private T getNext(T currentTurn) {
     List<T> seq = getAllTurns();
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
@@ -1374,6 +1395,14 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see
    */
   protected T getPrev() {
+    return getPrev(this.currentTurn);
+  }
+
+//  protected T getPrev(T currentTurn) {
+//    getAllTurns().stream().filter()
+//  }
+
+  T getPrev(T currentTurn) {
     List<T> seq = getAllTurns();
 
     int i = seq.indexOf(currentTurn);
@@ -1383,19 +1412,28 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   /**
    * TODO : don't put this here
+   *
+   * @param exidForTurn
+   * @param columns
    */
+
   @Override
-  public void addTurnForSameSpeaker() {
+  public void addTurnForSameSpeaker(T editorTurn) {
 
   }
 
   @Override
-  public void addTurnForOtherSpeaker() {
+  public void addTurnForOtherSpeaker(T editorTurn) {
 
   }
 
   @Override
-  public void deleteCurrentTurnOrPair() {
+  public void deleteCurrentTurnOrPair(T currentTurn) {
 
   }
+//
+//  @Override
+//  public COLUMNS getColumnForPrev(T widgets) {
+//    return null;
+//  }
 }

@@ -39,7 +39,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.FocusWidget;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -54,6 +53,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.LEFT;
+import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.MIDDLE;
+
 public class EditorTurn extends DivWidget implements ITurnPanel {
   private final Logger logger = Logger.getLogger("EditorTurn");
 
@@ -67,27 +69,31 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   private ITurnContainer<EditorTurn> turnContainer;
   private int dialogID;
   private String prev = "";
-  private ListenViewHelper.COLUMNS columns;
+  private ListenViewHelper.COLUMNS columns, prevColumn;
   private boolean isFirstTurn;
+  private TextBox content;
 
   /**
    * @param clientExercise
    * @param columns
+   * @param prevColumn
    * @param rightJustify
-   * @param language
    * @param controller
-   * @see DialogEditor#makeTurnPanel(ClientExercise, ListenViewHelper.COLUMNS, boolean)
+   * @see ListenViewHelper#makeTurnPanel(ClientExercise, ListenViewHelper.COLUMNS, ListenViewHelper.COLUMNS, boolean)
    */
   EditorTurn(final ClientExercise clientExercise,
              ListenViewHelper.COLUMNS columns,
+             ListenViewHelper.COLUMNS prevColumn,
              boolean rightJustify,
-             Language language,
              ExerciseController<?> controller,
              ITurnContainer<EditorTurn> turnContainer,
-             int dialogID, boolean isFirstTurn) {
-    logger.info("turn " + dialogID + " : " + clientExercise.getID() + " : '" + clientExercise.getForeignLanguage() + "' has english " + clientExercise.hasEnglishAttr() + " : " +columns);
+             int dialogID,
+             boolean isFirstTurn) {
+    logger.info("turn " + dialogID + " : " + clientExercise.getID() + " : '" + clientExercise.getForeignLanguage() + "' has english " + clientExercise.hasEnglishAttr() + " : " + columns);
 
     this.columns = columns;
+
+    this.prevColumn = prevColumn;
 
     this.isFirstTurn = isFirstTurn;
     //addStyleName("flfont");
@@ -106,7 +112,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     setWidth("50%");
     this.dialogID = dialogID;
     this.clientExercise = clientExercise;
-    this.language = language;
+    this.language = controller.getLanguageInfo();
     this.controller = controller;
     this.turnContainer = turnContainer;
     setId("EditorTurn_" + getExID());
@@ -156,14 +162,15 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     return false;
   }
 
-  private TextBox content;
 
-  public ListenViewHelper.COLUMNS getColumns() {
+  public ListenViewHelper.COLUMNS getColumn() {
     return columns;
   }
 
   @Override
-  public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices,
+  public void addWidgets(boolean showFL,
+                         boolean showALTFL,
+                         PhonesChoices phonesChoices,
                          EnglishDisplayChoices englishDisplayChoices) {
     DivWidget wrapper = new DivWidget();
     wrapper.getElement().setId("Wrapper_" + getExID());
@@ -207,8 +214,12 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
         w.setType(ButtonType.INFO);
 
         w.addClickHandler(event -> gotOtherSpeaker());
-
-        w.setIcon(IconType.ARROW_RIGHT);
+        ListenViewHelper.COLUMNS toUseForArrow = columns;
+        if (toUseForArrow == MIDDLE) {
+          toUseForArrow = prevColumn;
+        }
+      //  logger.info("the column is " + toUseForArrow);
+        w.setIcon(toUseForArrow == LEFT ? IconType.ARROW_RIGHT : IconType.ARROW_LEFT);
         w.addStyleName("topFiveMargin");
         w.addStyleName("leftFiveMargin");
         add(w);
@@ -218,15 +229,15 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   }
 
   private void gotPlus() {
-    turnContainer.addTurnForSameSpeaker();
+    turnContainer.addTurnForSameSpeaker(this);
   }
 
   private void gotMinus() {
-    turnContainer.deleteCurrentTurnOrPair();
+    turnContainer.deleteCurrentTurnOrPair(this);
   }
 
   private void gotOtherSpeaker() {
-    turnContainer.addTurnForOtherSpeaker();
+    turnContainer.addTurnForOtherSpeaker(this);
   }
 
   private void addPressAndHoldStyle(UIObject postAudioRecordButton) {
@@ -250,8 +261,8 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 
     String foreignLanguage = clientExercise.getForeignLanguage();
     if (foreignLanguage.isEmpty()) {
-      w.setPlaceholder(clientExercise.hasEnglishAttr() ? "English... (" +getExID()+
-          ")" : language.toDisplay() + " translation (" +getExID()+
+      w.setPlaceholder(clientExercise.hasEnglishAttr() ? "English... (" + getExID() +
+          ")" : language.toDisplay() + " translation (" + getExID() +
           ")");
     } else {
       w.setText(foreignLanguage);
@@ -268,41 +279,6 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 
     //w.setWidth("50%");
     wrapper.add(w);
-
-/*    DivWidget spanContainer = new DivWidget();
-    this.spanContainer = spanContainer;
-    spanContainer.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
-    //  spanContainer.addStyleName("floatLeft");
-    FlowPanel span = new FlowPanel("span") {
-      @Override
-      protected void onLoad() {
-        super.onLoad();
-        logger.info("onLoad width is " + getOffsetWidth());
-      }
-
-      @Override
-      protected void onAttach() {
-        super.onAttach();
-        logger.info("onAttach width is " + getOffsetWidth());
-
-      }
-    };
-    hiddenPartner = span;
-    spanContainer.add(span);
-    span.setHeight("5px");
-//      span.getElement().getStyle().setMarginLeft(10, Style.Unit.PX);
-    // span.getElement().getStyle().setProperty("display", "inherit");
-    //    span.getElement().getStyle().setDisplay(Style.Display.BLOCK);
-    w.addKeyUpHandler(event -> {
-      span.getElement().setInnerHTML(w.getText());
-      syncWidthOfVisible();
-    });
-
-    span.getElement().setInnerHTML(w.getText());*/
-
-    //   Scheduler.get().scheduleDeferred((Command) () -> w.setWidth(span.getOffsetWidth() + "px"));
-
-    //  add(spanContainer);
   }
 
   private void gotFocus() {
@@ -320,14 +296,11 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 
       logger.info("got enter!");
 
-      turnContainer.gotForward();
-//      userHitEnterKey(button);
+      turnContainer.gotForward(this);
     }
   }
 
-
   private void gotBlur() {
-    // String s = SimpleHtmlSanitizer.sanitizeHtml(content.getElement().getInnerText()).asString();
     String s = SimpleHtmlSanitizer.sanitizeHtml(content.getText()).asString();
     if (s.equals(prev)) {
       logger.info("gotBlur " + getExID() + " skip unchanged " + prev);
@@ -384,10 +357,8 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
    * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
   private void styleMe(DivWidget wrapper) {
-    //super.styleMe(wrapper);
     turnPanelDelegate.styleMe(wrapper);
     wrapper.setWidth("98%");
-    //flClickableRow.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
   }
 
   @Override

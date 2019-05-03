@@ -68,14 +68,15 @@ public class PerformViewHelper<T extends ObscureRecordDialogExercisePanel> exten
   /**
    * OK, let's go - hide everything!
    *
-   * @param clientExercise
    * @param isRight
+   * @param clientExercise
+   * @param prevColumn
    * @return
    */
   @NotNull
   @Override
-  protected T getTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
-    T turnPanel = super.getTurnPanel(clientExercise, columns);
+  protected T getTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn) {
+    T turnPanel = super.getTurnPanel(clientExercise, columns, prevColumn);
     turnPanel.obscureTextAndPhones();
     return turnPanel;
   }

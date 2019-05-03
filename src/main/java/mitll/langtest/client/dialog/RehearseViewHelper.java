@@ -701,8 +701,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   @Override
-  public void gotForward() {
-    super.gotForward();
+  public void gotForward(EditorTurn editorTurn) {
+    super.gotForward(editorTurn);
     safeStopRecording();
   }
 
@@ -721,14 +721,15 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   /**
-   * @param clientExercise
    * @param isRight
+   * @param clientExercise
+   * @param prevColumn
    * @return
    * @see #getTurnPanel
    */
   @NotNull
   @Override
-  protected T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
+  protected T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn) {
     T turnPanel = getRecordingTurnPanel(clientExercise, columns);
     exToTurn.put(clientExercise.getID(), turnPanel);
     return turnPanel;
@@ -1327,7 +1328,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   @Override
   public void gotRightArrow() {
-    gotForward();
+    gotForward(null);
   }
 
   @Override
