@@ -125,7 +125,7 @@ public class DialogTest extends BaseTest {
     // do delete!
     {
       int exid = exercises.get(exercises.size() - 1).getID();
-      boolean b = dialogDAO.deleteExercise(PROJECTID, id, exid);
+      boolean b = dialogDAO.deleteExercise(PROJECTID, id, exid).size() == 1;
       if (!b) {
         logger.error("didn't delete the exercise " + exid);
       } else {
@@ -406,7 +406,7 @@ public class DialogTest extends BaseTest {
     // do delete!
     {
       int exid = exercises.get(exercises.size() - 1).getID();
-      boolean b = dialogDAO.deleteExercise(PROJECTID, id, exid);
+      boolean b = dialogDAO.deleteExercise(PROJECTID, id, exid).size() ==1;
       if (!b) {
         logger.error("didn't delete the exercise " + exid);
       } else {
@@ -509,7 +509,7 @@ public class DialogTest extends BaseTest {
       ClientExercise next = exercises.get(4);
       int exid = toDelete.getID();
 
-      boolean b = dialogDAO.deleteExercise(PROJECTID, toAdd.getID(), exid);
+      boolean b = dialogDAO.deleteExercise(PROJECTID, toAdd.getID(), exid).size() ==1;
       Assert.assertTrue(b);
 
       toAdd = getiDialog(andPopulate, PROJECTID, id);
@@ -634,7 +634,7 @@ public class DialogTest extends BaseTest {
       ClientExercise next = exercises.get(4);
       int exid = toDelete.getID();
 
-      boolean b = dialogDAO.deleteExercise(PROJECTID, toAdd.getID(), exid);
+      boolean b = dialogDAO.deleteExercise(PROJECTID, toAdd.getID(), exid).size() ==1;
       Assert.assertTrue(b);
 
       toAdd = getiDialog(andPopulate, PROJECTID, id);
@@ -874,7 +874,7 @@ public class DialogTest extends BaseTest {
 
     IDialogDAO dialogDAO = andPopulate.getDialogDAO();
     int id = exercises.get(exercises.size() - 1).getID();
-    boolean b = dialogDAO.deleteExercise(projectid, iDialog.getID(), id);
+    boolean b = dialogDAO.deleteExercise(projectid, iDialog.getID(), id).size() ==1;
     if (!b) logger.error("didn't delete the exercise " + id);
 
 

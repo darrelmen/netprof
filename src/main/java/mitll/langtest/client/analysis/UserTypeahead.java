@@ -155,7 +155,7 @@ class UserTypeahead {
 
     @Override
     public String getDisplayString() {
-      return userInfo.getFirst() + " " + userInfo.getLast();
+      return userInfo.getFirst() + " " + userInfo.getLastDialog();
     }
 
     @Override
@@ -171,7 +171,7 @@ class UserTypeahead {
    * @see
    *//*
     UserSuggestion(String repl, UserInfo userInfo) {
-      super(repl, userInfo.getFirst() + " " + userInfo.getLast());
+      super(repl, userInfo.getFirst() + " " + userInfo.getLastDialog());
       this.repl = repl;
       this.userInfo = userInfo;
     }

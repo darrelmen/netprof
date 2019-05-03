@@ -842,7 +842,7 @@ public class Project implements IPronunciationLookup, IProject {
     return idToDialog.values();
   }
 
-  public IDialog getLast() {
+  public IDialog getLastDialog() {
      List<IDialog> iDialogs = new ArrayList<>(idToDialog.values());
     iDialogs.sort((o1, o2) -> -1 * Long.compare(o1.getModified(), o2.getModified()));
     return iDialogs.isEmpty() ? null : iDialogs.get(0);

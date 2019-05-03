@@ -57,6 +57,8 @@ import java.util.logging.Logger;
 public class EditorTurn extends DivWidget implements ITurnPanel {
   private final Logger logger = Logger.getLogger("EditorTurn");
 
+  public static final int HEIGHT_AND_WIDTH = 22;
+
   private TurnPanelDelegate turnPanelDelegate;
   private ClientExercise clientExercise;
 
@@ -66,6 +68,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   private int dialogID;
   private String prev = "";
   private ListenViewHelper.COLUMNS columns;
+  private boolean isFirstTurn;
 
   /**
    * @param clientExercise
@@ -81,11 +84,12 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
              Language language,
              ExerciseController<?> controller,
              ITurnContainer<EditorTurn> turnContainer,
-             int dialogID) {
-    logger.info("turn " + dialogID + " : " + clientExercise.getID() + " : '" + clientExercise.getForeignLanguage() + "' has english " + clientExercise.hasEnglishAttr());
+             int dialogID, boolean isFirstTurn) {
+    logger.info("turn " + dialogID + " : " + clientExercise.getID() + " : '" + clientExercise.getForeignLanguage() + "' has english " + clientExercise.hasEnglishAttr() + " : " +columns);
 
     this.columns = columns;
 
+    this.isFirstTurn = isFirstTurn;
     //addStyleName("flfont");
 
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify) {
@@ -119,7 +123,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 
   @Override
   public int getExID() {
-    return clientExercise.getID();
+    return clientExercise == null ? -1 : clientExercise.getID();
   }
 
   @Override
@@ -164,37 +168,6 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     DivWidget wrapper = new DivWidget();
     wrapper.getElement().setId("Wrapper_" + getExID());
     tryOne(wrapper);
-
-/*
-    //DivWidget w = new DivWidget();
-    FocusWidget w = new MyFocus(){};
-
-//    w.getElement().getStyle().setProperty("contenteditable", "true");
-    this.content = w;
-
-    String foreignLanguage = clientExercise.getForeignLanguage();
-    if (foreignLanguage.isEmpty()) {
-      String s = clientExercise.hasEnglishAttr() ? "English..." : language.toDisplay() + " translation.";
-      PlaceholderHelper placeholderHelper = GWT.create(PlaceholderHelper.class);
-      placeholderHelper.setPlaceholer(w.getElement(), s);
-//      w.setPlaceholder(s);
-    } else {
-//      w.setText(foreignLanguage);
-      w.getElement().setInnerText(foreignLanguage);
-      prev = foreignLanguage;
-    }
-    w.addBlurHandler(event -> gotBlur());
-
-//    w.addDomHandler(event -> gotBlur(), BlurEvent.getType());
-
-    w.addKeyUpHandler(this::gotKey);
-//    addDomHandler(this::gotKey, KeyUpEvent.getType());
-    w.addStyleName("leftTenMargin");
-    w.addStyleName("rightTenMargin");
-    w.addStyleName("topFiveMargin");
-    wrapper.add(w);
-*/
-
     styleMe(wrapper);
     add(wrapper);
 
@@ -209,7 +182,6 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
         w.addStyleName("topFiveMargin");
         w.addStyleName("leftFiveMargin");
         w.setType(ButtonType.SUCCESS);
-        //   w.getElement().getStyle().setBackgroundColor("#0171bc");
         add(w);
       }
 
@@ -217,26 +189,28 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
         Button w = new Button();
         addPressAndHoldStyle(w);
         w.addClickHandler(event -> gotMinus());
+        w.setType(ButtonType.WARNING);
 
         w.setIcon(IconType.MINUS);
         w.addStyleName("topFiveMargin");
         w.addStyleName("leftFiveMargin");
 
-        //turnContainer.
-        //  w.getElement().getStyle().setBackgroundColor("#0171bc");
+        // can't blow away the first turn!
+        w.setEnabled(!isFirstTurn);
+
         add(w);
       }
 
       {
         Button w = new Button();
         addPressAndHoldStyle(w);
+        w.setType(ButtonType.INFO);
 
         w.addClickHandler(event -> gotOtherSpeaker());
 
         w.setIcon(IconType.ARROW_RIGHT);
         w.addStyleName("topFiveMargin");
         w.addStyleName("leftFiveMargin");
-        //  w.getElement().getStyle().setBackgroundColor("#0171bc");
         add(w);
       }
     }
@@ -252,16 +226,16 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   }
 
   private void gotOtherSpeaker() {
-  turnContainer.addTurnForOtherSpeaker();
+    turnContainer.addTurnForOtherSpeaker();
   }
 
   private void addPressAndHoldStyle(UIObject postAudioRecordButton) {
     Style style = postAudioRecordButton.getElement().getStyle();
-    style.setProperty("borderRadius", "18px");
-    style.setPadding(8, Style.Unit.PX);
-    style.setWidth(19, Style.Unit.PX);
+    style.setProperty("borderRadius", 21 + "px");
+    style.setPadding(9, Style.Unit.PX);
+    style.setWidth(26, Style.Unit.PX);
     style.setMarginRight(5, Style.Unit.PX);
-    style.setHeight(19, Style.Unit.PX);
+    style.setHeight(20, Style.Unit.PX);
   }
 
   private void tryOne(DivWidget wrapper) {
@@ -276,7 +250,9 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 
     String foreignLanguage = clientExercise.getForeignLanguage();
     if (foreignLanguage.isEmpty()) {
-      w.setPlaceholder(clientExercise.hasEnglishAttr() ? "English..." : language.toDisplay() + " translation.");
+      w.setPlaceholder(clientExercise.hasEnglishAttr() ? "English... (" +getExID()+
+          ")" : language.toDisplay() + " translation (" +getExID()+
+          ")");
     } else {
       w.setText(foreignLanguage);
       prev = foreignLanguage;
@@ -333,10 +309,6 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     logger.info("gotFocus " + getExID());
     turnContainer.setCurrentTurnTo(this);
   }
-
-  /*public void syncWidthOfVisible() {
-    content.setWidth(hiddenPartner.getOffsetWidth() + "px");
-  }*/
 
   private void gotKey(KeyUpEvent event) {
     NativeEvent ne = event.getNativeEvent();

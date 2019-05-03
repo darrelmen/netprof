@@ -259,7 +259,7 @@ public class User extends MiniUser implements ReportUser {
 //    this.first = first;
 //  }
 //
-//  public String getLast() {
+//  public String getLastDialog() {
 //    return last;
 //  }
 //

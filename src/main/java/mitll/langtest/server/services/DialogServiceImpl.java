@@ -296,6 +296,10 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    */
   public List<Integer> deleteATurnOrPair(int projid, int dialogID, int exid) throws DominoSessionException {
     getUserIDFromSessionOrDB();
+
+    return db.getDialogDAO().deleteExercise(projid, dialogID, exid);
+/*
+
     IDialog dialog = db.getProject(projid).getDialog(dialogID);
     boolean delete = true;
 
@@ -331,7 +335,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       db.getProjectManagement().addDialogInfo(projid, dialogID);
     }
 
-    return deletedIDs;
+    return deletedIDs;*/
   }
 
   /**
@@ -351,7 +355,20 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     db.getDialogDAO().update(dialog);
   }
 
-  public List<ClientExercise> addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException {
-    return db.getDialogDAO().addEmptyExercises(getOneDialog(dialogID), getUserIDFromSessionOrDB(), afterExid, isLeftSpeaker, System.currentTimeMillis());
+  public IDialog addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException {
+    IDialog oneDialog = getOneDialog(dialogID);
+
+    int before = oneDialog.getExercises().size();
+
+    db.getDialogDAO().addEmptyExercises(oneDialog, getUserIDFromSessionOrDB(), afterExid, isLeftSpeaker, System.currentTimeMillis());
+
+    int after = oneDialog.getExercises().size();
+    if (oneDialog.getKind() == DialogType.INTERPRETER) {
+      if (after - before != 2) logger.error("before there were " + before + " but after add only " + after);
+    } else {
+      if (after - before != 1) logger.error("before there were " + before + " but after add only " + after);
+    }
+
+    return oneDialog;
   }
 }

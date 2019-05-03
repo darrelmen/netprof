@@ -92,6 +92,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_TYPE_ORDER = false;
   private static final boolean DEBUG_OR_MERGE = false;
+  private static final boolean DEBUG_EMPTY = false;
 
   public SectionHelper() {
     makeRoot();
@@ -144,7 +145,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
       // TODO : I feel like I did this before...?
       // put sound at end...
-   //   reorderTypes(types, );
+      //   reorderTypes(types, );
       // }
       //if (DEBUG)
 //        logger.warn("getTypeOrder types " + types);
@@ -737,7 +738,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     if (firstEmpty) {
       pairs.add(getPair(first, DEFAULT_FOR_EMPTY));
 //      unitToValue.put(first, "1");
-      if (c++ < WARN_THRESH || c % 100 == 0) {
+      if (DEBUG_EMPTY && (c++ < WARN_THRESH || c % 100 == 0)) {
         logger.warn("getUnitToValue (" + c + ") got empty " + first + " for " + id + " type order " + first + ", " + second);
       }
     } else {
@@ -745,12 +746,11 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     }
 
     if (!second.isEmpty()) {
-
       boolean empty = lesson.trim().isEmpty();
 
       if (empty) {
         pairs.add(getPair(second, DEFAULT_FOR_EMPTY));
-        if (c++ < WARN_THRESH || c % 100 == 0) {
+        if (DEBUG_EMPTY && (c++ < WARN_THRESH || c % 100 == 0)) {
           logger.warn("getUnitToValue (" + c + ") got empty second " + second + " for " + id + " type order " + first + ", " + second);
         }
 
@@ -758,7 +758,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
         pairs.add(getPair(second, lesson));
       }
       if (empty) {
-        if (c++ < WARN_THRESH) {
+        if (DEBUG_EMPTY && c++ < WARN_THRESH) {
           logger.warn("getUnitToValue got empty " + second + " for " + id);
         }
       }

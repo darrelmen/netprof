@@ -89,5 +89,5 @@ public interface IDialogDAO extends IDAO {
    */
   void removeForProject(int id);
 
-  boolean deleteExercise(int projid, int dialogID, int exid);
+  List<Integer> deleteExercise(int projid, int dialogID, int exid);
 }

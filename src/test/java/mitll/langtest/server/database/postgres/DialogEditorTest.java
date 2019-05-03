@@ -69,8 +69,7 @@ public class DialogEditorTest extends BaseTest {
     DatabaseImpl andPopulate = getDatabase();
     logger.warn("testNewDialog START ==--------- ");
 
-    Project project = andPopulate.getProject(PROJECTID, true);
-    andPopulate.waitForSetupComplete();
+    Project project = getProject(andPopulate);
 
     Dialog toAdd = addDialog(andPopulate, PROJECTID, DialogType.DIALOG);
 
@@ -85,15 +84,18 @@ public class DialogEditorTest extends BaseTest {
 
   }
 
+  private Project getProject(DatabaseImpl andPopulate) {
+    Project project = andPopulate.getProject(PROJECTID, true);
+    andPopulate.waitForSetupComplete();
+    return project;
+  }
+
   @Test
   public void testNewDialogOps() {
     DatabaseImpl andPopulate = getDatabase();
     logger.warn("testNewDialogOps START ==--------- ");
 
-    Project project = andPopulate.getProject(PROJECTID, true);
-    andPopulate.waitForSetupComplete();
-
-    //waitTillLoad();
+    Project project = getProject(andPopulate);
 
     // do create!
     IDialog toAdd = addDialog(andPopulate, PROJECTID, DialogType.DIALOG);
@@ -115,13 +117,13 @@ public class DialogEditorTest extends BaseTest {
     // do delete!
     {
       int exid = exercises.get(exercises.size() - 1).getID();
-      boolean b = dialogDAO.deleteExercise(PROJECTID, id, exid);
+      boolean b = dialogDAO.deleteExercise(PROJECTID, id, exid).size() == 1;
       if (!b) {
         logger.error("didn't delete the exercise " + exid);
       } else {
         logger.info("says it did delete " + exid);
-
       }
+      Assert.assertTrue("should have deleted " + exid, b);
 
       toAdd = getiDialog(andPopulate, PROJECTID, id);
       exercises = toAdd.getExercises();
@@ -238,8 +240,7 @@ public class DialogEditorTest extends BaseTest {
     DatabaseImpl andPopulate = getDatabase();
     logger.warn("testNewDialogOpsAlternate START ==--------- ");
 
-    Project project = andPopulate.getProject(PROJECTID, true);
-    andPopulate.waitForSetupComplete();
+    Project project = getProject(andPopulate);
 
     //waitTillLoad();
 
@@ -366,8 +367,7 @@ public class DialogEditorTest extends BaseTest {
     DatabaseImpl andPopulate = getDatabase();
     logger.warn("testNewIntepreterDialogOps START ==--------- ");
 
-    Project project = andPopulate.getProject(PROJECTID, true);
-    andPopulate.waitForSetupComplete();
+    Project project = getProject(andPopulate);
 
     //waitTillLoad();
 
@@ -388,7 +388,7 @@ public class DialogEditorTest extends BaseTest {
     for (ClientExercise exercise : exercises) {
       logger.info("new    " + exercise);
       CommonExercise lookup = project.getExerciseByID(exercise.getID());
-      logger.info("lookup " + lookup);
+      // logger.info("lookup " + lookup);
       if (!isFirst) {
         boolean bothEnglish = exercise.hasEnglishAttr() == prevEnglish;
         Assert.assertFalse(bothEnglish);
@@ -401,12 +401,18 @@ public class DialogEditorTest extends BaseTest {
     // do delete!
     {
       int exid = exercises.get(exercises.size() - 1).getID();
-      boolean b = dialogDAO.deleteExercise(PROJECTID, id, exid);
+      ClientExercise exByID = toAdd.getExByID(exid);
+
+      logger.info("there are " + exercises.size() + " in dialog - last has exid " + exid + " found " + exByID);
+
+      boolean b = dialogDAO.deleteExercise(PROJECTID, id, exid).size() == 2;
+
       if (!b) {
         logger.error("didn't delete the exercise " + exid);
       } else {
         logger.info("says it did delete " + exid);
       }
+      Assert.assertTrue("should have deleted " + exid, b);
 
       toAdd = getiDialog(andPopulate, PROJECTID, id);
       exercises = toAdd.getExercises();
@@ -504,7 +510,7 @@ public class DialogEditorTest extends BaseTest {
       ClientExercise next = exercises.get(4);
       int exid = toDelete.getID();
 
-      boolean b = dialogDAO.deleteExercise(PROJECTID, toAdd.getID(), exid);
+      boolean b = dialogDAO.deleteExercise(PROJECTID, toAdd.getID(), exid).size() == 2;
       Assert.assertTrue(b);
 
       toAdd = getiDialog(andPopulate, PROJECTID, id);
@@ -531,10 +537,7 @@ public class DialogEditorTest extends BaseTest {
     DatabaseImpl andPopulate = getDatabase();
     logger.warn("testNewIntepreterLeftRightDialogOps START ==--------- ");
 
-    Project project = andPopulate.getProject(PROJECTID, true);
-    andPopulate.waitForSetupComplete();
-
-    //waitTillLoad();
+    Project project = getProject(andPopulate);
 
     // do create!
     DialogType interpreter = DialogType.INTERPRETER;
@@ -630,7 +633,7 @@ public class DialogEditorTest extends BaseTest {
       ClientExercise next = exercises.get(4);
       int exid = toDelete.getID();
 
-      boolean b = dialogDAO.deleteExercise(PROJECTID, toAdd.getID(), exid);
+      boolean b = dialogDAO.deleteExercise(PROJECTID, toAdd.getID(), exid).size() == 2;
       Assert.assertTrue(b);
 
       toAdd = getiDialog(andPopulate, PROJECTID, id);
@@ -673,7 +676,10 @@ public class DialogEditorTest extends BaseTest {
   public void testNewDialogAndInsert() {
     DatabaseImpl andPopulate = getDatabase();
     logger.warn("testNewDialogAndInsert START ==--------- ");
-    Project project = andPopulate.getProject(21, true);
+
+
+    Project project = getProject(andPopulate);
+
     Dialog toAdd = new Dialog(-1,
         6,
         21,
@@ -688,7 +694,6 @@ public class DialogEditorTest extends BaseTest {
         "us", true
     );
 
-    andPopulate.waitForSetupComplete();
 
     andPopulate.getDialogDAO().add(toAdd);
 
@@ -716,9 +721,9 @@ public class DialogEditorTest extends BaseTest {
   @Ignore
   @Test
   public void testGetDialog() {
-    DatabaseImpl andPopulate = getDatabase();
     logger.warn("testGetDialog START ==--------- ");
-    Project project = andPopulate.getProject(PROJECTID, true);
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = getProject(andPopulate);
 
     List<IDialog> collect = project.getDialogs().stream().filter(dialog -> dialog.getID() == 83).collect(Collectors.toList());
 
@@ -739,17 +744,12 @@ public class DialogEditorTest extends BaseTest {
     int projectid = PROJECTID;
     int i = 32;
 
-    Project project = andPopulate.getProject(projectid, true);
-
-    andPopulate.getProject(projectid, true);
-
-    andPopulate.waitForSetupComplete();
+    Project project = getProject(andPopulate);
 
     IDialog iDialog = getiDialog(andPopulate, projectid, i);
     logger.info("before has " + iDialog.getExercises().size());
     iDialog.getExercises().forEach(logger::info);
     andPopulate.close();
-
   }
 
   @Ignore
@@ -759,11 +759,7 @@ public class DialogEditorTest extends BaseTest {
     int projectid = PROJECTID;
     int i = 33;
 
-    Project project = andPopulate.getProject(projectid, true);
-
-    andPopulate.getProject(projectid, true);
-
-    andPopulate.waitForSetupComplete();
+    Project project = getProject(andPopulate);
 
     IDialog iDialog = getiDialog(andPopulate, projectid, i);
     logger.info("before has " + iDialog.getExercises().size());
@@ -776,10 +772,10 @@ public class DialogEditorTest extends BaseTest {
   public void testChangeDialog() {
     DatabaseImpl andPopulate = getDatabase();
     logger.warn("testChangeDialog START ==--------- ");
-    int projectid = PROJECTID;
-    Project project = andPopulate.getProject(projectid, true);
 
-    IDialog iDialog = project.getLast();
+    Project project = getProject(andPopulate);
+
+    IDialog iDialog = project.getLastDialog();
     {
       logger.info("before dialog " + iDialog.getID() + " : " + iDialog.isPrivate());
       iDialog.getMutable().setIsPrivate(false);
@@ -788,7 +784,7 @@ public class DialogEditorTest extends BaseTest {
     {
       andPopulate.getDialogDAO().update(iDialog);
 
-      iDialog = project.getLast();
+      iDialog = project.getLastDialog();
       logger.info("after dialog " + iDialog.getID() + " : " + iDialog.isPrivate());
     }
 
@@ -803,7 +799,7 @@ public class DialogEditorTest extends BaseTest {
     {
       andPopulate.getDialogDAO().update(iDialog);
 
-      iDialog = project.getLast();
+      iDialog = project.getLastDialog();
       logger.info("2 after dialog " + iDialog.getID() + " : " + iDialog.isPrivate());
     }
 
@@ -814,32 +810,20 @@ public class DialogEditorTest extends BaseTest {
   }
 
   @Test
-  public void testInsertAtFrontDialog() {
+  public void testInsertExAtFrontDialog() {
     DatabaseImpl andPopulate = getDatabase();
     logger.warn("testInsertAtFrontDialog START ==--------- ");
     int projectid = PROJECTID;
-    //   int i = 32;
-    Project project = andPopulate.getProject(projectid, true);
-    IDialog last = project.getLast();
-    andPopulate.waitForSetupComplete();
 
-    // waitTillLoad();
+    Project project = getProject(andPopulate);
+    IDialog last = project.getLastDialog();
+    int id = last.getID();
+    IDialog iDialog = getiDialog(andPopulate, projectid, id);
 
-    IDialog iDialog = getiDialog(andPopulate, projectid, last.getID());
-
-    doInsert(andPopulate, projectid, last.getID(), iDialog);
+    doInsert(andPopulate, projectid, id, iDialog);
     logger.warn("testInsertAtFrontDialog END ==--------- ");
     andPopulate.close();
-
   }
-//
-//  private void waitTillLoad() {
-//    try {
-//      Thread.sleep(3000);
-//    } catch (InterruptedException e) {
-//      e.printStackTrace();
-//    }
-//  }
 
 /*
   @Test
@@ -848,7 +832,7 @@ public class DialogEditorTest extends BaseTest {
     int projectid = PROJECTID;
   //  int i = 32;
     Project project = andPopulate.getProject(projectid, true);
-    IDialog last = project.getLast();
+    IDialog last = project.getLastDialog();
 
     andPopulate.waitForSetupComplete();
 
@@ -914,7 +898,7 @@ public class DialogEditorTest extends BaseTest {
   public void testInterpreterStored() {
     logger.warn("testInterpreterStored START ==--------- ");
     DatabaseImpl andPopulate = getDatabase();
-    Project project = andPopulate.getProject(PROJECTID);
+    Project project = getProject(andPopulate);
     report(andPopulate, project);
     logger.warn("testInterpreterStored END ==--------- ");
     andPopulate.close();
@@ -925,8 +909,9 @@ public class DialogEditorTest extends BaseTest {
   public void testInterpreterFrenchToRecord() {
     DatabaseImpl andPopulate = getDatabase();
     logger.warn("testInterpreterFrenchToRecord START ==--------- ");
-    andPopulate.getProject(PROJECTID);
-    Project project = andPopulate.getProjectManagement().getProductionByLanguage(Language.FRENCH);
+    Project project = getProject(andPopulate);
+
+//    Project project = andPopulate.getProjectManagement().getProductionByLanguage(Language.FRENCH);
     int projectid = project.getID();
 
     FilterRequest request = new FilterRequest()
@@ -957,8 +942,8 @@ public class DialogEditorTest extends BaseTest {
   public void testInterpreterFrench() {
     DatabaseImpl andPopulate = getDatabase();
     logger.warn("testInterpreterFrench START ==--------- ");
-    andPopulate.getProject(PROJECTID);
-    Project project = andPopulate.getProjectManagement().getProductionByLanguage(Language.FRENCH);
+    Project project = getProject(andPopulate);
+    //   Project project = andPopulate.getProjectManagement().getProductionByLanguage(Language.FRENCH);
     int projectid = project.getID();
 
     FilterRequest request = new FilterRequest()
@@ -1014,8 +999,8 @@ public class DialogEditorTest extends BaseTest {
   public void testNormalFrench() {
     DatabaseImpl andPopulate = getDatabase();
     logger.warn("testNormalFrench START ==--------- ");
-    andPopulate.getProject(PROJECTID);
-    Project project = andPopulate.getProjectManagement().getProductionByLanguage(Language.FRENCH);
+
+    Project project = getProject(andPopulate);
     int projectid = project.getID();
 
     FilterRequest request = new FilterRequest()
@@ -1069,7 +1054,7 @@ public class DialogEditorTest extends BaseTest {
     DatabaseImpl andPopulate = getDatabase();
     logger.warn("testInterpreterRecord START ==--------- ");
     int projectid = PROJECTID;
-    Project project = andPopulate.getProject(projectid);
+    Project project = getProject(andPopulate);
 
     FilterRequest request = new FilterRequest().setRecordRequest(true).setMode(DIALOG);
     project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));

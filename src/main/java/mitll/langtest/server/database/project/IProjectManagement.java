@@ -158,11 +158,5 @@ public interface IProjectManagement {
 
   void updateOOV(List<OOV> updates, int user);
 
-  /**
-   *
-   * @param projID
-   */
-  //void addDialogInfo(int projID);
-
   void addDialogInfo(int projID, int dialogID);
 }

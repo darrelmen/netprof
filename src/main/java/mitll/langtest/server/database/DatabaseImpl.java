@@ -173,7 +173,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   private IPendingUserDAO pendingUserDAO;
   private IOOVDAO oovDAO;
 
-  boolean setupComplete=false;
+  private boolean setupComplete = false;
+  private boolean defaultUserFound = false;
 
   public DatabaseImpl() {
   }
@@ -384,23 +385,27 @@ public class DatabaseImpl implements Database, DatabaseServices {
       {
         int defaultUser = getUserDAO().getDefaultUser();
         imageDAO.ensureDefault(projectDAO.getDefault());
-        logger.info("finalSetup : default user " + defaultUser);
+        //    logger.info("finalSetup : default user " + defaultUser);
         dialogDAO.ensureDefault(defaultUser);
+        defaultUserFound = true;
       }
     }, "ensureDefaultUser").start();
 
     afterDAOSetup(slickAudioDAO);
 
-    logger.info("finalSetup : tables = " + getTables());
-
-    setupComplete=true;
+    setupComplete = true;
+    // logger.info("finalSetup : tables = " + getTables());
   }
+
+  private int count = 0;
 
   public void waitForDefaultUser() {
     while (getUserDAO().getDefaultUser() < 1) {
       try {
         sleep(1000);
-        logger.info("finalSetup ---> no default user yet.....");
+        if (count++ > 5) {
+          logger.info("finalSetup ---> no default user yet.....");
+        }
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
@@ -408,10 +413,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   public void waitForSetupComplete() {
-    while (!setupComplete) {
+    while (!setupComplete || !defaultUserFound) {
       try {
         sleep(1000);
-        logger.info("waitForSetupComplete setup not complete...");
+        logger.info("waitForSetupComplete : setup complete " + setupComplete + " user found " + defaultUserFound);
       } catch (InterruptedException e) {
         e.printStackTrace();
       }
@@ -429,8 +434,8 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @see #finalSetup
    * @param slickAudioDAO
+   * @see #finalSetup
    */
   private void afterDAOSetup(SlickAudioDAO slickAudioDAO) {
     if (userDAO instanceof UserDAO) {

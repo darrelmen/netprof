@@ -64,8 +64,6 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable,
   String getUnit();
   String getChapter();
 
- // String getCountryCode();
-
   String getAttributeValue(DialogMetadata metadata);
   ExerciseAttribute getAttribute(DialogMetadata metadata);
 
@@ -80,6 +78,7 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable,
    * @return
    */
   List<ClientExercise> getExercises();
+  ClientExercise getExByID(int exid);
 
   int getLastID();
   ClientExercise getLast();

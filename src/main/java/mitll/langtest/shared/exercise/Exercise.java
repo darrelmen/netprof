@@ -54,7 +54,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private transient Collection<String> refSentences = new ArrayList<String>();
 
-//  private transient List<String> firstPron = new ArrayList<>();
+  //  private transient List<String> firstPron = new ArrayList<>();
   private List<String> tokens;
   private long updateTime = 0;
 
@@ -376,9 +376,18 @@ public class Exercise extends AudioExercise implements CommonExercise,
         .collect(Collectors.toSet()).isEmpty();
   }
 
+  public String getSpeaker() {
+    Set<ExerciseAttribute> collect = getAttributes()
+        .stream()
+        .filter(attr ->
+            attr.getProperty().equalsIgnoreCase(DialogMetadata.SPEAKER.name()))
+        .collect(Collectors.toSet());
+    return collect.isEmpty() ? "" : collect.iterator().next().getValue();
+  }
+
   /**
-   * @see mitll.langtest.server.database.dialog.DialogReader#getExercise(List, Set, Path, String, String, String, List)
    * @param attribute
+   * @see mitll.langtest.server.database.dialog.DialogReader#getExercise(List, Set, Path, String, String, String, List)
    */
   public void addAttribute(ExerciseAttribute attribute) {
     attributes.add(attribute);
@@ -421,7 +430,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
 //  public List<String> getFirstPron() {
 //    return firstPron;
 //  }
-
   @Override
   public List<String> getTokens() {
     return tokens;
@@ -639,8 +647,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
       }
     }
 
-    return "Exercise #" +
-        getID() +
+    return "Exercise " +
+        "\n\t#" +        getID() +
         ", domino # " + getDominoID() +
         (isContext() ? "\n\tcontext " + isContext() : "") +
         (getOldID().isEmpty() ? "" : "\n\tnp id '" + getOldID() + "'") +

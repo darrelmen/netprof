@@ -370,7 +370,10 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           root.getMutable().addContextExercise(context);
           //      attached++;
         } else if (c++ < 2) {
-          logger.warn("1 " + prefix + " didn't attach " + relatedExercise + "" + " for\n" + root);
+          logger.warn("attachContextExercises : project " + prefix +
+              "\n\tdidn't attach " + relatedExercise +
+              "\n\tcontext       " + context +
+              "\n\tfor ex        " + root);
         }
       } else if (c++ < SPEW_THRESH || c % 100 == 0) {
         CommonExercise next = allNonContextExercises.isEmpty() ? null : allNonContextExercises.iterator().next();

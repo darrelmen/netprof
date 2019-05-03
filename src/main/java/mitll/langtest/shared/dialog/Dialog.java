@@ -237,6 +237,12 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
   }
 
   @Override
+  public ClientExercise getExByID(int exid) {
+    List<ClientExercise> collect = exercises.stream().filter(exercise -> exercise.getID() == exid).limit(1).collect(Collectors.toList());
+    return collect.isEmpty() ? null : collect.get(0);
+  }
+
+  @Override
   public int getLastID() {
     return getExercises().isEmpty() ? -1 : getExercises().get(getExercises().size() - 1).getID();
   }
@@ -290,7 +296,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     List<ExerciseAttribute> speakers = attributes
         .stream()
         .filter(exerciseAttribute -> (exerciseAttribute.getProperty().toLowerCase().startsWith(SPEAKER)))
-        .sorted(Comparator.comparing(Pair::getProperty))
+      //  .sorted(Comparator.comparing(Pair::getProperty))
         .collect(Collectors.toList());
 
     return speakers.stream().map(Pair::getValue)

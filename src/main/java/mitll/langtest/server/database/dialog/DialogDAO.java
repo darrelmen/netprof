@@ -182,13 +182,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
   @NotNull
   private List<IDialog> getOneDialog(int projid, SlickDialog theDialog) {
-    List<IDialog> dialogs = new ArrayList<>();
-    Map<Integer, Dialog> idToDialog = new HashMap<>();
-
     Dialog e = makeDialog(theDialog);
-    dialogs.add(e);
     int id = theDialog.id();
-    idToDialog.put(id, e);
 
     // add dialog attributes
     IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
@@ -203,8 +198,14 @@ public class DialogDAO extends DAO implements IDialogDAO {
     Map<Integer, List<SlickRelatedExercise>> dialogIDToCoreRelated =
         userExerciseDAO.getRelatedCoreExercise().getDialogIDToRelatedForDialog(id);
 
-    configureDialogs(projid, idToDialog, idToPair, dialogIDToRelated, dialogIDToCoreRelated);
+    {
+      Map<Integer, Dialog> idToDialog = new HashMap<>();
+      idToDialog.put(id, e);
+      configureDialogs(projid, idToDialog, idToPair, dialogIDToRelated, dialogIDToCoreRelated);
+    }
 
+    List<IDialog> dialogs = new ArrayList<>();
+    dialogs.add(e);
     return dialogs;
   }
 
@@ -251,7 +252,14 @@ public class DialogDAO extends DAO implements IDialogDAO {
     }
 
     //add exercises
-    addExercises(projid, dialogIDToRelated, dialogID, dialog);
+    List<ClientExercise> clientExercises = addExercises(projid, dialogIDToRelated, dialogID, dialog);
+
+    // sanity check for interpreter dialogs
+    if (dialog.getKind() == DialogType.INTERPRETER) {
+      if (clientExercises.size() % 2 != 0) {
+        logger.error("configureDialog : huh? dialog " + dialog + " has " + clientExercises.size() + " exercises - should be even!");
+      }
+    }
 
     // add core vocab
     addCoreVocab(dialogIDToCoreRelated.get(dialogID), project, dialog);
@@ -358,6 +366,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
       if (e == null) {
         logger.error("addAttributes no attr for id #" + slickDialogAttributeJoin.attrid());
       } else {
+        if (e.getProperty() == null || e.getValue() == null) {
+          logger.error("addAttributes huh? made an attribute with null fields ? " + e);
+        }
         dialog.getAttributes().add(e);
       }
     });
@@ -400,12 +411,13 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @param dialog
    * @see #configureDialog(int, Dialog, Map, Map, Map, IProject, Integer, Collection)
    */
-  private void addExercises(int projid,
-                            Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated,
-                            Integer dialogID,
-                            Dialog dialog) {
+  private List<ClientExercise> addExercises(int projid,
+                                            Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated,
+                                            Integer dialogID,
+                                            Dialog dialog) {
     List<SlickRelatedExercise> slickRelatedExercises = dialogIDToRelated.get(dialogID);
 
+    List<ClientExercise> exercises1 = dialog.getExercises();
     if (slickRelatedExercises != null) {
       List<CommonExercise> exercises = new ArrayList<>();
       Set<Integer> candidate = new HashSet<>();
@@ -446,7 +458,12 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
           if (childEx == null && childid != exid) {
             CommonExercise childExOrig = databaseImpl.getExercise(projid, childid);
-            idToEx.put(childid, childEx = new Exercise(childExOrig));
+
+            if (childExOrig == null) {
+              logger.warn("\n\n\naddExercises : can't find " + childid);
+            } else {
+              idToEx.put(childid, childEx = new Exercise(childExOrig));
+            }
           }
 
           if (childEx == null || childid == exid) {
@@ -488,20 +505,22 @@ public class DialogDAO extends DAO implements IDialogDAO {
 //      else if (size == 1) {
         //   } else if (size == 2) logger.warn("not expecting multiple parents " + firstEx);
 
-        exercises.forEach(current -> dialog.getExercises().add(current));
+        exercises1.addAll(exercises);
       }
     } else {
 //      logger.warn("no exercises for " + dialogID);
     }
 
     String message = "dialog " + dialog.getID() + " " + dialog.getUnit() + " " + dialog.getChapter() +
-        " has " + dialog.getExercises().size() + " exercises.";
+        " has " + exercises1.size() + " exercises.";
 
-    if (dialog.getExercises().isEmpty()) {
+    if (exercises1.isEmpty()) {
 //      logger.warn(message);
     } else if (DEBUG) {
       logger.info(message);
     }
+
+    return exercises1;
   }
 
   /**
@@ -591,27 +610,33 @@ public class DialogDAO extends DAO implements IDialogDAO {
     Project project = databaseImpl.getProject(projid);
     List<String> typeOrder = project.getTypeOrder();
 
-    List<ClientExercise> clientExercises = addExercisesToDialog(toAdd, projid, typeOrder, afterExid, isLeft);
-
-    DialogPopulate dialogPopulate = new DialogPopulate(databaseImpl, project.getPathHelper());
-
     if (afterExid == -1) {
       if (!toAdd.getExercises().isEmpty()) {
         logger.warn("\n\n\naddEmptyExercises : after id is -1 but dialog has " + toAdd.getExercises().size() + " exercises");
       }
     }
 
+    List<ClientExercise> clientExercises = addExercisesToDialog(toAdd, projid, typeOrder, afterExid, isLeft);
+
+    DialogPopulate dialogPopulate = new DialogPopulate(databaseImpl, project.getPathHelper());
+
+    int dialogID = toAdd.getID();
     if (afterExid == -1) {
       dialogPopulate.addExercises2(projid,
           userid,
           typeOrder,
           new Timestamp(now),
-          toAdd.getID(),
+          dialogID,
           clientExercises);
     } else {
       dialogPopulate.addExercisesAndSetID(projid, userid, typeOrder, clientExercises);
 
       IRelatedExercise relatedExercise = databaseImpl.getUserExerciseDAO().getRelatedExercise();
+
+      logger.info("addEmptyExercises : insert " + clientExercises.size() + " after " + afterExid);
+
+   //   sanityCheckLanguageAndSpeaker(toAdd, afterExid, clientExercises);
+
       for (ClientExercise newEx : clientExercises) {
         if (!relatedExercise.insertAfter(afterExid, newEx.getID())) {
           logger.warn("addEmptyExercises : didn't insert " + newEx.getID() + " after " + afterExid);
@@ -624,15 +649,52 @@ public class DialogDAO extends DAO implements IDialogDAO {
     refreshExercises(clientExercises, project);
 
     // refresh dialogs on project
-    databaseImpl.getProjectManagement().addDialogInfo(projid, toAdd.getID());
+    databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
+
+    List<ClientExercise> exercises = databaseImpl.getProject(projid).getDialog(dialogID).getExercises();
+
+
+    clientExercises.forEach(exercise -> logger.info("addEmptyExercises : new exercise " + exercise.getID() + " : " + exercise.getSpeaker() + " (" + exercise.hasEnglishAttr() + ") at position " + exercises.indexOf(exercise)));
+
+    exercises.forEach(exercise -> logger.info("addEmptyExercises : dialog exercises are now " + exercise.getID() + " : " + exercise.getSpeaker() + " eng " + exercise.hasEnglishAttr()));
 
     return clientExercises;
   }
 
+  private void sanityCheckLanguageAndSpeaker(IDialog toAdd, int afterExid, List<ClientExercise> clientExercises) {
+    if (toAdd.getKind() == DialogType.INTERPRETER) {
+      ClientExercise currentEx = toAdd.getExByID(afterExid);
+      ClientExercise nextEx = clientExercises.get(0);
+
+      {
+        boolean hasEnglishAttr = currentEx.hasEnglishAttr();
+        boolean hasEnglishAttr1 = nextEx.hasEnglishAttr();
+        if (hasEnglishAttr && hasEnglishAttr1) {
+          logger.error("huh? adding another english " + nextEx + " after a current english turn : " +
+              currentEx +
+              "?");
+        } else if (!hasEnglishAttr && !hasEnglishAttr1) {
+          logger.error("huh? adding another fl " + nextEx + " after a current fl turn : " +
+              currentEx +
+              "?");
+        }
+      }
+
+      {
+        String currentExSpeaker = currentEx.getSpeaker();
+        String nextExSpeaker = nextEx.getSpeaker();
+
+        if (currentExSpeaker.equalsIgnoreCase(nextExSpeaker)) {
+          logger.error("huh? adding two turns with same speaker : " +
+              currentExSpeaker +
+              "?");
+        }
+      }
+    }
+  }
+
   private void refreshExercises(List<ClientExercise> exercises, Project project) {
     ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
-
-    //List<ClientExercise> exercises = toAdd.getExercises();
     exercises.forEach(exercise -> {
       int id = exercise.getID();
 
@@ -662,13 +724,18 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @param exid
    * @return
    */
-  public boolean deleteExercise(int projid, int dialogID, int exid) {
+  public List<Integer> deleteExercise(int projid, int dialogID, int exid) {
     IDialog dialog = databaseImpl.getProject(projid).getDialog(dialogID);
     DialogType dialogType = dialog.getKind();
     IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
     IRelatedExercise relatedExercise = userExerciseDAO.getRelatedExercise();
+    List<Integer> deletedIDs = new ArrayList<>();
+
     if (dialogType == DialogType.INTERPRETER) {
       List<ClientExercise> exercises = dialog.getExercises();
+
+      logger.info("deleteExercise found " + exercises.size() + " exercises on " + dialogID);
+
       int found = -1;
       for (int i = 0; i < exercises.size(); i++) {
         if (exercises.get(i).getID() == exid) {
@@ -678,28 +745,30 @@ public class DialogDAO extends DAO implements IDialogDAO {
       }
       if (found == -1) {
         logger.error("deleteExercise can't find ex " + exid + " in " + dialogID);
-        return false;
+
       } else {
-        ClientExercise clientExercise = exercises.get(found - 1);
-        logger.info("deleteExercise prev of " + exid + " is " + clientExercise);
-        int prev = clientExercise.getID();
-        // boolean didIt = relatedExercise.deleteAndFixForEx(prev);
+        ClientExercise prevCandidate = exercises.get(found - 1);
+        logger.info("deleteExercise prev of " + exid + " is " + prevCandidate);
+        int prev = prevCandidate.getID();
         if (relatedExercise.deleteAndFixForEx(prev)) {
+          logger.info("\tdeleteExercise deleted prev relation " + exid);
+
           if (relatedExercise.deleteAndFixForEx(exid)) {
-            // refresh dialogs on project
+            logger.info("\tdeleteExercise deleted current relation " + exid);
           } else {
-            // refresh dialogs on project
-//            userExerciseDAO.deleteByExID(Arrays.asList(prev, exid));
-//            databaseImpl.getProjectManagement().addDialogInfo(projid);
             logger.info("deleteExercise did not delete requested ex " + exid + " in " + dialogID);
-            //return true;
           }
+
           userExerciseDAO.deleteByExID(Arrays.asList(prev, exid));
+
+          deletedIDs.add(prev);
+          deletedIDs.add(exid);
+
           databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
-          return true;
+
         } else {
           logger.error("deleteExercise did not delete prev ex " + prev + " in " + dialogID);
-          return false;
+//          return false;
         }
       }
     } else {
@@ -707,12 +776,12 @@ public class DialogDAO extends DAO implements IDialogDAO {
         userExerciseDAO.deleteByExID(Collections.singleton(exid));
         // refresh dialogs on project
         databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
-        return true;
+        deletedIDs.add(exid);
       } else {
         logger.error("did not delete ex " + exid + " in " + dialogID);
-        return false;
       }
     }
+    return deletedIDs;
   }
 
   /**
@@ -757,7 +826,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     String prefix = interpreter ? isLeft ? "E-" : SPEAKER_PREFIX : SPEAKER_PREFIX;
 
     String speaker = interpreter ?
-        isLeft ? BaseDialogReader.ENGLISH_SPEAKER : SPEAKER_A :
+        isLeft ? BaseDialogReader.ENGLISH_SPEAKER : SPEAKER_B :
         (isLeft ? SPEAKER_A : SPEAKER_B);
 
     String interpreterPrefix = "I-";
@@ -768,7 +837,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
       {
         Language firstLang = isLeft ? ENGLISH : projectLang;
         Exercise exercise = baseDialogReader.getExercise("", "", "", speaker, firstLang, speakerTurn, defaultUnitAndChapter);
-        exercises.add(exercise);
+        exercises.add(index, exercise);
         newEx.add(exercise);
       }
 
@@ -776,13 +845,13 @@ public class DialogDAO extends DAO implements IDialogDAO {
         Language secondLang = isLeft ? projectLang : ENGLISH;
         Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.INTERPRETERSPEAKER, secondLang,
             interpreterPrefix + index, defaultUnitAndChapter);
-        exercises.add(exercise1);
+        exercises.add(index + 1, exercise1);
         newEx.add(exercise1);
       }
 
     } else {
       Exercise exercise1 = baseDialogReader.getExercise("", "", "", speaker, projectLang, speakerTurn, defaultUnitAndChapter);
-      exercises.add(exercise1);
+      exercises.add(index, exercise1);
       newEx.add(exercise1);
     }
 

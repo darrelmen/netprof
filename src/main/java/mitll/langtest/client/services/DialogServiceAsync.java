@@ -50,14 +50,12 @@ public interface DialogServiceAsync {
 
   void delete(int projid, int id, AsyncCallback<Boolean> async);
 
-//  @Deprecated
-//  void deleteExerciseInDialog(int projid, int id, int exid,AsyncCallback<Boolean> async);
 
   void addDialog(IDialog dialog, AsyncCallback<IDialog> async);
 
   void update(IDialog dialog,AsyncCallback<Void> async);
 
-  void addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker, AsyncCallback<List<ClientExercise>> async);
+  void addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker, AsyncCallback<IDialog> async);
 
   void deleteATurnOrPair(int projid, int dialogID, int exid, AsyncCallback<List<Integer>> async);
 }
