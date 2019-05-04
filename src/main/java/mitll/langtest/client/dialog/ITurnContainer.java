@@ -37,6 +37,6 @@ public interface ITurnContainer<T extends ITurnPanel> {
   void addTurnForOtherSpeaker(T editorTurn);
   void deleteCurrentTurnOrPair(T currentTurn);
   void setCurrentTurnTo(T newTurn);
-
+boolean isInterpreter();
  // ListenViewHelper.COLUMNS getColumnForPrev(T widgets);
 }

@@ -57,12 +57,12 @@ public class DialogEditorTest extends BaseTest {
 
   public static final int MAX = 200;
   public static final int KOREAN_ID = 46;
-  private static final String PRESENTATION1 = "presentation";
+ // private static final String PRESENTATION1 = "presentation";
   private static final String ANY1 = "Any";
   private static final String UNIT1 = "Unit";
 
   private static final int USERID = 6;
-  private static final int PROJECTID = 21;
+  private static final int PROJECTID = 5;//21;
 
   @Test
   public void testNewDialog() {
@@ -682,7 +682,7 @@ public class DialogEditorTest extends BaseTest {
 
     Dialog toAdd = new Dialog(-1,
         6,
-        21,
+        PROJECTID,
         -1,
         -1,
         System.currentTimeMillis(),

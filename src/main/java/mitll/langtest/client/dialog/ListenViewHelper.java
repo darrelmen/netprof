@@ -59,7 +59,6 @@ import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -76,12 +75,13 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 public class ListenViewHelper<T extends ITurnPanel>
     extends DialogView
     implements ContentView, PlayListener, IListenView, ITurnContainer<T> {
-  public static final String A = "A";
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
   private static final String ENGLISH_SPEAKER = "English Speaker";
+
   private static final String INTERPRETER = "Interpreter";
-  private static final String SPEAKER_B = "B";
+  public static final String SPEAKER_A = "A";
+  public static final String SPEAKER_B = "B";
 
   private static final int INTERPRETER_WIDTH = 165;//235;
   private static final int PADDING_LOZENGE = 14;
@@ -252,41 +252,21 @@ public class ListenViewHelper<T extends ITurnPanel>
     rowOne.getElement().setId("speakerRow");
     rowOne.getElement().getStyle().setMarginTop(5, PX);
 
-    {
-      String firstSpeaker = getFirstSpeakerLabel(dialog);
-
-      //  if (isInterpreter) {
-      rowOne.add(getLeftSpeaker(firstSpeaker));
-      // }
-//      else {
-//        leftSpeakerBox = addLeftSpeaker(rowOne, firstSpeaker);
-//      }
-    }
-
-    // if (isInterpreter) {
+    rowOne.add(getLeftSpeaker(getFirstSpeakerLabel(dialog)));
     rowOne.add(getRightSpeaker(getSecondSpeakerLabel(dialog)));
-    //}
 
     {
-//      if (isInterpreter) {
       DivWidget middleSpeaker = getMiddleSpeaker();
-      if (!isInterpreter) middleSpeaker.setHeight("5px");
+      if (!isInterpreter) {
+        middleSpeaker.setHeight("5px");
+        middleSpeaker.setVisible(false);
+      }
       rowOne.add(middleSpeaker);
-      //    }
-//      else {
-//        rightSpeakerBox = addRightSpeaker(rowOne, getInterpreterSpeakerLabel(dialog));
-//      }
     }
 
     return rowOne;
   }
 
-//  @NotNull
-//  private String getInterpreterSpeakerLabel(IDialog dialog) {
-//    String interpreterSpeaker = dialog.getSpeakers().size() > 1 ? dialog.getSpeakers().get(1) : null;
-//    if (interpreterSpeaker == null) interpreterSpeaker = INTERPRETER;
-//    return interpreterSpeaker;
-//  }
 
   /**
    * TODO : allow english speaker to go second
@@ -336,7 +316,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 //        .sorted(Comparator.comparing(Pair::getProperty))
 //        .collect(Collectors.toList());
 
-   // properties.forEach(p -> logger.info(p.toString()));
+    // properties.forEach(p -> logger.info(p.toString()));
 
     String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
 
@@ -353,7 +333,7 @@ public class ListenViewHelper<T extends ITurnPanel>
       firstSpeaker = ENGLISH_SPEAKER;
     }
 
-    if (firstSpeaker == null) firstSpeaker = A;
+    if (firstSpeaker == null) firstSpeaker = SPEAKER_A;
     return firstSpeaker;
   }
 
@@ -372,7 +352,6 @@ public class ListenViewHelper<T extends ITurnPanel>
     setPadding(middle);
     middle.add(w);
     styleLabel(w);
-    //  w.getElement().getStyle().setMarginLeft(43, PX);
 
     middle.getElement().getStyle().setBackgroundColor(MIDDLE_COLOR);
     return middle;
@@ -436,18 +415,19 @@ public class ListenViewHelper<T extends ITurnPanel>
     style.setMarginTop(10, PX);
     style.setMarginBottom(10, PX);
     style.setZIndex(1000);
+    style.setOverflow(Style.Overflow.HIDDEN);
   }
 
-  private CheckBox addLeftSpeaker(DivWidget rowOne, String label) {
-    CheckBox checkBox = new CheckBox(label, true);
-    // setLeftTurnSpeakerInitial(checkBox);
-    styleLeftSpeaker(checkBox);
-
-//    checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
-
-    rowOne.add(getLeftSpeakerDiv(checkBox));
-    return checkBox;
-  }
+//  private CheckBox addLeftSpeaker(DivWidget rowOne, String label) {
+//    CheckBox checkBox = new CheckBox(label, true);
+//    // setLeftTurnSpeakerInitial(checkBox);
+//    styleLeftSpeaker(checkBox);
+//
+////    checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
+//
+//    rowOne.add(getLeftSpeakerDiv(checkBox));
+//    return checkBox;
+//  }
 
   private void styleLeftSpeaker(UIObject checkBox) {
     styleLabel(checkBox);
@@ -475,7 +455,6 @@ public class ListenViewHelper<T extends ITurnPanel>
   private void styleRightSpeaker(UIObject checkBox) {
     styleLabel(checkBox);
   }
-
   private void styleLabel(UIObject checkBox) {
     checkBox.getElement().getStyle().setFontSize(32, PX);
   }
@@ -566,7 +545,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     return rowOne;
   }
 
-  protected void addAllTurns(IDialog dialog, DivWidget rowOne) {
+   void addAllTurns(IDialog dialog, DivWidget rowOne) {
     String left = getFirstSpeakerLabel(dialog); //speakers.get(0);
     String right = getSecondSpeakerLabel(dialog);//speakers.get(2);
 /*    logger.info("for speaker " + left + " got " + speakerToEx.get(left).size());
@@ -1005,6 +984,11 @@ public class ListenViewHelper<T extends ITurnPanel>
     afterChangeTurns(isPlaying);
   }
 
+  @Override
+  public boolean isInterpreter() {
+    return dialog.getKind() == DialogType.INTERPRETER;
+  }
+
   private int beforeChangeTurns() {
     setPlayButtonToPlay();
 
@@ -1022,7 +1006,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   private void afterChangeTurns(boolean isPlaying) {
-   // logger.info("afterChangeTurns isPlaying " + isPlaying);
+    // logger.info("afterChangeTurns isPlaying " + isPlaying);
     markCurrent();
     if (isPlaying) playCurrentTurn();
   }
@@ -1411,6 +1395,9 @@ public class ListenViewHelper<T extends ITurnPanel>
   public void deleteCurrentTurnOrPair(T currentTurn) {
 
   }
+
+
+
 //
 //  @Override
 //  public COLUMNS getColumnForPrev(T widgets) {

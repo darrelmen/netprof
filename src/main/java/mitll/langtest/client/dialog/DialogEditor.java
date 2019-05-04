@@ -37,6 +37,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.dialog.DialogEditorView;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
@@ -235,8 +236,12 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
             }
           }
         });
-
   }
+
+//  @Override
+//  public boolean isInterpreter() {
+//    return dialog.getKind() == DialogType.INTERPRETER;
+//  }
 
   @NotNull
   private AsyncCallback<IDialog> getAsyncForNewTurns(int exid) {
@@ -248,7 +253,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
 
       @Override
       public void onSuccess(IDialog result) {
-
         addTurns(result, exid);
 //        gotForward(this);
 //        getCurrentTurn().grabFocus();
@@ -275,8 +279,10 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
    * @see DialogEditorView.MyShownCloseListener#gotShown
    */
   public void grabFocus() {
-    logger.info("give focus to turn for ex #" + getCurrentTurn().getExID());
-    getCurrentTurn().grabFocus();
+    if (getCurrentTurn() != null) {
+      logger.info("give focus to turn for ex #" + getCurrentTurn().getExID());
+      getCurrentTurn().grabFocus();
+    }
   }
 
   /**

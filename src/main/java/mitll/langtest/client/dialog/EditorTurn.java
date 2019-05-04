@@ -55,6 +55,9 @@ import java.util.logging.Logger;
 
 import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.LEFT;
 import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.MIDDLE;
+import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_A;
+import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_B;
+
 
 public class EditorTurn extends DivWidget implements ITurnPanel {
   private final Logger logger = Logger.getLogger("EditorTurn");
@@ -178,7 +181,8 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     styleMe(wrapper);
     add(wrapper);
 
-    if (columns == ListenViewHelper.COLUMNS.MIDDLE) {
+    boolean addButtons = columns == MIDDLE || !turnContainer.isInterpreter();
+    if (addButtons) {
       addStyleName("inlineFlex");
 
       {
@@ -218,7 +222,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
         if (toUseForArrow == MIDDLE) {
           toUseForArrow = prevColumn;
         }
-      //  logger.info("the column is " + toUseForArrow);
+        //  logger.info("the column is " + toUseForArrow);
         w.setIcon(toUseForArrow == LEFT ? IconType.ARROW_RIGHT : IconType.ARROW_LEFT);
         w.addStyleName("topFiveMargin");
         w.addStyleName("leftFiveMargin");
@@ -261,9 +265,13 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 
     String foreignLanguage = clientExercise.getForeignLanguage();
     if (foreignLanguage.isEmpty()) {
-      w.setPlaceholder(clientExercise.hasEnglishAttr() ? "English... (" + getExID() +
+      String placeholder = clientExercise.hasEnglishAttr() ? "English... (" + getExID() +
           ")" : language.toDisplay() + " translation (" + getExID() +
-          ")");
+          ")";
+      if (!turnContainer.isInterpreter()) {
+        placeholder = (columns == LEFT ? SPEAKER_A : SPEAKER_B) + " says...";
+      }
+      w.setPlaceholder(placeholder);
     } else {
       w.setText(foreignLanguage);
       prev = foreignLanguage;
@@ -296,7 +304,28 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 
       logger.info("got enter on " + this.getExID() + " : " + columns);
 
-      turnContainer.gotForward(this);
+      String s = SimpleHtmlSanitizer.sanitizeHtml(content.getText()).asString();
+      if (s.equals(prev)) {
+        turnContainer.gotForward(this);
+      } else {
+        prev = s;
+
+        EditorTurn outer = this;
+        logger.info("gotBlur " + getExID() + " = " + prev);
+
+        controller.getExerciseService().updateText(dialogID, getExID(), s, new AsyncCallback<Boolean>() {
+          @Override
+          public void onFailure(Throwable caught) {
+
+          }
+
+          @Override
+          public void onSuccess(Boolean result) {
+            //logger.info("OK, update was " + result);
+            turnContainer.gotForward(outer);
+          }
+        });
+      }
     }
   }
 
