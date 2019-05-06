@@ -757,4 +757,14 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   public boolean removeTeacherRole(int userid) {
     return false;
   }
+
+  @Override
+  public DBUser lookupDBUser(int id) {
+    return null;
+  }
+
+  @Override
+  public mitll.hlt.domino.shared.model.user.User lookupDominoUser(int id) {
+    return null;
+  }
 }

@@ -210,7 +210,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final boolean DEBUG_USER_CACHE = false;
 
   /**
-   * @see #lookupUser
+   * @see #lookupDBUser
    * @see #refreshCacheFor
    */
   private final LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
@@ -264,7 +264,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             @Override
             public User load(Integer key) {
               //    logger.info("idToUser Load " + key);
-              return getUser(lookupUser(key));
+              return getUser(lookupDBUser(key));
             }
           });
 
@@ -279,7 +279,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             @Override
             public User load(Integer key) {
               //    logger.info("idToUser Load " + key);
-              return getUser(lookupUser(key));
+              return getUser(lookupDBUser(key));
             }
           });
 
@@ -849,7 +849,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @see #changePasswordWithCurrent
    */
   private DBUser savePasswordAndGetUser(int id, String currentPassword, String newHashedPassword, String baseURL) {
-    DBUser dbUser = lookupUser(id);
+    DBUser dbUser = lookupDBUser(id);
     if (dbUser != null) {
       boolean b = delegate.changePassword(adminUser, dbUser, currentPassword, newHashedPassword, baseURL);
       if (!b) {
@@ -1193,7 +1193,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       return idToUser.get(id);
     } catch (ExecutionException e) {
       logger.warn("getByID got " + e);
-      return getUser(lookupUser(id));
+      return getUser(lookupDBUser(id));
     }
   }
 
@@ -1210,22 +1210,29 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    * @see #idToDBUser
    */
-  private DBUser lookupUser(int id) {
+  public DBUser lookupDBUser(int id) {
     try {
       DBUser dbUser = idToDBUser.get(id);
       if (dbUser == null) {
-        logger.warn("lookupUser can't find user by id " + id);
+        logger.warn("lookupDBUser can't find user by id " + id);
         //     dbUser = idToDBUser.get(defaultUser);
       }
       return dbUser;
     } catch (ExecutionException e) {
-      logger.warn("lookupUser got " + e);
+      logger.warn("lookupDBUser got " + e);
       return delegate.lookupDBUser(id);
     }
   }
 
+/*
   public String lookupUserId(int id) {
     return delegate.lookupUserId(id);
+  }
+*/
+
+  @Override
+  public mitll.hlt.domino.shared.model.user.User lookupDominoUser(int id) {
+    return delegate.lookupUser(id);
   }
 
   public void refreshCacheFor(int userid) {
@@ -1742,7 +1749,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   @Override
   public MiniUser getMiniUser(int userid) {
-    DBUser byID = lookupUser(userid);
+    DBUser byID = lookupDBUser(userid);
     return byID == null ? null : getMini(byID);
   }
 
@@ -1882,7 +1889,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    */
   public boolean isMale(int userid) {
-    return lookupUser(userid).getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Male;
+    return lookupDBUser(userid).getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Male;
   }
 
   /**
@@ -1950,7 +1957,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   @Override
   public void update(User toUpdate) {
-    DBUser dbUser = lookupUser(toUpdate.getID());
+    DBUser dbUser = lookupDBUser(toUpdate.getID());
 
     if (dbUser != null) {
       dbUser.setEmail(toUpdate.getEmail());
@@ -1971,7 +1978,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   @Override
   public boolean addTeacherRole(int userid) {
-    DBUser dbUser = lookupUser(userid);
+    DBUser dbUser = lookupDBUser(userid);
 
     if (dbUser != null) {
       Set<String> roleAbbreviations = dbUser.getRoleAbbreviations();
@@ -2006,7 +2013,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   @Override
   public boolean removeTeacherRole(int userid) {
-    DBUser dbUser = lookupUser(userid);
+    DBUser dbUser = lookupDBUser(userid);
 
     if (dbUser != null) {
       Set<String> roleAbbreviations = dbUser.getRoleAbbreviations();

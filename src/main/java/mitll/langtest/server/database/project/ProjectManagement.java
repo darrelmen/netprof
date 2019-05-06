@@ -38,7 +38,17 @@ import mitll.hlt.domino.server.data.DocumentServiceDelegate;
 import mitll.hlt.domino.server.data.IProjectWorkflowDAO;
 import mitll.hlt.domino.server.data.ProjectServiceDelegate;
 import mitll.hlt.domino.server.data.SimpleDominoContext;
+import mitll.hlt.domino.server.extern.importers.ImportResult;
+import mitll.hlt.domino.server.extern.importers.vocab.ExcelVocabularyImporter;
+import mitll.hlt.domino.server.extern.importers.vocab.VocabularyImportCommand;
 import mitll.hlt.domino.server.util.Mongo;
+import mitll.hlt.domino.shared.common.ImportMode;
+import mitll.hlt.domino.shared.model.HeadDocumentRevision;
+import mitll.hlt.domino.shared.model.document.IDocument;
+import mitll.hlt.domino.shared.model.document.VocabularyItem;
+import mitll.hlt.domino.shared.model.metadata.MetadataTypes;
+import mitll.hlt.domino.shared.model.project.ClientPMProject;
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
@@ -71,6 +81,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletContext;
+import java.io.File;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -162,6 +173,9 @@ public class ProjectManagement implements IProjectManagement {
 
   private final boolean debugOne;
 
+  /**
+   *
+   */
   private final IDominoImport dominoImport;
   private Map<Integer, Integer> oldToNew = new ConcurrentHashMap<>();
 
@@ -208,7 +222,8 @@ public class ProjectManagement implements IProjectManagement {
         workflowDelegate,
         documentDelegate,
         (Mongo) servletContext.getAttribute(MONGO_ATT_NAME),
-        db.getUserExerciseDAO());
+        db.getUserExerciseDAO(),
+        simpleDominoContext);
   }
 
 
@@ -1477,6 +1492,35 @@ public class ProjectManagement implements IProjectManagement {
     return dominoImport == null ? Collections.emptyMap() : dominoImport.getNPIDToDominoID(dominoProjectID);
   }
 
+  public boolean doDominoImport(int dominoID, String path) {
+    int defaultUser = db.getUserDAO().getDefaultUser();
+    DBUser dbUser = db.getUserDAO().lookupDBUser(defaultUser);
+
+    logger.info("doDominoImport using  user " + dbUser);
+    ClientPMProject clientPMProject = dominoImport.getClientPMProject(dominoID, dbUser);
+    logger.info("doDominoImport Found " + clientPMProject);
+
+    if (clientPMProject == null) {
+      logger.info("doDominoImport no project " + dominoID);
+      return false;
+    } else {
+      mitll.hlt.domino.shared.model.user.User user = db.getUserDAO().lookupDominoUser(defaultUser);
+      logger.info("doDominoImport using user " + user);
+      ExcelVocabularyImporter importer = new MyExcelVocabularyImporter(defaultUser, clientPMProject);
+
+      File excelFile2 = new File(path);
+      logger.info("reading from " + excelFile2);
+      MyVocabularyImportCommand iCmd = new MyVocabularyImportCommand(user, excelFile2);
+      iCmd.setIdIndex(1);
+      iCmd.setSemesterCol(6);
+      iCmd.setUnitIndex(7);
+      iCmd.setChapterIndex(8);
+      ImportResult result = importer.importDocument(iCmd);
+      logger.info("got result " + result);
+      return result.isSuccess();
+    }
+  }
+
   /**
    * Clear oov table of stale entries when we start over...
    *
@@ -1516,6 +1560,86 @@ public class ProjectManagement implements IProjectManagement {
     for (OOV update : updates) {
       boolean update1 = db.getOOVDAO().update(update.getID(), update.getEquivalent(), user);
       if (!update1) logger.warn("updateOOV can't update " + update);
+    }
+  }
+
+  private class MyExcelVocabularyImporter extends ExcelVocabularyImporter {
+    public MyExcelVocabularyImporter(int defaultUser, ClientPMProject clientPMProject) {
+      super(ProjectManagement.this.dominoImport.getDominoContext(), ProjectManagement.this.db.getUserDAO().lookupDominoUser(defaultUser), clientPMProject);
+    }
+
+    @Override
+    public ImportResult importDocument(Command cmd) {
+      if (!(cmd instanceof MyVocabularyImportCommand)) {
+        return new ImportResult("Invalid command type!");
+      }
+
+      MyVocabularyImportCommand tdtCmd = (MyVocabularyImportCommand) cmd;
+      try {
+        ExcelReader excelReader = new ExcelReader(tdtCmd.getFileName(), getDominoContext(), tdtCmd);
+
+        Collection<VocabularyItem> content1 = excelReader.getContent();
+
+        //				OptionSpecification unitOrder = proj.getWorkflow().getOptionSpec(UNIT_ORDER_OPTION);
+        //			log.info("After " + unitOrder + " : " + unitOrder.getChildOptionStrings());
+        Collection<HeadDocumentRevision> headDocumentRevisions =
+            importAllDirect(getCurrentUser(), tdtCmd.getImportMode(), content1);
+
+        ImportResult importResult = new ImportResult();
+        for (HeadDocumentRevision documentRevision : headDocumentRevisions)
+          importResult.addImportedDoc(documentRevision);
+        return importResult;
+      } catch (Exception ex) {
+        logger.error("Encountered exception reading file " + tdtCmd.getFileName(), ex);
+        return new ImportResult("Unknown exception encountered!");
+      }
+    }
+
+    private Collection<HeadDocumentRevision> importAllDirect(mitll.hlt.domino.shared.model.user.User user, ImportMode iMode, Collection<VocabularyItem> content1) {
+      Date now = new Date();
+      int c = 0;
+      int failures = 0;
+      int imported = 0;
+
+      int n = content1.size();
+
+      List<HeadDocumentRevision> importedDocs = new ArrayList<>();
+
+      logger.info(" importing ---- " + n + " items ");
+
+      for (VocabularyItem item : content1) {
+        boolean success = importDoc(user, iMode, now, importedDocs, item);
+        if (success) imported++;
+        else failures++;
+
+        //if (c > MAX) break;
+        if (c++ % 100 == 0) logger.info("did " + c);
+      }
+
+      if (failures > 0) logger.error("failed to import " + failures + "/" + n);
+      else logger.info("imported " + imported + "/" + n + " items");
+
+      return importedDocs;
+    }
+
+    private boolean importDoc(mitll.hlt.domino.shared.model.user.User user, ImportMode iMode, Date now, List<HeadDocumentRevision> importedDocs, IDocument doc) {
+      try {
+        //log.info(i + " START ---- " + item.getString(EN) + " ----------------- ");
+        ImportCommand cmd = new ImportCommand(user, now, null, iMode);
+        ImportResult importResult = addDocument(cmd, doc, null, MetadataTypes.VocabularyMetadata.V_NP_ID, null);
+        if (importResult.isSuccess()) {
+          //imported++;
+          importedDocs.add(importResult.getOnlyImportedDoc());
+          return true;
+        } else {
+//					if (failures++ < 10) log.error("couldn't import doc " + testItem + " : " + importResult.getErrorMessage());
+          return false;
+        }
+        //	log.info(i + " END   ---- " + item.getString(EN) + " ----------------- ");
+      } catch (Exception e) {
+        logger.error("Got " + e, e);
+      }
+      return false;
     }
   }
 }

@@ -116,7 +116,7 @@ public class CopyToPostgres<T extends CommonShell> {
     DROPALLBUT("b"),
 
     UPDATEUSER("u"),
-   // UPDATE("x"),
+    // UPDATE("x"),
     LATEST("l"),
     CREATED("z"),
     IMPORT("i"),
@@ -129,6 +129,7 @@ public class CopyToPostgres<T extends CommonShell> {
      */
     DIALOG("g"),
     DIALOGADD("f"),
+    DOMINOEXCELIMPORT("h"),
     /**
      * @see #cleanDialog
      */
@@ -162,8 +163,7 @@ public class CopyToPostgres<T extends CommonShell> {
     ONDAY("w", "on day"),
     DATABASE("d", "into database"),
     PROPERTIES("i", "optional properties file to read from within /opt/netprof/config, one-to-one for each deployed webapp"),
-    EXCEL("x", "optional excel file")
-    ;
+    EXCEL("x", "optional excel file");
 
     private final String value;
     private final String desc;
@@ -1533,6 +1533,17 @@ public class CopyToPostgres<T extends CommonShell> {
       } catch (NumberFormatException e) {
         logger.warn("can't parse " + optionValue);
       }
+    } else if (cmd.hasOption(DOMINOEXCELIMPORT.toLower())) {
+      action = DOMINOEXCELIMPORT;
+      String optionValue = cmd.getOptionValue(DOMINOEXCELIMPORT.toLower());
+
+      try {
+        to = Integer.parseInt(optionValue);
+      } catch (NumberFormatException e) {
+        logger.warn("can't parse " + optionValue);
+      }
+
+
     } else if (cmd.hasOption(CLEANDIALOG.toLower())) {
       action = CLEANDIALOG;
       try {
@@ -1721,11 +1732,15 @@ public class CopyToPostgres<T extends CommonShell> {
         doExit(true);  // ?
         break;
       case DIALOG:
-        copyDialog(to, cmd.getOptionValue(DIALOG.toLower()), propertiesFile, excelFile,true, false);
+        copyDialog(to, cmd.getOptionValue(DIALOG.toLower()), propertiesFile, excelFile, true, false);
         doExit(true);  // ?
         break;
       case DIALOGADD:
-        copyDialog(to, cmd.getOptionValue(DIALOGADD.toLower()), propertiesFile, excelFile,true, true);
+        copyDialog(to, cmd.getOptionValue(DIALOGADD.toLower()), propertiesFile, excelFile, true, true);
+        doExit(true);  // ?
+        break;
+      case DOMINOEXCELIMPORT:
+        copyExcelIntoDomino(to, cmd.getOptionValue(DOMINOEXCELIMPORT.toLower()), propertiesFile, excelFile);
         doExit(true);  // ?
         break;
       case CLEANDIALOG:
@@ -1776,9 +1791,9 @@ public class CopyToPostgres<T extends CommonShell> {
       logger.error("copyDialog remember to set the project id " + to + " or " + lang);
     } else {
       database.ensureProjectManagement(false);
-      logger.info("copyDialog id " + to + " or " + lang  + " with " +propertiesFile + " and file " +excel);
+      logger.info("copyDialog id " + to + " or " + lang + " with " + propertiesFile + " and file " + excel);
 
-   //   if (true) return;
+      //   if (true) return;
 
       int idToUse = getIdToUse(to, lang);
 
@@ -1803,13 +1818,66 @@ public class CopyToPostgres<T extends CommonShell> {
         } else {
           logger.info("\ncopyDialog populate for " + to + " in " + propertiesFile);
           logger.info("\ncopyDialog populate for " + project);
-       //   DialogPopulate dialogPopulate = new DialogPopulate(database, getPathHelper(database));
+          //   DialogPopulate dialogPopulate = new DialogPopulate(database, getPathHelper(database));
           //logger.info("populate found " + englishProject);
           if (!new DialogPopulate(database, getPathHelper(database)).populateDatabase(project, englishProject, keepAudio, excel, appendOK)) {
             logger.warn("project " + project + " already has dialog data.");
           } else {
             logger.info("added the dialogs to " + project);
           }
+        }
+      }
+    }
+
+    closeDatabase();
+  }
+
+  /**
+   * gotta load at least one project...
+   * @param to
+   * @param lang
+   * @param propertiesFile
+   * @param excel
+   */
+  private static void copyExcelIntoDomino(int to, String lang, String propertiesFile, String excel) {
+    database = getDatabase(propertiesFile);
+
+    if (to == -1 && (lang == null || lang.isEmpty())) {
+      logger.error("copyExcelIntoDomino remember to set the project id " + to + " or " + lang);
+    } else {
+      database.ensureProjectManagement(false);
+      int projectIDForLanguage = database.getProjectManagement().getProjectIDForLanguage(Language.SPANISH);
+      database.getProjectManagement().getProject(projectIDForLanguage,true);
+      logger.info("copyExcelIntoDomino id " + to + " or " + lang + " with " + propertiesFile + " and file " + excel);
+
+      if (to == -1) {
+        logger.error("\ncopyExcelIntoDomino no project with id " + to + " or " + lang);
+        doExit(false);
+      } else {
+        if (false) {//project == null) {
+          logger.error("\ncopyExcelIntoDomino no project with id " + to);
+          doExit(false);
+        } else {
+          logger.info("\ncopyExcelIntoDomino populate for " + to + " in " + propertiesFile);
+          boolean exists = new File(excel).exists();
+          logger.info("\ncopyExcelIntoDomino populate for " + new File(excel) + " : " + exists);
+
+          if (!exists) logger.error("can't find " + excel);
+          else {
+            database.waitForDefaultUser();
+
+
+            boolean b = database.getProjectManagement().doDominoImport(to, excel);
+            if (b) logger.info("Success!");
+            else logger.warn("failure!");
+          }
+          //   DialogPopulate dialogPopulate = new DialogPopulate(database, getPathHelper(database));
+          //logger.info("populate found " + englishProject);
+//          if (!new DialogPopulate(database, getPathHelper(database)).populateDatabase(project, englishProject, keepAudio, excel, appendOK)) {
+//            logger.warn("project " + project + " already has dialog data.");
+//          } else {
+//            logger.info("added the dialogs to " + project);
+//          }
         }
       }
     }
@@ -2050,6 +2118,10 @@ public class CopyToPostgres<T extends CommonShell> {
 
       {
         mapFile = new Option(DIALOGADD.getValue(), DIALOGADD.toLower(), true, "add more dialogs to project");
+        options.addOption(mapFile);
+      }
+      {
+        mapFile = new Option(DOMINOEXCELIMPORT.getValue(), DOMINOEXCELIMPORT.toLower(), true, "import excel contents into domino project");
         options.addOption(mapFile);
       }
 

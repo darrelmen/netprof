@@ -32,6 +32,7 @@ package mitll.langtest.server.domino;
 import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCursor;
 import mitll.hlt.domino.server.data.DocumentServiceDelegate;
+import mitll.hlt.domino.server.data.IDominoContext;
 import mitll.hlt.domino.server.data.IProjectWorkflowDAO;
 import mitll.hlt.domino.server.data.ProjectServiceDelegate;
 import mitll.hlt.domino.server.util.Mongo;
@@ -84,6 +85,7 @@ public class DominoImport implements IDominoImport {
   private final IProjectWorkflowDAO workflowDelegate;
   private final Mongo pool;
   private final IUserExerciseDAO userExerciseDAO;
+  private final IDominoContext dominoContext;
 
   /**
    * @param projectDelegate
@@ -95,12 +97,14 @@ public class DominoImport implements IDominoImport {
   public DominoImport(ProjectServiceDelegate projectDelegate,
                       IProjectWorkflowDAO workflowDelegate,
                       DocumentServiceDelegate documentDelegate,
-                      Mongo pool, IUserExerciseDAO userExerciseDAO) {
+                      Mongo pool, IUserExerciseDAO userExerciseDAO,
+                      IDominoContext dominoContext) {
     this.projectDelegate = projectDelegate;
     this.workflowDelegate = workflowDelegate;
     this.documentDelegate = documentDelegate;
     this.pool = pool;
     this.userExerciseDAO = userExerciseDAO;
+    this.dominoContext = dominoContext;
   }
 
   /**
@@ -170,9 +174,10 @@ public class DominoImport implements IDominoImport {
 
   /**
    * Language name from domino is in domino space of Language names!
-   * @see Language#getDominoName
+   *
    * @param project
    * @return
+   * @see Language#getDominoName
    */
   @NotNull
   private ImportProjectInfo getImportProjectInfo(ProjectDescriptor project) {
@@ -180,7 +185,7 @@ public class DominoImport implements IDominoImport {
     String languageName = project.getContent().getLanguageName();
 
     if (languageName.equalsIgnoreCase("Mandarin")) languageName = Language.MANDARIN.name();
-   // Language language = Language.valueOf(languageName);
+    // Language language = Language.valueOf(languageName);
     ImportProjectInfo importProjectInfo = new ImportProjectInfo(
         id,
         project.getCreator().getDocumentDBID(),
@@ -253,7 +258,7 @@ public class DominoImport implements IDominoImport {
   private String checkGetCap(String longName) {
     String cl = getCapitalized(longName);
     if (!cl.equals(longName)) {
-      logger.warn("checkGetCap use '" + cl + "' instead of '" + longName +"'");
+      logger.warn("checkGetCap use '" + cl + "' instead of '" + longName + "'");
       longName = cl;
     }
     return longName;
@@ -289,16 +294,22 @@ public class DominoImport implements IDominoImport {
   }
 
   /**
-   * @see ProjectManagement#getDominoProjectName
    * @param id
    * @return
+   * @see ProjectManagement#getDominoProjectName
    */
   @Override
   public String getDominoProjectName(int id) {
     return projectDelegate.getProjectName(id);
   }
 
-  private ClientPMProject getClientPMProject(int dominoID, DBUser dominoAdminUser) {
+  /**
+   * @param dominoID
+   * @param dominoAdminUser
+   * @return
+   * @see #getImportFromDomino(int, int, String, DBUser, boolean)
+   */
+  public ClientPMProject getClientPMProject(int dominoID, DBUser dominoAdminUser) {
     FindOptions<ProjectColumn> options = new FindOptions<>();
     options.addFilter(new FilterDetail<>(ProjectColumn.Id, "" + dominoID, FilterDetail.Operator.EQ));
     List<ClientPMProject> projectDescriptor = projectDelegate.getHeavyProjects(dominoAdminUser, options);
@@ -401,6 +412,10 @@ public class DominoImport implements IDominoImport {
 
     logger.info("getImportDocs : took " + (now - then) + " to get " + importDocs.size() + " document.");
     return importDocs;
+  }
+
+  public IDominoContext getDominoContext() {
+    return dominoContext;
   }
 
   /**

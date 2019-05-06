@@ -149,4 +149,6 @@ public interface IProjectManagement {
   OOVInfo checkOOV(int id, int num, int offset);
 
   void updateOOV(List<OOV> updates, int user);
+
+  boolean doDominoImport(int dominoID, String path);
 }

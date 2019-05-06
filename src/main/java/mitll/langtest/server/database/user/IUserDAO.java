@@ -119,7 +119,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   User getUserByID(String id);
 
   DBUser getDBUser(String userID);
-
+  DBUser lookupDBUser(int id);
   /**
    * TODO : replace with user where or rename
    *
@@ -135,6 +135,8 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    * @see mitll.langtest.server.ScoreServlet#getUser
    */
   User getUserWhere(int userid);
+
+  mitll.hlt.domino.shared.model.user.User lookupDominoUser(int id);
 
   void refreshCacheFor(int userid);
 
