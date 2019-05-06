@@ -32,16 +32,13 @@ package mitll.langtest.client.result;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.DialogBox;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.VerticalPanel;
 import mitll.langtest.client.analysis.BasicUserContainer;
@@ -51,7 +48,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
 public class ActiveUsersManager {
  // private final Logger logger = Logger.getLogger("ActiveUsersManager");

@@ -29,10 +29,6 @@
 
 package mitll.langtest.server.database.audio;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.Database;
@@ -62,7 +58,6 @@ import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.shared.user.MiniUser.Gender.Male;

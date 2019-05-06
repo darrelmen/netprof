@@ -70,7 +70,6 @@ import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.User;
-
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;

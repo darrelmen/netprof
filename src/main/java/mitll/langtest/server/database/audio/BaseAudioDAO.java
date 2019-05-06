@@ -30,8 +30,6 @@
 package mitll.langtest.server.database.audio;
 
 import com.google.common.base.CharMatcher;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.server.audio.AudioExportOptions;
 import mitll.langtest.server.database.DAO;

@@ -36,8 +36,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.custom.INavigation.VIEWS.PERFORM;
-import static mitll.langtest.client.custom.INavigation.VIEWS.PERFORM_PRESS_AND_HOLD;
 import static mitll.langtest.client.list.FacetExerciseList.LISTS;
 
 public class SelectionState {

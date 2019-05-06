@@ -34,7 +34,6 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 4/24/17.

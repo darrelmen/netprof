@@ -29,8 +29,8 @@
 
 package mitll.langtest.server.database.security;
 
-import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.user.ActiveInfo;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.IUserSessionDAO;

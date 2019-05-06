@@ -46,10 +46,10 @@ import javax.servlet.http.HttpSession;
 import java.util.Collection;
 import java.util.List;
 
-import static mitll.langtest.shared.user.ChoosePasswordResult.PasswordResultType.*;
 import static mitll.langtest.shared.user.ChoosePasswordResult.PasswordResultType.Success;
-import static mitll.langtest.shared.user.LoginResult.ResultType.*;
+import static mitll.langtest.shared.user.ChoosePasswordResult.PasswordResultType.*;
 import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
+import static mitll.langtest.shared.user.LoginResult.ResultType.*;
 
 @SuppressWarnings("serial")
 public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenUserService {

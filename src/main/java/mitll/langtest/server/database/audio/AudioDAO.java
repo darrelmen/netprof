@@ -34,7 +34,6 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.result.Result;
-import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.server.scoring.SmallVocabDecoder;

@@ -46,7 +46,6 @@ import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.ReportUser;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickSlimEvent;
-//import net.sf.uadetector.ReadableUserAgent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -56,6 +55,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+//import net.sf.uadetector.ReadableUserAgent;
 
 public class Report implements IReport {
   private static final Logger logger = LogManager.getLogger(Report.class);

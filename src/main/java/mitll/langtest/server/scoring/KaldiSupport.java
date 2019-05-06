@@ -34,7 +34,6 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.HTTPClient;
 import mitll.langtest.server.database.project.IProject;
-import mitll.langtest.shared.exercise.CommonExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;

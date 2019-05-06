@@ -49,14 +49,12 @@ import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.ActiveUser;
-import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;

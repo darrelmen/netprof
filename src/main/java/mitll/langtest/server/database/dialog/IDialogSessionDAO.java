@@ -31,7 +31,9 @@ package mitll.langtest.server.database.dialog;
 
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.shared.dialog.*;
+import mitll.langtest.shared.dialog.DialogSession;
+import mitll.langtest.shared.dialog.DialogStatus;
+import mitll.langtest.shared.dialog.IDialogSession;
 import mitll.npdata.dao.SlickDialogSession;
 
 import java.util.List;

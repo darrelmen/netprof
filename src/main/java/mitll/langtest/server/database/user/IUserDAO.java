@@ -35,7 +35,6 @@ import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.*;
