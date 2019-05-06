@@ -1112,13 +1112,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     return getUserExercises(dao.getOverrides(), shouldSwap);
   }
 
-/*
-  @Override
-  public Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap) {
-    return getUserExercises(getExercisesByIDs(exids), shouldSwap);
-  }
-*/
-
   @Override
   public List<SlickExercise> getExercisesByIDs(Collection<Integer> exids) {
     return dao.byIDs(exids);

@@ -34,7 +34,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.History;
 import com.google.gwt.user.client.Window;
@@ -275,7 +274,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
       public void onSuccess(Collection<T> result) {
         getMyLists().populateTable(result);
         populateUniqueListNames(result);
-        Scheduler.get().scheduleDeferred(() -> setShareHREF(getCurrentSelectionFromMyLists()));
+        setShareHREFLater();
       }
     });
   }
@@ -399,7 +398,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
   }
 
   private void showLearnList(ButtonMemoryItemContainer<T> container) {
-    controller.getNavigation().showListIn(getListID(container), INavigation.VIEWS.LEARN);
+    controller.getNavigation().showListIn(getItemID(container), INavigation.VIEWS.LEARN);
   }
 
   /**
@@ -407,7 +406,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
    * @see ListView.MyListContainer#gotDoubleClickOn
    */
   private void showQuiz(ButtonMemoryItemContainer<T> container) {
-    controller.showListIn(getListID(container), INavigation.VIEWS.QUIZ);
+    controller.showListIn(getItemID(container), INavigation.VIEWS.QUIZ);
   }
 
   @NotNull
@@ -415,7 +414,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     Button drill = getSuccessButton(DRILL);
     drill.setType(ButtonType.INFO);
 
-    drill.addClickHandler(event -> controller.showListIn(getListID(container), INavigation.VIEWS.PRACTICE));
+    drill.addClickHandler(event -> controller.showListIn(getItemID(container), INavigation.VIEWS.PRACTICE));
     addTooltip(drill, PRACTICE_THE_LIST);
     container.addButton(drill);
 
@@ -433,14 +432,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
 
     enableQuizButton(drill);
     return drill;
-  }
-
-  private int getListID(ButtonMemoryItemContainer<T> container) {
-    if (container == null) return -1;
-    else {
-      T currentSelection = getCurrentSelection(container);
-      return currentSelection == null ? -1 : currentSelection.getID();
-    }
   }
 
   @Override

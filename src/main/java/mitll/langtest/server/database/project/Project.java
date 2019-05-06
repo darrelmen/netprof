@@ -547,6 +547,11 @@ public class Project implements IPronunciationLookup, IProject {
     }
   }
 
+  @Override
+  public CommonExercise forgetExercise(int prev) {
+    return exerciseDAO.forget(prev);
+  }
+
   /**
    * Only accept an exact match
    *
@@ -843,7 +848,7 @@ public class Project implements IPronunciationLookup, IProject {
   }
 
   public IDialog getLastDialog() {
-     List<IDialog> iDialogs = new ArrayList<>(idToDialog.values());
+    List<IDialog> iDialogs = new ArrayList<>(idToDialog.values());
     iDialogs.sort((o1, o2) -> -1 * Long.compare(o1.getModified(), o2.getModified()));
     return iDialogs.isEmpty() ? null : iDialogs.get(0);
   }

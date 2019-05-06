@@ -95,4 +95,6 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
    * @return
    */
   boolean update(CommonExercise toChange);
+
+  CommonExercise forget(int id);
 }

@@ -177,7 +177,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
                          EnglishDisplayChoices englishDisplayChoices) {
     DivWidget wrapper = new DivWidget();
     wrapper.getElement().setId("Wrapper_" + getExID());
-    tryOne(wrapper);
+    addTextBox(wrapper);
     styleMe(wrapper);
     add(wrapper);
 
@@ -253,14 +253,17 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     style.setHeight(20, Style.Unit.PX);
   }
 
-  private void tryOne(DivWidget wrapper) {
+  /**
+   * @param wrapper
+   */
+  private void addTextBox(DivWidget wrapper) {
     // TODO : instead, make this a div contenteditable!
     TextBox w = new TextBox();
 
     w.getElement().getStyle().setFontSize(16, Style.Unit.PX);
 
     w.setId("TextBox_" + getExID());
-    w.setWidth("92%");
+    w.setWidth(88 + "%");
     this.content = w;
 
     String foreignLanguage = clientExercise.getForeignLanguage();
@@ -298,13 +301,13 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     NativeEvent ne = event.getNativeEvent();
     int keyCode = ne.getKeyCode();
     boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
+    String s = SimpleHtmlSanitizer.sanitizeHtml(content.getText()).asString();
     if (isEnter) {
       ne.preventDefault();
       ne.stopPropagation();
 
       logger.info("got enter on " + this.getExID() + " : " + columns);
 
-      String s = SimpleHtmlSanitizer.sanitizeHtml(content.getText()).asString();
       if (s.equals(prev)) {
         turnContainer.gotForward(this);
       } else {
@@ -325,6 +328,18 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
             turnContainer.gotForward(outer);
           }
         });
+      }
+    } else {
+      int length = s.split(" ").length;
+    //  logger.info("num tokens " + length);
+
+      if (length > 10) {
+        content.getElement().getStyle().setBackgroundColor("red");
+      } else if (length > 7) {
+        content.getElement().getStyle().setBackgroundColor("yellow");
+      } else {
+        content.getElement().getStyle().setBackgroundColor("white");
+
       }
     }
   }

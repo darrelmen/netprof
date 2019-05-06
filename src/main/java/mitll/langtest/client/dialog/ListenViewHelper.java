@@ -239,7 +239,14 @@ public class ListenViewHelper<T extends ITurnPanel>
       controlAndSpeakers.add(getSpeakerRow(dialog));
 
       child.add(getTurns(dialog));
+
+      child.add(addEditorButton());
     }
+  }
+
+  @NotNull
+  private DivWidget addEditorButton() {
+    return new DivWidget();
   }
 
   protected void addDialogHeader(IDialog dialog, Panel child) {

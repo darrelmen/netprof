@@ -126,6 +126,10 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 //    addYours(left);
   }
 
+  protected void setShareHREFLater() {
+    Scheduler.get().scheduleDeferred(() -> setShareHREF(getCurrentSelectionFromMyLists()));
+  }
+
   protected abstract void populateUniqueListNames(Collection<T> result);
 
   /**
@@ -164,6 +168,14 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 
   protected boolean canMakeQuiz() {
     return false;
+  }
+
+  protected int getItemID(ButtonMemoryItemContainer<T> container) {
+    if (container == null) return -1;
+    else {
+      T currentSelection = getCurrentSelection(container);
+      return currentSelection == null ? -1 : currentSelection.getID();
+    }
   }
 
   protected Button getAddQuizButton() {

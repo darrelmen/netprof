@@ -69,7 +69,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
   public static final String SPEAKER_A = BaseDialogReader.SPEAKER_A;
   public static final String SPEAKER_B = BaseDialogReader.SPEAKER_B;
   public static final String SPEAKER_PREFIX = "S-";
+
   public static final boolean DEBUG = false;
+  public static final boolean DEBUG_ADD_EXERCISE = true;
 
   private final DialogDAOWrapper dao;
 
@@ -421,7 +423,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
     if (slickRelatedExercises != null) {
       List<CommonExercise> exercises = new ArrayList<>();
       Set<Integer> candidate = new HashSet<>();
-      if (DEBUG) logger.info("addExercises got " + slickRelatedExercises.size() + " relations for " + dialogID);
+      if (DEBUG_ADD_EXERCISE)
+        logger.info("addExercises got " + slickRelatedExercises.size() + " relations for " + dialogID);
       Map<Integer, CommonExercise> idToEx = new HashMap<>();
 
       slickRelatedExercises.forEach(slickRelatedExercise -> {
@@ -432,13 +435,13 @@ public class DialogDAO extends DAO implements IDialogDAO {
         if (exercise == null) {
           exercise = databaseImpl.getExercise(projid, exid);
 
-          int before = 0;
+          int before;
           if (exercise != null) {
 
-            if (DEBUG) {
+            if (DEBUG_ADD_EXERCISE) {
               logger.info("addExercises (" + dialogID + ") " +
                   "\n\tex #   " + exercise.getID() +
-                  "\n\tfl     " + exercise.getForeignLanguage() +
+                  "\n\tfl     '" + exercise.getForeignLanguage() + "'" +
                   "\n\ttokens " + exercise.getTokens() +
                   "\n\tattr   " + exercise.getAttributes()
               );
@@ -449,6 +452,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
             int after = exercise.getAttributes().size();
             if (after != before) logger.error("\n\n\n\naddExercises huh before " + before + " after " + after);
+          } else {
+            logger.info("addExercises : no exercise with id " + exid);
           }
         }
 
@@ -462,6 +467,14 @@ public class DialogDAO extends DAO implements IDialogDAO {
             if (childExOrig == null) {
               logger.warn("\n\n\naddExercises : can't find " + childid);
             } else {
+              if (DEBUG_ADD_EXERCISE) {
+                logger.info("addExercises (" + dialogID + ") child - " +
+                    "\n\tex #   " + childExOrig.getID() +
+                    "\n\tfl     '" + childExOrig.getForeignLanguage() + "'" +
+                    "\n\ttokens " + childExOrig.getTokens() +
+                    "\n\tattr   " + childExOrig.getAttributes()
+                );
+              }
               idToEx.put(childid, childEx = new Exercise(childExOrig));
             }
           }
@@ -635,7 +648,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
       logger.info("addEmptyExercises : insert " + clientExercises.size() + " after " + afterExid);
 
-   //   sanityCheckLanguageAndSpeaker(toAdd, afterExid, clientExercises);
+      //   sanityCheckLanguageAndSpeaker(toAdd, afterExid, clientExercises);
 
       for (ClientExercise newEx : clientExercises) {
         if (!relatedExercise.insertAfter(afterExid, newEx.getID())) {
@@ -725,7 +738,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @return
    */
   public List<Integer> deleteExercise(int projid, int dialogID, int exid) {
-    IDialog dialog = databaseImpl.getProject(projid).getDialog(dialogID);
+    Project project = databaseImpl.getProject(projid);
+    IDialog dialog = project.getDialog(dialogID);
     DialogType dialogType = dialog.getKind();
     IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
     IRelatedExercise relatedExercise = userExerciseDAO.getRelatedExercise();
@@ -764,6 +778,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
           deletedIDs.add(prev);
           deletedIDs.add(exid);
 
+          project.forgetExercise(prev);
+          project.forgetExercise(exid);
+
           databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
 
         } else {
@@ -777,6 +794,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
         // refresh dialogs on project
         databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
         deletedIDs.add(exid);
+        project.forgetExercise(exid);
+
       } else {
         logger.error("did not delete ex " + exid + " in " + dialogID);
       }

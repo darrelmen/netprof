@@ -62,4 +62,6 @@ public interface IProject {
   ISection<CommonExercise> getSectionHelper();
 
   CommonExercise getExerciseByID(int id);
+
+  CommonExercise forgetExercise(int prev);
 }

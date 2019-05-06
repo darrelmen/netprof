@@ -29,13 +29,16 @@
 
 package mitll.langtest.client.custom.dialog;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
+import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.DialogEditor;
@@ -87,6 +90,30 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     addYours(left);
   }
 
+
+  @NotNull
+  @Override
+  protected DivWidget getButtons(ButtonMemoryItemContainer<T> container) {
+    DivWidget buttons = super.getButtons(container);
+    buttons.add(getListenButton(container));
+    return buttons;
+  }
+
+  @NotNull
+  private Button getListenButton(ButtonMemoryItemContainer<T> container) {
+    Button learn = getSuccessButton("Listen");
+    learn.setType(ButtonType.INFO);
+    learn.addClickHandler(event -> showLearnList(container));
+    addTooltip(learn, "Listen to the dialog.");
+    //learn.setEnabled(!container.isEmpty());
+    container.addButton(learn);
+    return learn;
+  }
+
+  private void showLearnList(ButtonMemoryItemContainer<T> container) {
+    controller.getNavigation().showDialogIn(getItemID(container), INavigation.VIEWS.LISTEN);
+  }
+
   private void addYours(DivWidget left) {
     showYours(Collections.emptyList(), left);
 
@@ -104,8 +131,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
           public void onSuccess(ExerciseListWrapper<T> result) {
             getMyLists().populateTable(result.getExercises());
             populateUniqueListNames(result.getExercises());
-
-            Scheduler.get().scheduleDeferred(() -> setShareHREF(getCurrentSelectionFromMyLists()));
+            setShareHREFLater();
           }
         });
   }

@@ -44,6 +44,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.exercise.Facet.SEMESTER;
@@ -60,8 +61,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_ROOT_TYPE = false;
   private static final boolean DEBUG_USER_CREATED = false;
-  private final Map<Integer, CommonExercise> idToContextExercise = new HashMap<>();
-  private final Map<Integer, CommonExercise> idToUserExercise = new HashMap<>();
+  private final Map<Integer, CommonExercise> idToContextExercise = new ConcurrentHashMap<>();
+  private final Map<Integer, CommonExercise> idToUserExercise = new ConcurrentHashMap<>();
 
   /**
    * @see mitll.langtest.server.database.project.ProjectManagement#setExerciseDAO
@@ -91,45 +92,44 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    */
   @Override
   public CommonExercise getExercise(int id) {
-    synchronized (idToExercise) { //?
-      CommonExercise commonExercise = idToExercise.get(id);
+    CommonExercise commonExercise = getCommonExercise(id);
 
-      if (commonExercise == null) {
-        //logger.info("getExercise can't find exercise " + id);
-        if (id != userExerciseDAO.getUnknownExerciseID()) {
-          commonExercise = idToContextExercise.get(id);
+    if (commonExercise == null) {
+      //logger.info("getExercise can't find exercise " + id);
+      if (id != userExerciseDAO.getUnknownExerciseID()) {
+        commonExercise = idToContextExercise.get(id);
+        if (commonExercise == null) {
+          commonExercise = idToUserExercise.get(id);
+
           if (commonExercise == null) {
-            commonExercise = idToUserExercise.get(id);
-
-            if (commonExercise == null) {
-              spew++;
-              if (spew < 10 || spew % 100 == 0) {
-                logger.warn(this + " getExercise : couldn't find " +
-                    "\n\texercise #" + id +
-                    "\n\tin        " + idToExercise.size() + " exercises" +
-                    "\n\tand       " + idToContextExercise.size() + " context exercises" +
-                    "\n\tuser      " + idToUserExercise.size() + " user exercises"
-                );
-              }
-            } else {
-//              logger.info("getExercise user ex for " + id + " = " + commonExercise.getEnglish() + " = " + commonExercise.getForeignLanguage());
+            spew++;
+            if (spew < 10 || spew % 100 == 0) {
+              logger.warn(this + " getExercise : couldn't find " +
+                  "\n\texercise #" + id +
+                  "\n\tin        " + idToExercise.size() + " exercises" +
+                  "\n\tand       " + idToContextExercise.size() + " context exercises" +
+                  "\n\tuser      " + idToUserExercise.size() + " user exercises"
+              );
             }
           } else {
-            //  logger.info("getExercise found context " + commonExercise.getID());
+//              logger.info("getExercise user ex for " + id + " = " + commonExercise.getEnglish() + " = " + commonExercise.getForeignLanguage());
           }
-        }
-      } else {
-        if (id != commonExercise.getID()) {
-          logger.error("getExercise " + id + " != " + commonExercise);
+        } else {
+          //  logger.info("getExercise found context " + commonExercise.getID());
         }
       }
+    } else {
+      if (id != commonExercise.getID()) {
+        logger.error("getExercise " + id + " != " + commonExercise);
+      }
+    }
 //      if (commonExercise == null) {
 //        commonExercise = maybeRefresh(id, commonExercise);
 //      }
 
-      return commonExercise;
-    }
+    return commonExercise;
   }
+
 
 //  private CommonExercise maybeRefresh(int id) {
 //    CommonExercise commonExercise = null;

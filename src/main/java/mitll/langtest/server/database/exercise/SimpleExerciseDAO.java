@@ -83,5 +83,4 @@ public interface SimpleExerciseDAO<T extends CommonShell & HasUnitChapter> {
   boolean isConfigured();
 
   void addUserExercise(CommonExercise commonExercise);
-
 }

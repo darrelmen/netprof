@@ -54,6 +54,9 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private static final String SEMI = ";";
   private static final int MAX_WARNS = Integer.MAX_VALUE;
 
+  /**
+   * @see
+   */
   final Map<Integer, CommonExercise> idToExercise = new HashMap<>();
   private final Map<String, CommonExercise> oldidToExercise = new HashMap<>();
 
@@ -198,6 +201,22 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       logger.info("setAudioDAO makeSureAudioIsThere " + projectID);
       audioDAO.makeSureAudioIsThere(projectID, language, false);
     }
+  }
+
+  CommonExercise getCommonExercise(int id) {
+    CommonExercise commonExercise;
+    synchronized (idToExercise) { //?
+      commonExercise = idToExercise.get(id);
+    }
+    return commonExercise;
+  }
+
+  public CommonExercise forget(int id) {
+    CommonExercise commonExercise;
+    synchronized (idToExercise) { //?
+      commonExercise = idToExercise.remove(id);
+    }
+    return commonExercise;
   }
 
   /**
