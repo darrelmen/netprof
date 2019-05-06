@@ -93,6 +93,11 @@ public class Search<T extends CommonExercise> {
                                                                                       boolean matchOnContext) {
     ExerciseTrie<T> trie = predefExercises ? fullTrie :
         new ExerciseTrie<>(exercises, getLanguage(projectID), getSmallVocabDecoder(projectID), true, false);
+
+
+    if (fullTrie == null) {
+      logger.warn("huh? full trie is null?");
+    }
     List<T> basicExercises = trie.getExercises(prefix);
     Project project = getProject(projectID);
     ExerciseTrie<T> fullContextTrie = !matchOnContext || project == null ? null : (ExerciseTrie<T>) project.getFullContextTrie();

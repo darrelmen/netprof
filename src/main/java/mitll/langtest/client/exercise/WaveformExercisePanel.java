@@ -145,6 +145,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
     }
 
     add(addDominoHint(container2));
+
     if (exercise.isContext()) {
       DivWidget container = new DivWidget();
       add(container);
@@ -358,7 +359,8 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
                                                  Panel vp,
                                                  AudioType audioType,
                                                  boolean showCurrentRecording) {
-    RecordAudioPanel fast = new RecordAudioPanel<>(exercise, controller, this, index, false, audioType, showCurrentRecording);
+    RecordAudioPanel fast = new RecordAudioPanel<>(exercise, controller, this, index, false,
+        audioType, showCurrentRecording);
     audioPanels.add(fast);
     vp.add(fast);
 

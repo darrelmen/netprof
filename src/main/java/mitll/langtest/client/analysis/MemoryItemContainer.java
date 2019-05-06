@@ -372,7 +372,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
       String item = localStorageIfSupported.getItem(selectedUserKey);
       if (item != null) {
-        logger.info("getSelectedUser " + selectedUserKey + " = " + item);
+     //   logger.info("getSelectedUser " + selectedUserKey + " = " + item);
         try {
           return Integer.parseInt(item);
         } catch (NumberFormatException e) {
@@ -396,7 +396,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #gotClickOnItem
    */
   private void storeSelectedUser(int selectedUser) {
-    logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
+  //  logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
 
     if (Storage.isLocalStorageSupported()) {
       Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();

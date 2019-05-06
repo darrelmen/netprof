@@ -181,7 +181,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     DialogEditor editorTurnDialogEditor = new DialogEditor(controller, INavigation.VIEWS.DIALOG_EDITOR, selectedItem);
     editorTurnDialogEditor.showContent(listContent, INavigation.VIEWS.DIALOG_EDITOR);
 
-    logger.info("list content " + listContent);
+  //  logger.info("list content " + listContent);
 
     new DialogHelper(true).show(
         "Add/Edit Turns" + " : " + getListName(),

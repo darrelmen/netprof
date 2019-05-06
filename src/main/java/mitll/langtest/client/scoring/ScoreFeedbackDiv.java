@@ -53,7 +53,7 @@ import java.util.logging.Logger;
  * Created by go22670 on 5/19/17.
  */
 public class ScoreFeedbackDiv extends ScoreProgressBar {
-  private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
+  //private Logger logger = Logger.getLogger("ScoreFeedbackDiv");
 
   private static final double NATIVE_THRSHOLD = 0.75D;
   private static final String OVERALL_SCORE = "Overall Score";
@@ -91,7 +91,8 @@ public class ScoreFeedbackDiv extends ScoreProgressBar {
    * @see SimpleRecordAudioPanel#addWidgets
    */
   public ScoreFeedbackDiv(HeadlessPlayAudio headlessPlayAudio,
-                          PlayAudioPanel playAudioPanel, DownloadContainer downloadContainer, boolean addPraise) {
+                          PlayAudioPanel playAudioPanel,
+                          DownloadContainer downloadContainer, boolean addPraise) {
     super();
     styleTheProgressBar(progressBar);
     addTooltip(progressBar, OVERALL_SCORE);

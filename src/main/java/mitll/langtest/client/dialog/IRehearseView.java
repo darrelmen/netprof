@@ -58,4 +58,6 @@ public interface IRehearseView extends IListenView {
    * @return
    */
   boolean isPressAndHold();
+
+  boolean isSimpleDialog();
 }

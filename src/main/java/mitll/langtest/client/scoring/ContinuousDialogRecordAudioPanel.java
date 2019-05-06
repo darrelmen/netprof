@@ -39,18 +39,26 @@ import mitll.langtest.shared.exercise.ClientExercise;
 
 import java.util.logging.Logger;
 
-class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel<ClientExercise> {
+public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel<ClientExercise> {
   private final Logger logger = Logger.getLogger("ContinuousDialogRecordAudioPanel");
 
   private IRehearseView rehearseView;
   private IRecordResponseListener recordDialogTurn;
   private static final boolean DEBUG = false;
 
-  ContinuousDialogRecordAudioPanel(ClientExercise exercise,
-                                   ExerciseController controller,
-                                   SessionManager sessionManager,
-                                   IRehearseView rehearseView,
-                                   IRecordResponseListener recordDialogTurn) {
+  /**
+   * @param exercise
+   * @param controller
+   * @param sessionManager
+   * @param rehearseView
+   * @param recordDialogTurn
+   * @see RecordDialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
+   */
+  public ContinuousDialogRecordAudioPanel(ClientExercise exercise,
+                                          ExerciseController controller,
+                                          SessionManager sessionManager,
+                                          IRehearseView rehearseView,
+                                          IRecordResponseListener recordDialogTurn) {
     super(exercise, controller, sessionManager);
     this.rehearseView = rehearseView;
     this.recordDialogTurn = recordDialogTurn;
@@ -82,10 +90,9 @@ class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel<Client
 
   @Override
   Widget getPopupTargetWidget() {
-    Widget widget = recordDialogTurn.myGetPopupTargetWidget();
-    logger.info("getPopupTargetWidget " + widget.getElement().getId());
-
-    return widget;
+    return recordDialogTurn.myGetPopupTargetWidget();
+//    logger.info("getPopupTargetWidget " + widget.getElement().getId());
+    // return widget;
   }
 
   /**
@@ -118,7 +125,7 @@ class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel<Client
     super.useInvalidResult(exid, isValid);
     rehearseView.useInvalidResult(exid);
     //getPostAudioRecordButton().setVisible(false);
-    logger.info("useInvalidResult got valid = " + isValid);
+    //  logger.info("useInvalidResult got valid = " + isValid);
   }
 
   /**
@@ -133,6 +140,6 @@ class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel<Client
 
   @Override
   public int getDialogSessionID() {
-    return rehearseView.getDialogSessionID();
+    return rehearseView == null ? 0 : rehearseView.getDialogSessionID();
   }
 }

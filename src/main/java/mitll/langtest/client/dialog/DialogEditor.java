@@ -88,7 +88,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
   @Override
   protected void gotTurnClick(EditorTurn turn) {
     super.gotTurnClick(turn);
-    logger.info("gotClickOnTurn " + turn);
+  //  logger.info("gotClickOnTurn " + turn);
     markCurrent();
   }
 
@@ -280,7 +280,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
    */
   public void grabFocus() {
     if (getCurrentTurn() != null) {
-      logger.info("give focus to turn for ex #" + getCurrentTurn().getExID());
+     // logger.info("give focus to turn for ex #" + getCurrentTurn().getExID());
       getCurrentTurn().grabFocus();
     }
   }

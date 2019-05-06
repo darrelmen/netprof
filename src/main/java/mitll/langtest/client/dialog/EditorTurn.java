@@ -36,16 +36,20 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.scoring.*;
 import mitll.langtest.client.sound.AllHighlight;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
@@ -75,6 +79,11 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   private ListenViewHelper.COLUMNS columns, prevColumn;
   private boolean isFirstTurn;
   private TextBox content;
+  private NoFeedbackRecordAudioPanel<ClientExercise> recordAudioPanel;
+
+ // private RecordAudioPanel recordAudioPanel;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param clientExercise
@@ -92,7 +101,9 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
              ITurnContainer<EditorTurn> turnContainer,
              int dialogID,
              boolean isFirstTurn) {
-    logger.info("turn " + dialogID + " : " + clientExercise.getID() + " : '" + clientExercise.getForeignLanguage() + "' has english " + clientExercise.hasEnglishAttr() + " : " + columns);
+    if (DEBUG) {
+      logger.info("turn " + dialogID + " : " + clientExercise.getID() + " : '" + clientExercise.getForeignLanguage() + "' has english " + clientExercise.hasEnglishAttr() + " : " + columns);
+    }
 
     this.columns = columns;
 
@@ -177,59 +188,171 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
                          EnglishDisplayChoices englishDisplayChoices) {
     DivWidget wrapper = new DivWidget();
     wrapper.getElement().setId("Wrapper_" + getExID());
-    addTextBox(wrapper);
-    styleMe(wrapper);
-    add(wrapper);
 
-    boolean addButtons = columns == MIDDLE || !turnContainer.isInterpreter();
-    if (addButtons) {
-      addStyleName("inlineFlex");
+    NoFeedbackRecordAudioPanel<ClientExercise> recordPanel =
+        new ContinuousDialogRecordAudioPanel(clientExercise, controller, null, null, new IRecordResponseListener() {
+          @Override
+          public void usePartial(StreamResponse response) {
 
+          }
+
+          @Override
+          public Widget myGetPopupTargetWidget() {
+            return null;
+          }
+        });
+
+
+  //  RecordAudioPanel recordAudioPanel = new RecordAudioPanel(clientExercise, controller, this, 0, false, AudioType.REGULAR, true);
+//    SimpleRecordAudioPanel<ClientExercise> recordPanel =
+//        new SimpleRecordAudioPanel<>(controller, clientExercise, null, true, null, null);
+    this.recordAudioPanel = recordPanel;
+
+
+  recordPanel.addWidgets();
+
+    // DivWidget flContainer = getHorizDiv();
+
+//    if (isRight()) {
+//      addStyleName("floatRight");
+//    } else if (isLeft()) {
+//      flContainer.addStyleName("floatLeft");
+//    }
+
+    PostAudioRecordButton postAudioRecordButton = null;
+    DivWidget buttonContainer = new DivWidget();
+    buttonContainer.setId("recordButtonContainer_" + getExID());
+buttonContainer.add(recordAudioPanel);
+    // add  button
+    if (true) {
       {
-        Button w = new Button();
-        addPressAndHoldStyle(w);
-        w.addClickHandler(event -> gotPlus());
-        w.setIcon(IconType.PLUS);
-        w.addStyleName("topFiveMargin");
-        w.addStyleName("leftFiveMargin");
-        w.setType(ButtonType.SUCCESS);
-        add(w);
+//        postAudioRecordButton = getPostAudioWidget(recordPanel, true);
+//        buttonContainer.add(postAudioRecordButton);
+//        RecorderPlayAudioPanel playAudioPanel = recordPanel.getPlayAudioPanel();
+//        playAudioPanel.showPlayButton();
+//        buttonContainer.add(playAudioPanel.getPlayButton());
+        // buttonContainer.add(recordPanel.getPl );
+        buttonContainer.getElement().getStyle().setMarginTop(3, Style.Unit.PX);
       }
-
-      {
-        Button w = new Button();
-        addPressAndHoldStyle(w);
-        w.addClickHandler(event -> gotMinus());
-        w.setType(ButtonType.WARNING);
-
-        w.setIcon(IconType.MINUS);
-        w.addStyleName("topFiveMargin");
-        w.addStyleName("leftFiveMargin");
-
-        // can't blow away the first turn!
-        w.setEnabled(!isFirstTurn);
-
-        add(w);
-      }
-
-      {
-        Button w = new Button();
-        addPressAndHoldStyle(w);
-        w.setType(ButtonType.INFO);
-
-        w.addClickHandler(event -> gotOtherSpeaker());
-        ListenViewHelper.COLUMNS toUseForArrow = columns;
-        if (toUseForArrow == MIDDLE) {
-          toUseForArrow = prevColumn;
-        }
-        //  logger.info("the column is " + toUseForArrow);
-        w.setIcon(toUseForArrow == LEFT ? IconType.ARROW_RIGHT : IconType.ARROW_LEFT);
-        w.addStyleName("topFiveMargin");
-        w.addStyleName("leftFiveMargin");
-        add(w);
-      }
+//      {
+//        Emoticon w = getEmoticonPlaceholder();
+//        emoticon = w;
+//        flContainer.add(w);
+//      }
     }
 
+    // add(flContainer);
+
+    wrapper.add(buttonContainer);
+
+
+    if (postAudioRecordButton != null) {
+      addPressAndHoldStyle(postAudioRecordButton);
+    }
+
+    DivWidget textBoxContainer = new DivWidget();
+
+    addTextBox(textBoxContainer);
+    wrapper.add(textBoxContainer);
+    styleMe(wrapper);
+    wrapper.addStyleName("inlineFlex");
+    add(wrapper);
+
+    if (columns == MIDDLE || !turnContainer.isInterpreter()) {
+      addStyleName("inlineFlex");
+      addAddTurnButton();
+      addDeleteButton();
+      addOtherTurn();
+    }
+  }
+
+  static final String BLUE_INACTIVE_COLOR = "#0171bc";
+
+  @NotNull
+  private PostAudioRecordButton getPostAudioWidget(NoFeedbackRecordAudioPanel<?> recordPanel, boolean enabled) {
+    PostAudioRecordButton postAudioRecordButton = recordPanel.getPostAudioRecordButton();
+    postAudioRecordButton.setEnabled(enabled);
+    postAudioRecordButton.getElement().getStyle().setBackgroundColor(BLUE_INACTIVE_COLOR);
+    return postAudioRecordButton;
+  }
+
+  private void addPressAndHoldStyle(PostAudioRecordButton postAudioRecordButton) {
+    Style style = postAudioRecordButton.getElement().getStyle();
+    style.setProperty("borderRadius", "18px");
+    style.setPadding(8, Style.Unit.PX);
+    style.setWidth(19, Style.Unit.PX);
+    style.setMarginRight(5, Style.Unit.PX);
+    style.setHeight(19, Style.Unit.PX);
+  }
+
+  public void cancelRecording() {
+    recordAudioPanel.cancelRecording();
+  }
+
+  /**
+   * @return
+   * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
+   */
+  @NotNull
+  private DivWidget getHorizDiv() {
+    DivWidget flContainer = new DivWidget();
+    flContainer.addStyleName("inlineFlex");
+    Style style = flContainer.getElement().getStyle();
+    style.setMarginTop(15, Style.Unit.PX);
+
+    if (isMiddle() && clientExercise.hasEnglishAttr()) {
+      style.setProperty("marginLeft", "auto");
+    }
+//    else {
+//      logger.info("setmargin NOT left  auto on " + getExID());
+//    }
+
+    flContainer.getElement().setId("RecordDialogExercisePanel_horiz");
+    return flContainer;
+  }
+
+  private void addOtherTurn() {
+    Button w = new Button();
+    addPressAndHoldStyle(w);
+    w.setType(ButtonType.INFO);
+
+    w.addClickHandler(event -> gotOtherSpeaker());
+    ListenViewHelper.COLUMNS toUseForArrow = columns;
+    if (toUseForArrow == MIDDLE) {
+      toUseForArrow = prevColumn;
+    }
+    //  logger.info("the column is " + toUseForArrow);
+    w.setIcon(toUseForArrow == LEFT ? IconType.ARROW_RIGHT : IconType.ARROW_LEFT);
+    w.addStyleName("topFiveMargin");
+    w.addStyleName("leftFiveMargin");
+    add(w);
+  }
+
+  private void addDeleteButton() {
+    Button w = new Button();
+    addPressAndHoldStyle(w);
+    w.addClickHandler(event -> gotMinus());
+    w.setType(ButtonType.WARNING);
+
+    w.setIcon(IconType.MINUS);
+    w.addStyleName("topFiveMargin");
+    w.addStyleName("leftFiveMargin");
+
+    // can't blow away the first turn!
+    w.setEnabled(!isFirstTurn);
+
+    add(w);
+  }
+
+  private void addAddTurnButton() {
+    Button w = new Button();
+    addPressAndHoldStyle(w);
+    w.addClickHandler(event -> gotPlus());
+    w.setIcon(IconType.PLUS);
+    w.addStyleName("topFiveMargin");
+    w.addStyleName("leftFiveMargin");
+    w.setType(ButtonType.SUCCESS);
+    add(w);
   }
 
   private void gotPlus() {
@@ -255,6 +378,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 
   /**
    * @param wrapper
+   * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
   private void addTextBox(DivWidget wrapper) {
     // TODO : instead, make this a div contenteditable!
@@ -297,6 +421,12 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     turnContainer.setCurrentTurnTo(this);
   }
 
+  /**
+   * If the turn is an interpreter turn, warn when it gets too long to remember by marking it yellow
+   * or red.
+   *
+   * @param event
+   */
   private void gotKey(KeyUpEvent event) {
     NativeEvent ne = event.getNativeEvent();
     int keyCode = ne.getKeyCode();
@@ -314,7 +444,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
         prev = s;
 
         EditorTurn outer = this;
-        logger.info("gotBlur " + getExID() + " = " + prev);
+        //logger.info("gotBlur " + getExID() + " = " + prev);
 
         controller.getExerciseService().updateText(dialogID, getExID(), s, new AsyncCallback<Boolean>() {
           @Override
@@ -329,9 +459,9 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
           }
         });
       }
-    } else {
+    } else if (isMiddle()) {
       int length = s.split(" ").length;
-    //  logger.info("num tokens " + length);
+      //  logger.info("num tokens " + length);
 
       if (length > 10) {
         content.getElement().getStyle().setBackgroundColor("red");
@@ -339,7 +469,6 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
         content.getElement().getStyle().setBackgroundColor("yellow");
       } else {
         content.getElement().getStyle().setBackgroundColor("white");
-
       }
     }
   }
@@ -375,7 +504,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     if (content == null) {
       logger.info("grabFocus no content yet for " + getExID());
     } else {
-      logger.info("grabFocus on " + getExID());
+      //   logger.info("grabFocus on " + getExID());
       content.setFocus(true);
     }
 //    logger.info("hiddenPartner " + hiddenPartner.getOffsetWidth());

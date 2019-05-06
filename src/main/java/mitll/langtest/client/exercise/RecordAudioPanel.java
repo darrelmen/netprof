@@ -332,8 +332,6 @@ public class RecordAudioPanel<T extends HasID & AudioRefExercise> extends AudioP
   }
 
   protected class MyWaveformPostAudioRecordButton extends WaveformPostAudioRecordButton {
-
-
     private long then, now;
 
     /**

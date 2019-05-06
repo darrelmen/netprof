@@ -314,7 +314,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   @NotNull
   private String getFirstSpeakerLabel(IDialog dialog) {
-    logger.info("getFirstSpeakerLabel for dialog " + dialog.getID());
+    //logger.info("getFirstSpeakerLabel for dialog " + dialog.getID());
 //    dialog.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute.toString()));
 
 //    List<ExerciseAttribute> properties = dialog.getAttributes()
@@ -327,7 +327,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
 
-    logger.info("getFirstSpeakerLabel first speaker " + firstSpeaker);
+ //   logger.info("getFirstSpeakerLabel first speaker " + firstSpeaker);
     if (!dialog.getExercises().isEmpty()) {
       ClientExercise next = dialog.getExercises().iterator().next();
       boolean hasEnglishAttr = next.hasEnglishAttr();
@@ -688,7 +688,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   private void markFirstTurn() {
     if (!allTurns.isEmpty()) {
       setCurrentTurn(allTurns.get(0));
-      logger.info("markFirstTurn : markCurrent ");
+  //    logger.info("markFirstTurn : markCurrent ");
       markCurrent();
       makeVisible(currentTurn);
     }
@@ -826,7 +826,6 @@ public class ListenViewHelper<T extends ITurnPanel>
         this,
         columns,
         rightJustify);
-
 
     return t;
   }
@@ -987,7 +986,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     boolean isPlaying = currentTurn.doPause();
     int i = beforeChangeTurns();
     setCurrentTurn(newTurn);
-    logger.info("setCurrentTurnTo ex #" + currentTurn.getExID());
+ //   logger.info("setCurrentTurnTo ex #" + currentTurn.getExID());
     afterChangeTurns(isPlaying);
   }
 

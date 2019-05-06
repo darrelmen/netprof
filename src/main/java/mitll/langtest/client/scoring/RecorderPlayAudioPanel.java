@@ -57,7 +57,7 @@ import static mitll.langtest.client.LangTest.RED_X_URL;
  *
  * @see SimpleRecordAudioPanel#makePlayAudioPanel
  */
-class RecorderPlayAudioPanel extends PlayAudioPanel {
+public class RecorderPlayAudioPanel extends PlayAudioPanel {
   //private final Logger logger = Logger.getLogger("RecorderPlayAudioPanel");
 
   private static final String FIRST_RED = LangTest.LANGTEST_IMAGES + "media-record-3_32x32.png";
@@ -87,7 +87,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
    * @param controller
    * @param exercise
    * @param useMicrophoneIcon
-   * @see SimpleRecordAudioPanel#makePlayAudioPanel
+   * @see NoFeedbackRecordAudioPanel#makePlayAudioPanel
    */
   RecorderPlayAudioPanel(final Button postAudioRecordButton1, ExerciseController controller, HasID exercise, boolean useMicrophoneIcon) {
     super(new PlayListener() {
@@ -108,20 +108,10 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     getElement().setId("RecorderPlayAudioPanel");
   }
 
-  private void configureButton(Button playButton) {
-    playButton.addClickHandler(event -> doPlayPauseToggle());
-//    logger.info("configureButton " + playButton.getElement().getId());
-    playButton.setIcon(PLAY);
-    playButton.setType(ButtonType.INFO);
-    playButton.setSize(ButtonSize.LARGE);
-    playButton.getElement().setId("PlayAudioPanel_playButton_recorder");
-    playButton.addStyleName("leftFiveMargin");
-    playButton.addStyleName("floatLeft");
-  }
-
-  void showPlayButton() {
+  public void showPlayButton() {
     playButton.setVisible(true);
   }
+
   void hidePlayButton() {
     playButton.setVisible(false);
   }
@@ -153,7 +143,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
     if (useMicrophoneIcon) {
       Style style1 = recordImage1.getElement().getStyle();
       style1.setBackgroundColor(BLUE_INACTIVE_COLOR);//"lightBlue");
-    //  style1.setBackgroundColor("blue");
+      //  style1.setBackgroundColor("blue");
 //    style1.setBackgroundColor("#da4f49");
     } else {
       recordImage1.setVisible(false);
@@ -194,6 +184,21 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
   }
 
   /**
+   * @param playButton
+   * @see #makePlayButton(DivWidget)
+   */
+  private void configureButton(Button playButton) {
+    playButton.addClickHandler(event -> doPlayPauseToggle());
+//    logger.info("configureButton " + playButton.getElement().getId());
+    playButton.setIcon(PLAY);
+    playButton.setType(ButtonType.INFO);
+    playButton.setSize(ButtonSize.LARGE);
+    playButton.getElement().setId("PlayAudioPanel_playButton_recorder");
+    playButton.addStyleName("leftFiveMargin");
+    playButton.addStyleName("floatLeft");
+  }
+
+  /**
    * @param waitCursor null OK
    * @return
    * @see SimpleRecordAudioPanel#addWidgets
@@ -211,7 +216,7 @@ class RecorderPlayAudioPanel extends PlayAudioPanel {
       recordImage1.setWidth("32px");
     }
 
-  //  recordImage1.addStyleName("hvr-pulse");
+    //  recordImage1.addStyleName("hvr-pulse");
 
     if (controller.shouldRecord()) {
       recordFeedback.add(recordImage1);

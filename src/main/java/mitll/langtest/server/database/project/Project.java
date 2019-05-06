@@ -79,7 +79,7 @@ public class Project implements IPronunciationLookup, IProject {
   private static final Logger logger = LogManager.getLogger(Project.class);
 
 
-  private static final boolean BUILD_TRIE = false;
+  private static final boolean BUILD_TRIE = true;
 
   private static final String HYDRA_2 = "hydra2";
   private static final String H_2 = "h2";
@@ -345,7 +345,8 @@ public class Project implements IPronunciationLookup, IProject {
     logger.info("buildExerciseTrie : build trie from " + rawExercises.size() + " exercises for " + project);
     long then = System.currentTimeMillis();
     fullTrie = new ExerciseTrie<>(rawExercises, project.language(), smallVocabDecoder, true, false);
-    logger.info("buildExerciseTrie : for " + project.id() + " took " + (System.currentTimeMillis() - then) + " millis to build trie for " + rawExercises.size() + " exercises");
+    logger.info("buildExerciseTrie : for " + project.id() +
+        "\n\ttook " + (System.currentTimeMillis() - then) + " millis to build trie for " + rawExercises.size() + " exercises");
   }
 
   private void makeContextTrie(List<CommonExercise> rawExercises, SmallVocabDecoder smallVocabDecoder) {

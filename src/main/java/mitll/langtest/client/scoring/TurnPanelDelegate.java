@@ -71,8 +71,8 @@ public class TurnPanelDelegate implements ITurnMarking {
    * @see ListenViewHelper#reallyGetTurnPanel
    */
   protected TurnPanelDelegate(final ClientExercise clientExercise,
-                           DivWidget widget,
-                           ListenViewHelper.COLUMNS columns, boolean rightJustify) {
+                              DivWidget widget,
+                              ListenViewHelper.COLUMNS columns, boolean rightJustify) {
     this.exercise = clientExercise;
     this.columns = columns;
     this.rightJustify = rightJustify;

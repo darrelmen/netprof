@@ -94,6 +94,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
 
     getElement().setId(PLAY_AUDIO_PANEL + (doSlow ? "slow" : "") + id);
 
+    logger.info("PlayAudioPanel " +getElement().getId());
     isSlow = doSlow;
 
     this.controller = controller;

@@ -120,7 +120,7 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
     this(controller, showSpectrogram, rightMargin, exercise, exerciseID);
     this.audioPath = path;
 
-   // logger.info("\n\n\nbutton title is " + RECORD);
+    logger.info("AudioPanel : (" + exerciseID + ") button title is " + RECORD);
     addWidgets(playButtonSuffix, RECORD);
     if (playAudio != null) {
       if (exercise == null) {
@@ -161,7 +161,7 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
     getElement().setId("AudioPanel_exercise_" + id);
 
     int width = getImageWidth();
-    //  logger.info("AudioPanel " + getElement().getId() + " width " + width);
+    logger.info("AudioPanel " + getElement().getId() + " width " + width);
     setWidth(width + "px");
   }
 
@@ -526,7 +526,7 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
     if (path != null && !path.equals(FILE_MISSING)) {
       final long then = System.currentTimeMillis();
 
-   //   logger.info("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
+      //   logger.info("getImageURLForAudio : req " + reqid + " path " + path + " type " + type + " width " + width);
 
       final int toUse = Math.max(MIN_WIDTH, width);
       int height = getScaledImageHeight(type);

@@ -106,7 +106,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @see RehearseViewHelper#getRecordingTurnPanel
    */
   public RecordDialogExercisePanel(final ClientExercise commonExercise,
-                                   final ExerciseController controller,
+                                   final ExerciseController<ClientExercise> controller,
                                    final ListInterface<?, ?> listContainer,
                                    Map<Integer, AlignmentOutput> alignments,
                                    IRehearseView listenView,
@@ -335,6 +335,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @param showALTFL
    * @param phonesChoices
    * @param englishDisplayChoices
+   * @see mitll.langtest.client.dialog.ListenViewHelper#getTurnPanel
    */
   @Override
   public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
@@ -346,9 +347,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     recordPanel.addWidgets();
 
     DivWidget flContainer = getHorizDiv();
-    if (turnPanelDelegate.isRight()) {
+    if (isRight()) {
       addStyleName("floatRight");
-    } else if (turnPanelDelegate.isLeft()) {
+    } else if (isLeft()) {
       flContainer.addStyleName("floatLeft");
     }
 
@@ -357,7 +358,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     buttonContainer.setId("recordButtonContainer_" + getExID());
 
     // add  button
-    if (isMiddle()) {
+    if (shouldShowRecordButton()) {
       {
         postAudioRecordButton = getPostAudioWidget(recordPanel);
         buttonContainer.add(postAudioRecordButton);
@@ -373,7 +374,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
     super.addWidgets(showFL, showALTFL, phonesChoices, englishDisplayChoices);
 
-    if (isMiddle()) {
+    if (shouldShowRecordButton()) {
       flClickableRow.addStyleName("inlineFlex");
 
       if (exercise.hasEnglishAttr()) {
@@ -391,6 +392,14 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
         flClickableRow.insert(recordPanel.getScoreFeedback(), 0);
       }
     }
+  }
+
+  /**
+   * For now only right side of conversation can be practiced.
+   * @return
+   */
+  protected boolean shouldShowRecordButton() {
+    return isMiddle() || (rehearseView.isSimpleDialog() && isRight());
   }
 
   @NotNull
@@ -461,7 +470,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     super.markCurrent();
 
     if (doPushToTalk) {
-      if (turnPanelDelegate.isMiddle()) {
+      if (shouldShowRecordButton()) {
         enableRecordButton();
       }
     }
@@ -521,7 +530,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
   /**
    * @return
-   * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
+   * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
   @NotNull
   private DivWidget getHorizDiv() {

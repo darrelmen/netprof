@@ -93,7 +93,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
    * @see TwoColumnExercisePanel#getItemContent
    * @see TwoColumnExercisePanel#addContextFields
    */
-  SimpleRecordAudioPanel(ExerciseController controller,
+  public SimpleRecordAudioPanel(ExerciseController controller,
                          T exercise,
                          ListInterface<?, ?> listContainer,
                          boolean addPlayer,
@@ -128,7 +128,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
    * @seex #AudioPanel
    * @see SimpleRecordAudioPanel#SimpleRecordAudioPanel
    */
-  protected void addWidgets() {
+  public void addWidgets() {
     //long then = System.currentTimeMillis();
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
@@ -150,7 +150,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
 
     getScoreFeedback().add(recordFeedback);
 
-    this.scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, playAudioPanel, playAudioPanel.getRealDownloadContainer(), true);
+    this.scoreFeedbackDiv = new ScoreFeedbackDiv(getPlayAudioPanel(), getPlayAudioPanel(), getPlayAudioPanel().getRealDownloadContainer(), true);
 
     add(col);
     // long now = System.currentTimeMillis();
@@ -182,7 +182,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
    */
   private void setDownloadHref() {
     String audioPathToUse = audioPath.endsWith(OGG) ? audioPath.replaceAll(OGG, MP3) : audioPath;
-    playAudioPanel.setDownloadHref(audioPathToUse, exercise.getID(), getUser(), controller.getHost());
+    getPlayAudioPanel().setDownloadHref(audioPathToUse, exercise.getID(), getUser(), controller.getHost());
   }
 
   private int getUser() {
@@ -292,9 +292,9 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
     if (path != null) {
       this.audioPath = path;
     }
-    if (playAudioPanel != null) {
+    if (getPlayAudioPanel() != null) {
       //logger.info("getReadyToPlayAudio startSong ready to play " +path);
-      playAudioPanel.startSong(path, true);
+      getPlayAudioPanel().startSong(path, true);
     }
   }
 
@@ -304,7 +304,6 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
    */
   private void showRecordingHistory(List<CorrectAndScore> scores) {
     if (scores != null) {
-
       for (CorrectAndScore score : scores) {
         miniScoreListener.addScore(score);
       }

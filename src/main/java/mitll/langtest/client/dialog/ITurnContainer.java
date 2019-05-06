@@ -33,10 +33,16 @@ import mitll.langtest.client.scoring.ITurnPanel;
 
 public interface ITurnContainer<T extends ITurnPanel> {
   void gotForward(EditorTurn editorTurn);
+
   void addTurnForSameSpeaker(T editorTurn);
+
   void addTurnForOtherSpeaker(T editorTurn);
+
   void deleteCurrentTurnOrPair(T currentTurn);
+
   void setCurrentTurnTo(T newTurn);
-boolean isInterpreter();
- // ListenViewHelper.COLUMNS getColumnForPrev(T widgets);
+
+  boolean isInterpreter();
+
+
 }

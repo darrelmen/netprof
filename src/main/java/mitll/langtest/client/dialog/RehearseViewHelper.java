@@ -59,6 +59,7 @@ import mitll.langtest.client.scoring.ScoreProgressBar;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.dialog.DialogSession;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
@@ -163,6 +164,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     boolean pressAndHold = getView().isPressAndHold();
 //    logger.info("isPressAndHold for " + getView() + " " + pressAndHold);
     return pressAndHold;
+  }
+
+  @Override
+  public boolean isSimpleDialog() {
+    return dialog.getKind() == DialogType.DIALOG;
   }
 
   @Override

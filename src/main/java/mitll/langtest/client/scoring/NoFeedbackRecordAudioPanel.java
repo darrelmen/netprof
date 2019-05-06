@@ -50,7 +50,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   final ExerciseController controller;
   final T exercise;
   private PostAudioRecordButton postAudioRecordButton;
-  RecorderPlayAudioPanel playAudioPanel;
+  private RecorderPlayAudioPanel playAudioPanel;
   DivWidget recordFeedback;
   DivWidget scoreFeedback;
   /**
@@ -73,7 +73,8 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   /**
    * @see RecordDialogExercisePanel#addWidgets
    */
-  void addWidgets() {
+  public void addWidgets() {
+    long then = System.currentTimeMillis();
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
     scoreFeedback.getElement().setId("scoreFeedback_" + exercise.getID());
@@ -89,8 +90,9 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     }
 
     add(col);
-    // long now = System.currentTimeMillis();
-    // logger.info("addWidgets "+ (now-then)+ " millis");
+
+    long now = System.currentTimeMillis();
+    logger.info("addWidgets " + (now - then) + " millis, has " + getWidgetCount() + " widgets...");
     //scoreFeedback.getElement().setId("scoreFeedbackRow");
   }
 
@@ -104,7 +106,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
    * @see AudioPanel#getPlayButtons
    */
   RecorderPlayAudioPanel makePlayAudioPanel() {
-    //long then = System.currentTimeMillis();
+    long then = System.currentTimeMillis();
     NoFeedbackRecordAudioPanel outer = this;
     postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller) {
       /**
@@ -113,7 +115,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
        */
       @Override
       protected String getDevice() {
-       // logger.info("no feedback device");
+        // logger.info("no feedback device");
         return getDeviceValue();
       }
 
@@ -129,8 +131,8 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
 
     playAudioPanel.hidePlayButton();
 
-//    long now = System.currentTimeMillis();
-    // logger.info("took " + (now-then) + " for makeAudioPanel");
+    long now = System.currentTimeMillis();
+    logger.info("makePlayAudioPanel : took " + (now - then) + " for makeAudioPanel");
     return playAudioPanel;
   }
 
@@ -139,7 +141,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   }
 
   Widget getPopupTargetWidget() {
-  //  logger.info("getPopupTargetWidget " + this.getId());
+    //  logger.info("getPopupTargetWidget " + this.getId());
     return postAudioRecordButton;
   }
 
@@ -152,7 +154,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
    * @return
    * @see TwoColumnExercisePanel#makeFirstRow
    */
-  PostAudioRecordButton getPostAudioRecordButton() {
+  public PostAudioRecordButton getPostAudioRecordButton() {
     return postAudioRecordButton;
   }
 
@@ -187,7 +189,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   /**
    * @see RecordDialogExercisePanel#cancelRecording()
    */
-  void cancelRecording() {
+  public void cancelRecording() {
     postAudioRecordButton.cancelRecording();
   }
 
@@ -233,5 +235,9 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
 
   DivWidget getScoreFeedback() {
     return scoreFeedback;
+  }
+
+  public RecorderPlayAudioPanel getPlayAudioPanel() {
+    return playAudioPanel;
   }
 }

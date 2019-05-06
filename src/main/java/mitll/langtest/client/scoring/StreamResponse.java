@@ -34,7 +34,7 @@ import mitll.langtest.shared.answer.Validity;
 /**
  *
  */
-class StreamResponse {
+public class StreamResponse {
   private final Validity validity;
   private final long streamTimestamp;
   private final boolean streamStop;
