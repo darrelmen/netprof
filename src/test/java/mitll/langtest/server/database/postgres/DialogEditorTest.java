@@ -62,7 +62,7 @@ public class DialogEditorTest extends BaseTest {
   private static final String UNIT1 = "Unit";
 
   private static final int USERID = 6;
-  private static final int PROJECTID = 5;//21;
+  private static final int PROJECTID = 21;//5;//21;
 
   @Test
   public void testNewDialog() {
@@ -83,6 +83,30 @@ public class DialogEditorTest extends BaseTest {
     andPopulate.close();
 
   }
+
+  @Test
+  public void testGetDialog2() {
+    DatabaseImpl andPopulate = getDatabase();
+    logger.warn("testGetDialog2 START ==--------- ");
+
+    Project project = getProject(andPopulate);
+
+    logger.info("got " + project);
+
+    IDialog dialog = project.getDialog(244);
+    logger.info("got dialog " + dialog);
+
+    for (ClientExercise exercise : dialog.getExercises()) {
+      logger.info("new    " + exercise);
+      CommonExercise lookup = project.getExerciseByID(exercise.getID());
+      logger.info("lookup " + lookup);
+    }
+
+    logger.warn("testGetDialog2 END ==--------- ");
+    andPopulate.close();
+
+  }
+
 
   private Project getProject(DatabaseImpl andPopulate) {
     Project project = andPopulate.getProject(PROJECTID, true);
