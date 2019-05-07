@@ -1834,6 +1834,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
   /**
    * gotta load at least one project...
+   *
    * @param to
    * @param lang
    * @param propertiesFile
@@ -1847,7 +1848,7 @@ public class CopyToPostgres<T extends CommonShell> {
     } else {
       database.ensureProjectManagement(false);
       int projectIDForLanguage = database.getProjectManagement().getProjectIDForLanguage(Language.SPANISH);
-      database.getProjectManagement().getProject(projectIDForLanguage,true);
+      Project project = database.getProjectManagement().getProject(projectIDForLanguage, true);
       logger.info("copyExcelIntoDomino id " + to + " or " + lang + " with " + propertiesFile + " and file " + excel);
 
       if (to == -1) {
@@ -1866,8 +1867,7 @@ public class CopyToPostgres<T extends CommonShell> {
           else {
             database.waitForDefaultUser();
 
-
-            boolean b = database.getProjectManagement().doDominoImport(to, excel);
+            boolean b = database.getProjectManagement().doDominoImport(to, new File(excel), database.getProject(to).getTypeOrder(), database.getUserDAO().getDefaultUser());
             if (b) logger.info("Success!");
             else logger.warn("failure!");
           }

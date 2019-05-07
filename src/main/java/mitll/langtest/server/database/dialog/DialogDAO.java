@@ -181,23 +181,25 @@ public class DialogDAO extends DAO implements IDialogDAO {
       Dialog dialog = idToDialog.get(dialogID);
       // add attributes
 
-      addAttributes(idToPair, slickDialogAttributeJoins, dialog);
+      if (dialog != null) {
+        addAttributes(idToPair, slickDialogAttributeJoins, dialog);
 
-      {
-        List<ExerciseAttribute> fltitle =
-            dialog.getAttributes()
-                .stream()
-                .filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(FLTITLE)).collect(Collectors.toList());
-        if (!fltitle.isEmpty()) dialog.getMutableShell().setForeignLanguage(fltitle.iterator().next().getValue());
+        {
+          List<ExerciseAttribute> fltitle =
+              dialog.getAttributes()
+                  .stream()
+                  .filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(FLTITLE)).collect(Collectors.toList());
+          if (!fltitle.isEmpty()) dialog.getMutableShell().setForeignLanguage(fltitle.iterator().next().getValue());
+        }
+
+        //add exercises
+        addExercises(projid, dialogIDToRelated, dialogID, dialog);
+
+        addCoreVocab(dialogIDToCoreRelated.get(dialogID), project, dialog);
+
+        // add images
+        addImage(projid, dialog);
       }
-
-      //add exercises
-      addExercises(projid, dialogIDToRelated, dialogID, dialog);
-
-      addCoreVocab(dialogIDToCoreRelated.get(dialogID), project, dialog);
-
-      // add images
-      addImage(projid, dialog);
     });
 
     return dialogs;
@@ -279,7 +281,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
             //           logger.info("adding attribute dialog " + dialog);
             //          logger.info("adding attribute dialog attr " + dialog.getAttributes());
 
-            dialog.getAttributes().add(e);
+            if (dialog != null) {
+              dialog.getAttributes().add(e);
+            }
           }
         });
   }
@@ -340,7 +344,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
           exercise = databaseImpl.getExercise(projid, exid);
 
           if (exercise != null) {
-            logger.info("addExercises ex #"+ exercise.getID() + " " +exercise.getForeignLanguage() + " -> tokens : " + exercise.getTokens());
+            logger.info("addExercises ex #" + exercise.getID() + " " + exercise.getForeignLanguage() + " -> tokens : " + exercise.getTokens());
             idToEx.put(exid, exercise = new Exercise(exercise));
           }
         }
@@ -351,7 +355,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
           if (childEx == null && childid != exid) {
             CommonExercise childExOrig = databaseImpl.getExercise(projid, childid);
-            idToEx.put(childid, childEx = new Exercise(childExOrig));
+            if (childExOrig != null)
+              idToEx.put(childid, childEx = new Exercise(childExOrig));
           }
 
           if (childEx == null || childid == exid) {

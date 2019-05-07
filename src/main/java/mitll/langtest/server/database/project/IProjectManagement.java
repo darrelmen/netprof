@@ -42,7 +42,9 @@ import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
+import org.apache.commons.fileupload.FileItem;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -146,9 +148,13 @@ public interface IProjectManagement {
 
   Map<String,Integer> getNpToDomino(int dominoProjectID);
 
+  boolean doDominoImport(int dominoID, FileItem item, Collection<String> typeOrder, int userID);
+
+  boolean doDominoImport(int dominoID, File excelFile, Collection<String> typeOrder, int userID);
+
   OOVInfo checkOOV(int id, int num, int offset);
 
   void updateOOV(List<OOV> updates, int user);
 
-  boolean doDominoImport(int dominoID, String path);
+ // boolean doDominoImport(int dominoID, String path);
 }

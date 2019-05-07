@@ -310,11 +310,15 @@ public class DominoImport implements IDominoImport {
    * @see #getImportFromDomino(int, int, String, DBUser, boolean)
    */
   public ClientPMProject getClientPMProject(int dominoID, DBUser dominoAdminUser) {
-    FindOptions<ProjectColumn> options = new FindOptions<>();
-    options.addFilter(new FilterDetail<>(ProjectColumn.Id, "" + dominoID, FilterDetail.Operator.EQ));
-    List<ClientPMProject> projectDescriptor = projectDelegate.getHeavyProjects(dominoAdminUser, options);
-
-    return projectDescriptor.iterator().next();
+    if (dominoID == -1) {
+      logger.error("huh? dominoID is -1?");
+      return null;
+    } else {
+      FindOptions<ProjectColumn> options = new FindOptions<>();
+      options.addFilter(new FilterDetail<>(ProjectColumn.Id, "" + dominoID, FilterDetail.Operator.EQ));
+      List<ClientPMProject> projectDescriptor = projectDelegate.getHeavyProjects(dominoAdminUser, options);
+      return projectDescriptor.isEmpty() ? null : projectDescriptor.iterator().next();
+    }
   }
 
   /**

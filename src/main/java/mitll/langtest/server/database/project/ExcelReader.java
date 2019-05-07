@@ -32,6 +32,7 @@ import mitll.hlt.domino.server.data.IDominoContext;
 import mitll.hlt.domino.server.extern.importers.metadata.BaseExcelReader;
 import mitll.hlt.domino.server.extern.importers.vocab.VocabularyImportCommand;
 import mitll.hlt.domino.server.extern.importers.vocab.VocabularyItemFactory;
+import mitll.hlt.domino.shared.model.document.CStringMetadata;
 import mitll.hlt.domino.shared.model.document.VocabularyItem;
 import mitll.hlt.domino.shared.model.metadata.MetadataTypes.VocabularyMetadata;
 import org.apache.logging.log4j.LogManager;
@@ -43,386 +44,400 @@ import java.io.InputStream;
 import java.util.*;
 
 public class ExcelReader extends BaseExcelReader<VocabularyItem> {
-	private static final Logger log = LogManager.getLogger();
+  private static final Logger log = LogManager.getLogger();
 
-	private static final String CONTEXT_TRANSLATION = "context translation";
-	private static final String TRANSLATION_OF_CONTEXT = "Translation of Context";
-	private static final String CONTEXT = "context";
-	private static final String ID = "id";
-	public static final String UNIT = "unit";
-	public static final String CHAPTER = "chapter";
-	public static final String WORD = "word";
-	public static final String TOPIC = "topic";
-	public static final String SUBTOPIC = "sub";
-	public static final String GRAMMAR = "grammar";
-	public static final String TRANSLITERATION = "transliteration";
-	private static final String ALT = "alt";
-	private static final String ALT_CONTEXT = "alt context sentence";
-	
-	private static final Map<String, String> grammarMap;
-	private static final Map<String, String> topicMap;
-	private static final Map<String, Map<String, String>> subtopicMaps;
-	
-	private VocabularyImportCommand cmd;
-	
-	private IDominoContext ctx;
+  private static final String CONTEXT_TRANSLATION = "context translation";
+  private static final String TRANSLATION_OF_CONTEXT = "Translation of Context";
+  private static final String CONTEXT = "context";
+  private static final String ID = "id";
+  public static final String UNIT = "unit";
+  public static final String CHAPTER = "chapter";
+  public static final String SEMESTER = "semester";
+  public static final String WORD = "word";
+  public static final String TOPIC = "topic";
+  public static final String SUBTOPIC = "sub";
+  public static final String GRAMMAR = "grammar";
+  public static final String TRANSLITERATION = "transliteration";
+  private static final String ALT = "alt";
+  private static final String ALT_CONTEXT = "alt context sentence";
 
-	ExcelReader(String fileName, IDominoContext ctx, MyVocabularyImportCommand cmd) {
-		super(fileName);
-		this.ctx = ctx;
-		this.cmd = cmd;
-	}
+  private static final Map<String, String> grammarMap;
+  private static final Map<String, String> topicMap;
+  private static final Map<String, Map<String, String>> subtopicMaps;
 
- 	/**
-	 * @param sheet
-	 * @return
-	 * @see #readRows(InputStream)
-	 */
-	@Override
-	protected Collection<VocabularyItem> readFromSheet(Sheet sheet, List<String> errors) {
-		List<VocabularyItem> exercises = new ArrayList<>();
-		boolean gotHeader = false;
+  private MyVocabularyImportCommand cmd;
 
-		int transliterationIndex = cmd.getTransliterationIndex();
-		int termIndex = cmd.getTermIndex();
-		int meaningIndex = cmd.getMeaningIndex();
-		int idIndex = cmd.getIdIndex();
-		int contextIndex = cmd.getContextIndex();
-		int contextTranslationIndex = cmd.getContextTranslationIndex();
-		int unitIndex = cmd.getUnitIndex();
-		int chapterIndex = cmd.getChapterIndex();
-		int topicIndex = cmd.getTopicIndex();
-		int subtopicIndex = cmd.getSubtopicIndex();
-		int grammarIndex = cmd.getGrammarIndex();
-		int altIndex = cmd.getAltIndex();
-		int altContextIndex = cmd.getAltContextIndex();
-		
-		List<String> lastRowValues = new ArrayList<>();
-		Set<String> knownIds = new HashSet<>();
+  private IDominoContext ctx;
+  private String unitColumnHeader = UNIT;
+  private String chapter = CHAPTER;
 
-		try {
-			Iterator<Row> iter = sheet.rowIterator();
-			Map<Integer, Collection<CellRangeAddress>> rowToRanges = getRowToRanges(sheet);
-			List<String> columns;
+  ExcelReader(String fileName, IDominoContext ctx, MyVocabularyImportCommand cmd) {
+    super(fileName);
+    this.ctx = ctx;
+    this.cmd = cmd;
+  }
 
-			for (; iter.hasNext(); ) {
-				Row next = iter.next();
-				//		if (id > maxExercises) break;
-				boolean inMergedRow = rowToRanges.keySet().contains(next.getRowNum());
+  /**
+   * @param sheet
+   * @return
+   * @see #readRows(InputStream)
+   */
+  @Override
+  protected Collection<VocabularyItem> readFromSheet(Sheet sheet, List<String> errors) {
+    List<VocabularyItem> exercises = new ArrayList<>();
+    boolean gotHeader = false;
 
-				if (!gotHeader) {
-					columns = getHeader(next); // could be several junk rows at the top of the spreadsheet
+    int transliterationIndex = cmd.getTransliterationIndex();
+    int termIndex = cmd.getTermIndex();
+    int meaningIndex = cmd.getMeaningIndex();
+    int idIndex = cmd.getIdIndex();
+    int contextIndex = cmd.getContextIndex();
+    int contextTranslationIndex = cmd.getContextTranslationIndex();
+    int unitIndex = cmd.getUnitIndex();
+    int chapterIndex = cmd.getChapterIndex();
+    int semesterIndex = cmd.getSemesterIndex();
+    int topicIndex = cmd.getTopicIndex();
+    int subtopicIndex = cmd.getSubtopicIndex();
+    int grammarIndex = cmd.getGrammarIndex();
+    int altIndex = cmd.getAltIndex();
+    int altContextIndex = cmd.getAltContextIndex();
 
-					// When ignoring the header row, just assume we got it and move on.
-					if (cmd.isIgnoreHeader()) {
-						gotHeader = true;
-					} else {
-						// otherwise, look up the header details.
-						log.info("Looking for columns in: {}", columns);
-						for (String col : columns) {
-							String colNormalized = col.toLowerCase();
-							if (colNormalized.startsWith(WORD)) {
-								gotHeader = true;
-								meaningIndex = columns.indexOf(col);
-								if (termIndex < 0) {
-									termIndex = meaningIndex+1;
-								}
-							} else if (transliterationIndex < 0 && colNormalized.contains(TRANSLITERATION)) {
-								transliterationIndex = columns.indexOf(col);
-							} else if (idIndex < 0 && colNormalized.contains(ID)) {
-								idIndex = columns.indexOf(col);
-							} else if (contextTranslationIndex < 0 && contextTransMatch(colNormalized)) { //be careful of ordering wrt this and the next item
-								contextTranslationIndex = columns.indexOf(col);
-							} else if (contextIndex < 0 && colNormalized.contains(CONTEXT)) {
-								contextIndex = columns.indexOf(col);
-							} else if (unitIndex < 0 && colNormalized.contains(UNIT)) {
-								unitIndex = columns.indexOf(col);
-							} else if (chapterIndex < 0 && colNormalized.contains(CHAPTER)) {
-								chapterIndex = columns.indexOf(col);
-							} else if (topicIndex < 0 && colNormalized.contains(TOPIC)) {
-								topicIndex = columns.indexOf(col);
-							} else if (subtopicIndex < 0 && colNormalized.contains(SUBTOPIC)) {
-								subtopicIndex = columns.indexOf(col);
-							} else if (grammarIndex < 0 && colNormalized.contains(GRAMMAR)) {
-								grammarIndex = columns.indexOf(col);
-							} else if (altIndex < 0 && colNormalized.contains(ALT)) {
-								altIndex = columns.indexOf(col);
-							} else if (altContextIndex < 0 && colNormalized.contains(ALT_CONTEXT)) {
-								altContextIndex = columns.indexOf(col);
-							}
-						}
-					}
+    List<String> lastRowValues = new ArrayList<>();
+    Set<String> knownIds = new HashSet<>();
 
-					log.debug("got header " + gotHeader + " term index=" + termIndex +
-							" unit=" + unitIndex + " chapter=" + chapterIndex +
-							" meaning=" + meaningIndex +
-							" transliterationIndex=" + transliterationIndex +
-							" contextIndex=" + contextIndex +
-							" topic=" + topicIndex + " subtopic=" + subtopicIndex +
-							" alt=" + altIndex + " altContext=" + altContextIndex +
-							" grammar=" + grammarIndex + " id=" + idIndex);
-				} else {
-					boolean isDelete = isDeletedRow(sheet, next, idIndex);
-					String meaning = getCell(next, meaningIndex).trim();
-					// remove starting or ending tics
-					String foreignLanguagePhrase = cleanTics(getCell(next, termIndex).trim());
-					String translit = getCell(next, transliterationIndex);
-					//String firstVal = getCell(next, unitIndex);
+    try {
+      Iterator<Row> iter = sheet.rowIterator();
+      Map<Integer, Collection<CellRangeAddress>> rowToRanges = getRowToRanges(sheet);
+      List<String> columns;
 
-					//log.info("for row " + next.getRowNum() + " english = " + english + 
-					// " in merged " + inMergedRow + " last row " + lastRowValues.size());
+      for (; iter.hasNext(); ) {
+        Row next = iter.next();
+        //		if (id > maxExercises) break;
+        boolean inMergedRow = rowToRanges.keySet().contains(next.getRowNum());
 
-					if (inMergedRow && !lastRowValues.isEmpty()) {
-						if (meaning.length() == 0) {
-							meaning = lastRowValues.get(0);
-						}
-					}
-					if (gotHeader && meaning.length() > 0) {
-						if (inMergedRow) log.info("got merged row ------------ ");
+        if (!gotHeader) {
+          columns = getHeader(next); // could be several junk rows at the top of the spreadsheet
 
-						if (inMergedRow && !lastRowValues.isEmpty()) {
-							if (foreignLanguagePhrase.length() == 0) {
-								foreignLanguagePhrase = lastRowValues.get(1);
-								//log.info("for row " + next.getRowNum() + " for foreign lang using " + foreignLanguagePhrase);
-							}
-						}
-						if (foreignLanguagePhrase.length() == 0) {
-							log.info("Got empty foreign language phrase row #" + next.getRowNum() + " for " + meaning);
-							errors.add(sheet.getSheetName() + "/" + "row #" + (next.getRowNum() + 1) + " phrase was blank.");
+          // When ignoring the header row, just assume we got it and move on.
+          if (cmd.isIgnoreHeader()) {
+            gotHeader = true;
+          } else {
+            // otherwise, look up the header details.
+            log.info("Looking for columns in: {}", columns);
+            for (String col : columns) {
+              String colNormalized = col.toLowerCase();
+              if (colNormalized.startsWith(WORD)) {
+                gotHeader = true;
+                meaningIndex = columns.indexOf(col);
+                if (termIndex < 0) {
+                  termIndex = meaningIndex + 1;
+                }
+              } else if (transliterationIndex < 0 && colNormalized.contains(TRANSLITERATION)) {
+                transliterationIndex = columns.indexOf(col);
+              } else if (idIndex < 0 && colNormalized.contains(ID)) {
+                idIndex = columns.indexOf(col);
+              } else if (contextTranslationIndex < 0 && contextTransMatch(colNormalized)) { //be careful of ordering wrt this and the next item
+                contextTranslationIndex = columns.indexOf(col);
+              } else if (contextIndex < 0 && colNormalized.contains(CONTEXT)) {
+                contextIndex = columns.indexOf(col);
+              } else {
+                if (unitIndex < 0 && colNormalized.contains(unitColumnHeader)) {
+                  unitIndex = columns.indexOf(col);
+                } else {
+                  if (chapterIndex < 0 && colNormalized.contains(chapter)) {
+                    chapterIndex = columns.indexOf(col);
+                  } else if (semesterIndex < 0 && colNormalized.contains(SEMESTER)) {
+                    semesterIndex = columns.indexOf(col);
+                  } else if (topicIndex < 0 && colNormalized.contains(TOPIC)) {
+                    topicIndex = columns.indexOf(col);
+                  } else if (subtopicIndex < 0 && colNormalized.contains(SUBTOPIC)) {
+                    subtopicIndex = columns.indexOf(col);
+                  } else if (grammarIndex < 0 && colNormalized.contains(GRAMMAR)) {
+                    grammarIndex = columns.indexOf(col);
+                  } else if (altIndex < 0 && colNormalized.contains(ALT)) {
+                    altIndex = columns.indexOf(col);
+                  } else if (altContextIndex < 0 && colNormalized.contains(ALT_CONTEXT)) {
+                    altContextIndex = columns.indexOf(col);
+                  }
+                }
+              }
+            }
+          }
+
+          log.debug("got header " + gotHeader + " term index=" + termIndex +
+              " unit=" + unitIndex +
+              "\n\tchapter=" + chapterIndex +
+              "\n\tsemester=" + semesterIndex +
+              "\n\tmeaning=" + meaningIndex +
+              " transliterationIndex=" + transliterationIndex +
+              " contextIndex=" + contextIndex +
+              " topic=" + topicIndex + " subtopic=" + subtopicIndex +
+              " alt=" + altIndex + " altContext=" + altContextIndex +
+              " grammar=" + grammarIndex + " id=" + idIndex);
+        } else {
+          boolean isDelete = isDeletedRow(sheet, next, idIndex);
+          String meaning = getCell(next, meaningIndex).trim();
+          // remove starting or ending tics
+          String foreignLanguagePhrase = cleanTics(getCell(next, termIndex).trim());
+          String translit = getCell(next, transliterationIndex);
+          //String firstVal = getCell(next, unitIndex);
+
+          //log.info("for row " + next.getRowNum() + " english = " + english +
+          // " in merged " + inMergedRow + " last row " + lastRowValues.size());
+
+          if (inMergedRow && !lastRowValues.isEmpty()) {
+            if (meaning.length() == 0) {
+              meaning = lastRowValues.get(0);
+            }
+          }
+          if (gotHeader && meaning.length() > 0) {
+            if (inMergedRow) log.info("got merged row ------------ ");
+
+            if (inMergedRow && !lastRowValues.isEmpty()) {
+              if (foreignLanguagePhrase.length() == 0) {
+                foreignLanguagePhrase = lastRowValues.get(1);
+                //log.info("for row " + next.getRowNum() + " for foreign lang using " + foreignLanguagePhrase);
+              }
+            }
+            if (foreignLanguagePhrase.length() == 0) {
+              log.info("Got empty foreign language phrase row #" + next.getRowNum() + " for " + meaning);
+              errors.add(sheet.getSheetName() + "/" + "row #" + (next.getRowNum() + 1) + " phrase was blank.");
 //						} else if (skipSemicolons && (foreignLanguagePhrase.contains(";") || translit.contains(";"))) {
 //							//semis++;
-						} else {
-							if (inMergedRow && !lastRowValues.isEmpty()) {
-								if (translit.length() == 0) {
-									translit = lastRowValues.get(2);
-								}
-							}
+            } else {
+              if (inMergedRow && !lastRowValues.isEmpty()) {
+                if (translit.length() == 0) {
+                  translit = lastRowValues.get(2);
+                }
+              }
 
-							String idVal = idIndex != -1 ? getCell(next, idIndex) : "";
-							String context = getCell(next, contextIndex);
-							String contextTranslation = getCell(next, contextTranslationIndex);
-							String unitVal = unitIndex != -1 ? getCell(next, unitIndex) : "";
-							String chapterVal = chapterIndex != -1 ? getCell(next, chapterIndex) : "";
+              String idVal = idIndex != -1 ? getCell(next, idIndex) : "";
+              String context = getCell(next, contextIndex);
+              String contextTranslation = getCell(next, contextTranslationIndex);
+              String unitVal = unitIndex != -1 ? getCell(next, unitIndex) : "";
+              String chapterVal = chapterIndex != -1 ? getCell(next, chapterIndex) : "";
+              String semesterVal = semesterIndex != -1 ? getCell(next, semesterIndex) : "";
 
-							String topicVal = topicIndex != -1 ? getCell(next, topicIndex) : "";
-							String subtopicVal = subtopicIndex != -1 ? getCell(next, subtopicIndex) : "";
-							String grammarVal = grammarIndex != -1 ? getCell(next, grammarIndex) : "";
-							String altVal = altIndex != -1 ? getCell(next, altIndex) : "";
-							String altContextVal = altContextIndex != -1 ? getCell(next, altContextIndex) : "";
-							
-							topicVal = convertTopic(topicVal);
-							subtopicVal = convertSubtopic(topicVal, subtopicVal);
-							grammarVal = convertGrammar(grammarVal);
-							
-							VocabularyItem imported = isDelete ? null :
-								VocabularyItemFactory.create(ctx, idVal, unitVal, chapterVal, foreignLanguagePhrase,
-										meaning, translit, altVal, context, contextTranslation, altContextVal, 
-										topicVal, subtopicVal, grammarVal);
-							if (!isDelete) {
-								String npId = getNPId(imported);
-								if (knownIds.contains(npId)) {
-									log.warn("readFromSheet : found duplicate entry under " + npId + " " + imported);
-								} else {
-									knownIds.add(npId);
-									exercises.add(imported);
-								}
-							} else {
-								if (isDelete) {
-									//deleted++;
-								} else {
+              String topicVal = topicIndex != -1 ? getCell(next, topicIndex) : "";
+              String subtopicVal = subtopicIndex != -1 ? getCell(next, subtopicIndex) : "";
+              String grammarVal = grammarIndex != -1 ? getCell(next, grammarIndex) : "";
+              String altVal = altIndex != -1 ? getCell(next, altIndex) : "";
+              String altContextVal = altContextIndex != -1 ? getCell(next, altContextIndex) : "";
 
-									//skipped++;
-								}
-							}
-							if (inMergedRow) {
-								//log.debug("found merged row...");
-								lastRowValues.add(meaning);
-								lastRowValues.add(foreignLanguagePhrase);
-								lastRowValues.add(translit);
-							} else if (!lastRowValues.isEmpty()) {
-								lastRowValues.clear();
-							}
-						}
-					} else if (gotHeader && foreignLanguagePhrase.length() > 0) {
-						errors.add(sheet.getSheetName() + "/" + "row #" + (next.getRowNum() + 1) + " Word/Expression was blank");
-					}
-				}
-			}
-		} catch (Exception e) {
-			log.error("got " + e, e);
-		}
+              topicVal = convertTopic(topicVal);
+              subtopicVal = convertSubtopic(topicVal, subtopicVal);
+              grammarVal = convertGrammar(grammarVal);
 
-		return exercises;
-	}
+              VocabularyItem imported = isDelete ? null :
+                  VocabularyItemFactory.create(ctx, idVal, unitVal, chapterVal, foreignLanguagePhrase,
+                      meaning, translit, altVal, context, contextTranslation, altContextVal,
+                      topicVal, subtopicVal, grammarVal);
+              if (!isDelete) {
 
-	private String convertGrammar(String grammar) {
-		String grammarLC = grammar.toLowerCase();
-		Optional<String> dominoGrammar = grammarMap.keySet().stream().filter(grammarLC::startsWith)
-				.findFirst()
-				.map(grammarMap::get);
-		String s = dominoGrammar.orElse("");
-		if (!grammar.isEmpty() && s.isEmpty()) {
-			log.warn("skipping grammar " + grammar);
-		}
-		return s;
-	}
+                imported.addMetadataField(new CStringMetadata("v-semester", semesterVal));
 
-	private String convertTopic(String topic) {
-		String topicLC = topic.toLowerCase();
-		Optional<String> dominoTopic = topicMap.keySet().stream().filter(topicLC::startsWith)
-				.findFirst()
-				.map(topicMap::get);
-		String s = dominoTopic.orElse("");
-		if (!topic.isEmpty() && s.isEmpty()) {
-			log.warn("skipping topic " + topic);
-		}
-		return s;
-	}
+                String npId = getNPId(imported);
+                if (knownIds.contains(npId)) {
+                  log.warn("readFromSheet : found duplicate entry under " + npId + " " + imported);
+                } else {
+                  knownIds.add(npId);
+                  exercises.add(imported);
+                }
+              } else {
+//                if (isDelete) {
+//                  //deleted++;
+//                } else {
+//                  //skipped++;
+//                }
+              }
+              if (inMergedRow) {
+                //log.debug("found merged row...");
+                lastRowValues.add(meaning);
+                lastRowValues.add(foreignLanguagePhrase);
+                lastRowValues.add(translit);
+              } else if (!lastRowValues.isEmpty()) {
+                lastRowValues.clear();
+              }
+            }
+          } else if (gotHeader && foreignLanguagePhrase.length() > 0) {
+            errors.add(sheet.getSheetName() + "/" + "row #" + (next.getRowNum() + 1) + " Word/Expression was blank");
+          }
+        }
+      }
+    } catch (Exception e) {
+      log.error("got " + e, e);
+    }
 
-	private String convertSubtopic(String topic, String subtopic) {
-		Map<String, String> subtopicM = subtopicMaps.get(topic);
-		if (subtopicM != null) {
-			String subtopicLC = subtopic.toLowerCase();
-			Optional<String> dominoSubtopic = subtopicM.keySet().stream().filter(subtopicLC::startsWith)
-					.findFirst()
-					.map(subtopicM::get);
-			String s = dominoSubtopic.orElse("");
-			if (!topic.isEmpty() && s.isEmpty()) {
-				log.warn("skipping subtopic " + subtopicLC);
-			}
-			return s;
-		}
-		else if (!topic.isEmpty()) {
-			log.warn("skipping topic " + topic);
-		}
-		return "";
-	}
+    return exercises;
+  }
+
+  private String convertGrammar(String grammar) {
+    String grammarLC = grammar.toLowerCase();
+    Optional<String> dominoGrammar = grammarMap.keySet().stream().filter(grammarLC::startsWith)
+        .findFirst()
+        .map(grammarMap::get);
+    String s = dominoGrammar.orElse("");
+    if (!grammar.isEmpty() && s.isEmpty()) {
+      log.warn("skipping grammar " + grammar);
+    }
+    return s;
+  }
+
+  private String convertTopic(String topic) {
+    String topicLC = topic.toLowerCase();
+    Optional<String> dominoTopic = topicMap.keySet().stream().filter(topicLC::startsWith)
+        .findFirst()
+        .map(topicMap::get);
+    String s = dominoTopic.orElse("");
+    if (!topic.isEmpty() && s.isEmpty()) {
+      log.warn("skipping topic " + topic);
+    }
+    return s;
+  }
+
+  private String convertSubtopic(String topic, String subtopic) {
+    Map<String, String> subtopicM = subtopicMaps.get(topic);
+    if (subtopicM != null) {
+      String subtopicLC = subtopic.toLowerCase();
+      Optional<String> dominoSubtopic = subtopicM.keySet().stream().filter(subtopicLC::startsWith)
+          .findFirst()
+          .map(subtopicM::get);
+      String s = dominoSubtopic.orElse("");
+      if (!topic.isEmpty() && s.isEmpty()) {
+        log.warn("skipping subtopic " + subtopicLC);
+      }
+      return s;
+    } else if (!topic.isEmpty()) {
+      log.warn("skipping topic " + topic);
+    }
+    return "";
+  }
 
 
-	private boolean contextTransMatch(String colNormalized) {
-		return colNormalized.contains(CONTEXT_TRANSLATION) || colNormalized.contains(TRANSLATION_OF_CONTEXT.toLowerCase());
-	}
+  private boolean contextTransMatch(String colNormalized) {
+    return colNormalized.contains(CONTEXT_TRANSLATION) || colNormalized.contains(TRANSLATION_OF_CONTEXT.toLowerCase());
+  }
 
-	private boolean isDeletedRow(Sheet sheet, Row next, int colIndex) {
-		boolean isDelete = false;
-		try {
-			Cell cell = next.getCell(colIndex);
-			if (cell != null) {
-				CellStyle cellStyle = cell.getCellStyle();
-				if (cellStyle != null) {
-					isDelete = sheet.getWorkbook().getFontAt(cellStyle.getFontIndex()).getStrikeout();
-				}
-			}
-		} catch (Exception e) {
-			log.debug("got error reading delete strikeout at row " + next.getRowNum());
-		}
-		return isDelete;
-	}
+  private boolean isDeletedRow(Sheet sheet, Row next, int colIndex) {
+    boolean isDelete = false;
+    try {
+      Cell cell = next.getCell(colIndex);
+      if (cell != null) {
+        CellStyle cellStyle = cell.getCellStyle();
+        if (cellStyle != null) {
+          isDelete = sheet.getWorkbook().getFontAt(cellStyle.getFontIndex()).getStrikeout();
+        }
+      }
+    } catch (Exception e) {
+      log.debug("got error reading delete strikeout at row " + next.getRowNum());
+    }
+    return isDelete;
+  }
 
-	private String getCell(Row next, int col) {
-		if (col == -1) return "";
-		Cell cell = next.getCell(col);
-		if (cell == null) return "";
-		if (cell.getCellTypeEnum() == CellType.NUMERIC) {
-			double numericCellValue = cell.getNumericCellValue();
-			if ((new Double(numericCellValue).intValue()) < numericCellValue)
-				return "" + numericCellValue;
-			else
-				return "" + new Double(numericCellValue).intValue();
-		} else if (cell.getCellTypeEnum() == CellType.STRING) {
-			return cell.getStringCellValue().trim();
-		} else {
-			return cell.toString().trim();
-		}
-	}
+  private String getCell(Row next, int col) {
+    if (col == -1) return "";
+    Cell cell = next.getCell(col);
+    if (cell == null) return "";
+    if (cell.getCellTypeEnum() == CellType.NUMERIC) {
+      double numericCellValue = cell.getNumericCellValue();
+      if ((new Double(numericCellValue).intValue()) < numericCellValue)
+        return "" + numericCellValue;
+      else
+        return "" + new Double(numericCellValue).intValue();
+    } else if (cell.getCellTypeEnum() == CellType.STRING) {
+      return cell.getStringCellValue().trim();
+    } else {
+      return cell.toString().trim();
+    }
+  }
 
-	private String cleanTics(String foreignLanguagePhrase) {
-		if (foreignLanguagePhrase.startsWith("\'")) {
-			foreignLanguagePhrase = foreignLanguagePhrase.substring(1);
-		}
-		if (foreignLanguagePhrase.endsWith("\'"))
-			foreignLanguagePhrase = foreignLanguagePhrase.substring(0, foreignLanguagePhrase.length() - 1);
-		return foreignLanguagePhrase;
-	}
-	
-	private String getNPId(VocabularyItem item) {
-		return item.getMetadataField(VocabularyMetadata.V_NP_ID).getDisplayValue();
-	}
-	
-	static {
-		topicMap = new HashMap<>();
-		topicMap.put("basics", "Basics");
-		topicMap.put("cult", "Cultural & Social");
-		topicMap.put("econ", "Economic & Political");
-		topicMap.put("geog", "Geography & Environment");
-		topicMap.put("mili", "Military & Security");
-		topicMap.put("sci", "Scientific & Technological");
-		
-		subtopicMaps = new HashMap<>();
-		
-		Map<String, String> m = new HashMap<>();
-		m.put("bio", "Biography & Anatomy");
-		m.put("everyday", "Everyday Vocabulary");	
-		m.put("expression", "Expressions, Cohesive Devices");
-		m.put("occupations", "Occupations");
-		m.put("times", "Times, Colors, Numbers");
-		subtopicMaps.put("Basics", m);
+  private String cleanTics(String foreignLanguagePhrase) {
+    if (foreignLanguagePhrase.startsWith("\'")) {
+      foreignLanguagePhrase = foreignLanguagePhrase.substring(1);
+    }
+    if (foreignLanguagePhrase.endsWith("\'"))
+      foreignLanguagePhrase = foreignLanguagePhrase.substring(0, foreignLanguagePhrase.length() - 1);
+    return foreignLanguagePhrase;
+  }
 
-		m = new HashMap<>();
-		m.put("customs", "Customs & Traditions");
-		m.put("education", "Education & Training");
-		m.put("food", "Food & Drink");
-		m.put("humanities", "Humanities (Lang., Lit., Rel., Arts, etc.)");
-		m.put("leisure", "Leisure & Entertainment");
-		subtopicMaps.put("Cultural & Social", m);
-		
-		m = new HashMap<>();
-		m.put("econ", "Economic & Business");
-		m.put("ind", "Industry");
-		m.put("legal", "Legal & Courts");
-		m.put("polit", "Political & Government");
-		m.put("trans", "Transportation & Travel");
-		subtopicMaps.put("Economic & Political", m);
-		
-		m = new HashMap<>();
-		m.put("cities", "Cities, States, Countries");
-		m.put("climate", "Climate & Weather");
-		m.put("direct", "Directions & Landmarks");
-		m.put("general env", "General Environment");
-		m.put("general geo", "General Geography");		
-		subtopicMaps.put("Geography & Environment", m);
-		
-		m = new HashMap<>();
-		m.put("crime", "Crime, Terrorism, Violence");
-		m.put("mil", "Military & Warfare");
-		m.put("ranks", "Ranks");
-		m.put("security", "Security & Law Enforcement");
-		m.put("weaponry", "Weaponry & Equipment");
-		subtopicMaps.put("Military & Security", m);
-		
-		m = new HashMap<>();
-		m.put("sci", "Scientific & Technological");
-		m.put("comp", "Computer & Internet");
-		m.put("general sci", "General Scientific");
-		m.put("general tech", "General Technological");
-		m.put("medical", "Medical & Health");
-		m.put("natural", "Natural Sciences (Phy., Chem., Bio., etc.)");
-		subtopicMaps.put("Scientific & Technological", m);
-		
-		grammarMap = new HashMap<>();
-		grammarMap.put("alpha", "Alphabet");
-		grammarMap.put("interject", "Interjections");
-		grammarMap.put("adj", "Adjectives");
-		grammarMap.put("adv", "Adverbs");
-		grammarMap.put("conj", "Conjunctions");
-		grammarMap.put("caus", "Causative Verbs");
-		grammarMap.put("trans", "Transitive Verbs");
-		grammarMap.put("intrans", "Intransitive Verbs");
-		grammarMap.put("nouns", "Nouns");
-		grammarMap.put("pro", "Pronouns");
-		grammarMap.put("pre", "Prefixes/Suffixes");
-		grammarMap.put("post", "Postpositions");
-              
+  private String getNPId(VocabularyItem item) {
+    return item.getMetadataField(VocabularyMetadata.V_NP_ID).getDisplayValue();
+  }
+
+  static {
+    topicMap = new HashMap<>();
+    topicMap.put("basics", "Basics");
+    topicMap.put("cult", "Cultural & Social");
+    topicMap.put("econ", "Economic & Political");
+    topicMap.put("geog", "Geography & Environment");
+    topicMap.put("mili", "Military & Security");
+    topicMap.put("sci", "Scientific & Technological");
+
+    subtopicMaps = new HashMap<>();
+
+    Map<String, String> m = new HashMap<>();
+    m.put("bio", "Biography & Anatomy");
+    m.put("everyday", "Everyday Vocabulary");
+    m.put("expression", "Expressions, Cohesive Devices");
+    m.put("occupations", "Occupations");
+    m.put("times", "Times, Colors, Numbers");
+    subtopicMaps.put("Basics", m);
+
+    m = new HashMap<>();
+    m.put("customs", "Customs & Traditions");
+    m.put("education", "Education & Training");
+    m.put("food", "Food & Drink");
+    m.put("humanities", "Humanities (Lang., Lit., Rel., Arts, etc.)");
+    m.put("leisure", "Leisure & Entertainment");
+    subtopicMaps.put("Cultural & Social", m);
+
+    m = new HashMap<>();
+    m.put("econ", "Economic & Business");
+    m.put("ind", "Industry");
+    m.put("legal", "Legal & Courts");
+    m.put("polit", "Political & Government");
+    m.put("trans", "Transportation & Travel");
+    subtopicMaps.put("Economic & Political", m);
+
+    m = new HashMap<>();
+    m.put("cities", "Cities, States, Countries");
+    m.put("climate", "Climate & Weather");
+    m.put("direct", "Directions & Landmarks");
+    m.put("general env", "General Environment");
+    m.put("general geo", "General Geography");
+    subtopicMaps.put("Geography & Environment", m);
+
+    m = new HashMap<>();
+    m.put("crime", "Crime, Terrorism, Violence");
+    m.put("mil", "Military & Warfare");
+    m.put("ranks", "Ranks");
+    m.put("security", "Security & Law Enforcement");
+    m.put("weaponry", "Weaponry & Equipment");
+    subtopicMaps.put("Military & Security", m);
+
+    m = new HashMap<>();
+    m.put("sci", "Scientific & Technological");
+    m.put("comp", "Computer & Internet");
+    m.put("general sci", "General Scientific");
+    m.put("general tech", "General Technological");
+    m.put("medical", "Medical & Health");
+    m.put("natural", "Natural Sciences (Phy., Chem., Bio., etc.)");
+    subtopicMaps.put("Scientific & Technological", m);
+
+    grammarMap = new HashMap<>();
+    grammarMap.put("alpha", "Alphabet");
+    grammarMap.put("interject", "Interjections");
+    grammarMap.put("adj", "Adjectives");
+    grammarMap.put("adv", "Adverbs");
+    grammarMap.put("conj", "Conjunctions");
+    grammarMap.put("caus", "Causative Verbs");
+    grammarMap.put("trans", "Transitive Verbs");
+    grammarMap.put("intrans", "Intransitive Verbs");
+    grammarMap.put("nouns", "Nouns");
+    grammarMap.put("pro", "Pronouns");
+    grammarMap.put("pre", "Prefixes/Suffixes");
+    grammarMap.put("post", "Postpositions");
+
 //		subtopicMaps = new HashMap<>();
 //		
 //		Map<String, String> m = new HashMap<>();
@@ -508,5 +523,13 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
 //		m.put("nat", "Natural Sciences"); 
 //		m.put("res", "Research, Discoveries");  
 //		subtopicMaps.put("Scientific and Technological", m);
-	}
+  }
+
+  public void setUnitColumnHeader(String unitColumnHeader) {
+    this.unitColumnHeader = unitColumnHeader;
+  }
+
+  public void setChapter(String chapter) {
+    this.chapter = chapter;
+  }
 }

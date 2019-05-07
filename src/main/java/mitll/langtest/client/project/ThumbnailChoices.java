@@ -63,9 +63,13 @@ public class ThumbnailChoices {
   @NotNull
   public Thumbnail getThumbnail() {
     Thumbnail thumbnail = new Thumbnail();
-    thumbnail.setWidth(CHOICE_WIDTH + "px");
+    thumbnail.setWidth(getChoiceWidth() + "px");
     thumbnail.setSize(2);
     return thumbnail;
+  }
+
+  protected int getChoiceWidth() {
+    return CHOICE_WIDTH;
   }
 
   @NotNull

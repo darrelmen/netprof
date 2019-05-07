@@ -36,17 +36,17 @@ import java.io.File;
 import java.util.Date;
 
 class MyVocabularyImportCommand extends VocabularyImportCommand {
-  private int semesterCol;
+  private int semesterIndex;
 
   public MyVocabularyImportCommand(mitll.hlt.domino.shared.model.user.User user, File excelFile2) {
     super(user, new Date(), excelFile2.getAbsolutePath(), ImportMode.Overwrite);
   }
 
-  public void setSemesterCol(int col) {
-    this.semesterCol = col;
+  public void setSemesterIndex(int col) {
+    this.semesterIndex = col;
   }
 
-  public int getSemesterCol() {
-    return semesterCol;
+  public int getSemesterIndex() {
+    return semesterIndex;
   }
 }

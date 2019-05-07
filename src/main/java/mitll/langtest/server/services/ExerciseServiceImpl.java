@@ -29,6 +29,8 @@
 
 package mitll.langtest.server.services;
 
+import com.google.gson.JsonObject;
+import mitll.hlt.domino.shared.Constants;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
@@ -47,12 +49,21 @@ import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.FileUploadException;
+import org.apache.commons.fileupload.disk.DiskFileItemFactory;
+import org.apache.commons.fileupload.servlet.ServletFileUpload;
+import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.Collator;
@@ -86,6 +97,106 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   public FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException {
     int userFromSessionID = getUserIDFromSessionOrDB();
     return db.getFilterResponseHelper().getTypeToValues(request, getProjectIDFromUser(userFromSessionID), userFromSessionID);
+  }
+
+  @Override
+  protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    ServletRequestContext ctx = new ServletRequestContext(request);
+    String contentType = ctx.getContentType();
+    //  String requestType = getRequestType(request);
+//    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
+    if (contentType != null && contentType.contains("multipart/form-data")) {
+      //reportOnHeaders(request);
+      doExcelUpload(request, response);
+    } else {
+      super.service(request, response);
+    }
+  }
+
+  private void doExcelUpload(HttpServletRequest request, HttpServletResponse response) {
+    logger.info("doExcelUpload : " +
+        "\n\tRequest " + request.getQueryString() +
+        "\n\tpath    " + request.getPathInfo());
+
+    int projId = -1;
+    FileItem docImportAttachment = null;
+
+    ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
+    try {
+      List<FileItem> items = upload.parseRequest(request);
+
+      for (FileItem item : items) {
+        String fieldName = item.getFieldName();
+        String fieldValue = item.getString();
+        //String contentType = item.getContentType();
+        String name = item.getName();
+
+        logger.info("doExcelUpload field '" + fieldName + "' = " + fieldValue.length() + " bytes : '" + name + "'");
+
+        if (Constants.PROJ_ID_PNM.equals(fieldName)) {
+          projId = Integer.parseInt(fieldValue);
+        } else if (Constants.Import.SRC_FILE_PNM.equals(fieldName)) {
+          if (!name.isEmpty()) {
+            docImportAttachment = item;
+          }
+        }
+      }
+
+      int sessionUserID = getSessionUserID();
+
+      logger.info("doExcelUpload service : " +
+          "\n\tprojId              " + projId +
+          "\n\tsessionUserID       " + sessionUserID +
+          "\n\tdocImportAttachment " + docImportAttachment);
+
+      if (projId == -1) {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("Result", "Failure");
+        jsonObject.addProperty("Error", "no project specified?");
+        sendResponse(response, jsonObject.toString());
+      } else if (docImportAttachment == null) {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("Result", "Failure");
+        jsonObject.addProperty("Error", "no import excel file specified?");
+        sendResponse(response, jsonObject.toString());
+      } else {
+        Project project = getProject(projId);
+        int dominoid = project.getProject().dominoid();
+        if (dominoid == -1) {
+          JsonObject jsonObject = new JsonObject();
+          jsonObject.addProperty("Result", "Failure");
+          jsonObject.addProperty("Error", "no domino id set for project.");
+          sendResponse(response, jsonObject.toString());
+        } else {
+          boolean b = db.getProjectManagement().doDominoImport(dominoid, docImportAttachment, project.getTypeOrder(), sessionUserID);
+          JsonObject jsonObject = new JsonObject();
+          jsonObject.addProperty("Result", b ? "Success" : "Failure");
+          jsonObject.addProperty("Error", "None");
+          sendResponse(response, jsonObject.toString());
+        }
+      }
+    } catch (FileUploadException e) {
+      logger.error("got error uploading " + e, e);
+
+      JsonObject jsonObject = new JsonObject();
+      jsonObject.addProperty("Error", "FileUploadException");
+      sendResponse(response, jsonObject.toString());
+    } catch (DominoSessionException dse) {
+      logger.info("session exception " + dse, dse);
+
+      JsonObject jsonObject = new JsonObject();
+      jsonObject.addProperty("Error", "DominoSessionException");
+      sendResponse(response, jsonObject.toString());
+    }
+  }
+
+  private void sendResponse(HttpServletResponse response, String outJSON) {
+    logger.info("Sending JSON response: " + outJSON);
+    try {
+      response.getWriter().write(outJSON);
+    } catch (Exception ex) {
+      logger.error("Exception writing response", ex);
+    }
   }
 
   /**

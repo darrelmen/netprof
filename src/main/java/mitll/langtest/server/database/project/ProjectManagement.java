@@ -40,7 +40,6 @@ import mitll.hlt.domino.server.data.ProjectServiceDelegate;
 import mitll.hlt.domino.server.data.SimpleDominoContext;
 import mitll.hlt.domino.server.extern.importers.ImportResult;
 import mitll.hlt.domino.server.extern.importers.vocab.ExcelVocabularyImporter;
-import mitll.hlt.domino.server.extern.importers.vocab.VocabularyImportCommand;
 import mitll.hlt.domino.server.util.Mongo;
 import mitll.hlt.domino.shared.common.ImportMode;
 import mitll.hlt.domino.shared.model.HeadDocumentRevision;
@@ -60,8 +59,10 @@ import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.exercise.Facet;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.result.SlickResultDAO;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.IDominoImport;
 import mitll.langtest.server.domino.ImportInfo;
@@ -75,6 +76,8 @@ import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -1492,33 +1495,57 @@ public class ProjectManagement implements IProjectManagement {
     return dominoImport == null ? Collections.emptyMap() : dominoImport.getNPIDToDominoID(dominoProjectID);
   }
 
-  public boolean doDominoImport(int dominoID, String path) {
-    int defaultUser = db.getUserDAO().getDefaultUser();
-    DBUser dbUser = db.getUserDAO().lookupDBUser(defaultUser);
+  @Override
+  public boolean doDominoImport(int dominoID, FileItem item, Collection<String> typeOrder, int userID) {
+    return doDominoImport(dominoID, getFilename(item), typeOrder, userID);
+  }
 
-    logger.info("doDominoImport using  user " + dbUser);
+  @Override
+  public boolean doDominoImport(int dominoID, File excelFile, Collection<String> typeOrder, int userID) {
+    IUserDAO userDAO = db.getUserDAO();
+
+    DBUser dbUser = userDAO.lookupDBUser(userID);
+
+    logger.info("doDominoImport using user " + dbUser + "\n\tor " + userDAO.getUserWhere(userID));
     ClientPMProject clientPMProject = dominoImport.getClientPMProject(dominoID, dbUser);
-    logger.info("doDominoImport Found " + clientPMProject);
+    logger.info("doDominoImport found domino project " + clientPMProject);
 
     if (clientPMProject == null) {
-      logger.info("doDominoImport no project " + dominoID);
+      logger.info("doDominoImport no project for domino ID #" + dominoID);
       return false;
     } else {
-      mitll.hlt.domino.shared.model.user.User user = db.getUserDAO().lookupDominoUser(defaultUser);
+      mitll.hlt.domino.shared.model.user.User user = userDAO.lookupDominoUser(userID);
       logger.info("doDominoImport using user " + user);
-      ExcelVocabularyImporter importer = new MyExcelVocabularyImporter(defaultUser, clientPMProject);
 
-      File excelFile2 = new File(path);
-      logger.info("reading from " + excelFile2);
-      MyVocabularyImportCommand iCmd = new MyVocabularyImportCommand(user, excelFile2);
+      ExcelVocabularyImporter importer = new MyExcelVocabularyImporter(userID, clientPMProject, typeOrder);
+
+      logger.info("doDominoImport reading from " + excelFile + " " + excelFile.length());
+      MyVocabularyImportCommand iCmd = new MyVocabularyImportCommand(user, excelFile);
       iCmd.setIdIndex(1);
-      iCmd.setSemesterCol(6);
+      iCmd.setSemesterIndex(6);
       iCmd.setUnitIndex(7);
       iCmd.setChapterIndex(8);
       ImportResult result = importer.importDocument(iCmd);
       logger.info("got result " + result);
       return result.isSuccess();
     }
+  }
+
+  private File getFilename(FileItem item) {
+    if (item instanceof DiskFileItem) {
+      DiskFileItem dItem = (DiskFileItem) item;
+      // Rename the temporary file to the real filename
+      // as this is required to determine the importer
+      // to run later.
+//      File tmpDir = dItem.getStoreLocation().getParentFile();
+      return dItem.getStoreLocation();
+    }
+    // TODO support writing to temporary file and reading it back out when/
+    // if necessary.
+    logger.warn("Import servlet does not handle in memory file items! " +
+        "Item: " + item.getName() + ", inMemory=" + item.isInMemory() +
+        ", of type " + item.getClass().getSimpleName());
+    return null;
   }
 
   /**
@@ -1563,9 +1590,15 @@ public class ProjectManagement implements IProjectManagement {
     }
   }
 
+  /**
+   *
+   */
   private class MyExcelVocabularyImporter extends ExcelVocabularyImporter {
-    public MyExcelVocabularyImporter(int defaultUser, ClientPMProject clientPMProject) {
-      super(ProjectManagement.this.dominoImport.getDominoContext(), ProjectManagement.this.db.getUserDAO().lookupDominoUser(defaultUser), clientPMProject);
+    Collection<String> typeOrder;
+
+    public MyExcelVocabularyImporter(int defaultUser, ClientPMProject clientPMProject, Collection<String> typeOrder) {
+      super(dominoImport.getDominoContext(), db.getUserDAO().lookupDominoUser(defaultUser), clientPMProject);
+      this.typeOrder = typeOrder;
     }
 
     @Override
@@ -1576,8 +1609,21 @@ public class ProjectManagement implements IProjectManagement {
 
       MyVocabularyImportCommand tdtCmd = (MyVocabularyImportCommand) cmd;
       try {
-        ExcelReader excelReader = new ExcelReader(tdtCmd.getFileName(), getDominoContext(), tdtCmd);
 
+        logger.info("type order " + typeOrder);
+        ExcelReader excelReader = new ExcelReader(tdtCmd.getFileName(), getDominoContext(), tdtCmd);
+        Iterator<String> iterator = typeOrder.iterator();
+
+        if (iterator.hasNext()) {
+          String next = iterator.next();
+          if (next.equalsIgnoreCase(Facet.SEMESTER.toString())) {
+            next = iterator.next(); //skip it
+          }
+          excelReader.setUnitColumnHeader(next);
+        }
+        if (iterator.hasNext()) {
+          excelReader.setChapter(iterator.next());
+        }
         Collection<VocabularyItem> content1 = excelReader.getContent();
 
         //				OptionSpecification unitOrder = proj.getWorkflow().getOptionSpec(UNIT_ORDER_OPTION);
