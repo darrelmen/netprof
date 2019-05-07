@@ -279,7 +279,7 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
         .map(grammarMap::get);
     String s = dominoGrammar.orElse("");
     if (!grammar.isEmpty() && s.isEmpty()) {
-      log.warn("skipping grammar " + grammar);
+      log.warn("skipping grammar '" + grammar +"'");
     }
     return s;
   }
@@ -365,6 +365,47 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
     return item.getMetadataField(VocabularyMetadata.V_NP_ID).getDisplayValue();
   }
 
+  /**
+   skipping subtopic agriculture
+   skipping subtopic arts
+   skipping subtopic banking
+   skipping subtopic body parts
+   skipping subtopic clothing
+   skipping subtopic daily life
+   skipping subtopic days, months, time
+   skipping subtopic descriptions
+   skipping subtopic directions
+   skipping subtopic emergency terms
+   skipping subtopic entertainment, media
+   skipping subtopic family, relatives
+   skipping subtopic general cultural
+   skipping subtopic general economic
+   skipping subtopic general geopgraphy
+   skipping subtopic general military
+   skipping subtopic general political
+   skipping subtopic general security
+   skipping subtopic greetings, introductions, farewells
+   skipping subtopic health
+   skipping subtopic helpful words, phrases
+   skipping subtopic historical / famous
+   skipping subtopic holidays, social events
+   skipping subtopic housing, household goods
+   skipping subtopic landmarks
+   skipping subtopic law enforcement
+   skipping subtopic leisure activities, sports
+   skipping subtopic location
+   skipping subtopic numbers
+   skipping subtopic occupations
+   skipping subtopic personal information
+   skipping subtopic religion
+   skipping subtopic shopping
+   skipping subtopic signs
+   skipping subtopic states, provinces
+   skipping subtopic trade issues
+   skipping subtopic traffic
+   skipping subtopic violence
+   skipping subtopic warfare
+   */
   static {
     topicMap = new HashMap<>();
     topicMap.put("basics", "Basics");
@@ -378,22 +419,45 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
 
     Map<String, String> m = new HashMap<>();
     m.put("bio", "Biography & Anatomy");
+    m.put("body", "Biography & Anatomy");
+    m.put("clothing", "Biography & Anatomy");
+    m.put("family", "Biography & Anatomy");
+    m.put("personal", "Biography & Anatomy");
+
     m.put("everyday", "Everyday Vocabulary");
+    m.put("descriptions", "Everyday Vocabulary");
+    m.put("helpful", "Everyday Vocabulary");
+    m.put("housing", "Everyday Vocabulary");
     m.put("expression", "Expressions, Cohesive Devices");
-    m.put("occupations", "Occupations");
+    m.put("greeting", "Expressions, Cohesive Devices");
+    m.put("occupation", "Occupations");
     m.put("times", "Times, Colors, Numbers");
+    m.put("daily", "Times, Colors, Numbers");
+    m.put("days", "Times, Colors, Numbers");
+    m.put("numbers", "Times, Colors, Numbers");
     subtopicMaps.put("Basics", m);
 
     m = new HashMap<>();
     m.put("customs", "Customs & Traditions");
+    m.put("general cultural", "Customs & Traditions");
+    m.put("holidays", "Customs & Traditions");
     m.put("education", "Education & Training");
     m.put("food", "Food & Drink");
     m.put("humanities", "Humanities (Lang., Lit., Rel., Arts, etc.)");
+    m.put("religion", "Humanities (Lang., Lit., Rel., Arts, etc.)");
+    m.put("arts", "Humanities (Lang., Lit., Rel., Arts, etc.)");
     m.put("leisure", "Leisure & Entertainment");
+    m.put("entertainment", "Leisure & Entertainment");
+    m.put("shop", "Leisure & Entertainment");
     subtopicMaps.put("Cultural & Social", m);
 
     m = new HashMap<>();
     m.put("econ", "Economic & Business");
+    m.put("general", "Economic & Business");
+    m.put("banking", "Economic & Business");
+    m.put("shop", "Economic & Business");
+    m.put("trade", "Economic & Business");
+
     m.put("ind", "Industry");
     m.put("legal", "Legal & Courts");
     m.put("polit", "Political & Government");
@@ -402,17 +466,29 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
 
     m = new HashMap<>();
     m.put("cities", "Cities, States, Countries");
+    m.put("states", "Cities, States, Countries");
     m.put("climate", "Climate & Weather");
+    m.put("agriculture", "Climate & Weather");
     m.put("direct", "Directions & Landmarks");
+    m.put("location", "Directions & Landmarks");
+    m.put("historical", "Directions & Landmarks");
+    m.put("landmarks", "Directions & Landmarks");
+    m.put("signs", "Directions & Landmarks");
     m.put("general env", "General Environment");
-    m.put("general geo", "General Geography");
+    m.put("general ge", "General Geography");
     subtopicMaps.put("Geography & Environment", m);
 
     m = new HashMap<>();
     m.put("crime", "Crime, Terrorism, Violence");
+    m.put("violence", "Crime, Terrorism, Violence");
     m.put("mil", "Military & Warfare");
+    m.put("general mil", "Military & Warfare");
+    m.put("warfare", "Military & Warfare");
     m.put("ranks", "Ranks");
+    m.put("law", "Security & Law Enforcement");
+    m.put("traffic", "Security & Law Enforcement");
     m.put("security", "Security & Law Enforcement");
+    m.put("general sec", "Security & Law Enforcement");
     m.put("weaponry", "Weaponry & Equipment");
     subtopicMaps.put("Military & Security", m);
 
@@ -421,7 +497,9 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
     m.put("comp", "Computer & Internet");
     m.put("general sci", "General Scientific");
     m.put("general tech", "General Technological");
+    m.put("health", "Medical & Health");
     m.put("medical", "Medical & Health");
+    m.put("emergency", "Medical & Health");
     m.put("natural", "Natural Sciences (Phy., Chem., Bio., etc.)");
     subtopicMaps.put("Scientific & Technological", m);
 
@@ -429,12 +507,16 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
     grammarMap.put("alpha", "Alphabet");
     grammarMap.put("interject", "Interjections");
     grammarMap.put("adj", "Adjectives");
+
     grammarMap.put("adv", "Adverbs");
     grammarMap.put("conj", "Conjunctions");
     grammarMap.put("caus", "Causative Verbs");
     grammarMap.put("trans", "Transitive Verbs");
+    grammarMap.put("Verb_Transitive", "Transitive Verbs");
     grammarMap.put("intrans", "Intransitive Verbs");
+    grammarMap.put("Verb_Intransitive", "Intransitive Verbs");
     grammarMap.put("nouns", "Nouns");
+    grammarMap.put("noun", "Nouns");
     grammarMap.put("pro", "Pronouns");
     grammarMap.put("pre", "Prefixes/Suffixes");
     grammarMap.put("post", "Postpositions");

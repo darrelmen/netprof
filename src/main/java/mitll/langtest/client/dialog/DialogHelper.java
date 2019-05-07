@@ -47,7 +47,7 @@ public class DialogHelper {
   private static final String OK = "OK";
   private static final String CANCEL = "Cancel";
   private final boolean doYesAndNo;
-  private Modal dialogBox;
+  protected Modal dialogBox;
 
   private Button closeButton;
 
@@ -160,18 +160,7 @@ public class DialogHelper {
     }
     container.add(row);
 
-    closeButton.addClickHandler(event -> {
-      closeButton.setEnabled(false);
-
-      boolean shouldHide = true;
-      if (listener != null) shouldHide = listener.gotYes();
-
-      closeButton.setEnabled(true);
-
-      if (shouldHide) {
-        dialogBox.hide();
-      }
-    });
+    closeButton.addClickHandler(event -> gotCloseButtonClick(listener, closeButton));
 
     if (listener != null) {
       dialogBox.addHiddenHandler(hiddenEvent -> listener.gotHidden());
@@ -183,6 +172,25 @@ public class DialogHelper {
     dialogBox.show();
 
     return closeButton;
+  }
+
+  protected void gotCloseButtonClick(CloseListener listener, Button closeButton) {
+    closeButton.setEnabled(false);
+
+    boolean shouldHide = true;
+    if (listener != null) shouldHide = listener.gotYes();
+
+    //if (shouldHide) {
+    afterGotYes(closeButton);
+    // }
+
+    if (shouldHide) {
+      dialogBox.hide();
+    }
+  }
+
+  protected void afterGotYes(Button closeButton) {
+    closeButton.setEnabled(true);
   }
 
   @NotNull

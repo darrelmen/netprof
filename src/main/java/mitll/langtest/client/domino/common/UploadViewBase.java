@@ -28,6 +28,7 @@
  */
 package mitll.langtest.client.domino.common;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.github.gwtbootstrap.client.ui.FileUpload;
 import com.github.gwtbootstrap.client.ui.Form;
@@ -168,10 +169,15 @@ public class UploadViewBase extends DivWidget {
 //		};
 //		modal.init();
 
-    dialogHelper = new DialogHelper(false);
-    dialogHelper.show("Upload excel file to Domino", this, new DialogHelper.CloseListener() {
+    dialogHelper = new DialogHelper(false) {
+      @Override protected void afterGotYes(Button closeButton) {
+        //closeButton.setEnabled(true);
+      }
+    };
+    Button upload_excel_file_to_domino = dialogHelper.show("Upload excel file to Domino", this, new DialogHelper.CloseListener() {
       @Override
       public boolean gotYes() {
+
         submitForm();
         return false;
       }
@@ -188,10 +194,6 @@ public class UploadViewBase extends DivWidget {
     }, 400, 400);
   }
 
-//	protected ModalSize getModalType() {
-//		return mType;
-//	}
-
   private boolean validateAndWarn() {
     boolean uploadSuccess = true;//validateFileUpload();
 //		if (uploadSuccess) {
@@ -199,17 +201,6 @@ public class UploadViewBase extends DivWidget {
 //		}
     return uploadSuccess;
   }
-
-//	private boolean validateFileUpload() {
-//		CommonValidation cValidation = new CommonValidation();
-//		CommonValidation.Result result = cValidation.validateAttachment(
-//				getRequiredAttachmentType(), uploadBox.getFilename());
-//		if (result.errorFound) {
-//			uploadFields.setError(result.message);
-//		}
-//
-//		return !result.errorFound;
-//	}
 
   private static final String[] EXCEL_TYPES =
       {"xlsx", "xls"};
