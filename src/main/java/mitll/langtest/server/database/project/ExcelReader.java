@@ -30,7 +30,6 @@ package mitll.langtest.server.database.project;
 
 import mitll.hlt.domino.server.data.IDominoContext;
 import mitll.hlt.domino.server.extern.importers.metadata.BaseExcelReader;
-import mitll.hlt.domino.server.extern.importers.vocab.VocabularyImportCommand;
 import mitll.hlt.domino.server.extern.importers.vocab.VocabularyItemFactory;
 import mitll.hlt.domino.shared.model.document.CStringMetadata;
 import mitll.hlt.domino.shared.model.document.VocabularyItem;
@@ -49,15 +48,16 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
   private static final String CONTEXT_TRANSLATION = "context translation";
   private static final String TRANSLATION_OF_CONTEXT = "Translation of Context";
   private static final String CONTEXT = "context";
-  private static final String ID = "id";
-  public static final String UNIT = "unit";
-  public static final String CHAPTER = "chapter";
-  public static final String SEMESTER = "semester";
-  public static final String WORD = "word";
-  public static final String TOPIC = "topic";
-  public static final String SUBTOPIC = "sub";
-  public static final String GRAMMAR = "grammar";
-  public static final String TRANSLITERATION = "transliteration";
+
+  private static final String ID = "np_id";
+  private static final String UNIT = "unit";
+  private static final String CHAPTER = "chapter";
+  private static final String SEMESTER = "semester";
+  private static final String WORD = "word";
+  private static final String TOPIC = "topic";
+  private static final String SUBTOPIC = "sub";
+  private static final String GRAMMAR = "grammar";
+  private static final String TRANSLITERATION = "transliteration";
   private static final String ALT = "alt";
   private static final String ALT_CONTEXT = "alt context sentence";
 
@@ -164,8 +164,8 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
             }
           }
 
-          log.debug("got header " + gotHeader + " term index=" + termIndex +
-              " unit=" + unitIndex +
+          log.info("got header " + gotHeader + " term index=" + termIndex +
+              "\n\tunit=" + unitIndex +
               "\n\tchapter=" + chapterIndex +
               "\n\tsemester=" + semesterIndex +
               "\n\tmeaning=" + meaningIndex +
@@ -243,13 +243,14 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
                   knownIds.add(npId);
                   exercises.add(imported);
                 }
-              } else {
+              }
+              //else {
 //                if (isDelete) {
 //                  //deleted++;
 //                } else {
 //                  //skipped++;
 //                }
-              }
+              // }
               if (inMergedRow) {
                 //log.debug("found merged row...");
                 lastRowValues.add(meaning);
@@ -438,98 +439,13 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
     grammarMap.put("pre", "Prefixes/Suffixes");
     grammarMap.put("post", "Postpositions");
 
-//		subtopicMaps = new HashMap<>();
-//		
-//		Map<String, String> m = new HashMap<>();
-//		m.put("body", "Body Parts");
-//		m.put("clo", "Clothing"); 
-//		m.put("col", "Colors");
-//		m.put("day", "Days, Months, Time"); 
-//		m.put("desc", "Descriptions");
-//		m.put("fam", "Family, Relatives"); 
-//		m.put("greet", "Greetings, Introductions, Farewells"); 
-//		m.put("help", "Helpful Words, Phrases & Questions"); 
-//		m.put("house", "Housing, Household Goods");
-//		m.put("num", "Numbers");
-//		m.put("occ", "Occupations"); 
-//		m.put("pers", "Personal Information"); 
-//		m.put("sign", "Signs");
-//		subtopicMaps.put("Basics", m);
-//
-//		m = new HashMap<>();
-//		m.put("art", "Arts");
-//		m.put("cus", "Customs, Traditions");
-//		m.put("daily", "Daily Life");
-//		m.put("edu", "Education");
-//		m.put("ent", "Entertainment, Media");
-//		m.put("food", "Food, Drink");
-//		m.put("gen", "General Cultural");
-//		m.put("hol", "Holidays, Social Events");
-//		m.put("leisure", "Leisure Activities, Sports");
-//		m.put("rel", "Religion");
-//		subtopicMaps.put("Cultural and Social", m);
-//
-//		m = new HashMap<>();
-//		m.put("agr", "Agriculture");
-//		m.put("ban", "Banking");
-//		m.put("ele", "Elections");
-//		m.put("general econ", "General Economic");
-//		m.put("general pol", "General Political");
-//		m.put("ind", "Industry");
-//		m.put("ins", "Institutions");
-//		m.put("int", "International Relations");
-//		m.put("legal", "Legal System");
-//		m.put("pol", "Political System");
-//		m.put("sho", "Shopping");
-//		m.put("trad", "Trade Issues");
-//		m.put("trans", "Transportation");
-//		subtopicMaps.put("Economic and Political", m);
-//
-//		m = new HashMap<>();
-//		m.put("cit", "Cities, Towns"); 
-//		m.put("cli", "Climate, Weather"); 
-//		m.put("cou", "Countries"); 
-//		m.put("dir", "Directions"); 
-//		m.put("gen", "General Geopgraphy"); 
-//		m.put("hist", "Historical, Famous sites"); 
-//		m.put("land", "Landmarks"); 
-//		m.put("loc", "Locations"); 
-//		m.put("state", "States, Provinces"); 
-//
-//		subtopicMaps.put("Geography", m);
-//		
-//		m = new HashMap<>();
-//		m.put("cri", "Crime"); 
-//		m.put("general mil", "General Military"); 
-//		m.put("general sec", "General Security"); 
-//		m.put("his", "History"); 
-//		m.put("law", "Law Enforcement"); 
-//		m.put("mil", "Military Organizations"); 
-//		m.put("ran", "Ranks"); 
-//		m.put("terr", "Terrorism"); 
-//		m.put("traf", "Traffic"); 
-//		m.put("viol", "Violence"); 
-//		m.put("war", "Warfare"); 
-//		m.put("weap", "Weaponry, Equipment"); 
-//
-//		subtopicMaps.put("Military and Security", m);
-//		
-//		m = new HashMap<>();
-//		m.put("emer", "Emergency Terms"); 
-//		m.put("general sci", "General Scientific"); 
-//		m.put("general tech", "General Technological"); 
-//		m.put("heal", "Health"); 
-//		m.put("med", "Medical"); 
-//		m.put("nat", "Natural Sciences"); 
-//		m.put("res", "Research, Discoveries");  
-//		subtopicMaps.put("Scientific and Technological", m);
   }
 
   public void setUnitColumnHeader(String unitColumnHeader) {
-    this.unitColumnHeader = unitColumnHeader;
+    this.unitColumnHeader = unitColumnHeader.toLowerCase();
   }
 
   public void setChapter(String chapter) {
-    this.chapter = chapter;
+    this.chapter = chapter.toLowerCase();
   }
 }

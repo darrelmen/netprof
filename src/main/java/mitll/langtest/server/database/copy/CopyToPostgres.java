@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.database.copy;
 
+import mitll.hlt.domino.server.extern.importers.ImportResult;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
@@ -1867,8 +1868,9 @@ public class CopyToPostgres<T extends CommonShell> {
           else {
             database.waitForDefaultUser();
 
-            boolean b = database.getProjectManagement().doDominoImport(to, new File(excel), database.getProject(to).getTypeOrder(), database.getUserDAO().getDefaultUser());
-            if (b) logger.info("Success!");
+            ImportResult importResult =
+                database.getProjectManagement().doDominoImport(to, new File(excel), database.getProject(to).getTypeOrder(), database.getUserDAO().getDefaultUser());
+            if (importResult.isSuccess()) logger.info("Success!");
             else logger.warn("failure!");
           }
           //   DialogPopulate dialogPopulate = new DialogPopulate(database, getPathHelper(database));

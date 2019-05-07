@@ -77,7 +77,6 @@ import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
 import org.apache.commons.fileupload.FileItem;
-import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -85,6 +84,7 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletContext;
 import java.io.File;
+import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -1255,7 +1255,7 @@ public class ProjectManagement implements IProjectManagement {
             cc = INTERPRETER1;
             // logger.info("addModeChoices : found first interpreter dialog : " + iDialog);
           } else {
-            logger.info("dialog kind is " + kind);
+            // logger.info("dialog kind is " + kind);
           }
         }
         dialog.setName(name);
@@ -1472,6 +1472,7 @@ public class ProjectManagement implements IProjectManagement {
    * @param sinceInUTC
    * @return
    * @see mitll.langtest.server.domino.ProjectSync#addPending
+   * @see #getImportFromDomino(int)
    */
   private ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC) {
     boolean shouldSwap = db.getProjectDAO().getDefPropValue(projID, ProjectProperty.SWAP_PRIMARY_AND_ALT).equalsIgnoreCase("TRUE");
@@ -1496,12 +1497,15 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   @Override
-  public boolean doDominoImport(int dominoID, FileItem item, Collection<String> typeOrder, int userID) {
-    return doDominoImport(dominoID, getFilename(item), typeOrder, userID);
+  public ImportResult doDominoImport(int dominoID, FileItem item, Collection<String> typeOrder, int userID) {
+    logger.info("doDominoImport : file " + item);
+    File filename = getFile(item);
+    logger.info("doDominoImport : file is " + filename);
+    return doDominoImport(dominoID, filename, typeOrder, userID);
   }
 
   @Override
-  public boolean doDominoImport(int dominoID, File excelFile, Collection<String> typeOrder, int userID) {
+  public ImportResult doDominoImport(int dominoID, File excelFile, Collection<String> typeOrder, int userID) {
     IUserDAO userDAO = db.getUserDAO();
 
     DBUser dbUser = userDAO.lookupDBUser(userID);
@@ -1512,40 +1516,91 @@ public class ProjectManagement implements IProjectManagement {
 
     if (clientPMProject == null) {
       logger.info("doDominoImport no project for domino ID #" + dominoID);
-      return false;
+      return new ImportResult();
+    } else if (excelFile == null) {
+      logger.warn("doDominoImport : huh? no excel file?");
+      return new ImportResult();
     } else {
       mitll.hlt.domino.shared.model.user.User user = userDAO.lookupDominoUser(userID);
-      logger.info("doDominoImport using user " + user);
+      logger.info("doDominoImport using " +
+          "\n\tuser         " + user +
+          "\n\treading from " + excelFile + " " + excelFile.length());
 
-      ExcelVocabularyImporter importer = new MyExcelVocabularyImporter(userID, clientPMProject, typeOrder);
-
-      logger.info("doDominoImport reading from " + excelFile + " " + excelFile.length());
       MyVocabularyImportCommand iCmd = new MyVocabularyImportCommand(user, excelFile);
-      iCmd.setIdIndex(1);
-      iCmd.setSemesterIndex(6);
-      iCmd.setUnitIndex(7);
-      iCmd.setChapterIndex(8);
-      ImportResult result = importer.importDocument(iCmd);
+//      iCmd.setIdIndex(1);
+//      iCmd.setSemesterIndex(6);
+//      iCmd.setUnitIndex(7);
+//      iCmd.setChapterIndex(8);
+      ImportResult result = new MyExcelVocabularyImporter(userID, clientPMProject, typeOrder).importDocument(iCmd);
       logger.info("got result " + result);
-      return result.isSuccess();
+      return result;
     }
   }
 
-  private File getFilename(FileItem item) {
+
+  private File getFile(FileItem item) {
+    try {
+      File tempDir = Files.createTempDirectory("fileUpload_" + item.getName()).toFile();
+      File tempFile = new File(tempDir, "upload_" + System.currentTimeMillis());
+
+      logger.info("write " +
+          "\n\tfile item " + item +
+          "\n\tto        " + tempFile);
+
+      item.write(tempFile);
+
+      logger.info("write wrote " +
+          "\n\tfile item " + item +
+          "\n\tbytes     " + tempFile.length());
+      return tempFile;
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+      return null;
+    }
+
+/*
     if (item instanceof DiskFileItem) {
       DiskFileItem dItem = (DiskFileItem) item;
       // Rename the temporary file to the real filename
       // as this is required to determine the importer
       // to run later.
-//      File tmpDir = dItem.getStoreLocation().getParentFile();
-      return dItem.getStoreLocation();
-    }
+      if (dItem == null) {
+        logger.error("getFile huh? item is null?");
+        return null;
+      } else {
+
+        try {
+          File tempFile = Files.createTempDirectory("fileUpload_" + item.getName()).toFile();
+          item.write(tempFile);
+        } catch (Exception e) {
+          logger.error("got " + e, e);
+          return null;
+        }
+
+        File storeLocation = dItem.getStoreLocation();
+        if (storeLocation == null) {
+          logger.error("getFile huh? storeLocation is null?");
+          return null;
+        } else {
+          File tmpDir = storeLocation.getParentFile();
+          logger.info("getFile TmpDir: " + tmpDir + ", " + item.getName());
+          File renamedF = new File(tmpDir, item.getName());
+          try {
+            dItem.write(renamedF);
+          } catch (Exception ex) {
+            logger.error("Error renaming file from " + storeLocation +
+                " to " + renamedF, ex);
+          }
+          return renamedF;
+        }
+      }
+    }*/
     // TODO support writing to temporary file and reading it back out when/
     // if necessary.
-    logger.warn("Import servlet does not handle in memory file items! " +
-        "Item: " + item.getName() + ", inMemory=" + item.isInMemory() +
-        ", of type " + item.getClass().getSimpleName());
-    return null;
+//    logger.warn("Import servlet does not handle in memory file items! " +
+//        "Item: " + item.getName() + ", inMemory=" + item.isInMemory() +
+//        ", of type " + item.getClass().getSimpleName());
+//    return null;
   }
 
   /**

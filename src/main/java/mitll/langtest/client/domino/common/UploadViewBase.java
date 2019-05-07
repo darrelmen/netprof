@@ -28,7 +28,6 @@
  */
 package mitll.langtest.client.domino.common;
 
-import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.Fieldset;
 import com.github.gwtbootstrap.client.ui.FileUpload;
 import com.github.gwtbootstrap.client.ui.Form;
@@ -40,9 +39,7 @@ import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
 import com.google.gwt.user.client.ui.FormPanel;
-import com.google.gwt.user.client.ui.HasWidgets;
 import com.google.gwt.user.client.ui.Hidden;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.user.BasicDialog;
@@ -50,7 +47,8 @@ import mitll.langtest.client.user.BasicDialog;
 import java.util.logging.Logger;
 
 public class UploadViewBase extends DivWidget {
-  private final Logger logger = Logger.getLogger("ProjectChoices");
+  public static final String PROJECT_ID = "project-id";
+  private final Logger logger = Logger.getLogger("UploadViewBase");
 
 //	protected static final Logger log = Logger.getLogger(UploadViewBase.class.getName());
 
@@ -68,12 +66,16 @@ public class UploadViewBase extends DivWidget {
   //	protected ModalSize mType = ModalSize.Small;
   //private  Modal modal;
   private int projectID;
+  private int user;
 
-  public UploadViewBase(int projectID) {
+  public UploadViewBase(int projectID, int user) {
+    this.user = user;
+
     init(projectID);
   }
 
   protected void handleFormSubmitSuccess(UploadResult result) {
+    result.inform();
   }
 
   private void init(int projectID) {
@@ -101,7 +103,8 @@ public class UploadViewBase extends DivWidget {
 
   private void addHidden(int projectID) {
     String pidVal = Integer.toString(projectID);
-    fields.add(new Hidden("project-id", pidVal));
+    fields.add(new Hidden(PROJECT_ID, pidVal));
+    fields.add(new Hidden("user-id", "" + user));
   }
 
   private void addFormFields(Fieldset fields) {
@@ -182,7 +185,7 @@ public class UploadViewBase extends DivWidget {
       public void gotHidden() {
 
       }
-    }, 300, 300);
+    }, 400, 400);
   }
 
 //	protected ModalSize getModalType() {
@@ -242,7 +245,12 @@ public class UploadViewBase extends DivWidget {
     // fired. Assuming the service returned a response of type text/html,
     // we can get the result text here (see the FormPanel documentation for
     // further explanation).
-    JSONObject jsonObj = digestJsonResponse(event.getResults());
+    String results = event.getResults();
+    logger.info("handleSubmitComplete got " + results);
+    if (results.startsWith("<pre>")) results = results.substring("<pre>".length());
+    if (results.endsWith("</pre>")) results = results.substring(0, results.length() - "</pre>".length());
+
+    JSONObject jsonObj = digestJsonResponse(results);
     if (jsonObj != null) {
       UploadResult result = new UploadResult(jsonObj);
       logger.info("Submission complete " + result);
@@ -288,7 +296,7 @@ public class UploadViewBase extends DivWidget {
   private void submitForm() {
     logger.info("submitForm -- ");
     // String pidVal = Integer.toString(getState().getCurrentProject().getId());
-    fields.add(new Hidden("project-id", "" + projectID));
+    // fields.add(new Hidden(PROJECT_ID, "" + projectID));
     //fields.add(new Hidden(AttachmentUpload.ATT_TYPE_PNM, getRequiredAttachmentType().name()));
     mainForm.submit();
   }
@@ -296,26 +304,28 @@ public class UploadViewBase extends DivWidget {
   /**
    * TODO:for audio, get metadata info, save the document
    */
-  static class UploadResult {
-    //		public final boolean success;
-//		public final int docId; // Returned for document attachments.
-//
+  class UploadResult {
+    public boolean success;
+
+    public int num; // Returned for document attachments.
+    //
 //		public final int attId; // Returned for project/exam attachments
-//		public final String errMsg;
-//		public final String attFilename;
+    public String errMsg;
+
+    //		public final String attFilename;
 //		public final String attContentType;
 //		private final JSONObject audioMetadata;
 //		public final double attSize;
 //
     UploadResult(JSONObject jsonObj) {
       if (jsonObj != null) {
-//				JSONValue jVal = jsonObj.get(AttachmentUpload.SUCCESS_RVAL);
-//				success = (jVal != null && jVal.isBoolean() != null) && jVal.isBoolean().booleanValue();
-//				jVal = jsonObj.get(Constants.ERR_MSG_RVAL);
-//				errMsg = (jVal != null && jVal.isString() != null) ? jVal.isString().stringValue() : "";
-//
-//				jVal = jsonObj.get(AttachmentUpload.DOC_ID_RVAL);
-//				docId = (jVal != null && jVal.isNumber() != null) ? (int)jVal.isNumber().doubleValue() : -1;
+        JSONValue jVal = jsonObj.get("Success");
+        success = (jVal != null && jVal.isBoolean() != null) && jVal.isBoolean().booleanValue();
+        jVal = jsonObj.get("Error");
+        errMsg = (jVal != null && jVal.isString() != null) ? jVal.isString().stringValue() : "";
+
+        jVal = jsonObj.get("Num");
+        num = (jVal != null && jVal.isNumber() != null) ? (int) jVal.isNumber().doubleValue() : -1;
 //				jVal = jsonObj.get(AttachmentUpload.ATT_ID_RVAL);
 //				attId = (jVal != null && jVal.isNumber() != null) ? (int)jVal.isNumber().doubleValue() : -1;
 //				jVal = jsonObj.get(AttachmentUpload.ATT_FILENAME_RVAL);
@@ -327,7 +337,7 @@ public class UploadViewBase extends DivWidget {
 //
 //				audioMetadata = jsonObj.get(AttachmentUpload.AUDIO_METADATA).isObject();
       } else {
-//				success = false;
+        success = false;
 //				docId = -1;
 //				attId = -1;
 //				errMsg = "Unknown Error";
@@ -337,8 +347,13 @@ public class UploadViewBase extends DivWidget {
 //				audioMetadata = new JSONObject();
 
       }
-//			log.info("Parsed result: success=" + success + ", docID=" + docId + ", errMsg=" + errMsg +
-//					" attContentType=" + attContentType + " attSize=" + attSize + " attFilename=" + attFilename);
+      logger.info("Parsed result: success=" + success + ", num=" + num + ", errMsg=" + errMsg);
+
+    }
+
+    public void inform() {
+      new DialogHelper(false).showErrorMessage("Import Complete!", success ? "Imported " + num + " items" : "Failed to import : " + errMsg);
+
     }
 
     /**

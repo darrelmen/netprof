@@ -36,7 +36,7 @@ import java.io.File;
 import java.util.Date;
 
 class MyVocabularyImportCommand extends VocabularyImportCommand {
-  private int semesterIndex;
+  private int semesterIndex = -1;
 
   public MyVocabularyImportCommand(mitll.hlt.domino.shared.model.user.User user, File excelFile2) {
     super(user, new Date(), excelFile2.getAbsolutePath(), ImportMode.Overwrite);

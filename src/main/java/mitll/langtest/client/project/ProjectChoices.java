@@ -31,7 +31,6 @@ package mitll.langtest.client.project;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
-import com.github.gwtbootstrap.client.ui.FileUpload;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -42,8 +41,6 @@ import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import mitll.hlt.domino.client.common.DecoratedFields;
-import mitll.hlt.domino.shared.Constants;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -958,11 +955,10 @@ public class ProjectChoices extends ThumbnailChoices {
 
     if (w != null) {
       w.addClickHandler(event -> {
-        UploadViewBase widgets = new UploadViewBase(projid);
+        UploadViewBase widgets = new UploadViewBase(projid, controller.getUser());
         widgets.showModal();
       });
     }
-
 
 //    FileUpload importFileBox = new FileUpload();
 //    importFileBox.setName("bulk-filename");

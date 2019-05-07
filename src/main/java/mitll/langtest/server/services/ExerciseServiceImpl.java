@@ -30,6 +30,7 @@
 package mitll.langtest.server.services;
 
 import com.google.gson.JsonObject;
+import mitll.hlt.domino.server.extern.importers.ImportResult;
 import mitll.hlt.domino.shared.Constants;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.server.database.audio.IAudioDAO;
@@ -60,15 +61,19 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.File;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.Collator;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static mitll.langtest.server.audio.HTTPClient.UTF_8;
 
 @SuppressWarnings("serial")
 public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
@@ -119,16 +124,27 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
         "\n\tpath    " + request.getPathInfo());
 
     int projId = -1;
+    int userID = -1;
     FileItem docImportAttachment = null;
 
-    ServletFileUpload upload = new ServletFileUpload(new DiskFileItemFactory());
+    DiskFileItemFactory fileItemFactory = new DiskFileItemFactory();
+    ServletFileUpload upload = new ServletFileUpload(fileItemFactory);
+//
+//    ServletContext servletContext = this.getServletConfig().getServletContext();
+//    File repository = (File) servletContext.getAttribute("javax.servlet.context.tempdir");
+//    if (repository == null) {
+//      logger.warn("no repo for temp files?");
+//    } else {
+//      logger.info("tmpdir is " + repository.getAbsolutePath());
+//      fileItemFactory.setRepository(repository);
+//    }
+
     try {
       List<FileItem> items = upload.parseRequest(request);
 
       for (FileItem item : items) {
         String fieldName = item.getFieldName();
         String fieldValue = item.getString();
-        //String contentType = item.getContentType();
         String name = item.getName();
 
         logger.info("doExcelUpload field '" + fieldName + "' = " + fieldValue.length() + " bytes : '" + name + "'");
@@ -139,6 +155,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
           if (!name.isEmpty()) {
             docImportAttachment = item;
           }
+        } else if ("user-id".equalsIgnoreCase(fieldName)) {
+          userID = Integer.parseInt(fieldValue);
         }
       }
 
@@ -147,16 +165,17 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       logger.info("doExcelUpload service : " +
           "\n\tprojId              " + projId +
           "\n\tsessionUserID       " + sessionUserID +
+          "\n\tuserID              " + userID +
           "\n\tdocImportAttachment " + docImportAttachment);
 
       if (projId == -1) {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("Result", "Failure");
+        jsonObject.addProperty("Success", false);
         jsonObject.addProperty("Error", "no project specified?");
         sendResponse(response, jsonObject.toString());
       } else if (docImportAttachment == null) {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("Result", "Failure");
+        jsonObject.addProperty("Success", false);
         jsonObject.addProperty("Error", "no import excel file specified?");
         sendResponse(response, jsonObject.toString());
       } else {
@@ -164,14 +183,15 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
         int dominoid = project.getProject().dominoid();
         if (dominoid == -1) {
           JsonObject jsonObject = new JsonObject();
-          jsonObject.addProperty("Result", "Failure");
+          jsonObject.addProperty("Success", false);
           jsonObject.addProperty("Error", "no domino id set for project.");
           sendResponse(response, jsonObject.toString());
         } else {
-          boolean b = db.getProjectManagement().doDominoImport(dominoid, docImportAttachment, project.getTypeOrder(), sessionUserID);
+          ImportResult b = db.getProjectManagement().doDominoImport(dominoid, docImportAttachment, project.getTypeOrder(), userID);
           JsonObject jsonObject = new JsonObject();
-          jsonObject.addProperty("Result", b ? "Success" : "Failure");
+          jsonObject.addProperty("Success", b.isSuccess());
           jsonObject.addProperty("Error", "None");
+          jsonObject.addProperty("Num", b.getImportedDocs().size());
           sendResponse(response, jsonObject.toString());
         }
       }
@@ -179,12 +199,14 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       logger.error("got error uploading " + e, e);
 
       JsonObject jsonObject = new JsonObject();
+      jsonObject.addProperty("Success", false);
       jsonObject.addProperty("Error", "FileUploadException");
       sendResponse(response, jsonObject.toString());
     } catch (DominoSessionException dse) {
       logger.info("session exception " + dse, dse);
 
       JsonObject jsonObject = new JsonObject();
+      jsonObject.addProperty("Success", false);
       jsonObject.addProperty("Error", "DominoSessionException");
       sendResponse(response, jsonObject.toString());
     }
@@ -193,6 +215,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private void sendResponse(HttpServletResponse response, String outJSON) {
     logger.info("Sending JSON response: " + outJSON);
     try {
+      response.setContentType("application/json; charset=UTF-8");
+      response.setCharacterEncoding(UTF_8);
+
       response.getWriter().write(outJSON);
     } catch (Exception ex) {
       logger.error("Exception writing response", ex);

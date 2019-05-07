@@ -338,7 +338,6 @@ public class ProjectSync implements IProjectSync {
             " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
         //    newEx.add(importEx);
       } else {
-
         if (currentIDs.contains(dominoID)/* || oldIDs.contains(npID)*/) {
           importUpdateEx.add(importEx);
           MutableExercise mutable = importEx.getMutable();

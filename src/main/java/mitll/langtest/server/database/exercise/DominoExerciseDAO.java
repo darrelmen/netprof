@@ -77,7 +77,7 @@ public class DominoExerciseDAO {
    * @param importDocs
    * @param shouldSwap
    * @return
-   * @see IProjectManagement#getImportFromDomino
+   * @see DominoImport#getImportFromDomino
    */
   public ImportInfo readExercises(int projid,
                                   ImportProjectInfo projectInfo,

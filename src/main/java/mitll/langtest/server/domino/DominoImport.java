@@ -114,7 +114,7 @@ public class DominoImport implements IDominoImport {
    * @param dominoAdminUser
    * @param shouldSwap
    * @return
-   * @see ProjectManagement#getImportFromDomino
+   * @see ProjectManagement#getImportFromDomino(int, int, String)
    */
   @Override
   public ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC, DBUser dominoAdminUser, boolean shouldSwap) {
@@ -382,6 +382,14 @@ public class DominoImport implements IDominoImport {
     return new ChangedAndDeleted(changedImports, deletedDocsSince, deletedNPIDs, addedImports, npidToDominoID);
   }
 
+  /**
+   * @param sinceInUTC
+   * @param dominoAdminUser
+   * @param next
+   * @param added
+   * @return
+   * @see #getChangedDocs(String, DBUser, ClientPMProject, boolean)
+   */
   @NotNull
   private List<ImportDoc> getAddedImports(String sinceInUTC, DBUser dominoAdminUser, ClientPMProject next, Set<Integer> added) {
     long then = System.currentTimeMillis();

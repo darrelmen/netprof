@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.database.project;
 
+import mitll.hlt.domino.server.extern.importers.ImportResult;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
@@ -148,9 +149,9 @@ public interface IProjectManagement {
 
   Map<String,Integer> getNpToDomino(int dominoProjectID);
 
-  boolean doDominoImport(int dominoID, FileItem item, Collection<String> typeOrder, int userID);
+  ImportResult doDominoImport(int dominoID, FileItem item, Collection<String> typeOrder, int userID);
 
-  boolean doDominoImport(int dominoID, File excelFile, Collection<String> typeOrder, int userID);
+  ImportResult doDominoImport(int dominoID, File excelFile, Collection<String> typeOrder, int userID);
 
   OOVInfo checkOOV(int id, int num, int offset);
 
