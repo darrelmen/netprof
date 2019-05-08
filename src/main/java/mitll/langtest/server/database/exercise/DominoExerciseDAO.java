@@ -218,7 +218,7 @@ public class DominoExerciseDAO {
       }
     }
     if (!skipped.isEmpty()) {
-      logger.warn("skipped vocab attributes " + skipped + " for " + ex.getID() + " old " + ex.getOldID() + " domino " +ex.getDominoID());
+      logger.warn("addAttributes skipped vocab attributes " + skipped + " for " + ex.getID() + " old " + ex.getOldID() + " domino " +ex.getDominoID());
     }
   }
 
@@ -352,6 +352,7 @@ public class DominoExerciseDAO {
    * @param createTime
    * @param exID
    * @return
+   * @see #getExerciseFromVocab(int, int, String, String, int, long, VocabularyItem, Map)
    */
   @NotNull
   private Exercise getExerciseFromVocabularyItem(int projid,

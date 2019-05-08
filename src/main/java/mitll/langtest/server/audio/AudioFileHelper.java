@@ -315,7 +315,7 @@ public class AudioFileHelper implements AlignDecode {
 //      project.getExerciseDAO().reload();
 //    }
 
-    return checkInfo.setNeedsReload(!changed.isEmpty());
+    return checkInfo.setNeedsReload(!changed.isEmpty() || !safe.isEmpty() || !unsafe.isEmpty());
   }
 
   /**
@@ -332,7 +332,8 @@ public class AudioFileHelper implements AlignDecode {
    */
   private OOVInfo checkAllExercises(Collection<CommonExercise> exercises,
 
-                                    Set<Integer> safe, Set<Integer> unsafe,
+                                    Set<Integer> safe,
+                                    Set<Integer> unsafe,
 
                                     Set<String> oov,
                                     Map<Integer, String> unsafeToNorm,
@@ -340,6 +341,7 @@ public class AudioFileHelper implements AlignDecode {
     int checkedVocab = 0;
     int checkedDirect = 0;
     int count = 0;
+    int safeChanged = 0;
     logger.info("checkAllExercises for " + exercises.size() + " ex, force " + includeKaldi);
 
     Set<ClientExercise> unsafeHighlighted = new TreeSet<>();
@@ -372,23 +374,25 @@ public class AudioFileHelper implements AlignDecode {
 
             // check context sentences
             for (ClientExercise context : exercise.getDirectlyRelated()) {
-              CommonExercise commonExercise = context.asCommon();
-              boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, unsafeToNorm, commonExercise, oov, includeKaldi, oovToEquivalents, unsafeHighlighted);
+              CommonExercise sentence = context.asCommon();
+              boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, unsafeToNorm, sentence, oov, includeKaldi, oovToEquivalents, unsafeHighlighted);
               checkedDirect++;
 
-              if (commonExercise.isSafeToDecode() != validForeignPhrase2) {
-                commonExercise.getMutable().setSafeToDecode(validForeignPhrase2);
+              if (sentence.isSafeToDecode() != validForeignPhrase2) {
+                sentence.getMutable().setSafeToDecode(validForeignPhrase2);
+                safeChanged++;
               }
             }
           }
         }
       }
-      logger.info("checkAllExercises (" + project.getName() +
-          ") " +
-          "\n\tchecked vocab  " + checkedVocab +
-          "\n\tchecked direct " + checkedDirect +
-          "\n\tunsafeHighlighted " + unsafeHighlighted.size() +
-          "\n\tfrom           " + exercises.size() +
+
+      logger.info("checkAllExercises (" + project.getName() + ") " +
+          "\n\tchecked vocab        " + checkedVocab +
+          "\n\tchecked direct       " + checkedDirect +
+          "\n\tcontext safe changed " + safeChanged +
+          "\n\tunsafeHighlighted    " + unsafeHighlighted.size() +
+          "\n\tfrom                 " + exercises.size() +
           "\n\tfor whether they can be decoded in " + (System.currentTimeMillis() - then) + " millis");
 
       return new OOVInfo(checkedVocab + checkedDirect, oov.size(), unsafeHighlighted);
@@ -494,19 +498,8 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   * @param oov
    * @param languageEnum
    */
-//  private void removeStaleOOV(Set<String> oov, Language languageEnum) {
-//    List<OOV> known = db.getOOVDAO().forLanguage(languageEnum);
-//    List<OOV> toRemove = known.stream().filter(oovEntry ->
-//        oovEntry.getEquivalent().isEmpty() &&
-//            !oov.contains(oovEntry.getOOV())).collect(Collectors.toList());
-//
-//    logger.info("addOOV remove " + toRemove.size() + " : " + toRemove);
-//
-//    toRemove.forEach(oov1 -> db.getOOVDAO().delete(oov1.getID()));
-//  }
   private void removeStaleOOV(Language languageEnum) {
     List<OOV> known = db.getOOVDAO().forLanguage(languageEnum);
     List<OOV> toRemove = known

@@ -238,7 +238,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param isContext
    * @param typeOrder
    * @return
-   * @seex #add
+   * @see #add(CommonExercise, boolean, Collection)
    * @see #update(CommonExercise, boolean, Collection)
    */
   private SlickExercise toSlick(CommonExercise shared, boolean isContext, Collection<String> typeOrder) {
@@ -286,10 +286,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     String secondType = unitToValue.getOrDefault(second, "");
     if (secondType.isEmpty()) secondType = unitToValue.getOrDefault(second.toLowerCase(), "");
 
-/*    logger.info("toSlick for " + shared.getID() + " "+shared.getOldID()+
-        " : " +first +
-        " = '" + firstType + "' " +
-        "" + second + " = '" + secondType + "'");*/
+    logger.info("toSlick for " + shared.getID() + " " + shared.getOldID() +
+        "\n\tfirst  " + first + " = '" + firstType + "' " +
+        "\n\tsecond " + second + " = '" + secondType + "'");
 
     String english = shared.getEnglish();
     if (english.length() > MAX_LENGTH) {
@@ -506,7 +505,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       logger.info("makeExercise ex (" + slick.id() +
           ") " + typeOrder + " - " + unitToValue);
       logger.info("makeExercise ex (" + slick.id() +
-          ") " + foreignlanguage + " " + english + " - " + meaning + " '" + noAccentFL +"'");
+          ") " + foreignlanguage + " " + english + " - " + meaning + " '" + noAccentFL + "'");
     }
 
     Exercise exercise = new Exercise(

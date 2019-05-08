@@ -576,6 +576,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       }
     }
+
+
   }
 
   /**

@@ -39,6 +39,7 @@ import mitll.langtest.server.database.exercise.Search;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.exercise.TripleExercises;
 import mitll.langtest.server.database.project.Project;
+import mitll.langtest.server.domino.ExcelUpload;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
@@ -112,117 +113,13 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 //    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
     if (contentType != null && contentType.contains("multipart/form-data")) {
       //reportOnHeaders(request);
-      doExcelUpload(request, response);
+      new ExcelUpload().doExcelUpload(request, response, this, db.getProjectManagement());
     } else {
       super.service(request, response);
     }
   }
 
-  private void doExcelUpload(HttpServletRequest request, HttpServletResponse response) {
-    logger.info("doExcelUpload : " +
-        "\n\tRequest " + request.getQueryString() +
-        "\n\tpath    " + request.getPathInfo());
 
-    int projId = -1;
-    int userID = -1;
-    FileItem docImportAttachment = null;
-
-    DiskFileItemFactory fileItemFactory = new DiskFileItemFactory();
-    ServletFileUpload upload = new ServletFileUpload(fileItemFactory);
-//
-//    ServletContext servletContext = this.getServletConfig().getServletContext();
-//    File repository = (File) servletContext.getAttribute("javax.servlet.context.tempdir");
-//    if (repository == null) {
-//      logger.warn("no repo for temp files?");
-//    } else {
-//      logger.info("tmpdir is " + repository.getAbsolutePath());
-//      fileItemFactory.setRepository(repository);
-//    }
-
-    try {
-      List<FileItem> items = upload.parseRequest(request);
-
-      for (FileItem item : items) {
-        String fieldName = item.getFieldName();
-        String fieldValue = item.getString();
-        String name = item.getName();
-
-        logger.info("doExcelUpload field '" + fieldName + "' = " + fieldValue.length() + " bytes : '" + name + "'");
-
-        if (Constants.PROJ_ID_PNM.equals(fieldName)) {
-          projId = Integer.parseInt(fieldValue);
-        } else if (Constants.Import.SRC_FILE_PNM.equals(fieldName)) {
-          if (!name.isEmpty()) {
-            docImportAttachment = item;
-          }
-        } else if ("user-id".equalsIgnoreCase(fieldName)) {
-          userID = Integer.parseInt(fieldValue);
-        }
-      }
-
-      int sessionUserID = getSessionUserID();
-
-      logger.info("doExcelUpload service : " +
-          "\n\tprojId              " + projId +
-          "\n\tsessionUserID       " + sessionUserID +
-          "\n\tuserID              " + userID +
-          "\n\tdocImportAttachment " + docImportAttachment);
-
-      if (projId == -1) {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("Success", false);
-        jsonObject.addProperty("Error", "no project specified?");
-        sendResponse(response, jsonObject.toString());
-      } else if (docImportAttachment == null) {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty("Success", false);
-        jsonObject.addProperty("Error", "no import excel file specified?");
-        sendResponse(response, jsonObject.toString());
-      } else {
-        Project project = getProject(projId);
-        int dominoid = project.getProject().dominoid();
-        if (dominoid == -1) {
-          JsonObject jsonObject = new JsonObject();
-          jsonObject.addProperty("Success", false);
-          jsonObject.addProperty("Error", "no domino id set for project.");
-          sendResponse(response, jsonObject.toString());
-        } else {
-          ImportResult b = db.getProjectManagement().doDominoImport(dominoid, docImportAttachment, project.getTypeOrder(), userID);
-          JsonObject jsonObject = new JsonObject();
-          jsonObject.addProperty("Success", b.isSuccess());
-          jsonObject.addProperty("Error", "None");
-          jsonObject.addProperty("Num", b.getImportedDocs().size());
-          sendResponse(response, jsonObject.toString());
-        }
-      }
-    } catch (FileUploadException e) {
-      logger.error("got error uploading " + e, e);
-
-      JsonObject jsonObject = new JsonObject();
-      jsonObject.addProperty("Success", false);
-      jsonObject.addProperty("Error", "FileUploadException");
-      sendResponse(response, jsonObject.toString());
-    } catch (DominoSessionException dse) {
-      logger.info("session exception " + dse, dse);
-
-      JsonObject jsonObject = new JsonObject();
-      jsonObject.addProperty("Success", false);
-      jsonObject.addProperty("Error", "DominoSessionException");
-      sendResponse(response, jsonObject.toString());
-    }
-  }
-
-  private void sendResponse(HttpServletResponse response, String outJSON) {
-    logger.info("Sending JSON response: " + outJSON);
-    try {
-      response.setContentType("application/json; charset=UTF-8");
-      response.setCharacterEncoding(UTF_8);
-
-      response.getWriter().write(outJSON);
-    } catch (Exception ex) {
-      logger.error("Exception writing response", ex);
-    }
-  }
 
   /**
    * Complicated.
@@ -259,7 +156,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       return new ExerciseListWrapper<>(request.getReqID(), ts);
     }
 
-    logger.info("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
+    logger.info("getExerciseIds : getting exercise ids for request " + request);
 
     if (request.getDialogID() != -1) {
       return getDialogResponse(request, projectID);

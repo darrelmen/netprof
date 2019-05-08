@@ -490,6 +490,7 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
     m.put("general mil", "Military & Warfare");
     m.put("warfare", "Military & Warfare");
     m.put("ranks", "Ranks");
+    m.put("occupations", "Ranks");
     m.put("law", "Security & Law Enforcement");
     m.put("traffic", "Security & Law Enforcement");
     m.put("security", "Security & Law Enforcement");

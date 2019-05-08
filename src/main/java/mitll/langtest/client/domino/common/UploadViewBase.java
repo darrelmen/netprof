@@ -28,14 +28,13 @@
  */
 package mitll.langtest.client.domino.common;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Fieldset;
-import com.github.gwtbootstrap.client.ui.FileUpload;
-import com.github.gwtbootstrap.client.ui.Form;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.Form.SubmitCompleteEvent;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.FormType;
+import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.json.client.JSONObject;
 import com.google.gwt.json.client.JSONParser;
 import com.google.gwt.json.client.JSONValue;
@@ -44,11 +43,16 @@ import com.google.gwt.user.client.ui.Hidden;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.user.BasicDialog;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
+import static com.github.gwtbootstrap.client.ui.constants.LabelType.IMPORTANT;
+
 public class UploadViewBase extends DivWidget {
   public static final String PROJECT_ID = "project-id";
+  public static final int WIDTH = 475;
+  public static final String HORRIBLE_PREV = "<pre style=\"word-wrap: break-word; white-space: pre-wrap;\">";
   private final Logger logger = Logger.getLogger("UploadViewBase");
 
 //	protected static final Logger log = Logger.getLogger(UploadViewBase.class.getName());
@@ -66,7 +70,7 @@ public class UploadViewBase extends DivWidget {
 
   //	protected ModalSize mType = ModalSize.Small;
   //private  Modal modal;
-  private int projectID;
+  //private int projectID;
   private int user;
 
   public UploadViewBase(int projectID, int user) {
@@ -80,10 +84,10 @@ public class UploadViewBase extends DivWidget {
   }
 
   private void init(int projectID) {
-    this.projectID = projectID;
+    //   this.projectID = projectID;
     mainForm = new Form();
-    String sUrl = DownloadHelper.toDominoUrl("langtest/exercise-manager");
-    mainForm.setAction(sUrl);
+    //String sUrl = DownloadHelper.toDominoUrl("langtest/exercise-manager");
+    mainForm.setAction(DownloadHelper.toDominoUrl("langtest/exercise-manager"));
     mainForm.setEncoding(FormPanel.ENCODING_MULTIPART);
     mainForm.setMethod(FormPanel.METHOD_POST);
     mainForm.setType(FormType.HORIZONTAL);
@@ -98,8 +102,30 @@ public class UploadViewBase extends DivWidget {
     addMainFormSubmitHandler();
     addMainFormSubmitCompleteHandler();
 
+    Label w = getLabel("Only do this if you're sure the NP_ID column is correct.");
+    add(w);
+    add(getLabel("Otherwise you may end up with lots of duplicate items that will need to be removed one-by-one."));
+    add(getLabel("It's strongly encouraged to edit content in the domino project directly."));
+    Label label = getLabel("Also note that import takes about a minute per 500 rows.");
+    label.setType(IMPORTANT);
+    label.addStyleName("topFiveMargin");
+
+    add(label);
+
+    label = getLabel("So please be patient.");
+    label.setType(IMPORTANT);
+    add(label);
+    mainForm.addStyleName("topFiveMargin");
     add(mainForm);
     //	initWidget(mainForm);
+  }
+
+  @NotNull
+  private Label getLabel(String text) {
+    Label w = new Label(LabelType.WARNING, text);
+    w.getElement().getStyle().setFontSize(16, Style.Unit.PX);
+    w.getElement().getStyle().setWhiteSpace(Style.WhiteSpace.NORMAL);
+    return w;
   }
 
   private void addHidden(int projectID) {
@@ -170,7 +196,8 @@ public class UploadViewBase extends DivWidget {
 //		modal.init();
 
     dialogHelper = new DialogHelper(false) {
-      @Override protected void afterGotYes(Button closeButton) {
+      @Override
+      protected void afterGotYes(Button closeButton) {
         //closeButton.setEnabled(true);
       }
     };
@@ -191,7 +218,7 @@ public class UploadViewBase extends DivWidget {
       public void gotHidden() {
 
       }
-    }, 400, 400);
+    }, 400, WIDTH);
   }
 
   private boolean validateAndWarn() {
@@ -238,13 +265,20 @@ public class UploadViewBase extends DivWidget {
     // further explanation).
     String results = event.getResults();
     logger.info("handleSubmitComplete got " + results);
+
     if (results.startsWith("<pre>")) results = results.substring("<pre>".length());
+    if (results.startsWith(HORRIBLE_PREV)) results = results.substring(HORRIBLE_PREV.length());
     if (results.endsWith("</pre>")) results = results.substring(0, results.length() - "</pre>".length());
 
+    String[] split = results.split("\\{");
+    if (split.length > 1) {
+      results = "{" + split[1];
+      logger.info("handleSubmitComplete result now " + results);
+    }
     JSONObject jsonObj = digestJsonResponse(results);
     if (jsonObj != null) {
       UploadResult result = new UploadResult(jsonObj);
-      logger.info("Submission complete " + result);
+      logger.info("handleSubmitComplete Submission complete " + result);
       dialogHelper.hide();
 //      if (!result.success || (result.docId < 0 && result.attId < 0)) {
 //        getMsgHelper().makeLoggedInlineMessage("Error on upload!",
@@ -254,6 +288,8 @@ public class UploadViewBase extends DivWidget {
       // }
     } else {
       dialogHelper.hide();
+      handleFormSubmitSuccess(new UploadResult(results.contains("{\"Success\":true")));
+
 //      getMsgHelper().makeLoggedInlineMessage(
 //          "Upload failed due to server error!<br/>",
 //          false, AlertType.ERROR);
@@ -264,7 +300,7 @@ public class UploadViewBase extends DivWidget {
    * Digest a json response from a servlet checking for a session expiration code
    */
   private JSONObject digestJsonResponse(String json) {
-    logger.info("Digesting response " + json);
+    logger.info("handleSubmitComplete Digesting response " + json);
     try {
       JSONValue val = JSONParser.parseStrict(json);
       JSONObject obj = (val != null) ? val.isObject() : null;
@@ -302,6 +338,10 @@ public class UploadViewBase extends DivWidget {
     //
 //		public final int attId; // Returned for project/exam attachments
     public String errMsg;
+
+    UploadResult(boolean success) {
+      this.success = success;
+    }
 
     //		public final String attFilename;
 //		public final String attContentType;

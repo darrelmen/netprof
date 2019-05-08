@@ -210,7 +210,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     }
   }
 
-  protected Project getProject(int projID) {
+  public Project getProject(int projID) {
     return db.getProject(projID);
   }
 
@@ -284,7 +284,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return securityManager == null ? null : securityManager.getLoggedInUser(getThreadLocalRequest());
   }
 
-  int getSessionUserID() throws DominoSessionException {
+  public int getSessionUserID() throws DominoSessionException {
     return securityManager.getLoggedInUserID(getThreadLocalRequest());
   }
 
@@ -305,7 +305,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
   protected String getLanguage(Project project) {
     if (project == null) {
-      logger.error("getLanguage : no current project ");
+      logger.warn("getLanguage : no current project ");
       return "unset";
     } else {
       return project.getProject().language();

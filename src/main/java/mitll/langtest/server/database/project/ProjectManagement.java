@@ -1618,7 +1618,6 @@ public class ProjectManagement implements IProjectManagement {
     Project project = getProject(id, false);
     List<CommonExercise> rawExercises = project.getRawExercises();
 
-
     int total = rawExercises.size();
 
     logger.info("checkOOV req for " + id + " num " + num + " offset " + offset + " total " + total);
