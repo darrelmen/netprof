@@ -240,10 +240,8 @@ public class AudioFileHelper implements AlignDecode {
    */
   public OOVInfo checkOOV(Collection<CommonExercise> exercises, boolean includeKaldi) {
     long now = System.currentTimeMillis();
-    Set<Integer> safe = new HashSet<>();
     Map<Integer, String> idToNorm = new HashMap<>();
     Set<String> oov = new HashSet<>();
-    Set<Integer> unsafe = new HashSet<>();
 
     {
       String message = "checkOOV : " + language + " checking " + exercises.size() + " exercises...";
@@ -254,6 +252,8 @@ public class AudioFileHelper implements AlignDecode {
       }
     }
 
+    Set<Integer> safe = new HashSet<>();
+    Set<Integer> unsafe = new HashSet<>();
     OOVInfo checkInfo;
     try {
       checkInfo = checkAllExercises(exercises, safe, unsafe, oov, idToNorm, includeKaldi);
@@ -275,12 +275,15 @@ public class AudioFileHelper implements AlignDecode {
     logger.info("checkLTSAndCountPhones " + language + " marking " + safe.size() + " safe, " + unsafe.size() + " unsafe");
     //}
 
+    if (project.getModelType() == ModelType.HYDRA && !unsafe.isEmpty()) {
+      logger.info("checkLTSAndCountPhones : since hydra - marking all " + unsafe.size() + " to be safe since we can go with the UNK model for OOV.");
+      safe.addAll(unsafe);
+    }
     project.getExerciseDAO().markSafeUnsafe(safe, unsafe, now);
 
     List<CommonExercise> changed = new ArrayList<>();
     {
-      List<SlickExerciseNorm> pairs = new ArrayList<>();
-      idToNorm.forEach((k, v) -> pairs.add(new SlickExerciseNorm(k, v)));
+      List<SlickExerciseNorm> pairs = getSlickExerciseNorms(idToNorm);
 
       logger.info("\ncheckOOV updating " + pairs.size() + " exercises");
 
@@ -298,7 +301,6 @@ public class AudioFileHelper implements AlignDecode {
 
     {
       long now2 = System.currentTimeMillis();
-
       if (now2 - then > 100) {
         logger.warn("checkLTSAndCountPhones took " + (now2 - then) + " millis to mark exercises safe/unsafe to decode.");
       }
@@ -310,12 +312,14 @@ public class AudioFileHelper implements AlignDecode {
       logger.info("checkLTSAndCountPhones out of " + exercises.size() + " dict and LTS fails on " + checkInfo.getOovWords());
     }
 
-//    if (!changed.isEmpty()) {
-//      logger.info("\ncheckOOV " + changed.size() + " exercises changed their normalized form.");
-//      project.getExerciseDAO().reload();
-//    }
-
     return checkInfo.setNeedsReload(!changed.isEmpty() || !safe.isEmpty() || !unsafe.isEmpty());
+  }
+
+  @NotNull
+  private List<SlickExerciseNorm> getSlickExerciseNorms(Map<Integer, String> idToNorm) {
+    List<SlickExerciseNorm> pairs = new ArrayList<>();
+    idToNorm.forEach((k, v) -> pairs.add(new SlickExerciseNorm(k, v)));
+    return pairs;
   }
 
   /**
@@ -526,9 +530,11 @@ public class AudioFileHelper implements AlignDecode {
    * @param oovToEquivalents
    * @param unsafeHighlighted
    * @return
-   * @see #checkForOOV
+   * @see #checkAllExercises(Collection, Set, Set, Set, Map, boolean)
    */
-  private boolean isValidForeignPhrase(Set<Integer> safe, Set<Integer> unsafe,
+  private boolean isValidForeignPhrase(Set<Integer> safe,
+                                       Set<Integer> unsafe,
+
                                        Map<Integer, String> safeToNorm,
                                        CommonExercise exercise, Set<String> oovCumulative,
                                        boolean includeKaldi,
@@ -608,15 +614,21 @@ public class AudioFileHelper implements AlignDecode {
     return project.getExerciseByID(id);
   }
 
-/*  private String getHighlighted(String foreignLanguage, Collection<String> kaldiOOV) {
-    String highlighted = foreignLanguage;
-    for (String oov : kaldiOOV) highlighted = highlighted.replaceAll(oov, "<b>" + oov + "</b>");
-    return highlighted;
-  }*/
+  /**
+   * @param exercise
+   * @param oovToEquivalents
+   * @param safeToNorm
+   * @param unsafeHighlighted
+   * @param oovCumulative
+   * @return
+   * @see #isValidForeignPhrase(Set, Set, Map, CommonExercise, Set, boolean, Map, Set)
+   */
+  private boolean checkWithHydra(ClientExercise exercise,
+                                 Map<String, List<OOV>> oovToEquivalents,
 
-  private boolean checkWithHydra(ClientExercise exercise, Map<String, List<OOV>> oovToEquivalents,
-
-                                 Map<Integer, String> safeToNorm, Set<ClientExercise> unsafeHighlighted, Set<String> oovCumulative) {
+                                 Map<Integer, String> safeToNorm,
+                                 Set<ClientExercise> unsafeHighlighted,
+                                 Set<String> oovCumulative) {
     boolean validForeignPhrase = true;
     String foreignLanguage = exercise.getForeignLanguage();
     Collection<String> oov = null;
@@ -635,10 +647,10 @@ public class AudioFileHelper implements AlignDecode {
           if (oov.isEmpty()) {
             safeToNorm.put(exercise.getID(), foreignLanguage);
           } else {
-            unsafeHighlighted.add(exercise);//getHighlighted(foreignLanguage, oov));
+            unsafeHighlighted.add(exercise);
           }
         } else {
-          unsafeHighlighted.add(exercise);//getHighlighted(foreignLanguage, oov));
+          unsafeHighlighted.add(exercise);
         }
       }
 

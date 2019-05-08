@@ -1621,8 +1621,8 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     List<CommonExercise> commonExercises = rawExercises.subList(num, num + offset);
-    boolean removeStale = num == 0;
-    logger.info("checkOOV removeStale " + removeStale + " for " + commonExercises.size());
+
+    logger.info("checkOOV removeStale " + (num == 0) + " for " + commonExercises.size());
     return project.getAudioFileHelper().checkOOV(commonExercises, true).setTotal(total);
   }
 
