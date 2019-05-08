@@ -1651,7 +1651,7 @@ public class ProjectManagement implements IProjectManagement {
   private class MyExcelVocabularyImporter extends ExcelVocabularyImporter {
     Collection<String> typeOrder;
 
-    public MyExcelVocabularyImporter(int defaultUser, ClientPMProject clientPMProject, Collection<String> typeOrder) {
+    MyExcelVocabularyImporter(int defaultUser, ClientPMProject clientPMProject, Collection<String> typeOrder) {
       super(dominoImport.getDominoContext(), db.getUserDAO().lookupDominoUser(defaultUser), clientPMProject);
       this.typeOrder = typeOrder;
     }

@@ -29,6 +29,7 @@
 package mitll.langtest.server.database.project;
 
 import mitll.hlt.domino.server.data.IDominoContext;
+import mitll.hlt.domino.server.extern.importers.DocumentImporterBase;
 import mitll.hlt.domino.server.extern.importers.metadata.BaseExcelReader;
 import mitll.hlt.domino.server.extern.importers.vocab.VocabularyItemFactory;
 import mitll.hlt.domino.shared.model.document.CStringMetadata;
@@ -42,6 +43,9 @@ import org.apache.poi.ss.util.CellRangeAddress;
 import java.io.InputStream;
 import java.util.*;
 
+/**
+ * @see ProjectManagement.MyExcelVocabularyImporter#importDocument(DocumentImporterBase.Command)
+ */
 public class ExcelReader extends BaseExcelReader<VocabularyItem> {
   private static final Logger log = LogManager.getLogger();
 
@@ -440,6 +444,7 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
     m = new HashMap<>();
     m.put("customs", "Customs & Traditions");
     m.put("general cultural", "Customs & Traditions");
+    m.put("daily", "Customs & Traditions");
     m.put("holidays", "Customs & Traditions");
     m.put("education", "Education & Training");
     m.put("food", "Food & Drink");
@@ -503,6 +508,8 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
     m.put("natural", "Natural Sciences (Phy., Chem., Bio., etc.)");
     subtopicMaps.put("Scientific & Technological", m);
 
+    // MUST BE LOWERCASE
+
     grammarMap = new HashMap<>();
     grammarMap.put("alpha", "Alphabet");
     grammarMap.put("interject", "Interjections");
@@ -512,9 +519,9 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
     grammarMap.put("conj", "Conjunctions");
     grammarMap.put("caus", "Causative Verbs");
     grammarMap.put("trans", "Transitive Verbs");
-    grammarMap.put("Verb_Transitive", "Transitive Verbs");
+    grammarMap.put("Verb_Transitive".toLowerCase(), "Transitive Verbs");
     grammarMap.put("intrans", "Intransitive Verbs");
-    grammarMap.put("Verb_Intransitive", "Intransitive Verbs");
+    grammarMap.put("Verb_Intransitive".toLowerCase(), "Intransitive Verbs");
     grammarMap.put("nouns", "Nouns");
     grammarMap.put("noun", "Nouns");
     grammarMap.put("pro", "Pronouns");

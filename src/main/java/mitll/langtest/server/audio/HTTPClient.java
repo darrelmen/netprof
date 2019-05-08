@@ -48,11 +48,11 @@ import java.util.List;
 public class HTTPClient {
   private static final Logger logger = LogManager.getLogger(HTTPClient.class);
   private static final int CONNECT_TIMEOUT = 5000;
-  private static final int READ_TIMEOUT = 20000;
+  private static final int READ_TIMEOUT = 10000;
   private static final String GET = "GET";
   private static final String POST = "POST";
   public static final String UTF_8 = "UTF8";
-  public static final String SENDING = "sending";
+  private static final String SENDING = "sending";
 
   private HttpURLConnection httpConn;
 

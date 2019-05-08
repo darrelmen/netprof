@@ -45,7 +45,6 @@ import mitll.langtest.server.scoring.*;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ModelType;
@@ -918,6 +917,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param score
    * @param options
    * @param pretestScore
+   * @param validityAndDur
    * @return
    * @see mitll.langtest.server.scoring.JsonScoring#getAnswer
    */
@@ -930,11 +930,12 @@ public class AudioFileHelper implements AlignDecode {
 
       float score,
       DecoderOptions options,
-      PretestScore pretestScore) {
-    AudioCheck.ValidityAndDur validity = audioConversion.getAudioCheck().isValid(file, false, isQuietAudioOK());
-    if (validity.getValidity() == Validity.MIC_DISCONNECTED) {
-      logger.warn("getAnswer : got mic disconnected for " + wavPath + " with dur " + validity.getDurationInMillis() + " range " + validity.getDynamicRange());
-    }
+      PretestScore pretestScore,
+      AudioCheck.ValidityAndDur validity) {
+//    AudioCheck.ValidityAndDur validity = getValidityAndDur(file);
+//    if (validity.getValidity() == Validity.MIC_DISCONNECTED) {
+//      logger.warn("getAnswer : got mic disconnected for " + wavPath + " with dur " + validity.getDurationInMillis() + " range " + validity.getDynamicRange());
+//    }
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, "", "");
 
     return options.shouldDoDecoding() ?
@@ -951,6 +952,10 @@ public class AudioFileHelper implements AlignDecode {
             validity,
             score, options, pretestScore)
         ;
+  }
+
+  public AudioCheck.ValidityAndDur getValidityAndDur(File file) {
+    return audioConversion.getAudioCheck().isValid(file, false, isQuietAudioOK());
   }
 
   /**

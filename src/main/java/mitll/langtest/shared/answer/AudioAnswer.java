@@ -39,8 +39,6 @@ import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
-import java.io.File;
-
 /**
  *
  */
@@ -99,7 +97,7 @@ public class AudioAnswer extends SimpleAudioAnswer {
   /**
    * @param dynamicRange
    * @see mitll.langtest.client.scoring.JSONAnswerParser#getAudioAnswer(JSONObject)
-   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerDecoding(ClientExercise, AudioContext, AnswerInfo.RecordingInfo, String, File, AudioCheck.ValidityAndDur, DecoderOptions)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerDecoding(ClientExercise, AudioContext, AnswerInfo.RecordingInfo, String, java.io.File, AudioCheck.ValidityAndDur, DecoderOptions)
    */
   public AudioAnswer setDynamicRange(double dynamicRange) {
     this.dynamicRange = dynamicRange;

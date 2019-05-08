@@ -39,7 +39,7 @@ class MyVocabularyImportCommand extends VocabularyImportCommand {
   private int semesterIndex = -1;
 
   public MyVocabularyImportCommand(mitll.hlt.domino.shared.model.user.User user, File excelFile2) {
-    super(user, new Date(), excelFile2.getAbsolutePath(), ImportMode.Overwrite);
+    super(user, new Date(), excelFile2.getAbsolutePath(), ImportMode.MergeItems);
   }
 
   public void setSemesterIndex(int col) {
