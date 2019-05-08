@@ -56,6 +56,8 @@ import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+//import net.sf.uadetector.ReadableUserAgent;
+
 public class Report implements IReport {
   private static final Logger logger = LogManager.getLogger(Report.class);
 

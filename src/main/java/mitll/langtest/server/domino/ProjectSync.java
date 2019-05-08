@@ -32,8 +32,9 @@ package mitll.langtest.server.domino;
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.exercise.ExerciseServices;
-import mitll.langtest.server.database.project.Project;
+import mitll.langtest.server.database.exercise.Facet;
 import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.*;
@@ -127,10 +128,19 @@ public class ProjectSync implements IProjectSync {
     return getDominoUpdateResponse(projectid, importUser, doChange, projectManagement.getImportFromDomino(projectid));
   }
 
+  /**
+   * Has hack to drop initial semester in type order - semester is special to pashto, and is generally handled as an attribute
+   * @param projectid
+   * @param importUser
+   * @param doChange
+   * @param importFromDomino
+   * @return
+   */
   @Override
   @NotNull
   public DominoUpdateResponse getDominoUpdateResponse(int projectid,
-                                                      int importUser, boolean doChange,
+                                                      int importUser,
+                                                      boolean doChange,
                                                       ImportInfo importFromDomino) {
     long requestTime = System.currentTimeMillis();
     Project project = projectServices.getProject(projectid);
@@ -170,8 +180,11 @@ public class ProjectSync implements IProjectSync {
       List<DominoUpdateItem> updates = new ArrayList<>();
 
       {
-        Collection<String> typeOrder = project.getTypeOrder();
-
+        List<String> typeOrder = project.getTypeOrder();
+        if (!typeOrder.isEmpty() && typeOrder.get(0).equalsIgnoreCase(Facet.SEMESTER.toString())) {
+          typeOrder = typeOrder.subList(1, typeOrder.size());
+          logger.info("\n\naddPending : dropping initial semester from type order, now " + typeOrder);
+        }
         if (!newEx.isEmpty()) {
           // add new
           logger.info("addPending adding " + newEx.size() + " new non-context exercises");
@@ -313,6 +326,15 @@ public class ProjectSync implements IProjectSync {
     //  return oldIDToExer;
   }
 
+  /**
+   * @param dominoIDToChangedExercise
+   * @param dominoToNonContextEx
+   * @param currentIDs
+   * @param newEx
+   * @param importUpdateEx
+   * @param importToKnownID
+   * @see #getNewAndChangedExercises(int, ImportInfo, Map, List, List, Map)
+   */
   private void addChangedExercises(Map<Integer, CommonExercise> dominoIDToChangedExercise,
                                    Map<Integer, SlickExercise> dominoToNonContextEx,
                                    Set<Integer> currentIDs,
@@ -322,10 +344,11 @@ public class ProjectSync implements IProjectSync {
                                    Map<CommonExercise, Integer> importToKnownID) {
     dominoIDToChangedExercise.forEach((dominoID, importEx) -> {
       logger.info("addChangedExercises import" +
-          "\n\tcontext   " + importEx.isContext() +
-          "\n\tdomino id " + dominoID +
-          "\n\teng       " + importEx.getEnglish() +
-          "\n\tfl        " + importEx.getForeignLanguage()
+          "\n\tcontext      " + importEx.isContext() +
+          "\n\tdomino id    " + dominoID +
+          "\n\teng          " + importEx.getEnglish() +
+          "\n\tfl           " + importEx.getForeignLanguage() +
+          "\n\tunit/chapter " + importEx.getUnitToValue()
       );
       // logger.info("addPending import importEx  '" + importEx.getEnglish() + "' = " + importEx.getForeignLanguage());
 
@@ -338,7 +361,6 @@ public class ProjectSync implements IProjectSync {
             " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
         //    newEx.add(importEx);
       } else {
-
         if (currentIDs.contains(dominoID)/* || oldIDs.contains(npID)*/) {
           importUpdateEx.add(importEx);
           MutableExercise mutable = importEx.getMutable();
@@ -366,7 +388,7 @@ public class ProjectSync implements IProjectSync {
                                Map<Integer, CommonExercise> dominoIDToAddedExercise) {
     dominoIDToAddedExercise.forEach((dominoID, importEx) -> {
       if (DEBUG) {
-        logger.info("addPending import ADDED" +
+        logger.info("addNewExercises import ADDED" +
             "\n\tcontext   " + importEx.isContext() +
             "\n\tdomino id " + dominoID +
             "\n\teng       " + importEx.getEnglish() +
@@ -380,14 +402,14 @@ public class ProjectSync implements IProjectSync {
       SlickExercise currentKnownExercise = dominoToNonContextEx.get(dominoID);
 
       if (currentKnownExercise == null) {
-        if (DEBUG) logger.info("addPending found new ADDED ex for domino id " + dominoID +
+        if (DEBUG) logger.info("addNewExercises found new ADDED ex for domino id " + dominoID +
             " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
         newEx.add(importEx);
       } else {
-        logger.warn("addPending huh? already know about " + currentKnownExercise);
+        logger.warn("addNewExercises huh? already know about " + currentKnownExercise);
       }
     });
-    logger.info("addPending import ADDED " + newEx.size() + " new exercises...");
+    logger.info("addNewExercises import ADDED " + newEx.size() + " new exercises...");
   }
 
 

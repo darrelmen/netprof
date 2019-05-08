@@ -34,13 +34,12 @@ import mitll.langtest.shared.scoring.NetPronImageType;
 
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Logger;
 
 /**
  * Created by go22670 on 4/24/17.
  */
 public class SegmentHighlightAudioControl implements AudioControl {
-  private final Logger logger = Logger.getLogger("SegmentHighlightAudioControl");
+//  private final Logger logger = Logger.getLogger("SegmentHighlightAudioControl");
   private final SegmentAudioControl wordSegments;
   private SegmentAudioControl phoneSegments = null;
 
@@ -84,19 +83,21 @@ public class SegmentHighlightAudioControl implements AudioControl {
 
   @Override
   public void update(double position) {
-
     wordSegments.update(position);
     if (phoneSegments != null) {
       phoneSegments.update(position);
-    } else {
-      logger.info("no phone segments? update " + position);
     }
+//    else {
+//      logger.info("no phone segments? update " + position);
+//    }
   }
 
   @Override
   public void songFinished() {
     wordSegments.songFinished();
-    if (phoneSegments != null) phoneSegments.songFinished();
+    if (phoneSegments != null) {
+      phoneSegments.songFinished();
+    }
   }
 
   public String toString() {

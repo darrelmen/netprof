@@ -32,7 +32,6 @@ package mitll.langtest.client.initial;
 import com.github.gwtbootstrap.client.ui.Breadcrumbs;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.google.gwt.dom.client.Style;
-import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.project.ProjectChoices;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.project.ProjectStartupInfo;

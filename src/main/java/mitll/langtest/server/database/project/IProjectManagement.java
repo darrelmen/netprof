@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.database.project;
 
+import mitll.hlt.domino.server.extern.importers.ImportResult;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
@@ -42,7 +43,9 @@ import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
+import org.apache.commons.fileupload.FileItem;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -153,6 +156,10 @@ public interface IProjectManagement {
   List<ImportProjectInfo> getVocabProjects();
 
   Map<String, Integer> getNpToDomino(int dominoProjectID);
+
+  ImportResult doDominoImport(int dominoID, FileItem item, Collection<String> typeOrder, int userID);
+
+  ImportResult doDominoImport(int dominoID, File excelFile, Collection<String> typeOrder, int userID);
 
   OOVInfo checkOOV(int id, int num, int offset);
 

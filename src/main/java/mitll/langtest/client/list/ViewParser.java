@@ -30,7 +30,6 @@
 package mitll.langtest.client.list;
 
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.shared.exercise.OOV;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;

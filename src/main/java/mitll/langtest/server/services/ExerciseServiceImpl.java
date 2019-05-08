@@ -30,11 +30,13 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.services.ExerciseService;
+import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.exercise.Search;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.exercise.TripleExercises;
+import mitll.langtest.server.database.project.Project;
+import mitll.langtest.server.domino.ExcelUpload;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
@@ -46,12 +48,17 @@ import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
+import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.Collator;
@@ -86,6 +93,22 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     int userFromSessionID = getUserIDFromSessionOrDB();
     return db.getFilterResponseHelper().getTypeToValues(request, getProjectIDFromUser(userFromSessionID), userFromSessionID);
   }
+
+  @Override
+  protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    ServletRequestContext ctx = new ServletRequestContext(request);
+    String contentType = ctx.getContentType();
+    //  String requestType = getRequestType(request);
+//    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
+    if (contentType != null && contentType.contains("multipart/form-data")) {
+      //reportOnHeaders(request);
+      new ExcelUpload().doExcelUpload(request, response, this, db.getProjectManagement());
+    } else {
+      super.service(request, response);
+    }
+  }
+
+
 
   /**
    * Complicated.
@@ -122,7 +145,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       return new ExerciseListWrapper<>(request.getReqID(), ts);
     }
 
-    logger.info("getExerciseIds : (" + getLanguage() + ") " + "getting exercise ids for request " + request);
+    logger.info("getExerciseIds : getting exercise ids for request " + request);
 
     if (request.getDialogID() != -1) {
       return getDialogResponse(request, projectID);
@@ -1162,6 +1185,19 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   public void reload(int projid) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     db.getExerciseDAO(projid).reload();
+  }
+
+  @Override
+  public void refreshAudio(int exid) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    db.getAudioDAO().clearAudioCacheForEx(exid);
+  }
+
+  @Override
+  public void refreshAllAudio(int projid) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    IAudioDAO audioDAO = db.getAudioDAO();
+    db.getProject(projid).getRawExercises().forEach(commonExercise -> audioDAO.clearAudioCacheForEx(commonExercise.getID()));
   }
 
   @Nullable

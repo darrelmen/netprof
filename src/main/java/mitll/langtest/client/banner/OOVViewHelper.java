@@ -68,7 +68,9 @@ import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.client.user.FormField;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.project.OOVInfo;
 import org.jetbrains.annotations.NotNull;
 

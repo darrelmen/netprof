@@ -42,6 +42,4 @@ public interface QCServiceAsync {
   void markState(int exid, STATE state, AsyncCallback<Void> async);
 
   void markAudioDefect(AudioAttribute audioAttribute, HasID exid, AsyncCallback<Void> async);
-
-//  void markGender(AudioAttribute attr, boolean isMale, AsyncCallback<Void> async);
 }

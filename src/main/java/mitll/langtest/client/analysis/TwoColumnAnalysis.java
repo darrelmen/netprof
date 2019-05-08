@@ -45,7 +45,6 @@ import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.logging.Logger;
 
 import static mitll.langtest.client.project.ProjectChoices.PLEASE_WAIT;
 

@@ -31,9 +31,7 @@ package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.OOV;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 

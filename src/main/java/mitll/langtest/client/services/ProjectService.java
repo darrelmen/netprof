@@ -35,7 +35,10 @@ import mitll.langtest.client.project.ProjectEditForm;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
-import mitll.langtest.shared.project.*;
+import mitll.langtest.shared.project.DominoProject;
+import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.ProjectInfo;
+import mitll.langtest.shared.project.ProjectProperty;
 
 import java.util.List;
 

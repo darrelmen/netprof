@@ -31,7 +31,6 @@ package mitll.langtest.server.scoring;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
@@ -187,8 +186,7 @@ public class PrecalcScores {
 
     for (TranscriptEvent ev : floatTranscriptEventMap.values()) {
       String event = ev.getEvent();
-      if (event.equals("sil") || event.equals("<s>") || event.equals("</s>")) {
-      } else {
+      if (!shouldSkip(event)) {
         Float orDefault = cvalue.getOrDefault(event, 0.0f);
         orDefault += 1.0f;
         cvalue.put(event, orDefault);
@@ -202,6 +200,10 @@ public class PrecalcScores {
       String key = pair.getKey();
       value2.put(key, pair.getValue() / cvalue.get(key));
     }
+  }
+
+  public static boolean shouldSkip(String event) {
+    return event.equals("sil") || event.equals("<s>") || event.equals("</s>");
   }
 
   private boolean isValidPrecalc() {

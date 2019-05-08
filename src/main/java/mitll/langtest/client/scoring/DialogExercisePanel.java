@@ -312,9 +312,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     if (alignmentOutputFromAudio != null) {
       alignmentFetcher.rememberAlignment(id, alignmentOutputFromAudio);
-    } else {
-      logger.warning("audioChangedWithAlignment : no alignment info for audio #" + id);
     }
+    //else {
+//      logger.warning("audioChangedWithAlignment : no alignment info for audio #" + id);
+    //}
     if (DEBUG) logger.info("audioChangedWithAlignment " + id + " : " + alignmentOutputFromAudio);
     audioChanged(id, duration);
   }

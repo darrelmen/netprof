@@ -39,7 +39,10 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
@@ -89,7 +92,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
   final U newUserExercise;
 
-  final ExerciseController controller;
+  final ExerciseController<?> controller;
 
   String originalForeign = "";
   String originalEnglish = "";
@@ -252,14 +255,14 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     Panel row = new DivWidget();
     container.add(row);
     context = addContext(container, newUserExercise);
-    context.box.addKeyUpHandler(keyUpEvent -> {
-      boolean hasText = hasTextInContextField();
-      //   logger.info("makeContextRow Got key up " + hasText);
-      maybeEnableContext(hasText);
-    });
+    context.box.addKeyUpHandler(keyUpEvent -> maybeEnableContext(hasTextInContextField()));
   }
 
   private boolean hasTextInContextField() {
+    return hasTextInField(this.context);
+  }
+
+  private boolean hasTextInField(FormField context) {
     return !context.box.getText().trim().isEmpty();
   }
 
@@ -395,7 +398,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @return
    */
   private FormField makeForeignLangRow(Panel container, String foreignLanguageAnnotation) {
-    //if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
+    if (true) {
+      logger.info("EditableExerciseDialog.makeForeignLangRow ---> " + foreignLanguageAnnotation);
+    }
+
     Panel row = new DivWidget();
     container.add(row);
 
@@ -407,6 +413,18 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       foreignLang.getWidget().getElement().getStyle().setProperty("fontFamily", "'MyUrduWebFont'");
     }
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
+
+
+    foreignLang.box.addKeyUpHandler(keyUpEvent -> {
+      boolean val = foreignLang.getSafeText().length() > 0 && hasRecordPermission();
+      if (rap != null) {
+        rap.setEnabled(val);
+      }
+      if (rapSlow != null) {
+        rapSlow.setEnabled(val);
+      }
+    });
+
     setFontSize(foreignLang);
     setMarginBottom(foreignLang);
     return foreignLang;
@@ -425,7 +443,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     label.setDirectionEstimator(true);   // automatically detect whether text is RTL
 
     row.addStyleName("leftFiveMargin");
- //   row.getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
+    //   row.getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
     setMarginBottom(label);
     return label;
   }
@@ -1046,26 +1064,48 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         }
       });
 
-      setEnabled(isOKToEnable(audioType));
+      setEnabled();
       controller.register(getPlayButton(), newExercise.getID());
     }
 
-    private boolean isOKToEnable(AudioType audioType) {
-      boolean b = hasRecordPermission();
-      return audioType != AudioType.CONTEXT_REGULAR ? b && hasTextInContextField() : b;
+    public void setEnabled() {
+      setEnabled(isOKToEnable());
     }
 
     private void disableOthers(boolean b) {
-      logger.info("disableOthers disable others " + b);
-
-
-      boolean enabled = b &= hasRecordPermission();
+     // logger.info("disableOthers disable others " + b);
+      boolean enabled = b && hasRecordPermission();
 
       if (enabled) {
-        enabled = isOKToEnable(audioType);
+        enabled = isOKToEnable();
       }
+
       final boolean val = enabled;
-      otherRAPs.forEach(otherRAP -> otherRAP.setEnabled(val));
+
+      otherRAPs.forEach(otherRAP ->
+          otherRAP.setEnabled(val && otherRAP.isOKToEnable())
+      );
+    }
+
+    @Override
+    public boolean isOKToEnable() {
+      boolean b = hasRecordPermission();
+      boolean b1 =
+          audioType == AudioType.CONTEXT_REGULAR ?
+              b && hasTextInContextField() :
+              b && hasTextInField(foreignLang);
+
+//      logger.info("isOKToEnable " +
+//          "\n\taudioType           " + audioType +
+//          "\n\thasRecordPermission " + b +
+//          "\n\tforeign             " + foreignLang.getSafeText() +
+//          "\n\tforeignLangNorm     " + foreignLangNorm.getText() +
+//          "\n\tenglish             " + english.getSafeText() +
+//          "\n\thasText             " + hasTextInField(foreignLang) +
+//          "\n\tenable              " + b1
+//      );
+
+      return b1;
     }
 
     /**

@@ -32,8 +32,8 @@ package mitll.langtest.server.database.audio;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Report;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.result.Result;
-import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
@@ -74,11 +74,11 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   private final IUserDAO userDAO;
 
   @Deprecated
-  public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 99, true, "default", false);
+  public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 99, true, "default");
   @Deprecated
-  public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 99, true, "Male", false);
+  public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 99, true, "Male");
   @Deprecated
-  public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female", false);
+  public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female");
 
   @Override
   public void deleteForProject(int projID) {
@@ -1133,5 +1133,15 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public List<Integer> getAllAudioIDs(int projectID, boolean hasProjectSpecificAudio) {
     return null;
+  }
+
+  @Override
+  public void clearAudioCacheForEx(int exid) {
+
+  }
+
+  @Override
+  public void setProjectManagement(IProjectManagement projectManagement) {
+
   }
 }

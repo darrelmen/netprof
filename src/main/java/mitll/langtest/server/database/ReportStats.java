@@ -32,7 +32,6 @@ package mitll.langtest.server.database;
 import com.google.gson.JsonObject;
 import mitll.npdata.dao.SlickProject;
 
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;

@@ -65,6 +65,7 @@ import java.util.stream.Collectors;
 
 import static mitll.langtest.server.audio.AudioConversion.LANGTEST_IMAGES_NEW_PRO_F_1_PNG;
 import static mitll.langtest.server.scoring.HydraOutput.STATUS_CODES.SUCCESS;
+import static mitll.langtest.server.scoring.PrecalcScores.shouldSkip;
 import static mitll.langtest.server.scoring.Scores.PHONES;
 
 public class ASRWebserviceScoring extends Scoring implements ASR {
@@ -584,25 +585,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           isMatch(result, typeToSegments));
 
       if (useKaldi) {
-        if (props.useWordAvgScoreForKaldi()) {
-          pretestScore.setRawOverallScore(overallScore);
-
-          if (DEBUG) {
-            logger.info("getPretestScore word scores   " + pretestScore.getWordScores());
-            logger.info("getPretestScore word segments " + pretestScore.getWordSegments());
-          }
-
-          float avgWordScore = pretestScore.getAvgWordScore();
-          logger.info("getPretestScore using word " + avgWordScore + " instead of " + overallScore);
-          overallScore = avgWordScore;
-          pretestScore.setOverallScore(overallScore);
-        } else if (props.usePhoneAvgScoreForKaldi()) {
-          pretestScore.setRawOverallScore(overallScore);
-          float avgPhoneScore = pretestScore.getAvgPhoneScore();
-          logger.info("getPretestScore using phone " + avgPhoneScore + " instead of " + overallScore);
-          overallScore = avgPhoneScore;
-          pretestScore.setOverallScore(overallScore);
-        }
+        hackOverallScoreForKaldi(overallScore, pretestScore);
       }
 
       long now = System.currentTimeMillis();
@@ -614,6 +597,28 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     } catch (Exception e) {
       logger.error("getPretestScore got " + e, e);
       return new PretestScore(-1).setStatus(e.getMessage());
+    }
+  }
+
+  private void hackOverallScoreForKaldi(float overallScore, PretestScore pretestScore) {
+    if (props.useWordAvgScoreForKaldi()) {
+      pretestScore.setRawOverallScore(overallScore);
+
+      if (DEBUG) {
+        logger.info("getPretestScore word scores   " + pretestScore.getWordScores());
+        logger.info("getPretestScore word segments " + pretestScore.getWordSegments());
+      }
+
+      float avgWordScore = pretestScore.getAvgWordScore();
+      logger.info("getPretestScore using word " + avgWordScore + " instead of " + overallScore);
+      overallScore = avgWordScore;
+      pretestScore.setOverallScore(overallScore);
+    } else if (props.usePhoneAvgScoreForKaldi()) {
+      pretestScore.setRawOverallScore(overallScore);
+      float avgPhoneScore = pretestScore.getAvgPhoneScore();
+      logger.info("getPretestScore using phone " + avgPhoneScore + " instead of " + overallScore);
+      overallScore = avgPhoneScore;
+      pretestScore.setOverallScore(overallScore);
     }
   }
 
@@ -646,19 +651,47 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
             jsonObject, reallyUsePhone, imageOptions.isWriteImages(), useKaldi);
   }
 
+  /**
+   * @param typeToSegments
+   * @param scores
+   * @see #getPretestScore
+   */
   private void maybeClampScore(Map<NetPronImageType, List<TranscriptSegment>> typeToSegments, Scores scores) {
     List<TranscriptSegment> transcriptSegments = typeToSegments.get(NetPronImageType.WORD_TRANSCRIPT);
-    if (transcriptSegments != null && transcriptSegments.size() == 1) {
-      TranscriptSegment transcriptSegment = transcriptSegments.get(0);
+
+    List<TranscriptSegment> filtered = transcriptSegments == null ?
+        Collections.emptyList() : transcriptSegments
+        .stream()
+        .filter(transcriptSegment -> !shouldSkip(transcriptSegment.getEvent())).collect(Collectors.toList());
+
+    if (transcriptSegments == null) {
+      logger.warn("maybeClampScore huh? no word transcript on  " + typeToSegments);
+    }
+
+    if (transcriptSegments != null && filtered.size() == 1) {
       float hydraScore = scores.getHydraScore();
-      float singleWordScore = transcriptSegment.getScore();
-      boolean diff = Math.abs(hydraScore - singleWordScore) > 0.0000001;
+      float singleWordScore = filtered.get(0).getScore();
+      float scoreDiff = Math.abs(hydraScore - singleWordScore);
+      boolean diff = scoreDiff > 0.0000001;
 
       if (diff) {
         scores.setHydraScore(singleWordScore);
-        logger.info("getPretestScore " +
-            "\n\tdiff = " + diff +
-            "\n\tclamp overall score to single word score " + singleWordScore + " from " + hydraScore);
+
+        logger.info("maybeClampScore " +
+            "\n\tdiff " + scoreDiff +
+            "\n\tclamp overall score to single word score " + singleWordScore +
+            "\n\tfrom " + hydraScore +
+            "\n\tnow  " + scores.getHydraScore()
+        );
+      } else {
+        logger.info("maybeClampScore NOT different : " +
+            "\n\tdiff " + scoreDiff +
+            "\n\tsingle word score " + singleWordScore +
+            "\n\tfrom " + hydraScore);
+      }
+    } else {
+      if (DEBUG && transcriptSegments != null) {
+        logger.info("maybeClampScore NOT doing change since " + filtered.size() + " word segments");
       }
     }
   }
@@ -834,7 +867,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
     String[] split = results[0].split(SEMI);
     Scores scores = new Scores(split);
 
-    logger.info("runHydra " + languageEnum +
+    logger.info("getScores " + languageEnum +
         "\n\ttook      " + timeToRunHydra + " millis to run " + (decode ? "decode" : "align") +
         "\n\ton        " + audioPath +
         "\n\tscore     " + split[0] /*+

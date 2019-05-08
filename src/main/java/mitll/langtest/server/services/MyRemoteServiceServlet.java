@@ -210,7 +210,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     }
   }
 
-  protected Project getProject(int projID) {
+  public Project getProject(int projID) {
     return db.getProject(projID);
   }
 
@@ -284,7 +284,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return securityManager == null ? null : securityManager.getLoggedInUser(getThreadLocalRequest());
   }
 
-  int getSessionUserID() throws DominoSessionException {
+  public int getSessionUserID() throws DominoSessionException {
     return securityManager.getLoggedInUserID(getThreadLocalRequest());
   }
 
@@ -295,17 +295,13 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   }
 
   /**
-   * This is safe!
-   *
+   * @see ResultServiceImpl#fixAudioPaths(int, Collection)
+   * @param project
    * @return
    */
-  protected String getLanguage() throws DominoSessionException {
-    return getLanguage(getProject());
-  }
-
   protected String getLanguage(Project project) {
     if (project == null) {
-      logger.error("getLanguage : no current project ");
+      logger.warn("getLanguage : no current project ");
       return "unset";
     } else {
       return project.getProject().language();
@@ -345,8 +341,9 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     Language language1;
 
     try {
-      if (language.equalsIgnoreCase(MANDARIN)) language = Language.MANDARIN.name();
-
+      if (language.equalsIgnoreCase(MANDARIN)) {
+        language = Language.MANDARIN.name();
+      }
       language1 = Language.valueOf(language.toUpperCase());
     } catch (IllegalArgumentException e) {
       language1 = Language.UNKNOWN;

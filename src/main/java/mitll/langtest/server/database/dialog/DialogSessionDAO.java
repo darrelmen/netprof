@@ -34,15 +34,21 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.project.Project;
-import mitll.langtest.shared.dialog.*;
-import mitll.npdata.dao.*;
+import mitll.langtest.shared.dialog.DialogSession;
+import mitll.langtest.shared.dialog.DialogStatus;
+import mitll.langtest.shared.dialog.IDialogSession;
+import mitll.npdata.dao.DBConnection;
+import mitll.npdata.dao.SlickDialogSession;
 import mitll.npdata.dao.dialog.DialogSessionDAOWrapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class DialogSessionDAO extends DAO implements IDialogSessionDAO {

@@ -40,7 +40,6 @@ import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.user.*;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;

@@ -32,7 +32,6 @@ package mitll.langtest.server.database.user;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.shared.user.SignUpUser;
 import mitll.langtest.shared.user.User;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

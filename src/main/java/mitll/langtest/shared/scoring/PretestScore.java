@@ -30,7 +30,6 @@
 package mitll.langtest.shared.scoring;
 
 import mitll.langtest.client.scoring.AudioPanel;
-import mitll.langtest.server.scoring.ASR;
 import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 

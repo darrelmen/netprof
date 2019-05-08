@@ -52,8 +52,6 @@ import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.recorder.RecordingKeyPressHelper;
-import mitll.langtest.client.scoring.ClickableWords;
-import mitll.langtest.client.scoring.FieldType;
 import mitll.langtest.client.scoring.ScoreFeedbackDiv;
 import mitll.langtest.client.scoring.ScoreProgressBar;
 import mitll.langtest.client.sound.CompressedAudio;
@@ -64,7 +62,6 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.jetbrains.annotations.NotNull;
@@ -73,7 +70,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.scoring.DialogExercisePanel.BLUE;
 import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.OGG;
 
 public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExercise> //T extends CommonExercise & MutableAnnotationExercise>

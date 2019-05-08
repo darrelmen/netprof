@@ -30,6 +30,7 @@
 package mitll.langtest.server.database.user;
 
 import mitll.hlt.domino.shared.model.user.ClientUserDetail;
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.hlt.domino.shared.model.user.Group;
 import mitll.langtest.shared.user.User;
 
@@ -39,4 +40,6 @@ public interface IDominoUserDAO {
   User getUserByID(String userID);
 
   ClientUserDetail toClientUserDetail(User user, String projectName, Group group);
+
+  DBUser lookupDBUser(int id);
 }

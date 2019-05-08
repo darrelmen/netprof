@@ -30,12 +30,10 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.bootstrap.ItemSorter;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
-import java.util.Set;
 
 /**
  * Created by go22670 on 3/9/17.

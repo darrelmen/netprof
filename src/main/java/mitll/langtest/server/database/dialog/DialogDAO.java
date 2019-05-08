@@ -371,7 +371,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
         if (e.getProperty() == null || e.getValue() == null) {
           logger.error("addAttributes huh? made an attribute with null fields ? " + e);
         }
-        dialog.getAttributes().add(e);
+        if (dialog != null) {
+          dialog.getAttributes().add(e);
+        }
       }
     });
   }
@@ -438,6 +440,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
           int before;
           if (exercise != null) {
 
+
             if (DEBUG_ADD_EXERCISE) {
               logger.info("addExercises (" + dialogID + ") " +
                   "\n\tex #   " + exercise.getID() +
@@ -447,7 +450,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
               );
             }
             before = exercise.getAttributes().size();
-
             idToEx.put(exid, exercise = new Exercise(exercise));
 
             int after = exercise.getAttributes().size();

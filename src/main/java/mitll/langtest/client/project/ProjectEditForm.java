@@ -290,10 +290,14 @@ public class ProjectEditForm extends UserDialog {
 
   @NotNull
   private Language getLanguage(String selectedValue) {
-    String s = MANDARIN.toDisplay().toUpperCase();
-    String s1 = selectedValue.toUpperCase();
-    boolean b = s1.equalsIgnoreCase(s);
-    return Language.valueOf(b ? MANDARIN.name() : s1);
+    if (isLanguageValid(selectedValue)) {
+      String s = MANDARIN.toDisplay().toUpperCase();
+      String s1 = selectedValue.toUpperCase();
+      boolean b = s1.equalsIgnoreCase(s);
+      return Language.valueOf(b ? MANDARIN.name() : s1);
+    } else {
+      return Language.UNKNOWN;
+    }
   }
 
   private void setPort() {
@@ -356,7 +360,11 @@ public class ProjectEditForm extends UserDialog {
   }
 
   private boolean isLanguageNotValid() {
-    return getLanguageChoice().equalsIgnoreCase(PLEASE_SELECT_A_LANGUAGE);
+    return !isLanguageValid(getLanguageChoice());
+  }
+
+  private boolean isLanguageValid(String languageChoice) {
+    return !languageChoice.equalsIgnoreCase(PLEASE_SELECT_A_LANGUAGE);
   }
 
   private String getLanguageChoice() {
@@ -592,31 +600,7 @@ public class ProjectEditForm extends UserDialog {
     this.language = new ListBox();
     this.language.addStyleName("leftTenMargin");
 
-    this.language.addChangeHandler(event -> projectServiceAsync.getDominoForLanguage(getLanguage(this.language.getSelectedValue()),
-        new AsyncCallback<List<DominoProject>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            logger.warning("got failure asking for " + language.getSelectedValue());
-          }
-
-          @Override
-          public void onSuccess(List<DominoProject> result) {
-            dominoProjectsListBox.clear();
-
-            result.forEach(dominoProject -> {
-              String item = dominoProject.getDominoID() + " : " + dominoProject.getName();
-              dominoProjectsListBox.addItem(item);
-              dominoToProject.put(item, dominoProject);
-
-            });
-
-            Scheduler.get().scheduleDeferred(() -> {
-              if (!result.isEmpty()) {
-                setUnitAndChapter("", result.iterator().next());
-              }
-            });
-          }
-        }));
+    this.language.addChangeHandler(event -> gotLanguageSelection());
 
     name.add(this.language);
 
@@ -632,6 +616,37 @@ public class ProjectEditForm extends UserDialog {
         this.language.setItemSelected(i, true);
       }
       i++;
+    }
+  }
+
+  private void gotLanguageSelection() {
+    String selectedValue = this.language.getSelectedValue();
+    if (isLanguageValid(selectedValue)) {
+      projectServiceAsync.getDominoForLanguage(getLanguage(selectedValue),
+          new AsyncCallback<List<DominoProject>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              logger.warning("got failure asking for " + language.getSelectedValue());
+            }
+
+            @Override
+            public void onSuccess(List<DominoProject> result) {
+              dominoProjectsListBox.clear();
+
+              result.forEach(dominoProject -> {
+                String item = dominoProject.getDominoID() + " : " + dominoProject.getName();
+                dominoProjectsListBox.addItem(item);
+                dominoToProject.put(item, dominoProject);
+
+              });
+
+              Scheduler.get().scheduleDeferred(() -> {
+                if (!result.isEmpty()) {
+                  setUnitAndChapter("", result.iterator().next());
+                }
+              });
+            }
+          });
     }
   }
 
@@ -878,6 +893,18 @@ public class ProjectEditForm extends UserDialog {
           public void onSuccess(Void result) {
             w.setEnabled(true);
             feedback.setText(CHECKING_AUDIO);
+
+            controller.getExerciseService().refreshAllAudio(info.getID(), new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable caught) {
+
+              }
+
+              @Override
+              public void onSuccess(Void result) {
+                logger.info("refreshAllAudio complete");
+              }
+            });
           }
         });
   }
@@ -889,7 +916,7 @@ public class ProjectEditForm extends UserDialog {
   }
 
   private int num = 0;
-  private  int offset = 100;
+  private int offset = 100;
 
   private void showCheckOOV(ProjectInfo info, Button w) {
     num = 0;

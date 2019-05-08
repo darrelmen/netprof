@@ -33,7 +33,6 @@ import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.project.ProjectStartupInfo;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;

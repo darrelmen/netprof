@@ -32,12 +32,10 @@ package mitll.langtest.server.database.exercise;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.project.Language;
-import mitll.npdata.dao.SlickPendingUser;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface IOOVDAO extends IDAO {
   void insertBulk(Collection<OOV> oovs, int userid, Language language);

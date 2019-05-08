@@ -33,10 +33,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioConversion;
-import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.audio.ScoreToJSON;
-import mitll.langtest.server.audio.TrackInfo;
+import mitll.langtest.server.audio.*;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -164,7 +161,7 @@ public class JsonScoring {
     long now = System.currentTimeMillis();
 
     if (now - then > 10) {
-      logger.info("getJsonForAudioForUser :  prep took " + (now - then) + " millis");
+      logger.info("getJsonForAudioForUser : prep took " + (now - then) + " millis");
     }
 
     then = System.currentTimeMillis();
@@ -291,7 +288,7 @@ public class JsonScoring {
    * @param projid
    * @param usePhoneToDisplay
    * @param fullJSON
-   * @param doFlashcard if true mark result with whether they said the prompt
+   * @param doFlashcard       if true mark result with whether they said the prompt
    * @param answer
    * @param pretestScore
    * @return
@@ -379,27 +376,39 @@ public class JsonScoring {
                                      DecoderOptions options) {
     AudioAnswer answer;
 
+    AudioCheck.ValidityAndDur validityAndDur = getAudioFileHelper(projectID).getValidityAndDur(saveFile);
+
     if (options.shouldDoDecoding()) {
       options.setDoDecode(true);
       answer = getAnswer(reqid, projectID, exerciseID, foreignLanguage, user, wavPath, saveFile, -1, deviceType, device,
           options,
-          null);
+          null, validityAndDur);
     } else {
-      PretestScore asrScoreForAudio = getASRScoreForAudio(reqid,
-          exerciseID,
-          wavPath,
-          foreignLanguage,
-          transliteration,
-          options.isUsePhoneToDisplay(),
-          projectID);
+      if (validityAndDur.getValidity() == Validity.OK) {
+        PretestScore asrScoreForAudio = getASRScoreForAudio(reqid,
+            exerciseID,
+            wavPath,
+            foreignLanguage,
+            transliteration,
+            options.isUsePhoneToDisplay(),
+            projectID);
 
-      options.setDoDecode(false);
+        options.setDoDecode(false);
 
-      answer = getAnswer(reqid, projectID, exerciseID, foreignLanguage, user, wavPath, saveFile,
-          asrScoreForAudio.getOverallScore(),
-          deviceType, device,
-          options,
-          asrScoreForAudio);
+        answer = getAnswer(reqid, projectID, exerciseID, foreignLanguage, user, wavPath, saveFile,
+            asrScoreForAudio.getOverallScore(),
+            deviceType, device,
+            options,
+            asrScoreForAudio, validityAndDur);
+      } else {
+        logger.info("skipping alignment - validity " + validityAndDur);
+        answer =
+            new AudioAnswer(
+                wavPath,
+                validityAndDur.getValidity(),
+                validityAndDur.getDynamicRange(),
+                validityAndDur.getDurationInMillis(), reqid, exerciseID);
+      }
     }
     return answer;
   }
@@ -441,8 +450,8 @@ public class JsonScoring {
   /**
    * Don't wait for mp3 to write to return - can take 70 millis for a short file.
    *
-   * @param projectID
    * @param reqid
+   * @param projectID
    * @param exerciseID
    * @param foreignLanguage
    * @param user
@@ -451,6 +460,7 @@ public class JsonScoring {
    * @param deviceType
    * @param device
    * @param pretestScore
+   * @param validity
    * @return
    * @see #getJsonForAudioForUser
    */
@@ -465,7 +475,7 @@ public class JsonScoring {
                                 String deviceType,
                                 String device,
                                 DecoderOptions options,
-                                PretestScore pretestScore) {
+                                PretestScore pretestScore, AudioCheck.ValidityAndDur validity) {
     ClientExercise exercise = exerciseID == unknownExID ? null : db.getCustomOrPredefExercise(projectID, exerciseID);  // allow custom items to mask out non-custom items
 
     if (exerciseID == 0 || exerciseID == unknownExID) {
@@ -486,7 +496,7 @@ public class JsonScoring {
         .getAnswer(exercise,
             audioContext,
             wavPath, file, deviceType, device, score,
-            options, pretestScore);
+            options, pretestScore, validity);
 
     ensureMP3Later(answer.getPath(), user, foreignLanguage, exercise.getEnglish(), language.getLanguage(), exercise);
 

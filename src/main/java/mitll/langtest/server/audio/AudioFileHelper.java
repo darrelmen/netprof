@@ -45,7 +45,6 @@ import mitll.langtest.server.scoring.*;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ModelType;
@@ -242,10 +241,8 @@ public class AudioFileHelper implements AlignDecode {
    */
   public OOVInfo checkOOV(Collection<CommonExercise> exercises, boolean includeKaldi) {
     long now = System.currentTimeMillis();
-    Set<Integer> safe = new HashSet<>();
     Map<Integer, String> idToNorm = new HashMap<>();
     Set<String> oov = new HashSet<>();
-    Set<Integer> unsafe = new HashSet<>();
 
     {
       String message = "checkOOV : " + language + " checking " + exercises.size() + " exercises...";
@@ -256,6 +253,8 @@ public class AudioFileHelper implements AlignDecode {
       }
     }
 
+    Set<Integer> safe = new HashSet<>();
+    Set<Integer> unsafe = new HashSet<>();
     OOVInfo checkInfo;
     try {
       checkInfo = checkAllExercises(exercises, safe, unsafe, oov, idToNorm, includeKaldi);
@@ -277,12 +276,15 @@ public class AudioFileHelper implements AlignDecode {
     logger.info("checkLTSAndCountPhones " + language + " marking " + safe.size() + " safe, " + unsafe.size() + " unsafe");
     //}
 
+    if (project.getModelType() == ModelType.HYDRA && !unsafe.isEmpty()) {
+      logger.info("checkLTSAndCountPhones : since hydra - marking all " + unsafe.size() + " to be safe since we can go with the UNK model for OOV.");
+      safe.addAll(unsafe);
+    }
     project.getExerciseDAO().markSafeUnsafe(safe, unsafe, now);
 
     List<CommonExercise> changed = new ArrayList<>();
     {
-      List<SlickExerciseNorm> pairs = new ArrayList<>();
-      idToNorm.forEach((k, v) -> pairs.add(new SlickExerciseNorm(k, v)));
+      List<SlickExerciseNorm> pairs = getSlickExerciseNorms(idToNorm);
 
       logger.info("\ncheckOOV updating " + pairs.size() + " exercises");
 
@@ -300,7 +302,6 @@ public class AudioFileHelper implements AlignDecode {
 
     {
       long now2 = System.currentTimeMillis();
-
       if (now2 - then > 100) {
         logger.warn("checkLTSAndCountPhones took " + (now2 - then) + " millis to mark exercises safe/unsafe to decode.");
       }
@@ -312,12 +313,14 @@ public class AudioFileHelper implements AlignDecode {
       logger.info("checkLTSAndCountPhones out of " + exercises.size() + " dict and LTS fails on " + checkInfo.getOovWords());
     }
 
-//    if (!changed.isEmpty()) {
-//      logger.info("\ncheckOOV " + changed.size() + " exercises changed their normalized form.");
-//      project.getExerciseDAO().reload();
-//    }
+    return checkInfo.setNeedsReload(!changed.isEmpty() || !safe.isEmpty() || !unsafe.isEmpty());
+  }
 
-    return checkInfo.setNeedsReload(!changed.isEmpty());
+  @NotNull
+  private List<SlickExerciseNorm> getSlickExerciseNorms(Map<Integer, String> idToNorm) {
+    List<SlickExerciseNorm> pairs = new ArrayList<>();
+    idToNorm.forEach((k, v) -> pairs.add(new SlickExerciseNorm(k, v)));
+    return pairs;
   }
 
   /**
@@ -334,7 +337,8 @@ public class AudioFileHelper implements AlignDecode {
    */
   private OOVInfo checkAllExercises(Collection<CommonExercise> exercises,
 
-                                    Set<Integer> safe, Set<Integer> unsafe,
+                                    Set<Integer> safe,
+                                    Set<Integer> unsafe,
 
                                     Set<String> oov,
                                     Map<Integer, String> unsafeToNorm,
@@ -342,6 +346,7 @@ public class AudioFileHelper implements AlignDecode {
     int checkedVocab = 0;
     int checkedDirect = 0;
     int count = 0;
+    int safeChanged = 0;
     logger.info("checkAllExercises for " + exercises.size() + " ex, force " + includeKaldi);
 
     Set<ClientExercise> unsafeHighlighted = new TreeSet<>();
@@ -374,23 +379,25 @@ public class AudioFileHelper implements AlignDecode {
 
             // check context sentences
             for (ClientExercise context : exercise.getDirectlyRelated()) {
-              CommonExercise commonExercise = context.asCommon();
-              boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, unsafeToNorm, commonExercise, oov, includeKaldi, oovToEquivalents, unsafeHighlighted);
+              CommonExercise sentence = context.asCommon();
+              boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, unsafeToNorm, sentence, oov, includeKaldi, oovToEquivalents, unsafeHighlighted);
               checkedDirect++;
 
-              if (commonExercise.isSafeToDecode() != validForeignPhrase2) {
-                commonExercise.getMutable().setSafeToDecode(validForeignPhrase2);
+              if (sentence.isSafeToDecode() != validForeignPhrase2) {
+                sentence.getMutable().setSafeToDecode(validForeignPhrase2);
+                safeChanged++;
               }
             }
           }
         }
       }
-      logger.info("checkAllExercises (" + project.getName() +
-          ") " +
-          "\n\tchecked vocab  " + checkedVocab +
-          "\n\tchecked direct " + checkedDirect +
-          "\n\tunsafeHighlighted " + unsafeHighlighted.size() +
-          "\n\tfrom           " + exercises.size() +
+
+      logger.info("checkAllExercises (" + project.getName() + ") " +
+          "\n\tchecked vocab        " + checkedVocab +
+          "\n\tchecked direct       " + checkedDirect +
+          "\n\tcontext safe changed " + safeChanged +
+          "\n\tunsafeHighlighted    " + unsafeHighlighted.size() +
+          "\n\tfrom                 " + exercises.size() +
           "\n\tfor whether they can be decoded in " + (System.currentTimeMillis() - then) + " millis");
 
       return new OOVInfo(checkedVocab + checkedDirect, oov.size(), unsafeHighlighted);
@@ -496,19 +503,8 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   * @param oov
    * @param languageEnum
    */
-//  private void removeStaleOOV(Set<String> oov, Language languageEnum) {
-//    List<OOV> known = db.getOOVDAO().forLanguage(languageEnum);
-//    List<OOV> toRemove = known.stream().filter(oovEntry ->
-//        oovEntry.getEquivalent().isEmpty() &&
-//            !oov.contains(oovEntry.getOOV())).collect(Collectors.toList());
-//
-//    logger.info("addOOV remove " + toRemove.size() + " : " + toRemove);
-//
-//    toRemove.forEach(oov1 -> db.getOOVDAO().delete(oov1.getID()));
-//  }
   private void removeStaleOOV(Language languageEnum) {
     List<OOV> known = db.getOOVDAO().forLanguage(languageEnum);
     List<OOV> toRemove = known
@@ -535,9 +531,11 @@ public class AudioFileHelper implements AlignDecode {
    * @param oovToEquivalents
    * @param unsafeHighlighted
    * @return
-   * @see #checkForOOV
+   * @see #checkAllExercises(Collection, Set, Set, Set, Map, boolean)
    */
-  private boolean isValidForeignPhrase(Set<Integer> safe, Set<Integer> unsafe,
+  private boolean isValidForeignPhrase(Set<Integer> safe,
+                                       Set<Integer> unsafe,
+
                                        Map<Integer, String> safeToNorm,
                                        CommonExercise exercise, Set<String> oovCumulative,
                                        boolean includeKaldi,
@@ -617,15 +615,21 @@ public class AudioFileHelper implements AlignDecode {
     return project.getExerciseByID(id);
   }
 
-/*  private String getHighlighted(String foreignLanguage, Collection<String> kaldiOOV) {
-    String highlighted = foreignLanguage;
-    for (String oov : kaldiOOV) highlighted = highlighted.replaceAll(oov, "<b>" + oov + "</b>");
-    return highlighted;
-  }*/
+  /**
+   * @param exercise
+   * @param oovToEquivalents
+   * @param safeToNorm
+   * @param unsafeHighlighted
+   * @param oovCumulative
+   * @return
+   * @see #isValidForeignPhrase(Set, Set, Map, CommonExercise, Set, boolean, Map, Set)
+   */
+  private boolean checkWithHydra(ClientExercise exercise,
+                                 Map<String, List<OOV>> oovToEquivalents,
 
-  private boolean checkWithHydra(ClientExercise exercise, Map<String, List<OOV>> oovToEquivalents,
-
-                                 Map<Integer, String> safeToNorm, Set<ClientExercise> unsafeHighlighted, Set<String> oovCumulative) {
+                                 Map<Integer, String> safeToNorm,
+                                 Set<ClientExercise> unsafeHighlighted,
+                                 Set<String> oovCumulative) {
     boolean validForeignPhrase = true;
     String foreignLanguage = exercise.getForeignLanguage();
     Collection<String> oov = null;
@@ -644,10 +648,10 @@ public class AudioFileHelper implements AlignDecode {
           if (oov.isEmpty()) {
             safeToNorm.put(exercise.getID(), foreignLanguage);
           } else {
-            unsafeHighlighted.add(exercise);//getHighlighted(foreignLanguage, oov));
+            unsafeHighlighted.add(exercise);
           }
         } else {
-          unsafeHighlighted.add(exercise);//getHighlighted(foreignLanguage, oov));
+          unsafeHighlighted.add(exercise);
         }
       }
 
@@ -919,6 +923,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param score
    * @param options
    * @param pretestScore
+   * @param validityAndDur
    * @return
    * @see mitll.langtest.server.scoring.JsonScoring#getAnswer
    */
@@ -931,11 +936,12 @@ public class AudioFileHelper implements AlignDecode {
 
       float score,
       DecoderOptions options,
-      PretestScore pretestScore) {
-    AudioCheck.ValidityAndDur validity = audioConversion.getAudioCheck().isValid(file, false, isQuietAudioOK());
-    if (validity.getValidity() == Validity.MIC_DISCONNECTED) {
-      logger.warn("getAnswer : got mic disconnected for " + wavPath + " with dur " + validity.getDurationInMillis() + " range " + validity.getDynamicRange());
-    }
+      PretestScore pretestScore,
+      AudioCheck.ValidityAndDur validity) {
+//    AudioCheck.ValidityAndDur validity = getValidityAndDur(file);
+//    if (validity.getValidity() == Validity.MIC_DISCONNECTED) {
+//      logger.warn("getAnswer : got mic disconnected for " + wavPath + " with dur " + validity.getDurationInMillis() + " range " + validity.getDynamicRange());
+//    }
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, "", "");
 
     return options.shouldDoDecoding() ?
@@ -952,6 +958,10 @@ public class AudioFileHelper implements AlignDecode {
             validity,
             score, options, pretestScore)
         ;
+  }
+
+  public AudioCheck.ValidityAndDur getValidityAndDur(File file) {
+    return audioConversion.getAudioCheck().isValid(file, false, isQuietAudioOK());
   }
 
   /**

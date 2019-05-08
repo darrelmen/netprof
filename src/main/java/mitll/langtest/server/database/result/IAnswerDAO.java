@@ -30,7 +30,6 @@
 package mitll.langtest.server.database.result;
 
 import mitll.langtest.server.database.AnswerInfo;
-import mitll.langtest.shared.scoring.AudioContext;
 
 public interface IAnswerDAO {
 /*  int addTextAnswer(AudioContext audioContext,

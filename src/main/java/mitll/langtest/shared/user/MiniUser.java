@@ -56,16 +56,15 @@ public class MiniUser extends FirstLastUser {
    * @param age
    * @param isMale
    * @param userID
-   * @param isAdmin
    */
-  public MiniUser(int id, int age, boolean isMale, String userID, boolean isAdmin) {
+  public MiniUser(int id, int age, boolean isMale, String userID) {
     super(id);
     this.age = age;
     this.isMale = isMale;
     this.realGender = isMale ? Gender.Male : Gender.Female;
 
     this.userID  = userID;
-    this.isAdmin = isAdmin;
+    this.isAdmin = false;
   }
 
   /**

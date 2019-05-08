@@ -30,7 +30,9 @@
 package mitll.langtest.server.database.audio;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.domino.AudioCopy;
@@ -38,6 +40,7 @@ import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.UserTimeBase;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.MiniUser;
@@ -54,6 +57,7 @@ import scala.Tuple2;
 import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.shared.user.MiniUser.Gender.Male;
@@ -72,30 +76,43 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   private int defaultResult;
 
+  private final Map<Integer, List<AudioAttribute>> exidToAudioAttributes = new ConcurrentHashMap<>();
+
   private static final boolean DEBUG_AUDIO_REPORT = false;
+
+  private IProjectManagement projectManagement;
 
   /**
    * @param database
    * @param dbConnection
    * @param userDAO
+   * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(IUserDAO)
    */
-  public SlickAudioDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
+  public SlickAudioDAO(Database database, DBConnection dbConnection, IUserDAO userDAO ) {
     super(database, userDAO);
     dao = new AudioDAOWrapper(dbConnection);
     serverProps = database.getServerProps();
     doCheckOnStartup = serverProps.doAudioCheckOnStartup();
     String mediaDir = serverProps.getMediaDir();
+
     hasMediaDir = new File(mediaDir).exists();
     if (!hasMediaDir) {
       logger.info("no media dir at " + mediaDir + " - this is OK on netprof host.");
     }
   }
 
+  /**
+   * @param projectID
+   * @param hasProjectSpecificAudio
+   * @return
+   * @see mitll.langtest.server.decoder.RefResultDecoder#writeRefDecode(Language, Collection, int, int)
+   * @see mitll.langtest.server.services.ScoringServiceImpl#recalcAlignments(int, Project)
+   */
   @Override
   @NotNull
   public List<Integer> getAllAudioIDs(int projectID, boolean hasProjectSpecificAudio) {
     // boolean hasProjectSpecificAudio = db.getProject(projectID).hasProjectSpecificAudio();
-    Map<Integer, List<AudioAttribute>> exToAudio =  getExToAudio(projectID, hasProjectSpecificAudio);
+    Map<Integer, List<AudioAttribute>> exToAudio = getExToAudio(projectID, hasProjectSpecificAudio);
     List<Integer> audioIDs = new ArrayList<>(exToAudio.size());
     exToAudio.values().forEach(audioAttributes -> audioIDs.addAll(audioAttributes
         .stream()
@@ -156,6 +173,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return report;
   }
 
+  public void setProjectManagement(IProjectManagement projectManagement) {
+    this.projectManagement = projectManagement;
+  }
+
   private static class UserTimeBaseImpl implements UserTimeBase {
     final int userid;
     final long timestamp;
@@ -179,16 +200,18 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   /**
    * @param info
    * @return
+   * @see mitll.langtest.server.database.project.DialogPopulate#addResultAndAudio(Project, int, int, long, ClientExercise, String, AudioCheck.ValidityAndDur, Integer)
    * @see mitll.langtest.server.services.AudioServiceImpl#addToAudioTable
    */
   @Override
   public AudioAttribute addOrUpdate(AudioInfo info) {
     MiniUser miniUser = userDAO.getMiniUser(info.getUserid());
 
+    int exerciseID = info.getExerciseID();
     AudioAttribute audioAttribute = toAudioAttribute(
         dao.addOrUpdate(
             info.getUserid(),
-            info.getExerciseID(),
+            exerciseID,
             info.getProjid(),
             info.getAudioType().toString(),
             info.getAudioRef(),
@@ -201,6 +224,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
         miniUser,
         info.isHasProjectSpecificAudio());
 
+    clearAudioCacheForEx(exerciseID);
+
 //    logger.info("addOrUpdate Add or update after  " + audioAttribute);
 
     //  Collection<SlickAudio> byID = dao.getByID(audioAttribute.getUniqueID());
@@ -208,6 +233,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 //    byID.forEach(slickAudio -> logger.info("addOrUpdate Got " + slickAudio));
 //    logger.info("Add or update exists " + audioAttribute);
     return audioAttribute;
+  }
+
+  public void clearAudioCacheForEx(int exerciseID) {
+    exidToAudioAttributes.remove(exerciseID);
   }
 
   /**
@@ -223,13 +252,13 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @paramx transcript
    * @paramx dnr
    */
-  @Override
+/*  @Override
   public void addOrUpdateUser(AudioInfo info) {
     dao.addOrUpdateUser(info.getUserid(), info.getExerciseID(), info.getProjid(),
         info.getAudioType().toString(), info.getAudioRef(), info.getTimestamp(),
         info.getDurationInMillis(), info.getTranscript(), info.getDnr(), info.getResultID(),
         info.getGender());
-  }
+  }*/
 
   /**
    * @param projid
@@ -242,6 +271,8 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     long pastTime = doCheckOnStartup || checkAll ? now : before;
     logger.info("validateFileExists before " + new Date(pastTime));
     dao.validateFileExists(projid, pastTime, installPath, language.toLowerCase());
+
+
   }
 
   @Override
@@ -354,38 +385,84 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
       audioAttribute.setAudioRef(audioRef.replaceAll(".wav", ".mp3"));
     }
   }
+//
+//  private final LoadingCache<Integer, List<AudioAttribute>> exidToAudioAttributes = CacheBuilder.newBuilder()
+//      .initialCapacity(100000)
+//    //  .expireAfterWrite(CACHE_TIMEOUT, TimeUnit.MINUTES)
+//      .build(
+//          new CacheLoader<Integer, List<AudioAttribute>>() {
+//            @Override
+//            public List<AudioAttribute> load(Integer key) {
+//              if (true) logger.info("idToDBUser Load " + key);
+////              DBUser dbUser = delegate.lookupDBUser(key);
+////              if (dbUser == null) {
+////                logger.warn("idToDBUser no db user with id " + key);
+////                dbUser = getStandIn(key);
+////              }
+//
+//
+//              return dbUser;
+//            }
+//          });
 
 
   /**
    * @param projID
    * @param exids
    * @return
-   * @see BaseAudioDAO#attachAudioToExercises
+   * @see BaseAudioDAO#attachAudioToExercises(Collection, Language, int)
    */
   Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(int projID, Set<Integer> exids, Map<Integer, MiniUser> idToMini) {
+    Map<Integer, List<AudioAttribute>> toReturn = new HashMap<>();
+
+    Set<Integer> toAskFor = new HashSet<>();
+    exids.forEach(exid -> {
+      List<AudioAttribute> audioAttributes = exidToAudioAttributes.get(exid);
+
+      if (audioAttributes == null) {
+        toAskFor.add(exid);
+      }
+    });
+
+    if (!toAskFor.isEmpty()) {
+      logger.info("getAudioAttributesForExercises : projid " + projID + " asking for missing " + toAskFor.size() + " exercises from " + exids.size());
+      exidToAudioAttributes.putAll(getAudioAttributes(projID, idToMini, toAskFor));
+    }
+
+    exids.forEach(exid -> toReturn.put(exid, exidToAudioAttributes.get(exid)));
+ /*   if (copy.size() != exids.size()) {
+      String suffix = copy.size() < 10 ? " : " + copy.keySet() : "";
+      logger.info("getAudioAttributesForExercises asked for " + exids.size() + " exercises, but only found " +
+          copy.size() + suffix);
+    }*/
+    return toReturn;
+  }
+
+  @NotNull
+  private Map<Integer, List<AudioAttribute>> getAudioAttributes(int projID, Map<Integer, MiniUser> idToMini, Set<Integer> toAskFor) {
     long then = System.currentTimeMillis();
-    Map<Integer, List<SlickAudio>> byExerciseID = dao.getByExerciseIDsThatExist(projID, exids);
+    Map<Integer, List<SlickAudio>> byExerciseID = dao.getByExerciseIDsThatExist(projID, toAskFor);
     long now = System.currentTimeMillis();
 
     if (now - then > 30) {
       logger.info("getAudioAttributesForExercise took " + (now - then) +
           "\n\tto get " + byExerciseID.size() + " attr" +
-          "\n\tfor    " + exids.size());
+          "\n\tfor    " + toAskFor.size());
     }
 
     Map<Integer, List<AudioAttribute>> copy = new HashMap<>(byExerciseID.size());
     byExerciseID.forEach((k, v) -> copy.put(k, toAudioAttributes(v, idToMini)));
 
     if (DEBUG) copy.forEach((k, v) -> logger.info(" getAudioAttributesForExercises " + k + " - " + v));
-
-    if (copy.size() != exids.size()) {
-      String suffix = copy.size() < 10 ? " : " + copy.keySet() : "";
-      logger.info("getAudioAttributesForExercises asked for " + exids.size() + " exercises, but only found " +
-          copy.size() + suffix);
-    }
     return copy;
   }
 
+  /**
+   * @param projID
+   * @param exids
+   * @return
+   * @see mitll.langtest.server.database.custom.UserListManager#getSimpleListsOnlyWithAudio(Collection, boolean)
+   */
   public Set<Integer> getExercisesThatHaveAudio(int projID, Collection<Integer> exids) {
     return dao.getExercisesThatHaveAudio(projID, exids);
   }
@@ -457,13 +534,24 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
   }
 
+  /**
+   *
+   * @param userid
+   * @param exerciseID
+   * @param audioType
+   * @return
+   */
   @Override
   int markDefect(int userid, int exerciseID, AudioType audioType) {
+    clearAudioCacheForEx(exerciseID);
+
     return dao.markDefect(userid, exerciseID, audioType.toString());
   }
 
   @Override
   public int markDefect(int id) {
+    dao.getByID(id).forEach(slickAudio -> clearAudioCacheForEx(slickAudio.exid()));
+
     return dao.markDefect(id);
   }
 
@@ -832,6 +920,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return toAudioAttribute(s, miniUser, hasProjectSpecificAudio);
   }
 
+  /**
+   * @param bulk
+   * @see #copyOne(AudioCopy, int, int, boolean)
+   */
   public void addBulk(List<SlickAudio> bulk) {
     dao.addBulk(bulk);
   }
@@ -872,6 +964,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
                   (serverProps.doAudioFileExistsCheck() || !foundFiles))) {
             logger.info("makeSureAudioIsThere validateFileExists ");
             validateFileExists(projectID, mediaDir, language, validateAll);
+
+            Project project = projectManagement.getProject(projectID, true);
+
+            // clear the audio cache for the project
+            project.getRawExercises().forEach(commonExercise -> exidToAudioAttributes.remove(commonExercise.getID()));
           }
         }
       } else {

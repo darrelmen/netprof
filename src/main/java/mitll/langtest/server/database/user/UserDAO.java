@@ -34,7 +34,6 @@ import mitll.hlt.domino.shared.model.user.ClientUserDetail;
 import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.AudioDAO;
-import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.shared.user.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -757,5 +756,15 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   @Override
   public boolean removeTeacherRole(int userid) {
     return false;
+  }
+
+  @Override
+  public DBUser lookupDBUser(int id) {
+    return null;
+  }
+
+  @Override
+  public mitll.hlt.domino.shared.model.user.User lookupDominoUser(int id) {
+    return null;
   }
 }

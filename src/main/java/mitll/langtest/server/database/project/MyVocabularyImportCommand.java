@@ -27,31 +27,26 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.server.database.report;
+package mitll.langtest.server.database.project;
 
-import com.google.gson.JsonObject;
-import mitll.langtest.server.LangTestDatabaseImpl;
-import mitll.langtest.server.LogAndNotify;
+import mitll.hlt.domino.server.extern.importers.vocab.VocabularyImportCommand;
+import mitll.hlt.domino.shared.common.ImportMode;
 
-import java.util.Map;
+import java.io.File;
+import java.util.Date;
 
-/**
- * Created by go22670 on 3/8/17.
- */
-public interface ReportingServices {
-  /**
-   * @param userID
-   * @see LangTestDatabaseImpl#sendReport
-   */
-  void sendReport(int userID);
+class MyVocabularyImportCommand extends VocabularyImportCommand {
+  private int semesterIndex = -1;
 
-  String getReport(int year, JsonObject jsonObject);
+  public MyVocabularyImportCommand(mitll.hlt.domino.shared.model.user.User user, File excelFile2) {
+    super(user, new Date(), excelFile2.getAbsolutePath(), ImportMode.MergeItems);
+  }
 
-  Map<String, Float> getMaleFemaleProgress(int projectid);
+  public void setSemesterIndex(int col) {
+    this.semesterIndex = col;
+  }
 
-  void doReport();
-
-  void sendReports();
-
-  LogAndNotify getLogAndNotify();
+  public int getSemesterIndex() {
+    return semesterIndex;
+  }
 }

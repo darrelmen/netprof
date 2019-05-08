@@ -421,7 +421,7 @@ public class DownloadHelper implements IShowStatus {
     return onButton;
   }
 
-  private String toDominoUrl(String relativeLoc) {
+  public static String toDominoUrl(String relativeLoc) {
     String baseUrl = GWT.getHostPageBaseURL();
     StringBuilder dominoUrl = new StringBuilder();
 

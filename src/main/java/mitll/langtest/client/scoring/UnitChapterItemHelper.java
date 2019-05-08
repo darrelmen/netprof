@@ -132,7 +132,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
    */
   private Panel getUnitLessonForExercise(T exercise) {
     // Panel flow = new HorizontalPanel();
-    logger.info("getUnitLessonForExercise for " + exercise);
+ //   logger.info("getUnitLessonForExercise for " + exercise);
     Panel flow = new DivWidget();
     flow.addStyleName("inlineFlex");
     //flow.getElement().setId("getUnitLessonForExercise_unitLesson");

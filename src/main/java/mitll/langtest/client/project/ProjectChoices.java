@@ -37,6 +37,7 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -45,6 +46,7 @@ import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
+import mitll.langtest.client.domino.common.UploadViewBase;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.LifecycleSupport;
@@ -57,8 +59,8 @@ import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.*;
-import mitll.langtest.shared.user.User;
 import mitll.langtest.shared.user.Permission;
+import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -72,6 +74,7 @@ import static mitll.langtest.shared.user.Permission.*;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices extends ThumbnailChoices {
+  public static final int THUMB_WIDTH = 181;
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
 
@@ -190,6 +193,11 @@ public class ProjectChoices extends ThumbnailChoices {
     this.userNotification = langTest;
     this.uiLifecycle = uiLifecycle;
     userService = langTest.getOpenUserService();
+  }
+
+  @Override
+  protected int getChoiceWidth() {
+    return THUMB_WIDTH;
   }
 
   /**
@@ -394,7 +402,7 @@ public class ProjectChoices extends ThumbnailChoices {
     DivWidget header = new DivWidget();
     header.addStyleName("container");
 
- //   logger.info("getHeader " + result.size() + " : " + nest);
+    //   logger.info("getHeader " + result.size() + " : " + nest);
     {
       DivWidget left = new DivWidget();
       left.addStyleName("floatLeftAndClear");
@@ -521,6 +529,7 @@ public class ProjectChoices extends ThumbnailChoices {
     } else {
       ProjectInfo remove = projects.remove(0);
       status.setText("Checking " + remove.getName() + "...");
+
       controller.getAudioServiceAsyncForHost(remove.getHost())
           .checkAudio(remove.getID(), new AsyncCallback<Void>() {
             @Override
@@ -532,6 +541,19 @@ public class ProjectChoices extends ThumbnailChoices {
             @Override
             public void onSuccess(Void result) {
               status.setText(remove.getName() + " checked...");
+
+              controller.getExerciseService().refreshAllAudio(remove.getID(), new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                  logger.info("refreshAllAudio complete");
+                }
+              });
+
               checkAudio(projects, status);
             }
           });
@@ -714,7 +736,7 @@ public class ProjectChoices extends ThumbnailChoices {
   }
 
   private void addPopoverUsual(FocusWidget button, SlimProject projectForLang) {
-   // logger.info("addPopoverUsual " + projectForLang);
+    // logger.info("addPopoverUsual " + projectForLang);
     Set<String> typeOrder = new HashSet<>(Collections.singletonList(COURSE));
     UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
     button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, ClientExerciseUnitChapterItemHelper));
@@ -816,8 +838,15 @@ public class ProjectChoices extends ThumbnailChoices {
     }
 
     {
-      if (isAllowedToDelete(projectForLang)) {
+      boolean allowedToDelete = isAllowedToDelete(projectForLang);
+      if (allowedToDelete) {
         Button deleteButton = getDeleteButton(projectForLang, label);
+        deleteButton.addStyleName("leftFiveMargin");
+        horiz2.add(getButtonContainer(deleteButton));
+      }
+
+      if (controller.getUserManager().isAdmin()) {
+        Button deleteButton = getUploadButton(projectForLang.getID());
         deleteButton.addStyleName("leftFiveMargin");
         horiz2.add(getButtonContainer(deleteButton));
       }
@@ -833,11 +862,27 @@ public class ProjectChoices extends ThumbnailChoices {
    * @return
    */
   private boolean isAllowedToDelete(SlimProject projectForLang) {
-    ProjectStatus status = projectForLang.getStatus();
-    return
-        status != ProjectStatus.PRODUCTION &&
-            (projectForLang.isMine(sessionUser) ||
-                controller.getUserManager().isAdmin());
+    return (projectForLang.getStatus() != ProjectStatus.PRODUCTION) && isOwnerOrAdmin(projectForLang);
+  }
+
+  private boolean didSpew = false;
+
+  private boolean isOwnerOrAdmin(SlimProject projectForLang) {
+    boolean mine = projectForLang.isMine(sessionUser);
+    boolean admin = controller.getUserManager().isAdmin();
+    boolean b = mine || admin;
+
+    if (b) {
+      if (mine) {
+        logger.info("isOwnerOrAdmin : project is mine (" + sessionUser + ")");
+      }
+
+      if (admin && !didSpew) {
+        logger.info("isOwnerOrAdmin : " + controller.getUserManager().getUserID() + " is an admin");
+        didSpew = true;
+      }
+    }
+    return b;
   }
 
   @NotNull
@@ -913,6 +958,37 @@ public class ProjectChoices extends ThumbnailChoices {
     w.addClickHandler(event -> showDeleteDialog(projectForLang, label));
 
     return w;
+  }
+
+  @NotNull
+  private com.github.gwtbootstrap.client.ui.Button getUploadButton(int projid) {
+    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
+
+    w.setIcon(IconType.UPLOAD);
+    w.setType(ButtonType.WARNING);
+
+    addTooltip(w, "Upload excel into domino.");
+
+    if (w != null) {
+      w.addClickHandler(event -> {
+        UploadViewBase widgets = new UploadViewBase(projid, controller.getUser());
+        widgets.showModal();
+      });
+    }
+
+//    FileUpload importFileBox = new FileUpload();
+//    importFileBox.setName("bulk-filename");
+//
+//    setAcceptOnInput(importFileBox.getElement());
+//      importFileFields = new DecoratedFields(IMPORT_BULK_AUDIO, importFileBox, getImportFileTip(), null);
+//      fields.add(importFileFields.getCtrlGroup());
+
+
+    return w;
+  }
+
+  private void setAcceptOnInput(Element element) {
+    element.setAttribute("accept", "application/vnd.ms-excel");
   }
 
   private void addTooltip(Widget w, String tip) {

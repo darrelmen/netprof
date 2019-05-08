@@ -36,7 +36,6 @@ import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
-import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;

@@ -31,7 +31,6 @@ package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.shared.project.ProjectMode;
-import mitll.langtest.shared.project.ProjectType;
 
 import java.util.*;
 
