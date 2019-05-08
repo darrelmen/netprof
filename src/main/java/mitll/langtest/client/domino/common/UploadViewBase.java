@@ -50,27 +50,17 @@ import java.util.logging.Logger;
 import static com.github.gwtbootstrap.client.ui.constants.LabelType.IMPORTANT;
 
 public class UploadViewBase extends DivWidget {
+  private final Logger logger = Logger.getLogger("UploadViewBase");
+
   public static final String PROJECT_ID = "project-id";
   public static final int WIDTH = 475;
   public static final String HORRIBLE_PREV = "<pre style=\"word-wrap: break-word; white-space: pre-wrap;\">";
-  private final Logger logger = Logger.getLogger("UploadViewBase");
 
-//	protected static final Logger log = Logger.getLogger(UploadViewBase.class.getName());
-
-  //	private DominoSaveableModal modal;
   private Form mainForm;
   private Fieldset fields;
 
-  //protected DecoratedFields uploadFields;
   private FileUpload uploadBox;
-//  protected TextBox descBox;
 
-//  protected String modalBtnNm = "Upload";
-//  protected String modalTitle = "Upload File";
-
-  //	protected ModalSize mType = ModalSize.Small;
-  //private  Modal modal;
-  //private int projectID;
   private int user;
 
   public UploadViewBase(int projectID, int user) {
@@ -106,7 +96,7 @@ public class UploadViewBase extends DivWidget {
     add(w);
     add(getLabel("Otherwise you may end up with lots of duplicate items that will need to be removed one-by-one."));
     add(getLabel("It's strongly encouraged to edit content in the domino project directly."));
-    Label label = getLabel("Also note that import takes about a minute per 500 rows.");
+    Label label = getLabel("Try to limit import to short spreadsheets - maybe 500 rows or so.");
     label.setType(IMPORTANT);
     label.addStyleName("topFiveMargin");
 
@@ -136,26 +126,8 @@ public class UploadViewBase extends DivWidget {
 
   private void addFormFields(Fieldset fields) {
     initUploadBox();
-
     new BasicDialog().addControlGroupEntry(fields, "Upload File", uploadBox, "Choose an excel file.");
-//    fields.add(addControlGroupEntryNoLabel(this, new Label("Upload File")));
-
-//		uploadFields = new DecoratedFields("Upload File", uploadBox);
-//		fields.add(uploadFields.getCtrlGroup());
-//		createAddTooltip(uploadFields.getCtrlGroup(),
-//				getUploadFileTip(getRequiredAttachmentType()), Placement.BOTTOM);
-//		addDescription(fields);
   }
-
-//  private ControlGroup addControlGroupEntryNoLabel(HasWidgets dialogBox, Widget widget) {
-//    final ControlGroup userGroup = new ControlGroup();
-//    userGroup.addStyleName("leftFiveMargin");
-//    widget.addStyleName("leftFiveMargin");
-//
-//    userGroup.add(widget);
-//    dialogBox.add(userGroup);
-//    return userGroup;
-//  }
 
   private void initUploadBox() {
     uploadBox = new FileUpload();
@@ -170,38 +142,17 @@ public class UploadViewBase extends DivWidget {
    */
   private void setAcceptOnInput(Element element) {
     element.setAttribute("accept", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-
   }
-//
-//	protected void addDescription(Fieldset fields) {
-//		descBox = new TextBox();
-//		descBox.setName(AttachmentUpload.ATT_DESC_PNM);
-//		fields.add(new DecoratedFields("File Description",
-//						descBox).getCtrlGroup());
-//	}
 
-//	protected String getUploadFileTip(AttachmentType attType) {
-//		return "Upload a file (" + attType.getExtensionsString() + ")";
-//	}
-
-  DialogHelper dialogHelper;
+  private DialogHelper dialogHelper;
 
   public void showModal() {
-//		modal = new DominoSaveableModal(true, modalTitle, modalBtnNm,
-//				getModalType(), this) {
-//			@Override protected void handleSave() {
-//				submitForm();
-//			}
-//		};
-//		modal.init();
-
     dialogHelper = new DialogHelper(false) {
       @Override
       protected void afterGotYes(Button closeButton) {
-        //closeButton.setEnabled(true);
       }
     };
-    Button upload_excel_file_to_domino = dialogHelper.show("Upload excel file to Domino", this, new DialogHelper.CloseListener() {
+    dialogHelper.show("Upload excel file to Domino", this, new DialogHelper.CloseListener() {
       @Override
       public boolean gotYes() {
 
@@ -231,20 +182,6 @@ public class UploadViewBase extends DivWidget {
 
   private static final String[] EXCEL_TYPES =
       {"xlsx", "xls"};
-
-//	public boolean validateAttachment( String filename) {
-//		if (filename == null) {
-//			return new CommonValidation.Result("No filename provided: " + filename);
-//		}
-//		String[] validExts = EXCEL_TYPES;
-//		for (int i = 0; i < validExts.length; i++) {
-//			if (filename.trim().toLowerCase().endsWith(validExts[i])) {
-//				return new CommonValidation.Result(); // success
-//			}
-//		}
-//		log.warning("Invalid attachment filename: " + filename);
-//		return new CommonValidation.Result("File type must be " + aType.getExtensionsString());
-//	}
 
   private void addMainFormSubmitHandler() {
     mainForm.addSubmitHandler(event -> {
@@ -384,16 +321,7 @@ public class UploadViewBase extends DivWidget {
 
     public void inform() {
       new DialogHelper(false).showErrorMessage("Import Complete!", success ? "Imported " + num + " items" : "Failed to import : " + errMsg);
-
     }
-
-    /**
-     * @see OpenDocumentUploadViewBase#addAudioMetadata
-     * @return
-     */
-//		public JSONObject getAudioMetadata() {
-//			return audioMetadata;
-//		}
   }
 
 }

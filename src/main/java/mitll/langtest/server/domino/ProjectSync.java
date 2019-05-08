@@ -388,7 +388,7 @@ public class ProjectSync implements IProjectSync {
                                Map<Integer, CommonExercise> dominoIDToAddedExercise) {
     dominoIDToAddedExercise.forEach((dominoID, importEx) -> {
       if (DEBUG) {
-        logger.info("addPending import ADDED" +
+        logger.info("addNewExercises import ADDED" +
             "\n\tcontext   " + importEx.isContext() +
             "\n\tdomino id " + dominoID +
             "\n\teng       " + importEx.getEnglish() +
@@ -402,14 +402,14 @@ public class ProjectSync implements IProjectSync {
       SlickExercise currentKnownExercise = dominoToNonContextEx.get(dominoID);
 
       if (currentKnownExercise == null) {
-        if (DEBUG) logger.info("addPending found new ADDED ex for domino id " + dominoID +
+        if (DEBUG) logger.info("addNewExercises found new ADDED ex for domino id " + dominoID +
             " import " + importEx.getEnglish() + " " + importEx.getForeignLanguage() + " context " + importEx.isContext());
         newEx.add(importEx);
       } else {
-        logger.warn("addPending huh? already know about " + currentKnownExercise);
+        logger.warn("addNewExercises huh? already know about " + currentKnownExercise);
       }
     });
-    logger.info("addPending import ADDED " + newEx.size() + " new exercises...");
+    logger.info("addNewExercises import ADDED " + newEx.size() + " new exercises...");
   }
 
 

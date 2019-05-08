@@ -283,7 +283,7 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
         .map(grammarMap::get);
     String s = dominoGrammar.orElse("");
     if (!grammar.isEmpty() && s.isEmpty()) {
-      log.warn("skipping grammar '" + grammar +"'");
+      log.warn("skipping grammar '" + grammar + "'");
     }
     return s;
   }
@@ -459,6 +459,7 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
     m = new HashMap<>();
     m.put("econ", "Economic & Business");
     m.put("general", "Economic & Business");
+    m.put("agriculture", "Economic & Business");
     m.put("banking", "Economic & Business");
     m.put("shop", "Economic & Business");
     m.put("trade", "Economic & Business");
@@ -466,12 +467,17 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
     m.put("ind", "Industry");
     m.put("legal", "Legal & Courts");
     m.put("polit", "Political & Government");
+    m.put("general poli", "Political & Government");
+    m.put("elections", "Political & Government");
+    m.put("institutions", "Political & Government");
+    m.put("international relation", "Political & Government");
     m.put("trans", "Transportation & Travel");
     subtopicMaps.put("Economic & Political", m);
 
     m = new HashMap<>();
     m.put("cities", "Cities, States, Countries");
     m.put("states", "Cities, States, Countries");
+    m.put("countries", "Cities, States, Countries");
     m.put("climate", "Climate & Weather");
     m.put("agriculture", "Climate & Weather");
     m.put("direct", "Directions & Landmarks");
@@ -485,9 +491,11 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
 
     m = new HashMap<>();
     m.put("crime", "Crime, Terrorism, Violence");
-    m.put("violence", "Crime, Terrorism, Violence");
+    m.put("terrorism", "Crime, Terrorism, Violence");
+    m.put("viol", "Crime, Terrorism, Violence");
     m.put("mil", "Military & Warfare");
     m.put("general mil", "Military & Warfare");
+    m.put("history", "Military & Warfare");
     m.put("warfare", "Military & Warfare");
     m.put("ranks", "Ranks");
     m.put("occupations", "Ranks");
@@ -500,6 +508,8 @@ public class ExcelReader extends BaseExcelReader<VocabularyItem> {
 
     m = new HashMap<>();
     m.put("sci", "Scientific & Technological");
+    m.put("Research".toLowerCase(), "Scientific & Technological");
+
     m.put("comp", "Computer & Internet");
     m.put("general sci", "General Scientific");
     m.put("general tech", "General Technological");

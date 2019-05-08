@@ -66,6 +66,7 @@ public class DominoExerciseDAO {
   public static final String UNKNOWN = "unknown";
   private boolean shouldSwap;
   private final IUserExerciseDAO userExerciseDAO;
+  public static final boolean DEBUG = false;
 
   public DominoExerciseDAO(IUserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
@@ -218,7 +219,7 @@ public class DominoExerciseDAO {
       }
     }
     if (!skipped.isEmpty()) {
-      logger.warn("addAttributes skipped vocab attributes " + skipped + " for " + ex.getID() + " old " + ex.getOldID() + " domino " +ex.getDominoID());
+      logger.warn("addAttributes skipped vocab attributes " + skipped + " for " + ex.getID() + " old " + ex.getOldID() + " domino " + ex.getDominoID());
     }
   }
 
@@ -337,7 +338,7 @@ public class DominoExerciseDAO {
     context.setDominoContextIndex(sample.getNum());
 
     context.setUnitToValue(unitToValue);
-  //  context.setParentDominoID(parentDominoID);
+    //  context.setParentDominoID(parentDominoID);
     return context;
   }
 
@@ -430,13 +431,15 @@ public class DominoExerciseDAO {
         dominoID, shouldSwap);
 
 
-    logger.info("getExerciseFromVocabularyItem : made ex" +
-        "\n\tdominoID " + exercise.getDominoID() +
-        "\n\tnpID     " + exercise.getOldID() +
-        "\n\tex id    " + exercise.getID() +
-        "\n\teng      '" + exercise.getEnglish() + "'" +
-        "\n\tfl       '" + exercise.getForeignLanguage() + "'" +
-        "\n\tcontext  " + isContext);
+    if (DEBUG) {
+      logger.info("getExerciseFromVocabularyItem : made ex" +
+          "\n\tdominoID " + exercise.getDominoID() +
+          "\n\tnpID     " + exercise.getOldID() +
+          "\n\tex id    " + exercise.getID() +
+          "\n\teng      '" + exercise.getEnglish() + "'" +
+          "\n\tfl       '" + exercise.getForeignLanguage() + "'" +
+          "\n\tcontext  " + isContext);
+    }
 
     exercise.setPredef(true);
 

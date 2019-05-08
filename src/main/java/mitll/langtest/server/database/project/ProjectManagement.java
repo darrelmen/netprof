@@ -39,13 +39,7 @@ import mitll.hlt.domino.server.data.IProjectWorkflowDAO;
 import mitll.hlt.domino.server.data.ProjectServiceDelegate;
 import mitll.hlt.domino.server.data.SimpleDominoContext;
 import mitll.hlt.domino.server.extern.importers.ImportResult;
-import mitll.hlt.domino.server.extern.importers.vocab.ExcelVocabularyImporter;
 import mitll.hlt.domino.server.util.Mongo;
-import mitll.hlt.domino.shared.common.ImportMode;
-import mitll.hlt.domino.shared.model.HeadDocumentRevision;
-import mitll.hlt.domino.shared.model.document.IDocument;
-import mitll.hlt.domino.shared.model.document.VocabularyItem;
-import mitll.hlt.domino.shared.model.metadata.MetadataTypes;
 import mitll.hlt.domino.shared.model.project.ClientPMProject;
 import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.LangTestDatabaseImpl;
@@ -59,7 +53,6 @@ import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
-import mitll.langtest.server.database.exercise.Facet;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -1527,12 +1520,8 @@ public class ProjectManagement implements IProjectManagement {
           "\n\treading from " + excelFile + " " + excelFile.length());
 
       MyVocabularyImportCommand iCmd = new MyVocabularyImportCommand(user, excelFile);
-//      iCmd.setIdIndex(1);
-//      iCmd.setSemesterIndex(6);
-//      iCmd.setUnitIndex(7);
-//      iCmd.setChapterIndex(8);
-      ImportResult result = new MyExcelVocabularyImporter(userID, clientPMProject, typeOrder).importDocument(iCmd);
-      logger.info("got result " + result);
+      ImportResult result = new MyExcelVocabularyImporter(this, userID, clientPMProject, typeOrder, dominoImport, userDAO).importDocument(iCmd);
+      logger.info("doDominoImport got result " + result);
       return result;
     }
   }
@@ -1644,102 +1633,4 @@ public class ProjectManagement implements IProjectManagement {
     }
   }
 
-  /**
-   *
-   */
-  private class MyExcelVocabularyImporter extends ExcelVocabularyImporter {
-    Collection<String> typeOrder;
-
-    MyExcelVocabularyImporter(int defaultUser, ClientPMProject clientPMProject, Collection<String> typeOrder) {
-      super(dominoImport.getDominoContext(), db.getUserDAO().lookupDominoUser(defaultUser), clientPMProject);
-      this.typeOrder = typeOrder;
-    }
-
-    @Override
-    public ImportResult importDocument(Command cmd) {
-      if (!(cmd instanceof MyVocabularyImportCommand)) {
-        return new ImportResult("Invalid command type!");
-      }
-
-      MyVocabularyImportCommand tdtCmd = (MyVocabularyImportCommand) cmd;
-      try {
-
-        logger.info("type order " + typeOrder);
-        ExcelReader excelReader = new ExcelReader(tdtCmd.getFileName(), getDominoContext(), tdtCmd);
-        Iterator<String> iterator = typeOrder.iterator();
-
-        if (iterator.hasNext()) {
-          String next = iterator.next();
-          if (next.equalsIgnoreCase(Facet.SEMESTER.toString())) {
-            next = iterator.next(); //skip it
-          }
-          excelReader.setUnitColumnHeader(next);
-        }
-        if (iterator.hasNext()) {
-          excelReader.setChapter(iterator.next());
-        }
-        Collection<VocabularyItem> content1 = excelReader.getContent();
-
-        //				OptionSpecification unitOrder = proj.getWorkflow().getOptionSpec(UNIT_ORDER_OPTION);
-        //			log.info("After " + unitOrder + " : " + unitOrder.getChildOptionStrings());
-        Collection<HeadDocumentRevision> headDocumentRevisions =
-            importAllDirect(getCurrentUser(), tdtCmd.getImportMode(), content1);
-
-        ImportResult importResult = new ImportResult();
-        for (HeadDocumentRevision documentRevision : headDocumentRevisions)
-          importResult.addImportedDoc(documentRevision);
-        return importResult;
-      } catch (Exception ex) {
-        logger.error("Encountered exception reading file " + tdtCmd.getFileName(), ex);
-        return new ImportResult("Unknown exception encountered!");
-      }
-    }
-
-    private Collection<HeadDocumentRevision> importAllDirect(mitll.hlt.domino.shared.model.user.User user, ImportMode iMode, Collection<VocabularyItem> content1) {
-      Date now = new Date();
-      int c = 0;
-      int failures = 0;
-      int imported = 0;
-
-      int n = content1.size();
-
-      List<HeadDocumentRevision> importedDocs = new ArrayList<>();
-
-      logger.info(" importing ---- " + n + " items ");
-
-      for (VocabularyItem item : content1) {
-        boolean success = importDoc(user, iMode, now, importedDocs, item);
-        if (success) imported++;
-        else failures++;
-
-        //if (c > MAX) break;
-        if (c++ % 100 == 0) logger.info("did " + c);
-      }
-
-      if (failures > 0) logger.error("failed to import " + failures + "/" + n);
-      else logger.info("imported " + imported + "/" + n + " items");
-
-      return importedDocs;
-    }
-
-    private boolean importDoc(mitll.hlt.domino.shared.model.user.User user, ImportMode iMode, Date now, List<HeadDocumentRevision> importedDocs, IDocument doc) {
-      try {
-        //log.info(i + " START ---- " + item.getString(EN) + " ----------------- ");
-        ImportCommand cmd = new ImportCommand(user, now, null, iMode);
-        ImportResult importResult = addDocument(cmd, doc, null, MetadataTypes.VocabularyMetadata.V_NP_ID, null);
-        if (importResult.isSuccess()) {
-          //imported++;
-          importedDocs.add(importResult.getOnlyImportedDoc());
-          return true;
-        } else {
-//					if (failures++ < 10) log.error("couldn't import doc " + testItem + " : " + importResult.getErrorMessage());
-          return false;
-        }
-        //	log.info(i + " END   ---- " + item.getString(EN) + " ----------------- ");
-      } catch (Exception e) {
-        logger.error("Got " + e, e);
-      }
-      return false;
-    }
-  }
 }
