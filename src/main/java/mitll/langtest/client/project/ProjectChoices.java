@@ -865,8 +865,22 @@ public class ProjectChoices extends ThumbnailChoices {
     return (projectForLang.getStatus() != ProjectStatus.PRODUCTION) && isOwnerOrAdmin(projectForLang);
   }
 
+  private boolean didSpew = false;
+
   private boolean isOwnerOrAdmin(SlimProject projectForLang) {
-    return projectForLang.isMine(sessionUser) || controller.getUserManager().isAdmin();
+    boolean mine = projectForLang.isMine(sessionUser);
+    boolean admin = controller.getUserManager().isAdmin();
+    boolean b = mine || admin;
+    if (b) {
+      if (mine) {
+        logger.info("isOwnerOrAdmin : project is mine (" + sessionUser + ")");
+      }
+      if (admin && !didSpew) {
+        logger.info("isOwnerOrAdmin : " + controller.getUserManager().getUserID() + " is an admin");
+        didSpew = true;
+      }
+    }
+    return b;
   }
 
   @NotNull

@@ -373,7 +373,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
         }
       });
     } else {
-      logger.info("setCogTitle : no project");
+   //   logger.info("setCogTitle : no project");
       setChoicesVisibility(isAdmin(), isTeacher());
       setVisibleChoices(false);
     }

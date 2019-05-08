@@ -295,14 +295,10 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   }
 
   /**
-   * This is safe!
-   *
+   * @see ResultServiceImpl#fixAudioPaths(int, Collection)
+   * @param project
    * @return
    */
-  protected String getLanguage() throws DominoSessionException {
-    return getLanguage(getProject());
-  }
-
   protected String getLanguage(Project project) {
     if (project == null) {
       logger.warn("getLanguage : no current project ");
@@ -345,8 +341,9 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     Language language1;
 
     try {
-      if (language.equalsIgnoreCase(MANDARIN)) language = Language.MANDARIN.name();
-
+      if (language.equalsIgnoreCase(MANDARIN)) {
+        language = Language.MANDARIN.name();
+      }
       language1 = Language.valueOf(language.toUpperCase());
     } catch (IllegalArgumentException e) {
       language1 = Language.UNKNOWN;

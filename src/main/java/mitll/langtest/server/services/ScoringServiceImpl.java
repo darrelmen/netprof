@@ -129,7 +129,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
         }
 
         if (exercise == null) {
-          logger.warn(getLanguage() + " can't find exercise id " + exerciseID);
+          logger.warn("getResultASRInfo : can't find exercise id " + exerciseID);
           return new PretestScore();
         } else {
           String audioFilePath = result.getAnswer();

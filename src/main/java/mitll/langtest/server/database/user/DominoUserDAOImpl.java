@@ -1619,7 +1619,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   @NotNull
   private Kind getKindForRole(String firstRole) {
-    if (firstRole.equals(PO_M)) firstRole = Kind.PROJECT_ADMIN.getRole();
+    if (firstRole.equals(PO_M)) {
+      firstRole = Kind.PROJECT_ADMIN.getRole();
+    }
     Kind kind = roleToKind.get(firstRole);
     if (kind == null) {
       try {
