@@ -845,7 +845,7 @@ public class ProjectChoices extends ThumbnailChoices {
         horiz2.add(getButtonContainer(deleteButton));
       }
 
-      if (isOwnerOrAdmin()) {
+      if (controller.getUserManager().isAdmin()) {
         Button deleteButton = getUploadButton(projectForLang.getID());
         deleteButton.addStyleName("leftFiveMargin");
         horiz2.add(getButtonContainer(deleteButton));
@@ -862,20 +862,20 @@ public class ProjectChoices extends ThumbnailChoices {
    * @return
    */
   private boolean isAllowedToDelete(SlimProject projectForLang) {
-    return (projectForLang.getStatus() != ProjectStatus.PRODUCTION) && isOwnerOrAdmin();
+    return (projectForLang.getStatus() != ProjectStatus.PRODUCTION) && isOwnerOrAdmin(projectForLang);
   }
 
   private boolean didSpew = false;
 
-  private boolean isOwnerOrAdmin() {
-   // boolean mine = projectForLang.isMine(sessionUser);
+  private boolean isOwnerOrAdmin(SlimProject projectForLang) {
+    boolean mine = projectForLang.isMine(sessionUser);
     boolean admin = controller.getUserManager().isAdmin();
-    boolean b = admin;
+    boolean b = mine || admin;
 
     if (b) {
-//      if (mine) {
-//        logger.info("isOwnerOrAdmin : project is mine (" + sessionUser + ")");
-//      }
+      if (mine) {
+        logger.info("isOwnerOrAdmin : project is mine (" + sessionUser + ")");
+      }
 
       if (admin && !didSpew) {
         logger.info("isOwnerOrAdmin : " + controller.getUserManager().getUserID() + " is an admin");
