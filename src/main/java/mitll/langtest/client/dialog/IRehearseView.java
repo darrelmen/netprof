@@ -29,8 +29,7 @@
 
 package mitll.langtest.client.dialog;
 
-import mitll.langtest.client.scoring.EnglishDisplayChoices;
-import mitll.langtest.client.scoring.PhonesChoices;
+import mitll.langtest.client.scoring.*;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
 
@@ -38,18 +37,33 @@ import mitll.langtest.shared.answer.Validity;
  * @see mitll.langtest.client.scoring.RecordDialogExercisePanel
  */
 public interface IRehearseView extends IListenView {
+  /**
+   * @see mitll.langtest.client.scoring.ContinuousDialogRecordAudioPanel#useResult
+   * @param audioAnswer
+   */
   void useResult(AudioAnswer audioAnswer);
 
   /**
-   * @see
+   * @see mitll.langtest.client.scoring.ContinuousDialogRecordAudioPanel#useInvalidResult
    * @param exid
    */
   void useInvalidResult(int exid);
 
+  /**
+   * @see mitll.langtest.client.scoring.RecordDialogExercisePanel#usePartial(StreamResponse)
+   * @param validity
+   */
   void addPacketValidity(Validity validity);
 
+  /**
+   * @see ContinuousDialogRecordAudioPanel#stopRecording
+   */
   void stopRecording();
 
+  /**
+   * @see mitll.langtest.client.scoring.RecordDialogExercisePanel#usePartial(StreamResponse)
+   * @return
+   */
   int getNumValidities();
 
   /**
@@ -59,5 +73,9 @@ public interface IRehearseView extends IListenView {
    */
   boolean isPressAndHold();
 
+  /**
+   * @see RecordDialogExercisePanel#shouldShowRecordButton()
+   * @return
+   */
   boolean isSimpleDialog();
 }

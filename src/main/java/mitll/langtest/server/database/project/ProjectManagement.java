@@ -55,6 +55,7 @@ import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.result.SlickResultDAO;
+import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.IDominoImport;
@@ -431,8 +432,9 @@ public class ProjectManagement implements IProjectManagement {
       }
       // remember to put the audio back on the exercises after a reload or else json export will
       // filter them out since they have no audio!
-      db.getAudioDAO().attachAudioToExercises(project.getRawExercises(), project.getLanguageEnum(), projectID);
     }
+
+    new Thread(() -> db.getAudioDAO().attachAudioToAllExercises(project.getRawExercises(), project.getLanguageEnum(), projectID), "attachAllAudio").start();
 
     if (project.getExerciseDAO() == null) {
       setExerciseDAO(project);
@@ -1197,6 +1199,7 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * @return
    * @see LangTestDatabaseImpl#getStartupInfo
+   * @see ProjectHelper#getProjectInfos(DatabaseServices, IUserSecurityManager)
    */
   public List<SlimProject> getNestedProjectInfo() {
     int numProjects = projectDAO.getNumProjects();
@@ -1317,11 +1320,10 @@ public class ProjectManagement implements IProjectManagement {
 
     boolean isRTL = addOtherProps(project, info);
 
-    String language = project.language();
-    return new SlimProject(
+    SlimProject slimProject = new SlimProject(
         project.id(),
         project.name(),
-        toEnum(language),
+        toEnum(project.language()),
         project.course(),
         project.countrycode(),
         ProjectStatus.valueOf(project.status()),
@@ -1346,6 +1348,7 @@ public class ProjectManagement implements IProjectManagement {
         project.dominoid(),
         info,
         userid);
+    return slimProject;
   }
 
   private void addCreatedBy(Map<String, String> info, int userid) {

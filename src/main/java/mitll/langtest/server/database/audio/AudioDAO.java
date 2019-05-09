@@ -1144,4 +1144,9 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   public void setProjectManagement(IProjectManagement projectManagement) {
 
   }
+
+  @Override
+  Map<Integer, List<AudioAttribute>> getAllAudioAttributesForExercises(int projID, Map<Integer, MiniUser> idToMini) {
+    return null;
+  }
 }

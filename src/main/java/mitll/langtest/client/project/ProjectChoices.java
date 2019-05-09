@@ -37,7 +37,6 @@ import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
@@ -285,12 +284,6 @@ public class ProjectChoices extends ThumbnailChoices {
 //    }
     return filtered;
   }
-
-/*
-  private boolean isPolyglot(SlimProject project) {
-    return project.getProjectType() == ProjectType.POLYGLOT;
-  }
-*/
 
   private boolean isCanRecord(Collection<Permission> permissions) {
     return permissions.contains(RECORD_AUDIO) ||
@@ -682,7 +675,7 @@ public class ProjectChoices extends ThumbnailChoices {
         boolean hasChildren = projectForLang.hasChildren();
         if (isQC) {
           if (!hasChildren) {
-            addPopover(button, projectForLang);
+            addPopover(button, getProps(projectForLang));
           }
         } else {
           if (projectForLang.getCourse().isEmpty()) {
@@ -739,15 +732,15 @@ public class ProjectChoices extends ThumbnailChoices {
     // logger.info("addPopoverUsual " + projectForLang);
     Set<String> typeOrder = new HashSet<>(Collections.singletonList(COURSE));
     UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
-    button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, ClientExerciseUnitChapterItemHelper));
+    button.addMouseOverHandler(event -> showPopoverUsual(projectForLang.getCourse(), button, typeOrder, ClientExerciseUnitChapterItemHelper));
   }
 
-  private void showPopoverUsual(SlimProject projectForLang,
+  private void showPopoverUsual(String course,
                                 Widget button,
                                 Set<String> typeOrder,
                                 UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper) {
     Map<String, String> value = new HashMap<>();
-    value.put(COURSE, projectForLang.getCourse());
+    value.put(COURSE, course);
     showPopover(value, button, typeOrder, ClientExerciseUnitChapterItemHelper, Placement.RIGHT);
   }
 
@@ -756,8 +749,8 @@ public class ProjectChoices extends ThumbnailChoices {
    * @param projectForLang
    * @see #getImageAnchor
    */
-  private void addPopover(FocusWidget button, SlimProject projectForLang) {
-    Map<String, String> props = getProps(projectForLang);
+  private void addPopover(FocusWidget button, Map<String, String> origProps) {
+    Map<String, String> props = new HashMap<>(origProps);
 
     props.remove(MODEL_TYPE.toString());
 
@@ -976,25 +969,18 @@ public class ProjectChoices extends ThumbnailChoices {
       });
     }
 
-//    FileUpload importFileBox = new FileUpload();
-//    importFileBox.setName("bulk-filename");
-//
-//    setAcceptOnInput(importFileBox.getElement());
-//      importFileFields = new DecoratedFields(IMPORT_BULK_AUDIO, importFileBox, getImportFileTip(), null);
-//      fields.add(importFileFields.getCtrlGroup());
-
-
     return w;
-  }
-
-  private void setAcceptOnInput(Element element) {
-    element.setAttribute("accept", "application/vnd.ms-excel");
   }
 
   private void addTooltip(Widget w, String tip) {
     new TooltipHelper().createAddTooltip(w, tip, Placement.TOP);
   }
 
+  /**
+   * @param projectForLang
+   * @param label
+   * @see #getEditButton
+   */
   private void showEditDialog(SlimProject projectForLang, Heading label) {
     ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {

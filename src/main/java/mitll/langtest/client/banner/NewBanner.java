@@ -593,7 +593,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     boolean visible = hasProjectChoice() && isDialog;
     setDialogNavVisible(visible);
 
-    logger.info("reflectPermissions : " + permissions);
+    if (DEBUG) logger.info("reflectPermissions : " + permissions);
   }
 
   /**
@@ -616,7 +616,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private void maybeShowDialogEditor(boolean isDialogMode) {
     List<Permission> temp = new ArrayList<>(DIALOG_EDITOR.getPerms());
     temp.retainAll(controller.getPermissions());
-    logger.info("permission overlap is " + temp);
+  //  logger.info("permission overlap is " + temp);
     dialogEditor.setVisible(isDialogMode && !temp.isEmpty());
   }
 

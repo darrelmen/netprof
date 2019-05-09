@@ -239,7 +239,7 @@ public class ProjectEditForm extends UserDialog {
 
     {
       String selectedValue = modelTypeBox.getSelectedValue();
-      //  logger.info("value is " + selectedValue);
+      logger.info("updateProject : value is " + selectedValue);
       info.setModelType(ModelType.valueOf(selectedValue));
     }
     //  logger.info("updateProject get model type " + info.getModelType());
@@ -412,6 +412,12 @@ public class ProjectEditForm extends UserDialog {
     });
   }
 
+  /**
+   * @see #getForm(ProjectInfo, boolean)
+   * @param info
+   * @param isNew
+   * @return
+   */
   private Fieldset getFields(ProjectInfo info, boolean isNew) {
     Fieldset fieldset = new Fieldset();
     int id1 = info.getID();
@@ -671,7 +677,9 @@ public class ProjectEditForm extends UserDialog {
     modelTypeBox.addStyleName("leftTenMargin");
     modelTypeBox.addItem(ModelType.HYDRA.toString());
     modelTypeBox.addItem(ModelType.KALDI.toString());
-    modelTypeBox.setItemSelected(info.getModelType() == ModelType.KALDI ? 1 : 0, true);
+    ModelType modelType = info.getModelType();
+
+    modelTypeBox.setItemSelected(modelType == ModelType.KALDI ? 1 : 0, true);
 
     return modelTypeBox;
   }

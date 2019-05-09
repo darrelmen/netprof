@@ -203,33 +203,35 @@ public class UploadViewBase extends DivWidget {
     String results = event.getResults();
     logger.info("handleSubmitComplete got " + results);
 
-    if (results.startsWith("<pre>")) results = results.substring("<pre>".length());
-    if (results.startsWith(HORRIBLE_PREV)) results = results.substring(HORRIBLE_PREV.length());
-    if (results.endsWith("</pre>")) results = results.substring(0, results.length() - "</pre>".length());
+    if (results != null) {
+      if (results.startsWith("<pre>")) results = results.substring("<pre>".length());
+      if (results.startsWith(HORRIBLE_PREV)) results = results.substring(HORRIBLE_PREV.length());
+      if (results.endsWith("</pre>")) results = results.substring(0, results.length() - "</pre>".length());
 
-    String[] split = results.split("\\{");
-    if (split.length > 1) {
-      results = "{" + split[1];
-      logger.info("handleSubmitComplete result now " + results);
-    }
-    JSONObject jsonObj = digestJsonResponse(results);
-    if (jsonObj != null) {
-      UploadResult result = new UploadResult(jsonObj);
-      logger.info("handleSubmitComplete Submission complete " + result);
-      dialogHelper.hide();
+      String[] split = results.split("\\{");
+      if (split.length > 1) {
+        results = "{" + split[1];
+        logger.info("handleSubmitComplete result now " + results);
+      }
+      JSONObject jsonObj = digestJsonResponse(results);
+      if (jsonObj != null) {
+        UploadResult result = new UploadResult(jsonObj);
+        logger.info("handleSubmitComplete Submission complete " + result);
+        dialogHelper.hide();
 //      if (!result.success || (result.docId < 0 && result.attId < 0)) {
 //        getMsgHelper().makeLoggedInlineMessage("Error on upload!",
 //            false, AlertType.ERROR);
 //      } else {
-      handleFormSubmitSuccess(result);
-      // }
-    } else {
-      dialogHelper.hide();
-      handleFormSubmitSuccess(new UploadResult(results.contains("{\"Success\":true")));
+        handleFormSubmitSuccess(result);
+        // }
+      } else {
+        dialogHelper.hide();
+        handleFormSubmitSuccess(new UploadResult(results.contains("{\"Success\":true")));
 
 //      getMsgHelper().makeLoggedInlineMessage(
 //          "Upload failed due to server error!<br/>",
 //          false, AlertType.ERROR);
+      }
     }
   }
 

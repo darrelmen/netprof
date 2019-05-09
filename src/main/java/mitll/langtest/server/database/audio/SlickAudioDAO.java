@@ -88,7 +88,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @param userDAO
    * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs(IUserDAO)
    */
-  public SlickAudioDAO(Database database, DBConnection dbConnection, IUserDAO userDAO ) {
+  public SlickAudioDAO(Database database, DBConnection dbConnection, IUserDAO userDAO) {
     super(database, userDAO);
     dao = new AudioDAOWrapper(dbConnection);
     serverProps = database.getServerProps();
@@ -238,27 +238,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   public void clearAudioCacheForEx(int exerciseID) {
     exidToAudioAttributes.remove(exerciseID);
   }
-
-  /**
-   * Update the user if the audio is already there.
-   *
-   * @paramx userid
-   * @paramx exerciseID
-   * @paramx projid
-   * @paramx audioType
-   * @paramx audioRef
-   * @paramx timestamp
-   * @paramx durationInMillis
-   * @paramx transcript
-   * @paramx dnr
-   */
-/*  @Override
-  public void addOrUpdateUser(AudioInfo info) {
-    dao.addOrUpdateUser(info.getUserid(), info.getExerciseID(), info.getProjid(),
-        info.getAudioType().toString(), info.getAudioRef(), info.getTimestamp(),
-        info.getDurationInMillis(), info.getTranscript(), info.getDnr(), info.getResultID(),
-        info.getGender());
-  }*/
 
   /**
    * @param projid
@@ -438,6 +417,14 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return toReturn;
   }
 
+  Map<Integer, List<AudioAttribute>> getAllAudioAttributesForExercises(int projID, Map<Integer, MiniUser> idToMini) {
+//    Map<Integer, List<AudioAttribute>> toReturn = new HashMap<>();
+    logger.info("getAudioAttributesForExercises : projid " + projID);
+    exidToAudioAttributes.putAll(getAllAudioAttributes(projID, idToMini));
+  //  exids.forEach(exid -> toReturn.put(exid, exidToAudioAttributes.get(exid)));
+    return exidToAudioAttributes;
+  }
+
   @NotNull
   private Map<Integer, List<AudioAttribute>> getAudioAttributes(int projID, Map<Integer, MiniUser> idToMini, Set<Integer> toAskFor) {
     long then = System.currentTimeMillis();
@@ -450,12 +437,33 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
           "\n\tfor    " + toAskFor.size());
     }
 
+    return toAudioAttributes(idToMini, byExerciseID);
+  }
+
+  @NotNull
+  private Map<Integer, List<AudioAttribute>> getAllAudioAttributes(int projID, Map<Integer, MiniUser> idToMini) {
+    long then = System.currentTimeMillis();
+    Map<Integer, List<SlickAudio>> byExerciseID = dao.getByExerciseIDsAllThatExist(projID);
+    long now = System.currentTimeMillis();
+
+    if (now - then > 30) {
+      logger.info("getAudioAttributesForExercise took " + (now - then) +
+          "\n\tto get " + byExerciseID.size() + " attr"
+      );
+    }
+
+    return toAudioAttributes(idToMini, byExerciseID);
+  }
+
+  @NotNull
+  private Map<Integer, List<AudioAttribute>> toAudioAttributes(Map<Integer, MiniUser> idToMini, Map<Integer, List<SlickAudio>> byExerciseID) {
     Map<Integer, List<AudioAttribute>> copy = new HashMap<>(byExerciseID.size());
     byExerciseID.forEach((k, v) -> copy.put(k, toAudioAttributes(v, idToMini)));
 
     if (DEBUG) copy.forEach((k, v) -> logger.info(" getAudioAttributesForExercises " + k + " - " + v));
     return copy;
   }
+
 
   /**
    * @param projID
@@ -535,7 +543,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
-   *
    * @param userid
    * @param exerciseID
    * @param audioType
