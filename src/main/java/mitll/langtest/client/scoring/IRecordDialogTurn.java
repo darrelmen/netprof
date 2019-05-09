@@ -33,7 +33,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.shared.answer.AudioAnswer;
 
-public interface IRecordDialogTurn extends IRecordResponseListener{
+public interface IRecordDialogTurn extends IRecordResponseListener, IRecordingTurnPanel {
   /**
    * @see RehearseViewHelper#showScores()
    */

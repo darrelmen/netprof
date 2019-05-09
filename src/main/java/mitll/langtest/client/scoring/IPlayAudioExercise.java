@@ -27,23 +27,26 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.client.dialog;
+package mitll.langtest.client.scoring;
 
-import mitll.langtest.client.scoring.ITurnPanel;
+import mitll.langtest.client.dialog.ListenViewHelper;
+import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
 
-public interface ITurnContainer<T extends ITurnPanel> {
-  void gotForward(EditorTurn editorTurn);
+public interface IPlayAudioExercise {
+  void rememberAudio(AudioAttribute next);
+  /**
+   * @see mitll.langtest.client.dialog.ListenViewHelper#getTurnPanel(ClientExercise, ListenViewHelper.COLUMNS, ListenViewHelper.COLUMNS)
+   * @param playListener
+   */
+  void addPlayListener(PlayListener playListener);
 
-  void addTurnForSameSpeaker(T editorTurn);
+  boolean doPause();
 
-  void addTurnForOtherSpeaker(T editorTurn);
+  void resetAudio();
 
-  void deleteCurrentTurnOrPair(T currentTurn);
+  boolean isPlaying();
 
-  void setCurrentTurnTo(T newTurn);
-
-  boolean isInterpreter();
-
-  int getVolume();
-
+  boolean doPlayPauseToggle();
 }

@@ -270,6 +270,10 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     listeners.forEach(audioControl -> audioControl.update(position));
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#playAndRemember
+   * @param audioAttribute
+   */
   protected void loadAndPlayOrPlayAudio(AudioAttribute audioAttribute) {
     rememberAudio(audioAttribute);
     loadAndPlay();

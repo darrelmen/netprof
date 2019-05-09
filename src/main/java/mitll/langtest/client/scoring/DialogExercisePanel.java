@@ -57,7 +57,7 @@ import java.util.stream.Collectors;
 /**
  * Created by go22670 on 3/23/17.
  */
-public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
+public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExercisePanel
     implements AudioChangeListener, RefAudioGetter, IPlayAudioControl {
   private final Logger logger = Logger.getLogger("DialogExercisePanel");
 
@@ -85,11 +85,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   /**
    * @see #makePlayAudio
    */
-  HeadlessPlayAudio playAudio;
+//  HeadlessPlayAudio playAudio;
 
   private static final boolean DEBUG = false;
   static final boolean DEBUG_SHOW_ALIGNMENT = false;
-  private static final boolean DEBUG_PLAY_PAUSE = false;
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
 
@@ -211,12 +210,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     style2.setMarginBottom(0, Style.Unit.PX);
   }
 
-/*
-  void addMarginLeft(Style style2) {
-    style2.setMarginLeft(15, Style.Unit.PX);
-  }
-*/
-
   /**
    * @param e
    * @param flContainer ignored here
@@ -224,8 +217,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see TwoColumnExercisePanel#makeFirstRow
    */
   void makePlayAudio(T e, DivWidget flContainer) {
-    playAudio = new HeadlessPlayAudio(controller.getSoundManager(), listenView);
-    alignmentFetcher.setPlayAudio(playAudio);
+    setPlayAudio(new HeadlessPlayAudio(controller.getSoundManager(), listenView));
+    alignmentFetcher.setPlayAudio(getPlayAudio());
     rememberAudio(getRegularSpeedIfAvailable(e));
 //    } else {
 //      logger.warning("makePlayAudio no audio in audio attributes " + e.getAudioAttributes() + " for exercise " + e.getID());
@@ -236,9 +229,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param next
    * @see
    */
-  void rememberAudio(AudioAttribute next) {
+  @Override
+  public void rememberAudio(AudioAttribute next) {
     //  logger.info("rememberAudio audio for " + this + "  " + next);
-    playAudio.rememberAudio(next);
+    super.rememberAudio(next);
     maybeShowAlignment(next);
   }
 
@@ -351,7 +345,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
           logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
         }
 
-        return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, flClickableRowPhones);
+        return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.getPlayAudio(), flClickableRow, flClickableRowPhones);
       } else {
         if (DEBUG_SHOW_ALIGNMENT) {
           logger.info("showAlignment SKIP for ex " + exercise.getID() + " audio id " + id + " vs " + currentAudioDisplayed);
@@ -1059,54 +1053,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     return false;
   }
 
-  /**
-   * @return
-   * @see ListenViewHelper#playCurrentTurn
-   */
-  @Override
-  public boolean doPlayPauseToggle() {
-    if (playAudio != null) {
-      if (DEBUG_PLAY_PAUSE) logger.info("doPlayPauseToggle on " + getExID());
-//
-//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("doing play for " +getExID()));
-//      logger.info("logException stack " + exceptionAsString);
 
-      return playAudio.doPlayPauseToggle();
-    } else {
-      logger.warning("doPlayPauseToggle no play audio???");
-      return false;
-    }
-  }
-
-  /**
-   * @param playListener
-   * @see ListenViewHelper#getTurnPanel
-   */
-  public void addPlayListener(PlayListener playListener) {
-    if (playAudio != null) {
-      playAudio.addPlayListener(playListener);
-    }
-  }
-
-  @Override
-  public boolean doPause() {
-    return playAudio.doPause();
-  }
-
-  public boolean isPlaying() {
-    return playAudio.isPlaying();
-  }
-
-  public void resetAudio() {
-    playAudio.reinitialize();
-  }
-
-  @Override
-  protected void onUnload() {
-    if (playAudio != null) {
-      playAudio.destroySound();
-    }
-  }
 
   /**
    * @see ListenViewHelper#clearHighlightAndRemoveMark

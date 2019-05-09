@@ -224,7 +224,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
         List<IHighlightSegment> flclickables = this.flclickables == null ? altflClickables : this.flclickables;
         DivWidget flClickableRow = this.getFlClickableRow() == null ? altFLClickableRow : this.getFlClickableRow();
         DivWidget flClickablePhoneRow = this.flClickableRowPhones == null ? altFLClickableRowPhones : this.flClickableRowPhones;
-        return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, flClickablePhoneRow);
+        return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.getPlayAudio(), flClickableRow, flClickablePhoneRow);
       } else {
         return null;
       }
@@ -437,8 +437,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
         flClickableRowPhones.getElement().setId("flClickableRowPhones");
         stylePhoneRow(flClickableRowPhones);
 
-        if (playAudio != null && playAudio.getCurrentAudioAttr() != null) {
-          AudioAttribute currentAudioAttr = playAudio.getCurrentAudioAttr();
+        if (getPlayAudio() != null && getPlayAudio().getCurrentAudioAttr() != null) {
+          AudioAttribute currentAudioAttr = getPlayAudio().getCurrentAudioAttr();
 
           if (DEBUG) logger.info("audioChangedWithAlignment audio " + currentAudioAttr.getUniqueID());
 
@@ -500,8 +500,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   }
 
   protected void makePlayAudio(T e, DivWidget flContainer) {
-    flContainer.add(playAudio = getPlayAudioPanel());
-    alignmentFetcher.setPlayAudio(playAudio);
+    flContainer.add(setPlayAudio(getPlayAudioPanel()));
+    alignmentFetcher.setPlayAudio(getPlayAudio());
   }
 
   protected void stylePhoneRow(UIObject phoneRow) {

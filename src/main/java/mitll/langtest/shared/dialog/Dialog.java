@@ -293,6 +293,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
 
   @Override
   public List<String> getSpeakers() {
+
     List<ExerciseAttribute> speakers = attributes
         .stream()
         .filter(exerciseAttribute -> (exerciseAttribute.getProperty().toLowerCase().startsWith(SPEAKER)))

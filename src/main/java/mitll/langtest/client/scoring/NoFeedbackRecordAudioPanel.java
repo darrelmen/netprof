@@ -123,6 +123,11 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
       protected Widget getPopupTargetWidget() {
         return outer.getPopupTargetWidget();
       }
+
+      @Override
+      protected boolean shouldAddToAudioTable() {
+        return outer.shouldAddToAudioTable();
+      }
     };
     postAudioRecordButton.addStyleName("leftFiveMargin");
     postAudioRecordButton.setVisible(controller.getProjectStartupInfo().isHasModel());
@@ -134,6 +139,10 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     long now = System.currentTimeMillis();
     logger.info("makePlayAudioPanel : took " + (now - then) + " for makeAudioPanel");
     return playAudioPanel;
+  }
+
+  protected boolean shouldAddToAudioTable() {
+    return false;
   }
 
   protected boolean useMicrophoneIcon() {
@@ -184,7 +193,6 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     playAudioPanel.setEnabled(true);
     playAudioPanel.hideRecord();
   }
-
 
   /**
    * @see RecordDialogExercisePanel#cancelRecording()

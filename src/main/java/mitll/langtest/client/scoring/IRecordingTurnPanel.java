@@ -27,23 +27,13 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.client.dialog;
+package mitll.langtest.client.scoring;
 
-import mitll.langtest.client.scoring.ITurnPanel;
+/**
+ * A turn in a dialog.
+ */
+public interface IRecordingTurnPanel {
+   boolean isRecording();
 
-public interface ITurnContainer<T extends ITurnPanel> {
-  void gotForward(EditorTurn editorTurn);
-
-  void addTurnForSameSpeaker(T editorTurn);
-
-  void addTurnForOtherSpeaker(T editorTurn);
-
-  void deleteCurrentTurnOrPair(T currentTurn);
-
-  void setCurrentTurnTo(T newTurn);
-
-  boolean isInterpreter();
-
-  int getVolume();
-
+  void cancelRecording();
 }

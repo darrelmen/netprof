@@ -34,9 +34,11 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
+import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.dialog.DialogEditorView;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.flashcard.SessionStorage;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -46,12 +48,13 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class DialogEditor extends ListenViewHelper<EditorTurn> {
+public class DialogEditor extends ListenViewHelper<EditorTurn> implements SessionManager {
   private final Logger logger = Logger.getLogger("DialogEditor");
 
   private int dialogID;
 
   private IDialog theDialog;
+  private final SessionStorage sessionStorage;
 
   /**
    * @see DialogEditorView#editList
@@ -60,6 +63,12 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
     super(controller, thisView);
     this.theDialog = theDialog;
     this.dialogID = theDialog.getID();
+    this.sessionStorage = new SessionStorage(controller.getStorage(), "editorSession");
+  }
+
+  @Override
+  public String getSession() {
+    return "" + sessionStorage.getSession();
   }
 
   /**
@@ -82,14 +91,55 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
         rightJustify,
         controller,
         this,
-        dialogID, isFirst);
+        dialogID,
+        isFirst,
+        this);
   }
 
+  /**
+   * If we're recording and we hit one of the forward/backward turns, stop recording right there...
+   */
+  @Override
+  void gotBackward() {
+    super.gotBackward();
+    safeStopRecording();
+  }
+
+  private void safeStopRecording() {
+    if (isRecording()) {
+      getCurrentTurn().cancelRecording();
+    }
+  }
+
+  private boolean isRecording() {
+    return getCurrentTurn() != null && getCurrentTurn().isRecording();
+  }
+
+  /**
+   *
+   * @param turn
+   */
   @Override
   protected void gotTurnClick(EditorTurn turn) {
-    super.gotTurnClick(turn);
+    //super.gotTurnClick(turn);
+
+    setGotTurnClick(true);
+
+    EditorTurn currentTurn = getCurrentTurn();
+
+    boolean different = currentTurn != turn;
+    logger.info("currentTurn  " + currentTurn);
+    logger.info("clicked turn " + turn);
+    logger.info("different    " + different);
+
+    if (different) {
+      removeMarkCurrent();
+      setCurrentTurn(turn);
+      markCurrent();
+    }
+//    playCurrentTurn();
+
   //  logger.info("gotClickOnTurn " + turn);
-    markCurrent();
   }
 
   public int getDialogID() {
@@ -115,6 +165,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> {
    */
   @Override
   public void gotForward(EditorTurn editorTurn) {
+    safeStopRecording();
     if (isLast(editorTurn)) {
       // make either one or two more turns and add to end of dialog
       addTurnForSameSpeaker(editorTurn);

@@ -717,10 +717,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private void safeStopRecording() {
     if (isRecording()) {
       currentRecordingTurn.cancelRecording();
-//      if (currentRecordingTurn.stopRecording()) {
-//        logger.info("gotBackward : stopped " + currentRecordingTurn);
-//        setCurrentRecordingTurn(null);
-//      }
     }
   }
 
@@ -1270,7 +1266,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     exToStudentDur.put(exid, matchingTurn.getStudentSpeechDur());
     exToRefDur.put(exid, matchingTurn.getRefSpeechDur());
 
-    boolean atEnd = addScore(exid, (float) audioAnswer.getScore(), matchingTurn);
+    /*boolean atEnd =*/ addScore(exid, (float) audioAnswer.getScore(), matchingTurn);
 
     // maybeMoveOnToNextTurn();
 
@@ -1332,7 +1328,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   public String getSession() {
     return "" + sessionStorage.getSession();
   }
-
 
   @Override
   public void gotRightArrow() {

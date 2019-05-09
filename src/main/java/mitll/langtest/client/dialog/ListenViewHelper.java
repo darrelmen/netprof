@@ -59,6 +59,7 @@ import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -87,6 +88,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   private static final int PADDING_LOZENGE = 14;
 
   private static final String MIDDLE_COLOR = "#00800059";
+
 
   public enum COLUMNS {LEFT, MIDDLE, RIGHT, UNK}
 
@@ -134,6 +136,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   private INavigation.VIEWS prev, next;
   private INavigation.VIEWS thisView;
+  private boolean gotTurnClick = false;
 
   /**
    * @param controller
@@ -171,7 +174,11 @@ public class ListenViewHelper<T extends ITurnPanel>
     });
   }
 
-  protected void clearTurnLists() {
+  protected void setGotTurnClick(boolean gotTurnClick) {
+    this.gotTurnClick = gotTurnClick;
+  }
+
+  void clearTurnLists() {
     promptTurns.clear();
     allTurns.clear();
     leftTurnPanels.clear();
@@ -314,20 +321,20 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   @NotNull
   private String getFirstSpeakerLabel(IDialog dialog) {
-    //logger.info("getFirstSpeakerLabel for dialog " + dialog.getID());
-//    dialog.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute.toString()));
+    logger.info("getFirstSpeakerLabel for dialog " + dialog.getID());
+    dialog.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute.toString()));
 
-//    List<ExerciseAttribute> properties = dialog.getAttributes()
-//        .stream()
-//        .filter(exerciseAttribute -> (exerciseAttribute.getProperty() != null))
-//        .sorted(Comparator.comparing(Pair::getProperty))
-//        .collect(Collectors.toList());
+    List<ExerciseAttribute> properties = dialog.getAttributes()
+        .stream()
+        .filter(exerciseAttribute -> (exerciseAttribute.getProperty() != null))
+        .sorted(Comparator.comparing(Pair::getProperty))
+        .collect(Collectors.toList());
 
-    // properties.forEach(p -> logger.info(p.toString()));
+    properties.forEach(p -> logger.info(p.toString()));
 
     String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
 
- //   logger.info("getFirstSpeakerLabel first speaker " + firstSpeaker);
+    //   logger.info("getFirstSpeakerLabel first speaker " + firstSpeaker);
     if (!dialog.getExercises().isEmpty()) {
       ClientExercise next = dialog.getExercises().iterator().next();
       boolean hasEnglishAttr = next.hasEnglishAttr();
@@ -462,6 +469,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   private void styleRightSpeaker(UIObject checkBox) {
     styleLabel(checkBox);
   }
+
   private void styleLabel(UIObject checkBox) {
     checkBox.getElement().getStyle().setFontSize(32, PX);
   }
@@ -552,7 +560,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     return rowOne;
   }
 
-   void addAllTurns(IDialog dialog, DivWidget rowOne) {
+  void addAllTurns(IDialog dialog, DivWidget rowOne) {
     String left = getFirstSpeakerLabel(dialog); //speakers.get(0);
     String right = getSecondSpeakerLabel(dialog);//speakers.get(2);
 /*    logger.info("for speaker " + left + " got " + speakerToEx.get(left).size());
@@ -688,7 +696,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   private void markFirstTurn() {
     if (!allTurns.isEmpty()) {
       setCurrentTurn(allTurns.get(0));
-  //    logger.info("markFirstTurn : markCurrent ");
+      //    logger.info("markFirstTurn : markCurrent ");
       markCurrent();
       makeVisible(currentTurn);
     }
@@ -830,10 +838,9 @@ public class ListenViewHelper<T extends ITurnPanel>
     return t;
   }
 
-  private boolean gotTurnClick = false;
 
   void gotTurnClick(T turn) {
-    gotTurnClick = true;
+    setGotTurnClick(true);
     removeMarkCurrent();
     setCurrentTurn(turn);
     playCurrentTurn();
@@ -986,7 +993,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     boolean isPlaying = currentTurn.doPause();
     int i = beforeChangeTurns();
     setCurrentTurn(newTurn);
- //   logger.info("setCurrentTurnTo ex #" + currentTurn.getExID());
+    //   logger.info("setCurrentTurnTo ex #" + currentTurn.getExID());
     afterChangeTurns(isPlaying);
   }
 
@@ -1000,7 +1007,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     int i = getAllTurns().indexOf(currentTurn);
 
-    logger.info("beforeChangeTurns " + i + " : " + currentTurn.getExID());
+    logger.info("beforeChangeTurns " + i + " : " + getExID());
 
     clearHighlightAndRemoveMark();
 
@@ -1009,6 +1016,10 @@ public class ListenViewHelper<T extends ITurnPanel>
       makeVisible(dialogHeader);  // make the top header visible...
     }
     return i;
+  }
+
+  private int getExID() {
+    return currentTurn.getExID();
   }
 
   private void afterChangeTurns(boolean isPlaying) {
@@ -1022,7 +1033,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #gotBackward()
    */
   private void clearHighlightAndRemoveMark() {
-    logger.info("clearHighlight on " + currentTurn);
+    logger.info("clearHighlight on " + getExID());
     currentTurn.resetAudio();
     currentTurn.clearHighlight();
     removeMarkCurrent();
@@ -1083,7 +1094,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     if (currentTurn == null) {
       logger.warning("setNextTurnForSide no current turn");
     } else {
-      if (DEBUG) logger.info("setNextTurnForSide current turn for ex " + currentTurn.getExID());
+      if (DEBUG) logger.info("setNextTurnForSide current turn for ex " + getExID());
     }
 
     int nextIndex = (i + 1 == allTurns.size()) ? 0 : i + 1;
@@ -1237,11 +1248,11 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   void currentTurnPlayEnded(boolean wasRecording) {
     if (DEBUG) {
-      logger.info("currentTurnPlayEnded (listen) - turn " + currentTurn.getExID() + " gotTurnClick " + gotTurnClick);
+      logger.info("currentTurnPlayEnded (listen) - turn " + getExID() + " gotTurnClick " + gotTurnClick);
     }
 
     if (gotTurnClick) {
-      gotTurnClick = false;
+      setGotTurnClick(false);
     } else {
       T next = getNext();
       if (DEBUG && next != null) {
@@ -1305,17 +1316,16 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   void removeMarkCurrent() {
-    logger.info("removeMarkCurrent on " + currentTurn.getExID());
+    logger.info("removeMarkCurrent on " + getExID());
 
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
 //    logger.info("logException stack:\n" + exceptionAsString);
-
 
     currentTurn.removeMarkCurrent();
   }
 
   void markCurrent() {
-    logger.info("markCurrent on " + currentTurn.getExID());
+    logger.info("markCurrent on " + getExID());
     currentTurn.markCurrent();
   }
 
@@ -1401,7 +1411,6 @@ public class ListenViewHelper<T extends ITurnPanel>
   public void deleteCurrentTurnOrPair(T currentTurn) {
 
   }
-
 
 
 //

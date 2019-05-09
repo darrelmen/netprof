@@ -43,13 +43,15 @@ import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.scoring.*;
 import mitll.langtest.client.sound.AllHighlight;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.shared.answer.AudioType;
+import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.Validity;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
@@ -63,7 +65,7 @@ import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_A;
 import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_B;
 
 
-public class EditorTurn extends DivWidget implements ITurnPanel {
+public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IRehearseView, IRecordingTurnPanel {
   private final Logger logger = Logger.getLogger("EditorTurn");
 
   public static final int HEIGHT_AND_WIDTH = 22;
@@ -81,9 +83,9 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   private TextBox content;
   private NoFeedbackRecordAudioPanel<ClientExercise> recordAudioPanel;
 
-  // private RecordAudioPanel recordAudioPanel;
+  private SessionManager sessionManager;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    * @param clientExercise
@@ -100,10 +102,19 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
              ExerciseController<?> controller,
              ITurnContainer<EditorTurn> turnContainer,
              int dialogID,
-             boolean isFirstTurn) {
+             boolean isFirstTurn,
+             SessionManager sessionManager) {
     if (DEBUG) {
-      logger.info("turn " + dialogID + " : " + clientExercise.getID() + " : '" + clientExercise.getForeignLanguage() + "' has english " + clientExercise.hasEnglishAttr() + " : " + columns);
+      logger.info("EditorTurn : turn " +
+          "\n\tdialog " + dialogID +
+          "\n\tex     " + clientExercise.getID() +
+          "\n\tfl     '" + clientExercise.getForeignLanguage() + "' " +
+          "\n\thas english " + clientExercise.hasEnglishAttr() +
+          "\n\tcol    " + columns +
+          "\n\taudio  " + clientExercise.getAudioAttributes()
+      );
     }
+    this.sessionManager = sessionManager;
 
     this.columns = columns;
 
@@ -147,35 +158,8 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   }
 
   @Override
-  public void addPlayListener(PlayListener playListener) {
-
-  }
-
-  @Override
-  public boolean doPause() {
-    return false;
-  }
-
-  @Override
-  public void resetAudio() {
-
-  }
-
-  @Override
-  public boolean isPlaying() {
-    return false;
-  }
-
-  @Override
   public void clearHighlight() {
-
   }
-
-  @Override
-  public boolean doPlayPauseToggle() {
-    return false;
-  }
-
 
   public ListenViewHelper.COLUMNS getColumn() {
     return columns;
@@ -190,48 +174,58 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     wrapper.getElement().setId("Wrapper_" + getExID());
 
     NoFeedbackRecordAudioPanel<ClientExercise> recordPanel =
-        new ContinuousDialogRecordAudioPanel(clientExercise, controller, null, null, new IRecordResponseListener() {
+        new ContinuousDialogRecordAudioPanel(clientExercise, controller, sessionManager, this, new IRecordResponseListener() {
           @Override
           public void usePartial(StreamResponse response) {
-
+            logger.info("addWidgets : Got partial..." + response);
           }
 
           @Override
           public Widget myGetPopupTargetWidget() {
             return null;
           }
-        });
+
+        }) {
+          @Override
+          protected boolean shouldAddToAudioTable() {
+            return true;
+          }
+        };
 
 
-    //  RecordAudioPanel recordAudioPanel = new RecordAudioPanel(clientExercise, controller, this, 0, false, AudioType.REGULAR, true);
-//    SimpleRecordAudioPanel<ClientExercise> recordPanel =
-//        new SimpleRecordAudioPanel<>(controller, clientExercise, null, true, null, null);
     this.recordAudioPanel = recordPanel;
 
 
     recordPanel.addWidgets();
 
-    // DivWidget flContainer = getHorizDiv();
-
-//    if (isRight()) {
-//      addStyleName("floatRight");
-//    } else if (isLeft()) {
-//      flContainer.addStyleName("floatLeft");
-//    }
 
     PostAudioRecordButton postAudioRecordButton = null;
     DivWidget buttonContainer = new DivWidget();
     buttonContainer.setId("recordButtonContainer_" + getExID());
-    buttonContainer.add(recordAudioPanel);
-    buttonContainer.add(recordPanel.getPlayAudioPanel().getPlayButton());
+    //buttonContainer.add(recordAudioPanel);
+//    buttonContainer.add(recordPanel.getPlayAudioPanel().getPlayButton());
     // add  button
     if (true) {
       {
-//        postAudioRecordButton = getPostAudioWidget(recordPanel, true);
-//        buttonContainer.add(postAudioRecordButton);
-//        RecorderPlayAudioPanel playAudioPanel = recordPanel.getPlayAudioPanel();
-//        playAudioPanel.showPlayButton();
-//        buttonContainer.add(playAudioPanel.getPlayButton());
+        postAudioRecordButton = getPostAudioWidget(recordPanel, true);
+        RecorderPlayAudioPanel playAudioPanel = recordPanel.getPlayAudioPanel();
+
+        setPlayAudio(playAudioPanel);
+
+        if (clientExercise.getAudioAttributes().isEmpty()) {
+          playAudioPanel.setEnabled(false);
+        } else {
+          AudioAttribute next = clientExercise.getAudioAttributes().iterator().next();
+          logger.info("addWidgets :binding " + next + " to play for turn for " + getExID());
+          playAudioPanel.rememberAudio(next);
+          playAudioPanel.setEnabled(true);
+        }
+        //       playAudioPanel.rememberAudio();
+        playAudioPanel.showPlayButton();
+        Widget playButton = playAudioPanel.getPlayButton();
+        buttonContainer.add(playButton);
+        playButton.addStyleName("floatRight");
+        addPressAndHoldStyleForRecordButton(playButton);
         // buttonContainer.add(recordPanel.getPl );
         buttonContainer.getElement().getStyle().setMarginTop(3, Style.Unit.PX);
       }
@@ -241,6 +235,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 //        flContainer.add(w);
 //      }
     }
+    buttonContainer.add(postAudioRecordButton);
 
     // add(flContainer);
 
@@ -248,7 +243,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 
 
     if (postAudioRecordButton != null) {
-      addPressAndHoldStyle(postAudioRecordButton);
+      addPressAndHoldStyleForRecordButton(postAudioRecordButton);
     }
 
     DivWidget textBoxContainer = new DivWidget();
@@ -277,15 +272,12 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     return postAudioRecordButton;
   }
 
-  private void addPressAndHoldStyle(PostAudioRecordButton postAudioRecordButton) {
-    Style style = postAudioRecordButton.getElement().getStyle();
-    style.setProperty("borderRadius", "18px");
-    style.setPadding(8, Style.Unit.PX);
-    style.setWidth(19, Style.Unit.PX);
-    style.setMarginRight(5, Style.Unit.PX);
-    style.setHeight(19, Style.Unit.PX);
+  @Override
+  public boolean isRecording() {
+    return recordAudioPanel.getPostAudioRecordButton().isRecording();
   }
 
+  @Override
   public void cancelRecording() {
     recordAudioPanel.cancelRecording();
   }
@@ -294,7 +286,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
    * @return
    * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
-  @NotNull
+/*  @NotNull
   private DivWidget getHorizDiv() {
     DivWidget flContainer = new DivWidget();
     flContainer.addStyleName("inlineFlex");
@@ -310,8 +302,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
 
     flContainer.getElement().setId("RecordDialogExercisePanel_horiz");
     return flContainer;
-  }
-
+  }*/
   private void addOtherTurn() {
     Button w = new Button();
     addPressAndHoldStyle(w);
@@ -376,6 +367,16 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     style.setMarginRight(5, Style.Unit.PX);
     style.setHeight(20, Style.Unit.PX);
   }
+
+  private void addPressAndHoldStyleForRecordButton(UIObject postAudioRecordButton) {
+    Style style = postAudioRecordButton.getElement().getStyle();
+    style.setProperty("borderRadius", "18px");
+    style.setPadding(8, Style.Unit.PX);
+    style.setWidth(19, Style.Unit.PX);
+    style.setMarginRight(5, Style.Unit.PX);
+    style.setHeight(19, Style.Unit.PX);
+  }
+
 
   /**
    * @param wrapper
@@ -450,7 +451,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
         controller.getExerciseService().updateText(dialogID, getExID(), s, new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
-
+            controller.handleNonFatalError("updating text...", caught);
           }
 
           @Override
@@ -486,7 +487,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
       controller.getExerciseService().updateText(dialogID, getExID(), s, new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
-
+          controller.handleNonFatalError("updating text...", caught);
         }
 
         @Override
@@ -591,5 +592,57 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   @Override
   public void addClickHandler(ClickHandler clickHandler) {
     turnPanelDelegate.addClickHandler(clickHandler);
+  }
+
+  @Override
+  public void useResult(AudioAnswer audioAnswer) {
+    logger.info("got " + audioAnswer);
+    if (audioAnswer.isValid()) {
+      String audioRef = audioAnswer.getAudioAttribute().getAudioRef();
+      logger.info("got back " + audioRef);
+      rememberAudio(audioAnswer.getAudioAttribute());
+      recordAudioPanel.getPlayAudioPanel().setEnabled(true);
+    }
+  }
+
+  @Override
+  public void useInvalidResult(int exid) {
+    logger.info("show feedback about what bad happened?");
+    recordAudioPanel.getPlayAudioPanel().setEnabled(false);
+  }
+
+  @Override
+  public void addPacketValidity(Validity validity) {
+    logger.info("addPacketValidity " + validity);
+  }
+
+  @Override
+  public void stopRecording() {
+    logger.info("got stop recording...");
+  }
+
+  @Override
+  public int getNumValidities() {
+    return 0;
+  }
+
+  @Override
+  public boolean isPressAndHold() {
+    return true;
+  }
+
+  @Override
+  public boolean isSimpleDialog() {
+    return !turnContainer.isInterpreter();
+  }
+
+  @Override
+  public int getVolume() {
+    return turnContainer.getVolume();
+  }
+
+  @Override
+  public int getDialogSessionID() {
+    return 0;
   }
 }

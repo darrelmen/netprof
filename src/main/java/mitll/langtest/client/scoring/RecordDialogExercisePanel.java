@@ -104,6 +104,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @param sessionManager
    * @param isRight
    * @see RehearseViewHelper#getRecordingTurnPanel
+   * @see RehearseViewHelper#makeRecordingTurnPanel
    */
   public RecordDialogExercisePanel(final ClientExercise commonExercise,
                                    final ExerciseController<ClientExercise> controller,
@@ -311,7 +312,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   @Override
   public void switchAudioToStudent() {
     //logger.info("switchAudioToStudent " + this);
-    playAudio.rememberAudio(studentAudioAttribute);
+    rememberAudio(studentAudioAttribute);
     showScoreInfo();
   }
 
@@ -513,7 +514,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   /**
    * @see RehearseViewHelper#gotPlay()
    */
-  public void cancelRecording() {
+  @Override public void cancelRecording() {
     recordAudioPanel.cancelRecording();
   }
 

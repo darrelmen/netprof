@@ -80,19 +80,15 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
   public void useResult(AudioAnswer result) {
     super.useResult(result);
     rehearseView.useResult(result);
-
     if (DEBUG) {
       logger.info("useResult got for ex " + result.getExid() + " vs local " + exercise.getID() +
           " = " + result.getValidity() + " " + result.getPretestScore());
     }
-    // logger.info("useResult got words " + result.getPretestScore().getWordScores());
   }
 
   @Override
   Widget getPopupTargetWidget() {
     return recordDialogTurn.myGetPopupTargetWidget();
-//    logger.info("getPopupTargetWidget " + widget.getElement().getId());
-    // return widget;
   }
 
   /**
@@ -124,8 +120,6 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
   public void useInvalidResult(int exid, boolean isValid) {
     super.useInvalidResult(exid, isValid);
     rehearseView.useInvalidResult(exid);
-    //getPostAudioRecordButton().setVisible(false);
-    //  logger.info("useInvalidResult got valid = " + isValid);
   }
 
   /**
@@ -138,6 +132,10 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
     rehearseView.stopRecording();
   }
 
+  /**
+   * @see FeedbackPostAudioRecordButton#getDialogSessionID
+   * @return
+   */
   @Override
   public int getDialogSessionID() {
     return rehearseView == null ? 0 : rehearseView.getDialogSessionID();

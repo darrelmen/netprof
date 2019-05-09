@@ -30,12 +30,14 @@
 package mitll.langtest.client.scoring;
 
 import com.google.gwt.user.client.ui.IsWidget;
+import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.shared.exercise.ClientExercise;
 
 /**
  * A turn in a dialog.
  */
-public interface ITurnPanel extends IsWidget, ITurnMarking, RefAudioGetter {
+public interface ITurnPanel extends IsWidget, ITurnMarking, RefAudioGetter, IPlayAudioExercise {
   /**
    * JUST FOR DEBUGGING
    *
@@ -43,17 +45,11 @@ public interface ITurnPanel extends IsWidget, ITurnMarking, RefAudioGetter {
    */
   int getExID();
 
-  void addPlayListener(PlayListener playListener);
-
-  boolean doPause();
-
-  void resetAudio();
-
-  boolean isPlaying();
-
   void clearHighlight();
 
-  boolean doPlayPauseToggle();
-
   void grabFocus();
+
+//  boolean isRecording();
+//
+//  void cancelRecording();
 }
