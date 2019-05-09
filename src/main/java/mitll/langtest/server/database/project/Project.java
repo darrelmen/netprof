@@ -441,17 +441,18 @@ public class Project implements IPronunciationLookup, IProject {
     return getProp(MODELS_DIR);
   }
 
-
+  /**
+   * @return
+   * @see ProjectManagement#getProjectInfo
+   */
   public ModelType getModelType() {
     String prop = getProp(MODEL_TYPE);
-  //  logger.info("getModelType (" + getID() + ") " + MODEL_TYPE + " : " + prop);
 
     if (prop == null || prop.isEmpty()) {
       return ModelType.HYDRA;
     } else {
       try {
         ModelType modelType = ModelType.valueOf(prop);
-    //    logger.info("\tgetModelType (" + getID() + ") " + MODEL_TYPE + " : " + prop + " : " + modelType);
         return modelType;
       } catch (IllegalArgumentException e) {
         logger.error("couldn't parse '" + prop + "' as model type enum?");
@@ -494,7 +495,7 @@ public class Project implements IPronunciationLookup, IProject {
       putAllProps();
 
       String propValue = db.getProjectDAO().getPropValue(getID(), prop);  // blank if miss, not null
-    //  logger.info("getProp : project " + getID() + " prop " + prop + " = " + propValue);
+      //  logger.info("getProp : project " + getID() + " prop " + prop + " = " + propValue);
 
       if (propValue == null) {
         logger.warn("huh? no prop value for " + prop);
@@ -504,7 +505,7 @@ public class Project implements IPronunciationLookup, IProject {
       }
       return propValue;
     } else {
-    //  logger.info("getProp : project #" + getID() + " : '" + prop + "' = '" + s + "'");
+      //  logger.info("getProp : project #" + getID() + " : '" + prop + "' = '" + s + "'");
       return s;
     }
   }
@@ -512,8 +513,7 @@ public class Project implements IPronunciationLookup, IProject {
   private void putAllProps() {
     int id = getID();
     propCache.putAll(db.getProjectDAO().getProps(id));
-
-  //  logger.info("getProp : project #" + getID() + " props " + propCache);
+//    logger.info("getProp : project #" + getID() + " props " + propCache);
   }
 
   private int spew = 0;

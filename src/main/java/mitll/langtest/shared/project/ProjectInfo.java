@@ -91,7 +91,8 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
                      String secondType,
                      boolean showOniOS,
                      int dominoID,
-                     int userID, Map<String, String> props) {
+                     int userID,
+                     Map<String, String> props) {
     super(dominoID, name, first, secondType);
     this.language = language;
     this.id = projectid;
@@ -282,6 +283,8 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
         "\ndomino    " + getDominoID() +
         "\nown audio " + audioPerProject +
         "\nshowOniOS " + showOniOS +
+        "\nmodel     " + getModelType() +
+        "\nproperties " + getPropertyValue() +
         "\nimported  " + new Date(lastImport) +
         "\nupdated   " + new Date(lastNetprof)
         ;

@@ -182,7 +182,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
     if (didChange) {
       currentProject.clearPropCache();
-//      logger.info("update for " + projid);
+      logger.info("update for " + projid);
     } else {
       logger.warn("update : didn't update " + projectInfo + " for current " + currentProject);
     }
@@ -295,10 +295,6 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     }
     return countryCode;
   }
-
-//  private boolean addOrUpdateBooleanProperty(int projid, String key, boolean newValue) {
-//    return addOrUpdateProperty(projid, key, newValue ? "true" : "false");
-//  }
 
   private boolean addOrUpdateBooleanProperty(int projid, ProjectProperty projectProperty, boolean newValue) {
     return addOrUpdateProperty(projid, projectProperty.getName(), newValue ? "true" : "false");
@@ -553,9 +549,9 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   }
 
   /**
-   * @see ProjectManagement#getProjectsForLanguage(String)
    * @param language
    * @return
+   * @see ProjectManagement#getProjectsForLanguage(String)
    */
   @Override
   public List<Integer> getByLanguage(String language) {

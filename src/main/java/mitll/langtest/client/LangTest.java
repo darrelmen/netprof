@@ -86,6 +86,7 @@ import mitll.langtest.shared.user.User;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.client.banner.NewContentChooser.MODE;
 
@@ -194,7 +195,7 @@ public class LangTest implements
       public void onSuccess(StartupInfo startupInfo) {
         long now = System.currentTimeMillis();
         if (startupInfo == null) {
-          logger.warning("startup info is null??");
+          logger.warning("askForStartupInfo startup info is null??");
         } else {
           rememberStartup(startupInfo, false);
         }

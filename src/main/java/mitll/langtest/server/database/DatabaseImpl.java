@@ -1793,7 +1793,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     Project project = getProject(projectid);
 
-    getAudioDAO().attachAudioToExercises(exercises, project.getLanguageEnum(), project.getID());
+    getAudioDAO().attachAudioToAllExercises(exercises, project.getLanguageEnum(), project.getID());
 
     {
       logger.info("attachAllAudio " + project.getName() + "/" + project.getLanguage() +
