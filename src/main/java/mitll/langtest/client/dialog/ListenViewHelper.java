@@ -117,15 +117,12 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   private T currentTurn;
 
-//  private CheckBox leftSpeakerBox = null;
-//  private CheckBox rightSpeakerBox = null;
-
   private ComplexWidget slider;
   private Button playButton;
   private DivWidget dialogHeader;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PLAY = false;
+  private static final boolean DEBUG_PLAY = true;
 
   /**
    *
@@ -172,10 +169,6 @@ public class ListenViewHelper<T extends ITurnPanel>
         showDialogGetRef(dialogFromURL, dialog, listContent);
       }
     });
-  }
-
-  protected void setGotTurnClick(boolean gotTurnClick) {
-    this.gotTurnClick = gotTurnClick;
   }
 
   void clearTurnLists() {
@@ -585,15 +578,12 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   private void addTurnForEachExercise(DivWidget rowOne, String left, String right, List<ClientExercise> exercises) {
     ClientExercise prev = null;
+    int index = 0;
     for (ClientExercise clientExercise : exercises) {
-      addTurn(rowOne, getColumnForEx(left, right, clientExercise), clientExercise, getColumnForEx(left, right, prev));
+      addTurn(rowOne, getColumnForEx(left, right, clientExercise), clientExercise, getColumnForEx(left, right, prev), index);
       prev = clientExercise;
+      index++;
     }
-//    exercises.forEach(clientExercise -> {
-//      // COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
-//      //    logger.info("ex " + clientExercise.getID() + " " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage() + " : " + columnForEx);
-//      addTurn(rowOne, getColumnForEx(left, right, clientExercise), clientExercise);
-//    });
   }
 
   private COLUMNS getColumnForEx(String left, String right, ClientExercise clientExercise) {
@@ -637,10 +627,11 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @param rowOne
    * @param columns
    * @param clientExercise
+   * @param index
    * @see #addTurnForEachExercise(DivWidget, String, String, List)
    */
-  private void addTurn(DivWidget rowOne, COLUMNS columns, ClientExercise clientExercise, COLUMNS prevColumn) {
-    T turn = getTurnPanel(clientExercise, columns, prevColumn);
+  private void addTurn(DivWidget rowOne, COLUMNS columns, ClientExercise clientExercise, COLUMNS prevColumn, int index) {
+    T turn = getTurnPanel(clientExercise, columns, prevColumn, index);
 
     if (columns == COLUMNS.RIGHT) {
       rightTurnPanels.add(turn);
@@ -764,12 +755,13 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @param isRight
    * @param clientExercise
    * @param prevColumn
+   * @param index
    * @return
    * @see #addTurn
    */
   @NotNull
-  T getTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn) {
-    T turn = reallyGetTurnPanel(clientExercise, columns, prevColumn);
+  T getTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
+    T turn = reallyGetTurnPanel(clientExercise, columns, prevColumn, index);
     turn.addWidgets(true, false, PhonesChoices.HIDE, EnglishDisplayChoices.SHOW);
     turn.addPlayListener(this);
     turn.addClickHandler(event -> gotTurnClick(turn));
@@ -780,18 +772,19 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @param clientExercise
    * @param columns
    * @param prevColumn
+   * @param index
    * @return
    * @see #getTurnPanel
    */
   @NotNull
-  T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn) {
-    boolean isInterpreter = columns == COLUMNS.MIDDLE;
-
-    boolean rightJustify = isInterpreter &&
+  T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
+//    boolean isInterpreter = columns == COLUMNS.MIDDLE;
+    boolean rightJustify = columns == COLUMNS.MIDDLE &&
         thisView == INavigation.VIEWS.LISTEN && clientExercise.hasEnglishAttr();
 
-    T widgets = makeTurnPanel(clientExercise, columns, prevColumn, rightJustify);
+    T widgets = makeTurnPanel(clientExercise, columns, prevColumn, rightJustify, index);
 
+    widgets.asWidget().getElement().getStyle().setProperty("tabindex", "" + index);
 //    if (isInterpreter) {
 //      if (widgets instanceof UIObject) {
 //        UIObject wid = (UIObject) widgets;
@@ -822,10 +815,11 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @param columns
    * @param prevColumn
    * @param rightJustify
+   * @param index
    * @return
    */
   @NotNull
-  protected T makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, boolean rightJustify) {
+  protected T makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, boolean rightJustify, int index) {
     T t = (T) new TurnPanel(
         clientExercise,
         controller,
@@ -838,13 +832,21 @@ public class ListenViewHelper<T extends ITurnPanel>
     return t;
   }
 
-
   void gotTurnClick(T turn) {
     setGotTurnClick(true);
     removeMarkCurrent();
     setCurrentTurn(turn);
     playCurrentTurn();
   }
+
+  public boolean isGotTurnClick() {
+    return gotTurnClick;
+  }
+
+  protected void setGotTurnClick(boolean gotTurnClick) {
+    this.gotTurnClick = gotTurnClick;
+  }
+
 
   /**
    * TODO add playback rate
@@ -1007,7 +1009,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     int i = getAllTurns().indexOf(currentTurn);
 
-    logger.info("beforeChangeTurns " + i + " : " + getExID());
+    if (DEBUG) logger.info("beforeChangeTurns " + i + " : " + getExID());
 
     clearHighlightAndRemoveMark();
 
@@ -1019,7 +1021,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   private int getExID() {
-    return currentTurn.getExID();
+    return currentTurn.getExID();// + " : " +currentTurn.getText();
   }
 
   private void afterChangeTurns(boolean isPlaying) {
@@ -1186,17 +1188,21 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   void playCurrentTurn() {
     if (currentTurn != null) {
-      if (DEBUG_PLAY) logger.info("playCurrentTurn " + currentTurn);
+      if (DEBUG_PLAY) logger.info("playCurrentTurn " + blurb());
       boolean didPause = currentTurn.doPlayPauseToggle();
       if (didPause) {
-        if (DEBUG_PLAY) logger.info("playCurrentTurn did pause " + currentTurn);
+        if (DEBUG_PLAY) logger.info("playCurrentTurn did pause " + blurb());
         setPlayButtonToPlay();
       } else {
-        if (DEBUG_PLAY) logger.info("playCurrentTurn maybe did play " + currentTurn);
+        if (DEBUG_PLAY) logger.info("playCurrentTurn maybe did play " + blurb());
       }
     } else {
       logger.warning("playCurrentTurn no current turn?");
     }
+  }
+
+  private String blurb() {
+    return getExID() + " " + getCurrentTurn().getText();
   }
 
   /**
@@ -1206,7 +1212,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   public void playStarted() {
     if (currentTurn != null) {
       if (DEBUG) {
-        logger.info("playStarted - turn " + currentTurn);
+        logger.info("playStarted - turn " + blurb());
       }
       setPlayButtonToPause();
       markCurrent();
@@ -1223,12 +1229,18 @@ public class ListenViewHelper<T extends ITurnPanel>
   public void playStopped() {
     if (currentTurn != null) {
       if (DEBUG) {
-        logger.info("playStopped for turn " + currentTurn);
+        logger.info("playStopped for turn " + blurb());
       }
 
       setPlayButtonToPlay();
-      removeMarkCurrent();
-      currentTurnPlayEnded(false);
+
+//      removeMarkCurrent();
+//      currentTurnPlayEnded(false);
+//
+      if (!isGotTurnClick()) {
+        removeMarkCurrent();
+        currentTurnPlayEnded(false);
+      }
     } else {
       logger.info("playStopped - no current turn.");
     }
@@ -1256,12 +1268,12 @@ public class ListenViewHelper<T extends ITurnPanel>
     } else {
       T next = getNext();
       if (DEBUG && next != null) {
-        logger.info("next turn " + next.getExID());
+        logger.info("currentTurnPlayEnded next turn " + next.getExID());
       }
       makeNextVisible();
 
       if (next == null) {
-        if (DEBUG) logger.info("OK stop");
+        if (DEBUG) logger.info("currentTurnPlayEnded OK stop");
       } else {
         removeMarkCurrent();
         setCurrentTurn(next);
@@ -1318,14 +1330,14 @@ public class ListenViewHelper<T extends ITurnPanel>
   void removeMarkCurrent() {
     logger.info("removeMarkCurrent on " + getExID());
 
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
-//    logger.info("logException stack:\n" + exceptionAsString);
+    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
+    logger.info("logException stack:\n" + exceptionAsString);
 
     currentTurn.removeMarkCurrent();
   }
 
   void markCurrent() {
-    logger.info("markCurrent on " + getExID());
+    logger.info("markCurrent on " + blurb());
     currentTurn.markCurrent();
   }
 

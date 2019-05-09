@@ -69,14 +69,13 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
 
   private static final String FILE_MISSING = "FILE_MISSING";
 
-  private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PLAY = false;
+  private static final boolean DEBUG = true;
+  private static final boolean DEBUG_PLAY = true;
   private static final boolean DEBUG_DETAIL = false;
 
   HeadlessPlayAudio(SoundManagerAPI soundManager) {
     id = counter++;
     getElement().setId("HeadlessPlayAudio_" + id);
-
     this.soundManager = soundManager;
   }
 

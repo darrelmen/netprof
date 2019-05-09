@@ -41,13 +41,12 @@ import java.util.logging.Logger;
 public class PlayAudioExercisePanel extends DivWidget implements IPlayAudioControl, IPlayAudioExercise {
   private final Logger logger = Logger.getLogger("PlayAudioExercisePanel");
   private HeadlessPlayAudio playAudio;
-  private static final boolean DEBUG_PLAY_PAUSE = false;
+  private static final boolean DEBUG_PLAY_PAUSE = true;
 
   public void rememberAudio(AudioAttribute next) {
     //  logger.info("rememberAudio audio for " + this + "  " + next);
     playAudio.rememberAudio(next);
   }
-
 
   /**
    * @return

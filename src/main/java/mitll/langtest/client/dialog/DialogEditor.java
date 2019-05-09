@@ -39,7 +39,6 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.dialog.DialogEditorView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.SessionStorage;
-import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
@@ -50,6 +49,7 @@ import java.util.stream.Collectors;
 
 public class DialogEditor extends ListenViewHelper<EditorTurn> implements SessionManager {
   private final Logger logger = Logger.getLogger("DialogEditor");
+  private static final boolean DEBUG = true;
 
   private int dialogID;
 
@@ -76,15 +76,17 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
    * @param columns
    * @param prevColumn
    * @param rightJustify
+   * @param index
    * @return
    * @see ListenViewHelper#reallyGetTurnPanel
    */
   @Override
   @NotNull
-  protected EditorTurn makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, boolean rightJustify) {
+  protected EditorTurn makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn,
+                                     boolean rightJustify, int index) {
     int i = theDialog.getExercises().indexOf(clientExercise);
     boolean isFirst = i == 0 && columns == COLUMNS.LEFT || i == 1 && columns == COLUMNS.MIDDLE;
-    return new EditorTurn(
+    EditorTurn widgets = new EditorTurn(
         clientExercise,
         columns,
         prevColumn,
@@ -94,6 +96,14 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
         dialogID,
         isFirst,
         this);
+
+//    widgets.getElement().setPropertyString("tabindex", "" + index);
+
+    return widgets;
+  }
+
+  @Override void gotPlay() {
+     playCurrentTurn();
   }
 
   /**
@@ -128,8 +138,8 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     EditorTurn currentTurn = getCurrentTurn();
 
     boolean different = currentTurn != turn;
-    logger.info("currentTurn  " + currentTurn);
-    logger.info("clicked turn " + turn);
+    logger.info("currentTurn  " + currentTurn.getExID());
+    logger.info("clicked turn " + turn.getExID());
     logger.info("different    " + different);
 
     if (different) {

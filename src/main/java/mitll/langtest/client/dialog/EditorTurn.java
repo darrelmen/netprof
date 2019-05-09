@@ -48,7 +48,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.*;
 import mitll.langtest.client.sound.AllHighlight;
 import mitll.langtest.client.sound.IHighlightSegment;
-import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -93,7 +92,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
    * @param prevColumn
    * @param rightJustify
    * @param controller
-   * @see ListenViewHelper#makeTurnPanel(ClientExercise, ListenViewHelper.COLUMNS, ListenViewHelper.COLUMNS, boolean)
+   * @see ListenViewHelper#makeTurnPanel(ClientExercise, ListenViewHelper.COLUMNS, ListenViewHelper.COLUMNS, boolean, int)
    */
   EditorTurn(final ClientExercise clientExercise,
              ListenViewHelper.COLUMNS columns,
@@ -153,6 +152,11 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   }
 
   @Override
+  public String getText() {
+    return getExID() + " " + clientExercise.getForeignLanguage();
+  }
+
+  @Override
   public int getExID() {
     return clientExercise == null ? -1 : clientExercise.getID();
   }
@@ -195,52 +199,39 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
     this.recordAudioPanel = recordPanel;
 
-
     recordPanel.addWidgets();
-
 
     PostAudioRecordButton postAudioRecordButton = null;
     DivWidget buttonContainer = new DivWidget();
     buttonContainer.setId("recordButtonContainer_" + getExID());
-    //buttonContainer.add(recordAudioPanel);
-//    buttonContainer.add(recordPanel.getPlayAudioPanel().getPlayButton());
-    // add  button
-    if (true) {
-      {
-        postAudioRecordButton = getPostAudioWidget(recordPanel, true);
-        RecorderPlayAudioPanel playAudioPanel = recordPanel.getPlayAudioPanel();
 
-        setPlayAudio(playAudioPanel);
+    {
+      postAudioRecordButton = getPostAudioWidget(recordPanel, true);
+      RecorderPlayAudioPanel playAudioPanel = recordPanel.getPlayAudioPanel();
 
-        if (clientExercise.getAudioAttributes().isEmpty()) {
-          playAudioPanel.setEnabled(false);
-        } else {
-          AudioAttribute next = clientExercise.getAudioAttributes().iterator().next();
-          logger.info("addWidgets :binding " + next + " to play for turn for " + getExID());
-          playAudioPanel.rememberAudio(next);
-          playAudioPanel.setEnabled(true);
-        }
-        //       playAudioPanel.rememberAudio();
-        playAudioPanel.showPlayButton();
-        Widget playButton = playAudioPanel.getPlayButton();
-        buttonContainer.add(playButton);
-        playButton.addStyleName("floatRight");
-        addPressAndHoldStyleForRecordButton(playButton);
-        // buttonContainer.add(recordPanel.getPl );
-        buttonContainer.getElement().getStyle().setMarginTop(3, Style.Unit.PX);
+      setPlayAudio(playAudioPanel);
+
+      if (clientExercise.getAudioAttributes().isEmpty()) {
+        playAudioPanel.setEnabled(false);
+      } else {
+        AudioAttribute next = clientExercise.getAudioAttributes().iterator().next();
+        logger.info("addWidgets :binding " + next + " to play for turn for " + getExID());
+        playAudioPanel.rememberAudio(next);
+        playAudioPanel.setEnabled(true);
       }
-//      {
-//        Emoticon w = getEmoticonPlaceholder();
-//        emoticon = w;
-//        flContainer.add(w);
-//      }
+      //       playAudioPanel.rememberAudio();
+      playAudioPanel.showPlayButton();
+      Widget playButton = playAudioPanel.getPlayButton();
+      buttonContainer.add(playButton);
+      playButton.addStyleName("floatRight");
+      addPressAndHoldStyleForRecordButton(playButton);
+      // buttonContainer.add(recordPanel.getPl );
+      buttonContainer.getElement().getStyle().setMarginTop(3, Style.Unit.PX);
     }
+
     buttonContainer.add(postAudioRecordButton);
 
-    // add(flContainer);
-
     wrapper.add(buttonContainer);
-
 
     if (postAudioRecordButton != null) {
       addPressAndHoldStyleForRecordButton(postAudioRecordButton);

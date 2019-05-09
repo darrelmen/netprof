@@ -88,7 +88,7 @@ public class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHe
       child.add(getHeader(dialog));
 
       controller.getDialogService().addSession(new DialogSession(controller.getUser(),
-          getProjectid(), dialog.getID(), INavigation.VIEWS.STUDY), new AsyncCallback<Integer>() {
+          getProjectid(), dialog.getID(), getFirstDialogView()), new AsyncCallback<Integer>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("creating new dialog study session", caught);
@@ -100,13 +100,18 @@ public class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHe
         }
       });
     }
-    super.showContent(child, INavigation.VIEWS.STUDY);
+    super.showContent(child, getFirstDialogView());
     hideList();
   }
 
   @NotNull
+  private INavigation.VIEWS getFirstDialogView() {
+    return INavigation.VIEWS.LISTEN;
+  }
+
+  @NotNull
   private DivWidget getHeader(IDialog dialog) {
-    DivWidget header = new DialogHeader(controller, INavigation.VIEWS.STUDY, getPrevView(), getNextView()).getHeader(dialog);
+    DivWidget header = new DialogHeader(controller, getFirstDialogView(), getPrevView(), getNextView()).getHeader(dialog);
     header.addStyleName("bottomFiveMargin");
     return header;
   }

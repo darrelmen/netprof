@@ -85,13 +85,14 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscu
    * @param isRight
    * @param clientExercise
    * @param prevColumn
+   * @param index
    * @return
    * @see #addTurn
    */
   @NotNull
   @Override
-  protected T getTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn) {
-    T turnPanel = super.getTurnPanel(clientExercise, columns, prevColumn);
+  protected T getTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
+    T turnPanel = super.getTurnPanel(clientExercise, columns, prevColumn, index);
 
     if (columns == COLUMNS.MIDDLE) {
       if (!clientExercise.hasEnglishAttr()) {

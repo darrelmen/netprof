@@ -55,7 +55,7 @@ class DialogSessionAnalysisTab<T extends IDialogSession> extends AnalysisTab {
                            ReqCounter reqCounter,
                            int reqID, int userID) {
     super(controller, overallBottom,
-        selectedUser.getView().toString(), false, reqCounter, INavigation.VIEWS.STUDY, new AnalysisRequest()
+        selectedUser.getView().toString(), false, reqCounter, INavigation.VIEWS.LISTEN, new AnalysisRequest()
             .setUserid(userID)
             .setMinRecordings(0)
             .setListid(-1)

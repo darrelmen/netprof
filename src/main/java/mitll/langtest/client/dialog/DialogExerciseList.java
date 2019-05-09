@@ -333,6 +333,6 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
    * @param dialog
    */
   private void gotClickOnDialog(IDialog dialog) {
-    controller.getNavigation().showDialogIn(dialog.getID(), INavigation.VIEWS.STUDY);
+    controller.getNavigation().showDialogIn(dialog.getID(), INavigation.VIEWS.LISTEN);
   }
 }

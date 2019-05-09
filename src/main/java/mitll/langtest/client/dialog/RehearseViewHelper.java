@@ -728,12 +728,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    * @param isRight
    * @param clientExercise
    * @param prevColumn
+   * @param index
    * @return
    * @see #getTurnPanel
    */
   @NotNull
   @Override
-  protected T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn) {
+  protected T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
     T turnPanel = getRecordingTurnPanel(clientExercise, columns);
     exToTurn.put(clientExercise.getID(), turnPanel);
     return turnPanel;

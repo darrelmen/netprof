@@ -90,6 +90,11 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
   }
 
   @Override
+  public String getText() {
+    return exercise.getForeignLanguage();
+  }
+
+  @Override
   boolean shouldShowPhones() {
     List<ExerciseAttribute> speaker = exercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equals("SPEAKER")).collect(Collectors.toList());
     boolean hasEnglishAttr = exercise.hasEnglishAttr();
