@@ -81,7 +81,7 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
   private TextBox content;
   private NoFeedbackRecordAudioPanel<ClientExercise> recordAudioPanel;
 
- // private RecordAudioPanel recordAudioPanel;
+  // private RecordAudioPanel recordAudioPanel;
 
   private static final boolean DEBUG = false;
 
@@ -203,13 +203,13 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
         });
 
 
-  //  RecordAudioPanel recordAudioPanel = new RecordAudioPanel(clientExercise, controller, this, 0, false, AudioType.REGULAR, true);
+    //  RecordAudioPanel recordAudioPanel = new RecordAudioPanel(clientExercise, controller, this, 0, false, AudioType.REGULAR, true);
 //    SimpleRecordAudioPanel<ClientExercise> recordPanel =
 //        new SimpleRecordAudioPanel<>(controller, clientExercise, null, true, null, null);
     this.recordAudioPanel = recordPanel;
 
 
-  recordPanel.addWidgets();
+    recordPanel.addWidgets();
 
     // DivWidget flContainer = getHorizDiv();
 
@@ -222,7 +222,8 @@ public class EditorTurn extends DivWidget implements ITurnPanel {
     PostAudioRecordButton postAudioRecordButton = null;
     DivWidget buttonContainer = new DivWidget();
     buttonContainer.setId("recordButtonContainer_" + getExID());
-buttonContainer.add(recordAudioPanel);
+    buttonContainer.add(recordAudioPanel);
+    buttonContainer.add(recordPanel.getPlayAudioPanel().getPlayButton());
     // add  button
     if (true) {
       {

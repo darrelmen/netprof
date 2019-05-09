@@ -37,6 +37,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -65,6 +66,7 @@ import static mitll.langtest.shared.project.ProjectType.DIALOG;
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
+  public static final String DIALOGS = "Dialogs";
   private final Logger logger = Logger.getLogger("NewBanner");
 
   private static final String DIALOG_PRACTICE = "Practice";
@@ -76,17 +78,18 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private static final List<VIEWS> DIALOG_VIEWS_IN_DROPDOWN =
       Arrays.asList(
-          STUDY,
+          //STUDY,
           LISTEN,
           REHEARSE,
           CORE_REHEARSE,
           PERFORM_PRESS_AND_HOLD,
-          PERFORM);
+          PERFORM,
+          SCORES);
 
   private static final List<VIEWS> DIALOG_VIEWS =
       Arrays.asList(
           VIEWS.DIALOG,
-          STUDY,
+          // STUDY,
           LISTEN,
           REHEARSE,
           CORE_REHEARSE,
@@ -126,10 +129,15 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private final UILifecycle lifecycle;
   /**
-   *
+   * @see #setDialogNavVisible(boolean)
    */
   private ComplexWidget recnav, defectnav, dialognav;
-  private Dropdown dialogPracticeNav;
+  private NavLink dialogEditor;
+
+  /**
+   * @see #getDialogNav
+   */
+  private Dropdown dialogPracticeNav, dialogChoicesNav;
 
   /**
    *
@@ -222,6 +230,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setCogVisible(userManager.hasUser());
   }
 
+  /**
+   * @return nav that is initial hidden
+   */
   @NotNull
   private Nav getDialogNav() {
     Nav recnav = new Nav();
@@ -229,21 +240,24 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     recnav.getElement().setId("dialogNav");
 
     recnav.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
-    recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
+    zeroRightMargin(recnav);
 
-    rememberViewAndLink(recnav, VIEWS.DIALOG);
+    dialogChoicesNav = new Dropdown(DIALOGS);
+    recnav.add(dialogChoicesNav);
+
+    rememberViewAndLink(dialogChoicesNav, VIEWS.DIALOG);
+    rememberViewAndLink(dialogChoicesNav, DIALOG_EDITOR);
 
     dialogPracticeNav = new Dropdown(DIALOG_PRACTICE);
     recnav.add(dialogPracticeNav);
 
     DIALOG_VIEWS_IN_DROPDOWN.forEach(views -> rememberViewAndLink(dialogPracticeNav, views));
 
-    rememberViewAndLink(recnav, SCORES);
+    //  rememberViewAndLink(recnav, SCORES);
 
     return recnav;
   }
 
-  private NavLink dialogEditor;
 
   /**
    * @return
@@ -272,6 +286,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private void zeroLeftRightMargins(ComplexWidget recnav) {
     recnav.getElement().getStyle().setMarginLeft(0, Style.Unit.PX);
+    zeroRightMargin(recnav);//.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
+  }
+
+  private void zeroRightMargin(UIObject recnav) {
     recnav.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
   }
 
@@ -378,7 +396,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
         }
       });
     } else {
-   //   logger.info("setCogTitle : no project");
+      //   logger.info("setCogTitle : no project");
       setChoicesVisibility(isAdmin(), isTeacher());
       setVisibleChoices(false);
     }
@@ -578,20 +596,34 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     logger.info("reflectPermissions : " + permissions);
   }
 
+  /**
+   * Having any of the required permissions allows you access to the dialog editor.
+   *
+   * @param visible
+   * @see #reflectPermissions
+   */
   private void setDialogNavVisible(boolean visible) {
     boolean isDialogMode = controller.getMode() == ProjectMode.DIALOG;
     dialognav.setVisible(visible && isDialogMode);
 
     if (dialogEditor != null) {
-      dialogEditor.setVisible(isDialogMode);
+      maybeShowDialogEditor(isDialogMode);
+    } else {
+      logger.warning("no dialog editor choice yet");
     }
-    else logger.warning("no dialog editor choice yet");
+  }
+
+  private void maybeShowDialogEditor(boolean isDialogMode) {
+    List<Permission> temp = new ArrayList<>(DIALOG_EDITOR.getPerms());
+    temp.retainAll(controller.getPermissions());
+    logger.info("permission overlap is " + temp);
+    dialogEditor.setVisible(isDialogMode && !temp.isEmpty());
   }
 
   /**
+   * @param val
    * @see #addWidgets(UserManager, UserMenu, Breadcrumbs)
    * @see #reset
-   * @param val
    */
   @Override
   public void setCogVisible(boolean val) {
@@ -704,7 +736,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   public void checkProjectSelected() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
- //   logger.info("checkProjectSelected " + projectStartupInfo);
+    //   logger.info("checkProjectSelected " + projectStartupInfo);
 
     setVisibleChoices(projectStartupInfo != null);
 
@@ -747,13 +779,16 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     if (DEBUG) logger.info("setVisibleChoicesByMode set visible choices " + mode);
     boolean isDialogMode = mode == ProjectMode.DIALOG;
     hideOrShowByMode(isDialogMode ? DIALOG_VIEWS : STANDARD_VIEWS);
-    if (DEBUG)
+
+    if (DEBUG) {
       logger.info("setVisibleChoicesByMode dialognav " + dialognav.getElement().getId() + " is " + isDialogMode);
+    }
 
     setDialogNavVisible(isDialogMode);
 
     if (dialogEditor != null) {
-      dialogEditor.setVisible(isDialogMode);
+      maybeShowDialogEditor(isDialogMode);
+    //  dialogEditor.setVisible(isDialogMode);
     }
   }
 

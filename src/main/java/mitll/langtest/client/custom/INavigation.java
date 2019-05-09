@@ -99,7 +99,11 @@ public interface INavigation extends IViewContaner {
     FIX_SENTENCES("Fix Sentences", QC_PERMISSIONS, false, true, true),
 
     OOV_EDITOR("Missing In Dictionary", VOCABULARY, QC_PERMISSIONS),
-    DIALOG_EDITOR("Dialog Editor", ProjectMode.DIALOG);
+
+    /**
+     *
+     */
+    DIALOG_EDITOR("Dialog Editor", ProjectMode.DIALOG, QC_PERMISSIONS);
 
     private final List<Permission> perms;
     private final ProjectMode mode;
