@@ -2350,6 +2350,16 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
     zoom: 101%;
 }*/
 
+.good-blink-target {
+    animation-name: goodblink;
+    animation-duration: 1s;
+}
+
+@keyframes goodblink {
+    0%   {background-color: #2f96b4;}
+    50%  {background-color: green;}
+    100% {background-color: #2f96b4;}
+}
 
 .blink-target {
     animation-name: blink;
