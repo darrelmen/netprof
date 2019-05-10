@@ -35,6 +35,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -44,6 +45,9 @@ import org.jetbrains.annotations.NotNull;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
+/**
+ * @see ListenViewHelper#addDialogHeader(IDialog, Panel)
+ */
 public class DialogHeader {
   //private final Logger logger = Logger.getLogger("DialogHeader");
   private static final String HEIGHT = 100 + "px";

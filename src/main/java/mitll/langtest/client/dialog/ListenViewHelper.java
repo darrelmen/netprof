@@ -118,7 +118,16 @@ public class ListenViewHelper<T extends ITurnPanel>
   private T currentTurn;
 
   private ComplexWidget slider;
+  /**
+   * @see #setPlayButtonToPlay()
+   * @see #setPlayButtonToPause()
+   */
   private Button playButton;
+  private Button playYourselfButton;
+
+  private boolean doRehearse = true;
+
+
   private DivWidget dialogHeader;
 
   /**
@@ -537,7 +546,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 //    return rightSpeakerBox == null || rightSpeakerBox.getValue();
 //  }
 
-  protected DivWidget turnContainer;
+  DivWidget turnContainer;
 
   /**
    * @param dialog
@@ -660,6 +669,10 @@ public class ListenViewHelper<T extends ITurnPanel>
     rowOne.add(turn);
   }
 
+  /**
+   * @param exid
+   * @see DialogEditor#deleteCurrentTurnOrPair
+   */
   void deleteTurn(int exid) {
     List<T> collect = allTurns.stream().filter(t -> t.getExID() == exid).limit(1).collect(Collectors.toList());
     if (collect.isEmpty()) {
@@ -716,7 +729,6 @@ public class ListenViewHelper<T extends ITurnPanel>
   T getCurrentTurn() {
     return currentTurn;
   }
-
 
   private void makeVisible(T currentTurn) {
     currentTurn.makeVisible();
@@ -794,28 +806,7 @@ public class ListenViewHelper<T extends ITurnPanel>
         thisView == INavigation.VIEWS.LISTEN && clientExercise.hasEnglishAttr();
 
     T widgets = makeTurnPanel(clientExercise, columns, prevColumn, rightJustify, index);
-
     widgets.asWidget().getElement().getStyle().setProperty("tabindex", "" + index);
-//    if (isInterpreter) {
-//      if (widgets instanceof UIObject) {
-//        UIObject wid = (UIObject) widgets;
-//     wid.addStyleName("inlineFlex");
-//        wid.setWidth("100%");
-//      }
-//    }
-
-//    logger.info("reallyGetTurnPanel this view " + thisView);
-//    logger.info("reallyGetTurnPanel clientExercise " + clientExercise);
-//
-//    if (rightJustify) {
-//      logger.info("reallyGetTurnPanel got here");
-//      if (widgets != null && widgets.getWidgetCount() > 0) {
-//        Widget widget = widgets.getWidget(0);
-//        if (widget != null) {
-//          widget.getElement().getStyle().setProperty("marginLeft", "auto");
-//        }
-//      }
-//    }
     return widgets;
   }
 
@@ -888,6 +879,17 @@ public class ListenViewHelper<T extends ITurnPanel>
       widgets1.addStyleName("leftFiveMargin");
       rowOne.add(widgets1);
       playButton = widgets1;
+    }
+
+    {
+      Button widgets1 = new Button("Yourself", IconType.PLAY, event -> gotPlayYourself());
+      widgets1.setActive(false);
+      widgets1.setEnabled(false);
+
+      widgets1.setSize(ButtonSize.LARGE);
+      widgets1.addStyleName("leftFiveMargin");
+      rowOne.add(widgets1);
+      playYourselfButton = widgets1;
     }
 
     {
@@ -1076,11 +1078,42 @@ public class ListenViewHelper<T extends ITurnPanel>
   void gotPlay() {
     setGotTurnClick(false);
     logger.info("gotPlay got click on play ");
+
+    gotRehearse();
+
     //  if (!setTurnToPromptSide()) {
     ifOnLastJumpBackToFirst();
     //  }
 
     playCurrentTurn();
+  }
+
+  protected boolean isDoRehearse() { return doRehearse; }
+
+  void gotPlayYourself() {
+    setGotTurnClick(false);
+    logger.info("gotPlay got click on play yourself");
+
+    gotHearYourself();
+    //  if (!setTurnToPromptSide()) {
+    ifOnLastJumpBackToFirst();
+    //  }
+
+    playCurrentTurn();
+  }
+
+  protected void setHearYourself(boolean enabled) {
+    playYourselfButton.setEnabled(enabled);
+  }
+
+  protected void gotRehearse() {
+    doRehearse = true;
+  }
+
+  protected void gotHearYourself() {
+    doRehearse = false;
+    if (DEBUG) logger.info("gotHearYourself : doRehearse = " + doRehearse);
+
   }
 
   void ifOnLastJumpBackToFirst() {
@@ -1337,27 +1370,32 @@ public class ListenViewHelper<T extends ITurnPanel>
     } else return false;
   }
 
-  private boolean sessionGoingNow;
 
   /**
    * @seex #setPlayButtonIcon
    * @see #playStarted
    */
   void setPlayButtonToPause() {
-    playButton.setIcon(IconType.PAUSE);
+    getPlayButtonToUse().setIcon(IconType.PAUSE);
     sessionGoingNow = true;
-  }
-
-  boolean isSessionGoingNow() {
-    return sessionGoingNow;
   }
 
   /**
    * @see #playCurrentTurn()
    */
   void setPlayButtonToPlay() {
-    playButton.setIcon(IconType.PLAY);
+    getPlayButtonToUse().setIcon(IconType.PLAY);
     sessionGoingNow = false;
+  }
+
+  private Button getPlayButtonToUse() {
+    return doRehearse? this.playButton:playYourselfButton;
+  }
+
+  private boolean sessionGoingNow;
+
+  boolean isSessionGoingNow() {
+    return sessionGoingNow;
   }
 
   /**
@@ -1462,13 +1500,5 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   @Override
   public void deleteCurrentTurnOrPair(T currentTurn) {
-
   }
-
-
-//
-//  @Override
-//  public COLUMNS getColumnForPrev(T widgets) {
-//    return null;
-//  }
 }
