@@ -38,6 +38,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.*;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.UIObject;
@@ -84,7 +85,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
   private SessionManager sessionManager;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param clientExercise
@@ -133,7 +134,6 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
     Style style = getElement().getStyle();
     style.setProperty("minWidth", "500px");
-
 
 //    setWidth((columns == MIDDLE ? 84 : 50) + "%");
 
@@ -210,6 +210,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
     {
       postAudioRecordButton = getPostAudioWidget(recordPanel, true);
+      buttonContainer.add(postAudioRecordButton);
+
+
       RecorderPlayAudioPanel playAudioPanel = recordPanel.getPlayAudioPanel();
 
       setPlayAudio(playAudioPanel);
@@ -222,18 +225,15 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
         playAudioPanel.rememberAudio(next);
         playAudioPanel.setEnabled(true);
       }
-      //       playAudioPanel.rememberAudio();
       playAudioPanel.showPlayButton();
       Widget playButton = playAudioPanel.getPlayButton();
       ((HasFocusHandlers)playButton).addFocusHandler(event -> grabFocus());
       buttonContainer.add(playButton);
       playButton.addStyleName("floatRight");
       addPressAndHoldStyleForRecordButton(playButton);
-      // buttonContainer.add(recordPanel.getPl );
       buttonContainer.getElement().getStyle().setMarginTop(3, Style.Unit.PX);
     }
 
-    buttonContainer.add(postAudioRecordButton);
 
     wrapper.add(buttonContainer);
 
@@ -397,7 +397,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   }
 
   private void gotFocus() {
-    logger.info("gotFocus " + getExID());
+    if (DEBUG) {
+      logger.info("gotFocus " + getExID());
+    }
     turnContainer.setCurrentTurnTo(this);
   }
 
@@ -626,4 +628,17 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   public int getDialogSessionID() {
     return 0;
   }
+
+  @Override
+  public void showNoAudioToPlay() {
+    recordAudioPanel.getPlayAudioPanel().getPlayButton().addStyleName("blink-target");
+    Timer timer = new Timer() {
+      @Override
+      public void run() {
+        recordAudioPanel.getPlayAudioPanel().getPlayButton().removeStyleName("blink-target");
+      }
+    };
+    timer.schedule(1000);
+  }
+
 }

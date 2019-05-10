@@ -81,8 +81,8 @@ public class ListenViewHelper<T extends ITurnPanel>
   private static final String ENGLISH_SPEAKER = "English Speaker";
 
   private static final String INTERPRETER = "Interpreter";
-  public static final String SPEAKER_A = "A";
-  public static final String SPEAKER_B = "B";
+   static final String SPEAKER_A = "A";
+   static final String SPEAKER_B = "B";
 
   private static final int INTERPRETER_WIDTH = 165;//235;
   private static final int PADDING_LOZENGE = 14;
@@ -129,9 +129,6 @@ public class ListenViewHelper<T extends ITurnPanel>
   private Button playButton;
   private DivWidget dialogHeader;
 
-  private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PLAY = true;
-
   /**
    *
    */
@@ -142,6 +139,9 @@ public class ListenViewHelper<T extends ITurnPanel>
   private INavigation.VIEWS prev, next;
   private INavigation.VIEWS thisView;
   private boolean gotTurnClick = false;
+
+  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PLAY = false;
 
   /**
    * @param controller
@@ -856,14 +856,13 @@ public class ListenViewHelper<T extends ITurnPanel>
     playCurrentTurn();
   }
 
-  public boolean isGotTurnClick() {
+  private boolean isGotTurnClick() {
     return gotTurnClick;
   }
 
-  protected void setGotTurnClick(boolean gotTurnClick) {
+  void setGotTurnClick(boolean gotTurnClick) {
     this.gotTurnClick = gotTurnClick;
   }
-
 
   /**
    * TODO add playback rate
@@ -1225,7 +1224,11 @@ public class ListenViewHelper<T extends ITurnPanel>
         if (DEBUG_PLAY) logger.info("playCurrentTurn did pause " + blurb());
         setPlayButtonToPlay();
       } else {
-        if (DEBUG_PLAY) logger.info("playCurrentTurn maybe did play " + blurb());
+        if (DEBUG_PLAY) {
+          logger.info("playCurrentTurn maybe did play " + blurb());
+        }
+        currentTurn.markCurrent();
+        currentTurn.showNoAudioToPlay();
       }
     } else {
       logger.warning("playCurrentTurn no current turn?");
@@ -1369,8 +1372,8 @@ public class ListenViewHelper<T extends ITurnPanel>
   void removeMarkCurrent() {
     logger.info("removeMarkCurrent on " + blurb());
 
-    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
-    logger.info("logException stack:\n" + exceptionAsString);
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
+//    logger.info("logException stack:\n" + exceptionAsString);
 
     currentTurn.removeMarkCurrent();
   }

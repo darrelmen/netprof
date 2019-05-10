@@ -51,14 +51,16 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
 import static mitll.langtest.client.custom.INavigation.VIEWS.SCORES;
 
 public class DialogEditor extends ListenViewHelper<EditorTurn> implements SessionManager {
-  public static final int FIXED_HEIGHT = 390;
   private final Logger logger = Logger.getLogger("DialogEditor");
-  private static final boolean DEBUG = true;
+
+  private static final int FIXED_HEIGHT = 390;
 
   private int dialogID;
 
   private final SessionStorage sessionStorage;
   private final boolean isInModal;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @see DialogEditorView#editList
@@ -143,9 +145,12 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     EditorTurn currentTurn = getCurrentTurn();
 
     boolean different = currentTurn != turn;
-    logger.info("currentTurn  " + currentTurn.getExID());
-    logger.info("clicked turn " + turn.getExID());
-    logger.info("different    " + different);
+
+    if (DEBUG) {
+      logger.info("currentTurn  " + currentTurn.getExID());
+      logger.info("clicked turn " + turn.getExID());
+      logger.info("different    " + different);
+    }
 
     if (different) {
       removeMarkCurrent();

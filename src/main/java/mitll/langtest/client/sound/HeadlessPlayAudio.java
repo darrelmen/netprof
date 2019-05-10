@@ -45,7 +45,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   protected final Logger logger = Logger.getLogger("HeadlessPlayAudio");
   protected final SoundManagerAPI soundManager;
   protected final Collection<AudioControl> listeners = new HashSet<>();
-  final List<PlayListener> playListeners = new ArrayList<>();
+  private final List<PlayListener> playListeners = new ArrayList<>();
   protected final int id;
   private IListenView listenView;
   private final HTML warnNoFlash = new HTML("<font color='red'>Flash is not activated. Do you have a flashblocker? " +
@@ -53,7 +53,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   /**
    * @see #rememberAudio
    */
-  String currentPath = null;
+  private String currentPath = null;
   /**
    *
    */
@@ -70,8 +70,8 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   private static final String FILE_MISSING = "FILE_MISSING";
 
   private static final boolean DEBUG = true;
-  private static final boolean DEBUG_PLAY = true;
-  private static final boolean DEBUG_DETAIL = true;
+  private static final boolean DEBUG_PLAY = false;
+  private static final boolean DEBUG_DETAIL = false;
 
   HeadlessPlayAudio(SoundManagerAPI soundManager) {
     id = counter++;
@@ -566,14 +566,8 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     }
 
     markNotPlaying();
-    //setPlayLabel();
-
-//    if (listener != null) {  // remember to delegate too
-//      listener.songFinished();
-//    }
 
     listeners.forEach(SimpleAudioListener::songFinished);
-    //playListeners.forEach(PlayListener::playStopped);
     tellListenersPlayStopped();
 
     if (simpleAudioListener != null) {
@@ -581,8 +575,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     }
   }
 
-
-  protected void tellListenersPlayStopped() {
+  void tellListenersPlayStopped() {
     playListeners.forEach(PlayListener::playStopped);
   }
 
@@ -611,5 +604,9 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
 
   public boolean isPlaying() {
     return playing;
+  }
+
+  public String toString() {
+    return "HeadlessPlayAudioPanel #" + id + " : " + currentPath;
   }
 }

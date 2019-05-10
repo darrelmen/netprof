@@ -68,6 +68,14 @@ public class PlayAudioExercisePanel extends DivWidget implements IPlayAudioContr
   }
 
   /**
+   * What to show if you go to play audio but there is none there...
+   */
+  @Override
+  public void showNoAudioToPlay() {
+
+  }
+
+  /**
    * @param playListener
    * @see ListenViewHelper#getTurnPanel
    */

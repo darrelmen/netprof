@@ -49,4 +49,6 @@ public interface IPlayAudioExercise {
   boolean isPlaying();
 
   boolean doPlayPauseToggle();
+
+  void showNoAudioToPlay();
 }

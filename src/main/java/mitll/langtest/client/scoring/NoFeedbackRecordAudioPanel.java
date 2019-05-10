@@ -111,7 +111,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
    * @see AudioPanel#getPlayButtons
    */
   RecorderPlayAudioPanel makePlayAudioPanel() {
-    long then = System.currentTimeMillis();
+   // long then = System.currentTimeMillis();
     NoFeedbackRecordAudioPanel outer = this;
     postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller) {
       /**
@@ -140,9 +140,12 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     playAudioPanel = new RecorderPlayAudioPanel(postAudioRecordButton, controller, exercise, useMicrophoneIcon());
 
     playAudioPanel.hidePlayButton();
+//
+//    if (DEBUG) {
+//      long now = System.currentTimeMillis();
+//      logger.info("makePlayAudioPanel : took " + (now - then) + " for makeAudioPanel");
+//    }
 
-    long now = System.currentTimeMillis();
-    logger.info("makePlayAudioPanel : took " + (now - then) + " for makeAudioPanel");
     return playAudioPanel;
   }
 

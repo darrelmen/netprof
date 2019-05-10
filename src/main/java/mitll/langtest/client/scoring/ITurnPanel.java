@@ -50,8 +50,4 @@ public interface ITurnPanel extends IsWidget, ITurnMarking, RefAudioGetter, IPla
   void grabFocus();
 
   String getText();
-
-//  boolean isRecording();
-//
-//  void cancelRecording();
 }

@@ -49,7 +49,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
 
   private static final String PLAY_AUDIO_PANEL = "PlayAudioPanel_";
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   protected static final IconType PLAY = IconType.PLAY;
 
@@ -355,7 +355,6 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   public void songFinished() {
     super.songFinished();
     setPlayLabel();
-    //tellListenersPlayStopped();
   }
 
   @Override
@@ -376,8 +375,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
     tellListenersPlayStopped();
   }
 
-
-  public String toString() {
-    return "PlayAudioPanel #" + id + " : " + currentPath;
-  }
+//  public String toString() {
+//    return "PlayAudioPanel #" + id + " : " + currentPath;
+//  }
 }

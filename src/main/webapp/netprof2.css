@@ -2350,6 +2350,18 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
     zoom: 101%;
 }*/
 
+
+.blink-target {
+    animation-name: blink;
+    animation-duration: 1s;
+}
+
+@keyframes blink {
+    0%   {background-color: #2f96b4;}
+    50%  {background-color: red;}
+    100% {background-color: #2f96b4;}
+}
+
 .animation-target {
     -webkit-animation: animation 2000ms linear both;
     animation: animation 2000ms linear both;
