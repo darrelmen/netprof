@@ -55,7 +55,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
   private static final int FIXED_HEIGHT = 390;
 
- // private int dialogID;
+  // private int dialogID;
 
   private final SessionStorage sessionStorage;
   private final boolean isInModal;
@@ -69,7 +69,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     super(controller, thisView);
     setDialog(theDialog);
     isInModal = theDialog != null;
-   // this.dialogID = theDialog == null ? -1 : theDialog.getID();
+    // this.dialogID = theDialog == null ? -1 : theDialog.getID();
     this.sessionStorage = new SessionStorage(controller.getStorage(), "editorSession");
   }
 
@@ -244,7 +244,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   @Override
   public void deleteCurrentTurnOrPair(EditorTurn currentTurn) {
     logger.info("deleteCurrentTurnOrPair : " +
-            "\n\tcurrent turn " + currentTurn
+        "\n\tcurrent turn " + currentTurn
     );
 
     // todo :return both turns
@@ -345,7 +345,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     setCurrentTurn(fnext);
 
     Scheduler.get().scheduleDeferred(() -> {
-      logger.info("addTurns : focus will be on " + fnext);
+      logger.info("addTurns : focus will be on " + (fnext == null ? "NULL" : fnext.getExID()));
       markCurrent();
       fnext.grabFocus();
     });

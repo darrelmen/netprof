@@ -102,6 +102,11 @@ public class RelatedExerciseHelper implements IRelatedExercise {
     return daoWrapper.deleteRelated(related);
   }
 
+  /**
+   * @see DialogDAO#deleteExercise
+   * @param exid
+   * @return
+   */
   @Override
   public boolean deleteAndFixForEx(int exid) {
     return daoWrapper.deleteAndFix(exid) > 0;

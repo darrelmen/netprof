@@ -67,8 +67,9 @@ import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_B;
  *
  */
 public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IRehearseView, IRecordingTurnPanel {
-  public static final int RIGHT_TURN_RIGHT_MARGIN = 153;
   private final Logger logger = Logger.getLogger("EditorTurn");
+
+  public static final int RIGHT_TURN_RIGHT_MARGIN = 153;
 
   public static final int HEIGHT_AND_WIDTH = 22;
 
@@ -128,7 +129,8 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       @Override
       protected void addMarginStyle(Style style2) {
         style2.setMarginLeft(15, Style.Unit.PX);
-        style2.setMarginRight(columns == ListenViewHelper.COLUMNS.RIGHT ? RIGHT_TURN_RIGHT_MARGIN : 10, Style.Unit.PX);
+        boolean useBigRightMargin = columns == ListenViewHelper.COLUMNS.RIGHT && turnContainer.isInterpreter();
+        style2.setMarginRight(useBigRightMargin ? RIGHT_TURN_RIGHT_MARGIN : 10, Style.Unit.PX);
         // style2.setMarginTop(7, Style.Unit.PX);
         style2.setMarginBottom(0, Style.Unit.PX);
       }

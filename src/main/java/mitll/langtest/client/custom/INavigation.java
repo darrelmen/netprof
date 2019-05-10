@@ -67,7 +67,6 @@ public interface INavigation extends IViewContaner {
     DIALOG("Dialogs", ProjectMode.DIALOG),
 
     /**
-     * @deprecatedx
      * @see mitll.langtest.client.banner.DialogExerciseList#gotClickOnDialog
      * @see mitll.langtest.client.banner.NewContentChooser#showView
      */

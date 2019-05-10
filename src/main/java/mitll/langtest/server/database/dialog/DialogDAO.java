@@ -752,13 +752,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
       logger.info("deleteExercise found " + exercises.size() + " exercises on " + dialogID);
 
-      int found = -1;
-      for (int i = 0; i < exercises.size(); i++) {
-        if (exercises.get(i).getID() == exid) {
-          found = i;
-          break;
-        }
-      }
+      int found = getIndex(exid, exercises);
       if (found == -1) {
         logger.error("deleteExercise can't find ex " + exid + " in " + dialogID);
 
@@ -792,17 +786,63 @@ public class DialogDAO extends DAO implements IDialogDAO {
       }
     } else {
       if (relatedExercise.deleteAndFixForEx(exid)) {
-        userExerciseDAO.deleteByExID(Collections.singleton(exid));
-        // refresh dialogs on project
-        databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
+        deleteTheExercise(projid, dialogID, exid, project, userExerciseDAO);
         deletedIDs.add(exid);
-        project.forgetExercise(exid);
+      } else { // look for the prev to this one
+        List<ClientExercise> exercises = dialog.getExercises();
 
-      } else {
-        logger.error("did not delete ex " + exid + " in " + dialogID);
+        int found = getIndex(exid, exercises);
+        if (found == -1) {
+          logger.error("deleteExercise 2 can't find ex " + exid + " in " + dialogID);
+        } else {
+          ClientExercise prevCandidate = exercises.get(found - 1);
+          logger.info("deleteExercise 2 prev of " + exid + " is " + prevCandidate);
+          if (relatedExercise.deleteAndFixForEx(prevCandidate.getID())) {
+            deleteTheExercise(projid, dialogID, exid, project, userExerciseDAO);
+            deletedIDs.add(exid);
+          } else {
+            logger.error("deleteExercise : did not delete ex " + exid + " in " + dialogID);
+          }
+        }
+
+        if (true) {
+        } else {
+          logger.error("deleteExercise : did not delete ex " + exid + " in " + dialogID);
+        }
       }
     }
     return deletedIDs;
+  }
+
+  /**
+   * Blow it away in the exercise table -
+   * tell the project to forget about it
+   * reload the dialog.
+   *
+   * @param projid
+   * @param dialogID
+   * @param exid
+   * @param project
+   * @param userExerciseDAO
+   */
+  private void deleteTheExercise(int projid, int dialogID, int exid,
+                                 Project project,
+                                 IUserExerciseDAO userExerciseDAO) {
+    userExerciseDAO.deleteByExID(Collections.singleton(exid));
+    // refresh dialogs on project
+    databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
+    project.forgetExercise(exid);
+  }
+
+  private int getIndex(int exid, List<ClientExercise> exercises) {
+    int found = -1;
+    for (int i = 0; i < exercises.size(); i++) {
+      if (exercises.get(i).getID() == exid) {
+        found = i;
+        break;
+      }
+    }
+    return found;
   }
 
   /**

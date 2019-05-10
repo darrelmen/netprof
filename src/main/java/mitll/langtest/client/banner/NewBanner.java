@@ -641,14 +641,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 */
 
-  private boolean shouldShowDialogEditor() {
-    boolean isDialogMode = controller.getMode() == ProjectMode.DIALOG;
-    List<Permission> temp = new ArrayList<>(DIALOG_EDITOR.getPerms());
-    temp.retainAll(controller.getPermissions());
-    //  logger.info("permission overlap is " + temp);
-    return isDialogMode && !temp.isEmpty();
-  }
-
   /**
    * @param val
    * @see #addWidgets(UserManager, UserMenu, Breadcrumbs)

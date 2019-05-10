@@ -32,6 +32,7 @@ package mitll.langtest.client.dialog;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
@@ -42,9 +43,15 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.dialog.IDialog;
+import mitll.langtest.shared.project.ProjectMode;
+import mitll.langtest.shared.user.Permission;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.google.gwt.dom.client.Style.Unit.PX;
+import static mitll.langtest.client.custom.INavigation.VIEWS.*;
 
 /**
  * @see ListenViewHelper#addDialogHeader(IDialog, Panel)
@@ -300,8 +307,7 @@ public class DialogHeader {
     Button widgets = new Button(getCapitalized(getPrevView().toString().toLowerCase()), IconType.ARROW_LEFT, event -> gotGoBack());
     new TooltipHelper().addTooltip(widgets, getPrevTooltip());
 
-    widgets.addStyleName("leftFiveMargin");
-    widgets.addStyleName("rightTenMargin");
+    styleButton(widgets);
     buttonDiv.add(widgets);
 
     setMinWidth(buttonDiv, ARROW_WIDTH);
@@ -314,21 +320,54 @@ public class DialogHeader {
     return nameForAnswer.substring(0, 1).toUpperCase() + nameForAnswer.substring(1);
   }
 
+  /**
+   * Show turn editor option if you have the permissions and if we're on LISTEN.
+   * @return
+   */
   @NotNull
   private Widget getRightArrow() {
     DivWidget buttonDiv = new DivWidget();
-    String nameForAnswer = getNextView() == null ? "" : getNextView().toString().toLowerCase();
-    Button rightButton = new Button(getCapitalized(nameForAnswer), IconType.ARROW_RIGHT, event -> gotGoForward());
-    new TooltipHelper().createAddTooltip(rightButton, getNextTooltip(), Placement.LEFT);
-    rightButton.addStyleName("leftFiveMargin");
-    rightButton.addStyleName("rightTenMargin");
-    rightButton.addStyleName("floatRight");
-    rightButton.setEnabled(next != null);
-
     setMinWidth(buttonDiv, ARROW_WIDTH);
-    buttonDiv.add(rightButton);
+
+    String nameForAnswer = getNextView() == null ? "" : getNextView().toString().toLowerCase();
+
+    {
+      Button rightButton = new Button(getCapitalized(nameForAnswer), IconType.ARROW_RIGHT, event -> gotGoForward());
+      new TooltipHelper().createAddTooltip(rightButton, getNextTooltip(), Placement.LEFT);
+      styleButton(rightButton);
+      rightButton.addStyleName("floatRight");
+      rightButton.setEnabled(next != null);
+
+      buttonDiv.add(rightButton);
+    }
+
+    if (shouldShowDialogEditor() && thisView == LISTEN) {
+      Button editButton = new Button(getCapitalized(TURN_EDITOR.toString()), IconType.ARROW_RIGHT, event -> controller.getNavigation().show(TURN_EDITOR));
+      new TooltipHelper().createAddTooltip(editButton, getNextTooltip(), Placement.LEFT);
+      styleButton(editButton);
+      editButton.addStyleName("floatRight");
+      editButton.addStyleName("topFiftyMargin");
+      editButton.setType(ButtonType.WARNING);
+
+      buttonDiv.add(editButton);
+    }
     return buttonDiv;
   }
+
+  private void styleButton(Button rightButton) {
+    rightButton.addStyleName("leftFiveMargin");
+    rightButton.addStyleName("rightTenMargin");
+  }
+
+
+  private boolean shouldShowDialogEditor() {
+    boolean isDialogMode = controller.getMode() == ProjectMode.DIALOG;
+    List<Permission> temp = new ArrayList<>(DIALOG_EDITOR.getPerms());
+    temp.retainAll(controller.getPermissions());
+    //  logger.info("permission overlap is " + temp);
+    return isDialogMode && !temp.isEmpty();
+  }
+
 
   private void gotGoBack() {
     controller.getNavigation().show(getPrevView());
