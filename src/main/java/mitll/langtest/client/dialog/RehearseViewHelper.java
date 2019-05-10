@@ -930,17 +930,18 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    * @see #showOverallDialogScore
    */
   private void startSession() {
+    int dialogID = getDialogID();
     if (dialogID == -1) {
-      logger.warning("huh? dialog id is  " + dialogID + "???\n\n\n\n");
+      logger.warning("startSession huh? dialog id is  " + dialogID + "???\n\n\n\n");
     } else {
-      setSession();
+      setSession(dialogID);
     }
   }
 
   /**
    * What if we log out or something in the middle here?
    */
-  private void setSession() {
+  private void setSession(int dialogID) {
     int projectid = controller.getProjectStartupInfo() == null ? -1 : controller.getProjectStartupInfo().getProjectid();
     dialogSession = new DialogSession(
         controller.getUser(),
@@ -1267,7 +1268,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     exToStudentDur.put(exid, matchingTurn.getStudentSpeechDur());
     exToRefDur.put(exid, matchingTurn.getRefSpeechDur());
 
-    /*boolean atEnd =*/ addScore(exid, (float) audioAnswer.getScore(), matchingTurn);
+    /*boolean atEnd =*/
+    addScore(exid, (float) audioAnswer.getScore(), matchingTurn);
 
     // maybeMoveOnToNextTurn();
 
@@ -1410,7 +1412,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
       int i = allTurns.indexOf(current) + 1;
 
-      next= allTurns.get(i);
+      next = allTurns.get(i);
 
 
     }

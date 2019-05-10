@@ -78,7 +78,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private static final int MIN_DEBUG_DURATION = 30;
   private static final int MIN_WARN_DURATION = 1000;
   private static final String LISTS = "Lists";
-
+  private static final String REGEX = " ";  // no break space!
+  private static final String TIC_REGEX = "&#39;";
   private static final boolean DEBUG_SEARCH = false;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_ID_LOOKUP = false;
@@ -107,7 +108,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       super.service(request, response);
     }
   }
-
 
 
   /**
@@ -1402,6 +1402,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
           "can't find " + exid);
       return false;
     } else {
+      content = getTrim(content);
+
       exerciseByID.getMutable().setForeignLanguage(content);
 
       boolean update = project.getExerciseDAO().update(exerciseByID);
@@ -1424,4 +1426,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       return update;
     }
   }
+
+  private String getTrim(String part) {
+    return part.replaceAll(REGEX, " ").replaceAll(TIC_REGEX, "'").trim();
+  }
+
 }

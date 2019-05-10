@@ -154,6 +154,15 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     }
   }
 
+  /**
+   * If we paste in some text and then reload the page without a blur, don't loose the text!
+   */
+  @Override
+  protected void onUnload() {
+    super.onUnload();
+    gotBlur();
+  }
+
   @Override
   public String getText() {
     return getExID() + " " + clientExercise.getForeignLanguage();
@@ -226,8 +235,12 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
         playAudioPanel.setEnabled(true);
       }
       playAudioPanel.showPlayButton();
+
       Widget playButton = playAudioPanel.getPlayButton();
-      ((HasFocusHandlers)playButton).addFocusHandler(event -> grabFocus());
+
+//      ((HasFocusHandlers) playButton).addFocusHandler(event -> grabFocus());
+      ((Focusable) playButton).setTabIndex(-1);
+
       buttonContainer.add(playButton);
       playButton.addStyleName("floatRight");
       addPressAndHoldStyleForRecordButton(playButton);
@@ -244,7 +257,8 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
     DivWidget textBoxContainer = new DivWidget();
 
-    addTextBox(textBoxContainer);
+    textBoxContainer.add(contentTextBox = addTextBox());
+
     wrapper.add(textBoxContainer);
     styleMe(wrapper);
     wrapper.addStyleName("inlineFlex");
@@ -361,16 +375,12 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
    * @param wrapper
    * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
-  private void addTextBox(DivWidget wrapper) {
+  private TextBox addTextBox() {
     // TODO : instead, make this a div contenteditable!
     TextBox w = new TextBox();
-
     w.getElement().getStyle().setFontSize(16, Style.Unit.PX);
-
-    w.setId("TextBox_" + getExID());
-    // w.setWidth(88 + "%");
+//    w.setId("TextBox_" + getExID());
     w.setWidth(350 + "px");
-    this.contentTextBox = w;
 
     String foreignLanguage = clientExercise.getForeignLanguage();
     if (foreignLanguage.isEmpty()) {
@@ -393,7 +403,8 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     w.addStyleName("rightTenMargin");
     w.addStyleName("topFiveMargin");
 
-    wrapper.add(w);
+    return w;
+
   }
 
   private void gotFocus() {

@@ -81,21 +81,13 @@ public class ListenViewHelper<T extends ITurnPanel>
   private static final String ENGLISH_SPEAKER = "English Speaker";
 
   private static final String INTERPRETER = "Interpreter";
-   static final String SPEAKER_A = "A";
-   static final String SPEAKER_B = "B";
+  static final String SPEAKER_A = "A";
+  static final String SPEAKER_B = "B";
 
   private static final int INTERPRETER_WIDTH = 165;//235;
   private static final int PADDING_LOZENGE = 14;
 
   private static final String MIDDLE_COLOR = "#00800059";
-
-  public IDialog getDialog() {
-    return dialog;
-  }
-
-  public void setDialog(IDialog dialog) {
-    this.dialog = dialog;
-  }
 
 
   public enum COLUMNS {LEFT, MIDDLE, RIGHT, UNK}
@@ -132,13 +124,14 @@ public class ListenViewHelper<T extends ITurnPanel>
   /**
    *
    */
-  protected int dialogID;
+  //protected int dialogID;
   private IDialog dialog;
   boolean isInterpreter = false;
 
   private INavigation.VIEWS prev, next;
   private INavigation.VIEWS thisView;
   private boolean gotTurnClick = false;
+  private int clickedTurn = -1;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PLAY = false;
@@ -182,6 +175,18 @@ public class ListenViewHelper<T extends ITurnPanel>
     });
   }
 
+  public IDialog getDialog() {
+    return dialog;
+  }
+
+  public void setDialog(IDialog dialog) {
+    this.dialog = dialog;
+  }
+
+  protected int getDialogID() {
+    return dialog == null ? -1 : dialog.getID();
+  }
+
   void clearTurnLists() {
     promptTurns.clear();
     allTurns.clear();
@@ -205,7 +210,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     this.dialog = dialog;
     logger.info("showDialogGetRef : show dialog " + dialogID);
     if (dialog != null) {
-      this.dialogID = dialog.getID();
+      // this.dialogID = dialog.getID();
       isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
       showDialog(dialogID, dialog, child);
       getRefAudio(new ArrayList<RefAudioGetter>(allTurns).iterator());
@@ -236,17 +241,21 @@ public class ListenViewHelper<T extends ITurnPanel>
       styleControlRow(controlAndSpeakers);
       child.add(controlAndSpeakers);
 
-      DivWidget outer = new DivWidget();
-      outer.addStyleName("inlineFlex");
-      outer.setWidth("100%");
+      {
+        DivWidget outer = new DivWidget();
+        outer.addStyleName("inlineFlex");
+        outer.setWidth("100%");
 
-      DivWidget controls = getControls();
-      controls.setWidth("100%");
+        {
+          DivWidget controls = getControls();
+          controls.setWidth("100%");
 
-      // only if flags
-      outer.add(controls);
+          // only if flags
+          outer.add(controls);
+        }
+        controlAndSpeakers.add(outer);
+      }
 
-      controlAndSpeakers.add(outer);
       controlAndSpeakers.add(getSpeakerRow(dialog));
 
       child.add(getTurns(dialog));
@@ -781,7 +790,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   T getTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
     T turn = reallyGetTurnPanel(clientExercise, columns, prevColumn, index);
     turn.addWidgets(true, false, PhonesChoices.HIDE, EnglishDisplayChoices.SHOW);
-    turn.addPlayListener(this);
+    if (!turn.addPlayListener(this)) logger.warning("didn't add the play listener...");
     turn.addClickHandler(event -> gotTurnClick(turn));
     return turn;
   }
@@ -849,7 +858,12 @@ public class ListenViewHelper<T extends ITurnPanel>
     return t;
   }
 
+  /**
+   * @param turn
+   */
   void gotTurnClick(T turn) {
+    logger.info("gotTurnClick " + turn.getExID());
+
     setGotTurnClick(true);
     removeMarkCurrent();
     setCurrentTurn(turn);
@@ -1075,10 +1089,11 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #getControls
    */
   void gotPlay() {
-    //   logger.info("got click on play ");
-  //  if (!setTurnToPromptSide()) {
-      ifOnLastJumpBackToFirst();
-  //  }
+    setGotTurnClick(false);
+    logger.info("gotPlay got click on play ");
+    //  if (!setTurnToPromptSide()) {
+    ifOnLastJumpBackToFirst();
+    //  }
 
     playCurrentTurn();
   }
@@ -1271,7 +1286,9 @@ public class ListenViewHelper<T extends ITurnPanel>
 //      removeMarkCurrent();
 //      currentTurnPlayEnded(false);
 //
-      if (!isGotTurnClick()) {
+      if (isGotTurnClick()) {
+        logger.info("playStopped ignore since click?");
+      } else {
         removeMarkCurrent();
         currentTurnPlayEnded(false);
       }

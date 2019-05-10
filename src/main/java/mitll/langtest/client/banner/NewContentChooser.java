@@ -113,7 +113,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
     dialogHelper = new DialogViewHelper(controller);
 
-   // studyHelper = new StudyHelper<>(controller);
+    // studyHelper = new StudyHelper<>(controller);
     listenHelper = new ListenViewHelper(controller, LISTEN);
     rehearseHelper = new RehearseViewHelper(controller, REHEARSE);
     coreRehearseHelper = new CoreRehearseViewHelper(controller, CORE_REHEARSE);
@@ -365,19 +365,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           clearPushAndShow(new DialogEditorView(controller), DIALOG_EDITOR);
           break;
         case TURN_EDITOR:
-          clearPushAndShow(new DialogEditor(controller,TURN_EDITOR,null){
-//            @NotNull
-//            protected INavigation.VIEWS getPrevView() {
-//              return SCORES;
-//            }
-//
-//            @NotNull
-//            @Override
-//            protected VIEWS getNextView() {
-//              return LISTEN;
-//            }
-
-            @Override protected int getDialogFromURL() {
+          clearPushAndShow(new DialogEditor(controller, TURN_EDITOR, null) {
+            @Override
+            protected int getDialogFromURL() {
               return new SelectionState().getDialog();
             }
           }, TURN_EDITOR);

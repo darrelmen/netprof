@@ -74,7 +74,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private static final String QUOT = "&quot;";
   private static final int MAX_LENGTH = 250;
   private static final String UNKNOWN1 = "unknown";
-  //private static final String MITLL = "MITLL";
+
   public static final boolean WARN_ABOUT_NO_TYPES = false;
   /**
    * If we don't have a value for a facet, it's value is "Blank" as opposed to "Any"

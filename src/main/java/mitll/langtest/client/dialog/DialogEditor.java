@@ -55,7 +55,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
   private static final int FIXED_HEIGHT = 390;
 
-  private int dialogID;
+ // private int dialogID;
 
   private final SessionStorage sessionStorage;
   private final boolean isInModal;
@@ -69,7 +69,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     super(controller, thisView);
     setDialog(theDialog);
     isInModal = theDialog != null;
-    this.dialogID = theDialog == null ? -1 : theDialog.getID();
+   // this.dialogID = theDialog == null ? -1 : theDialog.getID();
     this.sessionStorage = new SessionStorage(controller.getStorage(), "editorSession");
   }
 
@@ -100,7 +100,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
         rightJustify,
         controller,
         this,
-        dialogID,
+        getDialogID(),
         isFirst,
         this);
 
@@ -111,6 +111,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
   @Override
   void gotPlay() {
+    setGotTurnClick(false);
     playCurrentTurn();
   }
 
@@ -162,10 +163,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     //  logger.info("gotClickOnTurn " + turn);
   }
 
-  public int getDialogID() {
-    return dialogID;
-  }
-
   @Override
   protected void styleTurnContainer(DivWidget rowOne) {
     super.styleTurnContainer(rowOne);
@@ -215,7 +212,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
     // if prev turn is null we're on the first turn
     boolean isLeftSpeaker = isLeftSpeaker(columns, getPrev(turn));
-    controller.getDialogService().addEmptyExercises(dialogID, turn.getExID(), isLeftSpeaker, getAsyncForNewTurns(turn.getExID()));
+    controller.getDialogService().addEmptyExercises(getDialogID(), turn.getExID(), isLeftSpeaker, getAsyncForNewTurns(turn.getExID()));
   }
 
   private boolean isLeftSpeaker(COLUMNS columns, EditorTurn prevTurn) {
@@ -241,7 +238,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     );
 
     boolean isLeftSpeaker = isLeftSpeaker(columns, getPrev(editorTurn));
-    controller.getDialogService().addEmptyExercises(dialogID, editorTurn.getExID(), !isLeftSpeaker, getAsyncForNewTurns(editorTurn.getExID()));
+    controller.getDialogService().addEmptyExercises(getDialogID(), editorTurn.getExID(), !isLeftSpeaker, getAsyncForNewTurns(editorTurn.getExID()));
   }
 
   @Override
@@ -253,7 +250,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     // todo :return both turns
     controller.getDialogService().deleteATurnOrPair(
         getDialog().getProjid(),
-        dialogID,
+        getDialogID(),
         currentTurn.getExID(),
         new AsyncCallback<List<Integer>>() {
           @Override
@@ -291,7 +288,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
   @Override
   protected int getDialogFromURL() {
-    return dialogID;
+    return getDialogID();
   }
 
   @NotNull

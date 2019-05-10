@@ -39,8 +39,9 @@ public interface IPlayAudioExercise {
   /**
    * @see mitll.langtest.client.dialog.ListenViewHelper#getTurnPanel(ClientExercise, ListenViewHelper.COLUMNS, ListenViewHelper.COLUMNS)
    * @param playListener
+   * @return
    */
-  void addPlayListener(PlayListener playListener);
+  boolean addPlayListener(PlayListener playListener);
 
   boolean doPause();
 

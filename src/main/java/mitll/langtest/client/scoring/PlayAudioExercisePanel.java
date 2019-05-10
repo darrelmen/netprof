@@ -78,10 +78,16 @@ public class PlayAudioExercisePanel extends DivWidget implements IPlayAudioContr
   /**
    * @param playListener
    * @see ListenViewHelper#getTurnPanel
+   * @return
    */
-  public void addPlayListener(PlayListener playListener) {
+  public boolean addPlayListener(PlayListener playListener) {
     if (playAudio != null) {
       playAudio.addPlayListener(playListener);
+      return true;
+    }
+    else {
+      logger.warning("\n\naddPlayListener ignore adding play listener since no play audio...\n\n");
+      return false;
     }
   }
 
