@@ -86,6 +86,9 @@ public class ScoreServlet extends DatabaseServlet {
   private static final long REFRESH_CONTENT_INTERVAL = 12 * 60 * 60 * 1000L;
   private static final long REFRESH_CONTENT_INTERVAL_THREE = 3 * 60 * 60 * 1000L;
 
+  private static final String REGEX = " ";  // no break space!
+  private static final String TIC_REGEX = "&#39;";
+
   private static final String EXID = "exid";
   private static final String REQID = "reqid";
   private static final String VERSION = "version";
@@ -1396,7 +1399,11 @@ public class ScoreServlet extends DatabaseServlet {
       } else {
         decoded = new String(Base64.getDecoder().decode(flText.getBytes()));
 
-        logger.info("getExerciseIDFromText request to decode '" + exerciseText + "' = '" + decoded + "'");
+        String removeTics = getTrim(decoded);
+        logger.info("getExerciseIDFromText request to decode '" + exerciseText + "' to " +
+            "\n\tdecode  '" + decoded + "'" +
+            "\n\tcleaned '" + removeTics + "'");
+        decoded = removeTics;
 
         CommonExercise exercise = project1.getExerciseBySearchBoth(exerciseText.trim(), decoded.trim());
 
@@ -1404,11 +1411,15 @@ public class ScoreServlet extends DatabaseServlet {
           logger.info("getExerciseIDFromText for '" + exerciseText + "' '" + decoded + "' found exercise id " + exercise.getID());
           realExID = exercise.getID();
         } else {
-          logger.warn("getExerciseIDFromText can't find exercise for '" + exerciseText + "'='" + flText + "' - using unknown exercise");
+          logger.warn("getExerciseIDFromText can't find exercise for '" + exerciseText + "'='" + decoded + "' - using unknown exercise");
         }
       }
     }
     return new ExAndText(realExID, decoded);
+  }
+
+  private String getTrim(String part) {
+    return part.replaceAll(REGEX, " ").replaceAll(TIC_REGEX, "'").trim();
   }
 
   private static class ExAndText {

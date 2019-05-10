@@ -59,7 +59,7 @@ import java.util.stream.Collectors;
 public class TurnPanel extends DialogExercisePanel<ClientExercise> implements ITurnPanel {
   private final Logger logger = Logger.getLogger("TurnPanel");
 
-  TurnPanelDelegate turnPanelDelegate;
+  private TurnPanelDelegate turnPanelDelegate;
 
   /**
    * @param clientExercise

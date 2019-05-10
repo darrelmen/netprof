@@ -48,6 +48,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class AlignmentHelper extends TranscriptSegmentGenerator {
   private static final Logger logger = LogManager.getLogger(AlignmentHelper.class);
@@ -75,21 +76,33 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
       logger.info("addAlignmentOutput : For project " + projectID + " found " + audioToAlignment.size() +
           " audio->alignment entries, trying to marry to " + toAddAudioTo.size() + " exercises");
 
-      Set<Integer> ids = new HashSet<>();
+      Map<Boolean, List<ClientExercise>> collect = toAddAudioTo.stream().collect(Collectors.partitioningBy(ClientExercise::hasEnglishAttr));
 
-      for (ClientExercise exercise : toAddAudioTo) {
-        addAudioIDs(exercise, ids);
-        exercise.getDirectlyRelated().forEach(context -> addAudioIDs(context, ids));
-      }
+      List<ClientExercise> englishEx = collect.get(true);
+      List<ClientExercise> flEx = collect.get(false);
 
-      ids.removeAll(audioToAlignment.keySet());
+      logger.info("addAlignmentOutput found " + englishEx.size() + " eng, " + flEx.size() + " fl exercises");
 
-      Map<Integer, AlignmentAndScore> alignments = getAlignmentsFromDB(projectID, ids, project.getLanguageEnum());
+      audioToAlignment.putAll(getIDToAlignment(englishEx, projectID, audioToAlignment, Language.ENGLISH));
+      audioToAlignment.putAll(getIDToAlignment(flEx, projectID, audioToAlignment, project.getLanguageEnum()));
 
-      // synchronized (audioToAlignment) {
-      audioToAlignment.putAll(alignments);
-      //}
     }
+  }
+
+  private Map<Integer, AlignmentAndScore> getIDToAlignment(Collection<ClientExercise> toAddAudioTo,
+                                                           int projectID,
+                                                           Map<Integer, AlignmentOutput> audioToAlignment,
+                                                           Language languageEnum) {
+    Set<Integer> ids = new HashSet<>();
+
+    for (ClientExercise exercise : toAddAudioTo) {
+      addAudioIDs(exercise, ids);
+      exercise.getDirectlyRelated().forEach(context -> addAudioIDs(context, ids));
+    }
+
+    ids.removeAll(audioToAlignment.keySet());
+
+    return getAlignmentsFromDB(projectID, ids, languageEnum);
   }
 
   /**

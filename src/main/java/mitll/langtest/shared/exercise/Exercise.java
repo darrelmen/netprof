@@ -632,6 +632,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return normalizedFL;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkOOV
+   * @param normalizedFL
+   */
   public void setNormalizedFL(String normalizedFL) {
     this.normalizedFL = normalizedFL;
   }

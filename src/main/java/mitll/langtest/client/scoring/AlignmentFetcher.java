@@ -102,16 +102,18 @@ public class AlignmentFetcher {
     int before = req.size();
     Set<Integer> knownIDs = getKnownIDs(req);
 
-    if (DEBUG) logger.info("getRefAudio asking for" +
-            "\n\texercise  " + exerciseID + //" : " +
-            "\n\tbefore    " + before +
-            "\n\tafter     " + req.size()
-        // +
-        //           "\n\taudio     " + contextAudioAttr// +
+    if (DEBUG) {
+      logger.info("getRefAudio asking for" +
+              "\n\texercise  " + exerciseID + //" : " +
+              "\n\tbefore    " + before +
+              "\n\tafter     " + req.size()
+          // +
+          //           "\n\taudio     " + contextAudioAttr// +
 //            "\n\talignment " + contextAudioAttr
-        //    "\n\tspeed  " + currentAudioAttr.getSpeed() +
-        //    "\n\tisMale " + currentAudioAttr.getUser().isMale()
-    );
+          //    "\n\tspeed  " + currentAudioAttr.getSpeed() +
+          //    "\n\tisMale " + currentAudioAttr.getUser().isMale()
+      );
+    }
 
     int refID = getRefID();
     int contextRefID = getContextRefID();
@@ -307,11 +309,11 @@ public class AlignmentFetcher {
    * @see #addToRequest
    */
   void rememberAlignment(int refID, AlignmentOutput alignmentOutput) {
-   if (DEBUG) {
-     if (alignments.containsKey(refID)) {
-       logger.info("rememberAlignment : already has alignment for " + refID);
-     }
-   }
+    if (DEBUG) {
+      if (alignments.containsKey(refID)) {
+        logger.info("rememberAlignment : already has alignment for " + refID);
+      }
+    }
     alignments.put(refID, alignmentOutput);
   }
 
@@ -368,8 +370,12 @@ public class AlignmentFetcher {
 
             @Override
             public void onSuccess(Map<Integer, AlignmentAndScore> result) {
-              if (DEBUG) {
-                result.forEach((k, v) -> logger.info("getAlignments from server got " + k + " = " + v));
+              if (result == null) {
+                logger.warning("no alignments for " + req);
+              } else {
+                if (DEBUG) {
+                  result.forEach((k, v) -> logger.info("getAlignments from server got " + k + " = " + v));
+                }
               }
 
               alignments.putAll(result);

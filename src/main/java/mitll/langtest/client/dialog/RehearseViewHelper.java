@@ -101,9 +101,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   private static final int TOP_TO_USE = 10;
 
-  private static final boolean DEBUG = false;
-  private static final boolean DEBUG_SILENCE = false;
-  private static final boolean DEBUG_PLAY_ENDED = false;
+
 
   private boolean directClick = false;
 
@@ -147,6 +145,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private DialogSession dialogSession = null;
   String rehearsalKey = DIALOG_INTRO_SHOWN_REHEARSAL;
   private String rehearsalPrompt;
+
+  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_RECORDING = true;
+  private static final boolean DEBUG_SILENCE = false;
+  private static final boolean DEBUG_PLAY_ENDED = false;
 
   /**
    * @param controller
@@ -392,8 +395,20 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   @Override
   protected void gotTurnClick(T turn) {
+    logger.info(" gotTurnClick on " + turn.getExID());
     directClick = true;
-    super.gotTurnClick(turn);
+
+    T currentTurn = getCurrentTurn();
+    int exID = currentTurn == null ? -1 : currentTurn.getExID();
+    logger.info("gotTurnClick current turn is " + exID);
+
+    if (currentTurn != turn) {
+      logger.info("gotTurnClick switch to " + turn);
+      removeMarkCurrent();
+      setCurrentTurn(turn);
+    }
+
+    //super.gotTurnClick(turn);
   }
 
   /**
@@ -763,11 +778,16 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    */
   @Override
   protected void gotPlay() {
+    setGotTurnClick(false);
+
     if (getCurrentTurn() != null &&
         isCurrentTurnARecordingTurn() &&
         getCurrentTurn().isRecording()) {  // cancel current recording
 
-      if (DEBUG) logger.info("gotPlay on recording turn - so abort!");
+      if (DEBUG) {
+        logger.info("gotPlay on recording turn - so abort!");
+      }
+
       setPlayButtonToPlay();
       getCurrentTurn().cancelRecording();
     } else {
@@ -1251,13 +1271,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    * Answers may come much later - we need to find the corresponding turn...
    *
    * @param audioAnswer
+   * @see mitll.langtest.client.scoring.ContinuousDialogRecordAudioPanel#useResult
    */
   @Override
   public void useResult(AudioAnswer audioAnswer) {
     int exid = audioAnswer.getExid();
     T matchingTurn = getTurnForID(exid);
 
-    if (DEBUG) {
+    if (DEBUG_RECORDING) {
       logger.info("useResult set answer" +
           "\n\ton " + matchingTurn +
           "\n\tto " + audioAnswer);

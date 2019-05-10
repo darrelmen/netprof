@@ -60,7 +60,7 @@ public class DialogHeader {
   private final INavigation.VIEWS next;
   private final ExerciseController controller;
 
-  private static final int HINT_WIDTH = 250;
+  //private static final int HINT_WIDTH = 250;
   private static final String SPACE_PRESS_AND_HOLD = "<b>Space</b> to record (press and hold.)";
 
   private String ARROW_KEY_TIP;
@@ -83,7 +83,7 @@ public class DialogHeader {
 
     ARROW_KEY_TIP =
         "<i>" +
-            "<b>Rehearse</b> the dialog at your own speed.<br/><br/>" +
+            "<b>Rehearse</b> the dialog at your own speed.<br/>" +
             s +
             "<br/>" +
             "<b>Arrow keys</b> to advance to next turn or go back." +
@@ -91,7 +91,7 @@ public class DialogHeader {
 
     ARROW_KEY_TIP_CORE =
         "<i>" +
-            "<b>Remember</b> the core words.<br/><br/>" +
+            "<b>Remember</b> the core words.<br/>" +
             s +
             "<br/>" +
             "<b>Arrow keys</b> to advance to next turn or go back." +
@@ -196,8 +196,13 @@ public class DialogHeader {
 
     row.setWidth(ROW_WIDTH + "%");
     row.addStyleName("inlineFlex");
-    row.getElement().getStyle().setProperty("minWidth", "850px");
+
+    setMinWidth(row, 850);
     return row;
+  }
+
+  private void setMinWidth(DivWidget row, int i) {
+    row.getElement().getStyle().setProperty("minWidth", i + "px");
   }
 
   private void addViewHint(DivWidget row) {
@@ -287,6 +292,9 @@ public class DialogHeader {
     widgets.addStyleName("leftFiveMargin");
     widgets.addStyleName("rightTenMargin");
     buttonDiv.add(widgets);
+
+    setMinWidth(buttonDiv,190);
+
     return buttonDiv;
   }
 
@@ -303,9 +311,11 @@ public class DialogHeader {
     new TooltipHelper().createAddTooltip(rightButton, getNextTooltip(), Placement.LEFT);
     rightButton.addStyleName("leftFiveMargin");
     rightButton.addStyleName("rightTenMargin");
-    buttonDiv.add(rightButton);
     rightButton.addStyleName("floatRight");
     rightButton.setEnabled(next != null);
+
+    setMinWidth(buttonDiv,190);
+    buttonDiv.add(rightButton);
     return buttonDiv;
   }
 

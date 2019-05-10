@@ -208,12 +208,13 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
     this.dialog = dialog;
-    logger.info("showDialogGetRef : show dialog " + dialogID);
+    if (DEBUG) logger.info("showDialogGetRef : show dialog " + dialogID);
     if (dialog != null) {
-      // this.dialogID = dialog.getID();
       isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
       showDialog(dialogID, dialog, child);
-      getRefAudio(new ArrayList<RefAudioGetter>(allTurns).iterator());
+      List<RefAudioGetter> refAudioGetters = new ArrayList<>(allTurns);
+      if (DEBUG) logger.info("showDialogGetRef : Get ref audio for " + refAudioGetters.size());
+      getRefAudio(refAudioGetters.iterator());
     } else {
       logger.info("showDialogGetRef no dialog for " + dialogID);
     }
@@ -450,16 +451,6 @@ public class ListenViewHelper<T extends ITurnPanel>
     style.setOverflow(Style.Overflow.HIDDEN);
   }
 
-//  private CheckBox addLeftSpeaker(DivWidget rowOne, String label) {
-//    CheckBox checkBox = new CheckBox(label, true);
-//    // setLeftTurnSpeakerInitial(checkBox);
-//    styleLeftSpeaker(checkBox);
-//
-////    checkBox.addValueChangeHandler(event -> speakerOneCheck(event.getValue()));
-//
-//    rowOne.add(getLeftSpeakerDiv(checkBox));
-//    return checkBox;
-//  }
 
   private void styleLeftSpeaker(UIObject checkBox) {
     styleLabel(checkBox);
@@ -560,16 +551,10 @@ public class ListenViewHelper<T extends ITurnPanel>
     this.turnContainer = rowOne;
 
     logger.info("getTurns : dialog    " + dialog);
-    logger.info("getTurns : exercises " + dialog.getExercises().size());
+
+    if (DEBUG) logger.info("getTurns : exercises " + dialog.getExercises().size());
 
     styleTurnContainer(rowOne);
-
-    //  List<String> speakers = dialog.getSpeakers();
-    //logger.info("speakers " + speakers);
-
-//    Map<String, List<ClientExercise>> speakerToEx = dialog.groupBySpeaker();
-//    String middle = speakers.get(1);
-    // List<ClientExercise> middleTurns = speakerToEx.get(middle);
 
     addAllTurns(dialog, rowOne);
 
@@ -1251,7 +1236,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   private String blurb() {
-    return getExID() + " " + getCurrentTurn().getText();
+    return getExID() + " '" + getCurrentTurn().getText() + "'";
   }
 
   /**
@@ -1283,9 +1268,6 @@ public class ListenViewHelper<T extends ITurnPanel>
 
       setPlayButtonToPlay();
 
-//      removeMarkCurrent();
-//      currentTurnPlayEnded(false);
-//
       if (isGotTurnClick()) {
         logger.info("playStopped ignore since click?");
       } else {
@@ -1387,7 +1369,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #currentTurnPlayEnded(boolean)
    */
   void removeMarkCurrent() {
-    logger.info("removeMarkCurrent on " + blurb());
+    if (DEBUG) logger.info("removeMarkCurrent on " + blurb());
 
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
 //    logger.info("logException stack:\n" + exceptionAsString);
@@ -1396,7 +1378,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   void markCurrent() {
-    logger.info("markCurrent on " + blurb());
+    if (DEBUG) logger.info("markCurrent on " + blurb());
     currentTurn.markCurrent();
   }
 

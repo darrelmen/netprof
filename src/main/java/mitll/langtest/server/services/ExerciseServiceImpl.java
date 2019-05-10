@@ -1405,11 +1405,15 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       content = getTrim(content);
 
       exerciseByID.getMutable().setForeignLanguage(content);
+      project.getAudioFileHelper().checkOOV(Collections.singleton(exerciseByID),true);
 
       boolean update = project.getExerciseDAO().update(exerciseByID);
 
       if (update) {
-        logger.info("updateText now " + project.getExerciseByID(exid).getForeignLanguage());
+        CommonExercise exerciseByID1 = project.getExerciseByID(exid);
+        logger.info("updateText " +
+            "\n\tnow " + exerciseByID1.getForeignLanguage() +
+            "\n\tor  " + exerciseByID1.getNormalizedFL());
 
         IDialog collect = project.getDialog(dialogID);//.stream().filter(dialog -> dialog.getID() == dialogID).collect(Collectors.toList());
         if (collect == null) logger.warn("updateText can't find dialog ID " + dialogID);

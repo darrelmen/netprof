@@ -44,7 +44,7 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
 
   private IRehearseView rehearseView;
   private IRecordResponseListener recordDialogTurn;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    * @param exercise
@@ -54,7 +54,7 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
    * @param recordDialogTurn
    * @see RecordDialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
-  public ContinuousDialogRecordAudioPanel(ClientExercise exercise,
+  protected ContinuousDialogRecordAudioPanel(ClientExercise exercise,
                                           ExerciseController controller,
                                           SessionManager sessionManager,
                                           IRehearseView rehearseView,
@@ -80,6 +80,7 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
   public void useResult(AudioAnswer result) {
     super.useResult(result);
     rehearseView.useResult(result);
+
     if (DEBUG) {
       logger.info("useResult got for ex " + result.getExid() + " vs local " + exercise.getID() +
           " = " + result.getValidity() + " " + result.getPretestScore());

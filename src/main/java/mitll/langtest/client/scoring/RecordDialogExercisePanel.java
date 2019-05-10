@@ -62,6 +62,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
   private static final boolean DEBUG_PARTIAL = false;
+  private static final boolean DEBUG = false;
 
   private static final long MOVE_ON_DUR = 3000L;
   private static final long END_SILENCE = 300L;
@@ -481,7 +482,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   public void enableRecordButton() {
     PostAudioRecordButton recordButton = getRecordButton();
     recordButton.setEnabled(true);
-    logger.info("enable record button " + getExID());
+    if (DEBUG) {
+      logger.info("enable record button " + getExID());
+    }
     recordButton.getElement().getStyle().setBackgroundColor("#bd362f");
   }
 

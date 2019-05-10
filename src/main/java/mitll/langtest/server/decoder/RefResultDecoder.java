@@ -758,7 +758,13 @@ public class RefResultDecoder {
     return idToAlignment;
   }
 
-
+  /**
+   * @see #recalcAlignments(int, Collection, AudioFileHelper, int, boolean)
+   * @param projid
+   * @param audioID
+   * @param audioFileHelper
+   * @param userIDFromSession
+   */
   private void recalcOneOrGetCached(int projid,
                                     Integer audioID,
                                     AudioFileHelper audioFileHelper,

@@ -66,7 +66,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
   private static final int WORD_SPACER = 7;
 
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
-  public static final String BLUE = "#2196F3";
+  private static final String BLUE = "#2196F3";
 
   final T exercise;
   final ExerciseController<T> controller;
@@ -81,11 +81,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
    * @see #getFLEntry
    */
   List<IHighlightSegment> flclickables = null;
-
-  /**
-   * @see #makePlayAudio
-   */
-//  HeadlessPlayAudio playAudio;
 
   private static final boolean DEBUG = false;
   static final boolean DEBUG_SHOW_ALIGNMENT = false;

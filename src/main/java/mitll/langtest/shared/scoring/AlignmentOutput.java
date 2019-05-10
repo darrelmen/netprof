@@ -44,6 +44,7 @@ public class AlignmentOutput implements IsSerializable {
   private Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
 
   private boolean showPhoneScores;
+
   /**
    * Required by RPC.
    */
@@ -60,8 +61,8 @@ public class AlignmentOutput implements IsSerializable {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.ScoreFeedbackDiv#showScoreFeedback(AlignmentAndScore, boolean, DivWidget, float)
    * @return
+   * @see mitll.langtest.client.scoring.ScoreFeedbackDiv#showScoreFeedback(AlignmentAndScore, boolean, DivWidget, float)
    */
   public Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments() {
     return sTypeToEndTimes;
@@ -77,6 +78,6 @@ public class AlignmentOutput implements IsSerializable {
 
   public String toString() {
     List<TranscriptSegment> transcriptSegments = sTypeToEndTimes.get(NetPronImageType.WORD_TRANSCRIPT);
-    return transcriptSegments.isEmpty() ? " EMPTY " : transcriptSegments.toString();
+    return transcriptSegments == null ? "NO_SEGMENTS?" : transcriptSegments.isEmpty() ? " EMPTY " : transcriptSegments.toString();
   }
 }

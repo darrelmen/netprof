@@ -41,6 +41,7 @@ import mitll.langtest.server.database.dialog.IDialogSessionDAO;
 import mitll.langtest.server.database.project.IProject;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectManagement;
+import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.scoring.*;
 import mitll.langtest.server.trie.TextEntityValue;
 import mitll.langtest.server.trie.Trie;
@@ -1053,7 +1054,15 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
-
+  /**
+   * @param projid
+   * @param audioID
+   * @param audioFileHelper
+   * @param userIDFromSession
+   * @return
+   * @see mitll.langtest.server.decoder.RefResultDecoder#recalcOneOrGetCached(int, Integer, AudioFileHelper, int)
+   * @see mitll.langtest.server.services.ScoringServiceImpl#recalcOneOrGetCached(int, Integer, AudioFileHelper, int, ISlimResult, Map, Set, int)
+   */
   public PretestScore recalcRefAudioWithHelper(int projid,
                                                Integer audioID,
                                                AudioFileHelper audioFileHelper,
@@ -1080,14 +1089,34 @@ public class AudioFileHelper implements AlignDecode {
         //logger.info("getAlignmentsFromDB using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
       }
 
-      logger.info("recalcRefAudioWithHelper decoding audio #" + audioID + " '" + byID.getTranscript() + "' for exercise #" + byID.getExid() + "...");
+      boolean hasEnglishAttr = customOrPredefExercise != null && customOrPredefExercise.hasEnglishAttr();
+
+      logger.info("recalcRefAudioWithHelper decoding " +
+          "\n\taudio    #" + audioID + " '" + byID.getTranscript() + "' " +
+          "\n\tenglish   " + hasEnglishAttr +
+          "\n\texercise #" + byID.getExid() + "...");
 
       audioFileHelper = getExerciseDependentAudioFileHelper(audioFileHelper, customOrPredefExercise);
 
-      if (customOrPredefExercise != null && customOrPredefExercise.isSafeToDecode()) {
-        return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession, null, db.getProject(projid).getLanguageEnum());
-      } else {
+      if (customOrPredefExercise == null) {
         return new PretestScore();
+
+      } else {
+        if (customOrPredefExercise.isSafeToDecode()) {
+          return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession, null, db.getProject(projid).getLanguageEnum());
+        } else {
+          logger.info("recalcRefAudioWithHelper : ex " + byID.getExid() + " is not safe to decode?");
+
+          OOVInfo oovInfo = audioFileHelper.checkOOV(Collections.singleton(customOrPredefExercise), true);
+          logger.info("Got back " + oovInfo);
+
+          if (oovInfo.getUnsafe().contains(customOrPredefExercise)) {
+            logger.info("recalcRefAudioWithHelper : STILL ex " + byID.getExid() + " is not safe to decode.");
+            return new PretestScore();
+          } else {
+            return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession, null, db.getProject(projid).getLanguageEnum());
+          }
+        }
       }
     } else {
       logger.info("recalcRefAudioWithHelper can't find audio id " + audioID);
@@ -1095,6 +1124,13 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
+  /**
+   * Check to see if exercise is really english.
+   *
+   * @param audioFileHelper
+   * @param customOrPredefExercise
+   * @return
+   */
   private AudioFileHelper getExerciseDependentAudioFileHelper(AudioFileHelper audioFileHelper, CommonExercise customOrPredefExercise) {
     if (customOrPredefExercise != null && customOrPredefExercise.hasEnglishAttr()) {
       List<Project> matchingProjects = db.getProjectManagement().getMatchingProjects(Language.ENGLISH, false);
@@ -1103,7 +1139,7 @@ public class AudioFileHelper implements AlignDecode {
       } else {
         Project project = matchingProjects.get(0);
         audioFileHelper = project.getAudioFileHelper();
-        // logger.info("using english project audio file helper " +project.getID() + " " +project.getName());
+        logger.info("getExerciseDependentAudioFileHelper : using english project audio file helper " + project.getID() + " " + project.getName());
       }
     }
     return audioFileHelper;
@@ -1722,7 +1758,7 @@ public class AudioFileHelper implements AlignDecode {
     if (session == null || session.isEmpty()) {
       session = getSession(hydraHost);
     }
-    HTTPClient httpClient = getHttpClientForNetprofServer(english, foreignLanguage, userid, hydraHost, ScoreServlet.PostRequest.ALIGN, language);
+    HTTPClient httpClient = getHttpClientForNetprofServer(english, foreignLanguage, userid, hydraHost, language);
 
     if (session != null) {
 //      logger.info("getProxyScore adding session '" + session + "'");
@@ -1766,14 +1802,14 @@ public class AudioFileHelper implements AlignDecode {
                                                    String foreignLanguage,
                                                    int userid,
                                                    String hydraHost,
-                                                   ScoreServlet.PostRequest requestToServer,
                                                    Language language) {
     boolean isDefault = project.getWebserviceHost().equalsIgnoreCase(IProject.WEBSERVICE_HOST_DEFAULT);
 
     HTTPClient httpClient = getHttpClient(hydraHost, isDefault ? "" : project.getWebserviceHost());
-    httpClient.addRequestProperty(REQUEST.toString(), requestToServer.toString());
+    httpClient.addRequestProperty(REQUEST.toString(), ScoreServlet.PostRequest.ALIGN.toString());
     httpClient.addRequestProperty(ENGLISH.toString(), english);
     httpClient.addRequestProperty(EXERCISE.toString(), DEFAULT_EXID);
+    logger.info("getHttpClientForNetprofServer align '" + foreignLanguage + "'");
     httpClient.addRequestProperty(EXERCISE_TEXT.toString(), new String(Base64.getEncoder().encode(foreignLanguage.getBytes())));
 
     httpClient.addRequestProperty(LANGUAGE.toString(), language.name().toLowerCase());

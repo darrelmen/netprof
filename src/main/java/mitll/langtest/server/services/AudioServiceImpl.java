@@ -1555,7 +1555,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
    */
   public RecalcRefResponse recalcRefAudio(int projid) throws DominoSessionException {
-
+    logger.info("recalcRefAudio " + projid);
     return db.getProject(projid).recalcRefAudio(getUserIDFromSessionOrDB());
   }
 
