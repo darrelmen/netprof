@@ -168,7 +168,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   @Override
   public boolean isSimpleDialog() {
-    return dialog.getKind() == DialogType.DIALOG;
+    return getDialog().getKind() == DialogType.DIALOG;
   }
 
   @Override
@@ -1396,9 +1396,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    * @see DialogEditor#getAsyncForNewTurns
    */
   void addTurns(IDialog updated, int exid) {
-    this.dialog = updated;
+    this.setDialog(updated);
 
-    addAllTurns(dialog, turnContainer);
+    addAllTurns(getDialog(), turnContainer);
 
     List<T> collect = allTurns.stream().filter(turn -> turn.getExID() == exid).collect(Collectors.toList());
 

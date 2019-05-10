@@ -47,22 +47,27 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
+import static mitll.langtest.client.custom.INavigation.VIEWS.SCORES;
+
 public class DialogEditor extends ListenViewHelper<EditorTurn> implements SessionManager {
+  public static final int FIXED_HEIGHT = 390;
   private final Logger logger = Logger.getLogger("DialogEditor");
   private static final boolean DEBUG = true;
 
   private int dialogID;
 
-  private IDialog theDialog;
   private final SessionStorage sessionStorage;
+  private final boolean isInModal;
 
   /**
    * @see DialogEditorView#editList
    **/
   public DialogEditor(ExerciseController controller, INavigation.VIEWS thisView, IDialog theDialog) {
     super(controller, thisView);
-    this.theDialog = theDialog;
-    this.dialogID = theDialog.getID();
+    setDialog(theDialog);
+    isInModal = theDialog != null;
+    this.dialogID = theDialog == null ? -1 : theDialog.getID();
     this.sessionStorage = new SessionStorage(controller.getStorage(), "editorSession");
   }
 
@@ -84,7 +89,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   @NotNull
   protected EditorTurn makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn,
                                      boolean rightJustify, int index) {
-    int i = theDialog.getExercises().indexOf(clientExercise);
+    int i = getDialog().getExercises().indexOf(clientExercise);
     boolean isFirst = i == 0 && columns == COLUMNS.LEFT || i == 1 && columns == COLUMNS.MIDDLE;
     EditorTurn widgets = new EditorTurn(
         clientExercise,
@@ -102,8 +107,9 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     return widgets;
   }
 
-  @Override void gotPlay() {
-     playCurrentTurn();
+  @Override
+  void gotPlay() {
+    playCurrentTurn();
   }
 
   /**
@@ -126,7 +132,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   }
 
   /**
-   *
    * @param turn
    */
   @Override
@@ -149,7 +154,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     }
 //    playCurrentTurn();
 
-  //  logger.info("gotClickOnTurn " + turn);
+    //  logger.info("gotClickOnTurn " + turn);
   }
 
   public int getDialogID() {
@@ -159,12 +164,22 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   @Override
   protected void styleTurnContainer(DivWidget rowOne) {
     super.styleTurnContainer(rowOne);
-    rowOne.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
-    rowOne.setHeight("390px");
+    if (isInModal) {
+      rowOne.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
+      setFixedHeight(rowOne);
+    }
+  }
+
+  protected void setFixedHeight(DivWidget rowOne) {
+    rowOne.setHeight(FIXED_HEIGHT + "px");
   }
 
   @Override
   protected void addDialogHeader(IDialog dialog, Panel child) {
+    if (isInModal) {
+    } else {
+      super.addDialogHeader(dialog, child);
+    }
   }
 
   /**
@@ -187,24 +202,14 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
   @Override
   public void addTurnForSameSpeaker(EditorTurn turn) {
-    // EditorTurn currentTurn = getCurrentTurn();
-
-    // EditorTurn nextTurn = getNext();
     COLUMNS columns = turn.getColumn();
     logger.info("addTurnForSameSpeaker : " +
         "\n\tcurrent turn " + turn +
         "\n\tcolumns      " + columns
     );
 
-//    EditorTurn prevTurn = getPrev(turn);
     // if prev turn is null we're on the first turn
-
     boolean isLeftSpeaker = isLeftSpeaker(columns, getPrev(turn));
-//    boolean isLeftSpeaker = isInterpreter ?
-//        (prevTurn == null || prevTurn.getColumns() == COLUMNS.LEFT) :
-//        columns == COLUMNS.LEFT;
-
-    //int lastID = getLastID(currentTurn, nextTurn);
     controller.getDialogService().addEmptyExercises(dialogID, turn.getExID(), isLeftSpeaker, getAsyncForNewTurns(turn.getExID()));
   }
 
@@ -222,23 +227,8 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     return isLeftSpeaker;
   }
 
-
-  /**
-   * @param widgets
-   * @return
-   * @see EditorTurn#addWidgets
-   */
-//  @Override
-//  public COLUMNS getColumnForPrev(EditorTurn widgets) {
-//    EditorTurn prev = getPrev(widgets);
-//    boolean noPrev = prev == null;
-//    if (noPrev) logger.warning("huh? no prev for " + widgets.getExID() + " " + widgets.getColumn());
-//    return noPrev ? widgets.getColumn() : prev.getColumn();
-//  }
   @Override
   public void addTurnForOtherSpeaker(EditorTurn editorTurn) {
-//    EditorTurn currentTurn = getCurrentTurn();
-//    EditorTurn nextTurn = getNext();
     COLUMNS columns = editorTurn.getColumn();
     logger.info("addTurnForOtherSpeaker : " +
         "\n\tcurrent turn " + editorTurn.getExID() +
@@ -249,35 +239,15 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     controller.getDialogService().addEmptyExercises(dialogID, editorTurn.getExID(), !isLeftSpeaker, getAsyncForNewTurns(editorTurn.getExID()));
   }
 
-//  private int getLastID(EditorTurn currentTurn, EditorTurn nextTurn) {
-//    int lastID = currentTurn.getExID();
-//    if (isInterpreter) {
-//      // can't append after a left turn - only after a middle interpreter
-//      if (currentTurn.getColumns() == COLUMNS.LEFT) {
-//        if (nextTurn == null) {
-//          logger.warning("no next turn?");
-//        } else {
-//          lastID = nextTurn.getExID();
-//        }
-//      }
-//    }
-//    return lastID;
-//  }
-
   @Override
   public void deleteCurrentTurnOrPair(EditorTurn currentTurn) {
-    //EditorTurn currentTurn = getCurrentTurn();
-    // EditorTurn nextTurn = getNext();
     logger.info("deleteCurrentTurnOrPair : " +
             "\n\tcurrent turn " + currentTurn
-        //+
-        // "\n\tnext    turn " + nextTurn
     );
-//    int lastID = getLastID(currentTurn, nextTurn);
 
     // todo :return both turns
     controller.getDialogService().deleteATurnOrPair(
-        dialog.getProjid(),
+        getDialog().getProjid(),
         dialogID,
         currentTurn.getExID(),
         new AsyncCallback<List<Integer>>() {
@@ -299,11 +269,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
         });
   }
 
-//  @Override
-//  public boolean isInterpreter() {
-//    return dialog.getKind() == DialogType.INTERPRETER;
-//  }
-
   @NotNull
   private AsyncCallback<IDialog> getAsyncForNewTurns(int exid) {
     return new AsyncCallback<IDialog>() {
@@ -315,8 +280,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
       @Override
       public void onSuccess(IDialog result) {
         addTurns(result, exid);
-//        gotForward(this);
-//        getCurrentTurn().grabFocus();
       }
     };
   }
@@ -328,12 +291,12 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
   @NotNull
   protected INavigation.VIEWS getPrevView() {
-    return null;
+    return SCORES;
   }
 
   @NotNull
   protected INavigation.VIEWS getNextView() {
-    return null;
+    return LISTEN;
   }
 
   /**
@@ -341,7 +304,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
    */
   public void grabFocus() {
     if (getCurrentTurn() != null) {
-     // logger.info("give focus to turn for ex #" + getCurrentTurn().getExID());
+      // logger.info("give focus to turn for ex #" + getCurrentTurn().getExID());
       getCurrentTurn().grabFocus();
     }
   }
@@ -351,11 +314,11 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
    * @param afterThisTurn
    * @see DialogEditor#getAsyncForNewTurns
    */
-  void addTurns(IDialog updated, int exid) {
-    this.dialog = updated;
+  private void addTurns(IDialog updated, int exid) {
+    this.setDialog(updated);
 
     clearTurnLists();
-    addAllTurns(dialog, turnContainer);
+    addAllTurns(getDialog(), turnContainer);
 
     List<EditorTurn> collect = allTurns.stream().filter(turn -> turn.getExID() == exid).collect(Collectors.toList());
 
@@ -381,11 +344,8 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
     Scheduler.get().scheduleDeferred(() -> {
       logger.info("addTurns : focus will be on " + fnext);
-
       markCurrent();
       fnext.grabFocus();
     });
-
-    //   addTurnForEachExercise(turnContainer, getFirstSpeakerLabel(dialog), getSecondSpeakerLabel(dialog), exercises);
   }
 }

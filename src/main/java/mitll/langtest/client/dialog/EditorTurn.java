@@ -36,11 +36,10 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.event.dom.client.KeyCodes;
-import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.event.dom.client.*;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Focusable;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.SessionManager;
@@ -65,6 +64,7 @@ import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_B;
 
 
 public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IRehearseView, IRecordingTurnPanel {
+  public static final int RIGHT_TURN_RIGHT_MARGIN = 153;
   private final Logger logger = Logger.getLogger("EditorTurn");
 
   public static final int HEIGHT_AND_WIDTH = 22;
@@ -79,7 +79,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   private String prev = "";
   private ListenViewHelper.COLUMNS columns, prevColumn;
   private boolean isFirstTurn;
-  private TextBox content;
+  private TextBox contentTextBox;
   private NoFeedbackRecordAudioPanel<ClientExercise> recordAudioPanel;
 
   private SessionManager sessionManager;
@@ -120,20 +120,23 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     this.prevColumn = prevColumn;
 
     this.isFirstTurn = isFirstTurn;
-    //addStyleName("flfont");
 
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify) {
       @Override
       protected void addMarginStyle(Style style2) {
         style2.setMarginLeft(15, Style.Unit.PX);
-        style2.setMarginRight(10, Style.Unit.PX);
+        style2.setMarginRight(columns == ListenViewHelper.COLUMNS.RIGHT ? RIGHT_TURN_RIGHT_MARGIN : 10, Style.Unit.PX);
         // style2.setMarginTop(7, Style.Unit.PX);
         style2.setMarginBottom(0, Style.Unit.PX);
       }
     };
 
+    Style style = getElement().getStyle();
+    style.setProperty("minWidth", "500px");
 
-    setWidth("50%");
+
+//    setWidth((columns == MIDDLE ? 84 : 50) + "%");
+
     this.dialogID = dialogID;
     this.clientExercise = clientExercise;
     this.language = controller.getLanguageInfo();
@@ -146,7 +149,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
         addStyleName("floatRight");
       } else {
         addStyleName("floatLeft");
-        getElement().getStyle().setClear(Style.Clear.BOTH);
+        style.setClear(Style.Clear.BOTH);
       }
     }
   }
@@ -222,6 +225,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       //       playAudioPanel.rememberAudio();
       playAudioPanel.showPlayButton();
       Widget playButton = playAudioPanel.getPlayButton();
+      ((HasFocusHandlers)playButton).addFocusHandler(event -> grabFocus());
       buttonContainer.add(playButton);
       playButton.addStyleName("floatRight");
       addPressAndHoldStyleForRecordButton(playButton);
@@ -235,6 +239,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
     if (postAudioRecordButton != null) {
       addPressAndHoldStyleForRecordButton(postAudioRecordButton);
+      postAudioRecordButton.addFocusHandler(event -> grabFocus());
     }
 
     DivWidget textBoxContainer = new DivWidget();
@@ -273,27 +278,6 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     recordAudioPanel.cancelRecording();
   }
 
-  /**
-   * @return
-   * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
-   */
-/*  @NotNull
-  private DivWidget getHorizDiv() {
-    DivWidget flContainer = new DivWidget();
-    flContainer.addStyleName("inlineFlex");
-    Style style = flContainer.getElement().getStyle();
-    style.setMarginTop(15, Style.Unit.PX);
-
-    if (isMiddle() && clientExercise.hasEnglishAttr()) {
-      style.setProperty("marginLeft", "auto");
-    }
-//    else {
-//      logger.info("setmargin NOT left  auto on " + getExID());
-//    }
-
-    flContainer.getElement().setId("RecordDialogExercisePanel_horiz");
-    return flContainer;
-  }*/
   private void addOtherTurn() {
     Button w = new Button();
     addPressAndHoldStyle(w);
@@ -308,6 +292,8 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     w.setIcon(toUseForArrow == LEFT ? IconType.ARROW_RIGHT : IconType.ARROW_LEFT);
     w.addStyleName("topFiveMargin");
     w.addStyleName("leftFiveMargin");
+    w.addFocusHandler(event -> turnContainer.moveFocusToNext());
+
     add(w);
   }
 
@@ -323,6 +309,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
     // can't blow away the first turn!
     w.setEnabled(!isFirstTurn);
+    w.addFocusHandler(event -> turnContainer.moveFocusToNext());
 
     add(w);
   }
@@ -335,6 +322,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     w.addStyleName("topFiveMargin");
     w.addStyleName("leftFiveMargin");
     w.setType(ButtonType.SUCCESS);
+    w.addFocusHandler(event -> turnContainer.moveFocusToNext());
     add(w);
   }
 
@@ -380,8 +368,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     w.getElement().getStyle().setFontSize(16, Style.Unit.PX);
 
     w.setId("TextBox_" + getExID());
-    w.setWidth(88 + "%");
-    this.content = w;
+    // w.setWidth(88 + "%");
+    w.setWidth(350 + "px");
+    this.contentTextBox = w;
 
     String foreignLanguage = clientExercise.getForeignLanguage();
     if (foreignLanguage.isEmpty()) {
@@ -400,12 +389,10 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     w.addFocusHandler(event -> gotFocus());
     w.addKeyUpHandler(this::gotKey);
 
-
     w.addStyleName("leftTenMargin");
     w.addStyleName("rightTenMargin");
     w.addStyleName("topFiveMargin");
 
-    //w.setWidth("50%");
     wrapper.add(w);
   }
 
@@ -424,7 +411,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     NativeEvent ne = event.getNativeEvent();
     int keyCode = ne.getKeyCode();
     boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
-    String s = SimpleHtmlSanitizer.sanitizeHtml(content.getText()).asString();
+    String s = SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
     if (isEnter) {
       ne.preventDefault();
       ne.stopPropagation();
@@ -457,17 +444,17 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       //  logger.info("num tokens " + length);
 
       if (length > 10) {
-        content.getElement().getStyle().setBackgroundColor("red");
+        contentTextBox.getElement().getStyle().setBackgroundColor("red");
       } else if (length > 7) {
-        content.getElement().getStyle().setBackgroundColor("yellow");
+        contentTextBox.getElement().getStyle().setBackgroundColor("yellow");
       } else {
-        content.getElement().getStyle().setBackgroundColor("white");
+        contentTextBox.getElement().getStyle().setBackgroundColor("white");
       }
     }
   }
 
   private void gotBlur() {
-    String s = SimpleHtmlSanitizer.sanitizeHtml(content.getText()).asString();
+    String s = SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
     if (s.equals(prev)) {
       logger.info("gotBlur " + getExID() + " skip unchanged " + prev);
     } else {
@@ -494,11 +481,11 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
    */
   @Override
   public void grabFocus() {
-    if (content == null) {
-      logger.info("grabFocus no content yet for " + getExID());
+    if (contentTextBox == null) {
+      logger.info("grabFocus no contentTextBox yet for " + getExID());
     } else {
       //   logger.info("grabFocus on " + getExID());
-      content.setFocus(true);
+      contentTextBox.setFocus(true);
     }
 //    logger.info("hiddenPartner " + hiddenPartner.getOffsetWidth());
 //    syncWidthOfVisible();
@@ -525,6 +512,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
    */
   private void styleMe(DivWidget wrapper) {
     turnPanelDelegate.styleMe(wrapper);
+    if (columns == MIDDLE) {
+      wrapper.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
+    }
     wrapper.setWidth("98%");
   }
 

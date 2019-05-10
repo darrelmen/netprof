@@ -66,9 +66,9 @@ import static mitll.langtest.shared.project.ProjectType.DIALOG;
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
-  public static final String DIALOGS = "Dialogs";
   private final Logger logger = Logger.getLogger("NewBanner");
 
+  private static final String DIALOGS = "Dialogs";
   private static final String DIALOG_PRACTICE = "Practice";
 
   private static final String RECORD = "Record";
@@ -84,7 +84,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
           CORE_REHEARSE,
           PERFORM_PRESS_AND_HOLD,
           PERFORM,
-          SCORES);
+          SCORES,
+          TURN_EDITOR);
 
   private static final List<VIEWS> DIALOG_VIEWS =
       Arrays.asList(
@@ -95,7 +96,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
           CORE_REHEARSE,
           PERFORM_PRESS_AND_HOLD,
           PERFORM,
-          SCORES);
+          SCORES,
+          TURN_EDITOR);
 
   /**
    * @see #hideOrShowByMode
@@ -271,9 +273,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     Dropdown nav = new Dropdown(RECORD);
     rememberViewAndLink(nav, RECORD_ENTRIES);
-    rememberViewAndLink(nav, RECORD_SENTENCES);
+
+    if (!isDialogNavVisible()) {
+      rememberViewAndLink(nav, RECORD_SENTENCES);
+    }
+
     rememberViewAndLink(nav, OOV_EDITOR);
-    dialogEditor = rememberViewAndLink(nav, DIALOG_EDITOR);
+    //dialogEditor = rememberViewAndLink(nav, DIALOG_EDITOR);
 
     recnav.add(nav);
     return recnav;
@@ -459,9 +465,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see #addWidgets
    */
   private void addChoicesForUser(ComplexWidget nav) {
-    //boolean isPoly = controller.getPermissions().size() == 1 && controller.getPermissions().iterator().next() == Permission.POLYGLOT;
-    boolean isDialog = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == DIALOG;
-    List<VIEWS> toShow = (isDialog ? DIALOG_VIEWS : STANDARD_VIEWS);
+    List<VIEWS> toShow = (isDialogNavVisible() ? DIALOG_VIEWS : STANDARD_VIEWS);
 
     if (DEBUG) {
       logger.info("addChoicesForUser " + toShow.size() + " : startup : " + controller.getProjectStartupInfo() + " : " + toShow);
@@ -589,11 +593,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     recordMenuVisible();
     defectMenuVisible();
 
-    boolean isDialog = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == DIALOG;
-    boolean visible = hasProjectChoice() && isDialog;
-    setDialogNavVisible(visible);
+    boolean isDialog = isDialogNavVisible();
+    setDialogNavVisible(hasProjectChoice() && isDialog);
 
     if (DEBUG) logger.info("reflectPermissions : " + permissions);
+  }
+
+  private boolean isDialogNavVisible() {
+    return controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == DIALOG;
   }
 
   /**
@@ -607,17 +614,22 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     dialognav.setVisible(visible && isDialogMode);
 
     if (dialogEditor != null) {
-      maybeShowDialogEditor(isDialogMode);
+      maybeShowDialogEditor();
     } else {
       logger.warning("no dialog editor choice yet");
     }
   }
 
-  private void maybeShowDialogEditor(boolean isDialogMode) {
+  private void maybeShowDialogEditor() {
+    dialogEditor.setVisible(shouldShowDialogEditor());
+  }
+
+  private boolean shouldShowDialogEditor() {
+    boolean isDialogMode=controller.getMode() == ProjectMode.DIALOG;
     List<Permission> temp = new ArrayList<>(DIALOG_EDITOR.getPerms());
     temp.retainAll(controller.getPermissions());
-  //  logger.info("permission overlap is " + temp);
-    dialogEditor.setVisible(isDialogMode && !temp.isEmpty());
+    //  logger.info("permission overlap is " + temp);
+    return isDialogMode && !temp.isEmpty();
   }
 
   /**
@@ -787,7 +799,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setDialogNavVisible(isDialogMode);
 
     if (dialogEditor != null) {
-      maybeShowDialogEditor(isDialogMode);
+      maybeShowDialogEditor();
     //  dialogEditor.setVisible(isDialogMode);
     }
   }

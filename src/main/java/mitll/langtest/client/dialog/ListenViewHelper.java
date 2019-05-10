@@ -89,6 +89,14 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   private static final String MIDDLE_COLOR = "#00800059";
 
+  public IDialog getDialog() {
+    return dialog;
+  }
+
+  public void setDialog(IDialog dialog) {
+    this.dialog = dialog;
+  }
+
 
   public enum COLUMNS {LEFT, MIDDLE, RIGHT, UNK}
 
@@ -128,7 +136,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    *
    */
   protected int dialogID;
-  IDialog dialog;
+  private IDialog dialog;
   boolean isInterpreter = false;
 
   private INavigation.VIEWS prev, next;
@@ -155,12 +163,15 @@ public class ListenViewHelper<T extends ITurnPanel>
   @Override
   public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
     clearTurnLists();
+    showContentForDialogInURL(listContent);
+  }
 
+  private void showContentForDialogInURL(Panel listContent) {
     int dialogFromURL = getDialogFromURL();
     controller.getDialogService().getDialog(dialogFromURL, new AsyncCallback<IDialog>() {
       @Override
       public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("getting dialogs", caught);
+        controller.handleNonFatalError("getting a dialog", caught);
       }
 
       @Override
@@ -249,6 +260,11 @@ public class ListenViewHelper<T extends ITurnPanel>
     return new DivWidget();
   }
 
+  /**
+   * @param dialog
+   * @param child
+   * @see #showDialog(int, IDialog, Panel)
+   */
   protected void addDialogHeader(IDialog dialog, Panel child) {
     child.add(dialogHeader = new DialogHeader(controller, thisView, getPrevView(), getNextView()).getHeader(dialog));
   }
@@ -778,7 +794,6 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   @NotNull
   T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
-//    boolean isInterpreter = columns == COLUMNS.MIDDLE;
     boolean rightJustify = columns == COLUMNS.MIDDLE &&
         thisView == INavigation.VIEWS.LISTEN && clientExercise.hasEnglishAttr();
 
@@ -917,6 +932,16 @@ public class ListenViewHelper<T extends ITurnPanel>
   @Override
   public int getVolume() {
     return slider.getElement().getPropertyInt(VALUE);
+  }
+
+  @Override
+  public void moveFocusToNext() {
+    T next = getNext();
+    if (next != null) {
+      next.grabFocus();
+    } else if (!getAllTurns().isEmpty()) {
+      getAllTurns().get(0).grabFocus();
+    }
   }
 
   @Override
@@ -1330,8 +1355,8 @@ public class ListenViewHelper<T extends ITurnPanel>
   void removeMarkCurrent() {
     logger.info("removeMarkCurrent on " + getExID());
 
-    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
-    logger.info("logException stack:\n" + exceptionAsString);
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
+//    logger.info("logException stack:\n" + exceptionAsString);
 
     currentTurn.removeMarkCurrent();
   }

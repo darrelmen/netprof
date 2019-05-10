@@ -46,4 +46,5 @@ public interface ITurnContainer<T extends ITurnPanel> {
 
   int getVolume();
 
+  void moveFocusToNext();
 }

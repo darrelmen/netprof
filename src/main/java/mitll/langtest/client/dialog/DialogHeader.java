@@ -58,8 +58,8 @@ public class DialogHeader {
   private final INavigation.VIEWS prev;
   private final INavigation.VIEWS next;
   private final ExerciseController controller;
-  // private static final int KEY_PRESS_WIDTH = 125;
-  private static final int HINT_WIDTH = 250;//350;//300;
+
+  private static final int HINT_WIDTH = 250;
   private static final String SPACE_PRESS_AND_HOLD = "<b>Space</b> to record (press and hold.)";
 
   private String ARROW_KEY_TIP;
@@ -108,6 +108,7 @@ public class DialogHeader {
 
       row.setWidth(ROW_WIDTH + "%");
       row.addStyleName("inlineFlex");
+      row.getElement().getStyle().setProperty("minWidth", "850px");
 
       if (getPrevView() != null) {
         row.add(getLeftArrow());
@@ -117,9 +118,9 @@ public class DialogHeader {
       }
 
       {
-        com.google.gwt.user.client.ui.Image flag = getFlag(dialog.getImageRef());
-        flag.addStyleName("floatLeft");
-        row.add(flag);
+        com.google.gwt.user.client.ui.Image image = getImage(dialog.getImageRef());
+        image.addStyleName("floatLeft");
+        row.add(image);
       }
 
       DivWidget vert = new DivWidget();
@@ -208,14 +209,14 @@ public class DialogHeader {
   private Widget getHint(String keyBindings) {
     Widget child = new HTML(keyBindings);
     child.addStyleName("floatRight");
-  //  child.addStyleName("leftFiveMargin");
+    //  child.addStyleName("leftFiveMargin");
     child.getElement().getStyle().setProperty("marginLeft", "auto");
     child.setWidth(HINT_WIDTH + "px");
     return child;
   }
 
   @NotNull
-  private com.google.gwt.user.client.ui.Image getFlag(String cc) {
+  private com.google.gwt.user.client.ui.Image getImage(String cc) {
     com.google.gwt.user.client.ui.Image image = new com.google.gwt.user.client.ui.Image(cc);
     image.setHeight(HEIGHT);
     image.setWidth(HEIGHT);

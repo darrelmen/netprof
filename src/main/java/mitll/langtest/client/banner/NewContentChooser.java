@@ -81,7 +81,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private final DivWidget divWidget = new DivWidget();
   private final ExerciseListContent learnHelper;
 
-  private final ExerciseListContent studyHelper;
+//  private final ExerciseListContent studyHelper;
 
   private final DialogViewHelper dialogHelper;
   private final ListenViewHelper listenHelper;
@@ -113,7 +113,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
     dialogHelper = new DialogViewHelper(controller);
 
-    studyHelper = new StudyHelper<>(controller);
+   // studyHelper = new StudyHelper<>(controller);
     listenHelper = new ListenViewHelper(controller, LISTEN);
     rehearseHelper = new RehearseViewHelper(controller, REHEARSE);
     coreRehearseHelper = new CoreRehearseViewHelper(controller, CORE_REHEARSE);
@@ -173,7 +173,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       if (value != null && !value.isEmpty()) {
         storedMode = ProjectMode.valueOf(value);
         //ProjectMode viewMode = currentStoredView.getMode();
-      //  logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
+        //  logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
       }
     }
     {
@@ -304,9 +304,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           clearAndPush(isFirstTime, currentStoredView, DIALOG, true, keepList);
           dialogHelper.showContent(divWidget, DIALOG);
           break;
-        case STUDY:
-          clearPushAndShow(studyHelper, STUDY);
-          break;
+//        case STUDY:
+//          clearPushAndShow(studyHelper, STUDY);
+//          break;
         case LISTEN:
           clearPushAndShow(listenHelper, LISTEN);
           break;
@@ -360,9 +360,27 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         case OOV_EDITOR:
           clearPushAndShow(oovHelper, OOV_EDITOR);
           break;
-          
+
         case DIALOG_EDITOR:
           clearPushAndShow(new DialogEditorView(controller), DIALOG_EDITOR);
+          break;
+        case TURN_EDITOR:
+          clearPushAndShow(new DialogEditor(controller,TURN_EDITOR,null){
+//            @NotNull
+//            protected INavigation.VIEWS getPrevView() {
+//              return SCORES;
+//            }
+//
+//            @NotNull
+//            @Override
+//            protected VIEWS getNextView() {
+//              return LISTEN;
+//            }
+
+            @Override protected int getDialogFromURL() {
+              return new SelectionState().getDialog();
+            }
+          }, TURN_EDITOR);
           break;
         case NONE:
           logger.warning("showView skipping choice '" + view + "'");

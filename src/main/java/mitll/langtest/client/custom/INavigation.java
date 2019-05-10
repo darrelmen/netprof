@@ -68,6 +68,7 @@ public interface INavigation extends IViewContaner {
     /**
      * @see mitll.langtest.client.banner.DialogExerciseList#gotClickOnDialog
      * @see mitll.langtest.client.banner.NewContentChooser#showView
+     * @deprecated
      */
     STUDY("Study", ProjectMode.DIALOG),
     LISTEN("Listen", ProjectMode.DIALOG),
@@ -101,9 +102,11 @@ public interface INavigation extends IViewContaner {
     OOV_EDITOR("Missing In Dictionary", VOCABULARY, QC_PERMISSIONS),
 
     /**
+     * @see NewBanner#getDialogNav
      *
      */
-    DIALOG_EDITOR("Dialog Editor", ProjectMode.DIALOG, QC_PERMISSIONS);
+    DIALOG_EDITOR("Dialog Editor", ProjectMode.DIALOG, QC_PERMISSIONS),
+    TURN_EDITOR("Turn Editor", ProjectMode.DIALOG, QC_PERMISSIONS);
 
     private final List<Permission> perms;
     private final ProjectMode mode;
