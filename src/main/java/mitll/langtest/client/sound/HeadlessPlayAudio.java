@@ -71,7 +71,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
 
   private static final boolean DEBUG = true;
   private static final boolean DEBUG_PLAY = true;
-  private static final boolean DEBUG_DETAIL = false;
+  private static final boolean DEBUG_DETAIL = true;
 
   HeadlessPlayAudio(SoundManagerAPI soundManager) {
     id = counter++;
@@ -116,6 +116,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   public void addPlayListener(PlayListener playListener) {
     this.playListeners.add(playListener);
   }
+
   public void removePlayListener(PlayListener playListener) {
     this.playListeners.remove(playListener);
   }
@@ -190,6 +191,10 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     //logger.info("setListener now has listener " + listeners.size());
   }
 
+  /**
+   *
+   * @param listener
+   */
   private void addSimpleListener(SimpleAudioListener listener) {
     this.simpleAudioListener = listener;
   }
@@ -270,8 +275,8 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   }
 
   /**
-   * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#playAndRemember
    * @param audioAttribute
+   * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#playAndRemember
    */
   protected void loadAndPlayOrPlayAudio(AudioAttribute audioAttribute) {
     rememberAudio(audioAttribute);
@@ -379,9 +384,9 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @see #loadAudio
    */
   public String rememberAudio(String path) {
-     if (DEBUG_PLAY || path == null) {
-       logger.info("rememberAudio - path " + path);
-     }
+    if (DEBUG_PLAY || path == null) {
+      logger.info("rememberAudio - path " + path);
+    }
     destroySound();
     this.currentPath = CompressedAudio.getPath(path);
 /*    if (DEBUG && path != null && path.endsWith(".wav")) {
@@ -509,7 +514,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    */
   public void songFirstLoaded(double durationEstimate) {
     if (DEBUG_DETAIL) {
-      logger.info("HeadlessPlayAudio.songFirstLoaded : " + this.getId());
+      logger.info("HeadlessPlayAudio.songFirstLoaded : " + this.getId() + " : " + currentPath);
     }
 
     for (AudioControl listener : listeners) listener.songFirstLoaded(durationEstimate);
@@ -535,7 +540,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     for (AudioControl listener : listeners) listener.songLoaded(duration);
 
     if (simpleAudioListener != null) {
-      if (DEBUG) logger.info("HeadlessPlayAudio.songLoaded : " + this.getId());
+      if (DEBUG) logger.info("HeadlessPlayAudio.songLoaded : " + this.getId() + " tell simple listener...");
       simpleAudioListener.songLoaded(duration);
     }
 //    else {
@@ -550,8 +555,15 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * Called when the audio stops playing, also relays the message to the listener if there is one.
    */
   public void songFinished() {
-    if (DEBUG) logger.info("HeadlessPlayAudio :songFinished " + getElement().getId() +
-        ", tell " + listeners.size() + " listeners...");
+    if (DEBUG) {
+      logger.info("HeadlessPlayAudio :songFinished for " +
+          "\n\tid   " + getElement().getId() +
+          "\n\tpath " + currentPath +
+          "\n\ttell " + listeners.size() + " listeners" +
+          "\n\ttell " + playListeners.size() + " play listeners" +
+          "\n\tlistener " + simpleAudioListener
+      );
+    }
 
     markNotPlaying();
     //setPlayLabel();
@@ -561,11 +573,17 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
 //    }
 
     listeners.forEach(SimpleAudioListener::songFinished);
-    playListeners.forEach(PlayListener::playStopped);
+    //playListeners.forEach(PlayListener::playStopped);
+    tellListenersPlayStopped();
 
     if (simpleAudioListener != null) {
       simpleAudioListener.songFinished();
     }
+  }
+
+
+  protected void tellListenersPlayStopped() {
+    playListeners.forEach(PlayListener::playStopped);
   }
 
   /**

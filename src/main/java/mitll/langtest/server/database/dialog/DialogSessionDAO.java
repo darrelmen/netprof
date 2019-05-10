@@ -182,9 +182,10 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
         } catch (IllegalArgumentException e) {
         }
 
-        if (currentView != INavigation.VIEWS.STUDY && candidateView == INavigation.VIEWS.STUDY) {  // rehearse or perform trumps STUDY
-          candidate = dialogSession;
-        }
+        logger.info("getCandidate " + candidate);
+//        if (currentView != INavigation.VIEWS.STUDY && candidateView == INavigation.VIEWS.STUDY) {  // rehearse or perform trumps STUDY
+//          candidate = dialogSession;
+//        }
       }
     }
     return candidate;

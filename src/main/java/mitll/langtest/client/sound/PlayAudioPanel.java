@@ -49,7 +49,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
 
   private static final String PLAY_AUDIO_PANEL = "PlayAudioPanel_";
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   protected static final IconType PLAY = IconType.PLAY;
 
@@ -94,7 +94,10 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
 
     getElement().setId(PLAY_AUDIO_PANEL + (doSlow ? "slow" : "") + id);
 
-    logger.info("PlayAudioPanel " +getElement().getId());
+    if (DEBUG) {
+      logger.info("PlayAudioPanel " + getElement().getId());
+    }
+
     isSlow = doSlow;
 
     this.controller = controller;
@@ -297,12 +300,9 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
 
     setIcon(isPlaying());
 
- //   tellListenersPlayStopped();
+    //   tellListenersPlayStopped();
   }
 
-  private void tellListenersPlayStopped() {
-    playListeners.forEach(PlayListener::playStopped);
-  }
 
   private void showPlayIcon(IconAnchor playButton) {
     if (isSlow) {
@@ -355,7 +355,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
   public void songFinished() {
     super.songFinished();
     setPlayLabel();
-    tellListenersPlayStopped();
+    //tellListenersPlayStopped();
   }
 
   @Override
@@ -375,6 +375,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
     setPlayLabel();
     tellListenersPlayStopped();
   }
+
 
   public String toString() {
     return "PlayAudioPanel #" + id + " : " + currentPath;

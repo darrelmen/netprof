@@ -845,9 +845,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     if (DEBUG) logger.info("gotPlay currentTurn - " + currentTurn);
 
     // TODO : way too confusing
-    if (currentTurn == null || !currentTurn.isPlaying()) {
-      setTurnToPromptSide();
-    }
+//    if (currentTurn == null || !currentTurn.isPlaying()) {
+//      setTurnToPromptSide();
+//    }
 
     if (currentTurn == null) {
       logger.info("gotPlay no current turn");

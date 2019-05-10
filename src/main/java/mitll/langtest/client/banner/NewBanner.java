@@ -615,9 +615,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     if (dialogEditor != null) {
       maybeShowDialogEditor();
-    } else {
-      logger.warning("no dialog editor choice yet");
     }
+//    else {
+//      logger.warning("no dialog editor choice yet");
+//    }
   }
 
   private void maybeShowDialogEditor() {

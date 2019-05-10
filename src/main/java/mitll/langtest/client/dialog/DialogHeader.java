@@ -33,6 +33,8 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
@@ -103,79 +105,111 @@ public class DialogHeader {
     DivWidget outer = new DivWidget();
     outer.getElement().setId("dialogInfo");
     {
-      DivWidget row = new DivWidget();
-      row.addStyleName("cardBorderShadow");
+      DivWidget row = getRow();
 
-      row.setWidth(ROW_WIDTH + "%");
-      row.addStyleName("inlineFlex");
-      row.getElement().getStyle().setProperty("minWidth", "850px");
-
+      int midWidth = 50;
+      int sides = (100 - midWidth) / 2;
+      // add prev view
       if (getPrevView() != null) {
-        row.add(getLeftArrow());
-      }
-      if (getNextView() != null) {
-        row.add(getRightArrow());
+        Widget leftArrow = getLeftArrow();
+        leftArrow.setWidth(sides + "%");
+        row.add(leftArrow);
       }
 
+      DivWidget middle = new DivWidget();
+      row.add(middle);
+      //   alignCenter(middle);
+      middle.setWidth(75 + "%");
+
+      // add image
       {
         com.google.gwt.user.client.ui.Image image = getImage(dialog.getImageRef());
         image.addStyleName("floatLeft");
-        row.add(image);
+        image.addStyleName("rightFiveMargin");
+        middle.add(image);
       }
 
-      DivWidget vert = new DivWidget();
-      vert.getElement().setId("vert");
-      row.add(vert);
-      vert.addStyleName("leftTenMargin");
-      vert.addStyleName("rightTenMargin");
+      middle.add(getDialogLabels(dialog));
 
-      String foreignLanguage = dialog.getForeignLanguage();
-
-      {
-        DivWidget titleDiv = new DivWidget();
-        titleDiv.addStyleName("titleBlue");
-        titleDiv.add(getFLTitle(dialog));
-        vert.add(titleDiv);
+      //add next view arrow
+      if (getNextView() != null) {
+        Widget rightArrow = getRightArrow();
+        // rightArrow.addStyleName("floatRight");
+        rightArrow.setWidth(sides + "%");
+        row.add(rightArrow);
       }
 
-      String english = dialog.getEnglish();
-      String orientation = dialog.getOrientation();
-
-      boolean onlyTwoLines = foreignLanguage.equalsIgnoreCase(english);
-      String secondLine = onlyTwoLines ? orientation : english;
-      // if (!foreignLanguage.equalsIgnoreCase(english)) {
-      {
-        DivWidget titleDiv = new DivWidget();
-        titleDiv.getElement().getStyle().setBackgroundColor("#dff4fc");
-        titleDiv.add(getHeading(5, secondLine));
-        vert.add(titleDiv);
-      }
-      //}
-
-      if (!onlyTwoLines) {
-        DivWidget oreintDiv = new DivWidget();
-        Heading w1 = new Heading(5, orientation);
-        w1.addStyleName("wrapword");
-
-        oreintDiv.add(w1);
-        vert.add(oreintDiv);
-      }
       outer.add(row);
 
-      addViewHint(row);
+      //    addViewHint(row);
     }
     return outer;
   }
 
+//  private void alignCenter(DivWidget rowOne) {
+//    rowOne.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+//  }
+
+  @NotNull
+  private DivWidget getDialogLabels(IDialog dialog) {
+    DivWidget vert = new DivWidget();
+    vert.getElement().setId("vert");
+    vert.addStyleName("leftTenMargin");
+    vert.addStyleName("rightTenMargin");
+
+    {
+      DivWidget titleDiv = new DivWidget();
+      titleDiv.addStyleName("titleBlue");
+      titleDiv.add(getFLTitle(dialog));
+      vert.add(titleDiv);
+    }
+
+    String english = dialog.getEnglish();
+    String orientation = dialog.getOrientation();
+
+    boolean onlyTwoLines = dialog.getForeignLanguage().equalsIgnoreCase(english);
+    String secondLine = onlyTwoLines ? orientation : english;
+
+    {
+      DivWidget titleDiv = new DivWidget();
+      titleDiv.getElement().getStyle().setBackgroundColor("#dff4fc");
+      titleDiv.add(getHeading(5, secondLine));
+      vert.add(titleDiv);
+    }
+
+    if (!onlyTwoLines) {
+      DivWidget oreintDiv = new DivWidget();
+      Heading w1 = new Heading(5, orientation);
+      w1.addStyleName("wrapword");
+
+      oreintDiv.add(w1);
+      vert.add(oreintDiv);
+    }
+    addViewHint(vert);
+
+    return vert;
+  }
+
+  @NotNull
+  private DivWidget getRow() {
+    DivWidget row = new DivWidget();
+    row.addStyleName("cardBorderShadow");
+
+    row.setWidth(ROW_WIDTH + "%");
+    row.addStyleName("inlineFlex");
+    row.getElement().getStyle().setProperty("minWidth", "850px");
+    return row;
+  }
+
   private void addViewHint(DivWidget row) {
     switch (thisView) {
-      case STUDY:
-        row.add(getHint("<i><b>Study</b> the core words and phrases used in the dialog. " +
-            "<br/><b>Record</b> yourself to get ready for rehearsing the dialog. " +
-            "<br/>" +
-            PRESS_AND_HOLD_HINT +
-            "</i>"));
-        break;
+//      case STUDY:
+//        row.add(getHint("<i><b>Study</b> the core words and phrases used in the dialog. " +
+//            "<br/><b>Record</b> yourself to get ready for rehearsing the dialog. " +
+//            "<br/>" +
+//            PRESS_AND_HOLD_HINT +
+//            "</i>"));
+//        break;
       case LISTEN:
         row.add(getHint("<i><b>Listen</b> to the reference dialog to prepare to rehearse it.</i>"));
         break;
@@ -199,6 +233,13 @@ public class DialogHeader {
 
             "</i>"));
         break;
+      case TURN_EDITOR:
+        row.add(getHint("<i><b>Edit</b> the text of the turns. " +
+            "<br/><b>Record</b> audio for each turn. " +
+            "<br/>" +
+            PRESS_AND_HOLD_HINT +
+            "</i>"));
+        break;
       default:
         break;
     }
@@ -211,7 +252,8 @@ public class DialogHeader {
     child.addStyleName("floatRight");
     //  child.addStyleName("leftFiveMargin");
     child.getElement().getStyle().setProperty("marginLeft", "auto");
-    child.setWidth(HINT_WIDTH + "px");
+    //child.setWidth(HINT_WIDTH + "px");
+    child.setWidth(75 + "%");
     return child;
   }
 
@@ -258,12 +300,13 @@ public class DialogHeader {
   private Widget getRightArrow() {
     DivWidget buttonDiv = new DivWidget();
     String nameForAnswer = getNextView() == null ? "" : getNextView().toString().toLowerCase();
-    Button widgets = new Button(getCapitalized(nameForAnswer), IconType.ARROW_RIGHT, event -> gotGoForward());
-    new TooltipHelper().addTooltip(widgets, getNextTooltip());
-    widgets.addStyleName("leftFiveMargin");
-    widgets.addStyleName("rightTenMargin");
-    buttonDiv.add(widgets);
-    widgets.setEnabled(next != null);
+    Button rightButton = new Button(getCapitalized(nameForAnswer), IconType.ARROW_RIGHT, event -> gotGoForward());
+    new TooltipHelper().createAddTooltip(rightButton, getNextTooltip(), Placement.LEFT);
+    rightButton.addStyleName("leftFiveMargin");
+    rightButton.addStyleName("rightTenMargin");
+    buttonDiv.add(rightButton);
+    rightButton.addStyleName("floatRight");
+    rightButton.setEnabled(next != null);
     return buttonDiv;
   }
 

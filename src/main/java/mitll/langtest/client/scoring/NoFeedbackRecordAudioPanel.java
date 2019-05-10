@@ -58,6 +58,8 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
    */
   private final SessionManager sessionManager;
 
+  private static final boolean DEBUG = false;
+
   /**
    * @param exercise
    * @param controller
@@ -92,7 +94,10 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     add(col);
 
     long now = System.currentTimeMillis();
-    logger.info("addWidgets " + (now - then) + " millis, has " + getWidgetCount() + " widgets...");
+
+    if (DEBUG) {
+      logger.info("addWidgets " + (now - then) + " millis, has " + getWidgetCount() + " widgets...");
+    }
     //scoreFeedback.getElement().setId("scoreFeedbackRow");
   }
 

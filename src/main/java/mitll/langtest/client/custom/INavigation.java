@@ -71,6 +71,7 @@ public interface INavigation extends IViewContaner {
      * @deprecated
      */
     STUDY("Study", ProjectMode.DIALOG),
+
     LISTEN("Listen", ProjectMode.DIALOG),
 
     /**

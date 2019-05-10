@@ -330,7 +330,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   @NotNull
   private String getFirstSpeakerLabel(IDialog dialog) {
-    logger.info("getFirstSpeakerLabel for dialog " + dialog.getID());
+    //  logger.info("getFirstSpeakerLabel for dialog " + dialog.getID());
     dialog.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute.toString()));
 
     List<ExerciseAttribute> properties = dialog.getAttributes()
@@ -339,7 +339,7 @@ public class ListenViewHelper<T extends ITurnPanel>
         .sorted(Comparator.comparing(Pair::getProperty))
         .collect(Collectors.toList());
 
-    properties.forEach(p -> logger.info(p.toString()));
+    // properties.forEach(p -> logger.info(p.toString()));
 
     String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
 
@@ -596,7 +596,9 @@ public class ListenViewHelper<T extends ITurnPanel>
     ClientExercise prev = null;
     int index = 0;
     for (ClientExercise clientExercise : exercises) {
-      addTurn(rowOne, getColumnForEx(left, right, clientExercise), clientExercise, getColumnForEx(left, right, prev), index);
+      COLUMNS currentCol = getColumnForEx(left, right, clientExercise);
+      COLUMNS prevCol = prev == null ? COLUMNS.UNK : getColumnForEx(left, right, prev);
+      addTurn(rowOne, currentCol, clientExercise, prevCol, index);
       prev = clientExercise;
       index++;
     }
@@ -606,7 +608,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     String speaker = clientExercise == null ? "" : clientExercise.getSpeaker();
     //List<ExerciseAttribute> collect = getSpeakerAttributes(clientExercise);
     if (speaker.isEmpty()) {
-      logger.info("getColumnForEx : no speaker " + clientExercise);
+      logger.info("getColumnForEx : no speaker, ex = " + clientExercise);
       return COLUMNS.UNK;
     } else {
       return getColumnForSpeaker(left, right, speaker);
@@ -703,7 +705,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   private void markFirstTurn() {
     if (!allTurns.isEmpty()) {
       setCurrentTurn(allTurns.get(0));
-      //    logger.info("markFirstTurn : markCurrent ");
+      logger.info("markFirstTurn : markCurrent ");
       markCurrent();
       makeVisible(currentTurn);
     }
@@ -874,7 +876,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   DivWidget getControls() {
     DivWidget rowOne = new DivWidget();
     rowOne.getElement().setId("controls");
-    rowOne.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
+    alignCenter(rowOne);
 
     {
       Button widgets = new Button("", IconType.BACKWARD, event -> gotBackward());
@@ -904,6 +906,10 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
 
     return rowOne;
+  }
+
+  private void alignCenter(DivWidget rowOne) {
+    rowOne.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
   }
 
   /**
@@ -1071,9 +1077,9 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   void gotPlay() {
     //   logger.info("got click on play ");
-    if (!setTurnToPromptSide()) {
+  //  if (!setTurnToPromptSide()) {
       ifOnLastJumpBackToFirst();
-    }
+  //  }
 
     playCurrentTurn();
   }
@@ -1091,24 +1097,24 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @return true if changed turn to next one
    * @see #gotPlay
    */
-  boolean setTurnToPromptSide() {
-    Boolean leftSpeakerSet = false;//isLeftSpeakerSet();
-    Boolean rightSpeakerSet = true;//isRightSpeakerSet();
-    if (leftSpeakerSet && rightSpeakerSet) {
-      if (DEBUG) logger.info("setTurnToPromptSide both speakers ");
-      return false;
-    } else if (
-        leftSpeakerSet && !leftTurnPanels.contains(currentTurn) ||  // current turn is not the prompt set
-            rightSpeakerSet && !rightTurnPanels.contains(currentTurn)
-    ) {
-      if (DEBUG) logger.info("setTurnToPromptSide setNextTurnForSide ");
-
-      setNextTurnForSide();
-      return true;
-    } else {
-      return false;
-    }
-  }
+//  boolean setTurnToPromptSide() {
+//    Boolean leftSpeakerSet = false;//isLeftSpeakerSet();
+//    Boolean rightSpeakerSet = true;//isRightSpeakerSet();
+//    if (leftSpeakerSet && rightSpeakerSet) {
+//      if (DEBUG) logger.info("setTurnToPromptSide both speakers ");
+//      return false;
+//    } else if (
+//        leftSpeakerSet && !leftTurnPanels.contains(currentTurn) ||  // current turn is not the prompt set
+//            rightSpeakerSet && !rightTurnPanels.contains(currentTurn)
+//    ) {
+//      if (DEBUG) logger.info("setTurnToPromptSide setNextTurnForSide ");
+//
+//      setNextTurnForSide();
+//      return true;
+//    } else {
+//      return false;
+//    }
+//  }
 
   /**
    * TODO : not sure if this is right?
@@ -1352,11 +1358,19 @@ public class ListenViewHelper<T extends ITurnPanel>
     sessionGoingNow = false;
   }
 
+  /**
+   * @see DialogEditor#gotTurnClick(EditorTurn)
+   * @see #gotTurnClick(ITurnPanel)
+   * @see #clearHighlightAndRemoveMark()
+   * @see #setNextTurnForSide()
+   * @see #playStopped()
+   * @see #currentTurnPlayEnded(boolean)
+   */
   void removeMarkCurrent() {
-    logger.info("removeMarkCurrent on " + getExID());
+    logger.info("removeMarkCurrent on " + blurb());
 
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
-//    logger.info("logException stack:\n" + exceptionAsString);
+    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
+    logger.info("logException stack:\n" + exceptionAsString);
 
     currentTurn.removeMarkCurrent();
   }
