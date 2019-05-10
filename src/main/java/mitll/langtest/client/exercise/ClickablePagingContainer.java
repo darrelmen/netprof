@@ -49,7 +49,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_MARK_CURRENT = true;
-  private static final boolean DEBUG_ADDING = true;
+  private static final boolean DEBUG_ADDING = false;
 
   public ClickablePagingContainer(ExerciseController controller) {
     super(controller);
@@ -198,10 +198,16 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     int before = list.size();
 
     idToExercise.put(item.getID(), item);
-    int toUse = Math.max(0, before - 1);
+    int toUse = Math.max(-1, before - 1);
 
-    int i = afterThisOne == null ? toUse : list.indexOf(afterThisOne);
-    list.add(i + 1, item);
+    {
+      int i = afterThisOne == null ? toUse : list.indexOf(afterThisOne);
+//    if (afterThisOne == null) {
+//      list.add(0,)
+//    }
+      list.add(i + 1, item);
+    }
+
     int after = list.size();
 
     if (DEBUG_ADDING) {

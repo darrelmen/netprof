@@ -34,6 +34,7 @@ import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -53,11 +54,12 @@ public class DialogHeader {
   private static final String HEIGHT = 100 + "px";
 
   /**
-   * @see #getHeader
+   * @see #getRow()
    */
   private static final int ROW_WIDTH = 98;
   private static final String SPEAK_HINT = "<b>Speak</b> when you see the record icon.";
   private static final String PRESS_AND_HOLD_HINT = "<b>Press and hold</b> when recording.";
+  public static final int ARROW_WIDTH = 190;
 
   private final INavigation.VIEWS thisView;
   private final INavigation.VIEWS prev;
@@ -121,7 +123,6 @@ public class DialogHeader {
 
       DivWidget middle = new DivWidget();
       row.add(middle);
-      //   alignCenter(middle);
       middle.setWidth(75 + "%");
 
       // add image
@@ -137,14 +138,11 @@ public class DialogHeader {
       //add next view arrow
       if (getNextView() != null) {
         Widget rightArrow = getRightArrow();
-        // rightArrow.addStyleName("floatRight");
         rightArrow.setWidth(sides + "%");
         row.add(rightArrow);
       }
 
       outer.add(row);
-
-      //    addViewHint(row);
     }
     return outer;
   }
@@ -198,11 +196,15 @@ public class DialogHeader {
     DivWidget row = new DivWidget();
     row.addStyleName("cardBorderShadow");
 
-    row.setWidth(ROW_WIDTH + "%");
+    setRowWidth(row);
     row.addStyleName("inlineFlex");
 
     setMinWidth(row, 850);
     return row;
+  }
+
+  protected void setRowWidth(DivWidget row) {
+    row.setWidth(ROW_WIDTH + "%");
   }
 
   private void setMinWidth(DivWidget row, int i) {
@@ -257,11 +259,16 @@ public class DialogHeader {
   @NotNull
   private Widget getHint(String keyBindings) {
     Widget child = new HTML(keyBindings);
+
+    child.addStyleName("cardBorderShadow");
     child.addStyleName("floatRight");
     //  child.addStyleName("leftFiveMargin");
-    child.getElement().getStyle().setProperty("marginLeft", "auto");
+    Style style = child.getElement().getStyle();
+    style.setProperty("marginLeft", "auto");
+    style.setPaddingLeft(5, PX);
+    style.setBackgroundColor("aliceblue");
     //child.setWidth(HINT_WIDTH + "px");
-    child.setWidth(75 + "%");
+    child.setWidth(79 + "%");
     return child;
   }
 
@@ -297,7 +304,7 @@ public class DialogHeader {
     widgets.addStyleName("rightTenMargin");
     buttonDiv.add(widgets);
 
-    setMinWidth(buttonDiv,190);
+    setMinWidth(buttonDiv, ARROW_WIDTH);
 
     return buttonDiv;
   }
@@ -318,7 +325,7 @@ public class DialogHeader {
     rightButton.addStyleName("floatRight");
     rightButton.setEnabled(next != null);
 
-    setMinWidth(buttonDiv,190);
+    setMinWidth(buttonDiv, ARROW_WIDTH);
     buttonDiv.add(rightButton);
     return buttonDiv;
   }

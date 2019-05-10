@@ -73,15 +73,15 @@ import static mitll.langtest.shared.user.Permission.*;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices extends ThumbnailChoices {
-  public static final int THUMB_WIDTH = 181;
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
+  public static final int THUMB_WIDTH = 181;
 
   private static final String EDIT_PROJECT = "Edit project.";
   /**
    *
    */
-  private static final String MODES = "Interpreter and Vocab";
+  private static final String MODES = "Dialog and Vocabulary";
 
   private static final String GVIDAVER = "gvidaver";
 

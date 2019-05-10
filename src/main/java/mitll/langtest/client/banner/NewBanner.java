@@ -134,7 +134,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see #setDialogNavVisible(boolean)
    */
   private ComplexWidget recnav, defectnav, dialognav;
-  private NavLink dialogEditor;
+  //private NavLink dialogEditor;
 
   /**
    * @see #getDialogNav
@@ -274,7 +274,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Dropdown nav = new Dropdown(RECORD);
     rememberViewAndLink(nav, RECORD_ENTRIES);
 
-    if (!isDialogNavVisible()) {
+    boolean dialogNavVisible = isDialogNavVisible();
+    logger.info("Dialog nav visible : " + dialogNavVisible);
+    if (!dialogNavVisible) {
       rememberViewAndLink(nav, RECORD_SENTENCES);
     }
 
@@ -584,6 +586,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
+   * Don't show sentences if dialog mode.
+   *
    * @param permissions
    * @see #setVisibleChoices(boolean)
    * @see InitialUI#showUserPermissions
@@ -596,7 +600,17 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     boolean isDialog = isDialogNavVisible();
     setDialogNavVisible(hasProjectChoice() && isDialog);
 
-    if (DEBUG) logger.info("reflectPermissions : " + permissions);
+    NavLink widgets = viewToLink.get(RECORD_SENTENCES);
+    if (widgets != null) {
+      widgets.setVisible(!isDialog);
+      widgets.setDisabled(isDialog);
+    }
+
+    if (DEBUG) {
+      logger.info("reflectPermissions : " + permissions +
+          "\n\tdialog visible " + isDialog + " : " + widgets
+      );
+    }
   }
 
   private boolean isDialogNavVisible() {
@@ -613,20 +627,22 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     boolean isDialogMode = controller.getMode() == ProjectMode.DIALOG;
     dialognav.setVisible(visible && isDialogMode);
 
-    if (dialogEditor != null) {
-      maybeShowDialogEditor();
-    }
+//    if (dialogEditor != null) {
+//      maybeShowDialogEditor();
+//    }
 //    else {
 //      logger.warning("no dialog editor choice yet");
 //    }
   }
 
+/*
   private void maybeShowDialogEditor() {
     dialogEditor.setVisible(shouldShowDialogEditor());
   }
+*/
 
   private boolean shouldShowDialogEditor() {
-    boolean isDialogMode=controller.getMode() == ProjectMode.DIALOG;
+    boolean isDialogMode = controller.getMode() == ProjectMode.DIALOG;
     List<Permission> temp = new ArrayList<>(DIALOG_EDITOR.getPerms());
     temp.retainAll(controller.getPermissions());
     //  logger.info("permission overlap is " + temp);
@@ -798,11 +814,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     }
 
     setDialogNavVisible(isDialogMode);
-
-    if (dialogEditor != null) {
-      maybeShowDialogEditor();
-    //  dialogEditor.setVisible(isDialogMode);
-    }
+//
+//    if (dialogEditor != null) {
+//      maybeShowDialogEditor();
+//      //  dialogEditor.setVisible(isDialogMode);
+//    }
   }
 
   private void hideOrShowByMode(List<VIEWS> standardViews) {

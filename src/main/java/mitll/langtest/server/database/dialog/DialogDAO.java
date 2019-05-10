@@ -903,16 +903,14 @@ public class DialogDAO extends DAO implements IDialogDAO {
     int add = toAdd.getID();
     SlickDialogAttributeJoin e = new SlickDialogAttributeJoin(-1, userid, new Timestamp(now), add, orAddAttribute);
 
+    int insert = dialogAttributeJoinHelper.insert(e);
+
     logger.info("add dialog " +
         "\n\t#         " + add +
         "\n\tattr id   " + orAddAttribute +
         "\n\tattribute " + attribute +
-        "\n\tjoins     " + e
-    );
-
-    int insert = dialogAttributeJoinHelper.insert(e);
-
-    logger.info("add new id " + insert);
+        "\n\tjoins     " + e +
+        "\n\tadd new id " + insert);
 
     toAdd.getAttributes().add(attribute.setId(orAddAttribute));
     return now;

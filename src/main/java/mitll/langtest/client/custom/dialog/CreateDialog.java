@@ -491,7 +491,8 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
         grid.setWidget(row, col++, getLabel(type));
       }
 
-      logger.info("unit " + unit + " chapter " + chapter);
+     // logger.info("invoke unit " + unit + " chapter " + chapter);
+
       row++;
       col = 0;
       List<ListBox> all = new ArrayList<>();

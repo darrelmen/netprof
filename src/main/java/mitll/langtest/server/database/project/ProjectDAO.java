@@ -63,6 +63,8 @@ public class ProjectDAO extends DAO implements IProjectDAO {
   private final IUserExerciseDAO userExerciseDAO;
   private final DatabaseImpl databaseImpl;
 
+  private final boolean DEBUG = false;
+
   /**
    * @param database
    * @param dbConnection
@@ -167,7 +169,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
 
     boolean differentDomino = dominoID != currentProject.getProject().dominoid();
     if (differentDomino) {
-      logger.info("changed domino project to " + dominoID);
+      logger.info("update changed domino project to " + dominoID);
     }
     boolean checkForDominoIDs = differentDomino || userExerciseDAO.areThereAnyUnmatched(projid);
 
@@ -176,13 +178,15 @@ public class ProjectDAO extends DAO implements IProjectDAO {
     }
 
     boolean didUpdate = easyUpdate(changed);
-    if (!didUpdate) logger.error("update : couldn't update " + changed);
+    if (!didUpdate) {
+      logger.error("update : couldn't update " + changed);
+    }
     boolean updateProps = updateProperties(projectInfo);
     boolean didChange = didUpdate || updateProps;
 
     if (didChange) {
       currentProject.clearPropCache();
-      logger.info("update for " + projid);
+      if (DEBUG) logger.info("update for " + projid);
     } else {
       logger.warn("update : didn't update " + projectInfo + " for current " + currentProject);
     }
@@ -317,7 +321,7 @@ public class ProjectDAO extends DAO implements IProjectDAO {
    * @return true if changed
    */
   private boolean addOrUpdateProperty(int projid, String key, String type, String newValue) {
-    logger.info("addOrUpdateProperty project " + projid + " : " + key + "=" + newValue);
+    if (DEBUG) logger.info("addOrUpdateProperty project " + projid + " : " + key + "=" + newValue);
 
     ProjectPropertyDAO propertyDAO = getProjectPropertyDAO();
     Collection<SlickProjectProperty> slickProjectProperties = propertyDAO.byProjectAndKey(projid, key);

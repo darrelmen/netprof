@@ -417,14 +417,34 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     });
   }
 
+  /**
+   * @param divWidget
+   * @param dialog
+   */
+
   private void showScores(DivWidget divWidget, IDialog dialog) {
-    DivWidget header = new DialogHeader(controller, SCORES, VIEWS.PERFORM, null).getHeader(dialog);
+    VIEWS next = shouldShowDialogEditor() ? TURN_EDITOR : null;
+    DialogHeader dialogHeader = new DialogHeader(controller, SCORES, PERFORM, next) {
+      @Override
+      protected void setRowWidth(DivWidget row) {
+        //
+      }
+    };
+    DivWidget header = dialogHeader.getHeader(dialog);
     header.addStyleName("bottomFiveMargin");
     divWidget.add(header);
     divWidget.add(isTeacher() ?
         new StudentScores(controller) :
         new SessionAnalysis(controller, controller.getUser(), null));
     currentSection = SCORES;
+  }
+
+  private boolean shouldShowDialogEditor() {
+    boolean isDialogMode = controller.getMode() == ProjectMode.DIALOG;
+    List<Permission> temp = new ArrayList<>(DIALOG_EDITOR.getPerms());
+    temp.retainAll(controller.getPermissions());
+    //  logger.info("permission overlap is " + temp);
+    return isDialogMode && !temp.isEmpty();
   }
 
   private void clearAndPush(boolean isFirstTime, String currentStoredView, VIEWS listen, boolean doPushItem, boolean keepList) {

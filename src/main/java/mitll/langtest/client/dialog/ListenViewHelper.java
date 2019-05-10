@@ -350,7 +350,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   @NotNull
   private String getFirstSpeakerLabel(IDialog dialog) {
     //  logger.info("getFirstSpeakerLabel for dialog " + dialog.getID());
-    dialog.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute.toString()));
+    //  dialog.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute.toString()));
 
     List<ExerciseAttribute> properties = dialog.getAttributes()
         .stream()
@@ -362,7 +362,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
 
-    //   logger.info("getFirstSpeakerLabel first speaker " + firstSpeaker);
+    logger.info("getFirstSpeakerLabel first speaker " + firstSpeaker);
     if (!dialog.getExercises().isEmpty()) {
       ClientExercise next = dialog.getExercises().iterator().next();
       boolean hasEnglishAttr = next.hasEnglishAttr();
@@ -376,6 +376,8 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
 
     if (firstSpeaker == null) firstSpeaker = SPEAKER_A;
+    logger.info("getFirstSpeakerLabel 2 " +
+        "first speaker " + firstSpeaker);
     return firstSpeaker;
   }
 
@@ -622,7 +624,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   private COLUMNS getColumnForSpeaker(String left, String right, String speaker) {
     COLUMNS columns;
 
-    if (speaker.equalsIgnoreCase(left)) {
+    if (speaker.equalsIgnoreCase(left) || speaker.equalsIgnoreCase(SPEAKER_A)) {
       columns = COLUMNS.LEFT;
     } else if (speaker.equalsIgnoreCase(right) || speaker.equalsIgnoreCase(SPEAKER_B)) {
       columns = COLUMNS.RIGHT;
@@ -683,19 +685,20 @@ public class ListenViewHelper<T extends ITurnPanel>
       T currentTurn = getCurrentTurn();
 
       if (toRemove == currentTurn) {
-        logger.info("deleteTurn removing current turn " + currentTurn);
+        logger.info("deleteTurn removing current turn " + currentTurn.getExID());
 
         T prev = getPrev();
         if (prev == null) {
           T next = getNext();
-          logger.info("deleteTurn now next " + next);
+          logger.info("deleteTurn now next " + (next == null ? " NULL " : next.getExID()));
 
           setCurrentTurn(next);
         } else {
-          logger.info("deleteTurn now prev " + prev);
+          logger.info("deleteTurn now prev " + prev.getExID());
           setCurrentTurn(prev);
         }
-        logger.info("deleteTurn now current turn " + getCurrentTurn());
+        T currentTurn1 = getCurrentTurn();
+        logger.info("deleteTurn now current turn " + (currentTurn1 == null ? "NULL" : currentTurn1.getExID()));
       }
 
       allTurns.remove(toRemove);
@@ -705,7 +708,9 @@ public class ListenViewHelper<T extends ITurnPanel>
       middleTurnPanels.remove(toRemove);
 
       boolean remove = turnContainer.remove(toRemove);
-      if (!remove) logger.warning("deleteTurn : didn't remove turn " + toRemove);
+      if (!remove) {
+        logger.warning("deleteTurn : didn't remove turn " + toRemove);
+      }
     }
   }
 
@@ -1078,7 +1083,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   void gotPlay() {
     setGotTurnClick(false);
     logger.info("gotPlay got click on play ");
-
+    setHearYourself(false);
     gotRehearse();
 
     //  if (!setTurnToPromptSide()) {
@@ -1088,7 +1093,9 @@ public class ListenViewHelper<T extends ITurnPanel>
     playCurrentTurn();
   }
 
-  protected boolean isDoRehearse() { return doRehearse; }
+  protected boolean isDoRehearse() {
+    return doRehearse;
+  }
 
   void gotPlayYourself() {
     setGotTurnClick(false);
@@ -1102,7 +1109,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     playCurrentTurn();
   }
 
-  protected void setHearYourself(boolean enabled) {
+  void setHearYourself(boolean enabled) {
     playYourselfButton.setEnabled(enabled);
   }
 
@@ -1389,7 +1396,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   private Button getPlayButtonToUse() {
-    return doRehearse? this.playButton:playYourselfButton;
+    return doRehearse ? this.playButton : playYourselfButton;
   }
 
   private boolean sessionGoingNow;

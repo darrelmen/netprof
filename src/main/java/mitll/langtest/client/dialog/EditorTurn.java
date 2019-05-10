@@ -63,7 +63,9 @@ import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.MIDDLE;
 import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_A;
 import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_B;
 
-
+/**
+ *
+ */
 public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IRehearseView, IRecordingTurnPanel {
   public static final int RIGHT_TURN_RIGHT_MARGIN = 153;
   private final Logger logger = Logger.getLogger("EditorTurn");
@@ -193,7 +195,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
         new ContinuousDialogRecordAudioPanel(clientExercise, controller, sessionManager, this, new IRecordResponseListener() {
           @Override
           public void usePartial(StreamResponse response) {
-            logger.info("addWidgets : Got partial..." + response);
+            // logger.info("addWidgets : Got partial..." + response);
           }
 
           @Override
@@ -230,7 +232,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
         playAudioPanel.setEnabled(false);
       } else {
         AudioAttribute next = clientExercise.getAudioAttributes().iterator().next();
-        logger.info("addWidgets :binding " + next + " to play for turn for " + getExID());
+        if (DEBUG) {
+          logger.info("addWidgets :binding " + next + " to play for turn for " + getExID());
+        }
         playAudioPanel.rememberAudio(next);
         playAudioPanel.setEnabled(true);
       }
@@ -284,7 +288,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
   @Override
   public boolean isRecording() {
-    return recordAudioPanel.getPostAudioRecordButton().isRecording();
+    return getPostAudioRecordButton().isRecording();
   }
 
   @Override
@@ -469,11 +473,11 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   private void gotBlur() {
     String s = SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
     if (s.equals(prev)) {
-      logger.info("gotBlur " + getExID() + " skip unchanged " + prev);
+      if (DEBUG) logger.info("gotBlur " + getExID() + " skip unchanged " + prev);
     } else {
       prev = s;
 
-      logger.info("gotBlur " + getExID() + " = " + prev);
+      if (DEBUG) logger.info("gotBlur " + getExID() + " = " + prev);
 
       controller.getExerciseService().updateText(dialogID, getExID(), s, new AsyncCallback<Boolean>() {
         @Override
@@ -590,19 +594,35 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
   @Override
   public void useResult(AudioAnswer audioAnswer) {
-    logger.info("got " + audioAnswer);
+    logger.info("useResult got " + audioAnswer);
     if (audioAnswer.isValid()) {
       String audioRef = audioAnswer.getAudioAttribute().getAudioRef();
-      logger.info("got back " + audioRef);
+      logger.info("useResult got back " + audioRef);
       rememberAudio(audioAnswer.getAudioAttribute());
       recordAudioPanel.getPlayAudioPanel().setEnabled(true);
+
+      ((Button) getPlayButton()).setType(ButtonType.SUCCESS);
+      //  doBlinkAnimation(getPlayButton(), "good-blink-target");
+      // getPlayButton().getElement().getStyle().setBackgroundColor("green");
     }
+  }
+
+  private Widget getPlayButton() {
+    return recordAudioPanel.getPlayAudioPanel().getPlayButton();
   }
 
   @Override
   public void useInvalidResult(int exid) {
-    logger.info("show feedback about what bad happened?");
+//    logger.info("show feedback about what bad happened?");
     recordAudioPanel.getPlayAudioPanel().setEnabled(false);
+//    doBlinkAnimation(getPostAudioRecordButton(), "blink-target");
+    ((Button) getPlayButton()).setType(ButtonType.WARNING);
+
+//    getPlayButton().getElement().getStyle().setBackgroundColor("red");
+  }
+
+  private PostAudioRecordButton getPostAudioRecordButton() {
+    return recordAudioPanel.getPostAudioRecordButton();
   }
 
   @Override
@@ -612,7 +632,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
   @Override
   public void stopRecording() {
-    logger.info("got stop recording...");
+    //logger.info("got stop recording...");
   }
 
   @Override
@@ -642,11 +662,15 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
   @Override
   public void showNoAudioToPlay() {
-    recordAudioPanel.getPlayAudioPanel().getPlayButton().addStyleName("blink-target");
+    doBlinkAnimation(getPlayButton(), "blink-target");
+  }
+
+  private void doBlinkAnimation(Widget playButton, String style) {
+    playButton.addStyleName(style);
     Timer timer = new Timer() {
       @Override
       public void run() {
-        recordAudioPanel.getPlayAudioPanel().getPlayButton().removeStyleName("blink-target");
+        playButton.removeStyleName(style);
       }
     };
     timer.schedule(1000);

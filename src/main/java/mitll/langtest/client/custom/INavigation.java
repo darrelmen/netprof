@@ -65,12 +65,13 @@ public interface INavigation extends IViewContaner {
 
 
     DIALOG("Dialogs", ProjectMode.DIALOG),
+
     /**
+     * @deprecatedx
      * @see mitll.langtest.client.banner.DialogExerciseList#gotClickOnDialog
      * @see mitll.langtest.client.banner.NewContentChooser#showView
-     * @deprecated
      */
-    STUDY("Study", ProjectMode.DIALOG),
+    //  STUDY("Study", ProjectMode.DIALOG),
 
     LISTEN("Listen", ProjectMode.DIALOG),
 
@@ -104,7 +105,6 @@ public interface INavigation extends IViewContaner {
 
     /**
      * @see NewBanner#getDialogNav
-     *
      */
     DIALOG_EDITOR("Dialog Editor", ProjectMode.DIALOG, QC_PERMISSIONS),
     TURN_EDITOR("Turn Editor", ProjectMode.DIALOG, QC_PERMISSIONS);

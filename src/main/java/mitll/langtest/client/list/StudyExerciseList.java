@@ -46,6 +46,7 @@ import java.util.logging.Logger;
  * Only the exercises you need to study to practice a dialog.
  *
  * @param <T>
+ * @deprecated - we're skipping the study portion for now...
  */
 public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends ClientExerciseFacetExerciseList<T> {
   private Logger logger = Logger.getLogger("StudyExerciseList");
@@ -68,7 +69,7 @@ public class StudyExerciseList<T extends CommonShell & ScoredExercise> extends C
                            ExerciseController controller,
                            ListOptions listOptions,
                            DivWidget listHeader) {
-    super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, INavigation.VIEWS.STUDY);
+    super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, INavigation.VIEWS.NONE);
   }
 
   @Override
