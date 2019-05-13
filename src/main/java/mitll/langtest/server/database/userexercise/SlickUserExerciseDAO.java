@@ -36,7 +36,6 @@ import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.project.Project;
-import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.domino.DominoImport;
@@ -51,7 +50,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -1119,12 +1117,14 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   /**
    * @param exids
    * @see ProjectSync#doDelete
+   * @return
    */
-  public void deleteByExID(Collection<Integer> exids) {
+  public boolean deleteByExID(Collection<Integer> exids) {
     int i = dao.deleteByIDs(exids);
     if (i != exids.size()) {
       logger.warn("deleteByExID tried to delete " + exids.size() + " but only changed " + i + " rows?");
     }
+    return i == exids.size();
   }
 
   /**

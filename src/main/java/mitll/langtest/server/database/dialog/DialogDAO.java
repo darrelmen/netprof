@@ -742,12 +742,12 @@ public class DialogDAO extends DAO implements IDialogDAO {
   public List<Integer> deleteExercise(int projid, int dialogID, int exid) {
     Project project = databaseImpl.getProject(projid);
     IDialog dialog = project.getDialog(dialogID);
-    DialogType dialogType = dialog.getKind();
+
     IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
     IRelatedExercise relatedExercise = userExerciseDAO.getRelatedExercise();
     List<Integer> deletedIDs = new ArrayList<>();
 
-    if (dialogType == DialogType.INTERPRETER) {
+    if (dialog.getKind() == DialogType.INTERPRETER) {
       List<ClientExercise> exercises = dialog.getExercises();
 
       logger.info("deleteExercise found " + exercises.size() + " exercises on " + dialogID);
@@ -785,7 +785,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
         }
       }
     } else {
+      logger.info("deleteExercise : dialog delete " + exid);
       if (relatedExercise.deleteAndFixForEx(exid)) {
+        logger.info("deleteExercise : deleteAndFixForEx success for " + exid);
         deleteTheExercise(projid, dialogID, exid, project, userExerciseDAO);
         deletedIDs.add(exid);
       } else { // look for the prev to this one
@@ -795,6 +797,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
         if (found == -1) {
           logger.error("deleteExercise 2 can't find ex " + exid + " in " + dialogID);
         } else {
+          logger.info("deleteExercise 2 index " + found);
           ClientExercise prevCandidate = exercises.get(found - 1);
           logger.info("deleteExercise 2 prev of " + exid + " is " + prevCandidate);
           if (relatedExercise.deleteAndFixForEx(prevCandidate.getID())) {
@@ -805,12 +808,14 @@ public class DialogDAO extends DAO implements IDialogDAO {
           }
         }
 
-        if (true) {
-        } else {
-          logger.error("deleteExercise : did not delete ex " + exid + " in " + dialogID);
-        }
+//        if (true) {
+//        } else {
+//          logger.error("deleteExercise : did not delete ex " + exid + " in " + dialogID);
+//        }
       }
     }
+    logger.info("deleteExercise : deletedIDs " + deletedIDs);
+
     return deletedIDs;
   }
 
@@ -828,10 +833,15 @@ public class DialogDAO extends DAO implements IDialogDAO {
   private void deleteTheExercise(int projid, int dialogID, int exid,
                                  Project project,
                                  IUserExerciseDAO userExerciseDAO) {
-    userExerciseDAO.deleteByExID(Collections.singleton(exid));
-    // refresh dialogs on project
-    databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
-    project.forgetExercise(exid);
+    if (userExerciseDAO.deleteByExID(Collections.singleton(exid))) {
+      // refresh dialogs on project
+      CommonExercise commonExercise = project.forgetExercise(exid);
+      logger.info("deleteTheExercise : forgot " + commonExercise);
+
+      databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
+    } else {
+      logger.warn("deleteTheExercise : didn't delete " + exid);
+    }
   }
 
   private int getIndex(int exid, List<ClientExercise> exercises) {

@@ -130,8 +130,19 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     return commonExercise;
   }
 
+  @Override
+  public CommonExercise forget(int id) {
+    CommonExercise forget = super.forget(id);
+    if (forget == null) {
+      forget = idToContextExercise.remove(id);
+      if (forget == null) {
+        forget = idToUserExercise.remove(id);
+      }
+    }
+    return forget;
+  }
 
-//  private CommonExercise maybeRefresh(int id) {
+  //  private CommonExercise maybeRefresh(int id) {
 //    CommonExercise commonExercise = null;
 //    if (userExerciseDAO.getByID(id) != null) {  // is it in the database by this id at all?
 //      boolean refresh = refresh(id);

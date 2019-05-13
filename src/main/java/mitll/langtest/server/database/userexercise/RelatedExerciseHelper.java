@@ -103,13 +103,15 @@ public class RelatedExerciseHelper implements IRelatedExercise {
   }
 
   /**
-   * @see DialogDAO#deleteExercise
    * @param exid
    * @return
+   * @see DialogDAO#deleteExercise
    */
   @Override
   public boolean deleteAndFixForEx(int exid) {
-    return daoWrapper.deleteAndFix(exid) > 0;
+    int i = daoWrapper.deleteAndFix(exid);
+    logger.info("deleted " + i + " rows for " + exid);
+    return i > 0;
   }
 
   /**
@@ -189,10 +191,10 @@ public class RelatedExerciseHelper implements IRelatedExercise {
         if (!nextPointers.isEmpty()) {
           prev = contextExToRelation.get(nextPointers.iterator().next());
         }
-      //  logger.info("getDialogIDToRelated 1 final link is " + prev);
+        //  logger.info("getDialogIDToRelated 1 final link is " + prev);
       } else {
         prev = finalOneList.get(0);
-      //  logger.info("getDialogIDToRelated 2 final link is " + prev);
+        //  logger.info("getDialogIDToRelated 2 final link is " + prev);
       }
 
       {
@@ -201,13 +203,13 @@ public class RelatedExerciseHelper implements IRelatedExercise {
         if (contextExToRelation.isEmpty()) {
           if (prev != null) {
             inOrder.add(prev);
-           // logger.info("getDialogIDToRelated " + dialogID + " : 1 add link " + prev);
+            // logger.info("getDialogIDToRelated " + dialogID + " : 1 add link " + prev);
           }
         } else {
 //        SlickRelatedExercise prev = contextExToRelation.get(-1);
           while (prev != null) {
             inOrder.add(prev);
-           // logger.info("getDialogIDToRelated " + dialogID + " : 2 add link " + prev);
+            // logger.info("getDialogIDToRelated " + dialogID + " : 2 add link " + prev);
             // int exid = slickRelatedExercise.exid();
             prev = contextExToRelation.get(prev.exid());
             // inOrder.add(prev);

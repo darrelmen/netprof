@@ -202,7 +202,7 @@ public interface IUserExerciseDAO extends IDAO {
 
   List<SlickExercise> getExercisesByIDs(Collection<Integer> exids);
 
-  void deleteByExID(Collection<Integer> exids);
+  boolean deleteByExID(Collection<Integer> exids);
 
   /**
    * @param userExercise

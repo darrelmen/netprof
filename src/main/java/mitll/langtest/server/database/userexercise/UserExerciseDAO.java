@@ -631,17 +631,17 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   @Override
-  public void deleteByExID(Collection<Integer> exids) {
-
+  public boolean deleteByExID(Collection<Integer> exids) {
+    return false;
   }
 
-  private String getIds(Collection<Integer> exids) {
+/*  private String getIds(Collection<Integer> exids) {
     StringBuilder builder = new StringBuilder();
     for (Integer id : exids) builder.append("'" + id + "'").append(",");
     String s = builder.toString();
     s = s.substring(0, s.length() - 1);
     return s;
-  }
+  }*/
 
   /**
    * @param sql
