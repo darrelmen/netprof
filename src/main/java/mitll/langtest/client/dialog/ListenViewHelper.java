@@ -125,6 +125,10 @@ public class ListenViewHelper<T extends ITurnPanel>
   private Button playButton;
   private Button playYourselfButton;
 
+  /**
+   * @see #isDoRehearse
+   * @see #gotHearYourself
+   */
   private boolean doRehearse = true;
 
 
@@ -294,8 +298,11 @@ public class ListenViewHelper<T extends ITurnPanel>
     rowOne.getElement().setId("speakerRow");
     rowOne.getElement().getStyle().setMarginTop(5, PX);
 
-    rowOne.add(getLeftSpeaker(getFirstSpeakerLabel(dialog)));
-    rowOne.add(getRightSpeaker(getSecondSpeakerLabel(dialog)));
+    String firstSpeakerLabel = isInterpreter ? getFirstSpeakerLabel(dialog) : SPEAKER_A;
+    rowOne.add(getLeftSpeaker(firstSpeakerLabel));
+
+    String secondSpeakerLabel = isInterpreter ? getSecondSpeakerLabel(dialog) : SPEAKER_B;
+    rowOne.add(getRightSpeaker(secondSpeakerLabel));
 
     {
       DivWidget middleSpeaker = getMiddleSpeaker();
@@ -1097,7 +1104,14 @@ public class ListenViewHelper<T extends ITurnPanel>
     playCurrentTurn();
   }
 
-  protected boolean isDoRehearse() {
+  /**
+   * @return
+   * @see #gotPlay
+   * @see #setNextTurnForSide
+   * @see #currentTurnPlayEnded()
+   * @see #startRecordingTurn(T)
+   */
+  boolean isDoRehearse() {
     return doRehearse;
   }
 
@@ -1219,7 +1233,7 @@ public class ListenViewHelper<T extends ITurnPanel>
       boolean rightSpeaker = isRightSpeakerSet();
       List<T> ts = (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : allTurns;
       // logger.info("getPromptSeq " + ts.size());
-      report(ts);
+      report("prompts", ts);
       return ts;
     }
   }
@@ -1228,10 +1242,10 @@ public class ListenViewHelper<T extends ITurnPanel>
     return allTurns;
   }
 
-  private void report(List<T> allTurns) {
+  private void report(String prefix, List<T> allTurns) {
     StringBuilder builder = new StringBuilder();
     allTurns.forEach(turn -> builder.append(turn.getExID()).append(", "));
-    logger.info("seq " + builder);
+    logger.info("report : " + prefix + " seq " + builder);
   }
 
   /**
@@ -1285,7 +1299,7 @@ public class ListenViewHelper<T extends ITurnPanel>
             logger.info("playCurrentTurn maybe did play " + blurb());
           }
           currentTurn.markCurrent();
-         // currentTurn.showNoAudioToPlay();
+          // currentTurn.showNoAudioToPlay();
         }
       } else {
         currentTurn.showNoAudioToPlay();
@@ -1333,7 +1347,7 @@ public class ListenViewHelper<T extends ITurnPanel>
         logger.info("playStopped ignore since click?");
       } else {
         removeMarkCurrent();
-        currentTurnPlayEnded(false);
+        currentTurnPlayEnded();
       }
     } else {
       logger.info("playStopped - no current turn.");
@@ -1349,10 +1363,9 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   /**
-   * @param wasRecording
    * @see #playStopped
    */
-  void currentTurnPlayEnded(boolean wasRecording) {
+  void currentTurnPlayEnded() {
     if (DEBUG) {
       logger.info("currentTurnPlayEnded (listen) - turn " + getExID() + " gotTurnClick " + gotTurnClick);
     }
@@ -1432,7 +1445,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #clearHighlightAndRemoveMark()
    * @see #setNextTurnForSide()
    * @see #playStopped()
-   * @see #currentTurnPlayEnded(boolean)
+   * @see #currentTurnPlayEnded()
    */
   void removeMarkCurrent() {
     if (DEBUG) logger.info("removeMarkCurrent on " + blurb());

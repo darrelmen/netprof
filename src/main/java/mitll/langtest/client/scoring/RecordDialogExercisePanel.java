@@ -62,7 +62,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
   private static final boolean DEBUG_PARTIAL = false;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   private static final long MOVE_ON_DUR = 3000L;
   private static final long END_SILENCE = 300L;
@@ -82,6 +82,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    *
    */
   private long minDur;
+  /**
+   * @see #addWidgets
+   */
   private Emoticon emoticon;
   private final SessionManager sessionManager;
 
@@ -299,11 +302,11 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    */
   @Override
   public void useResult(AudioAnswer result) {
+    logger.info("useResult got " + result);
     this.studentSpeechDur = getSpeechDur(result.getExid(), result.getPretestScore());
 
     studentAudioAttribute = new AudioAttribute();
     studentAudioAttribute.setAudioRef(result.getPath());
-//    studentAudioAttribute.setAlignmentOutput(result.getPretestScore());
     studentAudioAlignmentOutput = result.getPretestScore();
     studentAudioAttribute.setDurationInMillis(result.getDurationInMillis());
 
@@ -369,6 +372,10 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
         Emoticon w = getEmoticonPlaceholder();
         emoticon = w;
         flContainer.add(w);
+
+        if (isRight()) {
+          flContainer.addStyleName("floatRight");
+        }
       }
     }
 
@@ -398,6 +405,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
   /**
    * For now only right side of conversation can be practiced.
+   *
    * @return
    */
   protected boolean shouldShowRecordButton() {
@@ -517,10 +525,15 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   /**
    * @see RehearseViewHelper#gotPlay()
    */
-  @Override public void cancelRecording() {
+  @Override
+  public void cancelRecording() {
     recordAudioPanel.cancelRecording();
   }
 
+  /**
+   * @return
+   * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
+   */
   @NotNull
   private Emoticon getEmoticonPlaceholder() {
     Emoticon w = new Emoticon();
@@ -559,10 +572,17 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    */
   public void startRecording() {
     start = System.currentTimeMillis();
-    logger.info("startRecording for " + getExID() + " at " + start + " or " + new Date(start));
+    boolean pushToTalk = isPushToTalk();
+
+    logger.info("startRecording " +
+        "\n\tfor  " + getExID() + " " +
+        "\n\tat   " + start + " or " + new Date(start) +
+        "\n\tpush " + pushToTalk
+    );
+
     firstVAD = -1;
 
-    if (isPushToTalk()) {
+    if (pushToTalk) {
       enableRecordButton();
     } else {
       reallyStartOrStopRecording();
@@ -570,15 +590,24 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   }
 
   public boolean reallyStartOrStopRecording() {
+
+
+    logger.info("reallyStartOrStopRecording " +
+        "\n\tfor  " + getExID()
+    );
+
     return getRecordButton().startOrStopRecording();
   }
 
+  /**
+   * @see RehearseViewHelper#stopRecordingSafe()
+   */
   public void stopRecordingSafe() {
     getRecordButton().stopRecordingSafe();
   }
 
   public boolean isPushToTalk() {
-    return isMiddle() && doPushToTalk;
+    return doPushToTalk;
   }
 
   private PostAudioRecordButton getRecordButton() {
