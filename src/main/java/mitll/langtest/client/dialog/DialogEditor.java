@@ -141,21 +141,28 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
    */
   @Override
   protected void gotTurnClick(EditorTurn turn) {
-    //super.gotTurnClick(turn);
-
-    setGotTurnClick(true);
-
     EditorTurn currentTurn = getCurrentTurn();
+    logger.info("gotTurnClick currentTurn  " + blurb(currentTurn));
+
 
     boolean different = currentTurn != turn;
 
-    if (DEBUG) {
-      logger.info("currentTurn  " + currentTurn.getExID());
-      logger.info("clicked turn " + turn.getExID());
-      logger.info("different    " + different);
+    if (DEBUG || true) {
+//      logger.info("gotTurnClick currentTurn  " + blurb(currentTurn));
+      logger.info("gotTurnClick clicked turn " + blurb(turn));
+      logger.info("gotTurnClick different    " + different);
     }
 
+    setGotTurnClick(true);
+
     if (different) {
+      if (currentTurn.isPlaying()) {
+        logger.info("gotTurnClick ok pause audio ");
+        playCurrentTurn(); // toggle to pause.
+      } else {
+        logger.info("gotTurnClick : The turn is not playing...?");
+      }
+
       removeMarkCurrent();
       setCurrentTurn(turn);
       markCurrent();
@@ -163,6 +170,11 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 //    playCurrentTurn();
 
     //  logger.info("gotClickOnTurn " + turn);
+  }
+
+  @NotNull
+  private String blurb(EditorTurn turn) {
+    return turn.getExID() + " : " + turn.getText();
   }
 
   @Override

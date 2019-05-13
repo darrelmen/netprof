@@ -981,6 +981,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   protected void currentTurnPlayEnded() {
     if (directClick) {
       directClick = false;
+      if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded direct click ");
       markCurrent();
     } else {
       T currentTurn = getCurrentTurn();

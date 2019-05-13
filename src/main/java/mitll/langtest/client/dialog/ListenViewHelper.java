@@ -142,10 +142,10 @@ public class ListenViewHelper<T extends ITurnPanel>
   private INavigation.VIEWS prev, next;
   private INavigation.VIEWS thisView;
   private boolean gotTurnClick = false;
-  //private int clickedTurn = -1;
 
-  private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PLAY = false;
+  private static final boolean DEBUG = true;
+  private static final boolean DEBUG_NEXT = true;
+  private static final boolean DEBUG_PLAY = true;
 
   /**
    * @param controller
@@ -694,6 +694,9 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
   }
 
+  /**
+   * @see #ifOnLastJumpBackToFirst
+   */
   private void markFirstTurn() {
     if (!allTurns.isEmpty()) {
       setCurrentTurn(allTurns.get(0));
@@ -719,6 +722,10 @@ public class ListenViewHelper<T extends ITurnPanel>
     currentTurn.makeVisible();
   }
 
+  /**
+   * @param currentTurn
+   * @see #beforeChangeTurns()
+   */
   void makeVisible(UIObject currentTurn) {
     if (currentTurn == null) {
       logger.warning("makeVisible: no current turn...");
@@ -932,6 +939,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   public void moveFocusToNext() {
     T next = getNext();
     if (next != null) {
+      logger.info("moveFocusToNext - have " + next.getExID() + " grab focus.");
       next.grabFocus();
     } else if (!getAllTurns().isEmpty()) {
       getAllTurns().get(0).grabFocus();
@@ -1028,12 +1036,14 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     int i = getAllTurns().indexOf(currentTurn);
 
-    if (DEBUG) logger.info("beforeChangeTurns " + i + " : " + getExID());
+    if (DEBUG || true) {
+      logger.info("beforeChangeTurns current at #" + i + " : " + getExID() + " : " + currentTurn.getText());
+    }
 
     clearHighlightAndRemoveMark();
 
     if (!makeNextVisible()) {
-      //  logger.info("gotForward : make current turn visible!");
+      logger.info("beforeChangeTurns : make header visible");
       makeVisible(dialogHeader);  // make the top header visible...
     }
     return i;
@@ -1112,10 +1122,6 @@ public class ListenViewHelper<T extends ITurnPanel>
     return true;
   }
 
-//  void showHearYourself(boolean enabled) {
-//    playYourselfButton.setVisible(enabled);
-//  }
-
   protected void gotRehearse() {
     doRehearse = true;
   }
@@ -1126,11 +1132,15 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   }
 
+  /**
+   * @see #gotPlay()
+   */
   void ifOnLastJumpBackToFirst() {
     T currentTurn = getCurrentTurn();
     boolean last = isLast(currentTurn);
-    if (last) logger.info("OK, on last - let's consider going back to start");
-    if (currentTurn != null && !currentTurn.hasCurrentMark()) {
+    if (last) logger.info("ifOnLastJumpBackToFirst : OK, on last - let's consider going back to start");
+
+    if (last && currentTurn != null && !currentTurn.hasCurrentMark()) {
       markFirstTurn();
     }
   }
@@ -1272,7 +1282,6 @@ public class ListenViewHelper<T extends ITurnPanel>
             logger.info("playCurrentTurn maybe did play " + blurb());
           }
           currentTurn.markCurrent();
-          // currentTurn.showNoAudioToPlay();
         }
       } else {
         currentTurn.showNoAudioToPlay();
@@ -1340,7 +1349,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   void currentTurnPlayEnded() {
     if (DEBUG) {
-      logger.info("currentTurnPlayEnded (listen) - turn " + getExID() + " gotTurnClick " + gotTurnClick);
+      logger.info("currentTurnPlayEnded - turn " + getExID() + " gotTurnClick " + gotTurnClick);
     }
 
     if (gotTurnClick) {
@@ -1350,10 +1359,14 @@ public class ListenViewHelper<T extends ITurnPanel>
       if (DEBUG && next != null) {
         logger.info("currentTurnPlayEnded next turn " + next.getExID());
       }
-      makeNextVisible();
+      if (!makeNextVisible()) logger.info("currentTurnPlayEnded didn't make next visible...");
 
       if (next == null) {
         if (DEBUG) logger.info("currentTurnPlayEnded OK stop");
+//        setCurrentTurn(allTurns.get(0));
+        logger.info("currentTurnPlayEnded : markCurrent ");
+        markCurrent();
+        makeVisible(currentTurn);
       } else {
         removeMarkCurrent();
         setCurrentTurn(next);
@@ -1369,9 +1382,11 @@ public class ListenViewHelper<T extends ITurnPanel>
   private boolean makeNextVisible() {
     T next = getNext();
     if (next != null) {
+      logger.info("makeNextVisible " + next.getExID() + " : " + next.getText());
       makeVisible((T) next);
       return true;
     } else {
+      logger.info("makeNextVisible - no next?");
       return false;
     }
   }
@@ -1445,13 +1460,13 @@ public class ListenViewHelper<T extends ITurnPanel>
     List<T> seq = getAllTurns();
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
-    if (DEBUG) logger.info("getNext current " + i + " next " + i1);
+    if (DEBUG_NEXT) logger.info("getNext current " + i + " next " + i1);
 
     if (i1 > seq.size() - 1) {
       return null;
     } else {
       T widgets = seq.get(i1);
-      if (DEBUG) logger.info("getNext current at " + i1 + " will be ex #" + widgets.getExID());
+      if (DEBUG_NEXT) logger.info("getNext current at " + i1 + " will be ex #" + widgets.getExID());
       return widgets;
     }
   }

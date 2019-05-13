@@ -67,9 +67,9 @@ import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_B;
  *
  */
 public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IRehearseView, IRecordingTurnPanel {
-  public static final int TURN_WIDTH = 98;
   private final Logger logger = Logger.getLogger("EditorTurn");
 
+  public static final int TURN_WIDTH = 97;
   public static final int RIGHT_TURN_RIGHT_MARGIN = 153;
 
   public static final int HEIGHT_AND_WIDTH = 22;
@@ -254,13 +254,10 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       buttonContainer.getElement().getStyle().setMarginTop(3, Style.Unit.PX);
     }
 
-
     wrapper.add(buttonContainer);
 
-    if (postAudioRecordButton != null) {
-      addPressAndHoldStyleForRecordButton(postAudioRecordButton);
-      postAudioRecordButton.addFocusHandler(event -> grabFocus());
-    }
+    addPressAndHoldStyleForRecordButton(postAudioRecordButton);
+    postAudioRecordButton.addFocusHandler(event -> grabFocus());
 
     DivWidget textBoxContainer = new DivWidget();
 
@@ -459,7 +456,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
           }
         });
       }
-    } else if (isMiddle()) {
+    } else {
       int length = s.split(" ").length;
       //  logger.info("num tokens " + length);
 
@@ -590,6 +587,10 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     turnPanelDelegate.makeVisible();
   }
 
+  /**
+   * @see ListenViewHelper#getTurnPanel
+   * @param clickHandler
+   */
   @Override
   public void addClickHandler(ClickHandler clickHandler) {
     turnPanelDelegate.addClickHandler(clickHandler);
