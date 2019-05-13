@@ -55,7 +55,17 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
   private final Logger logger = Logger.getLogger("CreateDialogDialog");
 
   private FormField entitleBox;
+  private ListBox dialogType;
+  private ControlGroup dialogTypeContainer;
 
+  /**
+   * @param current
+   * @param names
+   * @param isEdit
+   * @param controller
+   * @param listView
+   * @see DialogEditorView#getEditDialog()
+   */
   CreateDialogDialog(T current,
                      Set<String> names,
                      boolean isEdit,
@@ -72,12 +82,10 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     super(null, names, false, controller, listView);
   }
 
-  private ListBox dialogType;
-  private ControlGroup dialogTypeContainer;
 
   /**
-   * TODO : add en title
-   * TODO : add unit/chapter drop downs
+   * add en title
+   * shows unit/chapter drop downs
    *
    * @param child
    */
@@ -97,37 +105,40 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
 
     child.add(grid);
 
-    {
-      ListBox listBox = getListBox(200);
-      listBox.addStyleName("leftFiveMargin");
-      listBox.addItem("-- Choose type of dialog --");
-      listBox.addItem(DialogType.DIALOG.toString());
-      listBox.addItem(DialogType.INTERPRETER.toString());
-      dialogTypeContainer = new ControlGroup();
-      dialogTypeContainer.add(listBox);
-      dialogType = listBox;
-      child.add(dialogTypeContainer);
+    addDialogType(child);
 
-      if (isEdit) {
-        if (getCurrent().getKind() == DialogType.DIALOG) {
-          listBox.setSelectedValue(DialogType.DIALOG.toString());
-        } else if (getCurrent().getKind() == DialogType.INTERPRETER) {
-          listBox.setSelectedValue(DialogType.INTERPRETER.toString());
-        }
-      }
-    }
-    {
+   /* {
       ListBox listBox = getListBox(200);
       listBox.addStyleName("leftFiveMargin");
       listBox.addItem("-- Choose first speaker --");
       listBox.addItem("English Speaker");
       listBox.addItem(controller.getProjectStartupInfo().getLanguageInfo().toDisplay() + " Speaker");
       child.add(listBox);
-    }
+    }*/
     //listBox.addChangeHandler(event -> gotChangeOn);
 
     child.add(getPrivacyChoices());
     moveFocusToTitleLater();
+  }
+
+  private void addDialogType(Panel child) {
+    ListBox listBox = getListBox(200);
+    listBox.addStyleName("leftFiveMargin");
+    listBox.addItem("-- Choose type of dialog --");
+    listBox.addItem(DialogType.DIALOG.toString());
+    listBox.addItem(DialogType.INTERPRETER.toString());
+    dialogTypeContainer = new ControlGroup();
+    dialogTypeContainer.add(listBox);
+    dialogType = listBox;
+    child.add(dialogTypeContainer);
+
+    if (isEdit) {
+      if (getCurrent().getKind() == DialogType.DIALOG) {
+        listBox.setSelectedValue(DialogType.DIALOG.toString());
+      } else if (getCurrent().getKind() == DialogType.INTERPRETER) {
+        listBox.setSelectedValue(DialogType.INTERPRETER.toString());
+      }
+    }
   }
 
   @Override
@@ -234,7 +245,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
         isPrivate
     );
 
-    logger.info("doCreate new " +newDialog.getID() + " " + newDialog.isPrivate());
+    logger.info("doCreate new " + newDialog.getID() + " " + newDialog.isPrivate());
 
     controller.getDialogService().addDialog(newDialog,
         new AsyncCallback<IDialog>() {

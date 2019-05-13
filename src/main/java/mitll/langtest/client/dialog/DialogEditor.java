@@ -55,8 +55,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
   private static final int FIXED_HEIGHT = 390;
 
-  // private int dialogID;
-
   private final SessionStorage sessionStorage;
   private final boolean isInModal;
 
@@ -69,7 +67,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     super(controller, thisView);
     setDialog(theDialog);
     isInModal = theDialog != null;
-    // this.dialogID = theDialog == null ? -1 : theDialog.getID();
     this.sessionStorage = new SessionStorage(controller.getStorage(), "editorSession");
   }
 
@@ -177,14 +174,13 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     }
   }
 
-  protected void setFixedHeight(DivWidget rowOne) {
+  private void setFixedHeight(DivWidget rowOne) {
     rowOne.setHeight(FIXED_HEIGHT + "px");
   }
 
   @Override
   protected void addDialogHeader(IDialog dialog, Panel child) {
-    if (isInModal) {
-    } else {
+    if (!isInModal) {
       super.addDialogHeader(dialog, child);
     }
   }
@@ -198,6 +194,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   @Override
   public void gotForward(EditorTurn editorTurn) {
     safeStopRecording();
+
     if (isLast(editorTurn)) {
       // make either one or two more turns and add to end of dialog
       addTurnForSameSpeaker(editorTurn);

@@ -62,7 +62,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
   private static final boolean DEBUG_PARTIAL = false;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private static final long MOVE_ON_DUR = 3000L;
   private static final long END_SILENCE = 300L;
@@ -302,7 +302,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    */
   @Override
   public void useResult(AudioAnswer result) {
-    logger.info("useResult got " + result);
+    logger.info("useResult got " + result.getScore() + " for " +result.getPath());
+
     this.studentSpeechDur = getSpeechDur(result.getExid(), result.getPretestScore());
 
     studentAudioAttribute = new AudioAttribute();

@@ -258,6 +258,7 @@ public class DownloadServlet extends DatabaseServlet {
     if (split.length == 2) {
       String[] splitArgs = split[1].split(REGEXAMPERSAND);
       String listid = splitArgs[0];
+      logger.info("dialog id now " + listid);
       if (!listid.isEmpty()) {
         writeDialogList(response, db, listid, projid, getAudioExportOptions(splitArgs));
       }

@@ -67,6 +67,7 @@ import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_B;
  *
  */
 public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IRehearseView, IRecordingTurnPanel {
+  public static final int TURN_WIDTH = 98;
   private final Logger logger = Logger.getLogger("EditorTurn");
 
   public static final int RIGHT_TURN_RIGHT_MARGIN = 153;
@@ -534,7 +535,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     if (columns == MIDDLE) {
       wrapper.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
     }
-    wrapper.setWidth("98%");
+    wrapper.setWidth(TURN_WIDTH + "%");
   }
 
   @Override

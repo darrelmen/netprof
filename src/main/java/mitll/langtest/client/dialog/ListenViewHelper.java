@@ -29,13 +29,12 @@
 
 package mitll.langtest.client.dialog;
 
-import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.CheckBox;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Icon;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
@@ -137,17 +136,16 @@ public class ListenViewHelper<T extends ITurnPanel>
   /**
    *
    */
-  //protected int dialogID;
   private IDialog dialog;
   boolean isInterpreter = false;
 
   private INavigation.VIEWS prev, next;
   private INavigation.VIEWS thisView;
   private boolean gotTurnClick = false;
-  private int clickedTurn = -1;
+  //private int clickedTurn = -1;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PLAY = true;
+  private static final boolean DEBUG_PLAY = false;
 
   /**
    * @param controller
@@ -230,7 +228,28 @@ public class ListenViewHelper<T extends ITurnPanel>
       getRefAudio(refAudioGetters.iterator());
     } else {
       logger.info("showDialogGetRef no dialog for " + dialogID);
+      Label child1 = new Label(LabelType.INFO, "Please choose a dialog first under Dialogs.");
+      child1.getElement().getStyle().setFontSize(16, PX);
+      child1.addStyleName("topFiveMargin");
+      child1.addStyleName("floatLeft");
+      child1.getElement().getStyle().setClear(Style.Clear.BOTH);
+      child.add(child1);
+
+      {
+        Button widgets = new Button("Click here to choose a dialog", IconType.EYE_OPEN);
+        widgets.setType(ButtonType.INFO);
+        widgets.addClickHandler(event -> gotJumpToDialog());
+        widgets.addStyleName("leftFiveMargin");
+        widgets.addStyleName("topFiveMargin");
+        widgets.addStyleName("floatLeft");
+        widgets.getElement().getStyle().setClear(Style.Clear.BOTH);
+        child.add(widgets);
+      }
     }
+  }
+
+  void gotJumpToDialog() {
+    controller.getNavigation().showView(INavigation.VIEWS.DIALOG);
   }
 
   /**
@@ -508,52 +527,6 @@ public class ListenViewHelper<T extends ITurnPanel>
     return rightDiv;
   }
 
-//  private void setLeftTurnSpeakerInitial(CheckBox checkBox) {
-//    checkBox.setValue(true);
-//  }
-//
-//  void setRightTurnInitialValue(CheckBox checkBox) {
-//    checkBox.setValue(true);
-//  }
-
-//  void speakerOneCheck(Boolean value) {
-//    if (!value && !isRightSpeakerSelected()) {
-//      setRightSpeaker();
-//    }
-//  }
-
-//  private void setRightSpeaker() {
-//    setRightSpeaker(true);
-//  }
-
-//  void setRightSpeaker(boolean value) {
-//    if (rightSpeakerBox != null) {
-//      rightSpeakerBox.setValue(value);
-//    }
-//  }
-//
-//  void speakerTwoCheck(Boolean value) {
-//    if (!value && !isLeftSpeakerSelected()) {
-//      selectLeftSpeaker();
-//    }
-//  }
-//
-//  private void selectLeftSpeaker() {
-//    setLeftSpeaker(true);
-//  }
-
-//  void setLeftSpeaker(boolean val) {
-//    if (leftSpeakerBox != null)
-//      leftSpeakerBox.setValue(val);
-//  }
-//
-//  private Boolean isLeftSpeakerSelected() {
-//    return leftSpeakerBox == null || leftSpeakerBox.getValue();
-//  }
-//
-//  private Boolean isRightSpeakerSelected() {
-//    return rightSpeakerBox == null || rightSpeakerBox.getValue();
-//  }
 
   DivWidget turnContainer;
 
@@ -568,7 +541,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     this.turnContainer = rowOne;
 
-    logger.info("getTurns : dialog    " + dialog);
+    if (DEBUG) logger.info("getTurns : dialog    " + dialog);
 
     if (DEBUG) logger.info("getTurns : exercises " + dialog.getExercises().size());
 

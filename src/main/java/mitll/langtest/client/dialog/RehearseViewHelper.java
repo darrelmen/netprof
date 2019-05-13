@@ -89,11 +89,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   private static final int PROGRESS_BAR_WIDTH = 49;
 
-  // private static final String REHEARSE = "Rehearse";
-  /**
-   * @see #getButtonBarChoices()
-   */
-  // private static final String HEAR_YOURSELF = "Hear yourself";
   private static final int VALUE = -98;
 
   private static final String THEY_SPEAK = "Listen to : ";
@@ -1301,11 +1296,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
     if (atEnd) {
       if (DEBUG_PLAY_ENDED) logger.info("useResult at end...");
-      if (waitCursor.isVisible()) {
-        if (isDoRehearse()) {  // or could happen in currentTurnPlayEnded
-          showScores();
-        }
+      if (waitCursor.isVisible() || isLast(matchingTurn)) {
+        maybeShowScores();
       }
+
       //  currentTurnPlayEnded(false);
     }
     // maybeMoveOnToNextTurn();
@@ -1314,6 +1308,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 //      Scheduler.get().scheduleDeferred((Command) matchingTurn::showScoreInfo);
 //    }
     //maybeMoveOnIfNextTurnARecordingTurn();
+  }
+
+  private void maybeShowScores() {
+    if (isDoRehearse()) {  // or could happen in currentTurnPlayEnded
+      showScores();
+    }
   }
 
   /**

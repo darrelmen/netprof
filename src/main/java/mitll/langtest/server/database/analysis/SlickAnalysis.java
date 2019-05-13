@@ -62,8 +62,6 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private static final Logger logger = LogManager.getLogger(SlickAnalysis.class);
 
   private static final int WARN_THRESH = 100;
-  //  private static final String ANSWERS = "answers";
-//  private static final int MAX_TO_SEND = 25;
   private static final int DEFAULT_PROJECT = 1;
   private static final int UNKNOWN_EXERCISE = 2;
   private final SlickResultDAO resultDAO;
@@ -552,12 +550,14 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
   private List<SlickPerfResult> getNonEnglishOnly(Collection<SlickPerfResult> perfForUser) {
     Project project = database.getProject(projid);
 
+    boolean isEnglishProject = project.isEnglish();
+
     List<SlickPerfResult> nonEnglishOnly = perfForUser
         .stream()
         .filter(slickPerfResult ->
         {
           CommonExercise exerciseByID = project.getExerciseByID(slickPerfResult.exid());
-          return exerciseByID == null || !exerciseByID.hasEnglishAttr();
+          return exerciseByID == null || (isEnglishProject || !exerciseByID.hasEnglishAttr());
         }).collect(Collectors.toList());
 
     if (perfForUser.size() != nonEnglishOnly.size()) {

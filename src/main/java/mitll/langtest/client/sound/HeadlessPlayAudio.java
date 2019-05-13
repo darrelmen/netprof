@@ -128,7 +128,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    */
   @Override
   public boolean doPlayPauseToggle() {
-    logger.info("PlayAudioPanel doPlayPauseToggle " + playing + " " + currentPath);
+    if (DEBUG_PLAY)  logger.info("PlayAudioPanel doPlayPauseToggle " + playing + " " + currentPath);
 
     if (hasSound()) {
       if (isPlaying()) {
