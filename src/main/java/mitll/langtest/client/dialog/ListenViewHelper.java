@@ -143,7 +143,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   private int clickedTurn = -1;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PLAY = false;
+  private static final boolean DEBUG_PLAY = true;
 
   /**
    * @param controller
@@ -886,6 +886,7 @@ public class ListenViewHelper<T extends ITurnPanel>
       playButton = widgets1;
     }
 
+
     {
       Button widgets1 = new Button("Yourself", IconType.PLAY, event -> gotPlayYourself());
       widgets1.setActive(false);
@@ -893,7 +894,9 @@ public class ListenViewHelper<T extends ITurnPanel>
 
       widgets1.setSize(ButtonSize.LARGE);
       widgets1.addStyleName("leftFiveMargin");
-      rowOne.add(widgets1);
+      if (addPlayYourself()) {
+        rowOne.add(widgets1);
+      }
       playYourselfButton = widgets1;
     }
 
@@ -1098,7 +1101,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     return doRehearse;
   }
 
-  void gotPlayYourself() {
+  private void gotPlayYourself() {
     setGotTurnClick(false);
     logger.info("gotPlay got click on play yourself");
 
@@ -1110,9 +1113,21 @@ public class ListenViewHelper<T extends ITurnPanel>
     playCurrentTurn();
   }
 
+  /**
+   * @param enabled
+   * @see #gotPlay
+   */
   void setHearYourself(boolean enabled) {
     playYourselfButton.setEnabled(enabled);
   }
+
+  protected boolean addPlayYourself() {
+    return true;
+  }
+
+//  void showHearYourself(boolean enabled) {
+//    playYourselfButton.setVisible(enabled);
+//  }
 
   protected void gotRehearse() {
     doRehearse = true;
@@ -1260,17 +1275,22 @@ public class ListenViewHelper<T extends ITurnPanel>
   void playCurrentTurn() {
     if (currentTurn != null) {
       if (DEBUG_PLAY) logger.info("playCurrentTurn " + blurb());
-      boolean didPause = currentTurn.doPlayPauseToggle();
-      if (didPause) {
-        if (DEBUG_PLAY) logger.info("playCurrentTurn did pause " + blurb());
-        setPlayButtonToPlay();
-      } else {
-        if (DEBUG_PLAY) {
-          logger.info("playCurrentTurn maybe did play " + blurb());
+      if (currentTurn.hasAudio()) {
+        boolean didPause = currentTurn.doPlayPauseToggle();
+        if (didPause) {
+          if (DEBUG_PLAY) logger.info("playCurrentTurn did pause " + blurb());
+          setPlayButtonToPlay();
+        } else {
+          if (DEBUG_PLAY) {
+            logger.info("playCurrentTurn maybe did play " + blurb());
+          }
+          currentTurn.markCurrent();
+         // currentTurn.showNoAudioToPlay();
         }
-        currentTurn.markCurrent();
+      } else {
         currentTurn.showNoAudioToPlay();
       }
+
     } else {
       logger.warning("playCurrentTurn no current turn?");
     }

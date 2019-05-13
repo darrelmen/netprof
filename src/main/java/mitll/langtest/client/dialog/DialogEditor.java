@@ -74,6 +74,11 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   }
 
   @Override
+  protected boolean addPlayYourself() {
+    return false;
+  }
+
+  @Override
   public String getSession() {
     return "" + sessionStorage.getSession();
   }

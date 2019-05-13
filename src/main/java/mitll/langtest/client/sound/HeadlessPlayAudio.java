@@ -128,7 +128,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    */
   @Override
   public boolean doPlayPauseToggle() {
-    //logger.info("PlayAudioPanel doPlayPauseToggle " + playing + " " +currentPath);
+    logger.info("PlayAudioPanel doPlayPauseToggle " + playing + " " + currentPath);
 
     if (hasSound()) {
       if (isPlaying()) {
@@ -192,7 +192,6 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   }
 
   /**
-   *
    * @param listener
    */
   private void addSimpleListener(SimpleAudioListener listener) {
@@ -284,17 +283,23 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   }
 
   /**
+   * @return
    * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#configureButton2
    */
-  protected void loadAndPlay() {
+  protected boolean loadAndPlay() {
     if (currentPath == null) {
       logger.warning("loadAndPlay, current path is null?");
-
+      return false;
 //      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("no path?"));
 //      logger.info("logException stack " + exceptionAsString);
     } else {
       loadAndPlayOrPlayAudio(currentPath);
+      return true;
     }
+  }
+
+  public boolean hasAudio() {
+    return currentPath != null;
   }
 
   /**

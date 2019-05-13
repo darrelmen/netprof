@@ -30,6 +30,9 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.IPlayAudioControl;
@@ -69,25 +72,42 @@ public class PlayAudioExercisePanel extends DivWidget implements IPlayAudioContr
     }
   }
 
+  public boolean hasAudio() {
+    return playAudio.hasAudio();
+  }
+
   /**
    * What to show if you go to play audio but there is none there...
    */
   @Override
   public void showNoAudioToPlay() {
+//    Style style = getElement().getStyle();
+//    String before = style.getBackgroundColor();
+//    style.setBackgroundColor("red");
+    Widget widget = getChildren().get(0);
+    widget.addStyleName("blink-target");
 
+
+    Timer waitTimer = new Timer() {
+      @Override
+      public void run() {
+        //   logger.info("scheduleWaitTimer timer expired..." + outer);
+        widget.removeStyleName("blink-target");
+      }
+    };
+    waitTimer.schedule(1000);
   }
 
   /**
    * @param playListener
-   * @see ListenViewHelper#getTurnPanel
    * @return
+   * @see ListenViewHelper#getTurnPanel
    */
   public boolean addPlayListener(PlayListener playListener) {
     if (playAudio != null) {
       playAudio.addPlayListener(playListener);
       return true;
-    }
-    else {
+    } else {
       logger.warning("\n\naddPlayListener ignore adding play listener since no play audio...\n\n");
       return false;
     }
