@@ -524,7 +524,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   }
 
   /**
-   * @see RehearseViewHelper#gotPlay()
+   * @see RehearseViewHelper#gotClickOnPlay()
    */
   @Override
   public void cancelRecording() {

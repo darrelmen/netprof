@@ -113,6 +113,10 @@ public class PlayAudioExercisePanel extends DivWidget implements IPlayAudioContr
     }
   }
 
+  /**
+   *
+   * @return true if paused
+   */
   @Override
   public boolean doPause() {
     return playAudio.doPause();

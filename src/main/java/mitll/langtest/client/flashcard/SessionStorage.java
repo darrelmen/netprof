@@ -50,7 +50,7 @@ public class SessionStorage {
   }
 
   /**
-   * @see RehearseViewHelper#gotPlay
+   * @see RehearseViewHelper#gotClickOnPlay
    */
   public void storeSession() {
     storeSession(System.currentTimeMillis());

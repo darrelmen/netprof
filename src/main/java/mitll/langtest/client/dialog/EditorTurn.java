@@ -433,7 +433,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       ne.preventDefault();
       ne.stopPropagation();
 
-      logger.info("got enter on " + this.getExID() + " : " + columns);
+      logger.info("gotKey : got enter on " + this.getExID() + " : " + columns);
 
       if (s.equals(prev)) {
         turnContainer.gotForward(this);

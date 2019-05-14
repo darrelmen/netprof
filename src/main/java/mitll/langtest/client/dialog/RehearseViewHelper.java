@@ -140,8 +140,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   String rehearsalKey = DIALOG_INTRO_SHOWN_REHEARSAL;
   private String rehearsalPrompt;
 
-  private static final boolean DEBUG = false;
-  private static final boolean DEBUG_RECORDING = true;
+  private static final boolean DEBUG = true;
+  private static final boolean DEBUG_RECORDING = false;
   private static final boolean DEBUG_SILENCE = false;
   private static final boolean DEBUG_PLAY_ENDED = true;
 
@@ -306,7 +306,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 //    return onButton;
 //  }
 
-  private void configure(ClickHandler handler, Button onButton) {
+ /* private void configure(ClickHandler handler, Button onButton) {
     onButton.setType(ButtonType.INFO);
     onButton.addClickHandler(handler);
     onButton.setActive(false);
@@ -316,7 +316,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     Style style = toolbar.getElement().getStyle();
     style.setMarginTop(TOP_TO_USE, PX);
     style.setMarginBottom(TOP_TO_USE, PX);
-  }
+  }*/
 
   @NotNull
   protected DivWidget getLeftSpeakerDiv(CheckBox checkBox) {
@@ -664,7 +664,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     if (!overallSmiley.isVisible()) {
       showOverallDialogScore();
       recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
-      setPlayButtonToPlay();
+      //setPlayButtonToPlay();
       setCurrentTurn(getPromptSeq().get(0));
     }
   }
@@ -676,7 +676,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    * Move current turn to first turn when we switch who is the prompting speaker.
    */
   void gotSpeakerChoice() {
-    setPlayButtonToPlay();
+    //setPlayButtonToPlay();
     makeFirstTurnCurrent();
 
     if (!isInterpreter) {
@@ -758,29 +758,46 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    * @see ListenViewHelper#getControls
    */
   @Override
-  protected void gotPlay() {
-    setGotTurnClick(false);
+  protected void gotClickOnPlay() {
+//    setGotTurnClick(false);
+    togglePlayState();
+
     setHearYourself(false);
     gotRehearse();
+
+    if (DEBUG) {
+      logger.info("gotClickOnPlay  ");
+    }
 
     if (getCurrentTurn() != null &&
         isCurrentTurnARecordingTurn() &&
         getCurrentTurn().isRecording()) {  // cancel current recording
 
       if (DEBUG) {
-        logger.info("gotPlay on recording turn - so abort!");
+        logger.info("gotClickOnPlay on recording turn - so abort!");
       }
 
       setPlayButtonToPlay();
       getCurrentTurn().cancelRecording();
     } else {
       if (isDoRehearse()) {
+        if (DEBUG) {
+          logger.info("gotClickOnPlay do rehearsal ");
+        }
         if (isSessionGoingNow()) {
+          if (DEBUG) {
+            logger.info("gotClickOnPlay current turn recording turn ");
+          }
+
           if (getCurrentTurn() != null &&
               isCurrentTurnARecordingTurn()) {
             getCurrentTurn().disableRecordButton();
           }
-          setPlayButtonToPlay();
+          else {
+            playCurrentTurn();
+          }
+
+      //    setPlayButtonToPlay();
         } else {
           if (isFirstPrompt(getCurrentTurn())) {
             doRecordingNoticeMaybe();
@@ -789,6 +806,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
           }
         }
       } else {
+        if (DEBUG) {
+          logger.info("gotClickOnPlay play current turn ");
+        }
         ifOnLastJumpBackToFirst();
         playCurrentTurn();
       }
@@ -797,13 +817,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   private void doRecordingNoticeMaybe() {
     boolean dialogIntroShown = controller.getStorage().isTrue(rehearsalKey);
-    if (!dialogIntroShown) {
+    if (!dialogIntroShown || true) {
       controller.getStorage().setBoolean(rehearsalKey, true);
-
+      if (DEBUG) {
+        logger.info("doRecordingNoticeMaybe  ");
+      }
       DialogHelper dialogHelper = new DialogHelper(true);
       dialogHelper.show("Get ready!",
-          Arrays.asList(
-              getLarger(rehearsalPrompt)),
+          Collections.singletonList(getLarger(rehearsalPrompt)),
           new DialogHelper.CloseListener() {
             @Override
             public boolean gotYes() {
@@ -845,7 +866,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
     T currentTurn = getCurrentTurn();
 
-    if (DEBUG) logger.info("gotPlay currentTurn - " + currentTurn);
+    if (DEBUG) logger.info("gotClickOnPlay currentTurn - " + currentTurn);
 
     // TODO : way too confusing
 //    if (currentTurn == null || !currentTurn.isPlaying()) {
@@ -853,29 +874,29 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 //    }
 
     if (currentTurn == null) {
-      logger.info("gotPlay no current turn");
+      logger.info("gotClickOnPlay no current turn");
       setCurrentTurn(getPromptSeq().get(0));
     } else {
-      if (DEBUG) logger.info("gotPlay (rehearse) Current turn = " + currentTurn);
+      if (DEBUG) logger.info("gotClickOnPlay (rehearse) Current turn = " + currentTurn);
     }
 
     if (onFirstPromptTurn()) {  // if got play on the first turn, start a new session -
       if (currentTurn == null || !currentTurn.isPlaying()) {
         if (!showingScoresNow) { // we already did this above!
-          if (DEBUG) logger.info("gotPlay : start new session");
+          if (DEBUG) logger.info("gotClickOnPlay : start new session");
           sessionStorage.storeSession();
           clearScores();
         }
       } else {
-        // logger.info("gotPlay ignoring turn " + currentTurn);
+        // logger.info("gotClickOnPlay ignoring turn " + currentTurn);
       }
     }
 
     if (isTurnAPrompt(currentTurn)) {  // is the current turn a prompt? if so play the prompt
-      if (DEBUG) logger.info("gotPlay : current turn a prompt");
+      if (DEBUG) logger.info("gotClickOnPlay : current turn a prompt");
       playCurrentTurn();  // could do play/pause!
     } else { // the current turn is a response, start recording it
-      if (DEBUG) logger.info("gotPlay : current turn a recording turn.");
+      if (DEBUG) logger.info("gotClickOnPlay : current turn a recording turn.");
       startRecordingTurn(getCurrentTurn()); // advance automatically
     }
   }
@@ -905,7 +926,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   /**
-   * @see #gotPlay()
+   * @see #gotClickOnPlay()
    */
   void clearScores() {
     overallSmiley.setVisible(false);
@@ -1080,12 +1101,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    * TODO : don't keep validities here - keep them on each turn
    *
    * @param toStart
-   * @see #gotPlay()
+   * @see #gotClickOnPlay()
    * @see ListenViewHelper#currentTurnPlayEnded()
    */
   private void startRecordingTurn(T toStart) {
     if (isDoRehearse()) {
-      setPlayButtonToPause();
+      //setPlayButtonToPause();
 
       if (dialogSession == null) {
         startSession();

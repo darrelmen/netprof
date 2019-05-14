@@ -169,7 +169,7 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
         candidate = dialogSession;
       } else if (candidate.modified().getTime() < dialogSession.modified().getTime()) {
 
-
+/*
         INavigation.VIEWS candidateView = INavigation.VIEWS.NONE;
         try {
           candidateView = INavigation.VIEWS.valueOf(candidate.view().toUpperCase());
@@ -180,9 +180,9 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
         try {
           currentView = INavigation.VIEWS.valueOf(dialogSession.view().toUpperCase());
         } catch (IllegalArgumentException e) {
-        }
+        }*/
 
-        logger.info("getCandidate " + candidate);
+//        logger.info("getCandidate " + candidate);
 //        if (currentView != INavigation.VIEWS.STUDY && candidateView == INavigation.VIEWS.STUDY) {  // rehearse or perform trumps STUDY
 //          candidate = dialogSession;
 //        }

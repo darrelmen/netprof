@@ -35,6 +35,7 @@ import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.exercise.PlayAudioEvent;
+import mitll.langtest.client.scoring.PlayAudioExercisePanel;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 
@@ -171,6 +172,12 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     play();
   }
 
+  /**
+   * @see PlayAudioExercisePanel#doPause
+   * @see #cleanUp()
+   * @see #loadAudio(String)
+   * @return true if paused
+   */
   @Override
   public boolean doPause() {
     if (isPlaying()) {
@@ -285,6 +292,8 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   /**
    * @return
    * @see mitll.langtest.client.scoring.ChoicePlayAudioPanel#configureButton2
+   * @see #doPlayPauseToggle()
+   * @see #loadAndPlayOrPlayAudio(AudioAttribute)
    */
   protected boolean loadAndPlay() {
     if (currentPath == null) {
@@ -580,6 +589,9 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     }
   }
 
+  /**
+   * @see #songFinished()
+   */
   void tellListenersPlayStopped() {
 //    playListeners.forEach(playListener -> logger.info("telling stopped to " +playListener));
     playListeners.forEach(PlayListener::playStopped);

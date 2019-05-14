@@ -49,7 +49,6 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
 
   private static final String PLAY_AUDIO_PANEL = "PlayAudioPanel_";
 
-  private static final boolean DEBUG = false;
 
   protected static final IconType PLAY = IconType.PLAY;
 
@@ -69,6 +68,8 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
    * Only so we can log the event for a specific exercise
    */
   protected final int exid;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param buttonTitle
@@ -118,7 +119,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
       //logger.info("this " + getClass() + " got play audio event " + authenticationEvent.getSource());
       if (isPlaying()) {
         if (DEBUG) {
-          logger.info("\t PAUSE : this " + getClass() + " got play audio event " + authenticationEvent.getSource());
+          logger.info("gotPlayAudioEvent : PAUSE : this " + getClass() + " got play audio event " + authenticationEvent.getSource());
         }
         pause();
         reinitialize();
@@ -368,6 +369,11 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
     setPlayButtonText();
   }
 
+  /**
+   * @see HeadlessPlayAudio#doPlayPauseToggle()
+   * @see HeadlessPlayAudio#doPause()
+   * @see #gotPlayAudioEvent(PlayAudioEvent)
+   */
   @Override
   protected void pause() {
     super.pause();

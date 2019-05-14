@@ -112,9 +112,14 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   }
 
   @Override
-  void gotPlay() {
-    setGotTurnClick(false);
-    playCurrentTurn();
+  void gotClickOnPlay() {
+    togglePlayState();
+
+  //  setGotTurnClick(false);
+
+    if (isSessionGoingNow()) {
+      playCurrentTurn();
+    }
   }
 
   /**
@@ -153,9 +158,9 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
       logger.info("gotTurnClick different    " + different);
     }
 
-    setGotTurnClick(true);
+  //  setGotTurnClick(true);
 
-    if (different) {
+/*    if (different) {
       if (currentTurn.isPlaying()) {
         logger.info("gotTurnClick ok pause audio ");
         playCurrentTurn(); // toggle to pause.
@@ -166,7 +171,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
       removeMarkCurrent();
       setCurrentTurn(turn);
       markCurrent();
-    }
+    }*/
 //    playCurrentTurn();
 
     //  logger.info("gotClickOnTurn " + turn);
@@ -206,6 +211,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   @Override
   public void gotForward(EditorTurn editorTurn) {
     safeStopRecording();
+    int i = beforeChangeTurns();
 
     if (isLast(editorTurn)) {
       // make either one or two more turns and add to end of dialog

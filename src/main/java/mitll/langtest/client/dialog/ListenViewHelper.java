@@ -52,6 +52,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.*;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
+import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.DialogType;
@@ -141,11 +142,15 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   private INavigation.VIEWS prev, next;
   private INavigation.VIEWS thisView;
-  private boolean gotTurnClick = false;
+  /**
+   *
+   */
+//  private boolean gotTurnClick = false;
+//  private boolean playStateIsPlaying = false;
 
   private static final boolean DEBUG = true;
-  private static final boolean DEBUG_NEXT = true;
-  private static final boolean DEBUG_PLAY = true;
+  private static final boolean DEBUG_NEXT = false;
+  private static final boolean DEBUG_PLAY = false;
 
   /**
    * @param controller
@@ -830,21 +835,28 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @param turn
    */
   void gotTurnClick(T turn) {
-    logger.info("gotTurnClick " + turn.getExID());
+    logger.info("\n\n ------- gotTurnClick " + turn.getExID());
 
-    setGotTurnClick(true);
+    setPlayButtonToPlay();
+
+    //setGotTurnClick(true);
+
     removeMarkCurrent();
     setCurrentTurn(turn);
     playCurrentTurn();
   }
-
+/*
   private boolean isGotTurnClick() {
     return gotTurnClick;
   }
 
   void setGotTurnClick(boolean gotTurnClick) {
+    if (DEBUG) {
+      logger.info("\n\n ------- setGotTurnClick " + gotTurnClick);
+    }
+
     this.gotTurnClick = gotTurnClick;
-  }
+  }*/
 
   /**
    * TODO add playback rate
@@ -866,7 +878,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
 
     {
-      Button widgets1 = new Button("", IconType.PLAY, event -> gotPlay());
+      Button widgets1 = new Button("", IconType.PLAY, event -> gotClickOnPlay());
       widgets1.setSize(ButtonSize.LARGE);
       widgets1.addStyleName("leftFiveMargin");
       rowOne.add(widgets1);
@@ -1017,21 +1029,33 @@ public class ListenViewHelper<T extends ITurnPanel>
     afterChangeTurns(isPlaying);
   }
 
-  //@Override
+  /**
+   * If the focus changed, it must be from a user interaction?
+   *
+   * @param newTurn
+   * @see EditorTurn#gotFocus
+   */
   public void setCurrentTurnTo(T newTurn) {
+    if (DEBUG) logger.info("setCurrentTurnTo - " + newTurn.getExID());
+    //  setGotTurnClick(true);
+    setPlayButtonToPlay();
+
     boolean isPlaying = currentTurn.doPause();
-    int i = beforeChangeTurns();
+    if (DEBUG) logger.info("setCurrentTurnTo current turn paused " + isPlaying);
+
+    /*int i = */
+    beforeChangeTurns();
     setCurrentTurn(newTurn);
+    markCurrent();
     //   logger.info("setCurrentTurnTo ex #" + currentTurn.getExID());
-    afterChangeTurns(isPlaying);
+    // afterChangeTurns(isPlaying);
   }
 
-  @Override
-  public boolean isInterpreter() {
-    return dialog.getKind() == DialogType.INTERPRETER;
-  }
-
-  private int beforeChangeTurns() {
+  /**
+   * @return
+   * @see #setCurrentTurnTo
+   */
+  protected int beforeChangeTurns() {
     setPlayButtonToPlay();
 
     int i = getAllTurns().indexOf(currentTurn);
@@ -1049,12 +1073,17 @@ public class ListenViewHelper<T extends ITurnPanel>
     return i;
   }
 
+  @Override
+  public boolean isInterpreter() {
+    return dialog.getKind() == DialogType.INTERPRETER;
+  }
+
   private int getExID() {
     return currentTurn.getExID();// + " : " +currentTurn.getText();
   }
 
   private void afterChangeTurns(boolean isPlaying) {
-    // logger.info("afterChangeTurns isPlaying " + isPlaying);
+    if (DEBUG) logger.info("afterChangeTurns isPlaying " + isPlaying);
     markCurrent();
     if (isPlaying) playCurrentTurn();
   }
@@ -1074,9 +1103,11 @@ public class ListenViewHelper<T extends ITurnPanel>
   /**
    * @see #getControls
    */
-  void gotPlay() {
-    setGotTurnClick(false);
-    logger.info("gotPlay got click on play ");
+  void gotClickOnPlay() {
+    togglePlayState();
+
+    //setGotTurnClick(false);
+    logger.info("gotClickOnPlay got click on play ");
     setHearYourself(false);
     gotRehearse();
 
@@ -1087,20 +1118,11 @@ public class ListenViewHelper<T extends ITurnPanel>
     playCurrentTurn();
   }
 
-  /**
-   * @return
-   * @see #gotPlay
-   * @see #setNextTurnForSide
-   * @see #currentTurnPlayEnded()
-   * @see #startRecordingTurn(T)
-   */
-  boolean isDoRehearse() {
-    return doRehearse;
-  }
-
   private void gotPlayYourself() {
-    setGotTurnClick(false);
-    logger.info("gotPlay got click on play yourself");
+    togglePlayState();
+
+    //   setGotTurnClick(false);
+    logger.info("gotClickOnPlay got click on play yourself");
 
     gotHearYourself();
     //  if (!setTurnToPromptSide()) {
@@ -1111,8 +1133,43 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   /**
+   * what state is indicated by the play button - playing or paused?
+   * if paused, don't continue when audio ends or says it stopped.
+   */
+  protected void togglePlayState() {
+    if (sessionGoingNow) {
+      setPlayButtonToPlay();
+    } else {
+      setPlayButtonToPause();
+    }
+  }
+
+/*  public boolean isPlayStateIsPlaying() {
+    return playStateIsPlaying;
+  }
+
+  public void setPlayStateIsPlaying(boolean val) {
+    playStateIsPlaying = val;
+  }*/
+
+  public void setSessionGoingNow(boolean val) {
+    sessionGoingNow = val;
+  }
+
+  /**
+   * @return
+   * @see #gotClickOnPlay
+   * @see #setNextTurnForSide
+   * @see #currentTurnPlayEnded()
+   * @see #startRecordingTurn
+   */
+  boolean isDoRehearse() {
+    return doRehearse;
+  }
+
+  /**
    * @param enabled
-   * @see #gotPlay
+   * @see #gotClickOnPlay
    */
   void setHearYourself(boolean enabled) {
     playYourselfButton.setEnabled(enabled);
@@ -1133,7 +1190,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   /**
-   * @see #gotPlay()
+   * @see #gotClickOnPlay()
    */
   void ifOnLastJumpBackToFirst() {
     T currentTurn = getCurrentTurn();
@@ -1147,7 +1204,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   /**
    * @return true if changed turn to next one
-   * @see #gotPlay
+   * @see #gotClickOnPlay
    */
 //  boolean setTurnToPromptSide() {
 //    Boolean leftSpeakerSet = false;//isLeftSpeakerSet();
@@ -1237,8 +1294,9 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @return
    */
   List<T> getRespSeq() {
-    if (isInterpreter) return middleTurnPanels;
-    else {
+    if (isInterpreter) {
+      return middleTurnPanels;
+    } else {
       boolean leftSpeaker = isLeftSpeakerSet();
       boolean rightSpeaker = isRightSpeakerSet();
       return leftSpeaker ? rightTurnPanels : rightSpeaker ? leftTurnPanels : null;
@@ -1267,7 +1325,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   /**
    * @see #gotTurnClick
-   * @see #gotPlay()
+   * @see #gotClickOnPlay()
    */
   void playCurrentTurn() {
     if (currentTurn != null) {
@@ -1276,7 +1334,7 @@ public class ListenViewHelper<T extends ITurnPanel>
         boolean didPause = currentTurn.doPlayPauseToggle();
         if (didPause) {
           if (DEBUG_PLAY) logger.info("playCurrentTurn did pause " + blurb());
-          setPlayButtonToPlay();
+          //setPlayButtonToPlay();
         } else {
           if (DEBUG_PLAY) {
             logger.info("playCurrentTurn maybe did play " + blurb());
@@ -1297,6 +1355,8 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   /**
+   * TODO: consider other feedback to indicate audio is playing...
+   *
    * @see HeadlessPlayAudio#startPlaying
    */
   @Override
@@ -1305,7 +1365,7 @@ public class ListenViewHelper<T extends ITurnPanel>
       if (DEBUG) {
         logger.info("playStarted - turn " + blurb());
       }
-      setPlayButtonToPause();
+      //setPlayButtonToPause();
       markCurrent();
     }
   }
@@ -1315,6 +1375,8 @@ public class ListenViewHelper<T extends ITurnPanel>
    *
    * @seex mitll.langtest.client.sound.PlayAudioPanel#setPlayLabel
    * @see HeadlessPlayAudio#songFinished
+   * @see HeadlessPlayAudio#tellListenersPlayStopped
+   * @see PlayAudioPanel#pause
    */
   @Override
   public void playStopped() {
@@ -1323,13 +1385,17 @@ public class ListenViewHelper<T extends ITurnPanel>
         logger.info("playStopped for turn " + blurb());
       }
 
-      setPlayButtonToPlay();
+      //setPlayButtonToPlay();
 
-      if (isGotTurnClick()) {
-        logger.info("playStopped ignore since click?");
-      } else {
+//      if (isGotTurnClick()) {
+//        logger.info("playStopped ignore since click?");
+//      } else
+      if (isSessionGoingNow()) {
         removeMarkCurrent();
         currentTurnPlayEnded();
+      } else {
+        if (!isDoRehearse())
+        logger.info("playStopped ignore since session has ended (via play button click)");
       }
     } else {
       logger.info("playStopped - no current turn.");
@@ -1349,30 +1415,35 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   void currentTurnPlayEnded() {
     if (DEBUG) {
-      logger.info("currentTurnPlayEnded - turn " + getExID() + " gotTurnClick " + gotTurnClick);
+      logger.info("currentTurnPlayEnded - turn " + getExID() + " sessionGoingNow " + sessionGoingNow);
+
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("got turn click"));
+//      logger.info("logException stack " + exceptionAsString);
+
     }
 
-    if (gotTurnClick) {
-      setGotTurnClick(false);
-    } else {
-      T next = getNext();
-      if (DEBUG && next != null) {
-        logger.info("currentTurnPlayEnded next turn " + next.getExID());
-      }
-      if (!makeNextVisible()) logger.info("currentTurnPlayEnded didn't make next visible...");
+//    if (gotTurnClick) {
+//      setGotTurnClick(false);
+//    } else {
+    T next = getNext();
+    if (DEBUG && next != null) {
+      logger.info("currentTurnPlayEnded next turn " + next.getExID());
+    }
+    if (!makeNextVisible()) logger.info("currentTurnPlayEnded didn't make next visible...");
 
-      if (next == null) {
-        if (DEBUG) logger.info("currentTurnPlayEnded OK stop");
+    if (next == null) {
+      if (DEBUG) logger.info("currentTurnPlayEnded OK stop");
 //        setCurrentTurn(allTurns.get(0));
-        logger.info("currentTurnPlayEnded : markCurrent ");
-        markCurrent();
-        makeVisible(currentTurn);
-      } else {
-        removeMarkCurrent();
-        setCurrentTurn(next);
-        playCurrentTurn();
-      }
+      logger.info("currentTurnPlayEnded : markCurrent ");
+      markCurrent();
+      makeVisible(currentTurn);
+      setPlayButtonToPlay();
+    } else {
+      removeMarkCurrent();
+      setCurrentTurn(next);
+      playCurrentTurn();
     }
+    //  }
   }
 
   void makeCurrentTurnVisible() {
@@ -1404,7 +1475,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @seex #setPlayButtonIcon
    * @see #playStarted
    */
-  void setPlayButtonToPause() {
+ private void setPlayButtonToPause() {
     getPlayButtonToUse().setIcon(IconType.PAUSE);
     sessionGoingNow = true;
   }
@@ -1415,16 +1486,20 @@ public class ListenViewHelper<T extends ITurnPanel>
   void setPlayButtonToPlay() {
     getPlayButtonToUse().setIcon(IconType.PLAY);
     sessionGoingNow = false;
-  }
 
-  private Button getPlayButtonToUse() {
-    return doRehearse ? this.playButton : playYourselfButton;
+    if (currentTurn != null && currentTurn.isPlaying()) {
+      currentTurn.doPause();
+    }
   }
 
   private boolean sessionGoingNow;
 
   boolean isSessionGoingNow() {
     return sessionGoingNow;
+  }
+
+  private Button getPlayButtonToUse() {
+    return doRehearse ? this.playButton : playYourselfButton;
   }
 
   /**

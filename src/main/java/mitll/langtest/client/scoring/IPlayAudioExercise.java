@@ -43,6 +43,10 @@ public interface IPlayAudioExercise {
    */
   boolean addPlayListener(PlayListener playListener);
 
+  /**
+   *
+   * @return true if paused
+   */
   boolean doPause();
 
   void resetAudio();
