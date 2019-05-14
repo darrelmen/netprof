@@ -29,13 +29,13 @@
 
 package mitll.langtest.client.dialog;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.CheckBox;
+import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.safehtml.shared.SafeUri;
 import com.google.gwt.safehtml.shared.UriUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -89,10 +89,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   private static final int PROGRESS_BAR_WIDTH = 49;
 
-  private static final int VALUE = -98;
+  private static final int VALUE = -73;//-98;
 
-  private static final String THEY_SPEAK = "Listen to : ";
-  private static final String YOU_SPEAK = "Speak : ";
+  private static final String THEY_SPEAK = "Listen to";
+  private static final String YOU_SPEAK = "Speak";
 
   private static final int TOP_TO_USE = 10;
 
@@ -319,63 +319,93 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }*/
 
   @NotNull
-  protected DivWidget getLeftSpeakerDiv(CheckBox checkBox) {
-    if (isInterpreter) {
-      return super.getLeftSpeakerDiv(checkBox);
-    } else {
-      DivWidget rightDiv = new DivWidget();
-      checkBox.getElement().getStyle().setClear(Style.Clear.BOTH);
+  @Override
+  protected DivWidget getLeftSpeaker(String firstSpeaker) {
+    DivWidget leftSpeaker = super.getLeftSpeaker(firstSpeaker);
+    DivWidget container = new DivWidget();
+    container.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+    container.add(leftSpeaker);
+    container.add(getLeftHintHTML());
 
-      {
-        leftSpeakerHint = new HTML(THEY_SPEAK);
-        leftSpeakerHint.addStyleName("floatLeft");
-
-        Style style = leftSpeakerHint.getElement().getStyle();
-        style.setClear(Style.Clear.BOTH);
-        style.setMarginLeft(41, PX);
-
-        rightDiv.add(leftSpeakerHint);
-      }
-      rightDiv.add(checkBox);
-
-      return rightDiv;
-    }
+    return container;
   }
 
   @NotNull
-  DivWidget getRightSpeakerDiv(CheckBox checkBox) {
-    if (isInterpreter) {
-      return super.getRightSpeakerDiv(checkBox);
-    } else {
-      DivWidget rightDiv = new DivWidget();
-
-      {
-        rightSpeakerHint = new HTML(YOU_SPEAK);
-        rightSpeakerHint.addStyleName("floatRight");
-
-        Style style = rightSpeakerHint.getElement().getStyle();
-        style.setMarginRight(4, PX);
-        style.setMarginTop(VALUE, PX);
-
-        rightDiv.add(rightSpeakerHint);
-      }
-      checkBox.getElement().getStyle().setClear(Style.Clear.BOTH);
-      rightDiv.add(checkBox);
-
-      return rightDiv;
-    }
-  }
-
   @Override
-  protected CheckBox addRightSpeaker(DivWidget rowOne, String label) {
-    if (isInterpreter) {
-      return super.addRightSpeaker(rowOne, label);
-    } else {
-      CheckBox checkBox = super.addRightSpeaker(rowOne, label);
-      checkBox.getElement().getStyle().setMarginTop(-74, PX);
-      return checkBox;
-    }
+  protected DivWidget getRightSpeaker(String secondSpeaker) {
+    DivWidget rightSpeaker = super.getRightSpeaker(secondSpeaker);
+    DivWidget container = new DivWidget();
+    container.addStyleName("floatRight");
+    container.getElement().getStyle().setMarginTop(VALUE, PX);
+
+    container.add(rightSpeaker);
+    container.add(getRightHintHTML());
+    return container;
   }
+
+  /**
+   * @param checkBox
+   * @return
+   */
+//  @NotNull
+//  protected DivWidget getLeftSpeakerDiv(CheckBox checkBox) {
+//    if (isInterpreter) {
+//      return super.getLeftSpeakerDiv(checkBox);
+//    } else {
+//      DivWidget rightDiv = new DivWidget();
+//      checkBox.getElement().getStyle().setClear(Style.Clear.BOTH);
+//      rightDiv.add(checkBox);
+//
+//      return rightDiv;
+//    }
+//  }
+  private HTML getLeftHintHTML() {
+    leftSpeakerHint = new HTML(THEY_SPEAK);
+    leftSpeakerHint.addStyleName("floatLeft");
+
+    Style style = leftSpeakerHint.getElement().getStyle();
+    style.setClear(Style.Clear.BOTH);
+    style.setMarginLeft(5, PX);
+    style.setFontStyle(Style.FontStyle.ITALIC);
+    return leftSpeakerHint;
+  }
+
+//  @NotNull
+//  DivWidget getRightSpeakerDiv(CheckBox checkBox) {
+//    if (isInterpreter) {
+//      return super.getRightSpeakerDiv(checkBox);
+//    } else {
+//      DivWidget rightDiv = new DivWidget();
+//
+////      addRightHint(rightDiv);
+//      checkBox.getElement().getStyle().setClear(Style.Clear.BOTH);
+//      rightDiv.add(checkBox);
+//
+//      return rightDiv;
+//    }
+//  }
+
+  private HTML getRightHintHTML() {
+    rightSpeakerHint = new HTML(YOU_SPEAK);
+    // rightSpeakerHint.addStyleName("floatRight");
+
+    Style style = rightSpeakerHint.getElement().getStyle();
+    style.setMarginLeft(10, PX);
+    style.setFontStyle(Style.FontStyle.ITALIC);
+
+    return rightSpeakerHint;
+  }
+
+//  @Override
+//  protected CheckBox addRightSpeaker(DivWidget rowOne, String label) {
+//    if (isInterpreter) {
+//      return super.addRightSpeaker(rowOne, label);
+//    } else {
+//      CheckBox checkBox = super.addRightSpeaker(rowOne, label);
+//      checkBox.getElement().getStyle().setMarginTop(-74, PX);
+//      return checkBox;
+//    }
+//  }
 
   @NotNull
   private String getLeftHint() {
@@ -604,7 +634,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   /**
    * Forget about scores after showing them...
-   *
+   * <p>
    * Show scores if just recorded the last record turn.
    *
    * @param exid
@@ -792,12 +822,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
           if (getCurrentTurn() != null &&
               isCurrentTurnARecordingTurn()) {
             getCurrentTurn().disableRecordButton();
-          }
-          else {
+          } else {
             playCurrentTurn();
           }
 
-      //    setPlayButtonToPlay();
+          //    setPlayButtonToPlay();
         } else {
           if (isFirstPrompt(getCurrentTurn())) {
             doRecordingNoticeMaybe();
@@ -805,7 +834,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
             rehearseTurn();
           }
         }
-      } else {
+      } else {  // playback your audio
         if (DEBUG) {
           logger.info("gotClickOnPlay play current turn ");
         }
@@ -1291,7 +1320,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   /**
    * Race!
-   *
+   * <p>
    * Answers may come much later - we need to find the corresponding turn...
    *
    * @param audioAnswer

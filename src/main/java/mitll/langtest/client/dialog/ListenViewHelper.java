@@ -277,7 +277,6 @@ public class ListenViewHelper<T extends ITurnPanel>
 
       DivWidget controlAndSpeakers = new DivWidget();
       styleControlRow(controlAndSpeakers);
-      child.add(controlAndSpeakers);
 
       {
         DivWidget outer = new DivWidget();
@@ -295,6 +294,8 @@ public class ListenViewHelper<T extends ITurnPanel>
       }
 
       controlAndSpeakers.add(getSpeakerRow(dialog));
+
+      child.add(controlAndSpeakers);
 
       child.add(getTurns(dialog));
 
@@ -316,17 +317,29 @@ public class ListenViewHelper<T extends ITurnPanel>
     child.add(dialogHeader = new DialogHeader(controller, thisView, getPrevView(), getNextView()).getHeader(dialog));
   }
 
+  /**
+   * @see #showDialog
+   * @param dialog
+   * @return
+   */
   @NotNull
   private DivWidget getSpeakerRow(IDialog dialog) {
     DivWidget rowOne = new DivWidget();
     rowOne.getElement().setId("speakerRow");
-    rowOne.getElement().getStyle().setMarginTop(5, PX);
 
-    String firstSpeakerLabel = isInterpreter ? getFirstSpeakerLabel(dialog) : SPEAKER_A;
-    rowOne.add(getLeftSpeaker(firstSpeakerLabel));
+    Style style = rowOne.getElement().getStyle();
+    style.setMarginTop(5, PX);
+    style.setOverflow(Style.Overflow.HIDDEN);
 
-    String secondSpeakerLabel = isInterpreter ? getSecondSpeakerLabel(dialog) : SPEAKER_B;
-    rowOne.add(getRightSpeaker(secondSpeakerLabel));
+    {
+      String firstSpeakerLabel = isInterpreter ? getFirstSpeakerLabel(dialog) : SPEAKER_A;
+      rowOne.add(getLeftSpeaker(firstSpeakerLabel));
+    }
+
+    {
+      String secondSpeakerLabel = isInterpreter ? getSecondSpeakerLabel(dialog) : SPEAKER_B;
+      rowOne.add(getRightSpeaker(secondSpeakerLabel));
+    }
 
     {
       DivWidget middleSpeaker = getMiddleSpeaker();
@@ -433,7 +446,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   @NotNull
-  private DivWidget getRightSpeaker(String secondSpeaker) {
+  protected DivWidget getRightSpeaker(String secondSpeaker) {
     Heading w = new Heading(4, secondSpeaker);
 
     DivWidget right = new DivWidget();
@@ -450,7 +463,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   @NotNull
-  private DivWidget getLeftSpeaker(String firstSpeaker) {
+  protected DivWidget getLeftSpeaker(String firstSpeaker) {
     Heading w = new Heading(4, firstSpeaker);
 
     DivWidget left = new DivWidget();
@@ -466,6 +479,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     //left.addStyleName("leftFiveMargin");
     left.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
+
     return left;
   }
 
@@ -493,29 +507,33 @@ public class ListenViewHelper<T extends ITurnPanel>
     style.setOverflow(Style.Overflow.HIDDEN);
   }
 
-
   private void styleLeftSpeaker(UIObject checkBox) {
     styleLabel(checkBox);
   }
 
-  @NotNull
-  DivWidget getLeftSpeakerDiv(CheckBox checkBox) {
-    DivWidget rightDiv = new DivWidget();
-    rightDiv.add(checkBox);
-    return rightDiv;
-  }
+  /**
+   *
+   * @param checkBox
+   * @return
+   */
+//  @NotNull
+//  DivWidget getLeftSpeakerDiv(CheckBox checkBox) {
+//    DivWidget rightDiv = new DivWidget();
+//    rightDiv.add(checkBox);
+//    return rightDiv;
+//  }
 
-  CheckBox addRightSpeaker(DivWidget rowOne, String label) {
-    CheckBox checkBox = new CheckBox(label, true);
-
-    // setRightTurnInitialValue(checkBox);
-    styleRightSpeaker(checkBox);
-
-    //   checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
-
-    rowOne.add(getRightSpeakerDiv(checkBox));
-    return checkBox;
-  }
+//  CheckBox addRightSpeaker(DivWidget rowOne, String label) {
+//    CheckBox checkBox = new CheckBox(label, true);
+//
+//    // setRightTurnInitialValue(checkBox);
+//    styleRightSpeaker(checkBox);
+//
+//    //   checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
+//
+//    rowOne.add(getRightSpeakerDiv(checkBox));
+//    return checkBox;
+//  }
 
   private void styleRightSpeaker(UIObject checkBox) {
     styleLabel(checkBox);
@@ -525,12 +543,12 @@ public class ListenViewHelper<T extends ITurnPanel>
     checkBox.getElement().getStyle().setFontSize(32, PX);
   }
 
-  @NotNull
-  DivWidget getRightSpeakerDiv(CheckBox checkBox) {
-    DivWidget rightDiv = new DivWidget();
-    rightDiv.add(checkBox);
-    return rightDiv;
-  }
+//  @NotNull
+//  DivWidget getRightSpeakerDiv(CheckBox checkBox) {
+//    DivWidget rightDiv = new DivWidget();
+//    rightDiv.add(checkBox);
+//    return rightDiv;
+//  }
 
 
   DivWidget turnContainer;
@@ -1055,7 +1073,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @return
    * @see #setCurrentTurnTo
    */
-  protected int beforeChangeTurns() {
+   int beforeChangeTurns() {
     setPlayButtonToPlay();
 
     int i = getAllTurns().indexOf(currentTurn);
