@@ -143,7 +143,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_RECORDING = false;
   private static final boolean DEBUG_SILENCE = false;
-  private static final boolean DEBUG_PLAY_ENDED = false;
+  private static final boolean DEBUG_PLAY_ENDED = true;
+  private static final boolean DEBUG_OVERALL_SCORE = false;
 
   /**
    * @param controller
@@ -158,7 +159,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   @Override
   public boolean isPressAndHold() {
-  //  boolean pressAndHold = getView().isPressAndHold();
+    //  boolean pressAndHold = getView().isPressAndHold();
 //    logger.info("isPressAndHold for " + getView() + " " + pressAndHold);
     return getView().isPressAndHold();
   }
@@ -623,7 +624,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
 
-
   /**
    * Move current turn to first turn when we switch who is the prompting speaker.
    */
@@ -751,11 +751,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
           if (DEBUG) {
             logger.info("gotClickOnPlay no session started...? ");
           }
-          if (isFirstPrompt(getCurrentTurn())) {
-            doRecordingNoticeMaybe();
-          } else {
-            rehearseTurn();
-          }
+//          if (isFirstPrompt(getCurrentTurn())) {
+//            doRecordingNoticeMaybe();
+//          } else {
+          rehearseTurn();
+          //}
         }
       } else {  // playback your audio
         if (DEBUG) {
@@ -767,7 +767,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     }
   }
 
-  private void doRecordingNoticeMaybe() {
+/*  private void doRecordingNoticeMaybe() {
     boolean dialogIntroShown = controller.getStorage().isTrue(rehearsalKey);
     if (!dialogIntroShown || true) {
       controller.getStorage().setBoolean(rehearsalKey, true);
@@ -800,12 +800,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     } else {
       rehearseTurn();
     }
-  }
-
+  }*/
+/*
   @NotNull
   private String getLarger(String s) {
     return "<span style='font-size:larger'>" + s + "</span>";
-  }
+  }*/
 
   private void maybeClearScores() {
     if (overallSmiley.isVisible()) {   // start over
@@ -1029,7 +1029,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
             }
           }
         } else {
-          if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded skip last! " + currentTurn);
+          if (isDoRehearse()) {
+            if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded skip last (why?) " + currentTurn);
+          } else {  // ok, we're doing hear yourself, so make sure we set the first turn to be current and reset the play button state
+            showNextTurn(allTurns.get(0));
+            setPlayButtonToPlay();
+          }
         }
       }
     }
@@ -1119,14 +1124,16 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     double studentTotal = getTotal(this.exToStudentDur);
     double refTotal = getTotal(this.exToRefDur);
 
-    logger.info("showOverallDialogScore student total " + studentTotal + " vs ref " + refTotal);
+    if (DEBUG_OVERALL_SCORE)
+      logger.info("showOverallDialogScore student total " + studentTotal + " vs ref " + refTotal + " duration.");
 
     total = setScoreProgressLevel(total, num);
 
     {
       double totalRatio = refTotal == 0D ? 0D : studentTotal / (MAX_RATE_RATIO * refTotal);
       //double totalAvgRate = totalRatio / ((float) num);
-      logger.info("showOverallDialogScore avg rate " + studentTotal + " vs " + refTotal + " = " + totalRatio);
+      if (DEBUG_OVERALL_SCORE)
+        logger.info("showOverallDialogScore avg rate " + studentTotal + " vs " + refTotal + " = " + totalRatio);
       setRateProgress(totalRatio);
     }
 
@@ -1135,7 +1142,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       double actualRatio = studentTotal / refTotal;
 
       float v = roundToTens(actualRatio);
-      logger.info("showOverallDialogScore rate to show " + v + " vs raw " + actualRatio);
+      if (DEBUG_OVERALL_SCORE) logger.info("showOverallDialogScore rate to show " + v + " vs raw " + actualRatio);
       rateProgress.setText("Rate " + v + "x");
     }
 
@@ -1169,10 +1176,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     double percent = total * HUNDRED;
     double round = percent;// Math.max(percent, 30);
     if (percent == 0D) round = HUNDRED;
-    double percent1 = num == 0 ? HUNDRED : percent;
-    percent1 = Math.max(percent1, 30.0D);
-    //  scoreProgress.setPercent(percent1);
-    cheesySetPercent(scoreProgress, percent1);
+
+    {
+      double percent1 = num == 0 ? HUNDRED : percent;
+      percent1 = Math.max(percent1, 40.0D);
+      //  scoreProgress.setPercent(percent1);
+      cheesySetPercent(scoreProgress, percent1);
+    }
 
     scoreProgress.setVisible(true);
 

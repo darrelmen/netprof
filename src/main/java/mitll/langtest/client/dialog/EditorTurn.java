@@ -72,8 +72,6 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   private static final int TURN_WIDTH = 97;
   private static final int RIGHT_TURN_RIGHT_MARGIN = 153;
 
-  // public static final int HEIGHT_AND_WIDTH = 22;
-
   private final TurnPanelDelegate turnPanelDelegate;
   private final ClientExercise clientExercise;
 

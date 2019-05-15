@@ -395,15 +395,15 @@ public class ListenViewHelper<T extends ITurnPanel>
   @NotNull
   private String getFirstSpeakerLabel(IDialog dialog) {
     //  logger.info("getFirstSpeakerLabel for dialog " + dialog.getID());
-    //  dialog.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute.toString()));
-
-    List<ExerciseAttribute> properties = dialog.getAttributes()
-        .stream()
-        .filter(exerciseAttribute -> (exerciseAttribute.getProperty() != null))
-        .sorted(Comparator.comparing(Pair::getProperty))
-        .collect(Collectors.toList());
-
-    // properties.forEach(p -> logger.info(p.toString()));
+//    dialog.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute.toString()));
+//
+//    List<ExerciseAttribute> properties = dialog.getAttributes()
+//        .stream()
+//        .filter(exerciseAttribute -> (exerciseAttribute.getProperty() != null))
+//        .sorted(Comparator.comparing(Pair::getProperty))
+//        .collect(Collectors.toList());
+//
+//    properties.forEach(p -> logger.info(p.toString()));
 
     String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
 
@@ -1229,28 +1229,6 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
   }
 
-  /**
-   * @return true if changed turn to next one
-   * @see #gotClickOnPlay
-   */
-//  boolean setTurnToPromptSide() {
-//    Boolean leftSpeakerSet = false;//isLeftSpeakerSet();
-//    Boolean rightSpeakerSet = true;//isRightSpeakerSet();
-//    if (leftSpeakerSet && rightSpeakerSet) {
-//      if (DEBUG) logger.info("setTurnToPromptSide both speakers ");
-//      return false;
-//    } else if (
-//        leftSpeakerSet && !leftTurnPanels.contains(currentTurn) ||  // current turn is not the prompt set
-//            rightSpeakerSet && !rightTurnPanels.contains(currentTurn)
-//    ) {
-//      if (DEBUG) logger.info("setTurnToPromptSide setNextTurnForSide ");
-//
-//      setNextTurnForSide();
-//      return true;
-//    } else {
-//      return false;
-//    }
-//  }
 
   /**
    * TODO : not sure if this is right?
@@ -1459,7 +1437,9 @@ public class ListenViewHelper<T extends ITurnPanel>
     if (DEBUG && next != null) {
       logger.info("currentTurnPlayEnded next turn " + next.getExID());
     }
-    if (!makeNextVisible()) logger.info("currentTurnPlayEnded didn't make next visible...");
+    if (!makeNextVisible()) {
+      logger.info("currentTurnPlayEnded didn't make next visible...");
+    }
 
     if (next == null) {
       if (DEBUG) logger.info("currentTurnPlayEnded OK stop");
@@ -1483,11 +1463,11 @@ public class ListenViewHelper<T extends ITurnPanel>
   private boolean makeNextVisible() {
     T next = getNext();
     if (next != null) {
-      logger.info("makeNextVisible " + next.getExID() + " : " + next.getText());
+      if (DEBUG_NEXT) logger.info("makeNextVisible " + next.getExID() + " : " + next.getText());
       makeVisible((T) next);
       return true;
     } else {
-      logger.info("makeNextVisible - no next?");
+      if (DEBUG_NEXT) logger.info("makeNextVisible - no next?");
       return false;
     }
   }
@@ -1529,8 +1509,12 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   private Button getPlayButtonToUse() {
-    if (DEBUG) logger.info("getPlayButtonToUse doRehearse " + doRehearse);
-    return doRehearse ? this.playButton : playYourselfButton;
+
+    Button widgets = doRehearse ? this.playButton : playYourselfButton;
+    if (DEBUG || true) {
+      logger.info("getPlayButtonToUse doRehearse " + doRehearse + " : " + widgets);
+    }
+    return widgets;
   }
 
   /**
