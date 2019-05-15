@@ -336,13 +336,14 @@ public class RecordButton extends Button {
    * @see #cancelRecording
    * @see #addRecordingMaxLengthTimeout()
    * @see #startOrStopRecording
+   * @return
    */
-  protected void stop(long duration, boolean abort) {
+  protected boolean stop(long duration, boolean abort) {
 //    long now = System.currentTimeMillis();
     // long duration2 = now - started;
     // logger.info("startOrStopRecording after stop delay = " + duration2 + " millis, vs " + duration);
     showStopped();
-    recordingListener.stopRecording(duration, abort);
+    return recordingListener.stopRecording(duration, abort);
   }
 
   /**

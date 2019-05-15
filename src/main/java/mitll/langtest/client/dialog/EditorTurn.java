@@ -36,18 +36,19 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.*;
+import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.event.dom.client.KeyCodes;
+import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Focusable;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.*;
-import mitll.langtest.client.sound.AllHighlight;
-import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -55,7 +56,6 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.LEFT;
@@ -69,25 +69,27 @@ import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_B;
 public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IRehearseView, IRecordingTurnPanel {
   private final Logger logger = Logger.getLogger("EditorTurn");
 
-  public static final int TURN_WIDTH = 97;
-  public static final int RIGHT_TURN_RIGHT_MARGIN = 153;
+  private static final int TURN_WIDTH = 97;
+  private static final int RIGHT_TURN_RIGHT_MARGIN = 153;
 
-  public static final int HEIGHT_AND_WIDTH = 22;
+  // public static final int HEIGHT_AND_WIDTH = 22;
 
-  private TurnPanelDelegate turnPanelDelegate;
-  private ClientExercise clientExercise;
+  private final TurnPanelDelegate turnPanelDelegate;
+  private final ClientExercise clientExercise;
 
-  private Language language;
-  private ExerciseController<?> controller;
-  private ITurnContainer<EditorTurn> turnContainer;
-  private int dialogID;
+  private final Language language;
+  private final ExerciseController<?> controller;
+  private final ITurnContainer<EditorTurn> turnContainer;
+  private final int dialogID;
   private String prev = "";
-  private ListenViewHelper.COLUMNS columns, prevColumn;
-  private boolean isFirstTurn;
+  private final ListenViewHelper.COLUMNS columns;
+  private final ListenViewHelper.COLUMNS prevColumn;
+  private final boolean isFirstTurn;
   private TextBox contentTextBox;
+  private HTML turnFeedback;
   private NoFeedbackRecordAudioPanel<ClientExercise> recordAudioPanel;
 
-  private SessionManager sessionManager;
+  private final SessionManager sessionManager;
 
   private static final boolean DEBUG = false;
 
@@ -97,7 +99,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
    * @param prevColumn
    * @param rightJustify
    * @param controller
-   * @see ListenViewHelper#makeTurnPanel(ClientExercise, ListenViewHelper.COLUMNS, ListenViewHelper.COLUMNS, boolean, int)
+   * @see DialogEditor#makeTurnPanel(ClientExercise, ListenViewHelper.COLUMNS, ListenViewHelper.COLUMNS, boolean, int)
    */
   EditorTurn(final ClientExercise clientExercise,
              ListenViewHelper.COLUMNS columns,
@@ -140,8 +142,6 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     Style style = getElement().getStyle();
     style.setProperty("minWidth", "500px");
 
-//    setWidth((columns == MIDDLE ? 84 : 50) + "%");
-
     this.dialogID = dialogID;
     this.clientExercise = clientExercise;
     this.language = controller.getLanguageInfo();
@@ -182,6 +182,10 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   public void clearHighlight() {
   }
 
+  /**
+   * @return
+   * @see DialogEditor#addTurnForSameSpeaker
+   */
   public ListenViewHelper.COLUMNS getColumn() {
     return columns;
   }
@@ -203,13 +207,26 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
           @Override
           public Widget myGetPopupTargetWidget() {
-            return null;
+            return recordAudioPanel;
           }
 
         }) {
           @Override
           protected boolean shouldAddToAudioTable() {
             return true;
+          }
+
+          @Override
+          public void startRecording() {
+            //logger.info("startRecording...");
+            super.startRecording();
+            turnFeedback.setHTML("");
+
+          }
+
+          @Override
+          public void showInvalidResultPopup(String message) {
+            turnFeedback.setHTML(message);
           }
         };
 
@@ -264,6 +281,16 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     textBoxContainer.add(contentTextBox = addTextBox());
 
     wrapper.add(textBoxContainer);
+    HTML turnFeedback = new HTML("");
+
+    Style style = turnFeedback.getElement().getStyle();
+   // style.setBackgroundColor("white");
+    style.setMarginTop(-12, Style.Unit.PX);
+    style.setMarginLeft(12, Style.Unit.PX);
+    style.setTextAlign(Style.TextAlign.LEFT);
+    this.turnFeedback = turnFeedback;
+    textBoxContainer.add(turnFeedback);
+
     styleMe(wrapper);
     wrapper.addStyleName("inlineFlex");
     add(wrapper);
@@ -276,7 +303,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     }
   }
 
-  static final String BLUE_INACTIVE_COLOR = "#0171bc";
+  private static final String BLUE_INACTIVE_COLOR = "#0171bc";
 
   @NotNull
   private PostAudioRecordButton getPostAudioWidget(NoFeedbackRecordAudioPanel<?> recordPanel, boolean enabled) {
@@ -545,10 +572,10 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     return turnPanelDelegate.shouldAddFloatLeft();
   }
 
-  @NotNull
-  protected AllHighlight getAllHighlight(Collection<IHighlightSegment> flclickables) {
-    return new AllHighlight(flclickables, !turnPanelDelegate.isMiddle());
-  }
+//  @NotNull
+//  protected AllHighlight getAllHighlight(Collection<IHighlightSegment> flclickables) {
+//    return new AllHighlight(flclickables, !turnPanelDelegate.isMiddle());
+//  }
 
   @Override
   public boolean isMiddle() {
@@ -588,8 +615,8 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   }
 
   /**
-   * @see ListenViewHelper#getTurnPanel
    * @param clickHandler
+   * @see ListenViewHelper#getTurnPanel
    */
   @Override
   public void addClickHandler(ClickHandler clickHandler) {
@@ -599,7 +626,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   @Override
   public void useResult(AudioAnswer audioAnswer) {
     logger.info("useResult got " + audioAnswer);
+
     if (audioAnswer.isValid()) {
+      turnFeedback.setHTML("");
       String audioRef = audioAnswer.getAudioAttribute().getAudioRef();
       logger.info("useResult got back " + audioRef);
       rememberAudio(audioAnswer.getAudioAttribute());
@@ -608,6 +637,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       ((Button) getPlayButton()).setType(ButtonType.SUCCESS);
       //  doBlinkAnimation(getPlayButton(), "good-blink-target");
       // getPlayButton().getElement().getStyle().setBackgroundColor("green");
+    } else {
+      turnFeedback.setHTML(audioAnswer.getValidity().getPrompt());
+
     }
   }
 

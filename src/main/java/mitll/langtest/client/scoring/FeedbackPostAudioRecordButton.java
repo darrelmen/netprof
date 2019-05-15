@@ -151,7 +151,12 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
     simpleRecordAudioPanel.onPostFailure();
   }
 
+  /**
+   * @see #stopRecording(long, boolean)
+   */
   protected void gotShortDurationRecording() {
+    logger.info("gotShortDurationRecording");
+
     simpleRecordAudioPanel.gotShortDurationRecording();
   }
 }

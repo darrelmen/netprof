@@ -158,9 +158,9 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   @Override
   public boolean isPressAndHold() {
-    boolean pressAndHold = getView().isPressAndHold();
+  //  boolean pressAndHold = getView().isPressAndHold();
 //    logger.info("isPressAndHold for " + getView() + " " + pressAndHold);
-    return pressAndHold;
+    return getView().isPressAndHold();
   }
 
   @Override
@@ -241,124 +241,53 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     return breadRow;
   }
 
-/*  @NotNull
-  @Override
-  protected DivWidget getControls() {
-    DivWidget controls = super.getControls();
-    controls.add(getButtonBarChoices());
-    return controls;
-  }*/
-
-//  private Button rehearseChoice;
-//  private Button hearYourself;
-
-/*  private Widget getButtonBarChoices() {
-    ButtonToolbar toolbar = new ButtonToolbar();
-//    toolbar.getElement().setId("Choices_" + type);
-    toolbar.getElement().getStyle().setClear(Style.Clear.BOTH);
-    styleToolbar(toolbar);
-
-    {
-      ButtonGroup buttonGroup = new ButtonGroup();
-      toolbar.add(buttonGroup);
-
-//      {
-//        rehearseChoice = getChoice(buttonGroup, REHEARSE, event -> gotRehearse());
-//        rehearseChoice.setActive(true);
-//        rehearseChoice.setType(ButtonType.DEFAULT);
-//        buttonGroup.add(rehearseChoice);
-//        doRehearse = true;
-//      }
-//
-//      {
-//        hearYourself = getChoice(buttonGroup, HEAR_YOURSELF, event -> gotHearYourself());
-//        hearYourself.setActive(false);
-//        hearYourself.setEnabled(false);
-//        hearYourself.setType(ButtonType.DEFAULT);
-//        buttonGroup.add(hearYourself);
-//      }
-    }
-    return toolbar;
-  }*/
-
   /**
    * @see #getButtonBarChoices
    */
   protected void gotRehearse() {
     super.gotRehearse();
     recordDialogTurns.forEach(IRecordDialogTurn::switchAudioToReference);
-//    rehearseChoice.setActive(true);
-//    hearYourself.setActive(false);
   }
 
   protected void gotHearYourself() {
     super.gotHearYourself();
     recordDialogTurns.forEach(IRecordDialogTurn::switchAudioToStudent);
-//    if (DEBUG) logger.info("gotHearYourself : doRehearse = " + doRehearse);
-//    rehearseChoice.setActive(false);
-//    hearYourself.setActive(true);
   }
-
-//  private Button getChoice(ButtonGroup buttonGroup, final String text, ClickHandler handler) {
-//    Button onButton = new Button(text);
-//    configure(handler, onButton);
-//    buttonGroup.add(onButton);
-//    return onButton;
-//  }
-
- /* private void configure(ClickHandler handler, Button onButton) {
-    onButton.setType(ButtonType.INFO);
-    onButton.addClickHandler(handler);
-    onButton.setActive(false);
-  }
-
-  private void styleToolbar(ButtonToolbar toolbar) {
-    Style style = toolbar.getElement().getStyle();
-    style.setMarginTop(TOP_TO_USE, PX);
-    style.setMarginBottom(TOP_TO_USE, PX);
-  }*/
 
   @NotNull
   @Override
   protected DivWidget getLeftSpeaker(String firstSpeaker) {
-    DivWidget leftSpeaker = super.getLeftSpeaker(firstSpeaker);
-    DivWidget container = new DivWidget();
-    container.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
-    container.add(leftSpeaker);
-    container.add(getLeftHintHTML());
+    if (isInterpreter) return super.getLeftSpeaker(firstSpeaker);
+    else {
+      DivWidget leftSpeaker = super.getLeftSpeaker(firstSpeaker);
+      DivWidget container = new DivWidget();
+      container.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+      container.add(leftSpeaker);
+      if (!isInterpreter)
+        container.add(getLeftHintHTML());
 
-    return container;
+      return container;
+    }
   }
 
   @NotNull
   @Override
   protected DivWidget getRightSpeaker(String secondSpeaker) {
-    DivWidget rightSpeaker = super.getRightSpeaker(secondSpeaker);
-    DivWidget container = new DivWidget();
-    container.addStyleName("floatRight");
-    container.getElement().getStyle().setMarginTop(VALUE, PX);
+    if (isInterpreter) return super.getRightSpeaker(secondSpeaker);
+    else {
+      DivWidget rightSpeaker = super.getRightSpeaker(secondSpeaker);
+      DivWidget container = new DivWidget();
+      container.addStyleName("floatRight");
 
-    container.add(rightSpeaker);
-    container.add(getRightHintHTML());
-    return container;
+      container.add(rightSpeaker);
+      if (!isInterpreter) {
+        container.getElement().getStyle().setMarginTop(VALUE, PX);
+        container.add(getRightHintHTML());
+      }
+      return container;
+    }
   }
 
-  /**
-   * @param checkBox
-   * @return
-   */
-//  @NotNull
-//  protected DivWidget getLeftSpeakerDiv(CheckBox checkBox) {
-//    if (isInterpreter) {
-//      return super.getLeftSpeakerDiv(checkBox);
-//    } else {
-//      DivWidget rightDiv = new DivWidget();
-//      checkBox.getElement().getStyle().setClear(Style.Clear.BOTH);
-//      rightDiv.add(checkBox);
-//
-//      return rightDiv;
-//    }
-//  }
   private HTML getLeftHintHTML() {
     leftSpeakerHint = new HTML(THEY_SPEAK);
     leftSpeakerHint.addStyleName("floatLeft");
@@ -369,21 +298,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     style.setFontStyle(Style.FontStyle.ITALIC);
     return leftSpeakerHint;
   }
-
-//  @NotNull
-//  DivWidget getRightSpeakerDiv(CheckBox checkBox) {
-//    if (isInterpreter) {
-//      return super.getRightSpeakerDiv(checkBox);
-//    } else {
-//      DivWidget rightDiv = new DivWidget();
-//
-////      addRightHint(rightDiv);
-//      checkBox.getElement().getStyle().setClear(Style.Clear.BOTH);
-//      rightDiv.add(checkBox);
-//
-//      return rightDiv;
-//    }
-//  }
 
   private HTML getRightHintHTML() {
     rightSpeakerHint = new HTML(YOU_SPEAK);
@@ -703,14 +617,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
       //setPlayButtonToPlay();
       setCurrentTurn(getPromptSeq().get(0));
-    }
-    else {
+    } else {
       logger.info("showScores - skip!");
     }
   }
 
-  protected void setRightTurnInitialValue(CheckBox checkBox) {
-  }
+
 
   /**
    * Move current turn to first turn when we switch who is the prompting speaker.

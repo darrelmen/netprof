@@ -278,6 +278,8 @@ public abstract class PostAudioRecordButton extends RecordButton
   }
 
   void gotShortDurationRecording() {
+    logger.info("gotShortDurationRecording");
+
     showPopup("Recording too short");
   }
 
@@ -394,6 +396,7 @@ public abstract class PostAudioRecordButton extends RecordButton
     if (!checkAndShowTooLoud(validity)) {
       showPopup(validity.getPrompt());
     }
+//    gotInvalidResult(validity);
   }
 
   /**
@@ -466,12 +469,12 @@ public abstract class PostAudioRecordButton extends RecordButton
    *
    * @param toShow
    */
-  private void showPopup(String toShow) {
+  public void showPopup(String toShow) {
     Scheduler.get().scheduleDeferred((Command) () -> showPopupLater(toShow));
   }
 
   private void showPopupLater(String toShow) {
-    //  logger.info("showPopup " + toShow + " on " + getExerciseID());
+      logger.info("showPopup " + toShow + " on " + getExerciseID());
     new PopupHelper().showPopup(toShow, getPopupTargetWidget(), 5000);
   }
 

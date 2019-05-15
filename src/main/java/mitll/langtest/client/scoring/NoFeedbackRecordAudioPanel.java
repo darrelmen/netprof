@@ -126,7 +126,12 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
 
       @Override
       protected Widget getPopupTargetWidget() {
-        return outer.getPopupTargetWidget();
+        return postAudioRecordButton;
+      }
+
+      public void showPopup(String toShow) {
+        super.showPopup(toShow);
+        showInvalidResultPopup(toShow);
       }
 
       @Override
@@ -149,6 +154,9 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     return playAudioPanel;
   }
 
+  public void showInvalidResultPopup(String message) {
+
+  }
   protected boolean shouldAddToAudioTable() {
     return false;
   }
@@ -210,6 +218,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   }
 
   public void gotShortDurationRecording() {
+    logger.info("gotShortDurationRecording");
     playAudioPanel.hideRecord();
     setVisible(true);
   }

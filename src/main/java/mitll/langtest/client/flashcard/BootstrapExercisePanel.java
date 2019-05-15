@@ -204,36 +204,36 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     toAddTo.add(wrapper);
   }
 
- /* private void addContextSentenceToShowWhileWaiting(ExerciseController<T> controller, Panel toAddTo) {
-    ClientExercise contextSentence = exercise.getDirectlyRelated().iterator().next();
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-    if (projectStartupInfo != null) {
-      int fontSize = projectStartupInfo.getLanguageInfo().getFontSize();
+  /* private void addContextSentenceToShowWhileWaiting(ExerciseController<T> controller, Panel toAddTo) {
+     ClientExercise contextSentence = exercise.getDirectlyRelated().iterator().next();
+     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+     if (projectStartupInfo != null) {
+       int fontSize = projectStartupInfo.getLanguageInfo().getFontSize();
 
-      Language languageInfo = controller.getLanguageInfo();
-    //  languageInfo.isRTL();
-      ClickableWords commonExerciseClickableWords =
-          new ClickableWords<T>(null, exercise.getID(), languageInfo, fontSize, BLUE, true, controller.getExerciseService(), controller.getUser());
+       Language languageInfo = controller.getLanguageInfo();
+     //  languageInfo.isRTL();
+       ClickableWords commonExerciseClickableWords =
+           new ClickableWords<T>(null, exercise.getID(), languageInfo, fontSize, BLUE, true, controller.getExerciseService(), controller.getUser());
 
-      String flToShow = contextSentence.getFLToShow();
-      String toHighlight = exercise.getFLToShow();
-      DivWidget contentWidget = commonExerciseClickableWords.getClickableWordsHighlight(flToShow, toHighlight,
-          FieldType.FL, new ArrayList<>(), false, contextSentence.getTokens(), exercise.getTokens(),
-          languageInfo.isRTL());
+       String flToShow = contextSentence.getFLToShow();
+       String toHighlight = exercise.getFLToShow();
+       DivWidget contentWidget = commonExerciseClickableWords.getClickableWordsHighlight(flToShow, toHighlight,
+           FieldType.FL, new ArrayList<>(), false, contextSentence.getTokens(), exercise.getTokens(),
+           languageInfo.isRTL());
 
-      Panel contextSentenceWhileWaiting = getCenteredRow(contentWidget);
+       Panel contextSentenceWhileWaiting = getCenteredRow(contentWidget);
 
-      contextSentenceWhileWaiting.setVisible(false);
-      IconAnchor waiting = new IconAnchor();
-      waiting.setBaseIcon(MyCustomIconType.waiting);
+       contextSentenceWhileWaiting.setVisible(false);
+       IconAnchor waiting = new IconAnchor();
+       waiting.setBaseIcon(MyCustomIconType.waiting);
 
-      contextSentenceWhileWaiting.add(waiting);
+       contextSentenceWhileWaiting.add(waiting);
 
-      contextSentenceWhileWaiting.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
-      toAddTo.add(contextSentenceWhileWaiting);
-    }
-  }
-*/
+       contextSentenceWhileWaiting.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
+       toAddTo.add(contextSentenceWhileWaiting);
+     }
+   }
+ */
   private RecordButtonPanel answerWidget;
   private Widget button;
   private RecordButton realRecordButton;
@@ -407,11 +407,11 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
           }
 
           @Override
-          public void stop(long duration, boolean abort) {
+          public boolean stop(long duration, boolean abort) {
             controller.logEvent(this, AVP_RECORD_BUTTON, exerciseID, "Stop_Recording");
             outer.setAllowAlternates(showOnlyEnglish);
             //logger.info("BootstrapExercisePlugin : stop recording " + duration);
-            super.stop(duration, abort);
+            return super.stop(duration, abort);
           }
 
           /**
