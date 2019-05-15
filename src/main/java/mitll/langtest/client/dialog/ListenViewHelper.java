@@ -148,7 +148,8 @@ public class ListenViewHelper<T extends ITurnPanel>
 //  private boolean gotTurnClick = false;
 //  private boolean playStateIsPlaying = false;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_NEXT = false;
   private static final boolean DEBUG_PLAY = false;
 
@@ -318,9 +319,9 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   /**
-   * @see #showDialog
    * @param dialog
    * @return
+   * @see #showDialog
    */
   @NotNull
   private DivWidget getSpeakerRow(IDialog dialog) {
@@ -512,7 +513,6 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   /**
-   *
    * @param checkBox
    * @return
    */
@@ -534,7 +534,6 @@ public class ListenViewHelper<T extends ITurnPanel>
 //    rowOne.add(getRightSpeakerDiv(checkBox));
 //    return checkBox;
 //  }
-
   private void styleRightSpeaker(UIObject checkBox) {
     styleLabel(checkBox);
   }
@@ -803,7 +802,10 @@ public class ListenViewHelper<T extends ITurnPanel>
     T turn = reallyGetTurnPanel(clientExercise, columns, prevColumn, index);
     turn.addWidgets(true, false, PhonesChoices.HIDE, EnglishDisplayChoices.SHOW);
     if (!turn.addPlayListener(this)) logger.warning("didn't add the play listener...");
-    turn.addClickHandler(event -> gotTurnClick(turn));
+    turn.addClickHandler(event -> {
+      logger.info("got event " + event.getClass());
+      gotTurnClick(turn);
+    });
     return turn;
   }
 
@@ -897,6 +899,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     {
       Button widgets1 = new Button("", IconType.PLAY, event -> gotClickOnPlay());
+      widgets1.setType(ButtonType.SUCCESS);
       widgets1.setSize(ButtonSize.LARGE);
       widgets1.addStyleName("leftFiveMargin");
       rowOne.add(widgets1);
@@ -908,6 +911,7 @@ public class ListenViewHelper<T extends ITurnPanel>
       Button widgets1 = new Button("Yourself", IconType.PLAY, event -> gotPlayYourself());
       widgets1.setActive(false);
       widgets1.setEnabled(false);
+      widgets1.setType(ButtonType.SUCCESS);
 
       widgets1.setSize(ButtonSize.LARGE);
       widgets1.addStyleName("leftFiveMargin");
@@ -915,6 +919,7 @@ public class ListenViewHelper<T extends ITurnPanel>
         rowOne.add(widgets1);
       }
       playYourselfButton = widgets1;
+      playYourselfButton.setVisible(thisView != INavigation.VIEWS.LISTEN);
     }
 
     {
@@ -1073,7 +1078,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @return
    * @see #setCurrentTurnTo
    */
-   int beforeChangeTurns() {
+  int beforeChangeTurns() {
     setPlayButtonToPlay();
 
     int i = getAllTurns().indexOf(currentTurn);
@@ -1122,27 +1127,28 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #getControls
    */
   void gotClickOnPlay() {
-    togglePlayState();
-
-    //setGotTurnClick(false);
     logger.info("gotClickOnPlay got click on play ");
-    setHearYourself(false);
-    gotRehearse();
+    firstStepsWhenPlay();
 
-    //  if (!setTurnToPromptSide()) {
-    ifOnLastJumpBackToFirst();
-    //  }
 
     playCurrentTurn();
   }
 
+  void firstStepsWhenPlay() {
+    gotRehearse();
+    togglePlayState();
+    setHearYourself(false);
+    ifOnLastJumpBackToFirst();
+  }
+
   private void gotPlayYourself() {
+    gotHearYourself();
+
     togglePlayState();
 
     //   setGotTurnClick(false);
     logger.info("gotClickOnPlay got click on play yourself");
 
-    gotHearYourself();
     //  if (!setTurnToPromptSide()) {
     ifOnLastJumpBackToFirst();
     //  }
@@ -1154,7 +1160,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * what state is indicated by the play button - playing or paused?
    * if paused, don't continue when audio ends or says it stopped.
    */
-  protected void togglePlayState() {
+  void togglePlayState() {
     if (sessionGoingNow) {
       setPlayButtonToPlay();
     } else {
@@ -1199,12 +1205,15 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   protected void gotRehearse() {
     doRehearse = true;
+    if (DEBUG) logger.info("gotRehearse : doRehearse = " + doRehearse);
   }
 
+  /**
+   * @see #gotPlayYourself()
+   */
   protected void gotHearYourself() {
     doRehearse = false;
     if (DEBUG) logger.info("gotHearYourself : doRehearse = " + doRehearse);
-
   }
 
   /**
@@ -1264,7 +1273,10 @@ public class ListenViewHelper<T extends ITurnPanel>
     setCurrentTurn(allTurns.get(nextIndex));
   }
 
-
+  /**
+   * @return
+   * @see #setNextTurnForSide()
+   */
   boolean onLastTurn() {
     return isLast(currentTurn);
   }
@@ -1291,7 +1303,7 @@ public class ListenViewHelper<T extends ITurnPanel>
       boolean rightSpeaker = isRightSpeakerSet();
       List<T> ts = (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : allTurns;
       // logger.info("getPromptSeq " + ts.size());
-      report("prompts", ts);
+      if (DEBUG_DETAIL) report("prompts", ts);
       return ts;
     }
   }
@@ -1413,7 +1425,7 @@ public class ListenViewHelper<T extends ITurnPanel>
         currentTurnPlayEnded();
       } else {
         if (!isDoRehearse())
-        logger.info("playStopped ignore since session has ended (via play button click)");
+          logger.info("playStopped ignore since session has ended (via play button click)");
       }
     } else {
       logger.info("playStopped - no current turn.");
@@ -1493,7 +1505,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @seex #setPlayButtonIcon
    * @see #playStarted
    */
- private void setPlayButtonToPause() {
+  private void setPlayButtonToPause() {
     getPlayButtonToUse().setIcon(IconType.PAUSE);
     sessionGoingNow = true;
   }
@@ -1517,6 +1529,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   private Button getPlayButtonToUse() {
+    if (DEBUG) logger.info("getPlayButtonToUse doRehearse " + doRehearse);
     return doRehearse ? this.playButton : playYourselfButton;
   }
 

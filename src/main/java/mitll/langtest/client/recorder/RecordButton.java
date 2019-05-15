@@ -181,6 +181,7 @@ public class RecordButton extends Button {
         } else {
           logger.info("setupRecordButton ignoring mouse up since mouse already up");
         }
+        event.preventDefault();
       });
 
       addMouseOutHandler(event -> gotMouseOut());
@@ -205,7 +206,10 @@ public class RecordButton extends Button {
   protected void doClick(MouseEvent<?> clickEvent) {
     if (isVisible() && isEnabled()) {
       if (clickEvent != null) {
+//        logger.info("doClick - (" + clickEvent.getClass() +
+//            ") got click event\n\n\n");
         clickEvent.stopPropagation();
+        clickEvent.preventDefault();
       }
       startOrStopRecording();
     }
