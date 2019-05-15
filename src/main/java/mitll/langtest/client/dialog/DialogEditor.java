@@ -71,6 +71,21 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   }
 
   @Override
+  void onUnload() {
+    controller.getAudioService().reloadDialog(controller.getProjectID(), getDialogID(), new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+        logger.info("did reload on other server!");
+      }
+    });
+  }
+
+  @Override
   protected boolean addPlayYourself() {
     return false;
   }
@@ -121,6 +136,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
       playCurrentTurn();
     }
   }
+
 
   /**
    * If we're recording and we hit one of the forward/backward turns, stop recording right there...

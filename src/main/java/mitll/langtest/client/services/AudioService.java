@@ -124,4 +124,6 @@ public interface AudioService extends RemoteService {
   OOVInfo checkOOV(int id, int num, int offset) throws DominoSessionException;
 
   void updateOOV(int projectID, List<OOV> updates) throws DominoSessionException;
+
+  void reloadDialog(int projectID, int dialogID) throws DominoSessionException;
 }

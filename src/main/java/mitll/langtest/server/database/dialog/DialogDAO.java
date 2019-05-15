@@ -605,11 +605,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return toAdd;
   }
 
-//  @Override
-//  public List<ClientExercise> addEmptyExercises(IDialog toAdd, int userid, int afterExid, boolean isLeft) {
-//    return addEmptyExercises(toAdd, userid, afterExid, isLeft, System.currentTimeMillis());
-//  }
-
   /**
    * @param toAdd
    * @param projid

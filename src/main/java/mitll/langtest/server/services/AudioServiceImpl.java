@@ -1622,4 +1622,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     ExerciseDAO<CommonExercise> exerciseDAO = getDatabase().getProject(projID).getExerciseDAO();
     exids.forEach(exerciseDAO::refresh);
   }
+
+  @Override
+  public void reloadDialog(int projectID, int dialogID) throws DominoSessionException {
+    db.getProjectManagement().addDialogInfo(projectID, dialogID);
+  }
 }

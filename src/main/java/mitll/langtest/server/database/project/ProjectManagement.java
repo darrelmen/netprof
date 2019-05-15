@@ -62,8 +62,6 @@ import mitll.langtest.server.domino.IDominoImport;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.scoring.LTSFactory;
-import mitll.langtest.shared.dialog.DialogType;
-import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.OOV;
@@ -514,15 +512,17 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   @Override
-  public void addDialogInfo(int projID, int dialogID) {
-    addDialogInfo(getProject(projID, false), dialogID);
+  public boolean addDialogInfo(int projID, int dialogID) {
+    return addDialogInfo(getProject(projID, false), dialogID);
   }
 
-  private void addDialogInfo(Project project, int dialogID) {
+  private boolean addDialogInfo(Project project, int dialogID) {
     if (new DialogPopulate(db, pathHelper).addDialogInfo(project, dialogID)) {
       logger.info("addDialogInfo : add dialog info to " + project.getID() + " " + project.getName() + " now " + project.getDialogs().size() + " dialogs...");
+      return true;
     } else {
       logger.warn("addDialogInfo didn't add dialog info for " + project.getID());
+      return false;
     }
   }
 
@@ -548,7 +548,7 @@ public class ProjectManagement implements IProjectManagement {
       // logger.info("about to remember users for  " + projectID);
 
       db.getUserDAO().getFirstLastFor(db.getUserProjectDAO().getUsersForProject(projectID));
-     // logger.info("rememberUsers finished remembering users for  " + projectID);
+      // logger.info("rememberUsers finished remembering users for  " + projectID);
     }, "ProjectManagement.rememberUsers_" + projectID).start();
   }
 

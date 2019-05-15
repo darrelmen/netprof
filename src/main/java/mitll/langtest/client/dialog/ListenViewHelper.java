@@ -559,7 +559,15 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   @NotNull
   DivWidget getTurns(IDialog dialog) {
-    DivWidget rowOne = new DivWidget();
+    ListenViewHelper outer=this;
+    DivWidget rowOne = new DivWidget() {
+      @Override
+      protected void onUnload() {
+        super.onUnload();
+        outer.onUnload();
+
+      }
+    };
 
     this.turnContainer = rowOne;
 
@@ -574,6 +582,10 @@ public class ListenViewHelper<T extends ITurnPanel>
     markFirstTurn();
 
     return rowOne;
+  }
+
+  void onUnload() {
+
   }
 
   void addAllTurns(IDialog dialog, DivWidget rowOne) {

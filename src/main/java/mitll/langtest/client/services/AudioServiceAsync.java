@@ -113,4 +113,6 @@ public interface AudioServiceAsync {
   void checkOOV(int id, int num, int offset, AsyncCallback<OOVInfo> async);
 
   void updateOOV(int projectID, List<OOV> updates, AsyncCallback<Void> async);
+
+  void reloadDialog(int projectID, int dialogID, AsyncCallback<Void> async);
 }

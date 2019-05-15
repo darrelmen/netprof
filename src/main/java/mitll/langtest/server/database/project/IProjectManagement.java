@@ -165,5 +165,5 @@ public interface IProjectManagement {
 
   void updateOOV(List<OOV> updates, int user);
 
-  void addDialogInfo(int projID, int dialogID);
+  boolean addDialogInfo(int projID, int dialogID);
 }
