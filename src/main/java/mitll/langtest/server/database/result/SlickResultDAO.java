@@ -353,12 +353,13 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @param userid
    * @param ids
    * @param language
+   * @param projid
    * @return
    */
-  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> ids, Language language) {
+  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> ids, Language language, int projid) {
     Map<Integer, CorrectAndScore> exidToMaxScoreEver = new HashMap<>(ids.size());
 
-    getResultsForExIDInForUserEasy(ids, userid, language)
+    getResultsForExIDInForUserEasy(ids, userid, language, projid)
         .stream()
         .collect(groupingBy(CorrectAndScore::getExid))
         .forEach((k, v) -> exidToMaxScoreEver.put(k,
@@ -379,23 +380,25 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @param ids
    * @param userid
    * @param language
+   * @param projid
    * @return
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language) {
-    return getResultsForExIDInForUserEasy(ids, userid, language);
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language, int projid) {
+    return getResultsForExIDInForUserEasy(ids, userid, language, projid);
   }
 
   /**
    * @param ids
    * @param userid
    * @param language
+   * @param projid
    * @return
    * @paramx ignoredSession
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language) {
-    return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids), language);
+  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language, int projid) {
+    return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids, projid), language);
   }
 
   @Override

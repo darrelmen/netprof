@@ -463,9 +463,11 @@ public class FilterResponseHelper implements IResponseFilter {
    * @see mitll.langtest.server.database.DatabaseImpl#filterExercises
    */
   public List<CommonExercise> filterExercises(ExerciseListRequest request, List<CommonExercise> exercises, int projid) {
-    logger.info("filterExercises filter " +
-        "\n\treq       " + request +
-        "\n\texercises " + exercises.size());
+    if (DEBUG) {
+      logger.info("filterExercises filter " +
+          "\n\treq       " + request +
+          "\n\texercises " + exercises.size());
+    }
 
     boolean onlyExamples = request.isOnlyExamples();
 
@@ -509,7 +511,8 @@ public class FilterResponseHelper implements IResponseFilter {
       exercises = filterByUninspected(exercises);
       exercises = maybeDoInterpreterFilter(request, exercises);
     } else if (onlyExamples) {
-      logger.info("filterExercises OK doing examples 3");
+      if (DEBUG) logger.info("filterExercises OK doing examples 3");
+
       exercises = getContextExercises(exercises);
     } else if (hasDialogs(projid)) {
 //        logger.info("filterExercises remove english - before " + exercises.size());
@@ -520,9 +523,11 @@ public class FilterResponseHelper implements IResponseFilter {
 //      exercises = getExactMatch(request.getPrefix(), databaseServices.getProject(projid).getLanguageEnum(), exercises);
 //    }
 
-    logger.info("filterExercises" +
-        "\n\tfilter req " + request +
-        "\n\treturn     " + exercises.size());
+    if (DEBUG) {
+      logger.info("filterExercises" +
+          "\n\tfilter req " + request +
+          "\n\treturn     " + exercises.size());
+    }
 
     return exercises;
   }

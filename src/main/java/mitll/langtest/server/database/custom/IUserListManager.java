@@ -118,6 +118,8 @@ public interface IUserListManager {
 
   void addAnnotations(ClientExercise exercise);
 
+  void addAnnotationsToAll(Collection<ClientExercise> exercises);
+
   void markState(CommonExercise exercise, STATE state, int creatorID);
 
   void markCorrectness(CommonExercise exercise, boolean correct, int userid);

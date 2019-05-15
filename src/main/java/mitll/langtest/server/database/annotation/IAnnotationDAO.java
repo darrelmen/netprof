@@ -42,5 +42,7 @@ public interface IAnnotationDAO extends IDAO {
 
   Map<String, ExerciseAnnotation> getLatestByExerciseID(int exerciseID);
 
+ Map<Integer, Map<String, ExerciseAnnotation>> getLatestByExerciseIDs(Set<Integer> exerciseIDs);
+
   Set<Integer> getExercisesWithIncorrectAnnotations(int projID, boolean isContext);
 }

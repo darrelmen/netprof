@@ -131,6 +131,14 @@ public class SlickAnnotationDAO extends BaseAnnotationDAO implements IAnnotation
     return getFieldToAnnotationMapSlick(latestByExerciseID);
   }
 
+  @Override
+  public Map<Integer, Map<String, ExerciseAnnotation>> getLatestByExerciseIDs(Set<Integer> exerciseIDs) {
+    Map<Integer, Collection<SlickAnnotation>> latestByExerciseIDs = dao.getLatestByExerciseIDs(exerciseIDs);
+    Map<Integer, Map<String, ExerciseAnnotation>> exToAnnos = new HashMap<>(latestByExerciseIDs.size());
+    latestByExerciseIDs.forEach((k, v) -> exToAnnos.put(k, getFieldToAnnotationMapSlick(v)));
+    return exToAnnos;
+  }
+
   /**
    * @param projID
    * @param isContext

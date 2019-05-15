@@ -82,9 +82,11 @@ public interface IResultDAO extends IDAO {
   List<MonitorResult> getMonitorResults(int projid);
 
   List<MonitorResult> getResultsBySession(int userid, int projid, String sessionID);
+
   List<MonitorResult> getResultsInTimeRange(int userid, int projectid, Timestamp from, Timestamp to);
 
   List<MonitorResult> getMonitorResultsKnownExercises(int projid);
+
   List<MonitorResult> getMonitorResultsKnownExercisesWithLimit(int projid, int limit);
 
   List<MonitorResult> getMonitorResultsByExerciseID(int id);
@@ -94,20 +96,20 @@ public interface IResultDAO extends IDAO {
   UserToCount getUserToNumAnswers();
 
   List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
-                                                                          List<Integer> allIds,
-                                                                          Map<Integer, CommonExercise> idToEx,
+                                                                    List<Integer> allIds,
+                                                                    Map<Integer, CommonExercise> idToEx,
 
-                                                                          Language language);
+                                                                    Language language, int projid);
 
-  void attachScoreHistory(int userID, CommonExercise firstExercise, Language language);
+  void attachScoreHistory(int userID, CommonExercise firstExercise, Language language, int projid);
 
-  Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, Language language);
+  Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, Language language, int projid);
 
   List<CorrectAndScore> getResultsForExIDInForUser(int userID,
                                                    int id,
-                                                   Language language);
+                                                   Language language, int projid);
 
-  List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language);
+  List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language, int projid);
 
   CorrectAndScore getCorrectAndScoreForResult(int id, Language language);
 
@@ -131,5 +133,5 @@ public interface IResultDAO extends IDAO {
   List<SlickPerfResult> getLatestResultsForDialogSession(int dialogSessionID);
 
   //ResultDAOWrapper getDao();
-  Map<Integer,String> getResultIDToJSON(int projid);
+  Map<Integer, String> getResultIDToJSON(int projid);
 }
