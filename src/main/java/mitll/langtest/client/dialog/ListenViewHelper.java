@@ -91,7 +91,6 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   private static final String MIDDLE_COLOR = "#00800059";
 
-
   public enum COLUMNS {LEFT, MIDDLE, RIGHT, UNK}
 
   private static final String VALUE = "value";
@@ -564,14 +563,24 @@ public class ListenViewHelper<T extends ITurnPanel>
       @Override
       protected void onUnload() {
         super.onUnload();
+
+        logger.info("getTurns : on unload");
+
         outer.onUnload();
+
+      }
+
+      @Override
+      protected void onDetach() {
+        super.onDetach();
+        logger.info("getTurns : onDetach");
 
       }
     };
 
     this.turnContainer = rowOne;
 
-    if (DEBUG) logger.info("getTurns : dialog    " + dialog);
+    if (DEBUG || true) logger.info("getTurns : dialog    " + dialog);
 
     if (DEBUG) logger.info("getTurns : exercises " + dialog.getExercises().size());
 

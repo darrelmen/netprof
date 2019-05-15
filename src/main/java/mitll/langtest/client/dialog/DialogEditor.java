@@ -137,7 +137,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     }
   }
 
-
   /**
    * If we're recording and we hit one of the forward/backward turns, stop recording right there...
    */

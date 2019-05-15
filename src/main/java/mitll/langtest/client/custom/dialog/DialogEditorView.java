@@ -181,7 +181,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     DialogEditor editorTurnDialogEditor = new DialogEditor(controller, INavigation.VIEWS.DIALOG_EDITOR, selectedItem);
     editorTurnDialogEditor.showContent(listContent, INavigation.VIEWS.DIALOG_EDITOR);
 
-  //  logger.info("list content " + listContent);
+    //  logger.info("list content " + listContent);
 
     new DialogHelper(true).show(
         "Add/Edit Turns" + " : " + getListName(),
@@ -189,15 +189,17 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
         listContent,
         "Done",
         null,
-        new MyShownCloseListener(editorTurnDialogEditor), 710, -1, true);
+        new MyShownCloseListener(editorTurnDialogEditor, selectedItem.getID()), 710, -1, true);
 
   }
 
   private class MyShownCloseListener implements DialogHelper.ShownCloseListener {
     DialogEditor editItem;
+    int dialogID;
 
-    MyShownCloseListener(DialogEditor editItem) {
+    MyShownCloseListener(DialogEditor editItem, int dialogID) {
       this.editItem = editItem;
+      this.dialogID = dialogID;
     }
 
     @Override
@@ -217,6 +219,18 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
       // logger.info("Got hidden ");
       // editItem.removeHistoryListener();
       // History.newItem("");
+
+      controller.getAudioService().reloadDialog(controller.getProjectID(), dialogID, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          logger.info("did reload on other server.");
+        }
+      });
     }
 
     @Override
