@@ -176,7 +176,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
-  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, Language language) {
+  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, Language language, int projid) {
     return null;
   }
 
@@ -312,11 +312,12 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param ids
    * @param userid
    * @param language
+   * @param projid
    * @return
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language) {
+  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language, int projid) {
     try {
       String list = getInList(ids);
 
@@ -357,12 +358,13 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param ids
    * @param userid
    * @param language
+   * @param projid
    * @return
    * @seex #getSessionsForUserIn2
    * @see #attachScoreHistory
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
    */
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language, int projid) {
     try {
       String list = getInList(ids);
 
@@ -682,7 +684,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param statement
    * @return
    * @throws SQLException
-   * @see BaseResultDAO#getResultsForExIDInForUser(Collection, int, Language)
+   * @see BaseResultDAO#getResultsForExIDInForUser(Collection, int, Language, int)
    */
   private List<CorrectAndScore> getScoreResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();

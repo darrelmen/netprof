@@ -444,4 +444,8 @@ public class AnnotationDAO extends BaseAnnotationDAO implements IAnnotationDAO {
     return exToCreator;
   }
 
+  @Override
+  public Map<Integer, Map<String, ExerciseAnnotation>> getLatestByExerciseIDs(Set<Integer> exerciseIDs) {
+    return null;
+  }
 }

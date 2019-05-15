@@ -137,8 +137,13 @@ public class JsonSupport {
       idToEx.put(id, exercise);
     }
 
+    int projid = -1;
+    if (!exercisesForState.isEmpty()) {
+      projid = exercisesForState.iterator().next().getProjectID();
+    }
+    
     List<ExerciseCorrectAndScore> exerciseCorrectAndScores =
-        resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, language);
+        resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, language, projid);
 
 //    if (true) {
 //     // exerciseCorrectAndScores.sort(Comparator.comparingDouble(ExerciseCorrectAndScore::getLatestScore));

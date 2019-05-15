@@ -1049,6 +1049,28 @@ public class UserListManager implements IUserListManager {
     }
   }
 
+  @Override
+  public void addAnnotationsToAll(Collection<ClientExercise> exercises) {
+    Map<Integer, ClientExercise> idToEx = new HashMap<>();
+    exercises.forEach(exercise -> idToEx.put(exercise.getID(), exercise));
+    long then = System.currentTimeMillis();
+    Map<Integer, Map<String, ExerciseAnnotation>> latestByExerciseIDs = annotationDAO.getLatestByExerciseIDs(idToEx.keySet());
+    long now = System.currentTimeMillis();
+
+    if (now - then > 30) {
+      logger.info("addAnnotationsToAll : (" + (now - then) + ") adding annos for " + latestByExerciseIDs.size() + " from " + idToEx.size());
+    }
+
+    idToEx.forEach((id, exercise) -> {
+      Map<String, ExerciseAnnotation> latestByExerciseID = latestByExerciseIDs.get(id);
+      if (latestByExerciseID != null) {
+        MutableAnnotationExercise mutableAnnotation = exercise.getMutableAnnotation();
+    //    logger.info("addAnnotationsToAll : adding annos " + latestByExerciseID);
+        latestByExerciseID.forEach((k, v) -> mutableAnnotation.addAnnotation(k, v.getStatus(), v.getComment()));
+      }
+    });
+  }
+
   /**
    * @param exercise
    * @param correct

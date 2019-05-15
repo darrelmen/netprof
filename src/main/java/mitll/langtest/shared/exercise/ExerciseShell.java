@@ -213,7 +213,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
 
   /**
    * @param scores
-   * @see mitll.langtest.server.database.result.BaseResultDAO#attachScoreHistory(int, CommonExercise, mitll.langtest.shared.project.Language)
+   * @see mitll.langtest.server.database.result.BaseResultDAO#attachScoreHistory(int, CommonExercise, mitll.langtest.shared.project.Language, int)
    */
   @Override
   public void setScores(List<CorrectAndScore> scores) {

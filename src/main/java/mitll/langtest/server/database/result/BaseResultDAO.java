@@ -313,14 +313,15 @@ public abstract class BaseResultDAO extends DAO {
    * @param allIds
    * @param idToEx
    * @param language
+   * @param projid
    * @return
    * @see mitll.langtest.server.database.JsonSupport#getJsonScoreHistory(int, Map, ExerciseSorter)
    */
   public List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
                                                                            List<Integer> allIds,
                                                                            Map<Integer, CommonExercise> idToEx,
-                                                                           Language language) {
-    List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, userid, language);
+                                                                           Language language, int projid) {
+    List<CorrectAndScore> results = getResultsForExIDInForUser(allIds, userid, language, projid);
     // if (debug) logger.debug("found " + results.size() + " results for " + allIds.size() + " items");
     return getSortedHistory(results, allIds, idToEx);
   }
@@ -418,10 +419,11 @@ public abstract class BaseResultDAO extends DAO {
    * @param userID
    * @param firstExercise
    * @param language
+   * @param projid
    * @see mitll.langtest.server.services.ExerciseServiceImpl#addAnnotationsAndAudio
    */
-  public void attachScoreHistory(int userID, CommonExercise firstExercise, Language language) {
-    List<CorrectAndScore> resultsForExercise = getCorrectAndScores(userID, firstExercise, language);
+  public void attachScoreHistory(int userID, CommonExercise firstExercise, Language language, int projid) {
+    List<CorrectAndScore> resultsForExercise = getCorrectAndScores(userID, firstExercise, language, projid);
 
     if (resultsForExercise == null)
       logger.warn("huh? no score history for " + firstExercise.getID() + " for " + userID);
@@ -434,22 +436,24 @@ public abstract class BaseResultDAO extends DAO {
    * @param userid
    * @param exercises
    * @param language
+   * @param projid
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getScoreHistories
    */
-  public abstract Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, Language language);
+  public abstract Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, Language language, int projid);
 
   /**
    * @param userID
    * @param firstExercise
    * @param language
+   * @param projid
    * @return
    * @see #attachScoreHistory
    */
   private List<CorrectAndScore> getCorrectAndScores(int userID,
                                                     HasID firstExercise,
-                                                    Language language) {
-    return getResultsForExIDInForUser(userID, firstExercise.getID(), language);
+                                                    Language language, int projid) {
+    return getResultsForExIDInForUser(userID, firstExercise.getID(), language, projid);
   }
 
 /*
@@ -458,11 +462,11 @@ public abstract class BaseResultDAO extends DAO {
 
   public List<CorrectAndScore> getResultsForExIDInForUser(int userID,
                                                           int id,
-                                                          Language language) {
-    return getResultsForExIDInForUser(Collections.singleton(id), userID, language);
+                                                          Language language, int projid) {
+    return getResultsForExIDInForUser(Collections.singleton(id), userID, language, projid);
   }
 
-  abstract List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language);
+  abstract List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language, int projid);
 
 /*
   private Map<Integer, List<CorrectAndScore>> populateUserToAnswers(List<CorrectAndScore> results) {
