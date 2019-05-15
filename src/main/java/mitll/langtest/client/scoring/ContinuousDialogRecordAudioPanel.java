@@ -44,7 +44,7 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
 
   private IRehearseView rehearseView;
   private IRecordResponseListener recordDialogTurn;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    * @param exercise
@@ -55,23 +55,33 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
    * @see RecordDialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
   protected ContinuousDialogRecordAudioPanel(ClientExercise exercise,
-                                          ExerciseController controller,
-                                          SessionManager sessionManager,
-                                          IRehearseView rehearseView,
-                                          IRecordResponseListener recordDialogTurn) {
+                                             ExerciseController controller,
+                                             SessionManager sessionManager,
+                                             IRehearseView rehearseView,
+                                             IRecordResponseListener recordDialogTurn) {
     super(exercise, controller, sessionManager);
     this.rehearseView = rehearseView;
     this.recordDialogTurn = recordDialogTurn;
   }
 
+  /**
+   * Trouble if we have two consecutive recording turns!
+   * @return
+   */
+  @Override
+  protected boolean shouldUseRecordingStopDelay() {
+    return false;
+  }
 
-  @Override  public void gotShortDurationRecording() {
-    logger.info("gotShortDurationRecording");
+  @Override
+  public void gotShortDurationRecording() {
+  //  logger.info("gotShortDurationRecording");
     super.gotShortDurationRecording();
 
     getPostAudioRecordButton().showPopup("Recording too short - press and hold to record.");
 
   }
+
   @Override
   protected boolean useMicrophoneIcon() {
     return true;
@@ -142,8 +152,8 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
   }
 
   /**
-   * @see FeedbackPostAudioRecordButton#getDialogSessionID
    * @return
+   * @see FeedbackPostAudioRecordButton#getDialogSessionID
    */
   @Override
   public int getDialogSessionID() {

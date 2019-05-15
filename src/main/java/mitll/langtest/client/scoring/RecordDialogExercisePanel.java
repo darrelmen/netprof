@@ -61,7 +61,7 @@ import static mitll.langtest.client.scoring.RecorderPlayAudioPanel.BLUE_INACTIVE
 public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialogTurn {
   private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
-  private static final boolean DEBUG_PARTIAL = false;
+  private static final boolean DEBUG_PARTIAL = true;
   private static final boolean DEBUG = false;
 
   private static final long MOVE_ON_DUR = 3000L;
@@ -246,8 +246,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   public void maybeSetObscure(Map<String, ClientExercise> turnToEx) {
     String oldID = exercise.getOldID();
     ClientExercise clientExercise = turnToEx.get(oldID);
-    if (clientExercise == null) logger.warning("couldn't find core for " + oldID);
-    else {
+    if (clientExercise == null) {
+      logger.info("maybeSetObscure : couldn't find core for " + oldID);
+    } else {
       Set<String> coreVocab = Collections.singleton(clientExercise.getForeignLanguage());
       //  logger.info("got " + clientExercise.getForeignLanguage() + " for " + exercise.getForeignLanguage());
       getObscureCandidates(coreVocab).forEach(IHighlightSegment::setObscurable);
@@ -302,7 +303,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    */
   @Override
   public void useResult(AudioAnswer result) {
-    logger.info("useResult got " + result.getScore() + " for " +result.getPath());
+    logger.info("useResult got " + result.getScore() + " for " + result.getPath());
 
     this.studentSpeechDur = getSpeechDur(result.getExid(), result.getPretestScore());
 
@@ -434,6 +435,10 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     return recordPanel.getPostAudioRecordButton();
   }
 
+  /**
+   * @param response
+   * @see ContinuousDialogRecordAudioPanel#usePartial(StreamResponse)
+   */
   public void usePartial(StreamResponse response) {
     if (isRecording()) {
       Validity validity = response.getValidity();
@@ -457,11 +462,11 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       }
 
       if (response.isStreamStop()) {
-        // logger.info("usePartial stopStream");
+        logger.info("usePartial stopStream");
         gotStreamStop = true;
       }
     } else {
-      logger.warning("usePartial hmm " + report() + " getting response " + response + " but not recording...?");
+      logger.info("usePartial hmm " + report() + " getting response " + response + " but not recording...?");
     }
   }
 
@@ -591,12 +596,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   }
 
   public boolean reallyStartOrStopRecording() {
-
-
-    logger.info("reallyStartOrStopRecording " +
-        "\n\tfor  " + getExID()
-    );
-
+    logger.info("reallyStartOrStopRecording " + "\n\tfor  " + getExID());
     return getRecordButton().startOrStopRecording();
   }
 
@@ -637,7 +637,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
       boolean shouldStop = vadCheck || diff > minDurPlusMoveOn;// || doPushToTalk;
       if (shouldStop) {
-        logger.info("stopRecording " + this +
+        logger.info("gotEndSilenceMaybeStopRecordingTurn " + this +
             "\n\tvadCheck  " + vadCheck +
             "\n\tgotStreamStop " + gotStreamStop +
             "\n\tfirstVAD  " + firstVAD +

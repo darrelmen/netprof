@@ -58,9 +58,6 @@ public abstract class PostAudioRecordButton extends RecordButton
   // TODO : enum
   private static final String ABORT = "ABORT";
 
-  private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PACKET = false;
-
   private static final boolean USE_DELAY = true;
   private static final String END = "END";
 
@@ -73,6 +70,9 @@ public abstract class PostAudioRecordButton extends RecordButton
   protected final ExerciseController controller;
   private final JSONAnswerParser jsonAnswerParser = new JSONAnswerParser();
   private int projid;
+
+  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PACKET = false;
 
   /**
    * @param exerciseID
@@ -137,7 +137,9 @@ public abstract class PostAudioRecordButton extends RecordButton
         getDialogSessionID(),
         getDevice()  // device = session id in quiz
     );
-    if (DEBUG) logger.info("startRecording : " + clientAudioContext);
+    if (DEBUG) {
+      logger.info("startRecording : " + clientAudioContext);
+    }
 
     controller.startStream(clientAudioContext, this::gotPacketResponse);
   }
@@ -155,7 +157,7 @@ public abstract class PostAudioRecordButton extends RecordButton
   public boolean stopRecording(long duration, boolean abort) {
     if (DEBUG) logger.info("stopRecording " + duration);
     stopRecordingReqTimestamp = System.currentTimeMillis();
-    controller.stopRecording(USE_DELAY, abort);
+    controller.stopRecording(shouldUseRecordingStopDelay(), abort);
 
     if (duration > MIN_DURATION) {
       if (DEBUG) logger.info("stopRecording duration " + duration + " > min = " + MIN_DURATION);
@@ -166,6 +168,10 @@ public abstract class PostAudioRecordButton extends RecordButton
       logger.info("stopRecording duration " + duration + " < min = " + MIN_DURATION);
       return false;
     }
+  }
+
+  protected boolean shouldUseRecordingStopDelay() {
+    return USE_DELAY;
   }
 
   /**

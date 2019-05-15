@@ -41,10 +41,13 @@ public class BrowserRecording {
   private static final Logger logger = Logger.getLogger("BrowserRecording");
 
   private static final int DELAY_MILLIS = 130;
-  private static final boolean DEBUG = false;
 
   private static WebAudioRecorder webAudio;
   private static MicPermission micPermission;
+
+
+  private static final boolean DEBUG = false;
+
 
   public static void init(MicPermission micPermission) {
     BrowserRecording.webAudio = new WebAudioRecorder();

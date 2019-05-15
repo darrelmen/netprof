@@ -48,9 +48,9 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscu
   private Map<String, ClientExercise> exidToShell = new HashMap<>();
 
   /**
-   * @see mitll.langtest.client.custom.INavigation.VIEWS.CORE_REHEARSE
    * @param controller
    * @param thisView
+   * @see mitll.langtest.client.custom.INavigation.VIEWS.CORE_REHEARSE
    */
   public CoreRehearseViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     super(controller, thisView);
@@ -94,12 +94,20 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscu
   protected T getTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
     T turnPanel = super.getTurnPanel(clientExercise, columns, prevColumn, index);
 
-    if (columns == COLUMNS.MIDDLE) {
-      if (!clientExercise.hasEnglishAttr()) {
-        turnPanel.maybeSetObscure(exidToShell);
+    if (isInterpreter) {
+      if (columns == COLUMNS.MIDDLE) {
+        if (!clientExercise.hasEnglishAttr()) {
+          turnPanel.maybeSetObscure(exidToShell);
+        }
+      } else {
+        turnPanel.obscureTextAndPhones();
       }
     } else {
-      turnPanel.obscureTextAndPhones();
+      if (columns == COLUMNS.RIGHT) {
+        turnPanel.maybeSetObscure(exidToShell);
+      } else {
+        turnPanel.obscureTextAndPhones();
+      }
     }
     return turnPanel;
   }

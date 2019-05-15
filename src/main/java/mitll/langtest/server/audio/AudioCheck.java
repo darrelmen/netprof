@@ -67,7 +67,9 @@ public class AudioCheck {
   private static final ValidityAndDur INVALID_AUDIO = new ValidityAndDur();
   private static final boolean DEBUG = false;
   public static final int WAV_HEADER_LENGTH = 44;
-  private static final boolean DUMP_POWER_INFO = true;
+
+  private static final boolean DUMP_POWER_INFO = false;
+
   private final int minDynamicRange;
 
   // TODO :make a server prop

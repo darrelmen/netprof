@@ -107,7 +107,6 @@ public class RecordButton extends Button {
                          PropertyHandler propertyHandler) {
     super(buttonText);
     RECORD = buttonText;
-//    logger.info("RecordButton button text " + buttonText );
     STOP = stopButtonText;
     this.propertyHandler = propertyHandler;
     afterStopDelayMillis = propertyHandler.getAfterStopDelayMillis();

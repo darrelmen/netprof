@@ -51,6 +51,8 @@ public abstract class FlexListLayout<T extends CommonShell, U extends HasID> imp
 
   public PagingExerciseList<T, U> npfExerciseList;
   private final ExerciseController controller;
+  private boolean visible = true;
+  private FlowPanel section;
 
   /**
    * @param controller
@@ -104,7 +106,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends HasID> imp
     }
 
     bottomRowDiv.add(bottomRow);
-//    ScrollPanel widgets1 = new ScrollPanel(bottomRowDiv);
     twoRows.add(bottomRowDiv);
 
     Panel currentExerciseVPanel = getCurrentExercisePanel();
@@ -117,8 +118,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends HasID> imp
         listHeader, footer);
     npfExerciseList = widgets;
 
-  //  addThirdColumn(bottomRow);
-
     if (npfExerciseList == null) {
       logger.warning("huh? exercise list is null for " + instanceName + " and " + userListID);
     } else {
@@ -129,7 +128,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends HasID> imp
     return twoRows;
   }
 
-  private boolean visible = true;
 
   @Override
   public void setVisible(boolean vis) {
@@ -139,7 +137,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends HasID> imp
     visible = vis;
   }
 
-  private FlowPanel section;
 
   /**
    * TODO: Do something smarter here - if we scroll down and can't see facets anymore, change position to fixed, but with the bottom close to the bottom.
@@ -160,7 +157,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends HasID> imp
     this.section = section;
     section.setVisible(visible);
     section.addStyleName("sidebar");
-//    section.addStyleName("scrolledpos");
 
     twoRows.add(section);
     twoRows.setWidth("100%");
@@ -207,9 +203,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends HasID> imp
     currentExerciseVPanel.addStyleName("floatLeft");
     return currentExerciseVPanel;
   }
-
-//  private void addThirdColumn(Panel bottomRow) {
-//  }
 
   protected void styleBottomRow(Panel bottomRow) {
   }

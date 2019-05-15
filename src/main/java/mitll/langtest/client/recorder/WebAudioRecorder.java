@@ -29,20 +29,21 @@
 
 package mitll.langtest.client.recorder;
 
-import com.google.gwt.user.client.Timer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.BrowserCheck;
 import mitll.langtest.client.initial.WavCallback;
 import mitll.langtest.client.initial.WavStreamCallback;
 import mitll.langtest.client.scoring.PostAudioRecordButton;
 
+import java.util.logging.Logger;
+
 public class WebAudioRecorder {
-//  private static final Logger logger = Logger.getLogger("WebAudioRecorder");
+  private static final Logger logger = Logger.getLogger("WebAudioRecorder");
 
   private static boolean webAudioMicAvailable;
   private static boolean gotResponse = false;
 
-  private Timer theTimer = null;
+//  private Timer theTimer = null;
 
   /**
    * The valid responses to this are : webAudioMicAvailable, webAudioMicNotAvailable, webAudioPermissionDenied
@@ -224,7 +225,7 @@ public class WebAudioRecorder {
    */
   public void stopRecording(boolean abort) {
     //if (USE_STREAMS) {
-    // logger.info("WebAudioRecorder.stopRecording - stop stream, abort = " + abort);
+//    logger.info("WebAudioRecorder.stopRecording - stop stream, abort = " + abort);
     doStopStream("" + abort);
   /*  }
     else {

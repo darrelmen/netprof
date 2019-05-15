@@ -81,12 +81,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   private static final double HUNDRED = 100.0D;
 
   private static final String DIALOG_INTRO_SHOWN_REHEARSAL = "dialogIntroShownRehearsal";
-  private static final String HOLD_THE_RED_RECORD_BUTTON = "When it's your turn, press and hold the red record button or space bar.";
-  private static final String RED_RECORD_BUTTON = "Speak when you see the red record button.";
+
+//  private static final String HOLD_THE_RED_RECORD_BUTTON = "When it's your turn, press and hold the red record button or space bar.";
+//  private static final String RED_RECORD_BUTTON = "Speak when you see the red record button.";
 
   private static final double MAX_RATE_RATIO = 3D;
 
-  private static final int PROGRESS_BAR_WIDTH = 49;
+//  private static final int PROGRESS_BAR_WIDTH = 49;
 
   private static final int VALUE = -73;//-98;
 
@@ -134,13 +135,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   private DialogSession dialogSession = null;
   String rehearsalKey = DIALOG_INTRO_SHOWN_REHEARSAL;
-//  private String rehearsalPrompt;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PLAY = true;
+  private static final boolean DEBUG_PLAY = false;
   private static final boolean DEBUG_RECORDING = false;
   private static final boolean DEBUG_SILENCE = false;
-  private static final boolean DEBUG_PLAY_ENDED = true;
+  private static final boolean DEBUG_PLAY_ENDED = false;
   private static final boolean DEBUG_OVERALL_SCORE = false;
 
   /**
@@ -522,9 +522,17 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   /**
    * check - is the next turn a recording turn? if so we wait (for now) for the
    * recording to finish completely - we have to send an END and get back a response.
+   *
+   * @see #stopRecording
    */
   private void recordingHasStopped() {
-    if (isNextTurnAPrompt(getCurrentTurn())) {
+
+    if (DEBUG_PLAY_ENDED) {
+      logger.info("recordingHasStopped ...");
+    }
+    moveOnAfterRecordingStopped();
+
+/*    if (isNextTurnAPrompt(getCurrentTurn())) {
       if (DEBUG_PLAY_ENDED) {
         logger.info("recordingHasStopped OK, next turn is a prompt!");
       }
@@ -533,7 +541,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       if (DEBUG_PLAY_ENDED) {
         logger.info("recordingHasStopped next turn not a prompt so not advancing...");
       }
-    }
+    }*/
   }
 
   private void moveOnAfterRecordingStopped() {
@@ -988,7 +996,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
             setPlayButtonToPlay();
           } else if (!getRespSeq().isEmpty()) { // could be we don't have any response turns yet.
             if (DEBUG_PLAY_ENDED)
-              logger.info("currentTurnPlayEnded - no score for " + currentTurn.getExID() + " know about " + exToScore.keySet() + " so waiting...");
+              logger.info("currentTurnPlayEnded - no score for " + currentTurn.getExID() + " know about " + exToScore.keySet() + " exercises so waiting...");
 
             if (haveRecordedAllTurns()) {
               showWaitSpiner();  // wait for it
@@ -1205,14 +1213,18 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   /**
-   * @see RecordDialogExercisePanel.ContinuousDialogRecordAudioPanel#stopRecording()
+   * @see mitll.langtest.client.scoring.ContinuousDialogRecordAudioPanel#stopRecording()
    */
   @Override
   public void stopRecording() {
     if (getCurrentTurn() == allTurns.get(allTurns.size() - 1) && !exToScore.isEmpty()) {
       waitCursor.setVisible(true);
     }
-    // logger.info("stopRecording received!");
+    logger.info("stopRecording received!");
+
+    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("stopRecording"));
+    logger.info("logException stack " + exceptionAsString);
+
     recordingHasStopped();
   }
 

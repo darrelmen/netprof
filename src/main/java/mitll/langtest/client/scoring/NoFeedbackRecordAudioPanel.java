@@ -138,6 +138,11 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
       protected boolean shouldAddToAudioTable() {
         return outer.shouldAddToAudioTable();
       }
+
+      @Override
+      protected boolean shouldUseRecordingStopDelay() {
+        return outer.shouldUseRecordingStopDelay();
+      }
     };
     postAudioRecordButton.addStyleName("leftFiveMargin");
     postAudioRecordButton.setVisible(controller.getProjectStartupInfo().isHasModel());
@@ -157,6 +162,11 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   public void showInvalidResultPopup(String message) {
 
   }
+
+  protected boolean shouldUseRecordingStopDelay() {
+    return true;
+  }
+
   protected boolean shouldAddToAudioTable() {
     return false;
   }

@@ -93,6 +93,11 @@ public class ClientAudioContext {
   }
 
   public String toString() {
-    return "ex " + exerciseID + " req " + reqid + " add " + shouldAddToTable + " dialog " + dialogSessionID + " session " + recordingSessionID + " type " + audioType;
+    return "ex " + exerciseID +
+        "\n\treq " + reqid +
+        "\n\tadd " + shouldAddToTable +
+        "\n\tdialog  " + dialogSessionID +
+        "\n\tsession " + recordingSessionID +
+        "\n\ttype    " + audioType;
   }
 }
