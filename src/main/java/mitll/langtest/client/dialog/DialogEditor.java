@@ -115,7 +115,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   void gotClickOnPlay() {
     togglePlayState();
 
-  //  setGotTurnClick(false);
+    //  setGotTurnClick(false);
 
     if (isSessionGoingNow()) {
       playCurrentTurn();
@@ -147,18 +147,19 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   @Override
   protected void gotTurnClick(EditorTurn turn) {
     EditorTurn currentTurn = getCurrentTurn();
-    logger.info("gotTurnClick currentTurn  " + blurb(currentTurn));
+    if (DEBUG) logger.info("gotTurnClick currentTurn  " + blurb(currentTurn));
 
-
+/*
     boolean different = currentTurn != turn;
 
-    if (DEBUG || true) {
+    if (DEBUG) {
 //      logger.info("gotTurnClick currentTurn  " + blurb(currentTurn));
       logger.info("gotTurnClick clicked turn " + blurb(turn));
       logger.info("gotTurnClick different    " + different);
     }
+*/
 
-  //  setGotTurnClick(true);
+    //  setGotTurnClick(true);
 
 /*    if (different) {
       if (currentTurn.isPlaying()) {
@@ -225,14 +226,36 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   @Override
   public void addTurnForSameSpeaker(EditorTurn turn) {
     COLUMNS columns = turn.getColumn();
-    logger.info("addTurnForSameSpeaker : " +
-        "\n\tcurrent turn " + turn +
-        "\n\tcolumns      " + columns
-    );
+
+    int exID = turn.getExID();
+
+    if (DEBUG) {
+      logger.info("addTurnForSameSpeaker : " +
+          "\n\tcurrent turn " + exID +
+          "\n\tcolumns      " + columns
+      );
+    }
 
     // if prev turn is null we're on the first turn
-    boolean isLeftSpeaker = isLeftSpeaker(columns, getPrev(turn));
-    controller.getDialogService().addEmptyExercises(getDialogID(), turn.getExID(), isLeftSpeaker, getAsyncForNewTurns(turn.getExID()));
+    controller
+        .getDialogService()
+        .addEmptyExercises(getDialogID(), exID, isLeftSpeaker(columns, getPrev(turn)), getAsyncForNewTurns(exID));
+  }
+
+  @Override
+  public void addTurnForOtherSpeaker(EditorTurn editorTurn) {
+    COLUMNS columns = editorTurn.getColumn();
+
+    int exID = editorTurn.getExID();
+    if (DEBUG) {
+      logger.info("addTurnForOtherSpeaker : " +
+          "\n\tcurrent turn " + exID +
+          "\n\tcolumns      " + columns
+      );
+    }
+
+    boolean isLeftSpeaker = isLeftSpeaker(columns, getPrev(editorTurn));
+    controller.getDialogService().addEmptyExercises(getDialogID(), exID, !isLeftSpeaker, getAsyncForNewTurns(exID));
   }
 
   private boolean isLeftSpeaker(COLUMNS columns, EditorTurn prevTurn) {
@@ -247,18 +270,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
       isLeftSpeaker = columns == COLUMNS.LEFT;//duh
     }
     return isLeftSpeaker;
-  }
-
-  @Override
-  public void addTurnForOtherSpeaker(EditorTurn editorTurn) {
-    COLUMNS columns = editorTurn.getColumn();
-    logger.info("addTurnForOtherSpeaker : " +
-        "\n\tcurrent turn " + editorTurn.getExID() +
-        "\n\tcolumns      " + columns
-    );
-
-    boolean isLeftSpeaker = isLeftSpeaker(columns, getPrev(editorTurn));
-    controller.getDialogService().addEmptyExercises(getDialogID(), editorTurn.getExID(), !isLeftSpeaker, getAsyncForNewTurns(editorTurn.getExID()));
   }
 
   @Override
@@ -353,11 +364,13 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
       int i = allTurns.indexOf(current) + 1;
       next = allTurns.get(i);
 
-      logger.info("addTurns : num turns " + allTurns.size() +
-          "\n\texid    " + exid +
-          "\n\tcurrent " + current.getExID() +
-          "\n\tnext    " + next.getExID()
-      );
+      if (DEBUG) {
+        logger.info("addTurns : num turns " + allTurns.size() +
+            "\n\texid    " + exid +
+            "\n\tcurrent " + current.getExID() +
+            "\n\tnext    " + next.getExID()
+        );
+      }
     }
 
     final EditorTurn fnext = next;
@@ -365,9 +378,15 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     setCurrentTurn(fnext);
 
     Scheduler.get().scheduleDeferred(() -> {
-      logger.info("addTurns : focus will be on " + (fnext == null ? "NULL" : fnext.getExID()));
+      if (DEBUG) {
+        logger.info("addTurns : focus will be on " + (fnext == null ? "NULL" : fnext.getExID()));
+      }
+
       markCurrent();
-      fnext.grabFocus();
+
+      if (fnext != null) {
+        fnext.grabFocus();
+      }
     });
   }
 }

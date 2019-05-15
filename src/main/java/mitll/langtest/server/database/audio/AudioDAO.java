@@ -240,7 +240,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   /**
    * Pulls the list of audio recordings out of the database.
    *
-   * @param projid here ignored, since in old world there are no project ids
+   * @param projid                  here ignored, since in old world there are no project ids
    * @param hasProjectSpecificAudio
    * @return
    * @see #getExToAudio
@@ -284,7 +284,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
    * @see #attachAudioToExercise
    * @deprecated
    */
-  protected Collection<AudioAttribute> getAudioAttributesForExercise(int exid,Map<Integer, MiniUser> idToMini) {
+  protected Collection<AudioAttribute> getAudioAttributesForExercise(int exid, Map<Integer, MiniUser> idToMini) {
     try {
       String sql = SELECT_ALL + " WHERE " + Database.EXID + "='" + exid + "' AND " + DEFECT + "=false";
       Collection<AudioAttribute> resultsSQL = getResultsSQL(sql);
@@ -489,9 +489,9 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   /**
+   * @return
    * @paramx userIds
    * @paramx uniqueIDs
-   * @return
    * @see BaseAudioDAO#getRecordedReport
    */
 /*  protected int getCountBothSpeeds(Set<Integer> userIds,
@@ -536,7 +536,6 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     //logger.debug("both speeds " + results.size());
     return results.size();
   }*/
-
   private String getInClause(Collection<Integer> longs) {
     StringBuilder buffer = new StringBuilder();
     for (int id : longs) {
@@ -859,6 +858,7 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
 
   /**
    * TURNED THIS OFF FOR NOW.
+   *
    * @param uniqueID
    * @param dnr
    */
@@ -892,7 +892,6 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     }
   }
 */
-
   public void updateDNR(int uniqueID, float dnr) {
     try {
       Connection connection = database.getConnection(this.getClass().toString());
@@ -1148,5 +1147,10 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   Map<Integer, List<AudioAttribute>> getAllAudioAttributesForExercises(int projID, Map<Integer, MiniUser> idToMini) {
     return null;
+  }
+
+  @Override
+  public boolean updateTranscript(int id, String newTranscript) {
+    return false;
   }
 }

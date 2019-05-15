@@ -56,6 +56,7 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.LEFT;
@@ -83,6 +84,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   private final ListenViewHelper.COLUMNS columns;
   private final ListenViewHelper.COLUMNS prevColumn;
   private final boolean isFirstTurn;
+  /**
+   * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
+   */
   private TextBox contentTextBox;
   private HTML turnFeedback;
   private NoFeedbackRecordAudioPanel<ClientExercise> recordAudioPanel;
@@ -275,19 +279,12 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     postAudioRecordButton.addFocusHandler(event -> grabFocus());
 
     DivWidget textBoxContainer = new DivWidget();
-
+    textBoxContainer.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
     textBoxContainer.add(contentTextBox = addTextBox());
 
     wrapper.add(textBoxContainer);
-    HTML turnFeedback = new HTML("");
 
-    Style style = turnFeedback.getElement().getStyle();
-   // style.setBackgroundColor("white");
-    style.setMarginTop(-12, Style.Unit.PX);
-    style.setMarginLeft(12, Style.Unit.PX);
-    style.setTextAlign(Style.TextAlign.LEFT);
-    this.turnFeedback = turnFeedback;
-    textBoxContainer.add(turnFeedback);
+    textBoxContainer.add(getTurnFeedback());
 
     styleMe(wrapper);
     wrapper.addStyleName("inlineFlex");
@@ -299,6 +296,19 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       addDeleteButton();
       addOtherTurn();
     }
+  }
+
+  @NotNull
+  private HTML getTurnFeedback() {
+    HTML turnFeedback = new HTML("");
+
+    Style style = turnFeedback.getElement().getStyle();
+
+    style.setMarginTop(-12, Style.Unit.PX);
+    style.setMarginLeft(12, Style.Unit.PX);
+    style.setTextAlign(Style.TextAlign.LEFT);
+    this.turnFeedback = turnFeedback;
+    return turnFeedback;
   }
 
   private static final String BLUE_INACTIVE_COLOR = "#0171bc";
@@ -466,9 +476,10 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
         prev = s;
 
         EditorTurn outer = this;
-        //logger.info("gotBlur " + getExID() + " = " + prev);
+        int audioID = getAudioID();
+        logger.info("gotBlur " + getExID() + " = " + prev + " audio id " + audioID);
 
-        controller.getExerciseService().updateText(dialogID, getExID(), s, new AsyncCallback<Boolean>() {
+        controller.getExerciseService().updateText(dialogID, getExID(), audioID, s, new AsyncCallback<Boolean>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("updating text...", caught);
@@ -502,9 +513,10 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     } else {
       prev = s;
 
-      if (DEBUG) logger.info("gotBlur " + getExID() + " = " + prev);
+      int audioID = getAudioID();
+      if (DEBUG || true) logger.info("gotBlur " + getExID() + " = " + prev + " audio " + audioID);
 
-      controller.getExerciseService().updateText(dialogID, getExID(), s, new AsyncCallback<Boolean>() {
+      controller.getExerciseService().updateText(dialogID, getExID(), audioID, s, new AsyncCallback<Boolean>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("updating text...", caught);
@@ -516,6 +528,14 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
         }
       });
     }
+  }
+
+  private int getAudioID() {
+    // logger.info("has " + clientExercise.getAudioAttributes().size() + " audio attributes...");
+    Collection<AudioAttribute> audioAttributes = clientExercise.getAudioAttributes();
+    return audioAttributes.isEmpty() ? -1 : audioAttributes.iterator().next().getUniqueID();
+//    clientExercise.getAudioAttributes().forEach(audioAttribute -> logger.info("ex has " + audioAttribute.getUniqueID() + " : " + audioAttribute.getAudioType()));
+//    return clientExercise.getRegularSpeed() == null ? -1 : clientExercise.getRegularSpeed().getUniqueID();
   }
 
   /**
@@ -623,18 +643,19 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
   @Override
   public void useResult(AudioAnswer audioAnswer) {
-    logger.info("useResult got " + audioAnswer);
+    //  logger.info("useResult got " + audioAnswer);
 
     if (audioAnswer.isValid()) {
       turnFeedback.setHTML("");
-      String audioRef = audioAnswer.getAudioAttribute().getAudioRef();
-      logger.info("useResult got back " + audioRef);
-      rememberAudio(audioAnswer.getAudioAttribute());
+      AudioAttribute audioAttribute = audioAnswer.getAudioAttribute();
+      String audioRef = audioAttribute.getAudioRef();
+      //   logger.info("useResult got back " + audioRef);
+      rememberAudio(audioAttribute);
+      clientExercise.getMutableAudio().addAudio(audioAttribute);
       recordAudioPanel.getPlayAudioPanel().setEnabled(true);
 
       ((Button) getPlayButton()).setType(ButtonType.SUCCESS);
-      //  doBlinkAnimation(getPlayButton(), "good-blink-target");
-      // getPlayButton().getElement().getStyle().setBackgroundColor("green");
+
     } else {
       turnFeedback.setHTML(audioAnswer.getValidity().getPrompt());
 
@@ -649,10 +670,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   public void useInvalidResult(int exid) {
 //    logger.info("show feedback about what bad happened?");
     recordAudioPanel.getPlayAudioPanel().setEnabled(false);
-//    doBlinkAnimation(getPostAudioRecordButton(), "blink-target");
     ((Button) getPlayButton()).setType(ButtonType.WARNING);
-
-//    getPlayButton().getElement().getStyle().setBackgroundColor("red");
   }
 
   private PostAudioRecordButton getPostAudioRecordButton() {

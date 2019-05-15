@@ -135,6 +135,7 @@ public interface IAudioDAO extends IDAO {
   boolean didFindAnyAudioFiles(int projectid);
 
   void updateUser(int old, int newUser);
+  boolean updateTranscript(int id, String newTranscript);
 
   void makeSureAudioIsThere(int projectID, String language, boolean validateAll);
 

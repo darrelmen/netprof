@@ -1148,7 +1148,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (DEBUG) logger.info("getAudioAnswer audio type " + audioType + " ex " + exerciseID + " " + commonExercise);
     String audioTranscript = getAudioTranscript(audioType, commonExercise);
     if (audioTranscript.isEmpty()) {
-      logger.warn("\n\n\n\nhuh? no transcript for audio " + audioTranscript + " and " + commonExercise);
+      logger.warn("getAudioAnswer : huh? no transcript for audio " + audioTranscript + " and " + commonExercise);
     }
     if (DEBUG) logger.info("getAudioAnswer audioTranscript '" + audioTranscript + "'");
 

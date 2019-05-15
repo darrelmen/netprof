@@ -29,7 +29,10 @@
 
 package mitll.langtest.client.dialog;
 
-import com.github.gwtbootstrap.client.ui.*;
+import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Icon;
+import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
@@ -59,7 +62,6 @@ import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
-import mitll.langtest.shared.exercise.Pair;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -142,11 +144,6 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   private INavigation.VIEWS prev, next;
   private INavigation.VIEWS thisView;
-  /**
-   *
-   */
-//  private boolean gotTurnClick = false;
-//  private boolean playStateIsPlaying = false;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_DETAIL = false;
@@ -407,7 +404,8 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
 
-    logger.info("getFirstSpeakerLabel first speaker " + firstSpeaker);
+    if (DEBUG) logger.info("getFirstSpeakerLabel first speaker " + firstSpeaker);
+
     if (!dialog.getExercises().isEmpty()) {
       ClientExercise next = dialog.getExercises().iterator().next();
       boolean hasEnglishAttr = next.hasEnglishAttr();
@@ -421,8 +419,10 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
 
     if (firstSpeaker == null) firstSpeaker = SPEAKER_A;
-    logger.info("getFirstSpeakerLabel 2 " +
-        "first speaker " + firstSpeaker);
+    if (DEBUG) {
+      logger.info("getFirstSpeakerLabel 2 " +
+          "first speaker " + firstSpeaker);
+    }
     return firstSpeaker;
   }
 
@@ -803,7 +803,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     turn.addWidgets(true, false, PhonesChoices.HIDE, EnglishDisplayChoices.SHOW);
     if (!turn.addPlayListener(this)) logger.warning("didn't add the play listener...");
     turn.addClickHandler(event -> {
-      logger.info("got event " + event.getClass());
+      //    logger.info("got event " + event.getClass());
       gotTurnClick(turn);
     });
     return turn;
@@ -859,24 +859,10 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     setPlayButtonToPlay();
 
-    //setGotTurnClick(true);
-
     removeMarkCurrent();
     setCurrentTurn(turn);
     playCurrentTurn();
   }
-/*
-  private boolean isGotTurnClick() {
-    return gotTurnClick;
-  }
-
-  void setGotTurnClick(boolean gotTurnClick) {
-    if (DEBUG) {
-      logger.info("\n\n ------- setGotTurnClick " + gotTurnClick);
-    }
-
-    this.gotTurnClick = gotTurnClick;
-  }*/
 
   /**
    * TODO add playback rate
@@ -902,6 +888,7 @@ public class ListenViewHelper<T extends ITurnPanel>
       widgets1.setType(ButtonType.SUCCESS);
       widgets1.setSize(ButtonSize.LARGE);
       widgets1.addStyleName("leftFiveMargin");
+      widgets1.getElement().setId("playButton");
       rowOne.add(widgets1);
       playButton = widgets1;
     }
@@ -912,6 +899,7 @@ public class ListenViewHelper<T extends ITurnPanel>
       widgets1.setActive(false);
       widgets1.setEnabled(false);
       widgets1.setType(ButtonType.SUCCESS);
+      widgets1.getElement().setId("playYourselfButton");
 
       widgets1.setSize(ButtonSize.LARGE);
       widgets1.addStyleName("leftFiveMargin");
@@ -1083,14 +1071,16 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     int i = getAllTurns().indexOf(currentTurn);
 
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("beforeChangeTurns current at #" + i + " : " + getExID() + " : " + currentTurn.getText());
     }
 
     clearHighlightAndRemoveMark();
 
     if (!makeNextVisible()) {
-      logger.info("beforeChangeTurns : make header visible");
+      if (DEBUG) {
+        logger.info("beforeChangeTurns : make header visible");
+      }
       makeVisible(dialogHeader);  // make the top header visible...
     }
     return i;
@@ -1127,13 +1117,16 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #getControls
    */
   void gotClickOnPlay() {
-    logger.info("gotClickOnPlay got click on play ");
+    if (DEBUG) logger.info("gotClickOnPlay got click on play ");
     firstStepsWhenPlay();
-
 
     playCurrentTurn();
   }
 
+  /**
+   * Toggle the button state.
+   * Maybe go back to first turn
+   */
   void firstStepsWhenPlay() {
     gotRehearse();
     togglePlayState();
@@ -1146,12 +1139,9 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     togglePlayState();
 
-    //   setGotTurnClick(false);
-    logger.info("gotClickOnPlay got click on play yourself");
+    if (DEBUG) logger.info("gotClickOnPlay got click on play yourself");
 
-    //  if (!setTurnToPromptSide()) {
     ifOnLastJumpBackToFirst();
-    //  }
 
     playCurrentTurn();
   }
@@ -1168,13 +1158,6 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
   }
 
-/*  public boolean isPlayStateIsPlaying() {
-    return playStateIsPlaying;
-  }
-
-  public void setPlayStateIsPlaying(boolean val) {
-    playStateIsPlaying = val;
-  }*/
 
   public void setSessionGoingNow(boolean val) {
     sessionGoingNow = val;
@@ -1185,7 +1168,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #gotClickOnPlay
    * @see #setNextTurnForSide
    * @see #currentTurnPlayEnded()
-   * @see #startRecordingTurn
+   * @see RehearseViewHelper#startRecordingTurn
    */
   boolean isDoRehearse() {
     return doRehearse;
@@ -1430,21 +1413,17 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     }
 
-//    if (gotTurnClick) {
-//      setGotTurnClick(false);
-//    } else {
     T next = getNext();
     if (DEBUG && next != null) {
       logger.info("currentTurnPlayEnded next turn " + next.getExID());
     }
     if (!makeNextVisible()) {
-      logger.info("currentTurnPlayEnded didn't make next visible...");
+      if (DEBUG) logger.info("currentTurnPlayEnded didn't make next visible...");
     }
 
     if (next == null) {
       if (DEBUG) logger.info("currentTurnPlayEnded OK stop");
-//        setCurrentTurn(allTurns.get(0));
-      logger.info("currentTurnPlayEnded : markCurrent ");
+      if (DEBUG) logger.info("currentTurnPlayEnded : markCurrent ");
       markCurrent();
       makeVisible(currentTurn);
       setPlayButtonToPlay();
@@ -1453,7 +1432,6 @@ public class ListenViewHelper<T extends ITurnPanel>
       setCurrentTurn(next);
       playCurrentTurn();
     }
-    //  }
   }
 
   void makeCurrentTurnVisible() {
@@ -1511,8 +1489,8 @@ public class ListenViewHelper<T extends ITurnPanel>
   private Button getPlayButtonToUse() {
 
     Button widgets = doRehearse ? this.playButton : playYourselfButton;
-    if (DEBUG || true) {
-      logger.info("getPlayButtonToUse doRehearse " + doRehearse + " : " + widgets);
+    if (DEBUG) {
+      logger.info("getPlayButtonToUse doRehearse " + doRehearse + " : " + widgets.getElement().getId());
     }
     return widgets;
   }

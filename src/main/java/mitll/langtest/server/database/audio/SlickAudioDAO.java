@@ -250,8 +250,6 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     long pastTime = doCheckOnStartup || checkAll ? now : before;
     logger.info("validateFileExists before " + new Date(pastTime));
     dao.validateFileExists(projid, pastTime, installPath, language.toLowerCase());
-
-
   }
 
   @Override
@@ -421,7 +419,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 //    Map<Integer, List<AudioAttribute>> toReturn = new HashMap<>();
     logger.info("getAudioAttributesForExercises : projid " + projID);
     exidToAudioAttributes.putAll(getAllAudioAttributes(projID, idToMini));
-  //  exids.forEach(exid -> toReturn.put(exid, exidToAudioAttributes.get(exid)));
+    //  exids.forEach(exid -> toReturn.put(exid, exidToAudioAttributes.get(exid)));
     return exidToAudioAttributes;
   }
 
@@ -938,6 +936,11 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public void updateUser(int old, int newUser) {
     dao.updateUser(old, newUser);
+  }
+
+  @Override
+  public boolean updateTranscript(int id, String newTranscript) {
+    return dao.updateTranscript(id, newTranscript) > 0;
   }
 
   public void setDefaultResult(int defaultResult) {

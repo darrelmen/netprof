@@ -29,6 +29,8 @@
 
 package mitll.langtest.server.services;
 
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import mitll.langtest.client.dialog.EditorTurn;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
@@ -1387,12 +1389,15 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    *
    * @param dialogID
    * @param exid
+   * @param audioID
    * @param content
    * @return
    * @throws DominoSessionException
+   * @see mitll.langtest.client.dialog.EditorTurn#gotKey
+   * @see EditorTurn#gotBlur()
    */
   @Override
-  public boolean updateText(int dialogID, int exid, String content) throws DominoSessionException {
+  public boolean updateText(int dialogID, int exid, int audioID, String content) throws DominoSessionException {
     int projectIDFromUser = getProjectIDFromUser();
     Project project = getProject(projectIDFromUser);
     CommonExercise exerciseByID = project.getExerciseByID(exid);
@@ -1404,24 +1409,32 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       content = getTrim(content);
 
       exerciseByID.getMutable().setForeignLanguage(content);
-      project.getAudioFileHelper().checkOOV(Collections.singleton(exerciseByID),true);
+      project.getAudioFileHelper().checkOOV(Collections.singleton(exerciseByID), true);
 
       boolean update = project.getExerciseDAO().update(exerciseByID);
 
       if (update) {
         CommonExercise exerciseByID1 = project.getExerciseByID(exid);
         logger.info("updateText " +
-            "\n\tnow " + exerciseByID1.getForeignLanguage() +
-            "\n\tor  " + exerciseByID1.getNormalizedFL());
+            "\n\tnow        '" + exerciseByID1.getForeignLanguage() + "'" +
+            "\n\tnormalized '" + exerciseByID1.getNormalizedFL() + "'");
 
-        IDialog collect = project.getDialog(dialogID);//.stream().filter(dialog -> dialog.getID() == dialogID).collect(Collectors.toList());
-        if (collect == null) logger.warn("updateText can't find dialog ID " + dialogID);
-        else {
-          List<ClientExercise> collect1 = collect.getExercises().stream().filter(exercise -> exercise.getID() == exid).collect(Collectors.toList());
+        IDialog dialog = project.getDialog(dialogID);
+        if (dialog == null) {
+          logger.warn("updateText can't find dialog ID " + dialogID);
+        } else {
+          List<ClientExercise> collect1 = dialog.getExercises().stream().filter(exercise -> exercise.getID() == exid).collect(Collectors.toList());
           if (collect1.isEmpty()) {
             logger.warn("updateText can't find ex id  " + exid);
           } else {
             collect1.get(0).asCommon().getMutable().setForeignLanguage(content);
+            if (audioID != -1) {  // maybe we have text before the audio...
+              if (!db.getAudioDAO().updateTranscript(audioID, content)) {
+                logger.warn("updateText didn't update audio id# " + audioID + " with " + content);
+              }
+            } else {
+              logger.info("updateText  no audio id...");
+            }
           }
         }
       }

@@ -1698,7 +1698,8 @@ public class AudioFileHelper implements AlignDecode {
                                           String foreignLanguage,
                                           int projid,
                                           int userid,
-                                          File theFile, Language language) {
+                                          File theFile,
+                                          Language language) {
     boolean available = isHydraAvailable();
     String hydraHost = serverProps.getHydraHost();
     if (!available && !noted) {
@@ -1797,6 +1798,15 @@ public class AudioFileHelper implements AlignDecode {
     return null;
   }
 
+  /**
+   * @param english
+   * @param foreignLanguage
+   * @param userid
+   * @param hydraHost
+   * @param language
+   * @return
+   * @see #getProxyScore(String, String, int, File, String, Language)
+   */
   @NotNull
   private HTTPClient getHttpClientForNetprofServer(String english,
                                                    String foreignLanguage,
@@ -2074,61 +2084,69 @@ public class AudioFileHelper implements AlignDecode {
     String phraseToDecode = getPhraseToDecode(exercise, language);
 
     if (decoderOptions.shouldDoAlignment()) {
-      PrecalcScores precalcScores =
-          checkForWebservice(
-              exercise.getID(),
-              exercise.getEnglish(),
-              phraseToDecode,
-              project.getID(),
-              userID,
-              file,
-              language);
+      if (phraseToDecode.isEmpty()) {
+        logger.info("getAudioAnswer : OK, no transcript - we'll skip doing alignment for now...");
+      } else {
+        PrecalcScores precalcScores =
+            checkForWebservice(
+                exercise.getID(),
+                exercise.getEnglish(),
+                phraseToDecode,
+                project.getID(),
+                userID,
+                file,
+                language);
 
 
-      // if the item is marked english but this is not an english project - so we can do interpreter english turns in a korean dialog for instance
-      AudioFileHelper toUse = (hasEnglishAttr && this.language != Language.ENGLISH) ? getEnglishProductionAudioFileHelper(language) : this;
+        // if the item is marked english but this is not an english project - so we can do interpreter english turns in a korean dialog for instance
+        AudioFileHelper toUse = (hasEnglishAttr && this.language != Language.ENGLISH) ? getEnglishProductionAudioFileHelper(language) : this;
 
-      PretestScore asrScoreForAudio = toUse.getASRScoreForAudio(reqid,
-          file,
-          Collections.singleton(phraseToDecode),
-          "",
-          decoderOptions,
-          precalcScores);
+        PretestScore asrScoreForAudio = toUse.getASRScoreForAudio(reqid,
+            file,
+            Collections.singleton(phraseToDecode),
+            "",
+            decoderOptions,
+            precalcScores);
 
 //      logger.info("getAudioAnswer for file " + file + " asr score " + asrScoreForAudio);
 
-      audioAnswer.setPretestScore(asrScoreForAudio);
-      audioAnswer.setCorrect(audioAnswer.getScore() > MIN_SCORE_FOR_CORRECT_ALIGN &&
-          audioAnswer.getPretestScore().isFullMatch());
-
+        audioAnswer.setPretestScore(asrScoreForAudio);
+        audioAnswer.setCorrect(audioAnswer.getScore() > MIN_SCORE_FOR_CORRECT_ALIGN &&
+            audioAnswer.getPretestScore().isFullMatch());
+      }
       //  logger.info("align : validity " + audioAnswer.getValidity());
 
       return audioAnswer;
     } else if (decoderOptions.shouldDoDecoding()) {
-      PrecalcScores precalcScores =
-          checkForWebservice(
-              exercise.getID(),
-              exercise.getEnglish(),
-              phraseToDecode,
-              project.getID(),
-              userID,
-              file,
-              language);
-
-      PretestScore flashcardAnswer = getChecker().getDecodeScore(
-          exercise,
-          file,
-          audioAnswer,
-          language,
-          decoderOptions,
-          precalcScores);
-
-      audioAnswer.setPretestScore(flashcardAnswer);
-
-      //  logger.info("decoding : validity " + audioAnswer.getValidity());
-      return audioAnswer;
+      return getAudioAnswerDecoding(exercise, file, decoderOptions, userID, audioAnswer, language, phraseToDecode);
     }
 
+    return audioAnswer;
+  }
+
+  @NotNull
+  private AudioAnswer getAudioAnswerDecoding(ClientExercise exercise, File file, DecoderOptions decoderOptions, int userID, AudioAnswer audioAnswer, Language language, String phraseToDecode) {
+    PrecalcScores precalcScores =
+        checkForWebservice(
+            exercise.getID(),
+            exercise.getEnglish(),
+            phraseToDecode,
+            project.getID(),
+            userID,
+            file,
+            language);
+
+    PretestScore flashcardAnswer = getChecker().getDecodeScore(
+        exercise,
+        file,
+        audioAnswer,
+        language,
+        decoderOptions,
+        precalcScores);
+
+    audioAnswer.setPretestScore(flashcardAnswer);
+
+    //  logger.info("decoding : validity " + audioAnswer.getValidity());
     return audioAnswer;
   }
 
