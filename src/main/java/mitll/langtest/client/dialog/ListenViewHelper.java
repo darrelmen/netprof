@@ -91,6 +91,11 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   private static final String MIDDLE_COLOR = "#00800059";
 
+  T getTurnByID(int exid) {
+    List<T> collect = allTurns.stream().filter(turn -> turn.getExID() == exid).collect(Collectors.toList());
+    return collect.isEmpty() ? null : collect.get(0);
+  }
+
   public enum COLUMNS {LEFT, MIDDLE, RIGHT, UNK}
 
   private static final String VALUE = "value";
@@ -558,7 +563,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   @NotNull
   DivWidget getTurns(IDialog dialog) {
-    ListenViewHelper outer=this;
+    ListenViewHelper outer = this;
     DivWidget rowOne = new DivWidget() {
       @Override
       protected void onUnload() {
@@ -844,7 +849,10 @@ public class ListenViewHelper<T extends ITurnPanel>
         thisView == INavigation.VIEWS.LISTEN && clientExercise.hasEnglishAttr();
 
     T widgets = makeTurnPanel(clientExercise, columns, prevColumn, rightJustify, index);
-    widgets.asWidget().getElement().getStyle().setProperty("tabindex", "" + index);
+//    widgets.asWidget().getElement().getStyle().setProperty("tabindex", "" + index);
+//
+//    logger.info("reallyGetTurnPanel set tab index to " +index);
+
     return widgets;
   }
 
@@ -1068,7 +1076,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see EditorTurn#gotFocus
    */
   public void setCurrentTurnTo(T newTurn) {
-    if (DEBUG) logger.info("setCurrentTurnTo - " + newTurn.getExID());
+    if (DEBUG||true) logger.info("setCurrentTurnTo - " + newTurn.getExID());
     //  setGotTurnClick(true);
     setPlayButtonToPlay();
 

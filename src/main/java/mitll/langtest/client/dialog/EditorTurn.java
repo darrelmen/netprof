@@ -276,7 +276,8 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     wrapper.add(buttonContainer);
 
     addPressAndHoldStyleForRecordButton(postAudioRecordButton);
-    postAudioRecordButton.addFocusHandler(event -> grabFocus());
+    // postAudioRecordButton.addFocusHandler(event -> grabFocus());
+    ((Focusable) postAudioRecordButton).setTabIndex(-1);
 
     DivWidget textBoxContainer = new DivWidget();
     textBoxContainer.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
@@ -331,52 +332,72 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     recordAudioPanel.cancelRecording();
   }
 
-  private void addOtherTurn() {
-    Button w = new Button();
-    addPressAndHoldStyle(w);
-    w.setType(ButtonType.INFO);
+  private void addAddTurnButton() {
+    Button w = getTripleButton();
 
-    w.addClickHandler(event -> gotOtherSpeaker());
-    ListenViewHelper.COLUMNS toUseForArrow = columns;
-    if (toUseForArrow == MIDDLE) {
-      toUseForArrow = prevColumn;
-    }
-    //  logger.info("the column is " + toUseForArrow);
-    w.setIcon(toUseForArrow == LEFT ? IconType.ARROW_RIGHT : IconType.ARROW_LEFT);
-    w.addStyleName("topFiveMargin");
-    w.addStyleName("leftFiveMargin");
-    w.addFocusHandler(event -> turnContainer.moveFocusToNext());
+    w.addClickHandler(event -> gotPlus());
+    w.setIcon(IconType.PLUS);
+    w.setType(ButtonType.SUCCESS);
+
+    tripleButtonStyle(w);
 
     add(w);
+  }
+
+  @NotNull
+  private Button getTripleButton() {
+    return new Button() {
+        @Override
+        protected void onAttach() {
+          int tabIndex = getTabIndex();
+          super.onAttach();
+
+          if (-1 == tabIndex) {
+            setTabIndex(-1);
+          }
+        }
+      };
   }
 
   private void addDeleteButton() {
-    Button w = new Button();
-    addPressAndHoldStyle(w);
+    Button w = getTripleButton();
+
     w.addClickHandler(event -> gotMinus());
     w.setType(ButtonType.WARNING);
-
     w.setIcon(IconType.MINUS);
-    w.addStyleName("topFiveMargin");
-    w.addStyleName("leftFiveMargin");
 
-    // can't blow away the first turn!
     w.setEnabled(!isFirstTurn);
-    w.addFocusHandler(event -> turnContainer.moveFocusToNext());
+
+    tripleButtonStyle(w);
 
     add(w);
   }
 
-  private void addAddTurnButton() {
-    Button w = new Button();
+  private void addOtherTurn() {
+    Button w = getTripleButton();
+
+    w.setType(ButtonType.INFO);
+
+    w.addClickHandler(event -> gotOtherSpeaker());
+
+    ListenViewHelper.COLUMNS toUseForArrow = columns == MIDDLE ? prevColumn : columns;
+    //  logger.info("the column is " + toUseForArrow);
+    w.setIcon(toUseForArrow == LEFT ? IconType.ARROW_RIGHT : IconType.ARROW_LEFT);
+
+    tripleButtonStyle(w);
+
+    add(w);
+  }
+
+  private void tripleButtonStyle(Button w) {
     addPressAndHoldStyle(w);
-    w.addClickHandler(event -> gotPlus());
-    w.setIcon(IconType.PLUS);
+
     w.addStyleName("topFiveMargin");
     w.addStyleName("leftFiveMargin");
-    w.setType(ButtonType.SUCCESS);
-    w.addFocusHandler(event -> turnContainer.moveFocusToNext());
-    add(w);
+    // can't blow away the first turn!
+    //   w.addFocusHandler(event -> turnContainer.moveFocusToNext());
+    w.setTabIndex(-1);
+//    logger.info("aftr " + getExID() + " " + w.getTabIndex());
   }
 
   private void gotPlus() {
@@ -447,7 +468,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   }
 
   private void gotFocus() {
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("gotFocus " + getExID());
     }
     turnContainer.setCurrentTurnTo(this);

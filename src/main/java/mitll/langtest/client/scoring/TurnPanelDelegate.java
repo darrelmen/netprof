@@ -133,7 +133,6 @@ public class TurnPanelDelegate implements ITurnMarking {
     }
   }
 
-  //@Override
   @Override
   public boolean shouldAddFloatLeft() {
     return (columns != ListenViewHelper.COLUMNS.MIDDLE);

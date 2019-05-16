@@ -45,7 +45,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
 import static mitll.langtest.client.custom.INavigation.VIEWS.SCORES;
@@ -59,6 +58,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   private final boolean isInModal;
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_ADD_TURN = false;
 
   /**
    * @see DialogEditorView#editList
@@ -120,8 +120,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
         getDialogID(),
         isFirst,
         this);
-
-//    widgets.getElement().setPropertyString("tabindex", "" + index);
 
     return widgets;
   }
@@ -244,7 +242,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
     int exID = turn.getExID();
 
-    if (DEBUG) {
+    if (DEBUG_ADD_TURN) {
       logger.info("addTurnForSameSpeaker : " +
           "\n\tcurrent turn " + exID +
           "\n\tcolumns      " + columns
@@ -262,7 +260,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     COLUMNS columns = editorTurn.getColumn();
 
     int exID = editorTurn.getExID();
-    if (DEBUG) {
+    if (DEBUG_ADD_TURN) {
       logger.info("addTurnForOtherSpeaker : " +
           "\n\tcurrent turn " + exID +
           "\n\tcolumns      " + columns
@@ -368,18 +366,16 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     clearTurnLists();
     addAllTurns(getDialog(), turnContainer);
 
-    List<EditorTurn> collect = allTurns.stream().filter(turn -> turn.getExID() == exid).collect(Collectors.toList());
+    EditorTurn current = getTurnByID(exid);
 
     EditorTurn next = getCurrentTurn();
-    if (collect.isEmpty()) {
+    if (current == null) {
       logger.warning("addTurns : can't find exid " + exid);
     } else {
-      EditorTurn current = collect.get(0);
-
       int i = allTurns.indexOf(current) + 1;
       next = allTurns.get(i);
 
-      if (DEBUG) {
+      if (DEBUG_ADD_TURN) {
         logger.info("addTurns : num turns " + allTurns.size() +
             "\n\texid    " + exid +
             "\n\tcurrent " + current.getExID() +

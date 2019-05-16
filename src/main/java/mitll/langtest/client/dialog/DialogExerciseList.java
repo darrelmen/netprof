@@ -38,7 +38,6 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PushButton;
 import com.google.gwt.user.client.ui.UIObject;
-import mitll.langtest.client.LangTest;
 import mitll.langtest.client.banner.Emoticon;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;

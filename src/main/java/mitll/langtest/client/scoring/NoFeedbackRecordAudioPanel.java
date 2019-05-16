@@ -125,6 +125,16 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
       }
 
       @Override
+      protected void onAttach() {
+        int tabIndex = getTabIndex();
+        super.onAttach();
+
+        if (-1 == tabIndex) {
+          setTabIndex(-1);
+        }
+      }
+
+      @Override
       protected Widget getPopupTargetWidget() {
         return postAudioRecordButton;
       }

@@ -40,6 +40,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.flashcard.MyCustomIconType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
 import java.util.logging.Logger;
@@ -59,6 +60,9 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
 
   protected String playLabel;
   private String pauseLabel = PAUSE_LABEL;
+  /**
+   *
+   */
   protected IconAnchor playButton;
   private final boolean isSlow;
 
@@ -206,7 +210,7 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
    * @see #addButtons
    */
   protected IconAnchor makePlayButton(DivWidget toAddTo) {
-    Button playButton = new Button(playLabel);
+    Button playButton = getNewButton();
 
     playButton.addClickHandler(event -> {
       doPlayPauseToggle();
@@ -218,6 +222,21 @@ public class PlayAudioPanel extends HeadlessPlayAudio {
 
     toAddTo.add(playButton);
     return playButton;
+  }
+
+  @NotNull
+  protected Button getNewButton() {
+    return new Button(playLabel) {
+      @Override
+      protected void onAttach() {
+        int tabIndex = getTabIndex();
+        super.onAttach();
+
+        if (-1 == tabIndex) {
+          setTabIndex(-1);
+        }
+      }
+    };
   }
 
   @Override

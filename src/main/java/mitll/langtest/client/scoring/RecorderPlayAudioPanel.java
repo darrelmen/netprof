@@ -178,7 +178,8 @@ public class RecorderPlayAudioPanel extends PlayAudioPanel {
    * @see PlayAudioPanel#addButtons
    */
   protected IconAnchor makePlayButton(DivWidget ignoredDiv) {
-    Button playButton = new Button(playLabel);
+    Button playButton = getNewButton();
+
     configureButton(playButton);
     return playButton;
   }
