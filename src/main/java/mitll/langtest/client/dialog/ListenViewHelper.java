@@ -47,6 +47,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.IBanner;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
@@ -206,12 +207,18 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   void clearTurnLists() {
-    promptTurns.clear();
     allTurns.clear();
+
+    clearColumnTurnLists();
+
+    currentTurn = null;
+  }
+
+  void clearColumnTurnLists() {
+    promptTurns.clear();
     leftTurnPanels.clear();
     middleTurnPanels.clear();
     rightTurnPanels.clear();
-    currentTurn = null;
   }
 
   protected int getDialogFromURL() {
@@ -363,7 +370,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @return
    */
   @Nullable
-  private String getSecondSpeakerLabel(IDialog dialog) {
+  String getSecondSpeakerLabel(IDialog dialog) {
     String secondSpeaker = dialog.getSpeakers().size() > 2 ? dialog.getSpeakers().get(2) : null;
 
     // OK guess from the language of the first turn
@@ -394,7 +401,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @return
    */
   @NotNull
-  private String getFirstSpeakerLabel(IDialog dialog) {
+  String getFirstSpeakerLabel(IDialog dialog) {
     //  logger.info("getFirstSpeakerLabel for dialog " + dialog.getID());
 //    dialog.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute.toString()));
 //
@@ -631,15 +638,23 @@ public class ListenViewHelper<T extends ITurnPanel>
     for (ClientExercise clientExercise : exercises) {
       COLUMNS currentCol = getColumnForEx(left, right, clientExercise);
       COLUMNS prevCol = prev == null ? COLUMNS.UNK : getColumnForEx(left, right, prev);
-      addTurn(rowOne, currentCol, clientExercise, prevCol, index);
+      addTurn(rowOne, clientExercise, currentCol, prevCol, index);
       prev = clientExercise;
       index++;
     }
+
+    populateColumnTurnLists();
+
+    // addToColumnPanelLists(columns, turn);
   }
 
-  private COLUMNS getColumnForEx(String left, String right, ClientExercise clientExercise) {
+  void populateColumnTurnLists() {
+    allTurns.forEach(turn -> addToColumnPanelLists(
+        (turn.isLeft() ? COLUMNS.LEFT : turn.isRight() ? COLUMNS.RIGHT : COLUMNS.MIDDLE), turn));
+  }
+
+  COLUMNS getColumnForEx(String left, String right, ClientExercise clientExercise) {
     String speaker = clientExercise == null ? "" : clientExercise.getSpeaker();
-    //List<ExerciseAttribute> collect = getSpeakerAttributes(clientExercise);
     if (speaker.isEmpty()) {
       logger.info("getColumnForEx : no speaker, ex = " + clientExercise);
       return COLUMNS.UNK;
@@ -664,26 +679,24 @@ public class ListenViewHelper<T extends ITurnPanel>
     return columns;
   }
 
-  //
-//  private String getSpeaker(List<ExerciseAttribute> collect) {
-//    return collect.get(0).getValue();
-//  }
-//
-//  @NotNull
-//  private List<ExerciseAttribute> getSpeakerAttributes(ClientExercise clientExercise) {
-//    return clientExercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(DialogMetadata.SPEAKER.name())).collect(Collectors.toList());
-//  }
-
   /**
    * @param rowOne
-   * @param columns
    * @param clientExercise
+   * @param columns
    * @param index
    * @see #addTurnForEachExercise(DivWidget, String, String, List)
    */
-  private void addTurn(DivWidget rowOne, COLUMNS columns, ClientExercise clientExercise, COLUMNS prevColumn, int index) {
+  protected T addTurn(DivWidget rowOne, ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
     T turn = getTurnPanel(clientExercise, columns, prevColumn, index);
 
+    allTurns.add(index, turn);
+
+    rowOne.insert(turn, index);
+
+    return turn;
+  }
+
+  private void addToColumnPanelLists(COLUMNS columns, T turn) {
     if (columns == COLUMNS.RIGHT) {
       rightTurnPanels.add(turn);
       promptTurns.add(turn);
@@ -693,41 +706,44 @@ public class ListenViewHelper<T extends ITurnPanel>
     } else if (columns == COLUMNS.MIDDLE) {
       middleTurnPanels.add(turn);
     }
-
-    allTurns.add(turn);
-
-    rowOne.add(turn);
   }
 
   /**
    * @param exid
    * @see DialogEditor#deleteCurrentTurnOrPair
    */
-  void deleteTurn(int exid) {
-    List<T> collect = allTurns.stream().filter(t -> t.getExID() == exid).limit(1).collect(Collectors.toList());
-    if (collect.isEmpty()) {
+  T deleteTurn(int exid, Set<T> toRemoves) {
+    // List<T> collect = allTurns.stream().filter(t -> t.getExID() == exid).limit(1).collect(Collectors.toList());
+    T toRemove = getTurnByID(exid);
+    T newCurrentTurn = null;
+    if (toRemove == null) {
       logger.warning("huh? can't find " + exid);
+
     } else {
-      T toRemove = collect.get(0);
+      // fade it out for a second to show it disappearing...
+      ((Widget) toRemove).addStyleName("opacity-out-target");
 
-      T currentTurn = getCurrentTurn();
+//      T currentTurn = getCurrentTurn();
+//
+//      if (toRemove == currentTurn) {
+      logger.info("deleteTurn removing current turn " + currentTurn.getExID());
 
-      if (toRemove == currentTurn) {
-        logger.info("deleteTurn removing current turn " + currentTurn.getExID());
-
-        T prev = getPrev();
-        if (prev == null) {
-          T next = getNext();
-          logger.info("deleteTurn now next " + (next == null ? " NULL " : next.getExID()));
-
-          setCurrentTurn(next);
-        } else {
-          logger.info("deleteTurn now prev " + prev.getExID());
-          setCurrentTurn(prev);
-        }
-        T currentTurn1 = getCurrentTurn();
-        logger.info("deleteTurn now current turn " + (currentTurn1 == null ? "NULL" : currentTurn1.getExID()));
+      T prev = getPrev(toRemove);
+      if (prev == null) {
+        T next = getNext(toRemove);
+        logger.info("deleteTurn now next " + (next == null ? " NULL " : next.getExID()));
+        newCurrentTurn = next;
+      } else {
+        logger.info("deleteTurn now prev " + prev.getExID());
+        newCurrentTurn = prev;
       }
+//        T currentTurn1 = getCurrentTurn();
+//        logger.info("deleteTurn now current turn " + (currentTurn1 == null ? "NULL" : currentTurn1.getExID()));
+//      } else {
+//        logger.info("deleteTurn skip since current turn " + currentTurn.getExID() + " : " +currentTurn.getText());
+//
+//        //newCurrentTurn = currentTurn;
+//      }
 
       allTurns.remove(toRemove);
       leftTurnPanels.remove(toRemove);
@@ -735,10 +751,17 @@ public class ListenViewHelper<T extends ITurnPanel>
       promptTurns.remove(toRemove);
       middleTurnPanels.remove(toRemove);
 
-      boolean remove = turnContainer.remove(toRemove);
-      if (!remove) {
-        logger.warning("deleteTurn : didn't remove turn " + toRemove);
-      }
+      toRemoves.add(toRemove);
+      //removeFromContainer(toRemove);
+    }
+
+    return newCurrentTurn;
+  }
+
+  void removeFromContainer(T toRemove) {
+    boolean remove = turnContainer.remove(toRemove);
+    if (!remove) {
+      logger.warning("deleteTurn : didn't remove turn " + toRemove);
     }
   }
 
@@ -776,7 +799,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   void makeVisible(UIObject currentTurn) {
     if (currentTurn == null) {
-      logger.warning("makeVisible: no current turn...");
+      logger.info("makeVisible: no current turn...");
     } else {
       Element element = currentTurn.getElement();
       element.scrollIntoView();
@@ -988,13 +1011,34 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   @Override
+  public void gotBlur(T widgets) {
+    boolean last = isLast(widgets);
+    if (last) {
+      if (widgets.isDeleting()) {
+//        int i = getAllTurns().indexOf(widgets);
+//        if ()
+
+        logger.info("gotBlur ignore blur of " + widgets.getExID());
+
+      } else {
+
+        logger.info("gotBlur got blur of " + widgets.getExID() + " " + widgets.getText() +
+            " : " + widgets.isDeleting());
+
+        moveFocusToNext();
+      }
+    }
+  }
+
+  @Override
   public void moveFocusToNext() {
     T next = getNext();
     if (next != null) {
       logger.info("moveFocusToNext - have " + next.getExID() + " grab focus.");
       next.grabFocus();
     } else if (!getAllTurns().isEmpty()) {
-      getAllTurns().get(0).grabFocus();
+      logger.info("moveFocusToNext - to first - let's not!");
+      //getAllTurns().get(0).grabFocus();
     }
   }
 
@@ -1076,12 +1120,12 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see EditorTurn#gotFocus
    */
   public void setCurrentTurnTo(T newTurn) {
-    if (DEBUG||true) logger.info("setCurrentTurnTo - " + newTurn.getExID());
+    if (DEBUG_NEXT) logger.info("setCurrentTurnTo - " + newTurn.getExID());
     //  setGotTurnClick(true);
     setPlayButtonToPlay();
 
     boolean isPlaying = currentTurn.doPause();
-    if (DEBUG) logger.info("setCurrentTurnTo current turn paused " + isPlaying);
+    if (DEBUG_NEXT) logger.info("setCurrentTurnTo current turn paused " + isPlaying);
 
     /*int i = */
     beforeChangeTurns();
@@ -1100,17 +1144,21 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     int i = getAllTurns().indexOf(currentTurn);
 
-    if (DEBUG) {
-      logger.info("beforeChangeTurns current at #" + i + " : " + getExID() + " : " + currentTurn.getText());
+    if (DEBUG_NEXT) {
+      logger.info("beforeChangeTurns current at #" + i + " : " + blurb());
     }
 
     clearHighlightAndRemoveMark();
 
     if (!makeNextVisible()) {
-      if (DEBUG) {
+      if (DEBUG_NEXT) {
         logger.info("beforeChangeTurns : make header visible");
       }
-      makeVisible(dialogHeader);  // make the top header visible...
+      if (dialogHeader == null) {
+        logger.info("no dialog header?");
+      } else {
+        makeVisible(dialogHeader);  // make the top header visible...
+      }
     }
     return i;
   }
@@ -1533,7 +1581,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #currentTurnPlayEnded()
    */
   void removeMarkCurrent() {
-    if (DEBUG) logger.info("removeMarkCurrent on " + blurb());
+    if (DEBUG || true) logger.info("removeMarkCurrent on " + blurb());
 
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
 //    logger.info("logException stack:\n" + exceptionAsString);
@@ -1542,7 +1590,11 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   void markCurrent() {
-    if (DEBUG) logger.info("markCurrent on " + blurb());
+    if (DEBUG || true) logger.info("markCurrent on " + blurb());
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("markCurrent on " + currentTurn.getExID()));
+//    logger.info("logException stack:\n" + exceptionAsString);
+
     currentTurn.markCurrent();
   }
 
@@ -1557,7 +1609,8 @@ public class ListenViewHelper<T extends ITurnPanel>
     List<T> seq = getAllTurns();
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
-    if (DEBUG_NEXT) logger.info("getNext current " + i + " next " + i1);
+    if (DEBUG_NEXT) logger.info("getNext current of " + currentTurn.getExID() + " " + currentTurn.getText() +
+        " : " + i + " next " + i1);
 
     if (i1 > seq.size() - 1) {
       return null;

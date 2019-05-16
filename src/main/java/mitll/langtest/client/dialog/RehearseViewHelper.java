@@ -625,11 +625,12 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       showOverallDialogScore();
       recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
       //setPlayButtonToPlay();
-      setCurrentTurn(getPromptSeq().get(0));
+      setCurrentTurn(getFirstPrompt());
     } else {
       logger.info("showScores - skip!");
     }
   }
+
 
 
   /**
@@ -809,7 +810,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
     if (currentTurn == null) {
       logger.info("rehearseTurn no current turn");
-      setCurrentTurn(getPromptSeq().get(0));
+      setCurrentTurn(getFirstPrompt());
     } else {
       if (DEBUG_PLAY) logger.info("rehearseTurn (rehearse) Current turn = " + currentTurn);
     }
@@ -833,6 +834,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       if (DEBUG_PLAY) logger.info("rehearseTurn : current turn a recording turn.");
       startRecordingTurn(getCurrentTurn()); // advance automatically
     }
+  }
+
+  private T getFirstPrompt() {
+    return getPromptSeq().get(0);
   }
 
   private boolean isCurrentTurnARecordingTurn() {

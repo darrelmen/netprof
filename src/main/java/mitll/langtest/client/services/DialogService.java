@@ -33,6 +33,7 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.dialog.DialogExChangeResponse;
 import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.dialog.IDialogSession;
@@ -60,7 +61,7 @@ public interface DialogService extends RemoteService {
   ExerciseListWrapper<IDialog> getDialogs(ExerciseListRequest request) throws DominoSessionException;
 
   void update(IDialog dialog) throws DominoSessionException;
-  IDialog addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException;
+  DialogExChangeResponse addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException;
 
   IDialog addDialog(IDialog dialog) throws DominoSessionException;
   /**

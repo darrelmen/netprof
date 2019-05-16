@@ -49,8 +49,8 @@ public interface ITurnMarking {
 
   boolean shouldAddFloatLeft();
 
-  boolean isMiddle();
   boolean isLeft();
+  boolean isMiddle();
   boolean isRight();
 
   void addClickHandler(ClickHandler clickHandler);

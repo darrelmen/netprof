@@ -32,18 +32,23 @@ package mitll.langtest.client.dialog;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.dialog.DialogEditorView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.SessionStorage;
+import mitll.langtest.shared.dialog.DialogExChangeResponse;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
@@ -249,6 +254,8 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
       );
     }
 
+    removeMarkCurrent();
+
     // if prev turn is null we're on the first turn
     controller
         .getDialogService()
@@ -266,6 +273,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
           "\n\tcolumns      " + columns
       );
     }
+    removeMarkCurrent();
 
     boolean isLeftSpeaker = isLeftSpeaker(columns, getPrev(editorTurn));
     controller.getDialogService().addEmptyExercises(getDialogID(), exID, !isLeftSpeaker, getAsyncForNewTurns(exID));
@@ -288,8 +296,20 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   @Override
   public void deleteCurrentTurnOrPair(EditorTurn currentTurn) {
     logger.info("deleteCurrentTurnOrPair : " +
-        "\n\tcurrent turn " + currentTurn
+        "\n\tcurrent turn " + currentTurn.getExID()
     );
+    currentTurn.setDeleting(true);
+    currentTurn.getElement().getStyle().setOpacity(0.5);
+
+    if (isInterpreter) {
+      EditorTurn prev = getPrev(currentTurn);
+      if (prev == null) logger.warning("no prev????");
+      else {
+        //  prev.addStyleName("opacity-target");
+        prev.setDeleting(true);
+        prev.getElement().getStyle().setOpacity(0.5);
+      }
+    }
 
     // todo :return both turns
     controller.getDialogService().deleteATurnOrPair(
@@ -304,28 +324,57 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
           @Override
           public void onSuccess(List<Integer> ids) {
-            ids.forEach(exid -> deleteTurn(exid));
-            // TODO : remove one or two turns and change current turn to previous turn before deleted
-            if (getCurrentTurn() == null) {
-              logger.warning("huh? no current turn???");
-            } else {
-              getCurrentTurn().grabFocus();
+            Set<EditorTurn> toRemove = new HashSet<>();
+
+            EditorTurn newCurrentTurnCandidate = null;
+
+            for (Integer exid : ids) {
+              EditorTurn newCurrentTurn = deleteTurn(exid, toRemove);
+              if (newCurrentTurnCandidate == null) newCurrentTurnCandidate = newCurrentTurn;
             }
+
+//            ids.forEach(exid -> {
+//              EditorTurn newCurrentTurn = deleteTurn(exid, toRemove);
+//              if (newCurrentTurnCandidate == null) newCurrentTurnCandidate = newCurrentTurn;
+//            });
+
+            // we deleted the current turn!
+            final EditorTurn fnewCurrentTurnCandidate = newCurrentTurnCandidate;
+            final Set<EditorTurn> ftoRemove = toRemove;
+
+            // wait for animation to run before blowing it away...
+            Timer currentTimer = new Timer() {
+              @Override
+              public void run() {
+                ftoRemove.forEach(DialogEditor.this::removeFromContainer);
+
+                if (fnewCurrentTurnCandidate != null) {
+                  logger.info("new current now " + fnewCurrentTurnCandidate.getExID() + " " + fnewCurrentTurnCandidate.getText());
+                  removeMarkCurrent();
+                  setCurrentTurn(fnewCurrentTurnCandidate);
+                  markCurrent();
+                  fnewCurrentTurnCandidate.grabFocus();
+                } else {
+                  logger.info("not messing with current turn...");
+                }
+              }
+            };
+            currentTimer.schedule(1000);
           }
         });
   }
 
   @NotNull
-  private AsyncCallback<IDialog> getAsyncForNewTurns(int exid) {
-    return new AsyncCallback<IDialog>() {
+  private AsyncCallback<DialogExChangeResponse> getAsyncForNewTurns(int exid) {
+    return new AsyncCallback<DialogExChangeResponse>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("adding new turns to dialog.", caught);
       }
 
       @Override
-      public void onSuccess(IDialog result) {
-        addTurns(result, exid);
+      public void onSuccess(DialogExChangeResponse result) {
+        addTurns(result.getUpdated(), result.getChanged(), exid);
       }
     };
   }
@@ -360,11 +409,53 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
    * @param afterThisTurn
    * @see DialogEditor#getAsyncForNewTurns
    */
-  private void addTurns(IDialog updated, int exid) {
+  private void addTurns(IDialog updated, List<ClientExercise> changed, int exid) {
     this.setDialog(updated);
 
-    clearTurnLists();
-    addAllTurns(getDialog(), turnContainer);
+    ClientExercise prev = null;
+//    Set<Integer> known = new HashSet<>();
+    List<ClientExercise> updatedExercises = updated.getExercises();
+    for (ClientExercise turn : updatedExercises) {
+      if (turn.getID() == exid) break;
+      prev = turn;
+    }
+    //  allTurns.forEach(t -> known.add(t.getExID()));
+
+//    clearTurnLists();
+//    addAllTurns(getDialog(), turnContainer);
+
+    String left = getFirstSpeakerLabel(updated); //speakers.get(0);
+    String right = getSecondSpeakerLabel(updated);//speakers.get(2);
+
+    clearColumnTurnLists();
+
+    for (ClientExercise clientExercise : changed) {
+      // ClientExercise clientExercise = changed.get(0);
+      COLUMNS currentCol = getColumnForEx(left, right, clientExercise);
+      COLUMNS prevCol = prev == null ? COLUMNS.UNK : getColumnForEx(left, right, prev);
+      EditorTurn turn = addTurn(turnContainer, clientExercise, currentCol, prevCol, updatedExercises.indexOf(clientExercise));
+      turn.addStyleName("opacity-target");
+      prev = clientExercise;
+    }
+
+/*    if (isInterpreter) {
+      for (ClientExercise clientExercise : changed) {
+        // ClientExercise clientExercise = changed.get(0);
+        COLUMNS currentCol = getColumnForEx(left, right, clientExercise);
+        COLUMNS prevCol = prev == null ? COLUMNS.UNK : getColumnForEx(left, right, prev);
+        EditorTurn turn = addTurn(turnContainer, clientExercise, currentCol, prevCol, updatedExercises.indexOf(clientExercise));
+        turn.addStyleName("opacity-target");
+        prev = clientExercise;
+      }
+    } else {
+      ClientExercise clientExercise = changed.get(0);
+      COLUMNS currentCol = getColumnForEx(left, right, clientExercise);
+      COLUMNS prevCol = prev == null ? COLUMNS.UNK : getColumnForEx(left, right, prev);
+      EditorTurn turn = addTurn(turnContainer, clientExercise, currentCol, prevCol, updatedExercises.indexOf(clientExercise));
+      turn.addStyleName("opacity-target");
+      populateColumnTurnLists();
+    }*/
+    //  updated.getExercises().stream().filter(exercise -> !known.contains(exercise.getID())
 
     EditorTurn current = getTurnByID(exid);
 

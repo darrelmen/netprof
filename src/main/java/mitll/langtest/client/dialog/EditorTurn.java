@@ -92,6 +92,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   private NoFeedbackRecordAudioPanel<ClientExercise> recordAudioPanel;
 
   private final SessionManager sessionManager;
+  private boolean isDeleting = false;
 
   private static final boolean DEBUG = false;
 
@@ -347,16 +348,16 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   @NotNull
   private Button getTripleButton() {
     return new Button() {
-        @Override
-        protected void onAttach() {
-          int tabIndex = getTabIndex();
-          super.onAttach();
+      @Override
+      protected void onAttach() {
+        int tabIndex = getTabIndex();
+        super.onAttach();
 
-          if (-1 == tabIndex) {
-            setTabIndex(-1);
-          }
+        if (-1 == tabIndex) {
+          setTabIndex(-1);
         }
-      };
+      }
+    };
   }
 
   private void addDeleteButton() {
@@ -366,6 +367,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     w.setType(ButtonType.WARNING);
     w.setIcon(IconType.MINUS);
 
+    // can't blow away the first turn!
     w.setEnabled(!isFirstTurn);
 
     tripleButtonStyle(w);
@@ -394,8 +396,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
     w.addStyleName("topFiveMargin");
     w.addStyleName("leftFiveMargin");
-    // can't blow away the first turn!
+
     //   w.addFocusHandler(event -> turnContainer.moveFocusToNext());
+
     w.setTabIndex(-1);
 //    logger.info("aftr " + getExID() + " " + w.getTabIndex());
   }
@@ -468,7 +471,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   }
 
   private void gotFocus() {
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("gotFocus " + getExID());
     }
     turnContainer.setCurrentTurnTo(this);
@@ -527,7 +530,12 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     }
   }
 
+  /**
+   * Tell container we lost the focus so we can maybe pre-empt the natural sequence and move
+   * it to the first turn.
+   */
   private void gotBlur() {
+    turnContainer.gotBlur(this);
     String s = SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
     if (s.equals(prev)) {
       if (DEBUG) logger.info("gotBlur " + getExID() + " skip unchanged " + prev);
@@ -610,11 +618,6 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   public boolean shouldAddFloatLeft() {
     return turnPanelDelegate.shouldAddFloatLeft();
   }
-
-//  @NotNull
-//  protected AllHighlight getAllHighlight(Collection<IHighlightSegment> flclickables) {
-//    return new AllHighlight(flclickables, !turnPanelDelegate.isMiddle());
-//  }
 
   @Override
   public boolean isMiddle() {
@@ -749,4 +752,13 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     timer.schedule(1000);
   }
 
+  @Override
+  public boolean isDeleting() {
+    return isDeleting;
+  }
+
+  @Override
+  public void setDeleting(boolean deleting) {
+    isDeleting = deleting;
+  }
 }

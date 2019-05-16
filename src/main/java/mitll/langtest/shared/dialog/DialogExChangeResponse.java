@@ -27,36 +27,30 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.client.services;
+package mitll.langtest.shared.dialog;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.dialog.DialogExChangeResponse;
-import mitll.langtest.shared.dialog.DialogSession;
-import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.dialog.IDialogSession;
-import mitll.langtest.shared.exercise.*;
+import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.exercise.ClientExercise;
 
 import java.util.List;
 
-public interface DialogServiceAsync {
-  void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
+public class DialogExChangeResponse implements IsSerializable {
+  private List<ClientExercise> changed;
+  private IDialog updated;
 
-  <T extends IDialog> void getDialogs(ExerciseListRequest request, AsyncCallback<ExerciseListWrapper<T>> async);
+  public DialogExChangeResponse() {
+  }
 
-  void getDialog(int id, AsyncCallback<IDialog> async);
+  public DialogExChangeResponse(IDialog updated, List<ClientExercise> changed) {
+    this.updated = updated;
+    this.changed = changed;
+  }
 
-  void addSession(DialogSession dialogSession, AsyncCallback<Integer> async);
+  public List<ClientExercise> getChanged() {
+    return changed;
+  }
 
-  void getDialogSessions(int userid, int dialogid, AsyncCallback<List<IDialogSession>> async);
-
-  void delete(int projid, int id, AsyncCallback<Boolean> async);
-
-
-  void addDialog(IDialog dialog, AsyncCallback<IDialog> async);
-
-  void update(IDialog dialog,AsyncCallback<Void> async);
-
-  void addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker, AsyncCallback<DialogExChangeResponse> async);
-
-  void deleteATurnOrPair(int projid, int dialogID, int exid, AsyncCallback<List<Integer>> async);
+  public IDialog getUpdated() {
+    return updated;
+  }
 }

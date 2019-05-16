@@ -185,4 +185,14 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
   public void addClickHandler(ClickHandler clickHandler) {
     turnPanelDelegate.addClickHandler(clickHandler);
   }
+
+  @Override
+  public boolean isDeleting() {
+    return false;
+  }
+
+  @Override
+  public void setDeleting(boolean deleting) {
+
+  }
 }
