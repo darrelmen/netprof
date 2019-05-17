@@ -35,7 +35,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.dialog.DialogEditorView;
@@ -78,29 +77,31 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   @Override
   void onUnload() {
     int projectID = controller.getProjectID();
-    int dialogID = getDialogID();
-    controller.getAudioService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("reloading dialog.", caught);
-      }
+    if (projectID != -1) {
+      int dialogID = getDialogID();
+      controller.getAudioService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("reloading dialog.", caught);
+        }
 
-      @Override
-      public void onSuccess(Void result) {
-        logger.info("did reload on other server!");
-        controller.getExerciseService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            controller.handleNonFatalError("reloading dialog on netprof", caught);
-          }
+        @Override
+        public void onSuccess(Void result) {
+          logger.info("did reload on other server!");
+          controller.getExerciseService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              controller.handleNonFatalError("reloading dialog on netprof", caught);
+            }
 
-          @Override
-          public void onSuccess(Void result) {
-            logger.info("did reload on netprof.");
-          }
-        });
-      }
-    });
+            @Override
+            public void onSuccess(Void result) {
+              logger.info("did reload on netprof.");
+            }
+          });
+        }
+      });
+    }
   }
 
   @Override
@@ -244,7 +245,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     // if prev turn is null we're on the first turn
     controller
         .getDialogService()
-        .addEmptyExercises(getDialogID(), exID, isLeftSpeaker(columns, getPrev(turn)), getAsyncForNewTurns(exID));
+        .addEmptyExercises(getDialog().getProjid(), getDialogID(), exID, isLeftSpeaker(columns, getPrev(turn)), getAsyncForNewTurns(exID));
   }
 
   @Override
@@ -261,7 +262,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     removeMarkCurrent();
 
     boolean isLeftSpeaker = isLeftSpeaker(columns, getPrev(editorTurn));
-    controller.getDialogService().addEmptyExercises(getDialogID(), exID, !isLeftSpeaker, getAsyncForNewTurns(exID));
+    controller.getDialogService().addEmptyExercises(getDialog().getProjid(), getDialogID(), exID, !isLeftSpeaker, getAsyncForNewTurns(exID));
   }
 
   private boolean isLeftSpeaker(COLUMNS columns, EditorTurn prevTurn) {

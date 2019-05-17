@@ -1410,7 +1410,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
       content = getTrim(content);
 
       exerciseByID.getMutable().setForeignLanguage(content);
+
       //OOVInfo oovInfo = project.getAudioFileHelper().checkOOV(Collections.singleton(exerciseByID), true, new HashSet<String>());
+
       Set<String> oov = project.getAudioFileHelper().isValid(exerciseByID);
 
       boolean update = project.getExerciseDAO().update(exerciseByID);

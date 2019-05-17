@@ -221,30 +221,32 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
       // History.newItem("");
 
       int projectID = controller.getProjectID();
-      controller.getAudioService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          controller.handleNonFatalError("reloading dialog on hydra/score1", caught);
+      if (projectID != -1) {
+        controller.getAudioService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("reloading dialog on hydra/score1", caught);
 
-        }
+          }
 
-        @Override
-        public void onSuccess(Void result) {
-          logger.info("did reload on other server.");
-          controller.getExerciseService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              controller.handleNonFatalError("reloading dialog on netprof.", caught);
-            }
+          @Override
+          public void onSuccess(Void result) {
+            logger.info("did reload on other server.");
+            controller.getExerciseService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable caught) {
+                controller.handleNonFatalError("reloading dialog on netprof.", caught);
+              }
 
-            @Override
-            public void onSuccess(Void result) {
-              logger.info("did reload on netprof.");
+              @Override
+              public void onSuccess(Void result) {
+                logger.info("did reload on netprof.");
 
-            }
-          });
-        }
-      });
+              }
+            });
+          }
+        });
+      }
     }
 
     @Override

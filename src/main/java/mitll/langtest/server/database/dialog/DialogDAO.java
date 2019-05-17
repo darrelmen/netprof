@@ -409,6 +409,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
    *
    * Way too complicated - surely an easier way to do it.
    *
+   * Reloads the exercises from the database - maybe hydra/score1 has altered the safety!
+   *
    * @param projid
    * @param dialogIDToRelated
    * @param dialogID
@@ -435,8 +437,27 @@ public class DialogDAO extends DAO implements IDialogDAO {
         CommonExercise exercise = idToEx.get(exid);
 
         if (exercise == null) {
+          if (!databaseImpl.getExerciseDAO(projid).refresh(exid)) {
+            logger.warn("addExercises : didn't refresh " + exid);
+          }
+
           exercise = databaseImpl.getExercise(projid, exid);
 
+
+          boolean safeToDecode = exercise.isSafeToDecode();
+          if (safeToDecode)
+            logger.info("ex " + exercise.getID() + " safe " + safeToDecode);
+          else {
+            logger.warn("ex " + exercise.getID() + " safe " + safeToDecode);
+
+          }
+//          if (exercise == null) {
+//            if (!databaseImpl.getExerciseDAO(projid).refresh(exid)) {
+//              logger.warn("addExercises : didn't refresh " + exid);
+//            }
+//            exercise = databaseImpl.getExercise(projid, exid);
+//            if (exercise == null) logger.warn("even after attempt to refresh, can't find " + exid);
+//          }
           int before;
           if (exercise != null) {
 

@@ -91,6 +91,7 @@ public class JsonScoring {
   public static final String DURATION = "duration";
   public static final String TIMESTAMP = "timestamp";
   public static final String PATH = "path";
+  public static final String AUDIO_ID = "audioID";
   private final DatabaseImpl db;
   private final ServerProperties serverProps;
   private final int unknownExID;
@@ -256,6 +257,10 @@ public class JsonScoring {
     } else if (!addStream) {
       addDurationAndDNR(jsonForScore, answer);
     }
+
+    int uniqueID = answer.getAudioAttribute() == null ? -1 : answer.getAudioAttribute().getUniqueID();
+    jsonForScore.addProperty(AUDIO_ID, uniqueID);
+
 
     addValidity(exerciseID, jsonForScore,
         validity,

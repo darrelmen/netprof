@@ -1020,11 +1020,13 @@ public class ListenViewHelper<T extends ITurnPanel>
 
       } else {
 
-        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("gotBlur"));
-        logger.info("logException stack " + exceptionAsString);
+//        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("gotBlur"));
+//        logger.info("logException stack " + exceptionAsString);
 
-        if (DEBUG_BLUR) logger.info("gotBlur got blur of '" + widgets.getText() +
-            " : " + widgets.isDeleting());
+        if (DEBUG_BLUR) {
+          logger.info("gotBlur got blur of '" + widgets.getText() +
+              " : " + widgets.isDeleting());
+        }
 
 
         moveFocusToNext();

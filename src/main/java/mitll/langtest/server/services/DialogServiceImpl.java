@@ -355,20 +355,21 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     db.getDialogDAO().update(dialog);
   }
 
-  public DialogExChangeResponse addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException {
-    IDialog oneDialog = getOneDialog(dialogID);
+  public DialogExChangeResponse addEmptyExercises(int projid, int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException {
+    IDialog dialog = getProject(projid).getDialog(dialogID);
+//    IDialog oneDialog = getOneDialog(dialogID);
 
-    int before = oneDialog.getExercises().size();
+    int before = dialog.getExercises().size();
 
-    List<ClientExercise> added = db.getDialogDAO().addEmptyExercises(oneDialog, getUserIDFromSessionOrDB(), afterExid, isLeftSpeaker, System.currentTimeMillis());
+    List<ClientExercise> added = db.getDialogDAO().addEmptyExercises(dialog, getUserIDFromSessionOrDB(), afterExid, isLeftSpeaker, System.currentTimeMillis());
 
-    int after = oneDialog.getExercises().size();
-    if (oneDialog.getKind() == DialogType.INTERPRETER) {
+    int after = dialog.getExercises().size();
+    if (dialog.getKind() == DialogType.INTERPRETER) {
       if (after - before != 2) logger.error("before there were " + before + " but after add only " + after);
     } else {
       if (after - before != 1) logger.error("before there were " + before + " but after add only " + after);
     }
 
-    return new DialogExChangeResponse(oneDialog, added);
+    return new DialogExChangeResponse(dialog, added);
   }
 }

@@ -375,20 +375,33 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     tripleFirstStyle(w);
 
     w.addFocusHandler(event -> deleteGotFocus());
-
+    w.addBlurHandler(event -> deleteGotBlur());
     add(w);
   }
 
   /**
    * So, if you get the focus and you're not last, move on to next
+   * How can we distinguish between delete getting focus, just before buttton press
    */
   private void deleteGotFocus() {
     if (turnContainer.isLast(this)) {  // since you may be about to click it
+      if (DEBUG) logger.info("deleteGotFocus - ");
       grabFocus();
     } else {
       turnContainer.moveFocusToNext();
     }
   }
+
+  private void deleteGotBlur() {
+    if (turnContainer.isLast(this)) {  // since you may be about to click it
+      if (DEBUG) logger.info("deleteGotBlur - ");
+      // grabFocus();
+    } else {
+      if (DEBUG) logger.info("deleteGotBlur - not last ");
+      //  turnContainer.moveFocusToNext();
+    }
+  }
+
 
   private void addOtherTurn() {
     Button w = getTripleButton();
@@ -600,6 +613,8 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   private int getAudioID() {
     // logger.info("has " + clientExercise.getAudioAttributes().size() + " audio attributes...");
     Collection<AudioAttribute> audioAttributes = clientExercise.getAudioAttributes();
+    logger.info("getAudioID : audio attr " + audioAttributes);
+
     return audioAttributes.isEmpty() ? -1 : audioAttributes.iterator().next().getUniqueID();
   }
 
@@ -609,9 +624,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   @Override
   public void grabFocus() {
     if (contentTextBox == null) {
-      logger.info("grabFocus no contentTextBox yet for " + getExID());
+      logger.info("grabFocus no contentTextBox yet for " + getText());
     } else {
-      logger.info("grabFocus on " + getExID());
+      logger.info("grabFocus on " + getText());
       contentTextBox.setFocus(true);
     }
   }
@@ -707,7 +722,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       turnFeedback.setHTML("");
       AudioAttribute audioAttribute = audioAnswer.getAudioAttribute();
       String audioRef = audioAttribute.getAudioRef();
-      //   logger.info("useResult got back " + audioRef);
+
+      logger.info("useResult (" + audioAttribute.getUniqueID() + ") got back " + audioRef);
+
       rememberAudio(audioAttribute);
       clientExercise.getMutableAudio().addAudio(audioAttribute);
       recordAudioPanel.getPlayAudioPanel().setEnabled(true);

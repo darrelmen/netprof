@@ -585,6 +585,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           saveFile,
           projid);
 
+      if (audioAnswer.getAudioAttribute() == null) {
+        logger.warn("no audio attribute?");
+      }
+      else if (audioAnswer.getAudioAttribute().getUniqueID() == 0) {
+        logger.warn("no audio attribute id " + audioAnswer.getAudioAttribute());
+
+      }
       if (DEBUG_DETAIL) logger.info("path is " + audioAnswer.getPath());
 
       if (audioAnswer.getValidity() != OK) {
@@ -1127,6 +1134,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         db.getCustomOrPredefExercise(projectID, exerciseID) :
         db.getUserExerciseDAO().getTemplateExercise(db.getProjectDAO().getDefault());
 
+    if (commonExercise == null && isExistingExercise) {
+      if (!db.getExerciseDAO(projectID).refresh(exerciseID)) {
+        logger.warn("getAudioAnswer couldn't reload " + exerciseID);
+      } else {
+        commonExercise = db.getCustomOrPredefExercise(projectID, exerciseID);
+      }
+    }
+
     int audioContextProjid = audioContext.getProjid();
 
     if (audioContextProjid != projectID)
@@ -1139,6 +1154,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       ((Exercise) commonExercise).setProjectID(audioContextProjid);
       audioContext.setExid(commonExercise.getID());
     }
+
+
 
     if (commonExercise == null && isExistingExercise) {
       logger.warn("getAudioAnswer for " + project.getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
@@ -1372,6 +1389,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     } catch (Exception e) {
       logger.error("got " + e, e);
     }
+
+    logger.info("addToAudioTable : return " +audioAttribute.getUniqueID() + " : " +audioAttribute.getAudioRef() + " : " + audioAttribute.getTranscript());
+
     return audioAttribute;
   }
 
@@ -1628,16 +1648,16 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
-   * @see mitll.langtest.server.database.project.ProjectManagement#checkOOVForDialog(int, int)
    * @param projectID
    * @param dialogID
    * @throws DominoSessionException
+   * @see mitll.langtest.server.database.project.ProjectManagement#checkOOVForDialog(int, int)
    */
   @Override
   public void reloadDialog(int projectID, int dialogID) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     db.getProjectManagement().checkOOVForDialog(projectID, dialogID);
 
-  //  db.getProjectManagement().addDialogInfo(projectID, dialogID);
+    //  db.getProjectManagement().addDialogInfo(projectID, dialogID);
   }
 }

@@ -45,15 +45,15 @@ import java.util.logging.Logger;
 class JSONAnswerParser {
   private final Logger logger = Logger.getLogger("JSONAnswerParser");
 
-  public static final String TIMESTAMP = "timestamp";
-  public static final String RESULT_ID = "resultID";
-  public static final String IS_CORRECT = "isCorrect";
+  private static final String TIMESTAMP = "timestamp";
+  private static final String RESULT_ID = "resultID";
+  private static final String IS_CORRECT = "isCorrect";
 
-  public static final String PATH = "path";
-  public static final String DYNAMIC_RANGE = "dynamicRange";
-  public static final String DURATION = "duration";
-  public static final String EXID = "exid";
-  public static final String ISFULLMATCH = "isfullmatch";
+  private static final String PATH = "path";
+  private static final String DYNAMIC_RANGE = "dynamicRange";
+  private static final String DURATION = "duration";
+  private static final String EXID = "exid";
+  private static final String ISFULLMATCH = "isfullmatch";
 
 
   private static final String EVENT = "event";
@@ -109,7 +109,9 @@ class JSONAnswerParser {
 
       converted.setPretestScore(pretestScore);
 
-      converted.setAudioAttribute(new AudioAttribute().setAudioRef(converted.getPath()));
+      AudioAttribute audioAttribute = new AudioAttribute(getIntField(jsonObject, "audioID"), converted.getPath());
+  //    logger.info("getAudioAnswer got back " + audioAttribute);
+      converted.setAudioAttribute(audioAttribute);
     } else {
       logger.info("getAudioAnswer invalid : " + jsonObject);
     }
@@ -142,9 +144,9 @@ class JSONAnswerParser {
   }
 
   /**
-   * @see PostAudioRecordButton#gotPacketResponse
    * @param jsonObject
    * @return
+   * @see PostAudioRecordButton#gotPacketResponse
    */
   StreamResponse getResponse(JSONObject jsonObject) {
     return new StreamResponse(getValidity(jsonObject), getStreamTimestamp(jsonObject), getStreamStop(jsonObject));
@@ -213,7 +215,7 @@ class JSONAnswerParser {
       //   logger.info("getLongField obj "  +jsonValue + " is not a number?");
       String s = jsonValue.isString().stringValue();
       try {
-     //   logger.info("getLongField parse obj " + jsonValue + " : " + s);
+        //   logger.info("getLongField parse obj " + jsonValue + " : " + s);
         return Long.parseLong(s);
       } catch (NumberFormatException e) {
         logger.warning("can't parse " + s);
@@ -227,7 +229,7 @@ class JSONAnswerParser {
 
   private float getFloatField(JSONObject jsonObject, String reqid) {
     JSONValue jsonValue = jsonObject.get(reqid);
-   // if (jsonValue == null) logger.info("getFloatField no field " + reqid);
+    // if (jsonValue == null) logger.info("getFloatField no field " + reqid);
     return (float) (jsonValue == null ? 0F : jsonValue.isNumber().doubleValue());
   }
 

@@ -57,15 +57,6 @@ public interface IAudioDAO extends IDAO {
    */
   AudioAttribute addOrUpdate(AudioInfo info);
 
-  /**
-   * @param projectid
-   * @param hasProjectSpecificAudio
-   * @return
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getAllAudioIDs
-   */
-/*
-  Map<Integer, List<AudioAttribute>> getExToAudio(int projectid, boolean hasProjectSpecificAudio);
-*/
 
   Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid, boolean hasProjectSpecificAudio);
 
