@@ -90,7 +90,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private Map<String, String> parentToChildTypes = new HashMap<>();
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_TYPE_ORDER = true;
+  private static final boolean DEBUG_TYPE_ORDER = false;
   private static final boolean DEBUG_OR_MERGE = false;
   private static final boolean DEBUG_EMPTY = false;
 

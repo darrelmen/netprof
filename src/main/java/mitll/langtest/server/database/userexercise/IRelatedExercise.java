@@ -55,6 +55,7 @@ public interface IRelatedExercise extends IDAO {
   int deleteRelated(int related);
 
   boolean deleteAndFixForEx(int exid);
+  boolean deleteAndFixPair(int exid, int nextid);
 
   boolean insertAfter(int after, int exid);
 

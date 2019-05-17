@@ -49,4 +49,6 @@ public interface ITurnContainer<T extends ITurnPanel> {
   void moveFocusToNext();
 
   void gotBlur(T widgets);
+
+  boolean isLast(T test);
 }

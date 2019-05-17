@@ -97,7 +97,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
           @Override
           public void onSuccess(Void result) {
             logger.info("did reload on netprof.");
-
           }
         });
       }

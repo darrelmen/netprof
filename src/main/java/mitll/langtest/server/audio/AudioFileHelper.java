@@ -271,15 +271,15 @@ public class AudioFileHelper implements AlignDecode {
     long then = System.currentTimeMillis();
 
     if (then - now > 100) {
-      logger.warn("checkLTSAndCountPhones took " + (then - now) + " millis to examine " + exercises.size() + " exercises.");
+      logger.warn("checkOOV took " + (then - now) + " millis to examine " + exercises.size() + " exercises.");
     }
 
     // if (!safe.isEmpty() || !unsafe.isEmpty()) {
-    logger.info("checkLTSAndCountPhones " + language + " marking " + safe.size() + " safe, " + unsafe.size() + " unsafe");
+    logger.info("checkOOV " + language + " marking " + safe.size() + " safe, " + unsafe.size() + " unsafe");
     //}
 
     if (project.getModelType() == ModelType.HYDRA && !unsafe.isEmpty()) {
-      logger.info("checkLTSAndCountPhones : since hydra - marking all " + unsafe.size() + " to be safe since we can go with the UNK model for OOV.");
+      logger.info("checkOOV : since hydra - marking all " + unsafe.size() + " to be safe since we can go with the UNK model for OOV.");
       safe.addAll(unsafe);
     }
     project.getExerciseDAO().markSafeUnsafe(safe, unsafe, now);
@@ -294,10 +294,15 @@ public class AudioFileHelper implements AlignDecode {
 
       pairs.forEach(p -> {
         CommonExercise exerciseByID = getExerciseByID(p.id());
-        String foreignlanguagenorm = p.foreignlanguagenorm();
-        if (!exerciseByID.getNormalizedFL().equals(foreignlanguagenorm)) {
-          changed.add(exerciseByID);
-          exerciseByID.getMutable().setNormalizedFL(foreignlanguagenorm);
+
+        if (exerciseByID == null) {
+          logger.warn("checkOOV can't find ex " + p.id());
+        } else {
+          String foreignlanguagenorm = p.foreignlanguagenorm();
+          if (!exerciseByID.getNormalizedFL().equals(foreignlanguagenorm)) {
+            changed.add(exerciseByID);
+            exerciseByID.getMutable().setNormalizedFL(foreignlanguagenorm);
+          }
         }
       });
     }
@@ -305,14 +310,14 @@ public class AudioFileHelper implements AlignDecode {
     {
       long now2 = System.currentTimeMillis();
       if (now2 - then > 100) {
-        logger.warn("checkLTSAndCountPhones took " + (now2 - then) + " millis to mark exercises safe/unsafe to decode.");
+        logger.warn("checkOOV took " + (now2 - then) + " millis to mark exercises safe/unsafe to decode.");
       }
     }
 
     if (checkInfo.getOovWords() > 0) {
-      logger.warn("checkLTSAndCountPhones NOTE : out of " + exercises.size() + " dict and LTS fails on " + checkInfo.getOovWords());
+      logger.warn("checkOOV NOTE : out of " + exercises.size() + " dict and LTS fails on " + checkInfo.getOovWords());
     } else {
-      logger.info("checkLTSAndCountPhones out of " + exercises.size() + " dict and LTS fails on " + checkInfo.getOovWords());
+      logger.info("checkOOV out of " + exercises.size() + " dict and LTS fails on " + checkInfo.getOovWords());
     }
 
     return checkInfo.setNeedsReload(!changed.isEmpty() || !safe.isEmpty() || !unsafe.isEmpty());
@@ -353,7 +358,7 @@ public class AudioFileHelper implements AlignDecode {
 
     Set<ClientExercise> unsafeHighlighted = new TreeSet<>();
     long then = System.currentTimeMillis();
-    if (forceCheck ||dictModified > 0) {
+    if (forceCheck || dictModified > 0) {
 //      Map<String, List<OOV>> oovToEquivalents = getSorted();
       Map<String, List<OOV>> oovToEquivalents = db.getOOVDAO().getOOVToEquivalents(language);
 

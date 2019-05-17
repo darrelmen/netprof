@@ -60,6 +60,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.logging.Logger;
 
+import static com.google.gwt.event.dom.client.KeyCodes.KEY_TAB;
 import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.LEFT;
 import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.MIDDLE;
 import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_A;
@@ -174,7 +175,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
   @Override
   public String getText() {
-    return getExID() + " " + clientExercise.getForeignLanguage();
+    return getExID() + " '" + clientExercise.getForeignLanguage() + "'";
   }
 
   @Override
@@ -371,9 +372,22 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     // can't blow away the first turn!
     w.setEnabled(!isFirstTurn);
 
-    tripleButtonStyle(w);
+    tripleFirstStyle(w);
+
+    w.addFocusHandler(event -> deleteGotFocus());
 
     add(w);
+  }
+
+  /**
+   * So, if you get the focus and you're not last, move on to next
+   */
+  private void deleteGotFocus() {
+    if (turnContainer.isLast(this)) {  // since you may be about to click it
+      grabFocus();
+    } else {
+      turnContainer.moveFocusToNext();
+    }
   }
 
   private void addOtherTurn() {
@@ -393,10 +407,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   }
 
   private void tripleButtonStyle(Button w) {
-    addPressAndHoldStyle(w);
-
-    w.addStyleName("topFiveMargin");
-    w.addStyleName("leftFiveMargin");
+    tripleFirstStyle(w);
 
     //   w.addFocusHandler(event -> turnContainer.moveFocusToNext());
 
@@ -404,11 +415,19 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 //    logger.info("aftr " + getExID() + " " + w.getTabIndex());
   }
 
+  private void tripleFirstStyle(Button w) {
+    addPressAndHoldStyle(w);
+
+    w.addStyleName("topFiveMargin");
+    w.addStyleName("leftFiveMargin");
+  }
+
   private void gotPlus() {
     turnContainer.addTurnForSameSpeaker(this);
   }
 
   private void gotMinus() {
+    logger.info("gotMinus Got click on delete!");
     turnContainer.deleteCurrentTurnOrPair(this);
   }
 
@@ -518,6 +537,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
           }
         });
       }
+    } else if (keyCode == KEY_TAB) {
+
+      logger.info("Got tab for " + getText());
     } else {
       int length = s.split(" ").length;
       //  logger.info("num tokens " + length);
@@ -531,6 +553,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
         turnFeedback.setText("Avoid long phrases.");
       } else {
         contentTextBox.getElement().getStyle().setBackgroundColor("white");
+        turnFeedback.setText("");
       }
     }
   }
@@ -568,19 +591,16 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   private void showOOVResult(OOVWordsAndUpdate result) {
     if (!result.getOov().isEmpty()) {
       StringBuilder builder = new StringBuilder();
-      builder.append(result.isPossible() ? "No pronunciation for" : "You can't use these words ");
+      builder.append(result.isPossible() ? "No pronunciation for " : "You can't use these words ");
       result.getOov().forEach(oov -> builder.append(oov).append(" "));
       turnFeedback.setText(builder.toString());
-    }
-    else turnFeedback.setText("");
+    } else turnFeedback.setText("");
   }
 
   private int getAudioID() {
     // logger.info("has " + clientExercise.getAudioAttributes().size() + " audio attributes...");
     Collection<AudioAttribute> audioAttributes = clientExercise.getAudioAttributes();
     return audioAttributes.isEmpty() ? -1 : audioAttributes.iterator().next().getUniqueID();
-//    clientExercise.getAudioAttributes().forEach(audioAttribute -> logger.info("ex has " + audioAttribute.getUniqueID() + " : " + audioAttribute.getAudioType()));
-//    return clientExercise.getRegularSpeed() == null ? -1 : clientExercise.getRegularSpeed().getUniqueID();
   }
 
   /**
@@ -591,11 +611,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     if (contentTextBox == null) {
       logger.info("grabFocus no contentTextBox yet for " + getExID());
     } else {
-      //   logger.info("grabFocus on " + getExID());
+      logger.info("grabFocus on " + getExID());
       contentTextBox.setFocus(true);
     }
-//    logger.info("hiddenPartner " + hiddenPartner.getOffsetWidth());
-//    syncWidthOfVisible();
   }
 
   @Override

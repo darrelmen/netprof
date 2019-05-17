@@ -259,7 +259,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     // sanity check for interpreter dialogs
     if (dialog.getKind() == DialogType.INTERPRETER) {
       if (clientExercises.size() % 2 != 0) {
-        logger.error("configureDialog : huh? dialog " + dialog + " has " + clientExercises.size() + " exercises - should be even!");
+        logger.error("\n\n\nconfigureDialog : huh? dialog " + dialog + " has " + clientExercises.size() + " exercises - should be even!\n\n\n");
       }
     }
 
@@ -430,7 +430,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
       Map<Integer, CommonExercise> idToEx = new HashMap<>();
 
       slickRelatedExercises.forEach(slickRelatedExercise -> {
-//        logger.info("addExercises relation " + slickRelatedExercise);
+        logger.info("addExercises relation " + slickRelatedExercise);
         int exid = slickRelatedExercise.exid();
         CommonExercise exercise = idToEx.get(exid);
 
@@ -474,6 +474,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
                     "\n\tex #   " + childExOrig.getID() +
                     "\n\tfl     '" + childExOrig.getForeignLanguage() + "'" +
                     "\n\ttokens " + childExOrig.getTokens() +
+
                     "\n\tattr   " + childExOrig.getAttributes()
                 );
               }
@@ -755,7 +756,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
         ClientExercise prevCandidate = exercises.get(found - 1);
         logger.info("deleteExercise prev of " + exid + " is " + prevCandidate);
         int prev = prevCandidate.getID();
-        if (relatedExercise.deleteAndFixForEx(prev)) {
+
+
+  /*      if (relatedExercise.deleteAndFixForEx(prev)) {
           logger.info("\tdeleteExercise deleted prev relation " + exid);
 
           if (relatedExercise.deleteAndFixForEx(exid)) {
@@ -776,6 +779,22 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
         } else {
           logger.error("deleteExercise did not delete prev ex " + prev + " in " + dialogID);
+//          return false;
+        }*/
+
+        if (relatedExercise.deleteAndFixPair(prev, exid)) {
+          userExerciseDAO.deleteByExID(Arrays.asList(prev, exid));
+
+          deletedIDs.add(prev);
+          deletedIDs.add(exid);
+
+          project.forgetExercise(prev);
+          project.forgetExercise(exid);
+
+          databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
+        } else {
+          logger.error("deleteExercise did not delete prev ex " + prev + " and " + exid +
+              " in " + dialogID);
 //          return false;
         }
       }

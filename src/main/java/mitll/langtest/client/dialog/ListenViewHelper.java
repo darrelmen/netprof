@@ -139,7 +139,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   private boolean doRehearse = true;
 
 
-  private DivWidget dialogHeader;
+  private DivWidget dialogHeader, speakerRow;
 
   /**
    *
@@ -151,6 +151,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   private INavigation.VIEWS thisView;
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_BLUR = true;
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_NEXT = false;
   private static final boolean DEBUG_PLAY = false;
@@ -302,7 +303,7 @@ public class ListenViewHelper<T extends ITurnPanel>
         controlAndSpeakers.add(outer);
       }
 
-      controlAndSpeakers.add(getSpeakerRow(dialog));
+      controlAndSpeakers.add(speakerRow = getSpeakerRow(dialog));
 
       child.add(controlAndSpeakers);
 
@@ -1015,11 +1016,16 @@ public class ListenViewHelper<T extends ITurnPanel>
     boolean last = isLast(widgets);
     if (last) {
       if (widgets.isDeleting()) {
-        if (DEBUG) logger.info("gotBlur ignore blur of " + widgets.getExID());
+        if (DEBUG_BLUR) logger.info("gotBlur ignore blur of " + widgets.getExID());
 
       } else {
-        if (DEBUG) logger.info("gotBlur got blur of " + widgets.getExID() + " " + widgets.getText() +
+
+        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("gotBlur"));
+        logger.info("logException stack " + exceptionAsString);
+
+        if (DEBUG_BLUR) logger.info("gotBlur got blur of '" + widgets.getText() +
             " : " + widgets.isDeleting());
+
 
         moveFocusToNext();
       }
@@ -1151,7 +1157,8 @@ public class ListenViewHelper<T extends ITurnPanel>
         logger.info("beforeChangeTurns : make header visible");
       }
       if (dialogHeader == null) {
-        logger.info("no dialog header?");
+        makeVisible(speakerRow);
+        //  logger.info("no dialog header?");
       } else {
         makeVisible(dialogHeader);  // make the top header visible...
       }
@@ -1315,7 +1322,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     return isLast(currentTurn);
   }
 
-  protected boolean isLast(T currentTurn) {
+  public boolean isLast(T currentTurn) {
     List<T> seq = getAllTurns();
     return seq.indexOf(currentTurn) == seq.size() - 1;
   }

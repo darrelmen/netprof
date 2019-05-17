@@ -110,6 +110,11 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
   }
 
   @Override
+  public boolean deleteAndFixPair(int exid, int nextid) {
+    return false;
+  }
+
+  @Override
   public boolean insertAfter(int after, int exid) {
     return false;
   }
@@ -123,4 +128,6 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
   public Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelatedForDialog(int dialogID) {
     return daoWrapper.byProjectForOneDialog(dialogID);
   }
+
+
 }

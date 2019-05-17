@@ -113,6 +113,12 @@ public class RelatedExerciseHelper implements IRelatedExercise {
     logger.info("deleted " + i + " rows for " + exid);
     return i > 0;
   }
+  @Override
+  public boolean deleteAndFixPair(int exid, int nextid) {
+    int i = daoWrapper.deleteAndFixPair(exid,nextid);
+    logger.info("deleteAndFixPair " + i + " rows for " + exid + " and " + nextid);
+    return i > 0;
+  }
 
   /**
    * @param after

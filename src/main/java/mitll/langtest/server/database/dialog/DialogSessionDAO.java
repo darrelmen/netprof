@@ -53,6 +53,7 @@ import java.util.stream.Collectors;
 
 public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
   private static final Logger logger = LogManager.getLogger(DialogSessionDAO.class);
+  public static final boolean DEBUG = false;
 
   private final DialogSessionDAOWrapper dao;
 
@@ -134,12 +135,14 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
         {
           SlickDialogSession candidate = getCandidate(v);
 
-          if (candidate != null) {
-            logger.info("getLatestDialogSessionScores found " +
-                "\n\t#      " + candidate.id() +
-                "\n\tdialog " + candidate.dialogid() +
-                "\n\tview   " + candidate.view() +
-                "\n\tscore  " + candidate.score());
+          if (DEBUG) {
+            if (candidate != null) {
+              logger.info("getLatestDialogSessionScores found " +
+                  "\n\t#      " + candidate.id() +
+                  "\n\tdialog " + candidate.dialogid() +
+                  "\n\tview   " + candidate.view() +
+                  "\n\tscore  " + candidate.score());
+            }
           }
 
           dialogIDToScore.put(k, candidate == null ? 0F : candidate.score());
