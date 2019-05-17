@@ -671,7 +671,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return clientExercises;
   }
 
-  private void sanityCheckLanguageAndSpeaker(IDialog toAdd, int afterExid, List<ClientExercise> clientExercises) {
+/*  private void sanityCheckLanguageAndSpeaker(IDialog toAdd, int afterExid, List<ClientExercise> clientExercises) {
     if (toAdd.getKind() == DialogType.INTERPRETER) {
       ClientExercise currentEx = toAdd.getExByID(afterExid);
       ClientExercise nextEx = clientExercises.get(0);
@@ -701,7 +701,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
         }
       }
     }
-  }
+  }*/
 
   private void refreshExercises(List<ClientExercise> exercises, Project project) {
     ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
@@ -936,13 +936,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }
 
   private long addFLAttribute(IDialog toAdd, int projid, int userid) {
-    IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
-
     long now = System.currentTimeMillis();
 
     ExerciseAttribute attribute = new ExerciseAttribute(FLTITLE, toAdd.getForeignLanguage(), false);
 
-    int orAddAttribute = userExerciseDAO.getExerciseAttributeDAO()
+    int orAddAttribute = databaseImpl.getUserExerciseDAO().getExerciseAttributeDAO()
         .findOrAddAttribute(projid, now, userid, attribute, false);
 
     int add = toAdd.getID();

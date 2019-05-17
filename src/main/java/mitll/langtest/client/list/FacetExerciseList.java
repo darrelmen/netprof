@@ -570,15 +570,19 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return container;
   }
 
-  private void getTypeOrder() {
+  protected void getTypeOrder() {
     ProjectStartupInfo projectStartupInfo = getStartupInfo();
     if (projectStartupInfo == null) logger.warning("no project startup info?");
     else {
       typeOrder = getTypeOrderSimple();
       //logger.info("\n\n\ngetTypeOrder type order " + typeOrder);
       this.rootNodesInOrder = new ArrayList<>(typeOrder);
-      this.rootNodesInOrder.retainAll(projectStartupInfo.getRootNodes());
+      this.rootNodesInOrder.retainAll(getRootNodes(projectStartupInfo));
     }
+  }
+
+  protected Set<String> getRootNodes(ProjectStartupInfo projectStartupInfo) {
+    return projectStartupInfo.getRootNodes();
   }
 
   /**

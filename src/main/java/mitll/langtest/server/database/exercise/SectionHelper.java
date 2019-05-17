@@ -90,7 +90,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private Map<String, String> parentToChildTypes = new HashMap<>();
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_TYPE_ORDER = false;
+  private static final boolean DEBUG_TYPE_ORDER = true;
   private static final boolean DEBUG_OR_MERGE = false;
   private static final boolean DEBUG_EMPTY = false;
 
@@ -957,7 +957,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
   @Override
   public void report() {
-    logger.debug("report : type order " + getTypeOrder());
+    logger.info("report : type order " + getTypeOrder());
     for (String key : typeToUnitToLesson.keySet()) {
       Map<String, Lesson<T>> categoryToLesson = getCategoryToLesson(key);
       Set<String> sections = new TreeSet<>(categoryToLesson.keySet());

@@ -96,6 +96,7 @@ public class Project implements IPronunciationLookup, IProject {
 
   private static final boolean REPORT_ON_DIALOG_TYPES = false;
   private static final boolean DEBUG_FILE_LOOKUP = false;
+  public static final String TYPE = "Type";
 
   /**
    * @see #getWebservicePort
@@ -125,9 +126,11 @@ public class Project implements IPronunciationLookup, IProject {
   /**
    * @see #setDialogs
    */
-//  private List<IDialog> dialogs = new ArrayList<>();
   private Map<Integer, IDialog> idToDialog = new ConcurrentHashMap<>();
 
+  /**
+   *
+   */
   private final ISection<IDialog> dialogSectionHelper = new SectionHelper<>();
   private JsonExport jsonExport;
   /**
@@ -547,9 +550,9 @@ public class Project implements IPronunciationLookup, IProject {
   }
 
   /**
-   * @see mitll.langtest.server.database.dialog.DialogDAO#deleteExercise(int, int, int)
    * @param prev
    * @return
+   * @see mitll.langtest.server.database.dialog.DialogDAO#deleteExercise(int, int, int)
    */
   @Override
   public CommonExercise forgetExercise(int prev) {
@@ -914,15 +917,22 @@ public class Project implements IPronunciationLookup, IProject {
       }
 
       pairs.addAll(dialog.getAttributes());
+
+      String value = dialog.getKind().toString();
+      value = value.substring(0, 1).toUpperCase() + value.substring(1).toLowerCase();
+      // logger.info("adding " + value + " " + dialog.getID());
+      pairs.add(new Pair(TYPE, value));
+
       this.dialogSectionHelper.addPairs(dialog, pairs);
 
       seen.add(pairs);
     });
 
+    typeOrder.add(TYPE);
     dialogSectionHelper.rememberTypesInOrder(typeOrder, seen);
 
     if (REPORT_ON_DIALOG_TYPES) {
-      logger.info("report on dialog types");
+      logger.info("createDialogSectionHelper report on dialog types");
       dialogSectionHelper.report();
     }
   }

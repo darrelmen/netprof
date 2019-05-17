@@ -907,7 +907,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @param turn
    */
   void gotTurnClick(T turn) {
-    logger.info("\n\n ------- gotTurnClick " + turn.getExID());
+    if (DEBUG) logger.info("\n\n ------- gotTurnClick " + turn.getExID());
 
     setPlayButtonToPlay();
 
@@ -1015,14 +1015,10 @@ public class ListenViewHelper<T extends ITurnPanel>
     boolean last = isLast(widgets);
     if (last) {
       if (widgets.isDeleting()) {
-//        int i = getAllTurns().indexOf(widgets);
-//        if ()
-
-        logger.info("gotBlur ignore blur of " + widgets.getExID());
+        if (DEBUG) logger.info("gotBlur ignore blur of " + widgets.getExID());
 
       } else {
-
-        logger.info("gotBlur got blur of " + widgets.getExID() + " " + widgets.getText() +
+        if (DEBUG) logger.info("gotBlur got blur of " + widgets.getExID() + " " + widgets.getText() +
             " : " + widgets.isDeleting());
 
         moveFocusToNext();
@@ -1581,7 +1577,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #currentTurnPlayEnded()
    */
   void removeMarkCurrent() {
-    if (DEBUG || true) logger.info("removeMarkCurrent on " + blurb());
+    if (DEBUG) logger.info("removeMarkCurrent on " + blurb());
 
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
 //    logger.info("logException stack:\n" + exceptionAsString);
@@ -1590,7 +1586,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   void markCurrent() {
-    if (DEBUG || true) logger.info("markCurrent on " + blurb());
+    if (DEBUG) logger.info("markCurrent on " + blurb());
 
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("markCurrent on " + currentTurn.getExID()));
 //    logger.info("logException stack:\n" + exceptionAsString);

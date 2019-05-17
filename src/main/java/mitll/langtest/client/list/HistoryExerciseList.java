@@ -151,7 +151,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     removeHistoryListener();
   }
 
-  ProjectStartupInfo getStartupInfo() {
+  protected ProjectStartupInfo getStartupInfo() {
     return controller.getProjectStartupInfo();
   }
 
@@ -354,7 +354,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     }
   }
 
-  List<String> getTypeOrderSimple() {
+  protected List<String> getTypeOrderSimple() {
     return getStartupInfo().getTypeOrder();
   }
 

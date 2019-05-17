@@ -472,6 +472,18 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     return sb.toSafeHtml();
   }
 
+  protected SafeHtml getNoWrapContentBackground(String noWrapContent, String color) {
+    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+    sb.appendHtmlConstant("<div style='white-space: nowrap;'>" +
+        "<span style='background-color:" + color +
+        ";'>" +
+        noWrapContent +
+        "</span>");
+
+    sb.appendHtmlConstant("</div>");
+    return sb.toSafeHtml();
+  }
+
   public CellTable<?> getCellTable() {
     return table;
   }
