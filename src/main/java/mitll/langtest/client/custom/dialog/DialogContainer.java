@@ -39,11 +39,12 @@ import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextHeader;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.logging.Logger;
+
+import static mitll.langtest.client.dialog.DialogExerciseList.INTERP_COLOR;
 
 /**
  * TODO : add public/private column, and to dialog itself!
@@ -80,7 +81,6 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
     addIsPublic();
 
     table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tSafeHtmlColumn, true));
-
   }
 
   private void addID(List<T> list) {
@@ -115,8 +115,32 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
     return columnSortHandler;
   }
 
+//  @Override
+//  protected Column<T, SafeHtml> getItemColumn(int maxLength) {
+//    return getTruncatedCol2(maxLength, this::getItemLabel);
+//  }
 
-  protected void addDialogType() {
+  private Column<T, SafeHtml> getTruncatedCol2(int maxLength, GetSafe<T> getSafe) {
+    Column<T, SafeHtml> column = new Column<T, SafeHtml>(new ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(T shell) {
+        String truncate = truncate(getSafe.getSafe(shell), maxLength);
+        return shell.getKind() == DialogType.DIALOG ?
+            getNoWrapContentBackground(truncate, "aliceblue") : getNoWrapContentBackground(truncate, INTERP_COLOR);
+      }
+    };
+    column.setSortable(true);
+
+    return column;
+  }
+
+  private void addDialogType() {
     Column<T, SafeHtml> diff = getDialogType();
     diff.setSortable(true);
     addColumn(diff, new TextHeader("Type"));

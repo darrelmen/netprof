@@ -75,7 +75,7 @@ import static mitll.langtest.shared.user.Permission.*;
 public class ProjectChoices extends ThumbnailChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
-  public static final int THUMB_WIDTH = 181;
+  private static final int THUMB_WIDTH = 181;
 
   private static final String EDIT_PROJECT = "Edit project.";
   /**

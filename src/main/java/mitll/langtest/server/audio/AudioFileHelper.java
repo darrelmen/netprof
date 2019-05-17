@@ -67,7 +67,6 @@ import scala.collection.Iterator;
 
 import javax.servlet.ServletContext;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
@@ -203,6 +202,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param exercises
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExercises
    * @see ProjectManagement#configureProject
+   * @deprecated
    */
   public int checkForOOV(Collection<CommonExercise> exercises) {
     if (getASRScoring().isDictEmpty()) {
@@ -225,7 +225,7 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * Complicated, with side effects!
-   *
+   * <p>
    * Check exercises to see if they have OOV tokens
    * Divide exercises into two piles - safe and unsafe
    * write an OOV file suitable for export to Kaldi or Hydra dictionary prep
@@ -236,11 +236,11 @@ public class AudioFileHelper implements AlignDecode {
    * lists in sync.
    *
    * @param exercises
-   * @param includeKaldi
+   * @param forceCheck
    * @return OOVInfo
    * @see AudioFileHelper#checkForOOV(Collection)
    */
-  public OOVInfo checkOOV(Collection<CommonExercise> exercises, boolean includeKaldi) {
+  public OOVInfo checkOOV(Collection<CommonExercise> exercises, boolean forceCheck) {
     long now = System.currentTimeMillis();
     Map<Integer, String> idToNorm = new HashMap<>();
     Set<String> oov = new HashSet<>();
@@ -258,13 +258,14 @@ public class AudioFileHelper implements AlignDecode {
     Set<Integer> unsafe = new HashSet<>();
     OOVInfo checkInfo;
     try {
-      checkInfo = checkAllExercises(exercises, safe, unsafe, oov, idToNorm, includeKaldi);
+      checkInfo = checkAllExercises(exercises, safe, unsafe, oov, idToNorm, forceCheck);
       logger.info("checkOOV Got back " + checkInfo);
     } catch (Exception e) {
       checkInfo = new OOVInfo();
       logger.error("got " + e, e);
     }
 
+    // write to db
     writeOOV(oov);
 
     long then = System.currentTimeMillis();
@@ -332,7 +333,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param safe
    * @param unsafe
    * @param oov
-   * @param includeKaldi
+   * @param forceCheck
    * @return
    * @see #checkOOV(Collection, boolean)
    */
@@ -343,25 +344,25 @@ public class AudioFileHelper implements AlignDecode {
 
                                     Set<String> oov,
                                     Map<Integer, String> unsafeToNorm,
-                                    boolean includeKaldi) {
+                                    boolean forceCheck) {
     int checkedVocab = 0;
     int checkedDirect = 0;
     int count = 0;
     int safeChanged = 0;
-    logger.info("checkAllExercises for " + exercises.size() + " ex, force " + includeKaldi);
+    logger.info("checkAllExercises for " + exercises.size() + " ex, force " + forceCheck);
 
     Set<ClientExercise> unsafeHighlighted = new TreeSet<>();
     long then = System.currentTimeMillis();
-    if (dictModified > 0 || includeKaldi) {
+    if (forceCheck ||dictModified > 0) {
 //      Map<String, List<OOV>> oovToEquivalents = getSorted();
       Map<String, List<OOV>> oovToEquivalents = db.getOOVDAO().getOOVToEquivalents(language);
 
       for (CommonExercise exercise : exercises) {
-        if ((isStale(exercise) || includeKaldi)) {
+        if (forceCheck || (isStale(exercise))) {
           if (!exercise.hasEnglishAttr()) {
 //          if (spew2++ < 10 || spew2 % 100 == 0)
 //            logger.info("checkAllExercises for " + exercise.getForeignLanguage() + " last checked " + exercise.getLastChecked() + " vs dict modified " + dictModified);
-            boolean validForeignPhrase = isValidForeignPhrase(safe, unsafe, unsafeToNorm, exercise, oov, includeKaldi, oovToEquivalents, unsafeHighlighted);
+            boolean validForeignPhrase = isValidForeignPhrase(safe, unsafe, unsafeToNorm, exercise, oov, forceCheck, oovToEquivalents, unsafeHighlighted);
             //  logger.info("checkLTSAndCountPhones : " + language + " oov " + oov.size());
 
             checkedVocab++;
@@ -381,7 +382,7 @@ public class AudioFileHelper implements AlignDecode {
             // check context sentences
             for (ClientExercise context : exercise.getDirectlyRelated()) {
               CommonExercise sentence = context.asCommon();
-              boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, unsafeToNorm, sentence, oov, includeKaldi, oovToEquivalents, unsafeHighlighted);
+              boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, unsafeToNorm, sentence, oov, forceCheck, oovToEquivalents, unsafeHighlighted);
               checkedDirect++;
 
               if (sentence.isSafeToDecode() != validForeignPhrase2) {
@@ -449,44 +450,50 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
-  private void writeToFile(Set<String> oov, String suffix) throws IOException {
-    String fileName = "Project_" + suffix + project.getLanguage() + "_" + project.getName() + ".txt";
-    File file = new File("/tmp/" + fileName);
-    logger.info("writeOOV writing " + oov.size() + " oov items to " + file.getAbsolutePath());
-    FileWriter oovTokens = new FileWriter(file);
-    List<String> strings = new ArrayList<>(oov);
-    strings.sort(Comparator.naturalOrder());
-
-    for (String token : strings) {
-      try {
-        oovTokens.write(token + "\n");
-      } catch (IOException e) {
-        break;
-      }
-    }
-    oovTokens.close();
-  }
+//  private void writeToFile(Set<String> oov, String suffix) throws IOException {
+//    String fileName = "Project_" + suffix + project.getLanguage() + "_" + project.getName() + ".txt";
+//    File file = new File("/tmp/" + fileName);
+//    logger.info("writeOOV writing " + oov.size() + " oov items to " + file.getAbsolutePath());
+//    FileWriter oovTokens = new FileWriter(file);
+//    List<String> strings = new ArrayList<>(oov);
+//    strings.sort(Comparator.naturalOrder());
+//
+//    for (String token : strings) {
+//      try {
+//        oovTokens.write(token + "\n");
+//      } catch (IOException e) {
+//        break;
+//      }
+//    }
+//    oovTokens.close();
+//  }
 
   /**
+   * Won't add duplicates.
+   *
    * Don't step on oov entries with mappings.
    *
    * @param oov
    * @param removeStale
    */
-  private void addOOVToOOVTable(Set<String> oov) {//}, boolean removeStale) {
+  private void addOOVToOOVTable(Set<String> oov) {
     Language languageEnum = project.getLanguageEnum();
 
     int defaultUser = db.getUserDAO().getDefaultUser();
     List<OOV> toAdd = getOOVToAdd(oov, languageEnum, defaultUser);
-//    if (removeStale) {
-//      logger.info("\n\n\naddOOVToOOVTable remove stale entries");
-//      removeStaleOOV(oov, languageEnum);
-//    }
     logger.info("addOOV adding " + toAdd.size());
 
     db.getOOVDAO().insertBulk(toAdd, defaultUser, languageEnum);
   }
 
+  /**
+   * Won't add duplicates...
+   *
+   * @param oov
+   * @param languageEnum
+   * @param defaultUser
+   * @return
+   */
   @NotNull
   private List<OOV> getOOVToAdd(Set<String> oov, Language languageEnum, int defaultUser) {
     Map<String, List<OOV>> currentOOVToEquivalents = db.getOOVDAO().getOOV(languageEnum);
@@ -538,22 +545,42 @@ public class AudioFileHelper implements AlignDecode {
                                        Set<Integer> unsafe,
 
                                        Map<Integer, String> safeToNorm,
-                                       CommonExercise exercise, Set<String> oovCumulative,
+                                       ClientExercise exercise,
+                                       Set<String> oovCumulative,
                                        boolean includeKaldi,
                                        Map<String, List<OOV>> oovToEquivalents,
                                        Set<ClientExercise> unsafeHighlighted) {
+    boolean validForeignPhrase = isValidForeignPhraseEither(exercise, oovToEquivalents, includeKaldi, safeToNorm, oovCumulative, unsafeHighlighted);
+
+    (validForeignPhrase ? safe : unsafe).add(exercise.getID());
+
+    return validForeignPhrase;
+  }
+
+  public Set<String> isValid(ClientExercise exercise) {
+    Map<String, List<OOV>> oovToEquivalents = db.getOOVDAO().getOOVToEquivalents(language);
+
+    HashSet<String> oovCumulative = new HashSet<>();
+    isValidForeignPhraseEither(exercise, oovToEquivalents, true, new HashMap<>(), oovCumulative, new HashSet<>());
+    return oovCumulative;
+  }
+
+  private boolean isValidForeignPhraseEither(ClientExercise exercise,
+                                             Map<String, List<OOV>> oovToEquivalents,
+                                             boolean includeKaldi,
+
+                                             Map<Integer, String> safeToNorm,
+                                             Set<String> oovCumulative,
+                                             Set<ClientExercise> unsafeHighlighted) {
     boolean validForeignPhrase = true;
 
     if (project.getModelType() == ModelType.KALDI) {
       if (includeKaldi && !exercise.hasEnglishAttr()) {
-        validForeignPhrase = checkWithKaldi(exercise, exercise.getForeignLanguage(), oovToEquivalents, safeToNorm, unsafeHighlighted, oovCumulative);
+        validForeignPhrase = checkWithKaldi(exercise, oovToEquivalents, safeToNorm, unsafeHighlighted, oovCumulative);
       }
     } else {
       validForeignPhrase = checkWithHydra(exercise, oovToEquivalents, safeToNorm, unsafeHighlighted, oovCumulative);
     }
-
-    (validForeignPhrase ? safe : unsafe).add(exercise.getID());
-
     return validForeignPhrase;
   }
 
@@ -569,12 +596,14 @@ public class AudioFileHelper implements AlignDecode {
    * @param oovCumulative
    * @return
    */
-  private boolean checkWithKaldi(ClientExercise exercise, String foreignLanguage, Map<String, List<OOV>> oovToEquivalents,
+  private boolean checkWithKaldi(ClientExercise exercise,
+                                 Map<String, List<OOV>> oovToEquivalents,
 
                                  Map<Integer, String> safeToNorm,
                                  Set<ClientExercise> unsafeHighlighted,
                                  Set<String> oovCumulative) {
     // run it once
+    String foreignLanguage = exercise.getForeignLanguage();
     Collection<String> kaldiOOV = getASRScoring().getKaldiOOV(foreignLanguage);
 
     Set<String> replaced = new HashSet<>();

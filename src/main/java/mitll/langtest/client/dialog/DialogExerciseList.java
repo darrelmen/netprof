@@ -45,12 +45,14 @@ import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.project.ThumbnailChoices;
 import mitll.langtest.shared.dialog.DialogMetadata;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -60,7 +62,8 @@ import java.util.stream.Collectors;
 /**
  * A facet list display of dialogs.
  */
-class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
+public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
+  public static final String INTERP_COLOR = "#f0fff7";
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
   /**
@@ -74,7 +77,7 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private static final int NORMAL_MIN_HEIGHT = 101;// 67;
   private static final int LANGUAGE_SIZE = 6;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    *
@@ -84,6 +87,18 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   DialogExerciseList(Panel topRow, Panel currentExercisePanel, INavigation.VIEWS instanceName, DivWidget listHeader,
                      ExerciseController controller) {
     super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, INavigation.VIEWS.DIALOG);
+  }
+
+  @Override protected List<String> getTypeOrderSimple() {
+    ArrayList<String> strings = new ArrayList<>(getStartupInfo().getTypeOrder());
+    strings.add("Type");
+    return strings;
+  }
+
+  @Override protected Set<String> getRootNodes(ProjectStartupInfo projectStartupInfo) {
+    HashSet<String> strings = new HashSet<>(projectStartupInfo.getRootNodes());
+    strings.add("Type");
+    return strings;
   }
 
   @Override
@@ -286,7 +301,12 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     container.add(overallSmiley);
     container.setWidth("100%");
     container.addStyleName("floatLeft");
+    if (dialog.getKind() == DialogType.DIALOG) {
+      container.getElement().getStyle().setBackgroundColor("aliceblue");
+    } else {
+      container.getElement().getStyle().setBackgroundColor(INTERP_COLOR);
 
+    }
     return container;
   }
 

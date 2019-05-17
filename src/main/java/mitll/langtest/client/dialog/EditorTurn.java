@@ -54,6 +54,7 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.OOVWordsAndUpdate;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -503,14 +504,15 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
         int audioID = getAudioID();
         logger.info("gotBlur " + getExID() + " = " + prev + " audio id " + audioID);
 
-        controller.getExerciseService().updateText(dialogID, getExID(), audioID, s, new AsyncCallback<Boolean>() {
+        controller.getExerciseService().updateText(dialogID, getExID(), audioID, s, new AsyncCallback<OOVWordsAndUpdate>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("updating text...", caught);
           }
 
           @Override
-          public void onSuccess(Boolean result) {
+          public void onSuccess(OOVWordsAndUpdate result) {
+            showOOVResult(result);
             //logger.info("OK, update was " + result);
             turnContainer.gotForward(outer);
           }
@@ -522,8 +524,11 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
       if (length > 10) {
         contentTextBox.getElement().getStyle().setBackgroundColor("red");
+        turnFeedback.setText("Really avoid long phrases.");
+
       } else if (length > 7) {
         contentTextBox.getElement().getStyle().setBackgroundColor("yellow");
+        turnFeedback.setText("Avoid long phrases.");
       } else {
         contentTextBox.getElement().getStyle().setBackgroundColor("white");
       }
@@ -545,18 +550,29 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       int audioID = getAudioID();
       if (DEBUG || true) logger.info("gotBlur " + getExID() + " = " + prev + " audio " + audioID);
 
-      controller.getExerciseService().updateText(dialogID, getExID(), audioID, s, new AsyncCallback<Boolean>() {
+      controller.getExerciseService().updateText(dialogID, getExID(), audioID, s, new AsyncCallback<OOVWordsAndUpdate>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("updating text...", caught);
         }
 
         @Override
-        public void onSuccess(Boolean result) {
+        public void onSuccess(OOVWordsAndUpdate result) {
+          showOOVResult(result);
           //logger.info("OK, update was " + result);
         }
       });
     }
+  }
+
+  private void showOOVResult(OOVWordsAndUpdate result) {
+    if (!result.getOov().isEmpty()) {
+      StringBuilder builder = new StringBuilder();
+      builder.append(result.isPossible() ? "No pronunciation for" : "You can't use these words ");
+      result.getOov().forEach(oov -> builder.append(oov).append(" "));
+      turnFeedback.setText(builder.toString());
+    }
+    else turnFeedback.setText("");
   }
 
   private int getAudioID() {

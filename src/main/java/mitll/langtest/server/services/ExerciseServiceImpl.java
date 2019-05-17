@@ -29,11 +29,11 @@
 
 package mitll.langtest.server.services;
 
-import com.google.gwt.event.dom.client.KeyUpEvent;
 import mitll.langtest.client.dialog.EditorTurn;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.Search;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.exercise.TripleExercises;
@@ -49,6 +49,8 @@ import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.ModelType;
+import mitll.langtest.shared.project.OOVWordsAndUpdate;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.lang3.StringUtils;
@@ -129,7 +131,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * <p>
    * Sorts the result by unit, then chapter, then alphabetically in chapter. If role is recorder, put the recorded
    * items at the front.
-   *
+   * <p>
    * Gets the project id from user->project table - this request might be stale...
    *
    * @param request
@@ -798,9 +800,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
   /**
    * TODO : revisit the parameterized types here.
-   *
+   * <p>
    * Search should not return context - should get its parent...
-   *
+   * <p>
    * If you ask for a context exercise id, you get back the parent exercise.
    * If you look up by domino id, you get the matching exercise.
    *
@@ -1397,19 +1399,19 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see EditorTurn#gotBlur()
    */
   @Override
-  public boolean updateText(int dialogID, int exid, int audioID, String content) throws DominoSessionException {
-    int projectIDFromUser = getProjectIDFromUser();
-    Project project = getProject(projectIDFromUser);
+  public OOVWordsAndUpdate updateText(int dialogID, int exid, int audioID, String content) throws DominoSessionException {
+    Project project = getProject(getProjectIDFromUser());
     CommonExercise exerciseByID = project.getExerciseByID(exid);
     if (exerciseByID == null) {
-      logger.warn("updateText " +
-          "can't find " + exid);
-      return false;
+      logger.warn("updateText " + "can't find " + exid);
+
+      return new OOVWordsAndUpdate();
     } else {
       content = getTrim(content);
 
       exerciseByID.getMutable().setForeignLanguage(content);
-      project.getAudioFileHelper().checkOOV(Collections.singleton(exerciseByID), true);
+      //OOVInfo oovInfo = project.getAudioFileHelper().checkOOV(Collections.singleton(exerciseByID), true, new HashSet<String>());
+      Set<String> oov = project.getAudioFileHelper().isValid(exerciseByID);
 
       boolean update = project.getExerciseDAO().update(exerciseByID);
 
@@ -1439,7 +1441,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
         }
       }
 
-      return update;
+      return new OOVWordsAndUpdate(update, oov, project.getModelType() == ModelType.HYDRA);
     }
   }
 
@@ -1447,4 +1449,23 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     return part.replaceAll(REGEX, " ").replaceAll(TIC_REGEX, "'").trim();
   }
 
+  /**
+   * Make sure that if the audio service on score1 or hydra has marked an exercise safe or unsafe it's reflected here.
+   * Maybe we flash the item red if it's unsafe to decode???
+   *
+   * @param projectID
+   * @param dialogID
+   * @throws DominoSessionException
+   */
+  @Override
+  public void reloadDialog(int projectID, int dialogID) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+
+    db.getProjectManagement().addDialogInfo(projectID, dialogID);
+    ExerciseDAO<CommonExercise> exerciseDAO = db.getExerciseDAO(projectID);
+
+    db.getProject(projectID)
+        .getDialog(dialogID)
+        .getExercises().forEach(exercise -> exerciseDAO.refresh(exercise.getID()));
+  }
 }

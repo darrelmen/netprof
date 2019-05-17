@@ -62,6 +62,7 @@ import mitll.langtest.server.domino.IDominoImport;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.scoring.LTSFactory;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.OOV;
@@ -465,12 +466,12 @@ public class ProjectManagement implements IProjectManagement {
               id,
               isPolyglot(project))
       );
-
-      if (CHECK_FOR_OOV_ON_STARTUP) {
-        if (myProject) {
-          new Thread(() -> project.getAudioFileHelper().checkForOOV(rawExercises), "checkLTSAndCountPhones_" + project.getID()).start();
-        }
-      }
+//
+//      if (CHECK_FOR_OOV_ON_STARTUP) {
+//        if (myProject) {
+//          new Thread(() -> project.getAudioFileHelper().checkForOOV(rawExercises), "checkLTSAndCountPhones_" + project.getID()).start();
+//        }
+//      }
 
 //      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);
 
@@ -555,10 +556,10 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * NO : these are imported files - can't trust the UID.
    * NO : We should be able to look at the file and figure out the project and owner id
-   *
+   * <p>
    * answers/spanish/answers/plan/1711/0/subject-896/answer_1511623283958.wav
    * /opt/netprof/answers/spanish/answers/plan/1711/0/subject-896/answer_1511623283958.wav
-   *
+   * <p>
    * Search through every project?
    * I guess when we get an answer file, we don't really know where to look for it...?
    *
@@ -1548,7 +1549,6 @@ public class ProjectManagement implements IProjectManagement {
     }
   }
 
-
   private File getFile(FileItem item) {
     try {
       File tempDir = Files.createTempDirectory("fileUpload_" + item.getName()).toFile();
@@ -1568,50 +1568,6 @@ public class ProjectManagement implements IProjectManagement {
       logger.error("got " + e, e);
       return null;
     }
-
-/*
-    if (item instanceof DiskFileItem) {
-      DiskFileItem dItem = (DiskFileItem) item;
-      // Rename the temporary file to the real filename
-      // as this is required to determine the importer
-      // to run later.
-      if (dItem == null) {
-        logger.error("getFile huh? item is null?");
-        return null;
-      } else {
-
-        try {
-          File tempFile = Files.createTempDirectory("fileUpload_" + item.getName()).toFile();
-          item.write(tempFile);
-        } catch (Exception e) {
-          logger.error("got " + e, e);
-          return null;
-        }
-
-        File storeLocation = dItem.getStoreLocation();
-        if (storeLocation == null) {
-          logger.error("getFile huh? storeLocation is null?");
-          return null;
-        } else {
-          File tmpDir = storeLocation.getParentFile();
-          logger.info("getFile TmpDir: " + tmpDir + ", " + item.getName());
-          File renamedF = new File(tmpDir, item.getName());
-          try {
-            dItem.write(renamedF);
-          } catch (Exception ex) {
-            logger.error("Error renaming file from " + storeLocation +
-                " to " + renamedF, ex);
-          }
-          return renamedF;
-        }
-      }
-    }*/
-    // TODO support writing to temporary file and reading it back out when/
-    // if necessary.
-//    logger.warn("Import servlet does not handle in memory file items! " +
-//        "Item: " + item.getName() + ", inMemory=" + item.isInMemory() +
-//        ", of type " + item.getClass().getSimpleName());
-//    return null;
   }
 
   /**
@@ -1646,6 +1602,16 @@ public class ProjectManagement implements IProjectManagement {
 
     logger.info("checkOOV removeStale " + (num == 0) + " for " + commonExercises.size());
     return project.getAudioFileHelper().checkOOV(commonExercises, true).setTotal(total);
+  }
+
+  public void checkOOVForDialog(int projectID, int dialogID) {
+    addDialogInfo(projectID, dialogID);
+    Project project = getProject(projectID, false);
+    IDialog dialog = project.getDialog(dialogID);
+
+    List<CommonExercise> commonExercises = new ArrayList<>();
+    dialog.getExercises().forEach(exercise -> commonExercises.add(exercise.asCommon()));
+    project.getAudioFileHelper().checkOOV(commonExercises, true);
   }
 
   public void updateOOV(List<OOV> updates, int user) {
