@@ -206,7 +206,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     return dialog == null ? -1 : dialog.getID();
   }
 
-  void clearTurnLists() {
+  private void clearTurnLists() {
     allTurns.clear();
 
     clearColumnTurnLists();
@@ -262,7 +262,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
   }
 
-  void gotJumpToDialog() {
+  private void gotJumpToDialog() {
     controller.getNavigation().showView(INavigation.VIEWS.DIALOG);
   }
 
