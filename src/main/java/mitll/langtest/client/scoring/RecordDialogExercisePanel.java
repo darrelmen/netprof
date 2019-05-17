@@ -31,6 +31,7 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.Emoticon;
 import mitll.langtest.client.banner.SessionManager;
@@ -337,6 +338,21 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     emoticon.setUrl(RED_X_URL);
   }
 
+
+  private DivWidget placeForRecordButton;
+
+  @Override
+  @NotNull
+  protected DivWidget getBubble() {
+    DivWidget widgets = new DivWidget();
+    widgets.add(placeForRecordButton = new DivWidget());
+    placeForRecordButton.getElement().setId("placeForRecordButton");
+    placeForRecordButton.addStyleName("bottomFiveMargin");
+    placeForRecordButton.addStyleName("topFiveMargin");
+    placeForRecordButton.addStyleName("leftFiveMargin");
+    return widgets;
+  }
+
   /**
    * @param showFL
    * @param showALTFL
@@ -365,7 +381,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     buttonContainer.setId("recordButtonContainer_" + getExID());
 
     // add  button
-    if (shouldShowRecordButton()) {
+    boolean showRecordButton = shouldShowRecordButton();
+    if (showRecordButton) {
       {
         postAudioRecordButton = getPostAudioWidget(recordPanel);
         buttonContainer.add(postAudioRecordButton);
@@ -379,28 +396,33 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
           flContainer.addStyleName("floatRight");
         }
       }
+    } else {
+      //logger.warning("addWidgets : hide record button for " + getText());
     }
 
     add(flContainer);
 
     super.addWidgets(showFL, showALTFL, phonesChoices, englishDisplayChoices);
 
-    if (shouldShowRecordButton()) {
+    if (showRecordButton) {
       flClickableRow.addStyleName("inlineFlex");
 
       if (exercise.hasEnglishAttr()) {
         for (int i = 0; i < flClickableRow.getWidgetCount(); i++) {
           flClickableRow.getWidget(i).addStyleName("eightMarginTop");
         }
+      } else {
+        flClickableRow.getElement().getStyle().setMarginTop(14, Style.Unit.PX);
       }
 
+      placeForRecordButton.getParent().addStyleName("inlineFlex");
+
+
       if (rehearseView.isPressAndHold()) {
-        flClickableRow.insert(buttonContainer, 0);
-        if (postAudioRecordButton != null) {
-          addPressAndHoldStyle(postAudioRecordButton);
-        }
+        placeForRecordButton.add(buttonContainer);
+        addPressAndHoldStyle(postAudioRecordButton);
       } else {
-        flClickableRow.insert(recordPanel.getScoreFeedback(), 0);
+        placeForRecordButton.add(recordPanel.getScoreFeedback());
       }
     }
   }
@@ -422,7 +444,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     return postAudioRecordButton;
   }
 
-  private void addPressAndHoldStyle(PostAudioRecordButton postAudioRecordButton) {
+  private void addPressAndHoldStyle(UIObject postAudioRecordButton) {
     Style style = postAudioRecordButton.getElement().getStyle();
     style.setProperty("borderRadius", "18px");
     style.setPadding(8, Style.Unit.PX);

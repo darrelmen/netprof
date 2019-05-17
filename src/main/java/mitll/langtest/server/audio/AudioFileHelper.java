@@ -562,6 +562,11 @@ public class AudioFileHelper implements AlignDecode {
     return validForeignPhrase;
   }
 
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#updateText
+   * @param exercise
+   * @return
+   */
   public Set<String> isValid(ClientExercise exercise) {
     Map<String, List<OOV>> oovToEquivalents = db.getOOVDAO().getOOVToEquivalents(language);
 

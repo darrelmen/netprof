@@ -80,7 +80,7 @@ public interface ExerciseService<T extends CommonShell & ScoredExercise> extends
    */
   void reload(int projid) throws DominoSessionException;
 
-  OOVWordsAndUpdate updateText(int dialogID, int exid, int audioID, String content) throws DominoSessionException;
+  OOVWordsAndUpdate updateText(int projid, int dialogID, int exid, int audioID, String content) throws DominoSessionException;
 
   void refreshAudio(int exid) throws DominoSessionException;
 

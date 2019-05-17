@@ -82,8 +82,10 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private static final int MIN_DEBUG_DURATION = 30;
   private static final int MIN_WARN_DURATION = 1000;
   private static final String LISTS = "Lists";
+
   private static final String REGEX = " ";  // no break space!
   private static final String TIC_REGEX = "&#39;";
+
   private static final boolean DEBUG_SEARCH = false;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_ID_LOOKUP = false;
@@ -1387,8 +1389,11 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   }
 
   /**
-   * TODO : update exercise inside the dialog...
+   * update exercise inside the dialog...
    *
+   * Don't do OOV here, since we don't have kaldi, etc. here!
+   *
+   * @param projid
    * @param dialogID
    * @param exid
    * @param audioID
@@ -1399,8 +1404,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see EditorTurn#gotBlur()
    */
   @Override
-  public OOVWordsAndUpdate updateText(int dialogID, int exid, int audioID, String content) throws DominoSessionException {
-    Project project = getProject(getProjectIDFromUser());
+  public OOVWordsAndUpdate updateText(int projid, int dialogID, int exid, int audioID, String content) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    Project project = getProject(projid);
     CommonExercise exerciseByID = project.getExerciseByID(exid);
     if (exerciseByID == null) {
       logger.warn("updateText " + "can't find " + exid);
@@ -1413,7 +1419,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
       //OOVInfo oovInfo = project.getAudioFileHelper().checkOOV(Collections.singleton(exerciseByID), true, new HashSet<String>());
 
-      Set<String> oov = project.getAudioFileHelper().isValid(exerciseByID);
+     // Set<String> oov = project.getAudioFileHelper().isValid(exerciseByID);
 
       boolean update = project.getExerciseDAO().update(exerciseByID);
 
@@ -1443,7 +1449,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
         }
       }
 
-      return new OOVWordsAndUpdate(update, oov, project.getModelType() == ModelType.HYDRA);
+      return new OOVWordsAndUpdate(update, new HashSet<>(), project.getModelType() == ModelType.HYDRA);
     }
   }
 

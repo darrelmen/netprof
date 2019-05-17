@@ -79,6 +79,8 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     int projectID = controller.getProjectID();
     if (projectID != -1) {
       int dialogID = getDialogID();
+
+      logger.info("onUnload - reload the dialog on hydra/score1");
       controller.getAudioService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {

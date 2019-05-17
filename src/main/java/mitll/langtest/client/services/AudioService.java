@@ -42,10 +42,7 @@ import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.image.ImageResponse;
-import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.project.OOVInfo;
-import mitll.langtest.shared.project.ProjectInfo;
-import mitll.langtest.shared.project.StartupInfo;
+import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -128,6 +125,8 @@ public interface AudioService extends RemoteService {
   void checkOOVForDialog(int projID, int dialogID) throws DominoSessionException;
 
   void updateOOV(int projectID, List<OOV> updates) throws DominoSessionException;
+
+  OOVWordsAndUpdate isValid(int projid, int exid, String text) throws DominoSessionException;
 
   /**
    * @see DialogEditorView.MyShownCloseListener#gotHidden()

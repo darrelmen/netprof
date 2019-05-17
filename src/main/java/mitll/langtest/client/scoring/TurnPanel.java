@@ -169,7 +169,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
   }
 
   public boolean hasCurrentMark() {
-    return turnPanelDelegate.hasCurrentMark();// bubble.getElement().getStyle().getBorderColor().equalsIgnoreCase(HIGHLIGHT_COLOR);
+    return turnPanelDelegate.hasCurrentMark();
   }
 
   @Override

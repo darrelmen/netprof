@@ -577,23 +577,15 @@ public class ListenViewHelper<T extends ITurnPanel>
       protected void onUnload() {
         super.onUnload();
 
-        logger.info("getTurns : on unload");
+       // logger.info("getTurns : on unload");
 
         outer.onUnload();
-
-      }
-
-      @Override
-      protected void onDetach() {
-        super.onDetach();
-        logger.info("getTurns : onDetach");
-
       }
     };
 
     this.turnContainer = rowOne;
 
-    if (DEBUG || true) logger.info("getTurns : dialog    " + dialog);
+    if (DEBUG) logger.info("getTurns : dialog    " + dialog);
 
     if (DEBUG) logger.info("getTurns : exercises " + dialog.getExercises().size());
 

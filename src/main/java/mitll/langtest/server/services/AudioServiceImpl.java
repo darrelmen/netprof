@@ -61,9 +61,7 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
-import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.project.OOVInfo;
-import mitll.langtest.shared.project.StartupInfo;
+import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
@@ -125,6 +123,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   private PathWriter pathWriter;
   private IEnsureAudioHelper ensureAudioHelper;
   private AudioCheck audioCheck;
+
+  private static final String REGEX = " ";  // no break space!
+  private static final String TIC_REGEX = "&#39;";
+
   private final static boolean DEBUG_REF_TRIM = false;
   private final static boolean DEBUG_DETAIL = false;
 
@@ -586,13 +588,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           projid);
 
       if (audioAnswer.getAudioAttribute() == null) {
-        logger.warn("no audio attribute?");
-      }
-      else if (audioAnswer.getAudioAttribute().getUniqueID() == 0) {
-        logger.warn("no audio attribute id " + audioAnswer.getAudioAttribute());
+        logger.warn("getJsonObject no audio attribute?");
+      } else if (audioAnswer.getAudioAttribute().getUniqueID() == 0) {
+        logger.warn("getJsonObject no audio attribute id " + audioAnswer.getAudioAttribute());
 
       }
-      if (DEBUG_DETAIL) logger.info("path is " + audioAnswer.getPath());
+      if (DEBUG_DETAIL) logger.info("getJsonObject path is " + audioAnswer.getPath());
 
       if (audioAnswer.getValidity() != OK) {
         logger.info("getJsonObject not valid " + audioAnswer);
@@ -1156,7 +1157,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
 
 
-
     if (commonExercise == null && isExistingExercise) {
       logger.warn("getAudioAnswer for " + project.getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");
     }
@@ -1262,7 +1262,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   public void checkOOVForDialog(int projID, int dialogID) throws DominoSessionException {
-    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    getUserIDFromSessionOrDB();
     db.getProjectManagement().checkOOVForDialog(projID, dialogID);
   }
 
@@ -1276,6 +1276,26 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
+  @Override
+  public OOVWordsAndUpdate isValid(int projid, int exid, String text) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+
+    Project project = getProject(projid);
+    CommonExercise exerciseByID = project.getExerciseByID(exid);
+
+    if (exerciseByID == null) {
+      logger.warn("updateText " + "can't find " + exid);
+      return new OOVWordsAndUpdate(false);
+    } else {
+      Exercise exercise = new Exercise(exerciseByID);
+      exercise.getMutable().setForeignLanguage(getTrim(text));
+      return new OOVWordsAndUpdate(false, project.getAudioFileHelper().isValid(exercise), project.getModelType() == ModelType.HYDRA);
+    }
+  }
+
+  private String getTrim(String part) {
+    return part.replaceAll(REGEX, " ").replaceAll(TIC_REGEX, "'").trim();
+  }
 
   /**
    * @param projectid
@@ -1296,7 +1316,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     new Thread(() -> ensureAudioHelper.ensureAudio(projectid), "checkAudio_" + projectid).start();
   }
 
-  private void logEvent(String id, String widgetType, String exid, String context, int userid, String device, int projID) {
+  private void logEvent(String id, String widgetType, String exid, String context, int userid, String device,
+                        int projID) {
     try {
       db.logEvent(id, widgetType, exid, context, userid, device, projID);
     } catch (Exception e) {
@@ -1390,7 +1411,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.error("got " + e, e);
     }
 
-    logger.info("addToAudioTable : return " +audioAttribute.getUniqueID() + " : " +audioAttribute.getAudioRef() + " : " + audioAttribute.getTranscript());
+    logger.info("addToAudioTable : return " + audioAttribute.getUniqueID() + " : " + audioAttribute.getAudioRef() + " : " + audioAttribute.getTranscript());
 
     return audioAttribute;
   }
@@ -1617,7 +1638,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @see mitll.langtest.client.custom.dialog.NewUserExercise#gotContextBlur
    */
   @Override
-  public AudioAttribute getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript) throws DominoSessionException {
+  public AudioAttribute getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript) throws
+      DominoSessionException {
     getUserIDFromSessionOrDB();
 
     AudioCopy audioCopy = new AudioCopy(db, db.getProjectManagement(), db);

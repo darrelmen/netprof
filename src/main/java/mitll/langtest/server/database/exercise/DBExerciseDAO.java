@@ -674,7 +674,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 //      logger.info("refresh attributes for " + exid);
 //      logger.info("refresh attributes got " + attributesFor);
       byExID.setAttributes(attributesFor);
-      logger.info("refresh attributes after " + byExID.getAttributes());
+
+      if (DEBUG) logger.info("refresh attributes after " + byExID.getAttributes());
 
       CommonExercise exercise = getExercise(exid);
       if (exercise.getAttributes().size() != attributesFor.size()) {

@@ -78,10 +78,10 @@ public interface INavigation extends IViewContaner {
      *
      */
     REHEARSE("Rehearse", ProjectMode.DIALOG, true),
-    CORE_REHEARSE("Rehearse (auto play)", ProjectMode.DIALOG, false),
+    CORE_REHEARSE("Rehearse (auto)", ProjectMode.DIALOG, false),
 
     PERFORM_PRESS_AND_HOLD("Perform", ProjectMode.DIALOG, true),
-    PERFORM("Perform (auto play)", ProjectMode.DIALOG, false),
+    PERFORM("Perform (auto)", ProjectMode.DIALOG, false),
 
     /**
      * @see mitll.langtest.client.banner.NewContentChooser#showScores

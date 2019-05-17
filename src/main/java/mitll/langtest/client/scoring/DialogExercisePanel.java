@@ -70,6 +70,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
 
   final T exercise;
   final ExerciseController<T> controller;
+  /**
+   *
+   */
   DivWidget flClickableRow;
   ClickableWords clickableWords;
   /**
@@ -154,7 +157,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
       makeClickableWords(projectStartupInfo, null);
 
       {
-        DivWidget wrapper = new DivWidget();
+        DivWidget wrapper = getBubble();
         wrapper.add(getFLEntry(exercise));
         wrapper.add(flClickableRowPhones = clickableWords.getClickableDiv(isRTL));
         stylePhoneRow(flClickableRowPhones);
@@ -166,6 +169,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
 
       makePlayAudio(exercise, null);
     }
+  }
+
+  @NotNull
+  protected DivWidget getBubble() {
+    return new DivWidget();
   }
 
   ProjectStartupInfo getProjectStartupInfo() {

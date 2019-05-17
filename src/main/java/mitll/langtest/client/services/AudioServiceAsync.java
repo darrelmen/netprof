@@ -37,6 +37,7 @@ import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVInfo;
+import mitll.langtest.shared.project.OOVWordsAndUpdate;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
@@ -117,4 +118,6 @@ public interface AudioServiceAsync {
   void reloadDialog(int projectID, int dialogID, AsyncCallback<Void> async);
 
   void checkOOVForDialog(int projID, int dialogID, AsyncCallback<Void> async);
+
+  void isValid(int projid, int exid, String text, AsyncCallback<OOVWordsAndUpdate> async);
 }

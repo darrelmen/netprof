@@ -30,6 +30,7 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.shared.exercise.OOV;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -41,8 +42,13 @@ public class OOVWordsAndUpdate implements IsSerializable {
   private Set<String> oov = new HashSet<>();
   private boolean didUpdate;
   private boolean isPossible = true;
+  private boolean foundExercise = true;
 
   public OOVWordsAndUpdate() {
+  }
+
+  public OOVWordsAndUpdate(boolean foundExercise) {
+    this.foundExercise = foundExercise;
   }
 
   /**
@@ -66,10 +72,6 @@ public class OOVWordsAndUpdate implements IsSerializable {
     return didUpdate;
   }
 
-  public String toString() {
-    return "OOVWordsAndUpdate : " + getOov();
-  }
-
   public boolean isPossible() {
     return isPossible;
   }
@@ -77,5 +79,13 @@ public class OOVWordsAndUpdate implements IsSerializable {
   public OOVWordsAndUpdate setPossible(boolean possible) {
     isPossible = possible;
     return this;
+  }
+
+  public boolean isFoundExercise() {
+    return foundExercise;
+  }
+
+  public String toString() {
+    return "OOVWordsAndUpdate : " + getOov();
   }
 }

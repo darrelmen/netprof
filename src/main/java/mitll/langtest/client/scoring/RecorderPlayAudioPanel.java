@@ -240,7 +240,9 @@ public class RecorderPlayAudioPanel extends PlayAudioPanel {
   private Widget getRecordImage() {
     Icon icon = new Icon(IconType.MICROPHONE);
     Style style = icon.getElement().getStyle();
-    style.setMarginLeft(1, Style.Unit.PX);
+
+    style.setMarginLeft(4, Style.Unit.PX);
+
     style.setColor("white");
     icon.setSize(IconSize.LARGE);
 

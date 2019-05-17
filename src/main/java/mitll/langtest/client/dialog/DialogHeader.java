@@ -66,7 +66,7 @@ public class DialogHeader {
   private static final int ROW_WIDTH = 98;
   private static final String SPEAK_HINT = "<b>Speak</b> when you see the record icon.";
   private static final String PRESS_AND_HOLD_HINT = "<b>Press and hold</b> when recording.";
-  public static final int ARROW_WIDTH = 190;
+  private static final int ARROW_WIDTH = 190;
 
   private final INavigation.VIEWS thisView;
   private final INavigation.VIEWS prev;
@@ -86,7 +86,7 @@ public class DialogHeader {
    * @param next
    * @see mitll.langtest.client.banner.NewContentChooser#showScores(DivWidget, IDialog)
    */
-  public DialogHeader(ExerciseController controller, INavigation.VIEWS thisView, INavigation.VIEWS prev, INavigation.VIEWS next) {
+  protected DialogHeader(ExerciseController controller, INavigation.VIEWS thisView, INavigation.VIEWS prev, INavigation.VIEWS next) {
     this.controller = controller;
     this.thisView = thisView;
     this.prev = prev;
@@ -132,6 +132,8 @@ public class DialogHeader {
       row.add(middle);
       middle.setWidth(75 + "%");
 
+//      DivWidget headingContainer = getTitleBlurb();
+      middle.add(getTitleBlurb());
       // add image
       {
         com.google.gwt.user.client.ui.Image image = getImage(dialog.getImageRef());
@@ -154,16 +156,15 @@ public class DialogHeader {
     return outer;
   }
 
-//  private void alignCenter(DivWidget rowOne) {
-//    rowOne.getElement().getStyle().setTextAlign(Style.TextAlign.CENTER);
-//  }
-
   @NotNull
   private DivWidget getDialogLabels(IDialog dialog) {
     DivWidget vert = new DivWidget();
     vert.getElement().setId("vert");
     vert.addStyleName("leftTenMargin");
     vert.addStyleName("rightTenMargin");
+
+    DivWidget headingContainer = getTitleBlurb();
+//    vert.add(headingContainer);
 
     {
       DivWidget titleDiv = new DivWidget();
@@ -196,6 +197,36 @@ public class DialogHeader {
     addViewHint(vert);
 
     return vert;
+  }
+
+  @NotNull
+  private DivWidget getTitleBlurb() {
+    String toUse = "";
+    String sub = "";
+    if (thisView == LISTEN) {
+      toUse = "Listen";
+      sub = "to prepare to speak your part";
+    } else if (thisView == REHEARSE) {
+      toUse = "Rehearse";
+      sub = "at your own speed";
+    } else if (thisView == CORE_REHEARSE) {
+      toUse = "Rehearse";
+      sub = "at conversational speed";
+    } else if (thisView == PERFORM_PRESS_AND_HOLD) {
+      toUse = "Perform from memory";
+      sub = "at your own speed";
+    } else if (thisView == PERFORM) {
+      toUse = "Perform from memory";
+      sub = "at conversational speed";
+    }
+
+    DivWidget headingContainer = new DivWidget();
+
+    headingContainer.getElement().getStyle().setColor("#52a452");
+    Heading w = new Heading(3, toUse, sub);
+    w.getElement().getStyle().setMarginTop(-4, PX);
+    headingContainer.add(w);
+    return headingContainer;
   }
 
   @NotNull
@@ -275,7 +306,11 @@ public class DialogHeader {
     style.setPaddingLeft(5, PX);
     style.setBackgroundColor("aliceblue");
     //child.setWidth(HINT_WIDTH + "px");
-    child.setWidth(79 + "%");
+    //child.setWidth(79 + "%");
+    style.setMarginTop(-15, PX);
+    style.setMarginRight(50, PX);
+    style.setPaddingRight(27, PX);
+    style.setClear(Style.Clear.BOTH);
     return child;
   }
 
@@ -322,6 +357,7 @@ public class DialogHeader {
 
   /**
    * Show turn editor option if you have the permissions and if we're on LISTEN.
+   *
    * @return
    */
   @NotNull

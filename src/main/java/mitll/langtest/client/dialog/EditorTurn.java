@@ -421,9 +421,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
   private void tripleButtonStyle(Button w) {
     tripleFirstStyle(w);
-
     //   w.addFocusHandler(event -> turnContainer.moveFocusToNext());
-
     w.setTabIndex(-1);
 //    logger.info("aftr " + getExID() + " " + w.getTabIndex());
   }
@@ -461,8 +459,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     Style style = postAudioRecordButton.getElement().getStyle();
     style.setProperty("borderRadius", "18px");
     style.setPadding(8, Style.Unit.PX);
-    style.setWidth(19, Style.Unit.PX);
     style.setMarginRight(5, Style.Unit.PX);
+
+    style.setWidth(19, Style.Unit.PX);
     style.setHeight(19, Style.Unit.PX);
   }
 
@@ -531,28 +530,10 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
         turnContainer.gotForward(this);
       } else {
         prev = s;
-
-        EditorTurn outer = this;
         int audioID = getAudioID();
         logger.info("gotBlur " + getExID() + " = " + prev + " audio id " + audioID);
-
-        controller.getExerciseService().updateText(dialogID, getExID(), audioID, s, new AsyncCallback<OOVWordsAndUpdate>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            controller.handleNonFatalError("updating text...", caught);
-          }
-
-          @Override
-          public void onSuccess(OOVWordsAndUpdate result) {
-            showOOVResult(result);
-            //logger.info("OK, update was " + result);
-            turnContainer.gotForward(outer);
-          }
-        });
+        updateText(s, this, audioID, true);
       }
-    } else if (keyCode == KEY_TAB) {
-
-      logger.info("Got tab for " + getText());
     } else {
       int length = s.split(" ").length;
       //  logger.info("num tokens " + length);
@@ -560,7 +541,6 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       if (length > 10) {
         contentTextBox.getElement().getStyle().setBackgroundColor("red");
         turnFeedback.setText("Really avoid long phrases.");
-
       } else if (length > 7) {
         contentTextBox.getElement().getStyle().setBackgroundColor("yellow");
         turnFeedback.setText("Avoid long phrases.");
@@ -586,16 +566,54 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       int audioID = getAudioID();
       if (DEBUG || true) logger.info("gotBlur " + getExID() + " = " + prev + " audio " + audioID);
 
-      controller.getExerciseService().updateText(dialogID, getExID(), audioID, s, new AsyncCallback<OOVWordsAndUpdate>() {
+//      controller.getExerciseService().updateText(projid, dialogID, getExID(), audioID, s, new AsyncCallback<OOVWordsAndUpdate>() {
+//        @Override
+//        public void onFailure(Throwable caught) {
+//          controller.handleNonFatalError("updating text...", caught);
+//        }
+//
+//        @Override
+//        public void onSuccess(OOVWordsAndUpdate result) {
+//          showOOVResult(result);
+//          //logger.info("OK, update was " + result);
+//        }
+//      });
+
+
+      updateText(s, this, audioID, false);
+    }
+  }
+
+  private void updateText(String s, EditorTurn outer, int audioID, boolean moveToNextTurn) {
+    int projectID = controller.getProjectID();
+    if (projectID != -1) {
+
+      // talk to the audio service first to determine the oov
+      controller.getAudioService().isValid(projectID, getExID(), s, new AsyncCallback<OOVWordsAndUpdate>() {
         @Override
         public void onFailure(Throwable caught) {
-          controller.handleNonFatalError("updating text...", caught);
+          controller.handleNonFatalError("isValid on text...", caught);
         }
 
         @Override
         public void onSuccess(OOVWordsAndUpdate result) {
           showOOVResult(result);
-          //logger.info("OK, update was " + result);
+
+          controller.getExerciseService().updateText(projectID, dialogID, getExID(), audioID, s, new AsyncCallback<OOVWordsAndUpdate>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              controller.handleNonFatalError("updating text...", caught);
+            }
+
+            @Override
+            public void onSuccess(OOVWordsAndUpdate result) {
+              // showOOVResult(result);
+              //logger.info("OK, update was " + result);
+              if (moveToNextTurn) {
+                turnContainer.gotForward(outer);
+              }
+            }
+          });
         }
       });
     }
