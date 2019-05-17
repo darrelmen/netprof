@@ -61,7 +61,7 @@ import static mitll.langtest.client.scoring.RecorderPlayAudioPanel.BLUE_INACTIVE
 public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialogTurn {
   private final Logger logger = Logger.getLogger("RecordDialogExercisePanel");
 
-  private static final boolean DEBUG_PARTIAL = true;
+  private static final boolean DEBUG_PARTIAL = false;
   private static final boolean DEBUG = false;
 
   private static final long MOVE_ON_DUR = 3000L;

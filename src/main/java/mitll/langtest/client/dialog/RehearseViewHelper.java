@@ -1225,10 +1225,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     if (getCurrentTurn() == allTurns.get(allTurns.size() - 1) && !exToScore.isEmpty()) {
       waitCursor.setVisible(true);
     }
-    logger.info("stopRecording received!");
+//    logger.info("stopRecording received!");
 
-    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("stopRecording"));
-    logger.info("logException stack " + exceptionAsString);
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("stopRecording"));
+//    logger.info("logException stack " + exceptionAsString);
 
     recordingHasStopped();
   }
