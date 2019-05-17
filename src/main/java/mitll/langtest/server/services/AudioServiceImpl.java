@@ -185,15 +185,15 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * <p>
    * This might be helpful if we want to stream audio in a simple way outside a GWT RPC call.
    *
-   * @throws ServletException
-   * @throws IOException
    * @param request
    * @param response
+   * @throws ServletException
+   * @throws IOException
    */
   @Override
   protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     ServletRequestContext ctx = new ServletRequestContext(request);
-  //  String contentType = ctx.getContentType();
+    //  String contentType = ctx.getContentType();
     //  String requestType = getRequestType(request);
 //    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
     if (ctx.getContentType() != null && ctx.getContentType().equalsIgnoreCase(APPLICATION_WAV)) {
@@ -1112,7 +1112,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                      File fileInstead,
                                      int projectID) {
     Project project = db.getProject(projectID);
-   // logger.info("getAudioAnswer : project " +project);
+    // logger.info("getAudioAnswer : project " +project);
     boolean hasProjectSpecificAudio = project.hasProjectSpecificAudio();
     AudioFileHelper audioFileHelper = getAudioFileHelper(project);
 
@@ -1224,7 +1224,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
-   *
    * @param id
    * @param num
    * @param offset
@@ -1245,11 +1244,16 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
+  public void checkOOVForDialog(int projID, int dialogID) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    db.getProjectManagement().checkOOVForDialog(projID, dialogID);
+  }
+
   @Override
   public void updateOOV(int projectID, List<OOV> updates) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasAdminOrCDPerm(userIDFromSessionOrDB)) {
-       db.getProjectManagement().updateOOV(updates, userIDFromSessionOrDB);
+      db.getProjectManagement().updateOOV(updates, userIDFromSessionOrDB);
     } else {
       throw getRestricted("Check OOV on a project.");
     }
@@ -1623,8 +1627,17 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     exids.forEach(exerciseDAO::refresh);
   }
 
+  /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#checkOOVForDialog(int, int)
+   * @param projectID
+   * @param dialogID
+   * @throws DominoSessionException
+   */
   @Override
   public void reloadDialog(int projectID, int dialogID) throws DominoSessionException {
-    db.getProjectManagement().addDialogInfo(projectID, dialogID);
+    getUserIDFromSessionOrDB();
+    db.getProjectManagement().checkOOVForDialog(projectID, dialogID);
+
+  //  db.getProjectManagement().addDialogInfo(projectID, dialogID);
   }
 }

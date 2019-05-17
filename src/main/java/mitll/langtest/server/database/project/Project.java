@@ -546,6 +546,11 @@ public class Project implements IPronunciationLookup, IProject {
     }
   }
 
+  /**
+   * @see mitll.langtest.server.database.dialog.DialogDAO#deleteExercise(int, int, int)
+   * @param prev
+   * @return
+   */
   @Override
   public CommonExercise forgetExercise(int prev) {
     return exerciseDAO.forget(prev);

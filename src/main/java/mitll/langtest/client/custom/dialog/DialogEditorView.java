@@ -220,15 +220,29 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
       // editItem.removeHistoryListener();
       // History.newItem("");
 
-      controller.getAudioService().reloadDialog(controller.getProjectID(), dialogID, new AsyncCallback<Void>() {
+      int projectID = controller.getProjectID();
+      controller.getAudioService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("reloading dialog on hydra/score1", caught);
 
         }
 
         @Override
         public void onSuccess(Void result) {
           logger.info("did reload on other server.");
+          controller.getExerciseService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              controller.handleNonFatalError("reloading dialog on netprof.", caught);
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+              logger.info("did reload on netprof.");
+
+            }
+          });
         }
       });
     }

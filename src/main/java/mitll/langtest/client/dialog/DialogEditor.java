@@ -77,15 +77,29 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
   @Override
   void onUnload() {
-    controller.getAudioService().reloadDialog(controller.getProjectID(), getDialogID(), new AsyncCallback<Void>() {
+    int projectID = controller.getProjectID();
+    int dialogID = getDialogID();
+    controller.getAudioService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
-
+        controller.handleNonFatalError("reloading dialog.", caught);
       }
 
       @Override
       public void onSuccess(Void result) {
         logger.info("did reload on other server!");
+        controller.getExerciseService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("reloading dialog on netprof", caught);
+          }
+
+          @Override
+          public void onSuccess(Void result) {
+            logger.info("did reload on netprof.");
+
+          }
+        });
       }
     });
   }
@@ -166,34 +180,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   protected void gotTurnClick(EditorTurn turn) {
     EditorTurn currentTurn = getCurrentTurn();
     if (DEBUG) logger.info("gotTurnClick currentTurn  " + blurb(currentTurn));
-
-/*
-    boolean different = currentTurn != turn;
-
-    if (DEBUG) {
-//      logger.info("gotTurnClick currentTurn  " + blurb(currentTurn));
-      logger.info("gotTurnClick clicked turn " + blurb(turn));
-      logger.info("gotTurnClick different    " + different);
-    }
-*/
-
-    //  setGotTurnClick(true);
-
-/*    if (different) {
-      if (currentTurn.isPlaying()) {
-        logger.info("gotTurnClick ok pause audio ");
-        playCurrentTurn(); // toggle to pause.
-      } else {
-        logger.info("gotTurnClick : The turn is not playing...?");
-      }
-
-      removeMarkCurrent();
-      setCurrentTurn(turn);
-      markCurrent();
-    }*/
-//    playCurrentTurn();
-
-    //  logger.info("gotClickOnTurn " + turn);
   }
 
   @NotNull
@@ -295,17 +281,15 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
   @Override
   public void deleteCurrentTurnOrPair(EditorTurn currentTurn) {
-    logger.info("deleteCurrentTurnOrPair : " +
-        "\n\tcurrent turn " + currentTurn.getExID()
-    );
+    logger.info("deleteCurrentTurnOrPair : " + "\n\tcurrent turn " + currentTurn.getExID());
     currentTurn.setDeleting(true);
     currentTurn.getElement().getStyle().setOpacity(0.5);
 
     if (isInterpreter) {
       EditorTurn prev = getPrev(currentTurn);
-      if (prev == null) logger.warning("no prev????");
-      else {
-        //  prev.addStyleName("opacity-target");
+      if (prev == null) {
+        logger.warning("no prev????");
+      } else {
         prev.setDeleting(true);
         prev.getElement().getStyle().setOpacity(0.5);
       }
@@ -359,7 +343,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
                 }
               }
             };
-            currentTimer.schedule(1000);
+            currentTimer.schedule(500);
           }
         });
   }

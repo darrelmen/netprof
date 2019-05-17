@@ -34,6 +34,7 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.OOVInfo;
+import mitll.langtest.shared.project.OOVWordsAndUpdate;
 
 import java.util.Collection;
 
@@ -79,9 +80,12 @@ public interface ExerciseService<T extends CommonShell & ScoredExercise> extends
    */
   void reload(int projid) throws DominoSessionException;
 
-  boolean updateText(int dialogID, int exid, int audioID, String content) throws DominoSessionException;
+  OOVWordsAndUpdate updateText(int dialogID, int exid, int audioID, String content) throws DominoSessionException;
 
   void refreshAudio(int exid) throws DominoSessionException;
 
   void refreshAllAudio(int projid) throws DominoSessionException;
+
+  void reloadDialog(int projectID, int dialogID) throws DominoSessionException;
+
 }

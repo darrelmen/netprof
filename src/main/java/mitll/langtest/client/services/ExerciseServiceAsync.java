@@ -32,6 +32,7 @@ package mitll.langtest.client.services;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.list.ExerciseList;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.OOVWordsAndUpdate;
 
 import java.util.Collection;
 
@@ -70,9 +71,11 @@ public interface ExerciseServiceAsync<T extends CommonShell & HasUnitChapter> {
 
   void reload(int projid, AsyncCallback<Void> async);
 
-  void updateText(int dialogID, int exid, int audioID, String content, AsyncCallback<Boolean> async);
+  void updateText(int dialogID, int exid, int audioID, String content, AsyncCallback<OOVWordsAndUpdate> async);
 
   void refreshAudio(int exid, AsyncCallback<Void> async);
 
   void refreshAllAudio(int projid, AsyncCallback<Void> async);
+
+ void reloadDialog(int projectID, int dialogID, AsyncCallback<Void> async);
 }

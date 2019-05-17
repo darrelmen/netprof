@@ -2350,6 +2350,26 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
     zoom: 101%;
 }*/
 
+.opacity-target {
+    animation-name: opacity;
+    animation-duration: 1s;
+}
+
+@keyframes opacity {
+    0%   {opacity: 0;}
+    100% {opacity: 1;}
+}
+
+.opacity-out-target {
+     animation-name: opacity-out;
+     animation-duration: 1s;
+ }
+
+@keyframes opacity-out {
+    0%   {opacity: 0.5;}
+    100% {opacity: 0;}
+}
+
 .good-blink-target {
     animation-name: goodblink;
     animation-duration: 1s;

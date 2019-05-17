@@ -33,6 +33,8 @@ import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.custom.dialog.DialogEditorView;
+import mitll.langtest.client.dialog.DialogEditor;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
@@ -123,7 +125,16 @@ public interface AudioService extends RemoteService {
 
   OOVInfo checkOOV(int id, int num, int offset) throws DominoSessionException;
 
+  void checkOOVForDialog(int projID, int dialogID) throws DominoSessionException;
+
   void updateOOV(int projectID, List<OOV> updates) throws DominoSessionException;
 
+  /**
+   * @see DialogEditorView.MyShownCloseListener#gotHidden()
+   * @see DialogEditor#onUnload()
+   * @param projectID
+   * @param dialogID
+   * @throws DominoSessionException
+   */
   void reloadDialog(int projectID, int dialogID) throws DominoSessionException;
 }
