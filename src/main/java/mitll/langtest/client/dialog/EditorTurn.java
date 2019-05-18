@@ -588,27 +588,36 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     int projectID = controller.getProjectID();
     if (projectID != -1) {
 
+      logger.info("updateText : Checking " + s);
       // talk to the audio service first to determine the oov
       controller.getAudioService().isValid(projectID, getExID(), s, new AsyncCallback<OOVWordsAndUpdate>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("isValid on text...", caught);
+
+          String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(caught);
+          logger.info("logException stack " + exceptionAsString);
         }
 
         @Override
         public void onSuccess(OOVWordsAndUpdate result) {
+          logger.info("updateText : onSuccess " + result);
+
           showOOVResult(result);
 
           controller.getExerciseService().updateText(projectID, dialogID, getExID(), audioID, s, new AsyncCallback<OOVWordsAndUpdate>() {
             @Override
             public void onFailure(Throwable caught) {
               controller.handleNonFatalError("updating text...", caught);
+
+              String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(caught);
+              logger.info("logException stack " + exceptionAsString);
             }
 
             @Override
             public void onSuccess(OOVWordsAndUpdate result) {
               // showOOVResult(result);
-              //logger.info("OK, update was " + result);
+              logger.info("OK, update was " + result);
               if (moveToNextTurn) {
                 turnContainer.gotForward(outer);
               }

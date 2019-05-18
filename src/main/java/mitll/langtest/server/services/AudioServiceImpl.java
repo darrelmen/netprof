@@ -34,6 +34,7 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.gson.JsonObject;
+import mitll.langtest.client.dialog.EditorTurn;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.services.AudioService;
 import mitll.langtest.server.FileSaver;
@@ -1276,6 +1277,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
+  /**
+   * @see mitll.langtest.client.dialog.EditorTurn#updateText(String, EditorTurn, int, boolean)
+   * @param projid
+   * @param exid
+   * @param text
+   * @return
+   * @throws DominoSessionException
+   */
   @Override
   public OOVWordsAndUpdate isValid(int projid, int exid, String text) throws DominoSessionException {
     getUserIDFromSessionOrDB();
@@ -1289,7 +1298,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     } else {
       Exercise exercise = new Exercise(exerciseByID);
       exercise.getMutable().setForeignLanguage(getTrim(text));
-      return new OOVWordsAndUpdate(false, project.getAudioFileHelper().isValid(exercise), project.getModelType() == ModelType.HYDRA);
+      Set<String> valid = project.getAudioFileHelper().isValid(exercise);
+
+      OOVWordsAndUpdate oovWordsAndUpdate = new OOVWordsAndUpdate(false, valid, project.getModelType() == ModelType.HYDRA);
+
+      logger.info("isValid : Sending " +oovWordsAndUpdate);
+      return oovWordsAndUpdate;
     }
   }
 
