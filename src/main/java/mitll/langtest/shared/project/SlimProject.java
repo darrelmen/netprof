@@ -156,6 +156,9 @@ public class SlimProject extends ProjectInfo {
   }
 
   public String toString() {
-    return "SlimProject " + super.toString() + "\n\tnum children " + children.size();
+    return "SlimProject " + super.toString() +
+        "\n\tmode         " + mode +
+        "\n\tnum children " + children.size()
+        ;
   }
 }

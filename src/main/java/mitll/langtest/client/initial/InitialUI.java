@@ -386,7 +386,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       String implementationVersion = lifecycleSupport.getStartupInfo().getImplementationVersion();
       boolean teacher = isTeacher(userManager.getCurrent());
       if (projectStartupInfo == null) {
-        checkHearbeat(implementationVersion, teacher);
+        checkHeartbeat(implementationVersion, teacher);
       } else {
         if (DO_HEARTBEAT) {
           long then = System.currentTimeMillis();
@@ -442,7 +442,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     });
   }
 
-  private void checkHearbeat(String implementationVersion, boolean teacher) {
+  private void checkHeartbeat(String implementationVersion, boolean teacher) {
     long then = System.currentTimeMillis();
     Timer timer = getWifiTimer();
     checkHeartbeat(implementationVersion, teacher, then, timer);

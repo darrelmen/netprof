@@ -163,7 +163,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     Map<Integer, ExerciseAttribute> idToPair = userExerciseDAO.getExerciseAttributeDAO().getIDToPair(projid);
 
-    logger.info("getDialogs got " + idToPair.size() + " attributes for project #" + projid);
+    if (DEBUG) logger.info("getDialogs got " + idToPair.size() + " attributes for project #" + projid);
 
     Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated =
         userExerciseDAO.getRelatedExercise().getDialogIDToRelated(projid);
@@ -192,7 +192,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     Map<Integer, ExerciseAttribute> idToPair = userExerciseDAO.getExerciseAttributeDAO().getIDToPair(projid);
 
-    logger.info("getDialogs got " + idToPair.size() + " attributes for project #" + projid);
+    if (DEBUG) logger.info("getDialogs got " + idToPair.size() + " attributes for project #" + projid);
 
     Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated =
         userExerciseDAO.getRelatedExercise().getDialogIDToRelatedForDialog(id);

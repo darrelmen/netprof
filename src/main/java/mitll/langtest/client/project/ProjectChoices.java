@@ -272,16 +272,6 @@ public class ProjectChoices extends ThumbnailChoices {
       }
     }
 
-//    List<SlimProject> filtered2 = new ArrayList<>();
-//    if (isPoly) {
-//      for (SlimProject project : filtered) {
-//        if (isPolyglot(project) || project.hasChildren()) {
-//          filtered2.add(project);
-//        }
-//      }
-//    } else {
-//      filtered2 = filtered;
-//    }
     return filtered;
   }
 
@@ -333,7 +323,7 @@ public class ProjectChoices extends ThumbnailChoices {
    *
    * @param result
    * @param nest
-   * @see #showProjectChoices
+   * @see #showProjectChoices(List, int)
    */
   private Thumbnails addFlags(List<SlimProject> result, int nest) {
     Thumbnails current = new Thumbnails();
@@ -644,6 +634,9 @@ public class ProjectChoices extends ThumbnailChoices {
     String lang1 =
         nest == 0 &&
             projectForLang.hasChildren() ? lang : projectForLang.getName();
+    if (DEBUG) {
+      logger.info("getLangIcon " + lang + " " + projectForLang.getName() + " nest " + nest + " '" + lang1 + "'");
+    }
     return getImageAnchor(capitalize(lang1), projectForLang);
   }
 
@@ -866,9 +859,9 @@ public class ProjectChoices extends ThumbnailChoices {
     boolean b = mine || admin;
 
     if (b) {
-      if (mine) {
-        logger.info("isOwnerOrAdmin : project is mine (" + sessionUser + ")");
-      }
+//      if (mine) {
+//        logger.info("isOwnerOrAdmin : project is mine (" + sessionUser + ")");
+//      }
 
       if (admin && !didSpew) {
         logger.info("isOwnerOrAdmin : " + controller.getUserManager().getUserID() + " is an admin");
@@ -1158,8 +1151,17 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {
     List<SlimProject> children = projectForLang.getChildren();
-    if (DEBUG_CLICK) logger.info("gotClickOnFlag project " + projid + " has " + children);
-    NavLink breadcrumb = makeBreadcrumb(name);
+    if (DEBUG_CLICK) logger.info("gotClickOnFlag project " + projid + " has " + children + " name " + name);
+
+    if (children.size() == 2) {
+      Set<ProjectMode> names = new HashSet<>();
+      children.forEach(slimProject -> names.add(slimProject.getMode()));
+      if (names.contains(ProjectMode.VOCABULARY) && names.contains(ProjectMode.DIALOG)) {
+        name = "Mode";
+      }
+    }
+
+    NavLink breadcrumb = uiLifecycle.makeBreadcrumb(name);
     if (children.size() < 2) {
       if (DEBUG_CLICK) logger.info("gotClickOnFlag onClick select leaf project " + projid +
           " " + projectForLang.getMode() +
