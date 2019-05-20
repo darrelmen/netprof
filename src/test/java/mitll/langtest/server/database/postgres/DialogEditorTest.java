@@ -61,7 +61,7 @@ public class DialogEditorTest extends BaseTest {
   private static final String UNIT1 = "Unit";
 
   private static final int USERID = 6;
-  private static final int PROJECTID = 5;//21;//5;//21;
+  private static final int PROJECTID = 21;//5;//21;//5;//21;
 
   @Test
   public void testNewDialog() {
@@ -547,6 +547,93 @@ public class DialogEditorTest extends BaseTest {
 
       toAdd.getExercises().forEach(logger::info);
     }
+    logger.warn("testNewIntepreterDialogOps END ==--------- ");
+    andPopulate.close();
+
+  }
+
+
+  /**
+   * TODO : also test left side right side stuff
+   */
+  @Test
+  public void testSimpleDelete() {
+    DatabaseImpl andPopulate = getDatabase();
+    logger.warn("testNewIntepreterDialogOps START ==--------- ");
+
+    Project project = getProject(andPopulate);
+
+    // do create!
+    DialogType interpreter = DialogType.INTERPRETER;
+    IDialog toAdd = addDialog(andPopulate, PROJECTID, interpreter);
+    int id = toAdd.getID();
+    logger.info("new dialog " + toAdd);
+    IDialogDAO dialogDAO = andPopulate.getDialogDAO();
+
+    List<ClientExercise> exercises = toAdd.getExercises();
+
+    // now should have one exercise
+    Assert.assertEquals(exercises.size(), 2);
+
+    boolean prevEnglish = false;
+    boolean isFirst = true;
+    for (ClientExercise exercise : exercises) {
+      logger.info("new    " + exercise);
+      CommonExercise lookup = project.getExerciseByID(exercise.getID());
+      // logger.info("lookup " + lookup);
+      if (!isFirst) {
+        boolean bothEnglish = exercise.hasEnglishAttr() == prevEnglish;
+        Assert.assertFalse(bothEnglish);
+        isFirst = false;
+      }
+      prevEnglish = exercise.hasEnglishAttr();
+    }
+
+    // insert at end
+    {
+      int exid = exercises.get(exercises.size() - 1).getID();
+      List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, exid, true, System.currentTimeMillis());
+      Assert.assertEquals(clientExercises.size(), 2);
+
+      toAdd = getiDialog(andPopulate, PROJECTID, id);
+      exercises = toAdd.getExercises();
+      Assert.assertEquals(4, exercises.size());
+
+      ClientExercise added = clientExercises.get(0);
+
+      // newly added exercise should be after the first one
+      Assert.assertEquals(toAdd.getExercises().indexOf(added), toAdd.getExercises().size() - 2);
+
+      toAdd.getExercises().forEach(logger::info);
+    }
+
+    // do delete!
+    {
+      int exid = exercises.get(exercises.size() - 1).getID();
+      ClientExercise exByID = toAdd.getExByID(exid);
+
+      logger.info("there are " + exercises.size() + " in dialog - last has exid " + exid + " found " + exByID);
+
+      boolean b = dialogDAO.deleteExercise(PROJECTID, id, exid).size() == 2;
+
+      if (!b) {
+        logger.error("didn't delete the exercise " + exid);
+      } else {
+        logger.info("says it did delete " + exid);
+      }
+      Assert.assertTrue("should have deleted " + exid, b);
+
+      toAdd = getiDialog(andPopulate, PROJECTID, id);
+      exercises = toAdd.getExercises();
+    }
+
+    logger.info("\n\n\nafter  has " + exercises.size());
+
+    // after delete should have 0
+    Assert.assertEquals(2, exercises.size());
+
+    exercises.forEach(logger::info);
+
     logger.warn("testNewIntepreterDialogOps END ==--------- ");
     andPopulate.close();
 
