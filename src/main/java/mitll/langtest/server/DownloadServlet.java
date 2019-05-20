@@ -70,10 +70,14 @@ import java.util.stream.Collectors;
 @SuppressWarnings("serial")
 public class DownloadServlet extends DatabaseServlet {
   private static final Logger logger = LogManager.getLogger(DownloadServlet.class);
+
   private static final String AUDIO = "audio";
   private static final String LIST = "list";
+
+  private static final String REGEXAMPERSAND = "&";
+
   private static final String DIALOG = "d";
-  private static final String DIALOG_ARG = DIALOG + "=";
+  private static final String DIALOG_ARG = REGEXAMPERSAND + DIALOG + "=";
   private static final String FILE = "file";
 
   private static final String COMPRESSED_SUFFIX = "mp3";
@@ -91,7 +95,6 @@ public class DownloadServlet extends DatabaseServlet {
    */
   private static final String LISTS = "Lists=[";
 
-  private static final String REGEXAMPERSAND = "&";
 
   private static final String AMPERSAND = DownloadHelper.AMPERSAND;
   private static final String COMMA = DownloadHelper.COMMA;
@@ -102,7 +105,7 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String UNIT = "unit";
   private static final String SEARCH = "search";
   private static final String AUDIO1 = "audio";
-  //private static final int BUFFER_SIZE = 4096;
+
   private static final String STUDENT_AUDIO = "studentAudio";
   private static final String USERID = "userid";
   private static final String CONTENT_DISPOSITION = "Content-Disposition";
@@ -258,7 +261,7 @@ public class DownloadServlet extends DatabaseServlet {
     if (split.length == 2) {
       String[] splitArgs = split[1].split(REGEXAMPERSAND);
       String listid = splitArgs[0];
-      logger.info("dialog id now " + listid);
+      logger.info("downloadDialogContent dialog id now " + listid);
       if (!listid.isEmpty()) {
         writeDialogList(response, db, listid, projid, getAudioExportOptions(splitArgs));
       }

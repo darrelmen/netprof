@@ -138,6 +138,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
       } else if (getCurrent().getKind() == DialogType.INTERPRETER) {
         listBox.setSelectedValue(DialogType.INTERPRETER.toString());
       }
+      listBox.setEnabled(false);
     }
   }
 
@@ -228,7 +229,6 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
         controller.getUser(),
         controller.getProjectID(),
         imageID,
-        -1,
         System.currentTimeMillis(),
 
         unit,

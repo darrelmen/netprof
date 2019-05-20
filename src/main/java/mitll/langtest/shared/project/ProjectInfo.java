@@ -275,7 +275,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
   }
 
   public String toString() {
-    return "#" + getID() + "  " + getName() + " " + getStatus() + " " + getProjectType() +
+    return "#" + getID() + " '" + getName() + "' '" + getStatus() + "' : " + getProjectType() +
         "\nlang      " + language +
         "\nowner     " + userID +
         "\nhost      " + host + ":" + port +

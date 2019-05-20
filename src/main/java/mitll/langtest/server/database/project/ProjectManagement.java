@@ -500,14 +500,16 @@ public class ProjectManagement implements IProjectManagement {
     }
   }
 
+/*
   private void addDialogInfo(int projID) {
     addDialogInfo(getProject(projID, false));
   }
+*/
 
   private void addDialogInfo(Project project) {
     if (new DialogPopulate(db, pathHelper).addDialogInfo(project)) {
       logger.info("addDialogInfo : add dialog info to " + project.getID() + " " + project.getName() + " now " + project.getDialogs().size() + " dialogs...");
-    } else {
+    } else if (project.getKind() == ProjectType.DIALOG) {
       logger.warn("addDialogInfo didn't add dialog info for " + project.getID());
     }
   }
@@ -1212,12 +1214,13 @@ public class ProjectManagement implements IProjectManagement {
     }
 
     List<SlimProject> projectInfos = new ArrayList<>();
-    Map<String, List<Project>> langToProject = getLangToProjects();
+    Map<Language, List<Project>> langToProject = getLangToProjects();
 
-//    logger.info("getNestedProjectInfo lang->project is " + langToProject.keySet());
+    logger.info("getNestedProjectInfo languages : " + new TreeSet<>(langToProject.keySet()));
 
     langToProject.values().forEach(projects -> {
-      Project firstProduction = getFirstProduction(projects);
+      Project firstProduction = getFirstProductionIfAvailable(projects);
+      logger.info("getNestedProjectInfo First " + firstProduction.getID() + " " + firstProduction.getName() + " " + firstProduction.getLanguage());
       SlimProject parent = getProjectInfo(firstProduction);
       projectInfos.add(parent);
 
@@ -1231,6 +1234,8 @@ public class ProjectManagement implements IProjectManagement {
       } else {
         addModeChoices(firstProduction, parent);
       }
+      logger.info("getNestedProjectInfo parent " + parent.getID() + " has " +parent.getChildren().size() + " children.");
+
     });
 
     return projectInfos;
@@ -1238,6 +1243,8 @@ public class ProjectManagement implements IProjectManagement {
 
   /**
    * Use custom icons for both vocab and dialog - hack the country code.
+   * <p>
+   * This is just a cheesy hack to give us a project hierarchy...
    *
    * @param project
    * @param projectInfo
@@ -1247,55 +1254,38 @@ public class ProjectManagement implements IProjectManagement {
     if (project.getKind() == ProjectType.DIALOG) {
       {
         SlimProject vocab = getProjectInfo(project);
-        projectInfo.addChild(vocab);
 
         vocab.setName(VOCABULARY);
         vocab.setProjectType(ProjectType.DIALOG);
         vocab.setMode(ProjectMode.VOCABULARY);
         vocab.setCountryCode(VOCAB);
+
+        projectInfo.addChild(vocab);
       }
 
       {
         SlimProject dialog = getProjectInfo(project);
 
-//        Collection<IDialog> dialogs = project.getDialogs();
-        String name = DIALOG;
-        String cc = DIALOG1;
-
-        //      if (dialogs.isEmpty()) logger.warn("addModeChoices no dialogs in " + project);
-   /*     else {
-          IDialog iDialog = dialogs.get(0);
-          DialogType kind = iDialog.getKind();
-          if (kind == DialogType.INTERPRETER) {
-            name = INTERPRETER;
-            cc = INTERPRETER.toLowerCase();
-            // logger.info("addModeChoices : found first interpreter dialog : " + iDialog);
-          } else {
-            logger.info("addModeChoices : dialog kind is " + kind + " for " + iDialog.getID());
-          }
-        }*/
-        dialog.setName(name);
-
+        dialog.setName(DIALOG);
         dialog.setProjectType(ProjectType.DIALOG);
         dialog.setMode(ProjectMode.DIALOG);
-
-        dialog.setCountryCode(cc);
+        dialog.setCountryCode(DIALOG1);
 
         projectInfo.addChild(dialog);
       }
     }
   }
 
-  private Project getFirstProduction(List<Project> projects) {
+  private Project getFirstProductionIfAvailable(List<Project> projects) {
     List<Project> production = getProductionProjects(projects);
     return (production.isEmpty()) ? projects.iterator().next() : production.iterator().next();
   }
 
   @NotNull
-  private Map<String, List<Project>> getLangToProjects() {
-    Map<String, List<Project>> langToProject = new TreeMap<>();
+  private Map<Language, List<Project>> getLangToProjects() {
+    Map<Language, List<Project>> langToProject = new TreeMap<>();
     getProjects().forEach(project -> {
-      List<Project> slimProjects = langToProject.computeIfAbsent(project.getLanguage(), k -> new ArrayList<>());
+      List<Project> slimProjects = langToProject.computeIfAbsent(project.getLanguageEnum(), k -> new ArrayList<>());
       slimProjects.add(project);
     });
     return langToProject;

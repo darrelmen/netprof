@@ -123,7 +123,7 @@ public class BaseDialogReader {
     );
 
 
-    Dialog dialog = new Dialog(-1, defaultUser, projID, -1, -1, modified.getTime(),
+    Dialog dialog = new Dialog(-1, defaultUser, projID, -1, modified.getTime(),
         unit, chapter,
         orientation,
         imageRef,

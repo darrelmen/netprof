@@ -134,12 +134,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see #setDialogNavVisible(boolean)
    */
   private ComplexWidget recnav, defectnav, dialognav;
-  //private NavLink dialogEditor;
 
   /**
    * @see #getDialogNav
    */
-  private Dropdown dialogPracticeNav, dialogChoicesNav;
+ // private Dropdown dialogPracticeNav;
 
   /**
    *
@@ -244,13 +243,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     recnav.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     zeroRightMargin(recnav);
 
-    dialogChoicesNav = new Dropdown(DIALOGS);
+    Dropdown dialogChoicesNav = new Dropdown(DIALOGS);
     recnav.add(dialogChoicesNav);
 
     rememberViewAndLink(dialogChoicesNav, VIEWS.DIALOG);
     rememberViewAndLink(dialogChoicesNav, DIALOG_EDITOR);
 
-    dialogPracticeNav = new Dropdown(DIALOG_PRACTICE);
+    Dropdown dialogPracticeNav = new Dropdown(DIALOG_PRACTICE);
     recnav.add(dialogPracticeNav);
 
     DIALOG_VIEWS_IN_DROPDOWN.forEach(views -> rememberViewAndLink(dialogPracticeNav, views));
@@ -624,22 +623,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see #reflectPermissions
    */
   private void setDialogNavVisible(boolean visible) {
-    boolean isDialogMode = controller.getMode() == ProjectMode.DIALOG;
-    dialognav.setVisible(visible && isDialogMode);
+    boolean hasProject = controller.getProjectStartupInfo() != null;
+    boolean hasProjectChoice = hasProject && controller.getProjectID() != -1;
+    dialognav.setVisible(visible && hasProjectChoice && controller.getMode() == ProjectMode.DIALOG);
 
-//    if (dialogEditor != null) {
-//      maybeShowDialogEditor();
-//    }
-//    else {
-//      logger.warning("no dialog editor choice yet");
-//    }
+  //  logger.info("dialog nav " + dialognav.isVisible());
   }
-
-/*
-  private void maybeShowDialogEditor() {
-    dialogEditor.setVisible(shouldShowDialogEditor());
-  }
-*/
 
   /**
    * @param val
