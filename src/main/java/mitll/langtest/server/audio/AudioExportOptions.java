@@ -48,6 +48,9 @@ public class AudioExportOptions {
   private String search = "";
   private boolean includeAudio;
   private boolean forgiving;
+  private boolean sortByEnglish = true;
+  private boolean addProperties = false;
+  private boolean isInterpreter=false;
 
   /**
    * @param hasProjectSpecificAudio
@@ -93,8 +96,8 @@ public class AudioExportOptions {
   }
 
   /**
-   * @see mitll.langtest.server.database.DatabaseImpl#writeZip(OutputStream, Map, int, AudioExportOptions, IEnsureAudioHelper)
    * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#writeZip(OutputStream, Map, int, AudioExportOptions, IEnsureAudioHelper)
    */
   public String getSearch() {
     return search;
@@ -137,5 +140,29 @@ public class AudioExportOptions {
 
   public void setForgiving(boolean forgiving) {
     this.forgiving = forgiving;
+  }
+
+  public boolean isSortByEnglish() {
+    return sortByEnglish;
+  }
+
+  public void setSortByEnglish(boolean sortByEnglish) {
+    this.sortByEnglish = sortByEnglish;
+  }
+
+  public boolean isAddProperties() {
+    return addProperties;
+  }
+
+  public void setAddProperties(boolean addProperties) {
+    this.addProperties = addProperties;
+  }
+
+  public boolean isInterpreter() {
+    return isInterpreter;
+  }
+
+  public void setInterpreter(boolean interpreter) {
+    isInterpreter = interpreter;
   }
 }

@@ -31,10 +31,9 @@ package mitll.langtest.server.database.excel;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.AudioExport;
-import mitll.langtest.shared.exercise.AudioAttribute;
-import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.ExerciseAnnotation;
+import mitll.langtest.server.audio.AudioExportOptions;
+import mitll.langtest.shared.dialog.DialogMetadata;
+import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.user.MiniUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,6 +44,7 @@ import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ExcelExport {
   private static final Logger logger = LogManager.getLogger(ExcelExport.class);
@@ -70,14 +70,16 @@ public class ExcelExport {
    * @param typeOrder
    * @param language
    * @param isDefectList
+   * @param options
    * @see AudioExport#addSpreadsheetToZip
    */
   public void writeExcelToStream(Collection<CommonExercise> exercises,
                                  OutputStream out,
                                  Collection<String> typeOrder,
                                  String language,
-                                 boolean isDefectList) {
-    SXSSFWorkbook wb = writeExcel(exercises, language, typeOrder, isDefectList);
+                                 boolean isDefectList,
+                                 AudioExportOptions options) {
+    SXSSFWorkbook wb = writeExcel(exercises, language, typeOrder, isDefectList, options);
     long then = System.currentTimeMillis();
     try {
       wb.write(out);
@@ -99,13 +101,15 @@ public class ExcelExport {
    * @param language
    * @param typeOrder
    * @param isDefectList
+   * @param options
    * @return
    * @see #writeExcelToStream
    */
   private SXSSFWorkbook writeExcel(Collection<CommonExercise> copy,
                                    String language,
                                    Collection<String> typeOrder,
-                                   boolean isDefectList) {
+                                   boolean isDefectList,
+                                   AudioExportOptions options) {
     long now;
     long then = System.currentTimeMillis();
 
@@ -114,7 +118,9 @@ public class ExcelExport {
     int rownum = 0;
     Row headerRow = sheet.createRow(rownum++);
 
-    boolean english = addHeaderRow(language, typeOrder, headerRow, isDefectList);
+    boolean addProps = options.isAddProperties();
+    boolean english = addHeaderRow(language, typeOrder, headerRow, isDefectList, addProps);
+
 
     /**
      * Deal with per-project voices...
@@ -156,7 +162,11 @@ public class ExcelExport {
         row.createCell(j++).setCellValue(value);
       }
       Collection<ClientExercise> directlyRelated = exercise.getDirectlyRelated();
-      if (!directlyRelated.isEmpty()) {
+      if (directlyRelated.isEmpty()) {
+        row.createCell(j++).setCellValue("");
+        row.createCell(j++).setCellValue("");
+        row.createCell(j++).setCellValue("");
+      } else {
         ClientExercise next = directlyRelated.iterator().next();
         row.createCell(j++).setCellValue(next.getForeignLanguage());
         row.createCell(j++).setCellValue(next.getAltFL());
@@ -165,12 +175,36 @@ public class ExcelExport {
       if (isDefectList) {
         addDefects(english, preferredVoices, exercise, row, j);
       }
+      if (addProps) {
+        addProps(language, options, exercise, row, j);
+      }
     }
     now = System.currentTimeMillis();
     if (now - then > 100) {
       logger.info("toXLSX : took " + (now - then) + " millis to add " + rownum + " rows to sheet, or " + (now - then) / rownum + " millis/row");
     }
     return wb;
+  }
+
+  /**
+   * Speaker for now
+   *
+   * @param language
+   * @param options
+   * @param exercise
+   * @param row
+   * @param j
+   */
+  private void addProps(String language, AudioExportOptions options, CommonExercise exercise, Row row, int j) {
+    List<ExerciseAttribute> attributes = exercise.getAttributes();
+    List<ExerciseAttribute> collect = attributes.stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(DialogMetadata.SPEAKER.toString())).collect(Collectors.toList());
+
+    String speaker = collect.isEmpty() ? "" : collect.get(0).getValue();
+    if (options.isInterpreter() && speaker.equalsIgnoreCase("B")) {
+      speaker = language + " Speaker";
+    }
+    // logger.info("writeExcel for " + exercise.getID() + " " + exercise.getForeignLanguage() + " : " + speaker);
+    row.createCell(j++).setCellValue(speaker);
   }
 
   private void addDefects(boolean english, Set<Integer> preferredVoices, CommonExercise exercise, Row row, int j) {
@@ -266,7 +300,7 @@ public class ExcelExport {
     }
   }
 
-  private boolean addHeaderRow(String language, Collection<String> typeOrder, Row headerRow, boolean isDefectList) {
+  private boolean addHeaderRow(String language, Collection<String> typeOrder, Row headerRow, boolean isDefectList, boolean addProps) {
     List<String> columns = new ArrayList<>();
     columns.add(ID);
     columns.add("NP_ID");
@@ -294,6 +328,7 @@ public class ExcelExport {
       columns.add("female_reg");
       columns.add("female_slow");
     }
+    if (addProps) columns.add("Speaker");
 
     for (int i = 0; i < columns.size(); i++) {
       headerRow.createCell(i).setCellValue(columns.get(i));

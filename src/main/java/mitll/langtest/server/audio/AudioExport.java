@@ -74,13 +74,14 @@ public class AudioExport {
   private static final String MP3 = ".mp3";
   private static final String CNTXT_ = "_cntxt_";
   private static final String BLANK = "Blank";
-  private static final boolean DEBUG_COPY_AUDIO = true;
 
   private Collection<String> typeOrder;
   private final ServerProperties props;
 
   private final ServletContext servletContext;
 
+  private static final boolean DEBUG_COPY_AUDIO = false;
+  public static final boolean DEBUG = false;
   /**
    * @param props
    * @see DatabaseImpl#writeZip(OutputStream, Map, int, AudioExportOptions, mitll.langtest.server.database.audio.IEnsureAudioHelper)
@@ -166,7 +167,7 @@ public class AudioExport {
         language,
         out,
         isDefectList,
-        options);
+        options, isEnglish);
   }
 
   /**
@@ -176,6 +177,7 @@ public class AudioExport {
    * @param exercisesForSelectionState
    * @param language1
    * @param isDefectList
+   * @param isEnglish
    * @throws Exception
    * @see mitll.langtest.server.database.DatabaseImpl#writeUserListAudio
    */
@@ -185,11 +187,14 @@ public class AudioExport {
                                  Collection<? extends CommonExercise> exercisesForSelectionState,
                                  String language1,
                                  boolean isDefectList,
-                                 AudioExportOptions options) throws Exception {
+                                 AudioExportOptions options, boolean isEnglish) throws Exception {
     List<CommonExercise> copy = getSortableExercises(sectionHelper, exercisesForSelectionState);
-    new SimpleSorter<CommonExercise>().sortByEnglish(copy, "");
-    writeToStream(copy, prefix, typeOrder, language1, out,// false,
-        isDefectList, options);
+
+    if (options.isSortByEnglish()) {
+      new SimpleSorter<CommonExercise>().sortByEnglish(copy, "");
+    }
+
+    writeToStream(copy, prefix, typeOrder, language1, out, isDefectList, options, isEnglish);
   }
 
 
@@ -258,6 +263,7 @@ public class AudioExport {
    * @param language1
    * @param out
    * @param isDefectList
+   * @param isEnglish
    * @throws Exception
    * @paramx skipAudio
    * @see #writeUserListAudio
@@ -268,7 +274,8 @@ public class AudioExport {
                              String language1,
                              OutputStream out,
                              boolean isDefectList,
-                             AudioExportOptions options) throws Exception {
+                             AudioExportOptions options,
+                             boolean isEnglish) throws Exception {
     ZipOutputStream zOut = new ZipOutputStream(out);
 
     String baseName = baseName(language1, name).replaceAll(",", "_").replaceAll(" ", "_");
@@ -282,7 +289,7 @@ public class AudioExport {
         writeFolderContents(zOut,
             toWrite,
             overallName,
-            isEnglish(language1),
+            isEnglish,
             getCountryCode(language1),
             options,
             language1);
@@ -291,7 +298,7 @@ public class AudioExport {
       }
     }
 
-    addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, baseName, isDefectList);
+    addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, baseName, isDefectList, options);
   }
 
   /**
@@ -360,13 +367,16 @@ public class AudioExport {
   }
 
 
-  private void addSpreadsheetToZip(Collection<CommonExercise> toWrite, Collection<String> typeOrder,
-                                   String language1, ZipOutputStream zOut, String overallName,
-                                   boolean isDefectList) throws IOException {
+  private void addSpreadsheetToZip(Collection<CommonExercise> toWrite,
+                                   Collection<String> typeOrder,
+                                   String language1,
+                                   ZipOutputStream zOut,
+                                   String overallName,
+                                   boolean isDefectList, AudioExportOptions options) throws IOException {
     logger.info("addSpreadsheetToZip '" + overallName + "'");
 
     zOut.putNextEntry(new ZipEntry(overallName + File.separator + overallName + ".xlsx"));
-    new ExcelExport(props).writeExcelToStream(toWrite, zOut, typeOrder, language1, isDefectList);
+    new ExcelExport(props).writeExcelToStream(toWrite, zOut, typeOrder, language1, isDefectList, options);
   }
 
   private void addResultSpreadsheetToZip(Collection<MonitorResult> toWrite,
@@ -400,35 +410,7 @@ public class AudioExport {
     //int c = 0;
     long then = System.currentTimeMillis();
 
-    //logger.info("writeFolderContents overall name " + overallName);
-//    if (options.isAllContext()) {
-//      overallName += "_allContextAudio";
-//    }
-    //logger.debug("found audio for " + exToAudio.size() + " items and writing " + toWrite.size() + " items ");
-    // logger.debug("realContextPath " + realContextPath + " installPath " + installPath + " relativeConfigDir1 " +relativeConfigDir1);
-
-    // get prefMale and prefFemale majority users - map of user->childCount of recordings for this exercise
-//    Map<MiniUser, Integer> maleToCount = new HashMap<>();
-//    Map<MiniUser, Integer> femaleToCount = new HashMap<>();
-
-    // attach audio
-//    int numAttach = attachAudio(toWrite, audioDAO, language, hasProjectSpecificAudio);
-
     boolean justContext = options.isJustContext();// || options.isAllContext();
-    //  MiniUser majorityUser = null;
-    //if (justContext) {
-    //List<CommonExercise> contextEx = new ArrayList<>(toWrite.size());
-    //toWrite.forEach(exercise -> contextEx.addAll(exercise.getDirectlyRelated()));
-    //populateGenderToCount(contextEx, maleToCount, femaleToCount);
-    //} else {
-    //   populateGenderToCount(toWrite, maleToCount, femaleToCount);
-    //majorityUser =
-
-    //    options.isJustMale() ? getMaxUser(maleToCount) : getMaxUser(femaleToCount);
-    // }
-    // find the pref Male and pref Female with most recordings for this exercise set
-//    MiniUser prefMale   = getMaxUser(maleToCount);
-//    MiniUser prefFemale = getMaxUser(femaleToCount);
 
     AudioConversion audioConversion = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange(), servletContext.getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG));
 
@@ -473,7 +455,7 @@ public class AudioExport {
 
             someAudio = true;
           } else {
-            logger.info("writeFolderContents : no female audio for " + ex.getID());
+            if (DEBUG) logger.info("writeFolderContents : no female audio for " + ex.getID());
           }
         } else {
           AudioAttribute recording = getAudioAttribute(ex, options.isJustMale(), speed);
@@ -871,9 +853,6 @@ public class AudioExport {
       if (isMP3) {
         name += MP3;
       }
-      //else {
-      //  name += isMP3 ? MP3 : ".wav";
-      // }
 
       if (DEBUG_COPY_AUDIO) logger.info("copyAudioAtPath : audio file name is " + name);
 

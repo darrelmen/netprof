@@ -88,6 +88,7 @@ import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.shared.analysis.PhoneReportRequest;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.instrumentation.Event;
@@ -111,7 +112,6 @@ import java.io.File;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static java.lang.Thread.sleep;
 import static mitll.langtest.server.PathHelper.ANSWERS;
@@ -128,9 +128,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
   public static final List<String> QUIZ_TYPES = Arrays.asList(QUIZ, UNIT);
   public static final String DRY_RUN = "Dry Run";
   public static final int MAX_PHONES = 7;
-  private static final boolean TEST_SYNC = false;
+  //private static final boolean TEST_SYNC = false;
   private static final int WARN_THRESH = 10;
   private static final String CRASH = "crash";
+
+  private static final boolean DEBUG_AUDIO_EXPORT = false;
 
   private IUserDAO userDAO;
   private IUserSessionDAO userSessionDAO;
@@ -1765,6 +1767,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     } else {
       name = language + "_" + (iDialog.getEnglish().isEmpty() ? iDialog.getForeignLanguage() : iDialog.getEnglish());
 
+      options.setInterpreter(iDialog.getKind() == DialogType.INTERPRETER);
 
       doAudioExport(out, false, projectid, options, language, name, iDialog.getBothExercisesAndCore());
     }
@@ -1779,12 +1782,14 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
     List<CommonExercise> copyAsExercises = new ArrayList<>();
     for (CommonShell ex : exercises) {
-      logger.info("doAudioExport ex " + ex.getID() + " " + ex.getForeignLanguage());
+      if (DEBUG_AUDIO_EXPORT) logger.info("doAudioExport ex " + ex.getID() + " " + ex.getForeignLanguage());
 
       CommonExercise customOrPredefExercise = getCustomOrPredefExercise(projectid, ex.getID());
       if (customOrPredefExercise != null) {
         copyAsExercises.add(customOrPredefExercise);
-      } else logger.warn("doAudioExport no exercise found = " + ex.getID());
+      } else {
+        logger.warn("doAudioExport no exercise found = " + ex.getID());
+      }
     }
 
     {
@@ -1795,7 +1800,10 @@ public class DatabaseImpl implements Database, DatabaseServices {
         userListManager.addAnnotations(ex);
         if (smallVocabDecoder != null) {
           int i = getAudioDAO().attachAudioToExercise(ex, language, idToMini, smallVocabDecoder);
-          logger.info("doAudioExport attached " + i + " cuts to " + ex.getID());
+
+          if (DEBUG_AUDIO_EXPORT) {
+            logger.info("doAudioExport attached " + i + " cuts to " + ex.getID());
+          }
         }
       }
     }
@@ -1812,7 +1820,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
         copyAsExercises,
         language.getLanguage(),
         isCommentList,
-        options);
+        options, language == Language.ENGLISH);
   }
 
   /**

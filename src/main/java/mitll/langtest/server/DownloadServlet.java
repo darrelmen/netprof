@@ -864,6 +864,10 @@ public class DownloadServlet extends DatabaseServlet {
       setHeader(response, name);
 
       options.setUserList(true);
+
+      options.setSortByEnglish(false);
+      options.setAddProperties(true);
+
       db.writeDialogItems(response.getOutputStream(),
           id == null ? -1 : id,
           projectid,

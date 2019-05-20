@@ -99,14 +99,14 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
     DivWidget widgets = super.addWidgets(showFL, showALTFL, phonesChoices, englishDisplayChoices);
 
     if (exercise.getAudioAttributes().isEmpty()) {
-      widgets.add(getHasAudioIndicator(false));
+      flClickableRow.add(getHasAudioIndicator(false));
     }
     return widgets;
   }
 
   Widget getHasAudioIndicator(boolean hasRefAudio) {
     Icon audioIndicator = new Icon(IconType.VOLUME_UP);
-    audioIndicator.setSize(IconSize.TWO_TIMES);
+   // audioIndicator.setSize(IconSize.TWO_TIMES);
 
     if (!hasRefAudio) {
       audioIndicator.getElement().getStyle().setColor("red");
@@ -114,7 +114,13 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
 
     Panel simple = new SimplePanel();
     simple.add(audioIndicator);
-    simple.addStyleName("leftTenMargin");
+//    simple.addStyleName("leftTenMargin");
+   simple.addStyleName("floatRight");
+
+   // simple.getElement().getStyle().setMarginTop( 5, Style.Unit.PX);
+   // simple.getElement().getStyle().setMarginRight(5, Style.Unit.PX);
+   // simple.getElement().getStyle().setMarginLeft(-2, Style.Unit.PX);
+  //  simple.getElement().getStyle().setPaddingLeft(65, Style.Unit.PX);
 
     return simple;
   }

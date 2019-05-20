@@ -318,7 +318,7 @@ public class DialogHeader {
     style.setBackgroundColor("aliceblue");
     //child.setWidth(HINT_WIDTH + "px");
     //child.setWidth(79 + "%");
-    style.setMarginTop(-15, PX);
+    style.setMarginTop(-5, PX);
     style.setMarginRight(50, PX);
     style.setPaddingRight(27, PX);
     style.setClear(Style.Clear.BOTH);
@@ -405,15 +405,19 @@ public class DialogHeader {
     //  buttonDiv.add(new Anchor("Download", new DownloadHelper().getSimpleDialogDownload()));
     //  SafeHtml download = getAnchorHTML(new DownloadHelper().getSimpleDialogDownload(), "Download");
     //  logger.info("url " + download);
-    {
+
+    if (thisView == LISTEN || thisView == TURN_EDITOR) {
       DivWidget widgets = new DivWidget();
       Anchor download = new Anchor("Download");
       download.addClickHandler(event -> gotDownload());
-      widgets.add(new Image(LANGTEST_IMAGES + "icon_excel.png"));
+      download.addStyleName("leftFiveMargin");
+      widgets.add(new Image(LANGTEST_IMAGES + "icon-excel.png"));
       widgets.add(download);
-      download.addStyleName("floatRight");
-      download.getElement().getStyle().setMarginTop(25, PX);
-      download.getElement().getStyle().setMarginRight(12, PX);
+
+      widgets.addStyleName("floatRight");
+      widgets.getElement().getStyle().setMarginTop(25, PX);
+      widgets.getElement().getStyle().setMarginRight(12, PX);
+
       buttonDiv.add(widgets);
     }
     //}
