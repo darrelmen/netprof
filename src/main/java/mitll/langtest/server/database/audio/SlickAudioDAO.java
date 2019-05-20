@@ -235,6 +235,10 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
     return audioAttribute;
   }
 
+  /**
+   *
+   * @param exerciseID
+   */
   public void clearAudioCacheForEx(int exerciseID) {
     exidToAudioAttributes.remove(exerciseID);
   }

@@ -521,7 +521,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
           controller.getExerciseService().refreshAudio(exercise.getID(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
-
+              controller.handleNonFatalError("refresh audio for " + exercise.getID(), caught);
             }
 
             @Override

@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.services;
 
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.dialog.EditorTurn;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.server.database.audio.IAudioDAO;
@@ -1188,6 +1189,11 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     db.getExerciseDAO(projid).reload();
   }
 
+  /**
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getDeleteButton(Panel, AudioAttribute, HasID, String)
+   * @param exid
+   * @throws DominoSessionException
+   */
   @Override
   public void refreshAudio(int exid) throws DominoSessionException {
     getUserIDFromSessionOrDB();

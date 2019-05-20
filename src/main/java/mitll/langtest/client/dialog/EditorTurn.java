@@ -743,6 +743,10 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     turnPanelDelegate.addClickHandler(clickHandler);
   }
 
+  /**
+   * @param audioAnswer
+   * @see ContinuousDialogRecordAudioPanel#useResult(AudioAnswer)
+   */
   @Override
   public void useResult(AudioAnswer audioAnswer) {
     //  logger.info("useResult got " + audioAnswer);
@@ -752,7 +756,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       AudioAttribute audioAttribute = audioAnswer.getAudioAttribute();
       String audioRef = audioAttribute.getAudioRef();
 
-      logger.info("useResult (" + audioAttribute.getUniqueID() + ") got back " + audioRef);
+      if (DEBUG) {
+        logger.info("useResult (" + audioAttribute.getUniqueID() + ") got back " + audioRef);
+      }
 
       rememberAudio(audioAttribute);
       clientExercise.getMutableAudio().addAudio(audioAttribute);
@@ -760,10 +766,25 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
       ((Button) getPlayButton()).setType(ButtonType.SUCCESS);
 
+      tellNetprofAudioHasChanged(audioAttribute.getUniqueID());
+
     } else {
       turnFeedback.setHTML(audioAnswer.getValidity().getPrompt());
-
     }
+  }
+
+  private void tellNetprofAudioHasChanged(int id) {
+    controller.getExerciseService().refreshAudio(getExID(), new AsyncCallback<Void>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("refresh audio for " + getExID(), caught);
+      }
+
+      @Override
+      public void onSuccess(Void result) {
+        logger.info("tellNetprofAudioHasChanged : refreshed audio for " + getExID() + " and audio id " + id);
+      }
+    });
   }
 
   private Widget getPlayButton() {

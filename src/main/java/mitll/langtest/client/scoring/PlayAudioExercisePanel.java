@@ -61,7 +61,7 @@ public class PlayAudioExercisePanel extends DivWidget implements IPlayAudioContr
   public boolean doPlayPauseToggle() {
     if (playAudio != null) {
       if (DEBUG_PLAY_PAUSE) logger.info("doPlayPauseToggle on ");// + getExID());
-//
+
 //      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("doing play for " +getExID()));
 //      logger.info("logException stack " + exceptionAsString);
 
@@ -81,17 +81,12 @@ public class PlayAudioExercisePanel extends DivWidget implements IPlayAudioContr
    */
   @Override
   public void showNoAudioToPlay() {
-//    Style style = getElement().getStyle();
-//    String before = style.getBackgroundColor();
-//    style.setBackgroundColor("red");
     Widget widget = getChildren().get(0);
     widget.addStyleName("blink-target");
-
 
     Timer waitTimer = new Timer() {
       @Override
       public void run() {
-        //   logger.info("scheduleWaitTimer timer expired..." + outer);
         widget.removeStyleName("blink-target");
       }
     };
