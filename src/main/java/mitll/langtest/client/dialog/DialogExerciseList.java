@@ -64,6 +64,7 @@ import java.util.stream.Collectors;
  */
 public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   public static final String INTERP_COLOR = "#f0fff7";
+  public static final String ENGLISH = "english";
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
   /**
@@ -89,13 +90,15 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, INavigation.VIEWS.DIALOG);
   }
 
-  @Override protected List<String> getTypeOrderSimple() {
+  @Override
+  protected List<String> getTypeOrderSimple() {
     ArrayList<String> strings = new ArrayList<>(getStartupInfo().getTypeOrder());
     strings.add("Type");
     return strings;
   }
 
-  @Override protected Set<String> getRootNodes(ProjectStartupInfo projectStartupInfo) {
+  @Override
+  protected Set<String> getRootNodes(ProjectStartupInfo projectStartupInfo) {
     HashSet<String> strings = new HashSet<>(projectStartupInfo.getRootNodes());
     strings.add("Type");
     return strings;
@@ -237,9 +240,11 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
       {
         props.put(getProperty(attr), attr.getValue());
         if (isTitle(attr)) {
-          props.put("english", dialog.getEnglish());
+          props.put(ENGLISH, dialog.getEnglish());
         }
       });
+
+      props.put("type", dialog.getKind().toString());
 
       thumbnailChoices.addPopover(button, props, Placement.BOTTOM);
     }

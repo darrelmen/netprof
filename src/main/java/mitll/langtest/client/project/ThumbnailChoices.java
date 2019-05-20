@@ -53,10 +53,7 @@ public class ThumbnailChoices {
   @NotNull
   public Section getScrollingSection() {
     final Section section = new Section("section");
-    //section.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
     section.setHeight("100%");
-  //  section.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
-
     return section;
   }
 
@@ -101,6 +98,14 @@ public class ThumbnailChoices {
     button.addMouseOverHandler(event -> showPopover(props, button, typeOrder, ClientExerciseUnitChapterItemHelper, placement));
   }
 
+  /**
+   * @see ProjectChoices#showPopoverUsual(String, Widget, Set, UnitChapterItemHelper)
+   * @param props
+   * @param button
+   * @param typeOrder
+   * @param unitChapterItemHelper
+   * @param placement
+   */
   void showPopover(Map<String, String> props,
                    Widget button,
                    Set<String> typeOrder,

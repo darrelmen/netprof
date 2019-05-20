@@ -270,7 +270,7 @@ public class DialogHeader {
 //            "</i>"));
 //        break;
       case LISTEN:
-        row.add(getHint("<i><b>Listen</b> to the reference dialog to prepare to rehearse it.</i>"));
+        row.add(new DivWidget());
         break;
       case REHEARSE:
         row.add(getHint(ARROW_KEY_TIP));
@@ -282,14 +282,13 @@ public class DialogHeader {
         row.add(getHint("<i>Now carry on a natural conversation. " +
             "<br/>" + SPEAK_HINT +
             "<br/>" +
-
             "</i>"));
         break;
       case PERFORM_PRESS_AND_HOLD:
         row.add(getHint("<i>Now carry on a natural conversation. " +
-            "<br/>" + PRESS_AND_HOLD_HINT +
             "<br/>" +
-
+            PRESS_AND_HOLD_HINT +
+            "<br/>" +
             "</i>"));
         break;
       case TURN_EDITOR:
@@ -311,13 +310,11 @@ public class DialogHeader {
 
     child.addStyleName("cardBorderShadow");
     child.addStyleName("floatRight");
-    //  child.addStyleName("leftFiveMargin");
     Style style = child.getElement().getStyle();
     style.setProperty("marginLeft", "auto");
     style.setPaddingLeft(5, PX);
     style.setBackgroundColor("aliceblue");
-    //child.setWidth(HINT_WIDTH + "px");
-    //child.setWidth(79 + "%");
+
     style.setMarginTop(-5, PX);
     style.setMarginRight(50, PX);
     style.setPaddingRight(27, PX);
