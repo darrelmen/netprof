@@ -29,9 +29,14 @@
 
 package mitll.langtest.client.scoring;
 
+import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.IconSize;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.dialog.ListenViewHelper;
@@ -87,6 +92,31 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
       getElement().getStyle().setMarginRight(29, Style.Unit.PX);
     }
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify);
+  }
+
+  @Override
+  public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
+    DivWidget widgets = super.addWidgets(showFL, showALTFL, phonesChoices, englishDisplayChoices);
+
+    if (exercise.getAudioAttributes().isEmpty()) {
+      widgets.add(getHasAudioIndicator(false));
+    }
+    return widgets;
+  }
+
+  Widget getHasAudioIndicator(boolean hasRefAudio) {
+    Icon audioIndicator = new Icon(IconType.VOLUME_UP);
+    audioIndicator.setSize(IconSize.TWO_TIMES);
+
+    if (!hasRefAudio) {
+      audioIndicator.getElement().getStyle().setColor("red");
+    }
+
+    Panel simple = new SimplePanel();
+    simple.add(audioIndicator);
+    simple.addStyleName("leftTenMargin");
+
+    return simple;
   }
 
   @Override

@@ -358,10 +358,11 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @param showALTFL
    * @param phonesChoices
    * @param englishDisplayChoices
+   * @return
    * @see mitll.langtest.client.dialog.ListenViewHelper#getTurnPanel
    */
   @Override
-  public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
+  public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
     NoFeedbackRecordAudioPanel<ClientExercise> recordPanel =
         new ContinuousDialogRecordAudioPanel(exercise, controller, sessionManager, rehearseView, this);
 
@@ -425,6 +426,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
         placeForRecordButton.add(recordPanel.getScoreFeedback());
       }
     }
+    return flContainer;
   }
 
   /**

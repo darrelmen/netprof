@@ -44,6 +44,7 @@ import com.google.gwt.user.client.rpc.RpcTokenException;
 import com.google.gwt.user.client.rpc.StatusCodeException;
 import com.google.gwt.user.client.ui.RootPanel;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExceptionSupport;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.shared.common.DominoSessionException;
@@ -128,7 +129,7 @@ public class MessageHelper {
   }
 
   private Modal handleError(String msg, Throwable throwable, DDialogType dType) {
-   // log.warning("handleError got " + msg + " for " +throwable);
+    // log.warning("handleError got " + msg + " for " +throwable);
     if (throwable instanceof DominoSessionException) {
       log.warning("Logout for session (" + msg + ") : t=" + throwable);
       parentHelper.logout();
@@ -141,6 +142,10 @@ public class MessageHelper {
     } else if (throwable instanceof IncompatibleRemoteServiceException) {
       makeInternalDialog("Your version of netprof is out of date. Please click refresh on your browser to get the latest version.<br/><br/>",
           DDialogType.NonFatalError, false);
+
+      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(throwable);
+      log.info("logException stack " + exceptionAsString);
+
     } else if (isReload(throwable)) {
       // check wrapped
       logOnServer("User reload during ongoing request", throwable, false);

@@ -271,12 +271,13 @@ public class AudioExport {
                              AudioExportOptions options) throws Exception {
     ZipOutputStream zOut = new ZipOutputStream(out);
 
-    String baseName = baseName(language1, name).replaceAll(",", "_");
+    String baseName = baseName(language1, name).replaceAll(",", "_").replaceAll(" ", "_");
 
     {
       String overallName = baseName + options.getInfo();
 
-      logger.info("writeToStream overall name " + overallName);
+      logger.info("writeToStream overall name '" + overallName + "'");
+
       if (options.getIncludeAudio()) {
         writeFolderContents(zOut,
             toWrite,
@@ -362,6 +363,8 @@ public class AudioExport {
   private void addSpreadsheetToZip(Collection<CommonExercise> toWrite, Collection<String> typeOrder,
                                    String language1, ZipOutputStream zOut, String overallName,
                                    boolean isDefectList) throws IOException {
+    logger.info("addSpreadsheetToZip '" + overallName + "'");
+
     zOut.putNextEntry(new ZipEntry(overallName + File.separator + overallName + ".xlsx"));
     new ExcelExport(props).writeExcelToStream(toWrite, zOut, typeOrder, language1, isDefectList);
   }
@@ -405,8 +408,8 @@ public class AudioExport {
     // logger.debug("realContextPath " + realContextPath + " installPath " + installPath + " relativeConfigDir1 " +relativeConfigDir1);
 
     // get prefMale and prefFemale majority users - map of user->childCount of recordings for this exercise
-    Map<MiniUser, Integer> maleToCount = new HashMap<>();
-    Map<MiniUser, Integer> femaleToCount = new HashMap<>();
+//    Map<MiniUser, Integer> maleToCount = new HashMap<>();
+//    Map<MiniUser, Integer> femaleToCount = new HashMap<>();
 
     // attach audio
 //    int numAttach = attachAudio(toWrite, audioDAO, language, hasProjectSpecificAudio);
@@ -446,7 +449,7 @@ public class AudioExport {
               audioConversion, names, ex, !options.isJustMale(), language);
         }*/
         if (!someAudio && numMissing < 20) {
-          logger.warn("writeFolder : no context audio for exercise " + ex.getID() + " in " + ex.getAudioAttributes().size() + " attributes");
+          logger.warn("writeFolderContents : no context audio for exercise " + ex.getID() + " in " + ex.getAudioAttributes().size() + " attributes");
         }
         // if (someAudio) logger.info("found context for " + ex.getID());
 
@@ -460,7 +463,7 @@ public class AudioExport {
                 audioAttribute.getAudioRef(), audioAttribute.getUser(), ex.getID(), audioAttribute.getResultid(), ex.getEnglish(), ex.getForeignLanguage(), false, audioAttribute.isMale());
             someAudio = true;
           } else {
-            logger.info("writeFolder : no   male audio for " + ex.getID());
+            logger.info("writeFolderContents : no   male audio for " + ex.getID());
           }
 
           audioAttribute = getLatest(ex, false);
@@ -470,15 +473,22 @@ public class AudioExport {
 
             someAudio = true;
           } else {
-            logger.info("writeFolder : no female audio for " + ex.getID());
+            logger.info("writeFolderContents : no female audio for " + ex.getID());
           }
         } else {
           AudioAttribute recording = getAudioAttribute(ex, options.isJustMale(), speed);
+
+          if (recording == null && options.isForgiving() && !ex.getAudioAttributes().isEmpty()) {
+            recording = ex.getAudioAttributes().iterator().next();
+          }
+
           if (recording != null) {
-            // logger.debug("found " + recording + " by " + recording.getUser());
+            logger.info("writeFolderContents found " + recording + " by " + recording.getUser());
             copyAudioForExercise(zOut, overallName, isEnglish, audioConversion, names, speed, language,
                 recording.getAudioRef(), recording.getUser(), ex.getID(), recording.getResultid(), ex.getEnglish(), ex.getForeignLanguage(), false, recording.isMale());
             someAudio = true;
+          } else {
+            logger.info("writeFolderContents NO recording for  " + ex.getID() + "/" + ex.getForeignLanguage() + " : " + ex.getAudioAttributes());
           }
         }
       }
@@ -772,18 +782,18 @@ public class AudioExport {
   private AudioAttribute getAudioAttribute(/*MiniUser majorityUser, */CommonExercise ex, boolean isMale, String speed) {
     AudioAttribute recordingAtSpeed = null;//majorityUser != null ? ex.getRecordingsBy(majorityUser.getID(), speed) : null;
 
-    if (recordingAtSpeed == null) {  // can't find majority user or nothing by this person at that speed
-      Collection<AudioAttribute> byGender = ex.getByGender(isMale);
-      // choose the first one if not the majority majorityUser
-      for (AudioAttribute attribute : byGender) {
-        String speed1 = attribute.getSpeed();
-        if (speed1 != null &&
-            speed1.equalsIgnoreCase(speed)) {
-          recordingAtSpeed = attribute;
-          break;
-        }
+    // if (recordingAtSpeed == null) {  // can't find majority user or nothing by this person at that speed
+    Collection<AudioAttribute> byGender = ex.getByGender(isMale);
+    // choose the first one if not the majority majorityUser
+    for (AudioAttribute attribute : byGender) {
+      String speed1 = attribute.getSpeed();
+      if (speed1 != null &&
+          speed1.equalsIgnoreCase(speed)) {
+        recordingAtSpeed = attribute;
+        break;
       }
     }
+    // }
     return recordingAtSpeed;
   }
 

@@ -77,7 +77,7 @@ public class ResultManager extends PagerTable {
 
   private static final int MIN_TO_SHOW = 4;
 
-  private static final int PAGE_SIZE = 7;
+  private static final int PAGE_SIZE = 6;
   private static final String CORRECT = "Correct";
   private static final String PRO_F_SCORE = "Score";
   private static final String DURATION_SEC = "Dur (s)";
@@ -177,6 +177,10 @@ public class ResultManager extends PagerTable {
     return closeButton;
   }
 
+  /**
+   * @see PagerTable#getDownloadAnchor()
+   * @return
+   */
   @Override
   protected SafeHtml getURL2() {
     return getAnchorHTML("downloadResults", DOWNLOAD_EXCEL);

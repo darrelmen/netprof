@@ -47,6 +47,7 @@ public class AudioExportOptions {
 
   private String search = "";
   private boolean includeAudio;
+  private boolean forgiving;
 
   /**
    * @param hasProjectSpecificAudio
@@ -104,7 +105,7 @@ public class AudioExportOptions {
     return this;
   }
 
-  public boolean getIncludeAudio() {
+  boolean getIncludeAudio() {
     return includeAudio;
   }
 
@@ -128,5 +129,13 @@ public class AudioExportOptions {
 
   public void setInfo(String info) {
     this.info = info;
+  }
+
+  public boolean isForgiving() {
+    return forgiving;
+  }
+
+  public void setForgiving(boolean forgiving) {
+    this.forgiving = forgiving;
   }
 }

@@ -177,12 +177,12 @@ public class DownloadServlet extends DatabaseServlet {
             returnAudioFile(response, db, queryString, language, projid);
           } else if (queryString.startsWith(REQUEST + "=" + STUDENT_AUDIO)) {
             writeStudentAudio(request, response, db, projid);
-          } else if (queryString.startsWith(REQUEST)) {
-            //          logger.info("writeAudioZip " + requestURI);
-            writeAudioZip(response, db, queryString, projid);
           } else if (queryString.contains(DIALOG_ARG)) {
-            //        logger.info("downloadDialogContent " + requestURI);
+            logger.info("downloadDialogContent " + requestURI);
             downloadDialogContent(response, db, projid, queryString);
+          } else if (queryString.startsWith(REQUEST)) {
+            logger.info("writeAudioZip " + requestURI);
+            writeAudioZip(response, db, queryString, projid);
           } else {
             logger.warn("huh? did nothing with " + requestURI);
           }
@@ -263,8 +263,13 @@ public class DownloadServlet extends DatabaseServlet {
       String listid = splitArgs[0];
       logger.info("downloadDialogContent dialog id now " + listid);
       if (!listid.isEmpty()) {
-        writeDialogList(response, db, listid, projid, getAudioExportOptions(splitArgs));
+        AudioExportOptions audioExportOptions = getAudioExportOptions(splitArgs);
+        audioExportOptions.setIncludeAudio(true);
+        audioExportOptions.setForgiving(true);
+        writeDialogList(response, db, listid, projid, audioExportOptions);
       }
+    } else {
+      logger.error("downloadDialogContent can't find dialog id in " + queryString);
     }
   }
 
@@ -844,9 +849,18 @@ public class DownloadServlet extends DatabaseServlet {
 
       IDialog iDialog = db.getProject(projectid).getDialog(fid);//.stream().filter(d -> d.getID() == fid).collect(Collectors.toList());
 
-      String name = id == null | iDialog == null ? "unknown" : iDialog.getEnglish();
+      String english = iDialog == null ?
+          "unk" :
+          iDialog.getEnglish().isEmpty() ?
+              (iDialog.getForeignLanguage().isEmpty() ? iDialog.getOrientation() : iDialog.getForeignLanguage()) :
+              iDialog.getEnglish();
+
+      english = english.trim();
+
+      String name = id == null | iDialog == null ? "unknown" : english;
       name = name.replaceAll(",", "_").replaceAll(" ", "_");
       name += ".zip";
+      logger.info("writeDialogList : zip name " + name);
       setHeader(response, name);
 
       options.setUserList(true);

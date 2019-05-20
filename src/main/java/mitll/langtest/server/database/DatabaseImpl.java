@@ -989,7 +989,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   *
    * <p>
    * Lazy, latchy instantiation of DAOs.
    * Not sure why it really has to be this way.
@@ -1758,15 +1757,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
     Language language = getLanguageEnum(projectid);
     if (dialogID == -1) return language + "_Unknown";
     String name = "";
-//    List<IDialog> collect = getProject(projectid).getDialogs().stream().filter(d -> d.getID() == dialogID).collect(Collectors.toList());
 
-    IDialog iDialog = getProject(projectid).getDialog(dialogID);//.stream().filter(d -> d.getID() == fid).collect(Collectors.toList());
+    IDialog iDialog = getProject(projectid).getDialog(dialogID);
     if (iDialog == null) {
       logger.error("huh? can't find user list " + dialogID);
       return language + "_Unknown";
     } else {
-      //IDialog iDialog = collect.get(0);
       name = language + "_" + (iDialog.getEnglish().isEmpty() ? iDialog.getForeignLanguage() : iDialog.getEnglish());
+
+
       doAudioExport(out, false, projectid, options, language, name, iDialog.getBothExercisesAndCore());
     }
 
@@ -1777,24 +1776,35 @@ public class DatabaseImpl implements Database, DatabaseServices {
                                                      Language language, String name, List<T> exercises) throws Exception {
 
     long then = System.currentTimeMillis();
+
     List<CommonExercise> copyAsExercises = new ArrayList<>();
     for (CommonShell ex : exercises) {
+      logger.info("doAudioExport ex " + ex.getID() + " " + ex.getForeignLanguage());
+
       CommonExercise customOrPredefExercise = getCustomOrPredefExercise(projectid, ex.getID());
       if (customOrPredefExercise != null) {
         copyAsExercises.add(customOrPredefExercise);
-      } else logger.warn("writeUserListAudio no exercise found = " + ex.getID());
+      } else logger.warn("doAudioExport no exercise found = " + ex.getID());
     }
-    Map<Integer, MiniUser> idToMini = new HashMap<>();
-    Project project = getProject(projectid);
-    SmallVocabDecoder smallVocabDecoder = project == null ? null : project.getAudioFileHelper().getSmallVocabDecoder();
-    for (CommonExercise ex : copyAsExercises) {
-      userListManager.addAnnotations(ex);
-      if (smallVocabDecoder != null) {
-        getAudioDAO().attachAudioToExercise(ex, language, idToMini, smallVocabDecoder);
+
+    {
+      Map<Integer, MiniUser> idToMini = new HashMap<>();
+      Project project = getProject(projectid);
+      SmallVocabDecoder smallVocabDecoder = project == null ? null : project.getAudioFileHelper().getSmallVocabDecoder();
+      for (CommonExercise ex : copyAsExercises) {
+        userListManager.addAnnotations(ex);
+        if (smallVocabDecoder != null) {
+          int i = getAudioDAO().attachAudioToExercise(ex, language, idToMini, smallVocabDecoder);
+          logger.info("doAudioExport attached " + i + " cuts to " + ex.getID());
+        }
       }
     }
+
     long now = System.currentTimeMillis();
-    logger.debug("\nTook " + (now - then) + " millis to annotate and attach.");
+    if (now - then > 100) {
+      logger.info("\nTook " + (now - then) + " millis to annotate and attach.");
+    }
+
     new AudioExport(getServerProps(), pathHelper.getContext()).writeUserListAudio(
         out,
         name,

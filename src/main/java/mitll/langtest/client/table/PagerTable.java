@@ -38,8 +38,11 @@ import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.HasRows;
 
 import java.util.Date;
+import java.util.logging.Logger;
 
 public abstract class PagerTable {
+  private final Logger logger = Logger.getLogger("PagerTable");
+
   public static final String WHITE_SPACE_NOWRAP = "white-space: nowrap;";
 /*  public Panel getPagerAndTable(HasRows table, Widget tableAsPanel, int pageSize, int fastForwardRows) {
     com.github.gwtbootstrap.client.ui.SimplePager.Resources DEFAULT_RESOURCES = GWT.create(com.github.gwtbootstrap.client.ui.SimplePager.Resources.class);
@@ -100,14 +103,16 @@ public abstract class PagerTable {
 
   protected SafeHtml getAnchorHTML(String href, String label) {
     SafeHtmlBuilder sb = new SafeHtmlBuilder();
-    sb.appendHtmlConstant("<a href='" +        href +        "'" +        ">");
+    sb.appendHtmlConstant("<a href='" + href + "'" + ">");
     sb.appendEscaped(label);
     sb.appendHtmlConstant("</a>");
     return sb.toSafeHtml();
   }
 
   protected Anchor getDownloadAnchor() {
-    Anchor w = new Anchor(getURL2());
+    SafeHtml url2 = getURL2();
+    logger.info("url " + url2);
+    Anchor w = new Anchor(url2);
     w.addStyleName("leftFiveMargin");
     w.addStyleName("topFiveMargin");
     return w;

@@ -31,6 +31,7 @@ package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
+import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -38,28 +39,36 @@ import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.user.Permission;
+import org.apache.xpath.operations.Div;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
+import static mitll.langtest.client.LangTest.LANGTEST_IMAGES;
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
 
 /**
  * @see ListenViewHelper#addDialogHeader(IDialog, Panel)
  */
 public class DialogHeader {
-  //private final Logger logger = Logger.getLogger("DialogHeader");
+  private final Logger logger = Logger.getLogger("DialogHeader");
   private static final String HEIGHT = 100 + "px";
 
   /**
@@ -73,7 +82,7 @@ public class DialogHeader {
   private final INavigation.VIEWS thisView;
   private final INavigation.VIEWS prev;
   private final INavigation.VIEWS next;
-  private final ExerciseController controller;
+  private final ExerciseController<?> controller;
 
   private static final String SPACE_PRESS_AND_HOLD = "<b>Space</b> to record (press and hold.)";
 
@@ -389,14 +398,41 @@ public class DialogHeader {
 
       buttonDiv.add(editButton);
     }
-    if (thisView == LISTEN || thisView == TURN_EDITOR) {
-      new Button("Download", IconType.DOWNLOAD, event -> gotDownload());
+
+    //if (thisView == LISTEN || thisView == TURN_EDITOR) {
+    //  new Button("Download", IconType.DOWNLOAD, event -> gotDownload());
+
+    //  buttonDiv.add(new Anchor("Download", new DownloadHelper().getSimpleDialogDownload()));
+    //  SafeHtml download = getAnchorHTML(new DownloadHelper().getSimpleDialogDownload(), "Download");
+    //  logger.info("url " + download);
+    {
+      DivWidget widgets = new DivWidget();
+      Anchor download = new Anchor("Download");
+      download.addClickHandler(event -> gotDownload());
+      widgets.add(new Image(LANGTEST_IMAGES + "icon_excel.png"));
+      widgets.add(download);
+      download.addStyleName("floatRight");
+      download.getElement().getStyle().setMarginTop(25, PX);
+      download.getElement().getStyle().setMarginRight(12, PX);
+      buttonDiv.add(widgets);
     }
+    //}
 
     return buttonDiv;
   }
 
-  void gotDownload(){}
+//  private SafeHtml getAnchorHTML(String href, String label) {
+//    SafeHtmlBuilder sb = new SafeHtmlBuilder();
+//    sb.appendHtmlConstant("<a href='" + href + "'" + ">");
+//    sb.appendEscaped(label);
+//    sb.appendHtmlConstant("</a>");
+//    return sb.toSafeHtml();
+//  }
+
+  void gotDownload() {
+    new DownloadHelper().doSimpleDialogDownload(controller.getHost(), new SelectionState());
+  }
+
   private void styleButton(Button rightButton) {
     rightButton.addStyleName("leftFiveMargin");
     rightButton.addStyleName("rightTenMargin");

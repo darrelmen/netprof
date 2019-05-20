@@ -125,6 +125,7 @@ public class ProjectManagement implements IProjectManagement {
   private static final Pattern pattern = Pattern.compile(ANSWERS1);
   private static final boolean DEBUG_USER_FOR_FILE = false;
   private static final boolean CHECK_FOR_OOV_ON_STARTUP = false;
+  public static final boolean DEBUG = false;
 
   /**
    * JUST FOR TESTING
@@ -1216,11 +1217,14 @@ public class ProjectManagement implements IProjectManagement {
     List<SlimProject> projectInfos = new ArrayList<>();
     Map<Language, List<Project>> langToProject = getLangToProjects();
 
-    logger.info("getNestedProjectInfo languages : " + new TreeSet<>(langToProject.keySet()));
+    if (DEBUG) logger.info("getNestedProjectInfo languages : " + new TreeSet<>(langToProject.keySet()));
 
     langToProject.values().forEach(projects -> {
       Project firstProduction = getFirstProductionIfAvailable(projects);
-      logger.info("getNestedProjectInfo First " + firstProduction.getID() + " " + firstProduction.getName() + " " + firstProduction.getLanguage());
+      if (DEBUG) {
+        logger.info("getNestedProjectInfo First " + firstProduction.getID() + " " + firstProduction.getName() + " " + firstProduction.getLanguage());
+      }
+
       SlimProject parent = getProjectInfo(firstProduction);
       projectInfos.add(parent);
 
@@ -1234,7 +1238,10 @@ public class ProjectManagement implements IProjectManagement {
       } else {
         addModeChoices(firstProduction, parent);
       }
-      logger.info("getNestedProjectInfo parent " + parent.getID() + " has " +parent.getChildren().size() + " children.");
+
+      if (DEBUG) {
+        logger.info("getNestedProjectInfo parent " + parent.getID() + " has " + parent.getChildren().size() + " children.");
+      }
 
     });
 

@@ -458,11 +458,8 @@ public class DownloadHelper implements IShowStatus {
         " = '" + encode +
         "'");*/
 
-    String dialogParam = selectionState.getDialog() > 0 ? "&d=" + selectionState.getDialog() : "";
-    return "?" +
-        "request=" + DownloadContainer.DOWNLOAD_AUDIO +
+    return getURLPrefixWithOptionalDialogReference(selectionState) +
         "&unit=" + encode +
-        dialogParam +
         "&male=" + isMale +
         "&regular=" + speedChoices.isRegular() +
         "&context=" + isContext +
@@ -479,6 +476,17 @@ public class DownloadHelper implements IShowStatus {
         "&sessionid=" + sessionID;
   }
 
+  public void doSimpleDialogDownload(String host, SelectionState selectionState) {
+    String dialogParam = "?" + (selectionState.getDialog() > 0 ? "&d=" + selectionState.getDialog() : "");
+    doDownloadFrom(host, dialogParam);
+  }
+
+  @NotNull
+  private String getURLPrefixWithOptionalDialogReference(SelectionState selectionState) {
+    String dialogParam = selectionState.getDialog() > 0 ? "&d=" + selectionState.getDialog() : "";
+    String urlPrefix = "?" + "request=" + DownloadContainer.DOWNLOAD_AUDIO;
+    return urlPrefix + dialogParam;
+  }
 
   @NotNull
   private Map<String, Collection<String>> getSelectionMap(Map<String, Collection<String>> typeToSection) {
@@ -497,6 +505,7 @@ public class DownloadHelper implements IShowStatus {
 
   /**
    * for h2 locations - it's downloadResults/h2 not h2/downloadResults
+   *
    * @param host
    * @param search
    * @param listid

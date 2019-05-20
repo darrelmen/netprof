@@ -60,7 +60,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.logging.Logger;
 
-import static com.google.gwt.event.dom.client.KeyCodes.KEY_TAB;
 import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.LEFT;
 import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.MIDDLE;
 import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_A;
@@ -196,10 +195,10 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   }
 
   @Override
-  public void addWidgets(boolean showFL,
-                         boolean showALTFL,
-                         PhonesChoices phonesChoices,
-                         EnglishDisplayChoices englishDisplayChoices) {
+  public DivWidget addWidgets(boolean showFL,
+                              boolean showALTFL,
+                              PhonesChoices phonesChoices,
+                              EnglishDisplayChoices englishDisplayChoices) {
     DivWidget wrapper = new DivWidget();
     wrapper.getElement().setId("Wrapper_" + getExID());
 
@@ -300,6 +299,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       addDeleteButton();
       addOtherTurn();
     }
+    return wrapper;
   }
 
   @NotNull
@@ -587,10 +587,12 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   private void updateText(String s, EditorTurn outer, int audioID, boolean moveToNextTurn) {
     int projectID = controller.getProjectID();
     if (projectID != -1) {
+      final int exID = getExID();
 
-      logger.info("updateText : Checking " + s);
+      logger.info("updateText : Checking " + s + " on " + projectID + " for " + exID);
+
       // talk to the audio service first to determine the oov
-      controller.getAudioService().isValid(projectID, getExID(), s, new AsyncCallback<OOVWordsAndUpdate>() {
+      controller.getAudioService().isValid(projectID, exID, s, new AsyncCallback<OOVWordsAndUpdate>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("isValid on text...", caught);
@@ -605,7 +607,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
           showOOVResult(result);
 
-          controller.getExerciseService().updateText(projectID, dialogID, getExID(), audioID, s, new AsyncCallback<OOVWordsAndUpdate>() {
+          controller.getExerciseService().updateText(projectID, dialogID, exID, audioID, s, new AsyncCallback<OOVWordsAndUpdate>() {
             @Override
             public void onFailure(Throwable caught) {
               controller.handleNonFatalError("updating text...", caught);

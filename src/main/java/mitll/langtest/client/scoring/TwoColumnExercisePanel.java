@@ -183,9 +183,10 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * @param phonesChoices
    * @param englishDisplayChoices
    * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels
+   * @return
    */
   @Override
-  public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
+  public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
     this.showFL = showFL;
     this.showALTFL = showALTFL;
 
@@ -194,15 +195,17 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
 
+    DivWidget widgets = null;
     if (projectStartupInfo != null) {
       makeClickableWords(projectStartupInfo, listContainer);
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
-      add(getItemContent(exercise));
+      add(widgets=getItemContent(exercise));
     } else {
       //  logger.warning("addWidgets no project startup info?");
       clickableWords = null;
       commonExerciseUnitChapterItemHelper = null;
     }
+    return widgets;
   }
 
   /**
@@ -250,10 +253,10 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    * @see mitll.langtest.client.scoring.GoodwaveExercisePanel#getQuestionContent
    */
-  private Widget getItemContent(final T e) {
+  private DivWidget getItemContent(final T e) {
     long then = System.currentTimeMillis();
 
-    Panel card = new DivWidget();
+    DivWidget card = new DivWidget();
     card.setWidth("100%");
 
     //  logger.info("For "  +e.getID() + " meaning " + e.getMeaning() + " " + e.getEnglish() + " " + english);

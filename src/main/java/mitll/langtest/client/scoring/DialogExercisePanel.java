@@ -150,14 +150,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
   }
 
   @Override
-  public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
+  public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
 
     if (projectStartupInfo != null) {
       makeClickableWords(projectStartupInfo, null);
 
+      DivWidget wrapper = getBubble();
       {
-        DivWidget wrapper = getBubble();
         wrapper.add(getFLEntry(exercise));
         wrapper.add(flClickableRowPhones = clickableWords.getClickableDiv(isRTL));
         stylePhoneRow(flClickableRowPhones);
@@ -168,6 +168,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
       }
 
       makePlayAudio(exercise, null);
+      return wrapper;
+    } else {
+      return null;
     }
   }
 
@@ -195,8 +198,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
   }
 
   /**
-   * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    * @param widget
+   * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
   void styleMe(DivWidget widget) {
     addMarginStyle();
@@ -878,10 +881,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
    */
   @NotNull
   DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
-                                           List<TranscriptSegment> phonesInWord,
-                                           AudioControl audioControl,
-                                           TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
-                                           boolean simpleLayout, IHighlightSegment wordHighlight) {
+                                 List<TranscriptSegment> phonesInWord,
+                                 AudioControl audioControl,
+                                 TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
+                                 boolean simpleLayout, IHighlightSegment wordHighlight) {
     return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, !isRTL, wordHighlight, isRTL);
   }
 
@@ -1055,7 +1058,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
   boolean shouldShowPhones() {
     return false;
   }
-
 
 
   /**

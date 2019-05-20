@@ -82,6 +82,9 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   @Override
   public ExerciseListWrapper<IDialog> getDialogs(ExerciseListRequest request) throws DominoSessionException {
     ISection<IDialog> sectionHelper = getDialogSectionHelper();
+
+    logger.info("getDialogs for " + request);
+
     if (sectionHelper == null) {
       logger.info("getDialogs no response...");
       return new ExerciseListWrapper<>();
@@ -94,6 +97,8 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
         Map<Integer, CorrectAndScore> scoreHistoryPerExercise = getScoreHistoryForDialogs(userIDFromSessionOrDB, dialogList);
 
         setDialogScores(dialogList, scoreHistoryPerExercise);
+
+        logger.info("getDialogs returning " + dialogList.size() + " dialogs");
 
         return new ExerciseListWrapper<>(request.getReqID(), dialogList, scoreHistoryPerExercise, new HashMap<>());
       } else {
@@ -185,37 +190,6 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   }
 
   /**
-   * for now, get the latest session with any results in it...
-   *
-   * @param dialogid
-   * @return
-   * @throws DominoSessionException
-   */
-/*  @Override
-  public int getLatestDialogSessionID(int dialogid) throws DominoSessionException {
-    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-
-//    Map<Integer, List<SlickRelatedResult>> sessionToResults = db.getRelatedResultDAO().getByProjectForDialogForUser(getProjectIDFromUser(userIDFromSessionOrDB), dialogid, userIDFromSessionOrDB);
-    SlickRelatedResult slickRelatedResult = db.getRelatedResultDAO()
-        .latestByProjectForDialogForUser(getProjectIDFromUser(userIDFromSessionOrDB), dialogid, userIDFromSessionOrDB);
-    return slickRelatedResult == null ? -1 : slickRelatedResult.dialogsessionid();
-  }*/
-
-  // user implicit -
-
-  /**
-   * WHY?
-   *
-   * @param dialogid
-   * @return
-   * @throws DominoSessionException
-   */
-/*  public List<IDialogSession> getDialogSessions(int dialogid) throws DominoSessionException {
-    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-    return db.getDialogSessionDAO().getDialogSessions(userIDFromSessionOrDB, dialogid);
-  }*/
-
-  /**
    * @param userid
    * @param dialogid
    * @return
@@ -228,7 +202,6 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     logger.info("getDialogSessions session user " + userIDFromSessionOrDB + " req user " + userid + " dialog " + dialogid);
 
     if (dialogid == -1) {
-      // dialogid = getFirstDialog(userIDFromSessionOrDB);
       return new ArrayList<>();
     } else {
       List<IDialogSession> dialogSessions = db.getDialogSessionDAO().getDialogSessions(userid, dialogid);
@@ -236,7 +209,6 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       return dialogSessions;
     }
   }
-
 
   /**
    * @param dialogSession
@@ -270,20 +242,12 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   @Override
   public boolean delete(int projid, int id) throws DominoSessionException {
     getUserIDFromSessionOrDB();
-    // int projectIDFromUser = getProjectIDFromUser(getUserIDFromSessionOrDB());
     boolean delete = db.getDialogDAO().delete(projid, id);
     if (delete) {
       getProject(projid).forgetDialog(id);
     }
     return delete;
   }
-
-//  @Override
-//  public boolean deleteExerciseInDialog(int projid, int id, int exid) throws DominoSessionException {
-//    /* int userIDFromSessionOrDB =*/
-//    getUserIDFromSessionOrDB();
-//    return db.getDialogDAO().deleteExercise(projid, id, exid);
-//  }
 
   /**
    * Delete one turn if normal dialog or a pair if interpreter
@@ -296,46 +260,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    */
   public List<Integer> deleteATurnOrPair(int projid, int dialogID, int exid) throws DominoSessionException {
     getUserIDFromSessionOrDB();
-
     return db.getDialogDAO().deleteExercise(projid, dialogID, exid);
-/*
-
-    IDialog dialog = db.getProject(projid).getDialog(dialogID);
-    boolean delete = true;
-
-    List<Integer> deletedIDs = new ArrayList<>();
-
-    if (dialog.getKind() == DialogType.INTERPRETER) {
-      List<ClientExercise> exercises = dialog.getExercises();
-      List<ClientExercise> collect = exercises.stream().filter(clientExercise -> clientExercise.getID() == exid).collect(Collectors.toList());
-      ClientExercise clientExercise = collect.get(0);
-      int i = exercises.indexOf(clientExercise);
-      ClientExercise prev = exercises.get(i - 1);
-
-      {
-        int id = prev.getID();
-
-        logger.info("deleteATurnOrPair prev exercise " + id + " " + prev.getForeignLanguage() + " " + prev.hasEnglishAttr());
-
-        delete = db.getDialogDAO().deleteExercise(projid, dialogID, id);
-
-        logger.info("deleteATurnOrPair : delete " + dialogID + " ex " + id + " = " + delete);
-        if (delete) deletedIDs.add(id);
-      }
-    }
-
-    if (delete) {
-      delete = db.getDialogDAO().deleteExercise(projid, dialogID, exid);
-      logger.info("deleteATurnOrPair : delete " + dialogID + " ex " + exid + " = " + delete);
-      if (delete) deletedIDs.add(exid);
-    }
-
-    if (delete) {
-      logger.info("deleteATurnOrPair : refresh dialog " + dialogID);
-      db.getProjectManagement().addDialogInfo(projid, dialogID);
-    }
-
-    return deletedIDs;*/
   }
 
   /**
