@@ -54,7 +54,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
   private int userid;
   private int projid;
   private int imageid;
-  private int dominoid;
+  //private int dominoid;
   private long modified;
 
   private String fltitle;
@@ -86,7 +86,6 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
    * @param userid
    * @param projid
    * @param imageid
-   * @param dominoid
    * @param modified
    * @param unit
    * @param chapter
@@ -107,7 +106,6 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
                 int userid,
                 int projid,
                 int imageid,
-                int dominoid,
                 long modified,
                 String unit,
                 String chapter,
@@ -125,7 +123,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     this.userid = userid;
     this.projid = projid;
     this.imageid = imageid;
-    this.dominoid = dominoid;
+  //  this.dominoid = dominoid;
     this.imageRef = imageRef;
     this.modified = modified;
     this.entitle = entitle;
@@ -190,11 +188,6 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
   @Override
   public int getProjid() {
     return projid;
-  }
-
-  @Override
-  public int getDominoid() {
-    return dominoid;
   }
 
   @Override

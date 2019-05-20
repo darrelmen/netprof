@@ -49,11 +49,16 @@ import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
+import mitll.langtest.shared.user.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import static mitll.langtest.client.custom.INavigation.QC_PERMISSIONS;
 
 /**
  * Created by go22670 on 7/3/17.
@@ -114,11 +119,18 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     controller.getNavigation().showDialogIn(getItemID(container), INavigation.VIEWS.LISTEN);
   }
 
+  /**
+   * Unless you're an admin you can only see dialogs you made.
+   * @param left
+   */
   private void addYours(DivWidget left) {
     showYours(Collections.emptyList(), left);
 
+    int user = controller.getUser();
     ExerciseListRequest request =
-        new ExerciseListRequest(0, controller.getUser(), controller.getProjectID()).setSortByDate(true);
+        new ExerciseListRequest(0, user, controller.getProjectID()).setSortByDate(true);
+
+    final boolean fcanSeeAll = isCanSeeAll();
 
     controller.getDialogService().getDialogs(request,
         new AsyncCallback<ExerciseListWrapper<T>>() {
@@ -129,11 +141,31 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
           @Override
           public void onSuccess(ExerciseListWrapper<T> result) {
-            getMyLists().populateTable(result.getExercises());
+            {
+              List<T> exercises = result.getExercises();
+              if (!fcanSeeAll) {
+                exercises = exercises.stream().filter(d -> d.getUserid() == user).collect(Collectors.toList());
+              }
+              getMyLists().populateTable(exercises);
+            }
             populateUniqueListNames(result.getExercises());
             setShareHREFLater();
           }
         });
+  }
+
+  private boolean isCanSeeAll() {
+    boolean canSeeAll = controller.getUserManager().isAdmin();
+
+    if (!canSeeAll) {
+      for (Permission perm : controller.getUserManager().getPermissions()) {
+        if (QC_PERMISSIONS.contains(perm)) {
+          canSeeAll = true;
+          break;
+        }
+      }
+    }
+    return canSeeAll;
   }
 
   /**

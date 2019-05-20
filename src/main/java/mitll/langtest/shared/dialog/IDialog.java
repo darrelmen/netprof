@@ -44,12 +44,6 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable,
 
   int getProjid();
 
-  /**
-   * @deprecated
-   * @return
-   */
-  int getDominoid();
-
   long getModified();
 
   DialogType getKind();

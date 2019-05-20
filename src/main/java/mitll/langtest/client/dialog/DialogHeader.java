@@ -36,6 +36,8 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.Widget;
@@ -73,7 +75,6 @@ public class DialogHeader {
   private final INavigation.VIEWS next;
   private final ExerciseController controller;
 
-  //private static final int HINT_WIDTH = 250;
   private static final String SPACE_PRESS_AND_HOLD = "<b>Space</b> to record (press and hold.)";
 
   private String ARROW_KEY_TIP;
@@ -146,7 +147,8 @@ public class DialogHeader {
 
       //add next view arrow
       if (getNextView() != null) {
-        Widget rightArrow = getRightArrow();
+        boolean mine = dialog.getUserid() == controller.getUser();
+        Widget rightArrow = getRightArrow(mine);
         rightArrow.setWidth(sides + "%");
         row.add(rightArrow);
       }
@@ -163,7 +165,7 @@ public class DialogHeader {
     vert.addStyleName("leftTenMargin");
     vert.addStyleName("rightTenMargin");
 
-    DivWidget headingContainer = getTitleBlurb();
+//    DivWidget headingContainer = getTitleBlurb();
 //    vert.add(headingContainer);
 
     {
@@ -361,7 +363,7 @@ public class DialogHeader {
    * @return
    */
   @NotNull
-  private Widget getRightArrow() {
+  private Widget getRightArrow(boolean mine) {
     DivWidget buttonDiv = new DivWidget();
     setMinWidth(buttonDiv, ARROW_WIDTH);
 
@@ -377,7 +379,7 @@ public class DialogHeader {
       buttonDiv.add(rightButton);
     }
 
-    if (shouldShowDialogEditor() && thisView == LISTEN) {
+    if (shouldShowDialogEditor(mine) && thisView == LISTEN) {
       Button editButton = new Button(getCapitalized(TURN_EDITOR.toString()), IconType.ARROW_RIGHT, event -> controller.getNavigation().show(TURN_EDITOR));
       new TooltipHelper().createAddTooltip(editButton, getNextTooltip(), Placement.LEFT);
       styleButton(editButton);
@@ -387,21 +389,29 @@ public class DialogHeader {
 
       buttonDiv.add(editButton);
     }
+    if (thisView == LISTEN || thisView == TURN_EDITOR) {
+      new Button("Download", IconType.DOWNLOAD, event -> gotDownload());
+    }
+
     return buttonDiv;
   }
 
+  void gotDownload(){}
   private void styleButton(Button rightButton) {
     rightButton.addStyleName("leftFiveMargin");
     rightButton.addStyleName("rightTenMargin");
   }
 
-
-  private boolean shouldShowDialogEditor() {
+  private boolean shouldShowDialogEditor(boolean mine) {
     boolean isDialogMode = controller.getMode() == ProjectMode.DIALOG;
     List<Permission> temp = new ArrayList<>(DIALOG_EDITOR.getPerms());
     temp.retainAll(controller.getPermissions());
     //  logger.info("permission overlap is " + temp);
-    return isDialogMode && !temp.isEmpty();
+    boolean perm = !temp.isEmpty();
+    if (!perm) {
+      perm = mine;
+    }
+    return isDialogMode && perm;
   }
 
 

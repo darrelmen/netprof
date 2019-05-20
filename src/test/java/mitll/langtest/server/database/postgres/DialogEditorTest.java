@@ -106,6 +106,32 @@ public class DialogEditorTest extends BaseTest {
 
   }
 
+  @Test
+  public void testGetDialogs() {
+    DatabaseImpl andPopulate = getDatabase();
+    logger.warn("testGetDialogs START ==--------- ");
+
+    Project project = getProject(andPopulate);
+
+    andPopulate.waitForSetupComplete();
+    logger.info("got " + project);
+
+    IDialog dialog = project.getDialogs().iterator().next();
+    logger.info("got dialog " + dialog);
+
+    for (ClientExercise exercise : dialog.getExercises()) {
+      logger.info("new    " + exercise);
+      CommonExercise lookup = project.getExerciseByID(exercise.getID());
+      logger.info("lookup " + lookup);
+    }
+
+    andPopulate.getDialogSectionHelper(PROJECTID).report();
+    logger.warn("testGetDialog2 END ==--------- ");
+    andPopulate.close();
+
+  }
+
+
 
   private Project getProject(DatabaseImpl andPopulate) {
     Project project = andPopulate.getProject(PROJECTID, true);
@@ -892,7 +918,6 @@ public class DialogEditorTest extends BaseTest {
         USERID,
         projectid,
         -1,
-        -1,
         System.currentTimeMillis(),
         "1", "1", "orient", "", "fl Wednesday", "en",
         new ArrayList<>(),
@@ -917,7 +942,6 @@ public class DialogEditorTest extends BaseTest {
     Dialog toAdd = new Dialog(-1,
         6,
         PROJECTID,
-        -1,
         -1,
         System.currentTimeMillis(),
         "1", "1", "orient", "", "fl Friday", "en",

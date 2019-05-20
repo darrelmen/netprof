@@ -47,7 +47,7 @@ import java.util.List;
 import static mitll.langtest.client.dialog.DialogExerciseList.INTERP_COLOR;
 
 /**
- * TODO : add public/private column, and to dialog itself!
+ * TODOx : add public/private column, and to dialog itself!
  *
  * @param <T>
  */

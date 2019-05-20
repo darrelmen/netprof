@@ -752,7 +752,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       configureUIGivenUser(userID);
       lifecycleSupport.logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
     } else {
-      logger.info("gotUser ignoring got user for current user " + userID + " perms " + userManager.getPermissions());
+      if (DEBUG)  logger.info("gotUser ignoring got user for current user " + userID + " perms " + userManager.getPermissions());
       if (navigation != null) {
         showNavigation();
         navigation.showPreviousState();

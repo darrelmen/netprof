@@ -314,7 +314,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
         slickDialog.userid(),
         slickDialog.projid(),
         slickDialog.imageid(),
-        slickDialog.dominoid(),
         slickDialog.modified().getTime(),
         slickDialog.unit(),
         slickDialog.lesson(),
@@ -406,9 +405,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
   /**
    * Add exercises to dialog.
-   *
+   * <p>
    * Way too complicated - surely an easier way to do it.
-   *
+   * <p>
    * Reloads the exercises from the database - maybe hydra/score1 has altered the safety!
    *
    * @param projid
@@ -432,25 +431,27 @@ public class DialogDAO extends DAO implements IDialogDAO {
       Map<Integer, CommonExercise> idToEx = new HashMap<>();
 
       slickRelatedExercises.forEach(slickRelatedExercise -> {
-        logger.info("addExercises relation " + slickRelatedExercise);
+        if (DEBUG) logger.info("addExercises relation " + slickRelatedExercise);
+
         int exid = slickRelatedExercise.exid();
         CommonExercise exercise = idToEx.get(exid);
 
         if (exercise == null) {
-          if (!databaseImpl.getExerciseDAO(projid).refresh(exid)) {
+          if (!databaseImpl.getExerciseDAO(projid).refresh(exid)) {  // so we need to keep both netprof instances in sync
             logger.warn("addExercises : didn't refresh " + exid);
           }
 
           exercise = databaseImpl.getExercise(projid, exid);
 
-
-          boolean safeToDecode = exercise.isSafeToDecode();
-          if (safeToDecode)
-            logger.info("ex " + exercise.getID() + " safe " + safeToDecode);
-          else {
-            logger.warn("ex " + exercise.getID() + " safe " + safeToDecode);
-
+          if (exercise != null) {
+            boolean safeToDecode = exercise.isSafeToDecode();
+            if (safeToDecode) {
+              if (DEBUG) logger.info("ex " + exercise.getID() + " safe " + safeToDecode);
+            } else {
+              logger.warn("ex " + exercise.getID() + " safe " + safeToDecode);
+            }
           }
+
 //          if (exercise == null) {
 //            if (!databaseImpl.getExerciseDAO(projid).refresh(exid)) {
 //              logger.warn("addExercises : didn't refresh " + exid);
@@ -460,8 +461,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
 //          }
           int before;
           if (exercise != null) {
-
-
             if (DEBUG_ADD_EXERCISE) {
               logger.info("addExercises (" + dialogID + ") " +
                   "\n\tex #   " + exercise.getID() +
@@ -1023,7 +1022,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
         dialog.getID(),
         dialog.getUserid(),
         projid,
-        dialog.getDominoid(),
+        -1,
         dialog.getImageID(),
         new Timestamp(modified),
         new Timestamp(modified),
