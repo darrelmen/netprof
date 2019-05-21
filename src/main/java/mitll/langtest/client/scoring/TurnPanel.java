@@ -44,6 +44,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.AllHighlight;
 import mitll.langtest.client.sound.IHighlightSegment;
+import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -92,6 +93,22 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
       getElement().getStyle().setMarginRight(29, Style.Unit.PX);
     }
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify);
+  }
+
+  protected void rememberAudio() {
+    AudioAttribute latestAudio = getLatestAudio();
+    logger.info("rememberAudio : turn " + getText() + " audio is " + latestAudio);
+    rememberAudio(latestAudio);
+  }
+
+  private AudioAttribute getLatestAudio() {
+    AudioAttribute latest = null;
+    for (AudioAttribute audio : exercise.getAudioAttributes()) {
+      if (latest == null || audio.getTimestamp() > latest.getTimestamp()) {
+        latest = audio;
+      }
+    }
+    return latest;
   }
 
   @Override

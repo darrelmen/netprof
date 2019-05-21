@@ -177,7 +177,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       iHighlightSegment.clearHighlight();
     });
 
-    rememberAudio(getRegularSpeedIfAvailable(exercise));
+   // rememberAudio(getRegularSpeedIfAvailable(exercise));
+    rememberAudio();
   }
 
   private void hideEmoticon() {

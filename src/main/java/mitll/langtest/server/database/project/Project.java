@@ -862,9 +862,6 @@ public class Project implements IPronunciationLookup, IProject {
 
   public IDialog getDialog(int id) {
     return idToDialog.get(id);
-//    List<IDialog> collect = dialogs.stream().filter(dialog -> dialog.getID() == id).collect(Collectors.toList());
-//    collect.forEach(logger::info);
-//    return collect.get(0);
   }
 
   public Collection<Integer> getDialogExerciseIDs(int dialogID) {

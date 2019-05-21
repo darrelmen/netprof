@@ -261,8 +261,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       if (clientExercise.getAudioAttributes().isEmpty()) {
         playAudioPanel.setEnabled(false);
       } else {
-        AudioAttribute next = clientExercise.getAudioAttributes().iterator().next();
-        if (DEBUG) {
+        AudioAttribute next = getLatestAudio();
+
+        if (DEBUG || true) {
           logger.info("addWidgets :binding " + next + " to play for turn for " + getExID());
         }
         playAudioPanel.rememberAudio(next);
@@ -271,8 +272,6 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       playAudioPanel.showPlayButton();
 
       Widget playButton = playAudioPanel.getPlayButton();
-
-//      ((HasFocusHandlers) playButton).addFocusHandler(event -> grabFocus());
       ((Focusable) playButton).setTabIndex(-1);
 
       buttonContainer.add(playButton);
@@ -284,7 +283,6 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     wrapper.add(buttonContainer);
 
     addPressAndHoldStyleForRecordButton(postAudioRecordButton);
-    // postAudioRecordButton.addFocusHandler(event -> grabFocus());
     ((Focusable) postAudioRecordButton).setTabIndex(-1);
 
     DivWidget textBoxContainer = new DivWidget();
@@ -307,6 +305,17 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     }
     return wrapper;
   }
+
+  private AudioAttribute getLatestAudio() {
+    AudioAttribute latest = null;
+    for (AudioAttribute audio : clientExercise.getAudioAttributes()) {
+      if (latest == null || audio.getTimestamp() > latest.getTimestamp()) {
+        latest = audio;
+      }
+    }
+    return latest;
+  }
+
 
   @NotNull
   private HTML getTurnFeedback() {
@@ -613,27 +622,31 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
           showOOVResult(result);
 
-          controller.getExerciseService().updateText(projectID, dialogID, exID, audioID, s, new AsyncCallback<OOVWordsAndUpdate>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              controller.handleNonFatalError("updating text...", caught);
-
-              String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(caught);
-              logger.info("logException stack " + exceptionAsString);
-            }
-
-            @Override
-            public void onSuccess(OOVWordsAndUpdate result) {
-              // showOOVResult(result);
-              logger.info("OK, update was " + result);
-              if (moveToNextTurn) {
-                turnContainer.gotForward(outer);
-              }
-            }
-          });
+          updateTextViaExerciseService(projectID, exID, audioID, s, moveToNextTurn, outer);
         }
       });
     }
+  }
+
+  private void updateTextViaExerciseService(int projectID, int exID, int audioID, String s, boolean moveToNextTurn, EditorTurn outer) {
+    controller.getExerciseService().updateText(projectID, dialogID, exID, audioID, s, new AsyncCallback<OOVWordsAndUpdate>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("updating text...", caught);
+
+        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(caught);
+        logger.info("logException stack " + exceptionAsString);
+      }
+
+      @Override
+      public void onSuccess(OOVWordsAndUpdate result) {
+        // showOOVResult(result);
+        logger.info("OK, update was " + result);
+        if (moveToNextTurn) {
+          turnContainer.gotForward(outer);
+        }
+      }
+    });
   }
 
   private void showOOVResult(OOVWordsAndUpdate result) {
@@ -759,10 +772,11 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
     if (audioAnswer.isValid()) {
       turnFeedback.setHTML("");
+
       AudioAttribute audioAttribute = audioAnswer.getAudioAttribute();
-      String audioRef = audioAttribute.getAudioRef();
 
       if (DEBUG) {
+        String audioRef = audioAttribute.getAudioRef();
         logger.info("useResult (" + audioAttribute.getUniqueID() + ") got back " + audioRef);
       }
 

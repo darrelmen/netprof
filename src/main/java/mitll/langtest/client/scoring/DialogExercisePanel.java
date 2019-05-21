@@ -225,10 +225,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
   void makePlayAudio(T e, DivWidget flContainer) {
     setPlayAudio(new HeadlessPlayAudio(controller.getSoundManager(), listenView));
     alignmentFetcher.setPlayAudio(getPlayAudio());
-    rememberAudio(getRegularSpeedIfAvailable(e));
+    rememberAudio();
 //    } else {
 //      logger.warning("makePlayAudio no audio in audio attributes " + e.getAudioAttributes() + " for exercise " + e.getID());
 //    }
+  }
+
+  protected void rememberAudio() {
+    rememberAudio(getRegularSpeedIfAvailable(exercise));
   }
 
   /**
@@ -256,7 +260,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
     }
   }
 
-  AudioAttribute getRegularSpeedIfAvailable(T e) {
+  private  AudioAttribute getRegularSpeedIfAvailable(T e) {
     AudioAttribute candidate = e.getRegularSpeed();
     return candidate == null ? e.getFirst() : candidate;
   }

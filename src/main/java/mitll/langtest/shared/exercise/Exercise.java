@@ -423,14 +423,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.english = englishSentence;
   }
 
-  /**
-   * @return
-   * @see mitll.langtest.server.sorter.ExerciseSorter#phoneCompFirst
-   */
-//  @Override
-//  public List<String> getFirstPron() {
-//    return firstPron;
-//  }
   @Override
   public List<String> getTokens() {
     return tokens;
@@ -443,15 +435,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
   public void setTokens(List<String> tokens) {
     this.tokens = tokens;
   }
-
-  /**
-   * @param firstPron
-   * @see mitll.langtest.server.audio.AudioFileHelper#countPhones
-   */
-//  @Override
-//  public void setFirstPron(List<String> firstPron) {
-//    this.firstPron = firstPron;
-//  }
 
   /**
    * @param updateTime

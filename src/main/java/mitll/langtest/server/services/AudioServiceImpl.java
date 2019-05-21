@@ -1087,7 +1087,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @see RecordButton.RecordingListener#stopRecording
    * @see RecordButton.RecordingListener#stopRecording
    */
-  @Override
+/*  @Override
   public AudioAnswer writeAudioFile(String base64EncodedString,
                                     AudioContext audioContext,
 
@@ -1097,7 +1097,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   ) throws DominoSessionException {
     return getAudioAnswer(base64EncodedString, audioContext,
         deviceType, device, decoderOptions, null, getProjectIDFromUser());
-  }
+  }*/
 
   /**
    * Does alignment!
@@ -1156,7 +1156,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       ((Exercise) commonExercise).setProjectID(audioContextProjid);
       audioContext.setExid(commonExercise.getID());
     }
-
 
     if (commonExercise == null && isExistingExercise) {
       logger.warn("getAudioAnswer for " + project.getLanguage() + " : couldn't find exerciseID with id '" + exerciseID + "'");

@@ -47,6 +47,8 @@ import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.IDialog;
+import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.project.Language;
@@ -577,6 +579,13 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
                     project.getAudioFileHelper().getSmallVocabDecoder(), true)
         );
 
+        dialog.getExercises().forEach(clientExercise -> {
+              AudioAttribute latestAudio = getLatestAudio(clientExercise);
+              String info = latestAudio == null ? "" : latestAudio.getUniqueID() + " : " + latestAudio.getTranscript() + " : " + latestAudio.getAudioRef();
+              logger.info("ex " + clientExercise.getID() + " " + clientExercise.getForeignLanguage() + " : " + clientExercise.getAudioAttributes().size() + " : " + info);
+            }
+        );
+
     /*    iDialog.getExercises().forEach(exercise ->
             logger.info("lang for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " " + language)
         );*/
@@ -586,6 +595,16 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     }
 
     return dialog;
+  }
+
+  private AudioAttribute getLatestAudio(ClientExercise clientExercise) {
+    AudioAttribute latest = null;
+    for (AudioAttribute audio : clientExercise.getAudioAttributes()) {
+      if (latest == null || audio.getTimestamp() > latest.getTimestamp()) {
+        latest = audio;
+      }
+    }
+    return latest;
   }
 
   /**

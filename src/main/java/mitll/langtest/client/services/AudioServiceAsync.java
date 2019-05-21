@@ -58,14 +58,14 @@ public interface AudioServiceAsync {
    * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile
    */
-  void writeAudioFile(String base64EncodedString,
+/*  void writeAudioFile(String base64EncodedString,
                       AudioContext audioContext,
 
                       String deviceType,
                       String device,
                       DecoderOptions decoderOptions,
 
-                      AsyncCallback<AudioAnswer> async);
+                      AsyncCallback<AudioAnswer> async);*/
 
   /**
    * @param reqid

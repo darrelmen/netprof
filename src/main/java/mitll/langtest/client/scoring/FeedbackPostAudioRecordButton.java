@@ -54,9 +54,7 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
    * @param controller
    * @see NoFeedbackRecordAudioPanel#makePlayAudioPanel
    */
-  FeedbackPostAudioRecordButton(int exid,
-                                RecordingAudioListener simpleRecordAudioPanel,
-                                ExerciseController controller) {
+  FeedbackPostAudioRecordButton(int exid, RecordingAudioListener simpleRecordAudioPanel, ExerciseController controller) {
     super(exid,
         controller,
         "",
@@ -113,7 +111,6 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
   }
 
   /**
-   *
    * @param exid
    * @param validity
    * @param dynamicRange
@@ -122,7 +119,7 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
    */
   @Override
   public void useInvalidResult(int exid, Validity validity, double dynamicRange) {
-   // logger.info("useInvalidResult " + validity);
+    // logger.info("useInvalidResult " + validity);
     super.useInvalidResult(exid, validity, dynamicRange);
     simpleRecordAudioPanel.useInvalidResult(exid, validity == Validity.OK);
   }

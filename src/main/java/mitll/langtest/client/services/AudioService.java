@@ -65,11 +65,13 @@ public interface AudioService extends RemoteService {
    * @see mitll.langtest.client.scoring.PostAudioRecordButton#postAudioFile
    * @see mitll.langtest.client.recorder.RecordButtonPanel#postAudioFile(Panel, String)
    */
+/*
   AudioAnswer writeAudioFile(String base64EncodedString,
                              AudioContext audioContext,
                              String deviceType,
                              String device,
                              DecoderOptions decoderOptions) throws DominoSessionException;
+*/
 
   /**
    * TODO : why exerciseID a String
