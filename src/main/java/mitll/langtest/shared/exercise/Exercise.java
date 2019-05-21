@@ -272,6 +272,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.dominoID = exercise.getDominoID();
     this.oldid = exercise.getOldID();
     this.tokens = exercise.getTokens();
+    this.parentExerciseID = exercise.getParentExerciseID();
 
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());

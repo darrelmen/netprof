@@ -144,7 +144,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
       // TODO : I feel like I did this before...?
       // put sound at end...
-   //   reorderTypes(types, );
+      //   reorderTypes(types, );
       // }
       //if (DEBUG)
 //        logger.warn("getTypeOrder types " + types);
@@ -907,6 +907,8 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   }
 
   /**
+   * TODO : figure out why we're seeing : removeExerciseToLesson no lesson for Domino Project/780 in []
+   *
    * @param exercise
    * @param type
    * @param unitName
@@ -921,7 +923,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     } else {
       Lesson<T> tLesson = unit.get(unitName);
       if (tLesson == null) {
-        logger.error("removeExerciseToLesson no lesson for " + type + "/" + unitName + " in " + unit.keySet());
+        logger.warn("removeExerciseToLesson no lesson for type '" + type + "' unit name '" + unitName + "' in '" + unit.keySet() + "'");
         return false;
       } else {
         return tLesson.remove(exercise);
