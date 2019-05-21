@@ -340,7 +340,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     //  logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
     Map<Integer, AlignmentAndScore> audioIDToAlignment =
         // recalcAlignments(projid, audioIDs, getUserIDFromSessionOrDB(), audioIDMap, db.getProject(projid).hasModel());
-        project == null ? Collections.emptyMap() : getCached(projid, project, audioIDs, audioIDMap);
+        project == null ? Collections.emptyMap() : getCached(project.getLanguageEnum(), audioIDs, audioIDMap);
 
     return audioIDToAlignment;
     //  logger.info("getAligments for " + projid + " and " + audioIDs + " found " + idToAlignment.size());
@@ -353,8 +353,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return audioToResult;
   }
 
-  private Map<Integer, AlignmentAndScore> getCached(int projid,
-                                                    Project project,
+  private Map<Integer, AlignmentAndScore> getCached(Language languageEnum,
                                                     Collection<Integer> audioIDs,
 
                                                     Map<Integer, ISlimResult> audioToResult) {
@@ -362,12 +361,13 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
 
     // if (hasModel) {
 //      logger.info("recalcAlignments recalc " + audioIDs.size() + " audio ids for project #" + projid);
-    if (audioIDs.isEmpty()) logger.error("recalcAlignments huh? no audio for " + projid);
+
+    //  if (audioIDs.isEmpty()) logger.error("recalcAlignments huh? no audio for " + projid);
 
     //Set<Integer> completed = new HashSet<>(audioToResult.size());
 //      audioIDs.forEach(audioID ->
 //          recalcOneOrGetCached(projid, audioID, audioFileHelper, userIDFromSession, audioToResult.get(audioID), idToAlignment, completed, audioIDs.size()));
-    Language languageEnum = project.getLanguageEnum();
+    // Language languageEnum = project.getLanguageEnum();
 
     audioIDs.forEach(audioID ->
     {

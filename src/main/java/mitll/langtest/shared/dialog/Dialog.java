@@ -33,7 +33,10 @@ import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -54,7 +57,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
   private int userid;
   private int projid;
   private int imageid;
-  //private int dominoid;
+
   private long modified;
 
   private String fltitle;
@@ -79,6 +82,33 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
   private float score = -1;
 
   public Dialog() {
+  }
+
+  public Dialog(IDialog copy) {
+    this(copy.getID(),
+        copy.getUserid(),
+        copy.getProjid(),
+        copy.getImageID(),
+        copy.getModified(),
+        copy.getUnit(),
+        copy.getChapter(),
+        copy.getOrientation(),
+        copy.getImageRef(),
+        copy.getForeignLanguage(),
+        copy.getEnglish(),
+
+        new ArrayList<>(),//copy.getAttributes(),
+        new ArrayList<>(),// copy.getExercises(),
+        new ArrayList<>(),//copy.getCoreVocabulary(),
+
+        copy.getKind(),
+        copy.getCountryCode(),
+        copy.isPrivate()
+    );
+
+    copy.getAttributes().forEach(attr -> attributes.add(new ExerciseAttribute(attr)));
+    copy.getExercises().forEach(ex -> exercises.add(new Exercise(ex.asCommon())));
+    copy.getCoreVocabulary().forEach(ex -> coreVocabulary.add(new Exercise(ex.asCommon())));
   }
 
   /**
@@ -123,7 +153,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     this.userid = userid;
     this.projid = projid;
     this.imageid = imageid;
-  //  this.dominoid = dominoid;
+
     this.imageRef = imageRef;
     this.modified = modified;
     this.entitle = entitle;
@@ -290,7 +320,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     List<ExerciseAttribute> speakers = attributes
         .stream()
         .filter(exerciseAttribute -> (exerciseAttribute.getProperty().toLowerCase().startsWith(SPEAKER)))
-      //  .sorted(Comparator.comparing(Pair::getProperty))
+        //  .sorted(Comparator.comparing(Pair::getProperty))
         .collect(Collectors.toList());
 
     return speakers.stream().map(Pair::getValue)

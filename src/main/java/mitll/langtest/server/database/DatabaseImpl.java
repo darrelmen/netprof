@@ -1799,7 +1799,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       for (CommonExercise ex : copyAsExercises) {
         userListManager.addAnnotations(ex);
         if (smallVocabDecoder != null) {
-          int i = getAudioDAO().attachAudioToExercise(ex, language, idToMini, smallVocabDecoder);
+          int i = getAudioDAO().attachAudioToExercise(ex, language, idToMini, smallVocabDecoder,false);
 
           if (DEBUG_AUDIO_EXPORT) {
             logger.info("doAudioExport attached " + i + " cuts to " + ex.getID());

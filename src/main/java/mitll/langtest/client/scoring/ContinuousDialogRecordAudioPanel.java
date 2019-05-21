@@ -77,9 +77,7 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
   public void gotShortDurationRecording() {
   //  logger.info("gotShortDurationRecording");
     super.gotShortDurationRecording();
-
     getPostAudioRecordButton().showPopup("Recording too short - press and hold to record.");
-
   }
 
   @Override

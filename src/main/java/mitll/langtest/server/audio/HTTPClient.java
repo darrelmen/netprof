@@ -121,7 +121,7 @@ public class HTTPClient {
       logger.debug("isAvailable for " + webserviceIP + " " + webservicePort + " " + service + " :" + fnf);
       return true;
     } catch (IOException e) {
-      logger.warn("isAvailable for " +url+ " : Got " + e);
+      logger.warn("isAvailable for " + url + " : Got " + e);
       return false;
     }
   }
@@ -131,7 +131,7 @@ public class HTTPClient {
    * @return
    * @see #isAvailable
    */
-  public String readFromGET(String url) throws IOException {
+  private String readFromGET(String url) throws IOException {
     HttpURLConnection httpConn = setupGetHttpConn(url);
     String receive = receive(httpConn);
     httpConn.disconnect();
@@ -148,10 +148,10 @@ public class HTTPClient {
   }
 
   /**
-   * @see #HTTPClient(String)
    * @param url
    * @return
    * @throws IOException
+   * @see #HTTPClient(String)
    */
   private HttpURLConnection setupPostHttpConn(String url) throws IOException {
     HttpURLConnection httpConn = getHttpURLConnection(url);
@@ -272,12 +272,17 @@ public class HTTPClient {
       logError(input, ce, "receiving");
       return "";
     } catch (IOException e) {
-      logger.error("sendAndReceive receiving from " + input + " got " + e, e);
+      logger.error("sendAndReceive receiving " +
+              "\n\tfrom    " + input +
+              "\n\tcode    " + httpConn.getResponseCode() +
+              "\n\tmessage " + httpConn.getResponseMessage() +
+              "\n\tgot     " + e,
+          e);
       throw e;
     }
   }
 
-  public String sendAndReceiveCookie(String input) throws IOException {
+  String sendAndReceiveCookie(String input) throws IOException {
     try {
       //logger.info("sending START " + input.length());
       send(input);

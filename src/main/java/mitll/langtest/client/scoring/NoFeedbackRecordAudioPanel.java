@@ -36,6 +36,7 @@ import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.ScoredExercise;
 
@@ -153,6 +154,11 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
       protected boolean shouldUseRecordingStopDelay() {
         return outer.shouldUseRecordingStopDelay();
       }
+
+      @Override
+      protected AudioType getAudioType() {
+        return outer.getAudioType();
+      }
     };
     postAudioRecordButton.addStyleName("leftFiveMargin");
     postAudioRecordButton.setVisible(controller.getProjectStartupInfo().isHasModel());
@@ -180,6 +186,8 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   protected boolean shouldAddToAudioTable() {
     return false;
   }
+
+  protected AudioType getAudioType() { return AudioType.LEARN; }
 
   protected boolean useMicrophoneIcon() {
     return false;

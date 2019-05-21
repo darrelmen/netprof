@@ -50,6 +50,7 @@ import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.*;
 import mitll.langtest.shared.answer.AudioAnswer;
+import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -218,6 +219,11 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
           @Override
           protected boolean shouldAddToAudioTable() {
             return true;
+          }
+
+          @Override
+          protected AudioType getAudioType() {
+            return AudioType.REGULAR;
           }
 
           @Override

@@ -151,9 +151,8 @@ public class KaldiSupport implements IKaldiSupport {
             .setStatus(ERROR)
             .setLog(e.getMessage());
       }
-
     } catch (Exception e) {
-      logger.error("Got " + e, e);
+      logger.error("runKaldi : got " + e);
       return getHydraOutputForError(e.getMessage());
     }
   }
@@ -302,8 +301,7 @@ public class KaldiSupport implements IKaldiSupport {
             iterator.remove();
             logger.info("getInvalidCharRanges : list after  " + pairs);
             break;
-          }
-          else {
+          } else {
             iterator.previous();
           }
         }
@@ -314,7 +312,7 @@ public class KaldiSupport implements IKaldiSupport {
       }
     }
 
-    logger.info("getInvalidCharRanges : list finally " +pairs);
+    logger.info("getInvalidCharRanges : list finally " + pairs);
 
     return pairs;
   }

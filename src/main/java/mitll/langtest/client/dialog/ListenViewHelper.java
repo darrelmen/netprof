@@ -679,7 +679,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @param index
    * @see #addTurnForEachExercise(DivWidget, String, String, List)
    */
-  protected T addTurn(DivWidget rowOne, ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
+   T addTurn(DivWidget rowOne, ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
     T turn = getTurnPanel(clientExercise, columns, prevColumn, index);
 
     allTurns.add(index, turn);

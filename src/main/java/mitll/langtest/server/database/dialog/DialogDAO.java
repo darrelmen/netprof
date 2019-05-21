@@ -71,7 +71,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
   public static final String SPEAKER_PREFIX = "S-";
 
   public static final boolean DEBUG = false;
-  public static final boolean DEBUG_ADD_EXERCISE = true;
+  private static final boolean DEBUG_ADD_EXERCISE = true;
 
   private final DialogDAOWrapper dao;
 
@@ -218,7 +218,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
                                 Map<Integer, List<SlickRelatedExercise>> dialogIDToCoreRelated) {
     IProject project = databaseImpl.getIProject(projid);
 
-    logger.info("getDialogs found " + idToDialog.size() + " dialogs for " + project);
+    if (DEBUG) logger.info("getDialogs found " + idToDialog.size() + " dialogs for " + project);
 
     dialogAttributeJoinHelper.getAllJoinByProject(projid).forEach((dialogID, slickDialogAttributeJoins) -> {
       Dialog dialog = idToDialog.get(dialogID);
@@ -306,7 +306,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @see #getDialogs(int)
    */
   private Dialog makeDialog(SlickDialog slickDialog) {
-    boolean isprivate = slickDialog.isprivate();
+   // boolean isprivate = slickDialog.isprivate();
     //  logger.info("makeDialog : " + isprivate + " " + slickDialog.id());
 
     Dialog dialog = new Dialog(
@@ -326,7 +326,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
         new ArrayList<>(),
         getDialogType(slickDialog),
         database.getProject(slickDialog.projid()).getProject().countrycode(),
-        isprivate);
+        slickDialog.isprivate());
 
 //    logger.info("makeDialog : " + dialog);
 

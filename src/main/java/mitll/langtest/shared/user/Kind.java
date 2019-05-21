@@ -47,6 +47,7 @@ public enum Kind implements IsSerializable {
   SPAM("Spam Account", "SPM", true),                   // for marking nuisance accounts
 
   PROJECT_ADMIN("Project Admin", "PrAdmin", true),    // invite new users, admin accounts below
+  GROUP_ADMIN("Group Admin", "GrAM", true),    // group admins...
   ADMIN("System Admin", "UM", true);                  // invite project admins, closed set determined by server properties
 
   String name;

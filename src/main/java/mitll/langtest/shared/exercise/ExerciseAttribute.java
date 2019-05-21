@@ -44,19 +44,23 @@ public class ExerciseAttribute extends Pair implements Comparable<ExerciseAttrib
   }
 
   /**
-   * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#addAttribute
    * @param status
    * @param value
+   * @see mitll.langtest.server.database.exercise.DominoExerciseDAO#addAttribute
    */
   public ExerciseAttribute(String status, String value) {
     super(status, value);
   }
 
+  public ExerciseAttribute(ExerciseAttribute other) {
+    super(other.getProperty(), other.getValue());
+  }
+
   /**
-   * @see mitll.langtest.server.database.userexercise.AttributeHelper#makeOrGet(Map, SlickExerciseAttribute)
    * @param status
    * @param value
    * @param isFacet
+   * @see mitll.langtest.server.database.userexercise.AttributeHelper#makeOrGet(Map, SlickExerciseAttribute)
    */
   public ExerciseAttribute(String status, String value, boolean isFacet) {
     super(status, value);

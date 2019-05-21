@@ -349,15 +349,19 @@ public abstract class BaseAudioDAO extends DAO {
    * @param firstExercise
    * @param language
    * @param smallVocabDecoder
+   * @param debug
    * @see mitll.langtest.server.services.ExerciseServiceImpl#attachAudio
    * @see DatabaseImpl#writeUserListAudio(OutputStream, int, int, AudioExportOptions)
    */
-  public int attachAudioToExercise(ClientExercise firstExercise, Language language, Map<Integer, MiniUser> idToMini, SmallVocabDecoder smallVocabDecoder) {
+  public int attachAudioToExercise(ClientExercise firstExercise,
+                                   Language language,
+                                   Map<Integer, MiniUser> idToMini,
+                                   SmallVocabDecoder smallVocabDecoder, boolean debug) {
     long then = System.currentTimeMillis();
     int id = firstExercise.getID();
     Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(id, idToMini);
     long now = System.currentTimeMillis();
-    boolean debugAttach = DEBUG_ATTACH;// || firstExercise.getID() == 10711;
+    boolean debugAttach = DEBUG_ATTACH || debug;// || firstExercise.getID() == 10711;
 
     if (now - then > WARN_DURATION || debugAttach)
       logger.warn("attachAudioToExercise took " + (now - then) +
@@ -819,7 +823,6 @@ public abstract class BaseAudioDAO extends DAO {
                                   Map<Integer, String> exToTranscript,
                                   Set<Integer> idsOfRecordedExercisesForMales,
                                   Set<Integer> idsOfRecordedExercisesForFemales);
-
 
 
   /**

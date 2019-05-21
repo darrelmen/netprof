@@ -73,7 +73,7 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
       int projectID = project.getID();
       Map<Integer, AlignmentOutput> audioToAlignment = project.getAudioToAlignment();
 
-      logger.info("addAlignmentOutput : For project " + projectID + " found " + audioToAlignment.size() +
+      if (DEBUG) logger.info("addAlignmentOutput : For project " + projectID + " found " + audioToAlignment.size() +
           " audio->alignment entries, trying to marry to " + toAddAudioTo.size() + " exercises");
 
       Map<Boolean, List<ClientExercise>> collect = toAddAudioTo.stream().collect(Collectors.partitioningBy(ClientExercise::hasEnglishAttr));
@@ -81,7 +81,7 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
       List<ClientExercise> englishEx = collect.get(true);
       List<ClientExercise> flEx = collect.get(false);
 
-      logger.info("addAlignmentOutput found " + englishEx.size() + " eng, " + flEx.size() + " fl exercises");
+      if (DEBUG) logger.info("addAlignmentOutput found " + englishEx.size() + " eng, " + flEx.size() + " fl exercises");
 
       audioToAlignment.putAll(getIDToAlignment(englishEx, projectID, audioToAlignment, Language.ENGLISH));
       audioToAlignment.putAll(getIDToAlignment(flEx, projectID, audioToAlignment, project.getLanguageEnum()));

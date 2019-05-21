@@ -45,6 +45,7 @@ import mitll.langtest.server.property.ServerInitializationManagerNetProf;
 import mitll.langtest.server.scoring.AlignmentHelper;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
+import mitll.langtest.shared.dialog.Dialog;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
@@ -295,9 +296,9 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   }
 
   /**
-   * @see ResultServiceImpl#fixAudioPaths(int, Collection)
    * @param project
    * @return
+   * @see ResultServiceImpl#fixAudioPaths(int, Collection)
    */
   protected String getLanguage(Project project) {
     if (project == null) {
@@ -535,7 +536,6 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
       logger.debug("shareDB : hmm... found existing database reference " + databaseReference);
     }
     servletContext.setAttribute(DATABASE_REFERENCE, db);
-//    logger.info("shareDB shared db " + servletContext.getAttribute(DATABASE_REFERENCE));
   }
 
   @NotNull
@@ -557,18 +557,24 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @throws DominoSessionException
    */
   public IDialog getDialog(int id) throws DominoSessionException {
-    IDialog iDialog = getOneDialog(id);
+    IDialog oDialog = getOneDialog(id);
 
-    //  logger.info("getDialog get dialog " + id + "\n\treturns " + iDialog);
+    IDialog dialog = null;
+    if (oDialog != null) {
+      if (DEBUG) logger.info("getDialog get dialog " + id + "\n\treturns " + oDialog.getID());
 
-    if (iDialog != null) {
-      int projid = iDialog.getProjid();
+      dialog = new Dialog(oDialog);
+
+      int projid = dialog.getProjid();
       Project project = db.getProject(projid);
 
       {
         Language language = project.getLanguageEnum();
-        iDialog.getExercises().forEach(clientExercise ->
-            db.getAudioDAO().attachAudioToExercise(clientExercise, language, new HashMap<>(), project.getAudioFileHelper().getSmallVocabDecoder())
+
+        dialog.getExercises().forEach(clientExercise ->
+            db.getAudioDAO()
+                .attachAudioToExercise(clientExercise, language, new HashMap<>(),
+                    project.getAudioFileHelper().getSmallVocabDecoder(), true)
         );
 
     /*    iDialog.getExercises().forEach(exercise ->
@@ -576,10 +582,10 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
         );*/
       }
 
-      new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(project, iDialog.getExercises());
+      new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(project, dialog.getExercises());
     }
 
-    return iDialog;
+    return dialog;
   }
 
   /**
@@ -588,7 +594,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @throws DominoSessionException
    * @see DialogServiceImpl#addEmptyExercises
    */
-  IDialog getOneDialog(int id) throws DominoSessionException {
+  private IDialog getOneDialog(int id) throws DominoSessionException {
     return getOneDialog(getUserIDFromSessionOrDB(), id);
   }
 
@@ -629,9 +635,9 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   }
 
   /**
-   * @see DialogServiceImpl#getDialogs(int)
    * @param userIDFromSessionOrDB
    * @return
+   * @see DialogServiceImpl#getDialogs(int)
    */
   protected Collection<IDialog> getDialogs(int userIDFromSessionOrDB) {
     int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);

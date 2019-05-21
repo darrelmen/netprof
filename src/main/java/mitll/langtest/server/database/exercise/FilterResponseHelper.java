@@ -601,11 +601,15 @@ public class FilterResponseHelper implements IResponseFilter {
     for (CommonExercise exercise : exercises) {
       if (audioAnnos.contains(exercise.getID())) {
         copy.add(exercise);
-        logger.info("filterByOnlyAnno for " + exercise.getID() +
-            " parent is " + exercise.getParentExerciseID());
+        if (DEBUG) {
+          logger.info("filterByOnlyAnno for " + exercise.getID() + " parent is " + exercise.getParentExerciseID());
+        }
       }
     }
-    logger.info("filterByOnlyAnno from " + exercises.size() + " to " + copy.size());
+    if (DEBUG) {
+      logger.info("filterByOnlyAnno from " + exercises.size() + " to " + copy.size());
+    }
+
     return copy;
   }
 

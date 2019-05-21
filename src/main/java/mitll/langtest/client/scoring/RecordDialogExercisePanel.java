@@ -193,7 +193,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   }
 
   /**
-   * TODOx : do this better - should
+   * Don't show emoticons for english turns.
    *
    * @see RehearseViewHelper#showScores
    * @see #switchAudioToStudent
@@ -201,7 +201,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   @Override
   public void showScoreInfo() {
     //   logger.info("showScoreInfo for " + this);
-    showEmoticon();
+    if (!exercise.hasEnglishAttr()) {
+      showEmoticon();
+    }
 
     if (transcriptToHighlight == null) {
       if (studentAudioAttribute != null) {
@@ -397,9 +399,10 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
           flContainer.addStyleName("floatRight");
         }
       }
-    } else {
-      //logger.warning("addWidgets : hide record button for " + getText());
     }
+    //else {
+      //logger.warning("addWidgets : hide record button for " + getText());
+   // }
 
     add(flContainer);
 

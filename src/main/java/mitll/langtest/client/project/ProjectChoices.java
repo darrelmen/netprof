@@ -171,7 +171,7 @@ public class ProjectChoices extends ThumbnailChoices {
 
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_CLICK = false;
+  private static final boolean DEBUG_CLICK = true;
 
   /**
    * @param langTest
@@ -1151,15 +1151,17 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {
     List<SlimProject> children = projectForLang.getChildren();
-    if (DEBUG_CLICK) logger.info("gotClickOnFlag project " + projid + " has " + children + " name " + name);
+    if (DEBUG_CLICK) logger.info("gotClickOnFlag project " + projid + " has " + children.size() + " children, name " + name);
 
-    if (children.size() == 2) {
+/*    if (children.size() == 2) {
       Set<ProjectMode> names = new HashSet<>();
       children.forEach(slimProject -> names.add(slimProject.getMode()));
       if (names.contains(ProjectMode.VOCABULARY) && names.contains(ProjectMode.DIALOG)) {
-        name = "Mode";
+      //  name = "Mode";
+
+        if (DEBUG_CLICK) logger.info("gotClickOnFlag  name " + name);
       }
-    }
+    }*/
 
     NavLink breadcrumb = uiLifecycle.makeBreadcrumb(name);
     if (children.size() < 2) {

@@ -49,7 +49,7 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable,
   DialogType getKind();
 
   int getImageID();
-
+  String getCountryCode();
   String getImageRef();
 
   String getOrientation();
