@@ -167,7 +167,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 */
 
   private static final long STALE_DUR = 24L * 60L * 60L * 1000L;
- // private static final boolean SWITCH_USER_PROJECT = false;
+  // private static final boolean SWITCH_USER_PROJECT = false;
   private static final String ACTIVE = "active";
   private static final String EMAIL = "email";
   public static final String UNKNOWN = "Unknown";
@@ -232,6 +232,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   /**
    * Try to deal in a way that doesn't collapse multiple users into one.
+   *
    * @param key
    * @return
    */
@@ -301,7 +302,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       delegate = (IUserServiceDelegate) attribute;
       pool = (Mongo) servletContext.getAttribute(MONGO_ATT_NAME);
       logger.info("DominoUserDAOImpl got " +
-          "\n\tpool reference " + pool+
+          "\n\tpool reference " + pool +
           "\n\tdelegate       " + delegate.getClass()
       );
       serializer = (JSONSerializer) servletContext.getAttribute(JSON_SERIALIZER);
@@ -440,10 +441,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
   }
 
+  /**
+   * Hack for group admins to map to project admin....
+   */
   private void populateRoles() {
     for (Kind kind : Kind.values()) {
       roleToKind.put(kind.getRole(), kind);
     }
+    roleToKind.put(GROUP_ADMIN.getRole(), PROJECT_ADMIN);
   }
 
   @Override
@@ -540,7 +545,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       }
 
       dominoImportUser = delegate.getUser(IMPORT_USER);
-    //  DBUser defaultDBUser = delegate.lookupDBUser(defaultUser);
+      //  DBUser defaultDBUser = delegate.lookupDBUser(defaultUser);
     }
   }
 
@@ -1506,7 +1511,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
     return language;
   }*/
-
   private Language getLanguage(String lang) {
     Language language = Language.UNKNOWN;
     try {
@@ -1993,9 +1997,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         boolean b = doUpdate(dbUser);
         if (b) {
           refresh(userid);
-        }
-        else {
-          logger.warn("addTeacherRole couldn't update " +dbUser);
+        } else {
+          logger.warn("addTeacherRole couldn't update " + dbUser);
         }
         return b;
       }

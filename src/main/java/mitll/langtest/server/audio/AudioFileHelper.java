@@ -2433,22 +2433,27 @@ public class AudioFileHelper implements AlignDecode {
       File file = new File(dictFile);
       this.dictModified = file.lastModified();
 
-      logger.info("makeDict (" + project.getID() + " " + project.getName() + " " + project.getLanguageEnum().toDisplay() +
+      String s = project.getLanguageEnum().toDisplay();
+      logger.info("makeDict (" + project.getID() + " " + project.getName() + " " + s +
           ") read " + file.getAbsolutePath() + " with mod date " + new Date(dictModified));
 
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
-      long now = System.currentTimeMillis();
-      int size = htkDictionary.size(); // force read from lazy val
-      if (now - then > 10) {
-        logger.info("makeDict for " + getLanguage() + " read" +
-            " dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
+
+      {
+        long now = System.currentTimeMillis();
+        int size = htkDictionary.size(); // force read from lazy val
+        if (now - then > 10) {
+          logger.info("makeDict for " + s + " read" +
+              " dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
+        }
       }
       return htkDictionary;
     } else {
       if (hasModel()) {
         if (new File(serverProps.getMediaDir()).exists()) {
-          logger.warn("\n----->>>> makeDict : Can't find dict file at " + dictFile);
-          logger.warn("\nThis is an error if you see this on hydra or hydra2 and not a problem on netprof.");
+          logger.warn(
+              "makeDict : Can't find dict file at " + dictFile +
+                  "\nThis is an error if you see this on hydra or hydra2 and not a problem on netprof.");
         } else {
           logger.debug("makeDict : NOTE: Can't find dict file at " + dictFile);
         }
