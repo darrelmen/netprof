@@ -36,24 +36,30 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
+import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.IOException;
+
+import static mitll.langtest.server.audio.AudioConversion.LANGTEST_IMAGES_NEW_PRO_F_1_PNG;
 
 public class PathWriter {
   private static final Logger logger = LogManager.getLogger(PathWriter.class);
   private static final String REFERENCE_AUDIO = "reference audio";
   private final File bestDir;
   private final boolean foundBestDir;
+  private final ServletContext servletContext;
 
   /**
    * Do some sanity checks...
    *
    * @param properties
+   * @param servletContext
    * @see mitll.langtest.server.services.AudioServiceImpl#init
    */
-  public PathWriter(ServerProperties properties) {
+  public PathWriter(ServerProperties properties, ServletContext servletContext) {
     bestDir = new File(properties.getMediaDir());
     foundBestDir = bestDir.exists();
+    this.servletContext = servletContext;
 
     doSanityCheckOnDir(bestDir, REFERENCE_AUDIO);
   }
@@ -131,11 +137,10 @@ public class PathWriter {
     }
     String s = getAudioConversion(serverProperties).writeCompressedVersions(destination, overwrite, trackInfo, true);
 
-  //  String audioBaseDir = serverProperties.getAudioBaseDir();
-    String audioBaseDir = commonAudioPrefix;
-    String relPath = destination.getAbsolutePath().substring(audioBaseDir.length());
+    //  String audioBaseDir = serverProperties.getAudioBaseDir();
+    String relPath = destination.getAbsolutePath().substring(commonAudioPrefix.length());
     logger.info("getPermanentAudioPath " +
-        "\n\tbase      " + audioBaseDir +
+        "\n\tbase      " + commonAudioPrefix +
         "\n\twrote to  " + s +
         "\n\trel path  " + relPath
     );
@@ -144,7 +149,7 @@ public class PathWriter {
 
   @NotNull
   private AudioConversion getAudioConversion(ServerProperties serverProperties) {
-    return new AudioConversion(serverProperties.shouldTrimAudio(), serverProperties.getMinDynamicRange());
+    return new AudioConversion(serverProperties.shouldTrimAudio(), serverProperties.getMinDynamicRange(), servletContext.getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG));
   }
 
   /**

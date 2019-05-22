@@ -30,6 +30,10 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.server.DownloadServlet;
+import mitll.langtest.server.database.audio.IEnsureAudioHelper;
+
+import java.io.OutputStream;
+import java.util.Map;
 
 /**
  * Created by go22670 on 6/5/17.
@@ -39,6 +43,8 @@ public class AudioExportOptions {
   private boolean justRegularSpeed = true;
   private boolean justContext = false;
   private boolean isUserList = false;
+  private String info;
+
   private String search = "";
   private boolean includeAudio;
 
@@ -46,10 +52,6 @@ public class AudioExportOptions {
    * @param hasProjectSpecificAudio
    * @see DownloadServlet#getAudioExportOptions
    */
-  public AudioExportOptions(boolean hasProjectSpecificAudio) {
-    /*this.hasProjectSpecificAudio = hasProjectSpecificAudio;*/
-  }
-
   public void setJustMale(boolean justMale) {
     this.justMale = justMale;
   }
@@ -85,29 +87,37 @@ public class AudioExportOptions {
     this.isUserList = userList;
   }
 
-/*
-  public boolean isHasProjectSpecificAudio() {
-    return hasProjectSpecificAudio;
-  }
-
-  public void setHasProjectSpecificAudio(boolean hasProjectSpecificAudio) {
-    this.hasProjectSpecificAudio = hasProjectSpecificAudio;
-  }
-*/
-
   public void setSearch(String search) {
     this.search = search;
   }
 
+  /**
+   * @see mitll.langtest.server.database.DatabaseImpl#writeZip(OutputStream, Map, int, AudioExportOptions, IEnsureAudioHelper)
+   * @return
+   */
   public String getSearch() {
     return search;
   }
 
+  public AudioExportOptions setIncludeAudio(boolean includeAudio) {
+    this.includeAudio = includeAudio;
+    return this;
+  }
+
+  public boolean getIncludeAudio() {
+    return includeAudio;
+  }
+
   public String getInfo() {
     return
-        "_" + (justMale ? "male" : "female") + "_" +
-            (justRegularSpeed ? "regular" : "slow") + "_" +
-            (justContext ? "context" : "vocab");
+        "_" + (info == null ?
+            (
+                (justMale ? "male" : "female") + "_" +
+                    (justRegularSpeed ? "regular" : "slow") + "_" +
+                    (justContext ? "context" : "vocab") +
+                    (search.isEmpty() ? "" : "_" + search.replaceAll("\\s++", "_"))
+            ) :
+            info);
   }
 
   public String toString() {
@@ -116,11 +126,7 @@ public class AudioExportOptions {
         (isUserList ? "user list" : "predef");
   }
 
-  public void setIncludeAudio(boolean includeAudio) {
-    this.includeAudio = includeAudio;
-  }
-
-  public boolean getIncludeAudio() {
-    return includeAudio;
+  public void setInfo(String info) {
+    this.info = info;
   }
 }

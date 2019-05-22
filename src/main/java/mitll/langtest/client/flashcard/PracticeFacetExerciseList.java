@@ -35,7 +35,6 @@ import mitll.langtest.client.banner.PracticeHelper;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListFacetExerciseList;
-import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -76,8 +75,8 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
   }
 
   /**
-   * @see StatsFlashcardFactory#StatsFlashcardFactory
    * @param state
+   * @see StatsFlashcardFactory#StatsFlashcardFactory
    */
   void setControlState(ControlState state) {
     this.controlState = state;
@@ -107,10 +106,6 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
     super.goToFirst(searchIfAny, exerciseID);
 
     if (practiceHelper != null) {
-      PolyglotFlashcardFactory<T, ClientExercise> polyglotFlashcardFactory = practiceHelper.getPolyglotFlashcardFactory();
-      if (polyglotFlashcardFactory != null) {
-        polyglotFlashcardFactory.setMode(practiceHelper.getMode());
-      }
       if (getStatsFlashcardFactory() != null) {
         getStatsFlashcardFactory().setNavigation(practiceHelper.getNavigation());
       }
@@ -193,14 +188,7 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
 
   @Override
   protected void showExercises(final Collection<ClientExercise> result, final int reqID) {
-//    hidePrevNextWidgets();
-//
-//    setSortBoxVisible(true);
-//    setDownloadVisible(false);
-//    setPagerRowVisible(true);
-
     showOnlySortBox();
-
     showOnlyOne(result);
   }
 

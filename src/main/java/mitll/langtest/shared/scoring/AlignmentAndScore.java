@@ -38,7 +38,7 @@ import java.util.Map;
  * @see mitll.langtest.client.scoring.ScoreFeedbackDiv#showScoreFeedback
  */
 public class AlignmentAndScore extends AlignmentOutput {
-  protected float hydecScore = -1f;
+  float overallScore = -1f;
   private boolean fullMatch = true;
 
   public AlignmentAndScore() {
@@ -46,13 +46,18 @@ public class AlignmentAndScore extends AlignmentOutput {
 
   public AlignmentAndScore(Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes, float hydecScore, boolean isFullMatch) {
     super(sTypeToEndTimes);
-    this.hydecScore = hydecScore;
+    this.overallScore = hydecScore;
     this.fullMatch = isFullMatch;
   }
 
-  public float getHydecScore() {
-    return hydecScore;
+  public float getOverallScore() {
+    return overallScore;
   }
+
+  public void setOverallScore(float overallScore) {
+    this.overallScore = overallScore;
+  }
+
   public boolean isFullMatch() {
     return fullMatch;
   }

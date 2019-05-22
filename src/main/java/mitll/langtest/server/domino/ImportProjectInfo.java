@@ -31,7 +31,6 @@ package mitll.langtest.server.domino;
 
 import mitll.hlt.domino.shared.common.FindOptions;
 import mitll.hlt.domino.shared.model.user.DBUser;
-import mitll.langtest.shared.project.Language;
 
 import java.util.Date;
 

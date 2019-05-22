@@ -86,24 +86,28 @@ public class Scores {
    * @return
    * @see ASRWebserviceScoring#scoreRepeatExercise
    */
-  public JsonObject getKaldiJsonObject() {
+  JsonObject getKaldiJsonObject() {
     return kaldiJsonObject;
   }
 
-  public Scores setKaldiJsonObject(JsonObject kaldiJsonObject) {
+  Scores setKaldiJsonObject(JsonObject kaldiJsonObject) {
     this.kaldiJsonObject = kaldiJsonObject;
     return this;
   }
 
-  public Map<String, Map<String, Float>> getEventScores() {
+  Map<String, Map<String, Float>> getEventScores() {
     return eventScores;
   }
 
-  public float getHydraScore() {
+  float getHydraScore() {
     return hydraScore;
   }
 
-  public void setHydraScore(float score) {
+  /**
+   * @see ASRWebserviceScoring#maybeClampScore(Map, Scores)
+   * @param score
+   */
+  void setHydraScore(float score) {
     this.hydraScore = score;
   }
 

@@ -71,19 +71,20 @@ import java.util.logging.Logger;
 public abstract class AudioExampleContainer<T extends WordScore> extends SimplePagingContainer<T>
     implements PlayListener {
   private final Logger logger = Logger.getLogger("AudioExampleContainer");
+  public static final int REF_AUDIO_WIDTH = 85;
 
   private static final String REFERENCE = "Reference";
   /**
    * @see #resetReview
    */
-  private static final String REVIEW1 = "Review";
-  private static final String REVIEW = REVIEW1;
+  // private static final String REVIEW1 = "Review";
+  private static final String REVIEW = "Review";
   private static final String PLAY = "Play";
+  private static final String PAUSE = "Pause";
 
   protected static final boolean DEBUG = false;
 
   private static final int TABLE_HEIGHT = 225;
-  private static final String PAUSE = "Pause";
 
   private final INavigation.VIEWS jumpView;
   private final MySoundFeedback soundFeedback = new MySoundFeedback(this.controller.getSoundManager());
@@ -201,6 +202,10 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     return TABLE_HEIGHT;
   }
 
+  /**
+   * @see #addTable
+   * @return
+   */
   @NotNull
   private DivWidget getButtonRow() {
     DivWidget wrapper = new DivWidget();
@@ -213,7 +218,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
     }
 
     {
-      Button play = getPlayButton(80, false);
+      Button play = getPlayButton(REF_AUDIO_WIDTH, false);
       wrapper.add(play);
       this.refAudio = play;
     }
@@ -234,22 +239,25 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
       wrapper.add(review);
     }
 
-    {
-      Button learn = new Button(jumpView.toString());
-      learn.addStyleName("topFiveMargin");
-      learn.addStyleName("leftTenMargin");
-      learn.setType(ButtonType.SUCCESS);
-
-      learn.addClickHandler(event -> {
-        learn.setEnabled(false);
-        gotClickOnLearn();
-      });
-      wrapper.add(learn);
-    }
+    wrapper.add(getJumpToLearnButton(wrapper));
 
     DivWidget child = new DivWidget();
     child.add(wrapper);
     return child;
+  }
+
+  private Button getJumpToLearnButton(DivWidget wrapper) {
+    Button learn = new Button(jumpView.toString());
+    learn.addStyleName("topFiveMargin");
+    learn.addStyleName("leftTenMargin");
+    learn.setType(ButtonType.SUCCESS);
+
+    learn.addClickHandler(event -> {
+      learn.setEnabled(false);
+      gotClickOnLearn();
+    });
+    return learn;
+    // wrapper.add(learn);
   }
 
   @NotNull
@@ -286,10 +294,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
   private void gotClickOnLearn() {
     T selected = getSelected();
     if (selected != null) {
-      int exid = selected.getExid();
-
-
-      controller.getExerciseService().getExerciseIDOrParent(exid, new AsyncCallback<Integer>() {
+      controller.getExerciseService().getExerciseIDOrParent(selected.getExid(), new AsyncCallback<Integer>() {
         @Override
         public void onFailure(Throwable caught) {
 
@@ -301,8 +306,6 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
           controller.getShowTab(jumpView).showLearnAndItem(result);
         }
       });
-
-
 //      logger.info("gotClickOnLearn OK show " + exid);
 //      controller.getShowTab(this.jumpView).showLearnAndItem(exid);
     }
@@ -440,7 +443,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
       WordScore lastVisible = table.getVisibleItem(visibleItemCount - 1);
       boolean b = lastVisible.getExid() == lastPlayed;
-     // if (b) logger.info("onLastVisible ON LAST : visible # " + visibleItemCount);
+      // if (b) logger.info("onLastVisible ON LAST : visible # " + visibleItemCount);
       return b;
     }
   }
@@ -449,7 +452,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
    *
    */
   private void resetReview() {
-    review.setText(REVIEW1);
+    review.setText(REVIEW);
     review.setIcon(IconType.PLAY);
     isReview = false;
   }

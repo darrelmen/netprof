@@ -33,11 +33,16 @@ import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.server.scoring.AlignDecode;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class PretestScore extends AlignmentAndScore {
+  private static final String SIL = "sil";
+  private static final String SIL1 = "SIL";
+  private static final String UNKNOWN_MODEL = "UNKNOWNMODEL";
+
   private int reqid = 0;
   private Map<String, Float> phoneScores;
   private Map<String, Float> wordScores;
@@ -53,6 +58,7 @@ public class PretestScore extends AlignmentAndScore {
   private transient boolean ranNormally;
   private String status = "";
   private String message = "";
+  private float rawOverallScore;
 
   public PretestScore() {
   } // required for serialization
@@ -62,12 +68,12 @@ public class PretestScore extends AlignmentAndScore {
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#scoreRepeatExercise
    */
   public PretestScore(float score) {
-    this.hydecScore = score;
+    this.overallScore = score;
     ranNormally = false;
   }
 
   /**
-   * @param hydecScore
+   * @param overallScore
    * @param phoneScores
    * @param wordScores
    * @param sTypeToImage
@@ -77,7 +83,7 @@ public class PretestScore extends AlignmentAndScore {
    * @param isFullMatch
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore
    */
-  public PretestScore(float hydecScore,
+  public PretestScore(float overallScore,
                       Map<String, Float> phoneScores,
                       Map<String, Float> wordScores,
                       Map<NetPronImageType, String> sTypeToImage,
@@ -86,7 +92,7 @@ public class PretestScore extends AlignmentAndScore {
                       float wavFileLengthSeconds,
                       int processDur,
                       boolean isFullMatch) {
-    super(sTypeToEndTimes, hydecScore, isFullMatch);
+    super(sTypeToEndTimes, overallScore, isFullMatch);
     this.sTypeToImage = sTypeToImage;
     this.phoneScores = phoneScores;
     this.wordScores = wordScores;
@@ -94,6 +100,10 @@ public class PretestScore extends AlignmentAndScore {
     this.wavFileLengthSeconds = wavFileLengthSeconds;
     this.processDur = processDur;
     this.ranNormally = true;
+  }
+
+  public AlignmentAndScore getSkinny() {
+    return new AlignmentAndScore(getTypeToSegments(), getOverallScore(), isFullMatch());
   }
 
   /**
@@ -104,8 +114,73 @@ public class PretestScore extends AlignmentAndScore {
     return phoneScores;
   }
 
+  /**
+   * @return
+   * @see mitll.langtest.client.scoring.ReviewScoringPanel#scoreAudio(String, int, String, String, AudioPanel.ImageAndCheck, AudioPanel.ImageAndCheck, int, int, int)
+   * @see mitll.langtest.client.scoring.ReviewScoringPanel#addWordScoreTable(PretestScore)
+   */
   public Map<String, Float> getWordScores() {
     return wordScores;
+  }
+
+  /**
+   * Arithmetic average!
+   *
+   * @return
+   */
+  public float getAvgWordScore() {
+    return wordScores == null || wordScores.isEmpty() ? getSegmentAverage(getWordSegments()) : getAverage(wordScores.values());
+  }
+
+  public List<TranscriptSegment> getWordSegments() {
+    return getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
+  }
+
+  private float getAverage(Collection<Float> values) {
+    float total = 0F;
+    for (float vv : values) total += vv;
+    return values.isEmpty() ? 0F : total / Integer.valueOf(values.size()).floatValue();
+  }
+
+  public float getAvgPhoneScore() {
+    return getSegmentAverage(getTypeToSegments().get(NetPronImageType.PHONE_TRANSCRIPT));
+  }
+
+  private float getSegmentAverage(List<TranscriptSegment> transcriptSegments) {
+    if (transcriptSegments == null || transcriptSegments.isEmpty()) {
+      return 0F;
+    } else {
+      float numValidSegments = getNumValidSegments(transcriptSegments);
+      if (numValidSegments == 0) {
+        return 0F;
+      } else {
+        return getValidSegmentScoreTotal(transcriptSegments) / numValidSegments;
+      }
+    }
+  }
+
+  public float getValidSegmentScoreTotal(List<TranscriptSegment> transcriptSegments) {
+    float total = 0F;
+    for (TranscriptSegment seg : transcriptSegments) {
+      if (isValidEvent(seg.getEvent())) {
+        total += seg.getScore();
+      }
+    }
+    return total;
+  }
+
+  public float getNumValidSegments(List<TranscriptSegment> transcriptSegments) {
+    float total = 0F;
+    for (TranscriptSegment seg : transcriptSegments) {
+      if (isValidEvent(seg.getEvent())) {
+        total += 1F;
+      }
+    }
+    return total;
+  }
+
+  private boolean isValidEvent(String event) {
+    return !event.equals(UNKNOWN_MODEL) && !event.equals(SIL) && !event.equals(SIL1);
   }
 
   public Map<NetPronImageType, String> getsTypeToImage() {
@@ -178,6 +253,14 @@ public class PretestScore extends AlignmentAndScore {
     this.message = message;
   }
 
+  public float getRawOverallScore() {
+    return rawOverallScore;
+  }
+
+  public void setRawOverallScore(float rawOverallScore) {
+    this.rawOverallScore = rawOverallScore;
+  }
+
   public String toString() {
     String ss = status.isEmpty() ? "" : "\n\tstatus         " + status;
     String ms = message.isEmpty() ? "" : "\n\tmessage        " + message;
@@ -187,7 +270,10 @@ public class PretestScore extends AlignmentAndScore {
     return "score" +
         ss +
         ms +
-        "\n\tscore          " + getHydecScore() +
+        "\n\tscore          " + getOverallScore() +
+        "\n\traw overall    " + getRawOverallScore() +
+        "\n\tword avg       " + getAvgWordScore() +
+        "\n\tphone avg      " + getAvgPhoneScore() +
         "\n\tphones         " + getPhoneScores() +
         ts +
         "\n\ttype->endtimes " + getTypeToSegments() +

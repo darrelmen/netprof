@@ -31,8 +31,10 @@ package mitll.langtest.server;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.database.DAOContainer;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.report.ReportingServices;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.json.ProjectExport;
@@ -62,6 +64,9 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+
+import static mitll.langtest.server.ScoreServlet.PostRequest.ALIGN;
+import static mitll.langtest.shared.project.ProjectStatus.DELETED;
 
 @SuppressWarnings("serial")
 public class ScoreServlet extends DatabaseServlet {
@@ -122,6 +127,7 @@ public class ScoreServlet extends DatabaseServlet {
   private static final String PROJID = "projid";
   private static final String AMPERSAND = "&";
   private static final String DATE = "Date";
+  private static final int SAVE_FILE_WARN_THRESHOLD = 20;
 
   private boolean removeExercisesWithMissingAudioDefault = true;
 
@@ -439,9 +445,11 @@ public class ScoreServlet extends DatabaseServlet {
   private int getTripleProjID(HttpServletRequest request) {
     int projid = getProjID(request);
 
-    if (projid == -1) {
-      String[] split1 = request.getQueryString().split(AMPERSAND);
-      Map<String, Collection<String>> selection = new URLParamParser(split1).invoke(false).getSelection();
+    String queryString = request.getQueryString();
+
+    if (projid == -1 && queryString != null) {
+      String[] split1 = queryString.split(AMPERSAND);
+      Map<String, Collection<String>> selection = new ParamParser(split1).invoke(false).getSelection();
       if (selection.get(PROJID) != null) {
         String projid1 = selection.get(PROJID).iterator().next();
         try {
@@ -450,7 +458,7 @@ public class ScoreServlet extends DatabaseServlet {
           logger.warn("getTripleProjID : couldn't parse '" + projid1 + "'");
         }
       } else {
-        logger.info("getTripleProjID no " + PROJID + " in " + selection + " from " + request.getQueryString());
+        logger.info("getTripleProjID no " + PROJID + " in " + selection + " from " + queryString);
       }
     }
 
@@ -537,40 +545,65 @@ public class ScoreServlet extends DatabaseServlet {
   /**
    * PRODUCTION instance - assume only one?
    *
-   * @param language
+   * @param languageName
    * @param isKaldi
    * @return
    */
-  private int getProjectID(String language, boolean isKaldi) {
-    Language language1 = null;
+  private int getProjectID(String languageName, boolean isKaldi) {
+    Language language;
     try {
-      language1 = Language.valueOf(language.toUpperCase());
-      List<Project> productionByLanguage = db.getProjectManagement().getProjectByLangauge(language1);
+      language = Language.valueOf(languageName.toUpperCase());
+      IProjectManagement projectManagement = db.getProjectManagement();
+      List<Project> projectByLanguage = projectManagement.getProjectByLanguage(language);
 
       if (isKaldi) {
-        productionByLanguage = productionByLanguage.stream().filter(project -> project.getModelType() == ModelType.KALDI).collect(Collectors.toList());
+        projectByLanguage = findKaldiProjects(projectByLanguage);
       } else {
-        productionByLanguage = productionByLanguage.stream().filter(project -> project.getModelType() != ModelType.KALDI).collect(Collectors.toList());
+        projectByLanguage = findHydraProjects(projectByLanguage);
 
-        List<Project> candidates = productionByLanguage;
-        productionByLanguage = candidates.stream().filter(project -> project.getStatus() == ProjectStatus.PRODUCTION).collect(Collectors.toList());
-        if (productionByLanguage.isEmpty()) {
-          logger.warn("can't find any production projects?");
-          productionByLanguage = candidates;
+        List<Project> candidates = projectByLanguage;
+        projectByLanguage = candidates.stream().filter(project -> project.getStatus() == ProjectStatus.PRODUCTION).collect(Collectors.toList());
+        if (projectByLanguage.isEmpty()) {
+          logger.warn("getProjectID : can't find any production projects for " + language);
+          projectByLanguage = candidates;
+        }
+        if (projectByLanguage.isEmpty()) {
+          projectByLanguage = findHydraProjects(projectManagement.getProjectByLanguage(language));
+          if (projectByLanguage.isEmpty()) {
+            logger.warn("getProjectID : can't find any projects for " + language);
+          }
         }
       }
 
-      if (productionByLanguage.size() > 1) {
-        logger.warn("getProjectIDFromSession more than one production language for " + language1 + " : " + productionByLanguage.size());
-        Project project = productionByLanguage.get(0);
+      if (projectByLanguage.size() > 1) {
+        logger.warn("getProjectIDFromSession more than one production languageName for " + language + " : " + projectByLanguage.size());
+        Project project = projectByLanguage.get(0);
         logger.warn("getProjectIDFromSession will choose " + project + " : model = " + project.getModelType());
       }
 
-      return productionByLanguage.isEmpty() ? -1 : productionByLanguage.get(0).getID();
+      return projectByLanguage.isEmpty() ? -1 : projectByLanguage.get(0).getID();
     } catch (IllegalArgumentException e) {
-      logger.error("can't parse language " + language);
+      logger.error("can't parse languageName " + languageName);
       return -1;
     }
+  }
+
+  @NotNull
+  private List<Project> findHydraProjects(List<Project> productionByLanguage) {
+    Set<ProjectStatus> notThese = new HashSet<>(Arrays.asList(ProjectStatus.RETIRED, DELETED));
+    return productionByLanguage
+        .stream()
+        .filter(project -> project.getModelType() != ModelType.KALDI && !notThese.contains(project.getStatus()))
+        .collect(Collectors.toList());
+  }
+
+  @NotNull
+  private List<Project> findKaldiProjects(List<Project> productionByLanguage) {
+    Set<ProjectStatus> notThese = new HashSet<>(Arrays.asList(ProjectStatus.RETIRED, DELETED));
+    return productionByLanguage
+        .stream()
+        .filter(project -> project.getModelType() == ModelType.KALDI && !notThese.contains(project.getStatus()))
+        .collect(Collectors.toList());
   }
 
   private DAOContainer getDAOContainer() {
@@ -613,7 +646,7 @@ public class ScoreServlet extends DatabaseServlet {
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
   private JsonObject getPhoneReport(JsonObject toReturn, String[] split1, int projid, int userid, long sessionID) {
-    Map<String, Collection<String>> selection = new URLParamParser(split1).invoke(true).getSelection();
+    Map<String, Collection<String>> selection = new ParamParser(split1).invoke(true).getSelection();
 
     try {
       long then = System.currentTimeMillis();
@@ -668,7 +701,7 @@ public class ScoreServlet extends DatabaseServlet {
       if (split1.length < 2) {
         toReturn.addProperty(ERROR, "expecting at least two query parameters");
       } else {
-        Map<String, Collection<String>> selection = new URLParamParser(split1).invoke(true).getSelection();
+        Map<String, Collection<String>> selection = new ParamParser(split1).invoke(true).getSelection();
 
         //logger.debug("chapterHistory " + user + " selection " + selection);
         try {
@@ -780,7 +813,7 @@ public class ScoreServlet extends DatabaseServlet {
     } else {
       logger.info("doPost request type is null - assume align.");
       try {
-        JsonObject = getJsonForAudio(request, PostRequest.ALIGN, deviceType, device);
+        JsonObject = getJsonForAudio(request, ALIGN, deviceType, device);
       } catch (Exception e) {
         logger.error("doPost got " + e, e);
         JsonObject.addProperty(ERROR, "got except " + e.getMessage());
@@ -1120,7 +1153,7 @@ public class ScoreServlet extends DatabaseServlet {
     int projid = getProjid(request);
 
     String postedWordOrPhrase;
-    // language overrides user id mapping...
+    // language overrides user id mapping...???
     {
       ExAndText exerciseIDFromText = getExerciseIDFromText(request, realExID, projid);
       realExID = exerciseIDFromText.exid;
@@ -1128,76 +1161,93 @@ public class ScoreServlet extends DatabaseServlet {
     }
 
     String user = getUser(request);
-    int userid = userManagement.getUserFromParam(user);
-    if (userid != sessionUser && userid != -1) {
-      logger.info("getJsonForAudio posted user was " + userid + " but session user was " + sessionUser);
-    }
-    userid = sessionUser;
+    int userid = getUserid(sessionUser, user);
 
     boolean fullJSON = isFullJSON(request);
 
     long now = System.currentTimeMillis();
-    logger.info("getJsonForAudio got" +
-        "\n\trequest  " + requestType +
-        "\n\tfor user " + user + "/" + userid +
-        "\n\tprojid   " + projid +
-        "\n\texid     " + realExID +
-        "\n\treq      " + reqid +
-        "\n\tfull     " + fullJSON +
-        "\n\tprep time " + (now - then) +
-        "\n\tdevice   " + deviceType + "/" + device);
 
+    {
+      String dev = !deviceType.equals("unk") && !device.equals("unk") ? "\n\tdevice   " + deviceType + "/" + device : "";
+      String req = requestType == ALIGN ? "" : "\n\trequest  " + requestType;
+      String prepInfo = (now - then) > 10 ? "\n\tprep time " + (now - then) : "";
+      logger.info("getJsonForAudio got" +
+          req +
+          "\n\tfor user " + user + "/" + userid +
+          "\n\tprojid   " + projid +
+          "\n\texid     " + realExID +
+          "\n\treq      " + reqid +
+          "\n\tfull     " + fullJSON +
+          prepInfo +
+          dev);
+    }
 
     then = System.currentTimeMillis();
     FileSaver.FileSaveResponse response = new FileSaver().writeAudioFile(
         pathHelper, request.getInputStream(), realExID, userid, getProject(projid).getLanguageEnum(), true);
 
-    File saveFile = response.getFile();
+    File fileToScore = response.getFile();
     now = System.currentTimeMillis();
-    if (now - then > 10) {
-      logger.info("getJsonForAudio save file to " + saveFile.getAbsolutePath() + " took " + (now - then) + " millis");
+    if (now - then > SAVE_FILE_WARN_THRESHOLD) {
+      logger.info("getJsonForAudio save file to " + fileToScore.getAbsolutePath() + " took " + (now - then) + " millis");
     }
     //  then = System.currentTimeMillis();
 
     if (response.getStatus() == FileSaver.FileSaveResponse.STATUS.OK) {
 //      AudioCheck.ValidityAndDur validityAndDur = new AudioConversion(false, db.getServerProps().getMinDynamicRange())
-//          .getValidityAndDur(saveFile, false, db.getServerProps().isQuietAudioOK(), then);
+//          .getValidityAndDur(fileToScore, false, db.getServerProps().isQuietAudioOK(), then);
 
 //      now = System.currentTimeMillis();
 //      if (now - then > 10) {
-//        logger.info("getJsonForAudio audio conversion for " + saveFile.getAbsolutePath() + " took " + (now - then) + " millis");
+//        logger.info("getJsonForAudio audio conversion for " + fileToScore.getAbsolutePath() + " took " + (now - then) + " millis");
 //      }
 
       // TODO : put back trim silence? or is it done somewhere else
-//    new AudioConversion(null).trimSilence(saveFile);
+//    new AudioConversion(null).trimSilence(fileToScore);
 
       if (requestType == PostRequest.DECODE && CONVERT_DECODE_TO_ALIGN) {
         // logger.info("\tfor now we force decode requests into alignment...");
-        requestType = PostRequest.ALIGN;
+        requestType = ALIGN;
       }
 
-      return jsonScoring.getJsonForAudioForUser(
-          reqid,
-          projid,
-          realExID,
+      if (fileToScore.length() < AudioCheck.WAV_HEADER_LENGTH) {
+        JsonObject jsonObject = new JsonObject();
+        new JsonScoring(getDatabase()).addValidity(realExID, jsonObject, Validity.TOO_SHORT, "" + reqid);
+        return jsonObject;
+      } else {
+        JsonObject jsonForAudioForUser = jsonScoring.getJsonForAudioForUser(
+            reqid,
+            projid,
+            realExID,
 
-          postedWordOrPhrase,
+            postedWordOrPhrase,
 
-          userid,
-          requestType,
-          saveFile.getAbsolutePath(),
-          saveFile,
-          deviceType,
-          device,
-          new DecoderOptions()
-              .setAllowAlternates(getAllowAlternates(request))
-              .setUsePhoneToDisplay(getUsePhoneToDisplay(request)),
-          fullJSON);
+            userid,
+            requestType,
+            fileToScore,
+            deviceType,
+            device,
+            new DecoderOptions()
+                .setAllowAlternates(getAllowAlternates(request))
+                .setUsePhoneToDisplay(getUsePhoneToDisplay(request)),
+            fullJSON);
+        jsonForAudioForUser.addProperty("scoring", getIsKaldi(request) ? "Kaldi" : "Hydra");
+        return jsonForAudioForUser;
+      }
     } else {
       JsonObject jsonObject = new JsonObject();
       new JsonScoring(getDatabase()).addValidity(realExID, jsonObject, Validity.TOO_LONG, "" + reqid);
       return jsonObject;
     }
+  }
+
+  private int getUserid(int sessionUser, String user) {
+    int userid = userManagement.getUserFromParam(user);
+    if (userid != sessionUser && userid != -1) {
+      logger.info("getJsonForAudio posted user was " + userid + " but session user was " + sessionUser);
+    }
+    userid = sessionUser;
+    return userid;
   }
 
   private boolean isFullJSON(HttpServletRequest request) {
@@ -1223,8 +1273,6 @@ public class ScoreServlet extends DatabaseServlet {
       if (projid != -1) {
         logger.info("getProjid got projid from language " + projid);
       }
-    } else {
-//      logger.info("getProjid got projid from request " + projid);
     }
 
     if (projid == -1) {
@@ -1290,14 +1338,6 @@ public class ScoreServlet extends DatabaseServlet {
     return header != null && header.equalsIgnoreCase("TRUE");
   }
 
-/*  private int getStreamSession(HttpServletRequest request) {
-    return request.getIntHeader(HeaderValue.STREAMSESSION.toString());
-  }
-
-  private int getStreamPacket(HttpServletRequest request) {
-    return request.getIntHeader(HeaderValue.STREAMSPACKET.toString());
-  }*/
-
   private String getHeader(HttpServletRequest request, HeaderValue resultId) {
     return request.getHeader(resultId.toString());
   }
@@ -1345,7 +1385,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (projid > 0) {
       Project project1 = getProject(projid);
       String flText = getHeader(request, HeaderValue.EXERCISE_TEXT);
-      if (flText == null) {
+      if (flText == null || flText.isEmpty()) {
         logger.info("getExerciseIDFromText no optional header " + HeaderValue.EXERCISE_TEXT);
         return new ExAndText(realExID, decoded);
       } else {
@@ -1419,7 +1459,7 @@ public class ScoreServlet extends DatabaseServlet {
     if (userManagement == null) {
       db = getDatabase();
       if (db != null) {
-        setPaths();
+        setPaths(getServletContext());
         ServerProperties serverProps = db.getServerProps();
         this.userManagement = new RestUserManagement(db, serverProps);
         removeExercisesWithMissingAudioDefault = serverProps.removeExercisesWithMissingAudio();
@@ -1427,19 +1467,6 @@ public class ScoreServlet extends DatabaseServlet {
       }
     }
   }
-
-/*  private LoadTesting getLoadTesting() {
-    LoadTesting ref = null;
-    Object databaseReference = getServletContext().getAttribute(LOAD_TESTING);
-    if (databaseReference != null) {
-      ref = (LoadTesting) databaseReference;
-      // logger.debug("found existing audio file reference " + fileHelper + " under " + getServletContext());
-    } else {
-      logger.error("huh? for " + db.getServerProps().getLanguage() + " no existing load test reference?");
-    }
-    return ref;
-  }*/
-
 
   private void addVersion(JsonObject JsonObject, int projid) {
     JsonObject.addProperty(VERSION, VERSION_NOW);

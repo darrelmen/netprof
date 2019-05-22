@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.audio;
 
+import com.sun.management.UnixOperatingSystemMXBean;
 import mitll.langtest.server.ServerProperties;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.logging.log4j.LogManager;
@@ -40,7 +41,10 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.UnsupportedAudioFileException;
 import java.io.*;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class AudioConversion extends AudioBase {
@@ -62,6 +66,8 @@ public class AudioConversion extends AudioBase {
   private static final boolean SPEW = true;
   private static final String MP3 = ".mp3";
   private static final String WAV = ".wav";
+  public static final String LANGTEST_IMAGES_NEW_PRO_F_1_PNG = "langtest/images/NewProF1.png";
+  private static final int MIN_CONVERT_TO_WARN = 20;
   private final AudioCheck audioCheck;
   private static final int MIN_WARN_DUR = 50;
 
@@ -71,11 +77,17 @@ public class AudioConversion extends AudioBase {
   private static final boolean DEBUG_DETAIL = false;
   private final boolean trimAudio;
   private static final boolean WARN_MISSING_FILE = false;
+  private String realPath = "";
 
   /**
    * @paramx props
    * @seex mitll.langtest.server.DatabaseServlet#ensureMP3
    */
+  public AudioConversion(boolean trimAudio, int minDynamicRange, String realPath) {
+    this(trimAudio,minDynamicRange);
+    this.realPath = realPath;
+  }
+
   public AudioConversion(boolean trimAudio, int minDynamicRange) {
     this.trimAudio = trimAudio;
     soxPath = getSox();
@@ -101,7 +113,7 @@ public class AudioConversion extends AudioBase {
                                                       boolean quietAudioOK) {
     long then = System.currentTimeMillis();
     File parentFile = file.getParentFile();
-    parentFile.mkdirs();
+    boolean didIt = parentFile.mkdirs();
 
     setPermissions(parentFile);
     setPermissions(parentFile.getParentFile());
@@ -124,7 +136,7 @@ public class AudioConversion extends AudioBase {
    * @see #convertBase64ToAudioFiles(String, File, boolean, boolean)
    */
   @NotNull
-  public AudioCheck.ValidityAndDur getValidityAndDur(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK, long then) {
+  AudioCheck.ValidityAndDur getValidityAndDur(File file, boolean useSensitiveTooLoudCheck, boolean quietAudioOK, long then) {
     if (DEBUG) logger.debug("getValidityAndDur: wrote wav file " + file.getAbsolutePath());
     boolean b;
     b = file.setReadable(true, false);
@@ -135,18 +147,29 @@ public class AudioConversion extends AudioBase {
     if (!file.exists()) {
       logger.error("getValidityAndDur : after writing, can't find file at " + file.getAbsolutePath());
     }
+ //   dumpFD("getValidityAndDur_before");
+
     AudioCheck.ValidityAndDur valid = isValid(file, useSensitiveTooLoudCheck, quietAudioOK);
     if (valid.isValid() && trimAudio) {
       valid.setDuration(trimSilence(file).getDuration());
     }
+  //  dumpFD("getValidityAndDur_after");
 
     long now = System.currentTimeMillis();
     long diff = now - then;
     if (diff > MIN_WARN_DUR) {
-      logger.debug("getValidityAndDur: took " + diff + " millis to write wav file (" + file.getName() +
+      logger.info("getValidityAndDur: took " + diff + " millis to write wav file (" + file.getName() +
           ") " + valid.getDurationInMillis() + " millis long");
     }
     return valid;
+  }
+
+  private void dumpFD(String message) {
+    OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
+    if (os instanceof UnixOperatingSystemMXBean) {
+      logger.info("writeAudioFile (" + message +
+          ") Number of open fd: " + ((UnixOperatingSystemMXBean) os).getOpenFileDescriptorCount());
+    }
   }
 
 /*  @NotNull
@@ -232,10 +255,16 @@ public class AudioConversion extends AudioBase {
    */
   public String convertTo16Khz(String testAudioDir, String testAudioFileNoSuffix, long uniqueTimestamp) throws UnsupportedAudioFileException {
     String pathname = testAudioDir + File.separator + testAudioFileNoSuffix + WAV;
-    File wavFile = convertTo16Khz(new File(pathname), uniqueTimestamp);
-    boolean b = wavFile.setReadable(true, false);
-    if (!b) logger.warn("couldn't make " + wavFile + " readable?");
-    return removeSuffix(wavFile.getName());
+    File originalWavFile = new File(pathname);
+
+    if (originalWavFile.length() < AudioCheck.WAV_HEADER_LENGTH) {
+      return originalWavFile.getName();
+    } else {
+      File wavFile = convertTo16Khz(originalWavFile, uniqueTimestamp);
+      boolean b = wavFile.setReadable(true, false);
+      if (!b) logger.warn("couldn't make " + wavFile + " readable?");
+      return removeSuffix(wavFile.getName());
+    }
   }
 
 
@@ -262,7 +291,7 @@ public class AudioConversion extends AudioBase {
         long now = System.currentTimeMillis();
         long diff = now - then;
 
-        if (diff > 5) {
+        if (diff > MIN_CONVERT_TO_WARN) {
           logger.info("convertTo16Khz : " +
               "\n\ttook            " + diff + " millis to convert " +
               "\n\toriginal        " + orig.getName() +
@@ -307,9 +336,9 @@ public class AudioConversion extends AudioBase {
 
   /**
    * @param pathToAudioFile
+   * @return temp file that is at 16K
    * @throws IOException
    * @see #convertTo16Khz
-   * @return temp file that is at 16K
    */
   private String convertTo16KHZ(String pathToAudioFile) throws IOException {
     return sampleAt16KHZ(pathToAudioFile, makeTempFile("convertTo16KHZ"));
@@ -401,7 +430,7 @@ public class AudioConversion extends AudioBase {
       logger.info("wav2raw Reading from " + sourceFile + " exists " + sourceFile.exists() + " at " + sourceFile.getAbsolutePath());
 
     try {
-      sourceStream = AudioSystem.getAudioInputStream(sourceFile);
+      sourceStream = getAudioInputStream(sourceFile);
 
       String absolutePath = outputFile.getAbsolutePath();
       if (DEBUG) logger.info("wav2raw Writing to " + absolutePath);
@@ -444,6 +473,18 @@ public class AudioConversion extends AudioBase {
         logger.error("Got " + e, e);
       }
     }
+  }
+
+  /**
+   * Have to do this or else leaves an open file handle - gah!
+   *
+   * @param wavFile
+   * @return
+   * @throws UnsupportedAudioFileException
+   * @throws IOException
+   */
+  private static AudioInputStream getAudioInputStream(File wavFile) throws UnsupportedAudioFileException, IOException {
+    return AudioSystem.getAudioInputStream(new BufferedInputStream(new FileInputStream(wavFile)));
   }
 
   private static void makeOutputReadable(File outputFile, String absolutePath) {
@@ -679,11 +720,33 @@ public class AudioConversion extends AudioBase {
       title = title.substring(0, 30);
     }
     if (title == null) title = "";
-    ProcessBuilder lameProc = new ProcessBuilder(lamePath, pathToAudioFile, mp3File,
-        "--tt", title,
-        "--ta", trackInfo.getArtist(),
-        "--tc", trackInfo.getComment(),
-        "--tl", trackInfo.getAlbum());
+
+
+    List<String> args;
+    if (new File(realPath).exists()) {
+      args = new ArrayList<>(Arrays.asList(lamePath, pathToAudioFile, mp3File,
+          "--tt", title,
+          "--ta", trackInfo.getArtist(),
+          "--tc", trackInfo.getComment(),
+          "--tl", trackInfo.getAlbum(),
+          "--ti", realPath,
+          "--add-id3v2"));
+    } else {
+      logger.warn("can't find " + new File(realPath).getAbsolutePath());
+      args = new ArrayList<>(Arrays.asList(lamePath, pathToAudioFile, mp3File,
+          "--tt", title,
+          "--ta", trackInfo.getArtist(),
+          "--tc", trackInfo.getComment(),
+          "--tl", trackInfo.getAlbum(),
+
+          "--add-id3v2"));
+    }
+
+    trackInfo.getUnitToValue().forEach((k, v) -> {
+      args.add("--tv");
+      args.add(k + "=" + v);
+    });
+    ProcessBuilder lameProc = new ProcessBuilder(args);
     try {
       if (DEBUG_DETAIL) logger.info("running lame" + lameProc.command());
       new ProcessRunner().runProcess(lameProc);
@@ -709,9 +772,8 @@ public class AudioConversion extends AudioBase {
           }
         } catch (IOException e) {
           logger.error("convertToMP3FileAndCheck for " + lameProc + " got " + e, e);
-          logger.warn("consider on mac : brew install lame");
+          logger.warn("consider on mac :\n\n\nbrew install lame");
         }
-
       }
       return false;
     }

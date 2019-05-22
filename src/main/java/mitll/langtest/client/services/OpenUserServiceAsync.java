@@ -72,9 +72,9 @@ public interface OpenUserServiceAsync {
    */
   void isKnownUserWithEmail(String id, AsyncCallback<Boolean> async);
 
-  void setCurrentUserToProject(int projid, String implVersion, AsyncCallback<HeartbeatStatus> async);
+  void setCurrentUserToProject(int projid, String implVersion, boolean isTeacher, AsyncCallback<HeartbeatStatus> async);
 
-  void checkHeartbeat(String implVersion, AsyncCallback<HeartbeatStatus> async);
+  void checkHeartbeat(String implVersion, boolean isTeacher, AsyncCallback<HeartbeatStatus> async);
 
   void accountExistsWithEmail(String email, AsyncCallback<Boolean> async);
 

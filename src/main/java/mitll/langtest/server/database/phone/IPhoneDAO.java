@@ -31,7 +31,7 @@ package mitll.langtest.server.database.phone;
 
 import com.google.gson.JsonObject;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.analysis.*;
 
 import java.util.Collection;

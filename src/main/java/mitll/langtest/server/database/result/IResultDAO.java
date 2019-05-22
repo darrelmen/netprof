@@ -29,9 +29,9 @@
 
 package mitll.langtest.server.database.result;
 
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.ReportStats;
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -40,6 +40,7 @@ import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.result.MonitorResult;
 import mitll.npdata.dao.SlickPerfResult;
 
+import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -76,11 +77,17 @@ public interface IResultDAO extends IDAO {
   /**
    * @param projid
    * @return
-   * @see mitll.langtest.server.database.DatabaseImpl#getMonitorResults
+   * @see DatabaseServices#getMonitorResults
    */
   List<MonitorResult> getMonitorResults(int projid);
 
+  List<MonitorResult> getResultsBySession(int userid, int projid, String sessionID);
+
+  List<MonitorResult> getResultsInTimeRange(int userid, int projectid, Timestamp from, Timestamp to);
+
   List<MonitorResult> getMonitorResultsKnownExercises(int projid);
+
+  List<MonitorResult> getMonitorResultsKnownExercisesWithLimit(int projid, int limit);
 
   List<MonitorResult> getMonitorResultsByExerciseID(int id);
 
@@ -89,20 +96,20 @@ public interface IResultDAO extends IDAO {
   UserToCount getUserToNumAnswers();
 
   List<ExerciseCorrectAndScore> getExerciseCorrectAndScoresByPhones(int userid,
-                                                                          List<Integer> allIds,
-                                                                          Map<Integer, CommonExercise> idToEx,
+                                                                    List<Integer> allIds,
+                                                                    Map<Integer, CommonExercise> idToEx,
 
-                                                                          Language language);
+                                                                    Language language, int projid);
 
-  void attachScoreHistory(int userID, CommonExercise firstExercise, Language language);
+  void attachScoreHistory(int userID, CommonExercise firstExercise, Language language, int projid);
 
-  Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, Language language);
+  Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, Language language, int projid);
 
   List<CorrectAndScore> getResultsForExIDInForUser(int userID,
                                                    int id,
-                                                   Language language);
+                                                   Language language, int projid);
 
-  List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language);
+  List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language, int projid);
 
   CorrectAndScore getCorrectAndScoreForResult(int id, Language language);
 
@@ -125,5 +132,6 @@ public interface IResultDAO extends IDAO {
 
   List<SlickPerfResult> getLatestResultsForDialogSession(int dialogSessionID);
 
-  Map<Integer,String> getResultIDToJSON(int projid);
+  //ResultDAOWrapper getDao();
+  Map<Integer, String> getResultIDToJSON(int projid);
 }

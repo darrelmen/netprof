@@ -120,13 +120,13 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> {
                                            List<TranscriptSegment> phonesInWord,
                                            AudioControl audioControl,
                                            TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
-                                           boolean simpleLayout) {
-    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, false);
+                                           boolean simpleLayout, IHighlightSegment wordHighlight) {
+    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap,  phonesInWord, simpleLayout, wordSegment, false, wordHighlight, isRTL);
   }
 
   /**
    * @param wrapper
-   * @see DialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices)
+   * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
   protected void styleMe(DivWidget wrapper) {
     this.bubble = wrapper;

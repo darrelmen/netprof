@@ -33,10 +33,8 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.copy.VocabFactory;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.refaudio.IRefResultDAO;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
 import mitll.langtest.shared.exercise.*;
@@ -48,8 +46,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
-import java.util.*;
 import java.util.Date;
+import java.util.*;
 
 /**
  * @deprecated
@@ -575,10 +573,10 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   /**
+   * @param shouldSwap
    * @return
    * @seex #setAudioDAO(AudioDAO)
    * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
-   * @param shouldSwap
    */
   @Override
   public Collection<CommonExercise> getOverrides(boolean shouldSwap) {
@@ -628,7 +626,6 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
     return getCommonExercises(sql);
   }
 */
-
   @Override
   public List<SlickExercise> getExercisesByIDs(Collection<Integer> exids) {
     return null;
@@ -699,7 +696,8 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         rs.getInt("creatorid"),
         rs.getString("english"),
         foreignLanguage,
-        foreignLanguage, "",
+        foreignLanguage,
+        "",
         "",
         rs.getString(TRANSLITERATION),
         rs.getBoolean(OVERRIDE),
@@ -710,7 +708,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
         System.currentTimeMillis(),
         false,
         -1,
-        -1, false);
+        false);
   }
 
   //  private Map<String, List<AudioAttribute>> exToAudio;

@@ -29,19 +29,17 @@
 
 package mitll.langtest.shared.user;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.server.database.user.DominoUserDAOImpl;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.project.ProjectStartupInfo;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
 import static mitll.langtest.shared.user.Kind.STUDENT;
-import static mitll.langtest.shared.user.User.Permission.*;
+import static mitll.langtest.shared.user.Permission.*;
 
 public class User extends MiniUser implements ReportUser {
   @Deprecated
@@ -112,30 +110,10 @@ public class User extends MiniUser implements ReportUser {
     return hasAppPermission;
   }
 
-
-  /**
-   * Closely related to {@link mitll.langtest.client.custom.INavigation.VIEWS}
-   */
-  public enum Permission implements IsSerializable {
-    TEACHER_PERM("View Student Data"),  // gets to see teacher things like student analysis, invite
-    QUALITY_CONTROL("Quality Control"), // mark defects, fix defects
-    RECORD_AUDIO("Record Audio"),       // record audio
-    DEVELOP_CONTENT("Develop Content"), // not sure how different from Record Audio
-    PROJECT_ADMIN("Project Admin"),     // make new projects, edit via domino
-    /**
-     * @see DominoUserDAOImpl#toUser
-     */
-    POLYGLOT("Polyglot");     // only see polyglot projects
-
-    String name;
-
-    Permission() {
-    }
-
-    Permission(String name) {
-      this.name = name;
-    }
+  public int getGender() {
+    return isMale() ? 0 : 1;
   }
+
 
   public User() {
   } // for serialization
@@ -272,43 +250,21 @@ public class User extends MiniUser implements ReportUser {
     return startupInfo;
   }
 
-
-  public String getFirst() {
-    return first;
-  }
-
-  public void setFirst(String first) {
-    this.first = first;
-  }
-
-  public String getLast() {
-    return last;
-  }
-
-  public void setLast(String last) {
-    this.last = last;
-  }
-
-  public String getFullName() {
-    return first != null && !first.isEmpty() || last != null && !last.isEmpty() ? getName() : getUserID();
-  }
-
-  @Nullable
-  public String getFirstInitialName() {
-    String f = first == null ? "" :
-        (first.length() > 0 ?
-            first.substring(0, 1) + ". " : "");
-    String l = last == null ? "" : last;
-    String both = f + l;
-    // logger.info("getFirstInitialName Got " +userid + " " + firstLastUser + " : " + s);
-
-    if (both.isEmpty() || both.equalsIgnoreCase("F. Last")) {
-      both = getUserID();
-    }
-    // logger.info("now Got " +userid + " " + firstLastUser + " : " + s);
-
-    return both;
-  }
+//  public String getFirst() {
+//    return first;
+//  }
+//
+//  public void setFirst(String first) {
+//    this.first = first;
+//  }
+//
+//  public String getLast() {
+//    return last;
+//  }
+//
+//  public void setLast(String last) {
+//    this.last = last;
+//  }
 
   public Collection<Permission> getPermissions() {
     return permissions;
@@ -316,6 +272,7 @@ public class User extends MiniUser implements ReportUser {
 
   /**
    * @param permissions
+   * @see DominoUserDAOImpl#toUser
    */
   public void setPermissions(Collection<Permission> permissions) {
     this.permissions = permissions;
@@ -366,16 +323,16 @@ public class User extends MiniUser implements ReportUser {
   }
 
   /**
-   * @see mitll.langtest.client.user.SignUpForm#handleAddUserResponse
    * @return
+   * @see mitll.langtest.client.user.SignUpForm#handleAddUserResponse
    */
   public String getResetKey() {
     return resetKey;
   }
 
   /**
-   * @see mitll.langtest.server.database.user.BaseUserDAO#addUser
    * @param resetKey
+   * @see mitll.langtest.server.database.user.BaseUserDAO#addUser
    */
   public void setResetKey(String resetKey) {
     this.resetKey = resetKey;

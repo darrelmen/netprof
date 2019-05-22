@@ -89,7 +89,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     this.userListManager = userListManager;
     this.language = language;
     this.addDefects = addDefects;
-   // logger.debug("language is " + language + " add defects " + addDefects);
+    // logger.debug("language is " + language + " add defects " + addDefects);
   }
 
   public Set<Integer> getIDs() {
@@ -128,6 +128,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    */
   public void reload() {
     synchronized (idToExercise) {
+      long then = System.currentTimeMillis();
       logger.info("START : reloading exercises ");
 
       exercises = null;
@@ -136,12 +137,13 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       sectionHelper.clear();
       getRawExercises();
 
-      logger.info("END   : reloading exercises ");
+      logger.info("END   : reloading exercises in " + (System.currentTimeMillis() - then) + " millis");
     }
   }
 
   /**
    * Do steps after reading the exercises.
+   *
    * @see #getRawExercises
    */
   private void afterReadingExercises() {
@@ -208,7 +210,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     // logger.info("populateIdToExercise Examining " + exercises.size() + " exercises");
     for (CommonExercise e : exercises) {
       idToExercise.put(e.getID(), e);
-     // idToExercise.put(e.getDominoID(), e);
+      // idToExercise.put(e.getDominoID(), e);
       oldidToExercise.put(e.getOldID(), e);
     }
 
@@ -328,14 +330,14 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     if (currentExercise == null) {
       logger.info("addOverlay : huh? can't find " + userExercise);
     } else {
-      logger.debug("addOverlay at " + userExercise.getOldID() + " found " + currentExercise);
+      logger.info("addOverlay at " + userExercise.getOldID() + " found " + currentExercise);
       synchronized (idToExercise) {
         int i = exercises.indexOf(currentExercise);
-        logger.debug("addOverlay at " + i + " when looking for " + currentExercise);
+        logger.info("addOverlay at " + i + " when looking for " + currentExercise);
         if (i == -1) {
           logger.error("addOverlay : huh? couldn't find " + currentExercise);
         } else {
-          logger.debug("addOverlay step on " + i + " : " + exercises.get(i));
+          logger.info("addOverlay step on " + i + " : " + exercises.get(i));
 
           exercises.set(i, userExercise);
         }
@@ -365,18 +367,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       }
     }
   }
-
-  /**
-   * @param id
-   * @return true if exercise with this id was removed
-   * @seex DatabaseImpl#deleteItem
-   */
-/*  public boolean remove(int id) {
-    synchronized (this) {
-      CommonExercise remove = idToExercise.remove(id);
-      return remove != null && exercises.remove(remove);
-    }
-  }*/
 
   /**
    * This DAO needs to talk to other DAOs.
@@ -526,6 +516,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private boolean isKnownExercise(int id) {
     return idToExercise.containsKey(id);
   }
+
   private boolean isKnownExercise(String id) {
     return oldidToExercise.containsKey(id);
   }

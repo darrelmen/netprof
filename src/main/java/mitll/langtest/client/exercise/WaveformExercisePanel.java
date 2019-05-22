@@ -32,10 +32,6 @@ package mitll.langtest.client.exercise;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.MouseOutEvent;
-import com.google.gwt.event.dom.client.MouseOutHandler;
-import com.google.gwt.event.dom.client.MouseOverEvent;
-import com.google.gwt.event.dom.client.MouseOverHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.dialog.DominoLinkNotice;
@@ -138,7 +134,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
 
     add(container2);
 
-    logger.info("typeOrder " + typeOrder);
+   // logger.info("typeOrder " + typeOrder);
     UIObject unitChapterItem = new UnitChapterItemHelper<T>(typeOrder).addUnitChapterItem(exercise, container2);
     if (unitChapterItem != null) {
       unitChapterItem.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
@@ -149,21 +145,26 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
       DivWidget container = new DivWidget();
       add(container);
       addHeading();
-      ExerciseServiceAsync<T> exerciseService = controller.getExerciseService();
-      exerciseService.getExercise(parentExerciseID, new AsyncCallback<T>() {
-        @Override
-        public void onFailure(Throwable caught) {
+      if (parentExerciseID == -1) {
+        logger.warning("addInstructions : exercise " + exercise.getID() + " has no parent?");
+      } else {
+        ExerciseServiceAsync<T> exerciseService = controller.getExerciseService();
+        exerciseService.getExercise(parentExerciseID, new AsyncCallback<T>() {
+          @Override
+          public void onFailure(Throwable caught) {
 
-        }
+          }
 
-        @Override
-        public void onSuccess(T result) {
-          HTML maybeRTL = getMaybeRTL(ExerciseFormatter.getArabic(result.getFLToShow(), controller.getLanguageInfo()));
-          maybeRTL.addStyleName("numItemFont");
-          maybeRTL.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
-          container.add(maybeRTL);
-        }
-      });
+          @Override
+          public void onSuccess(T result) {
+
+            HTML maybeRTL = getMaybeRTL(ExerciseFormatter.getArabic(result.getFLToShow(), controller.getLanguageInfo()));
+            maybeRTL.addStyleName("numItemFont");
+            maybeRTL.getElement().getStyle().setFontStyle(Style.FontStyle.ITALIC);
+            container.add(maybeRTL);
+          }
+        });
+      }
     } else {
       addHeading();
     }

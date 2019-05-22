@@ -43,8 +43,18 @@ import java.util.*;
 import java.util.logging.Logger;
 
 class JSONAnswerParser {
-  public static final String PATH = "path";
   private final Logger logger = Logger.getLogger("JSONAnswerParser");
+
+  public static final String TIMESTAMP = "timestamp";
+  public static final String RESULT_ID = "resultID";
+  public static final String IS_CORRECT = "isCorrect";
+
+  public static final String PATH = "path";
+  public static final String DYNAMIC_RANGE = "dynamicRange";
+  public static final String DURATION = "duration";
+  public static final String EXID = "exid";
+  public static final String ISFULLMATCH = "isfullmatch";
+
 
   private static final String EVENT = "event";
   private static final String START = "start";
@@ -68,31 +78,18 @@ class JSONAnswerParser {
   AudioAnswer getAudioAnswer(JSONObject jsonObject) {
     Validity validity = getValidity(jsonObject);
 
-    JSONValue jsonValue2 = jsonObject.get(PATH);
-    if (jsonValue2 == null && validity == Validity.OK) {
+    boolean isValid = validity == Validity.OK;
+    if (isValid && jsonObject.get(PATH) == null) {
       logger.warning("getAudioAnswer no path on json? validity = " + validity);
     }
 
-    AudioAnswer converted = new AudioAnswer(
-        getField(jsonObject, PATH),
-        validity,
-        getIntField(jsonObject, REQID),
-        getIntField(jsonObject, "duration"),
-        getIntField(jsonObject, "exid")
-    );
+    AudioAnswer converted = getAudioAnswer(jsonObject, validity);
 
-    converted.setResultID(getIntField(jsonObject, "resultID"));
-
-    converted.setDynamicRange(getFloatField(jsonObject, "dynamicRange"));
-    long timestamp = getLongField(jsonObject, "timestamp");
-  //  logger.info("getAudioAnswer json timestamp " + timestamp + " " + new Date(timestamp));
-    converted.setTimestamp(timestamp);
-
-    if (validity == Validity.OK /*|| validity == Validity.CUT_OFF*/) {
+    if (isValid /*|| validity == Validity.CUT_OFF*/) {
       // logger.info("Got validity " + validity);
-      float score = getFloatField(jsonObject, "score");
+      float score = getFloatField(jsonObject, SCORE);
       converted.setScore(score);
-      converted.setCorrect(getBoolean(jsonObject, "isCorrect"));
+      converted.setCorrect(getBoolean(jsonObject, IS_CORRECT));
 
       Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<>();
       sTypeToEndTimes.put(NetPronImageType.PHONE_TRANSCRIPT, getTranscriptSegments(jsonObject, PHONE_TRANSCRIPT));
@@ -101,7 +98,7 @@ class JSONAnswerParser {
       float wavFileLengthSeconds = ((float) converted.getDurationInMillis()) / 1000F;
 
       // if somehow we don't get full match field, skip it
-      JSONValue jsonValue = jsonObject.get("isfullmatch");
+      JSONValue jsonValue = jsonObject.get(ISFULLMATCH);
       boolean isFullMatch = jsonValue == null || jsonValue.isBoolean().booleanValue();
 
       PretestScore pretestScore = new PretestScore(score, new HashMap<>(),
@@ -117,6 +114,25 @@ class JSONAnswerParser {
       logger.info("getAudioAnswer invalid : " + jsonObject);
     }
 
+    return converted;
+  }
+
+  @NotNull
+  private AudioAnswer getAudioAnswer(JSONObject jsonObject, Validity validity) {
+    AudioAnswer converted = new AudioAnswer(
+        getField(jsonObject, PATH),
+        validity,
+        getFloatField(jsonObject, DYNAMIC_RANGE),
+        getIntField(jsonObject, DURATION),
+        getIntField(jsonObject, REQID),
+        getIntField(jsonObject, EXID)
+    );
+
+    converted.setResultID(getIntField(jsonObject, RESULT_ID));
+    // converted.setDynamicRange(getFloatField(jsonObject, DYNAMIC_RANGE));
+    //  long timestamp = getLongField(jsonObject, "timestamp");
+    //  logger.info("getAudioAnswer json timestamp " + timestamp + " " + new Date(timestamp));
+    converted.setTimestamp(getLongField(jsonObject, TIMESTAMP));
     return converted;
   }
 

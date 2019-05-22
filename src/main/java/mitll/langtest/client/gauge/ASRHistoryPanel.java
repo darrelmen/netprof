@@ -113,7 +113,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     showChart(controller.getHost());
     addPlayer();
 
-    CorrectAndScore hydecScore = new CorrectAndScore(score.getHydecScore(), path);
+    CorrectAndScore hydecScore = new CorrectAndScore(score.getOverallScore(), path);
     hydecScore.setScores(score.getTypeToSegments());
     hydecScore.setJson(score.getJson());
     addScore(hydecScore);
@@ -127,7 +127,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   public void addScore(CorrectAndScore hydecScore) {
     if (currentMax == null || hydecScore.getScore() > currentMax.getScore()) {
       currentMax = hydecScore;
-      //  logger.info("current max now " + hydecScore);
+      //  logger.info("current max now " + overallScore);
     }
   }
 

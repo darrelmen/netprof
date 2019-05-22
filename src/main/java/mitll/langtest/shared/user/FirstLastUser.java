@@ -59,20 +59,7 @@ public class FirstLastUser extends SimpleUser {
   public String getAffiliation() {
     return this.affiliation;
   }
-
   public void setAffiliation(String affilation) {
     this.affiliation = affilation;
   }
-
-/*
-  public boolean isPoly() {
-    return affiliation.toLowerCase().startsWith("poly");
-  }
-*/
-
-/*
-  public boolean isNPQ() {
-    return affiliation.toLowerCase().startsWith("npq");
-  }
-*/
 }

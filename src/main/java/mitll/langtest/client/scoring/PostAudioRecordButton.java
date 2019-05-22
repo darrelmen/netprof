@@ -52,7 +52,7 @@ import static mitll.langtest.shared.answer.Validity.OK;
 
 public abstract class PostAudioRecordButton extends RecordButton
     implements RecordButton.RecordingListener {
-  public static final String MESSAGE = "MESSAGE";
+  private static final String MESSAGE = "MESSAGE";
   private final Logger logger = Logger.getLogger("PostAudioRecordButton");
 
   // TODO : enum
@@ -72,6 +72,7 @@ public abstract class PostAudioRecordButton extends RecordButton
   private int exerciseID;
   protected final ExerciseController controller;
   private final JSONAnswerParser jsonAnswerParser = new JSONAnswerParser();
+  private int projid;
 
   /**
    * @param exerciseID
@@ -95,6 +96,7 @@ public abstract class PostAudioRecordButton extends RecordButton
     setRecordingListener(this);
     this.exerciseID = exerciseID;
     this.controller = controller;
+    this.projid = controller.getProjectID();
 
     getElement().setId("PostAudioRecordButton");
 
@@ -168,12 +170,12 @@ public abstract class PostAudioRecordButton extends RecordButton
 
   /**
    * We can get back
-   *  START - starting a recording... but just like a STREAM packet
-   *  STREAM - a mid point packet of audio
-   *  ABORT - we cancelled it!
-   *  END - got the final packet, let's look at the ASR result
+   * START - starting a recording... but just like a STREAM packet
+   * STREAM - a mid point packet of audio
+   * ABORT - we cancelled it!
+   * END - got the final packet, let's look at the ASR result
    *
-   *  or nothing - in which case we got a 500 or 503 or something...
+   * or nothing - in which case we got a 500 or 503 or something...
    * <p>
    * So if we get something other than a 200 http response, stop recording and show a big failure warning.
    * which is different than a "hey, please speak in response to the prompt" or "check your mic"
@@ -414,7 +416,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @see #onPostSuccess
    */
   private void addRT(int resultID, int roundtrip) {
-    controller.getScoringService().addRoundTrip(resultID, roundtrip, new AsyncCallback<Void>() {
+    controller.getScoringService().addRoundTrip(projid, resultID, roundtrip, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("addRoundTrip", caught);
@@ -435,6 +437,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @see #startRecording
    */
   abstract protected AudioType getAudioType();
+
   abstract protected int getDialogSessionID();
 
   private void logRoundtripTime(long durationInMillis, long roundtrip) {

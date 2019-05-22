@@ -32,6 +32,7 @@ package mitll.langtest.server.database.result;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.Report;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
@@ -115,6 +116,11 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
     return 0;
   }
 
+  @Override
+  public List<MonitorResult> getMonitorResultsKnownExercisesWithLimit(int projid, int limit) {
+    return null;
+  }
+
   /**
    * Pulls the list of results out of the database.
    *
@@ -170,14 +176,14 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
-  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, Language language) {
+  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> exercises, Language language, int projid) {
     return null;
   }
 
   /**
    * @param projid
    * @return
-   * @see DatabaseImpl#getMonitorResults(int)
+   * @see DatabaseServices#getMonitorResults(int)
    */
   @Override
   public List<MonitorResult> getMonitorResults(int projid) {
@@ -306,11 +312,12 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param ids
    * @param userid
    * @param language
+   * @param projid
    * @return
    * @seex mitll.langtest.server.LangTestDatabaseImpl#getScoresForUser
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language) {
+  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language, int projid) {
     try {
       String list = getInList(ids);
 
@@ -351,12 +358,13 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param ids
    * @param userid
    * @param language
+   * @param projid
    * @return
    * @seex #getSessionsForUserIn2
    * @see #attachScoreHistory
    * @see mitll.langtest.server.database.DatabaseImpl#getJsonScoreHistory
    */
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language) {
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language, int projid) {
     try {
       String list = getInList(ids);
 
@@ -676,7 +684,7 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
    * @param statement
    * @return
    * @throws SQLException
-   * @see BaseResultDAO#getResultsForExIDInForUser(Collection, int, Language)
+   * @see BaseResultDAO#getResultsForExIDInForUser(Collection, int, Language, int)
    */
   private List<CorrectAndScore> getScoreResultsForQuery(Connection connection, PreparedStatement statement) throws SQLException {
     ResultSet rs = statement.executeQuery();
@@ -1018,6 +1026,17 @@ public class ResultDAO extends BaseResultDAO implements IResultDAO {
 
   @Override
   public Map<Integer, String> getResultIDToJSON(int projid) {
+    return null;
+  }
+
+  @Override
+  public List<MonitorResult> getResultsBySession(int userid, int projid, String sessionID) {
+    return null;
+  }
+
+
+  @Override
+  public List<MonitorResult> getResultsInTimeRange(int userid, int projectid, Timestamp from, Timestamp to) {
     return null;
   }
 }

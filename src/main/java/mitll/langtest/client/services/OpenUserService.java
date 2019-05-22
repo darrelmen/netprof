@@ -107,11 +107,12 @@ public interface OpenUserService extends RemoteService {
   /**
    *
    * @param projid
+   * @param isTeacher
    * @return
    */
-  HeartbeatStatus setCurrentUserToProject(int projid, String implVersion);
+  HeartbeatStatus setCurrentUserToProject(int projid, String implVersion, boolean isTeacher);
 
-  HeartbeatStatus checkHeartbeat(String implVersion);
+  HeartbeatStatus checkHeartbeat(String implVersion, boolean isTeacher);
 
   boolean isValidServer(String server);
 }

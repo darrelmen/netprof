@@ -63,7 +63,7 @@ public class BasicDialog {
   private static final boolean DEBUG = false;
   static final String TRY_AGAIN = "Try Again";
 
-  protected FormField addControlFormField(Panel dialogBox) {
+  public FormField addControlFormField(Panel dialogBox) {
     return addControlFormField(dialogBox, "", false, 0, 30, -1, "");
   }
 
@@ -118,8 +118,7 @@ public class BasicDialog {
                                          String label,
                                          TextBoxBase user,
                                          int minLength, String hint) {
-    final ControlGroup userGroup = addControlGroupEntry(dialogBox, label, user, hint);
-    return new FormField(user, userGroup, minLength);
+    return new FormField(user, addControlGroupEntry(dialogBox, label, user, hint), minLength);
   }
 
   /**
@@ -148,7 +147,7 @@ public class BasicDialog {
    * @return
    * @see BasicDialog#getSimpleFormField(Panel, String, TextBoxBase, int, String)
    */
-  protected ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget, String hint) {
+  public ControlGroup addControlGroupEntry(Panel dialogBox, String label, Widget widget, String hint) {
     final ControlGroup userGroup = new ControlGroup();
     userGroup.addStyleName("leftFiveMargin");
 

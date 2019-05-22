@@ -46,12 +46,6 @@ import mitll.langtest.shared.user.Kind;
 import mitll.langtest.shared.user.ReportUser;
 import mitll.npdata.dao.SlickProject;
 import mitll.npdata.dao.SlickSlimEvent;
-
-import net.sf.uadetector.OperatingSystemFamily;
-import net.sf.uadetector.ReadableUserAgent;
-import net.sf.uadetector.UserAgentStringParser;
-import net.sf.uadetector.VersionNumber;
-import net.sf.uadetector.service.UADetectorServiceFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -61,6 +55,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+
+//import net.sf.uadetector.ReadableUserAgent;
 
 public class Report implements IReport {
   private static final Logger logger = LogManager.getLogger(Report.class);
@@ -96,15 +92,15 @@ public class Report implements IReport {
    *
    */
   private static final String REF_AUDIO_RECORDINGS = "Ref Audio Recordings";
-  private static final String OPERATING_SYSTEM = "operatingSystem";
-  private static final String OPERATING_SYSTEM_VERSION = "operatingSystemVersion";
-  private static final String BROWSER = "browser";
-  private static final String BROWSER_VERSION = "browserVersion";
-  private static final String NAME = "name";
+//  private static final String OPERATING_SYSTEM = "operatingSystem";
+//  private static final String OPERATING_SYSTEM_VERSION = "operatingSystemVersion";
+//  private static final String BROWSER = "browser";
+//  private static final String BROWSER_VERSION = "browserVersion";
+//  private static final String NAME = "name";
   private static final String ACTIVE_I_PAD = "Active iPad/iPhone Users";
   private static final int EVIL_LAST_WEEK = 54;
   private static final String SKIP_USER = "gvidaver";
-  static final int DAY_TO_SEND_REPORT = Calendar.SATURDAY;// Calendar.SUNDAY;
+  // static final int DAY_TO_SEND_REPORT = Calendar.SATURDAY;// Calendar.SUNDAY;
   private static final int MIN_DURATION = 250;
   private static final String WEEK1 = "week";
   private static final String YEAR = "year";
@@ -190,7 +186,6 @@ public class Report implements IReport {
          List<ReportUser> users,
          List<ReportUser> deviceUsers,
          Map<Integer, Integer> userToProject,
-         String hostname,
          LogAndNotify logAndNotify) {
     this.resultDAO = resultDAO;
     this.eventDAO = eventDAO;
@@ -199,12 +194,12 @@ public class Report implements IReport {
 
     users.forEach(user -> idToUserID.put(user.getID(), user.getUserID()));
 
-    Set<ReportUser> foundLincoln = new HashSet<>();
+  //  Set<ReportUser> foundLincoln = new HashSet<>();
     users.forEach(reportUser -> {
       Kind userKind = reportUser.getUserKind();
       if (userKind == Kind.STUDENT) {
         if (isLincoln(reportUser)) {
-          foundLincoln.add(reportUser);
+    //      foundLincoln.add(reportUser);
         } else {
           allStudents.add(reportUser.getID());
         }
@@ -212,8 +207,8 @@ public class Report implements IReport {
       if (userKind == Kind.TEACHER) allTeachers.add(reportUser.getID());
     });
 
-    StringBuilder builder = new StringBuilder();
-    foundLincoln.forEach(reportUser -> builder.append(reportUser.getUserID()).append(", "));
+//    StringBuilder builder = new StringBuilder();
+//    foundLincoln.forEach(reportUser -> builder.append(reportUser.getUserID()).append(", "));
     //  logger.info("found lincoln users " + builder);
 
     this.deviceUsers = deviceUsers;
@@ -240,30 +235,8 @@ public class Report implements IReport {
                                     PathHelper pathHelper,
                                     boolean forceSend,
                                     boolean getAllYears) {
-    // check if it's a monday
-    if (!getShouldSkip()) {
-      int thisYear = getAllYears ? ALL_YEARS : getThisYear();
-      return writeReport(projid, language, site, pathHelper, thisYear, forceSend);
-    } else {
-      return Collections.emptyList();
-    }
-  }
-
-  private boolean getShouldSkip() {
- /*   try {
-      InetAddress ip = InetAddress.getLocalHost();
-      String hostName = ip.getHostName().toLowerCase();
-      skipReport = hostName.contains(MITLL) || hostName.contains("hydra");
-      if (skipReport) {
-        logger.info("skip writing report while testing.... " + ip.getHostName());
-      } else {
-        logger.info("will write report");
-      }
-    } catch (UnknownHostException e) {
-      logger.error("Got " + e, e);
-      e.printStackTrace();
-    }*/
-    return false;
+    int thisYear = getAllYears ? ALL_YEARS : getThisYear();
+    return writeReport(projid, language, site, pathHelper, thisYear, forceSend);
   }
 
   /**
@@ -403,8 +376,8 @@ public class Report implements IReport {
     return getReportFile(pathHelper, today, language, site, suffix);
   }
 
-  @Override
-  public File getReportPathDLI(PathHelper pathHelper, String suffix) {
+  //@Override
+  private File getReportPathDLI(PathHelper pathHelper, String suffix) {
     return new File(getReportsDir(pathHelper), getFileName() + suffix);
   }
 
@@ -737,7 +710,7 @@ public class Report implements IReport {
             "<h2>Project  : " + projectName + "</h2>\n";
   }
 
-  private final Map<String, ReadableUserAgent> userAgentToReadable = new HashMap<>();
+ // private final Map<String, ReadableUserAgent> userAgentToReadable = new HashMap<>();
 
   /**
    * @param fusers
@@ -746,7 +719,7 @@ public class Report implements IReport {
    * @param document
    * @see #getReport
    */
-  private void getBrowserReport(List<ReportUser> fusers, int year, JsonObject section, StringBuilder document) {
+/*  private void getBrowserReport(List<ReportUser> fusers, int year, JsonObject section, StringBuilder document) {
     List<ReportUser> usersByYear = filterUsersByYear(fusers, year);
 
     UserAgentStringParser parser = UADetectorServiceFactory.getResourceModuleParser();
@@ -821,9 +794,9 @@ public class Report implements IReport {
 
     if (miss > 0)
       logger.info("getBrowserReport for " + year + " users by year " + userAgentToReadable.size() + " miss " + miss);
-  }
+  }*/
 
-  private List<ReportUser> filterUsersByYear(List<ReportUser> fusers, int year) {
+/*  private List<ReportUser> filterUsersByYear(List<ReportUser> fusers, int year) {
     Calendar calendar = getCalendarForYear(year);
     YearTimeRange yearTimeRange = new YearTimeRange(year, calendar).invoke();
     List<ReportUser> forYear = new ArrayList<>();
@@ -844,7 +817,7 @@ public class Report implements IReport {
 
   private void incr(Map<String, Integer> osToCount, String host) {
     osToCount.put(host, osToCount.getOrDefault(host, 0) + 1);
-  }
+  }*/
 
   /**
    * @param builder
@@ -1173,9 +1146,11 @@ public class Report implements IReport {
         "</tr></table>";
   }
 
+/*
   private String getWrapper(String users1, String content) {
     return "<h2>" + users1 + "</h2>" + content;
   }
+*/
 
   private String getYTD(int ytd, String users1, JsonObject jsonObject, int year) {
     jsonObject.addProperty("label", users1);
@@ -1258,7 +1233,7 @@ public class Report implements IReport {
    * @return
    * @see #getBrowserReport(List, int, JsonObject, StringBuilder)
    */
-  private String getCountTable(String unit, String count, JsonArray jsonArray, String label, Map<String, Integer> monthToValue) {
+/*  private String getCountTable(String unit, String count, JsonArray jsonArray, String label, Map<String, Integer> monthToValue) {
     String s = "";
     for (Map.Entry<String, Integer> pair : monthToValue.entrySet()) {
       Integer value = pair.getValue();
@@ -1270,7 +1245,7 @@ public class Report implements IReport {
       s += getHTMLRow(month, value);
     }
     return getTableHTML(unit, count, s);
-  }
+  }*/
 
   private String getHTMLRow(String month, Object value) {
     return "<tr>" +
@@ -1488,8 +1463,8 @@ public class Report implements IReport {
     Map<Integer, Integer> weekToInvalid = new HashMap<>();
     Map<Integer, Integer> weekToAll = new HashMap<>();
     Map<Integer, Integer> weekToValid = new HashMap<>();
-    try {
-      BufferedWriter writer = null;
+    //try {
+    //  BufferedWriter writer = null;
       Calendar calendar = getCalendarForYear(year);
 
       Set<String> seen = new HashSet<>();
@@ -1564,12 +1539,12 @@ public class Report implements IReport {
           beforeJanuary++;
         }
       }
-      if (WRITE_RESULTS_TO_FILE) {
-        writer.close();
-      }
-    } catch (IOException e) {
-      logger.error("got " + e, e);
-    }
+//      if (WRITE_RESULTS_TO_FILE) {
+//        writer.close();
+//      }
+//    } catch (IOException e) {
+//      logger.error("got " + e, e);
+//    }
 
     if (DEBUG) {
       logger.debug("getResultsForSet" +
@@ -2013,10 +1988,7 @@ public class Report implements IReport {
     int month = calendar.get(Calendar.MONTH);
 
     Map<Long, Set<SlickSlimEvent>> userToEvents = monthToUserToEvents.get(month);
-    Set<Long> users = monthToCount.get(month);
-    if (users == null) {
-      monthToCount.put(month, users = new HashSet<>());
-    }
+    Set<Long> users = monthToCount.computeIfAbsent(month, k -> new HashSet<>());
     users.add(creatorID);
 
     if (userToEvents == null) {
@@ -2029,16 +2001,10 @@ public class Report implements IReport {
 
     // weeks
     int w = calendar.get(Calendar.WEEK_OF_YEAR);
-    Set<Long> userInWeek = weekToCount.get(w);
-    if (userInWeek == null) {
-      weekToCount.put(w, userInWeek = new HashSet<>());
-    }
+    Set<Long> userInWeek = weekToCount.computeIfAbsent(w, k -> new HashSet<>());
     userInWeek.add(creatorID);
 
-    userToEvents = weekToUserToEvents.get(w);
-    if (userToEvents == null) {
-      weekToUserToEvents.put(w, userToEvents = new HashMap<>());
-    }
+    userToEvents = weekToUserToEvents.computeIfAbsent(w, k -> new HashMap<>());
 
 //    events = userToEvents.get(creatorID);
 //    if (events == null) userToEvents.put(creatorID, events = new TreeSet<>());
@@ -2048,8 +2014,7 @@ public class Report implements IReport {
   }
 
   private void rememberEvent(SlickSlimEvent event, long creatorID, Map<Long, Set<SlickSlimEvent>> userToEvents) {
-    Set<SlickSlimEvent> events = userToEvents.get(creatorID);
-    if (events == null) userToEvents.put(creatorID, events = new TreeSet<>());
+    Set<SlickSlimEvent> events = userToEvents.computeIfAbsent(creatorID, k -> new TreeSet<>());
     events.add(event);
   }
 
@@ -2192,13 +2157,13 @@ public class Report implements IReport {
       this.calendar = calendar;
     }
 
-    public long getStart() {
-      return time;
-    }
-
-    public long getEnd() {
-      return time1;
-    }
+//    public long getStart() {
+//      return time;
+//    }
+//
+//    public long getEnd() {
+//      return time1;
+//    }
 
     boolean inYear(long test) {
       return test >= time && test < time1;

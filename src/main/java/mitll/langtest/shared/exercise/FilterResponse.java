@@ -30,7 +30,6 @@
 package mitll.langtest.shared.exercise;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.database.exercise.ISection;
 
 import java.util.HashMap;
 import java.util.HashSet;

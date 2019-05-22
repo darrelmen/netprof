@@ -30,6 +30,7 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.trie.ExerciseTrie;

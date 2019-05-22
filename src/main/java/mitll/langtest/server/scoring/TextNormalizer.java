@@ -54,8 +54,12 @@ public class TextNormalizer {
    * FF01 = full width exclamation
    * FF1B - full semi
    * 002D - hyphen
+   * left french quote -- \\u00AB
+   * right quote - 00BB
+   * ellipsis - 2026
+   * light horizontal
    */
-  private static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193\\u2026\\uFF01\\uFF1B\\u002D;~/']";
+  private static final String REMOVE_ME = "[()/\\u00AB\\u00BB\\u2026\\u2500\\u0130\\u2022\\u2219\\u2191\\u2193\\uFF01\\uFF1B\\u002D;~/']";
   private static final String REPLACE_ME_OE = "[\\u0152\\u0153]";
 
   private static final String P_Z = "\\p{Z}+";
@@ -67,9 +71,8 @@ public class TextNormalizer {
   private static final String P_P = "\\p{P}";
   private static final String INTERNAL_PUNCT_REGEX = "(?:(?<!\\S)\\p{Punct}+)|(?:\\p{Punct}+(?!\\S))";
 
-  private static final boolean DEBUG = false;
+  //private static final boolean DEBUG = false;
   private static final String NORMAL_I = "I";
-
 
   private final Pattern punctCleaner;
   private final Pattern tickPattern;
@@ -99,18 +102,17 @@ public class TextNormalizer {
   }
 
   public String getNorm(String raw) {
-    return String.join(" ", getTokens(raw, removeAccents, false));
+    return String.join(" ", getTokens(raw, removeAccents));
   }
 
   /**
    * @param sentence
    * @param removeAllAccents
-   * @param debug
    * @return
    * @see IPronunciationLookup#getPronunciationsFromDictOrLTS
    * @see mitll.langtest.server.audio.SLFFile#createSimpleSLFFile
    */
-  public List<String> getTokens(String sentence, boolean removeAllAccents, boolean debug) {
+  public List<String> getTokens(String sentence, boolean removeAllAccents) {
     List<String> all = new ArrayList<>();
  /*   if (sentence.isEmpty()) {
       logger.warn("huh? empty sentence?");
@@ -150,7 +152,7 @@ public class TextNormalizer {
   /**
    * @param s
    * @return
-   * @see #getTokens(String, boolean, boolean)
+   * @see #getTokens(String, boolean)
    */
   public String toFull(String s) {
     StringBuilder builder = new StringBuilder();
@@ -161,6 +163,22 @@ public class TextNormalizer {
         int offset = c - ZERO;
         int full = FULL_WIDTH_ZERO + offset;
         builder.append(Character.valueOf((char) full).toString());
+      } else {
+        builder.append(c);
+      }
+    }
+    return builder.toString();
+  }
+
+  public String fromFull(String s) {
+    StringBuilder builder = new StringBuilder();
+
+    final CharacterIterator it = new StringCharacterIterator(s);
+    for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
+      if (c >= FULL_WIDTH_ZERO && c <= FULL_WIDTH_ZERO + 9) {
+        int offset = c - FULL_WIDTH_ZERO;
+        int normal = ZERO + offset;
+        builder.append(Character.valueOf((char) normal).toString());
       } else {
         builder.append(c);
       }
@@ -221,7 +239,7 @@ public class TextNormalizer {
   private void convertFile(String infile, String outfile) {
     try {
       File fileDir = new File(infile);
-      if (!fileDir.exists()) System.err.println("can't find " + infile + " at "+ fileDir.getAbsolutePath());
+      if (!fileDir.exists()) System.err.println("can't find " + infile + " at " + fileDir.getAbsolutePath());
       else {
         // TextNormalizer textNormalizer = new TextNormalizer(lang.toUpperCase());
         BufferedReader in = new BufferedReader(

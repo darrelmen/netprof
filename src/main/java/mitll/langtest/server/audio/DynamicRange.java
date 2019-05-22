@@ -35,7 +35,10 @@ import org.apache.logging.log4j.Logger;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.text.DecimalFormat;
 
@@ -57,7 +60,8 @@ public class DynamicRange {
   public RMSInfo getDynamicRange(File file) {
     AudioInputStream ais = null;
     try {
-      ais = AudioSystem.getAudioInputStream(file);
+      //logger.info("getDynamicRange open " + file);
+      ais = getAudioInputStream(file);
       File absoluteFile = file.getAbsoluteFile();
       String fileInfo = absoluteFile.toString();
       return getRmsInfo(fileInfo, ais);
@@ -65,7 +69,12 @@ public class DynamicRange {
       logger.error("Got " + e, e);
     } finally {
       try {
-        if (ais != null) ais.close();
+        if (ais != null) {
+          //logger.info("getDynamicRange close stream on " + file.getAbsolutePath());
+          ais.close();
+        } else {
+          logger.warn("getDynamicRange no close?");
+        }
       } catch (IOException e) {
         logger.error("Got " + e, e);
       }
@@ -73,7 +82,11 @@ public class DynamicRange {
     return null;
   }
 
-  public RMSInfo getRmsInfo(String fileInfo, AudioInputStream ais) throws IOException {
+  private AudioInputStream getAudioInputStream(File wavFile) throws UnsupportedAudioFileException, IOException {
+    return AudioSystem.getAudioInputStream(new BufferedInputStream(new FileInputStream(wavFile)));
+  }
+
+  RMSInfo getRmsInfo(String fileInfo, AudioInputStream ais) throws IOException {
     AudioFormat format = ais.getFormat();
     //    logger.info("file " + file.getName() + " sample rate " + format.getSampleRate());
 
@@ -162,7 +175,7 @@ public class DynamicRange {
           }
 
           windowTotal += squared;
-  //        windowCount++;
+          //        windowCount++;
 
           sIndex++;
 
@@ -245,6 +258,9 @@ public class DynamicRange {
     final double maxRMS;
     final DecimalFormat decimalFormat = new DecimalFormat("##.##");
 
+    /**
+     * @see AudioCheck#getDynamicRange
+     */
     RMSInfo() {
       this(0, 0, 0, 0, 0, 0);
     }

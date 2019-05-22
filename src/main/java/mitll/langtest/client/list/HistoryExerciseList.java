@@ -564,7 +564,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
                                 int exerciseID,
                                 ExerciseListRequest request) {
     waitCursorHelper.scheduleWaitTimer();
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("getExerciseIDs for '" + prefix + "' and " + exerciseID +
           "\n\tfor " + request);
 
@@ -573,6 +573,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     }
 
     if (controller.getUser() > 0) {
+
       // final long then = System.currentTimeMillis();
       service.getExerciseIds(
           request,

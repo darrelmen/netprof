@@ -38,7 +38,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
@@ -49,6 +49,7 @@ import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.logging.log4j.LogManager;
@@ -63,7 +64,7 @@ import java.net.UnknownHostException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.server.database.exercise.Project.MANDARIN;
+import static mitll.langtest.server.database.project.Project.MANDARIN;
 
 @SuppressWarnings("serial")
 public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implements LogAndNotify {
@@ -116,27 +117,27 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 
   protected boolean hasAdminPerm(int userIDFromSessionOrDB) throws DominoSessionException {
     return getPermissions(userIDFromSessionOrDB)
-        .contains(User.Permission.PROJECT_ADMIN);
+        .contains(Permission.PROJECT_ADMIN);
   }
 
   boolean hasAdminOrCDPerm(int userIDFromSessionOrDB) throws DominoSessionException {
-    Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
+    Collection<Permission> permissions = getPermissions(userIDFromSessionOrDB);
     boolean hasPerm = permissions
-        .contains(User.Permission.PROJECT_ADMIN) || permissions.contains(User.Permission.DEVELOP_CONTENT);
+        .contains(Permission.PROJECT_ADMIN) || permissions.contains(Permission.DEVELOP_CONTENT);
 //    logger.info("hasAdminOrCDPerm for " + userIDFromSessionOrDB + " are " + permissions + " has perm " + hasPerm);
     return hasPerm;
   }
 
   boolean hasCDPerm(int userIDFromSessionOrDB) throws DominoSessionException {
-    Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
-    boolean hasPerm = permissions.contains(User.Permission.DEVELOP_CONTENT);
+    Collection<Permission> permissions = getPermissions(userIDFromSessionOrDB);
+    boolean hasPerm = permissions.contains(Permission.DEVELOP_CONTENT);
     logger.info("hasCDPerm for " + userIDFromSessionOrDB + " are " + permissions + " has perm " + hasPerm);
     return hasPerm;
   }
 
   boolean hasQCPerm(int userIDFromSessionOrDB) throws DominoSessionException {
-    Collection<User.Permission> permissions = getPermissions(userIDFromSessionOrDB);
-    return permissions.contains(User.Permission.QUALITY_CONTROL) || permissions.contains(User.Permission.PROJECT_ADMIN);
+    Collection<Permission> permissions = getPermissions(userIDFromSessionOrDB);
+    return permissions.contains(Permission.QUALITY_CONTROL) || permissions.contains(Permission.PROJECT_ADMIN);
   }
 
   /**
@@ -146,7 +147,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
    * @return
    * @throws DominoSessionException
    */
-  protected Collection<User.Permission> getPermissions(int userIDFromSessionOrDB) throws DominoSessionException {
+  protected Collection<Permission> getPermissions(int userIDFromSessionOrDB) throws DominoSessionException {
 //    logger.info("getPermissions for" + "\nuser " + userIDFromSessionOrDB);
     User userFromSession = db.getUserDAO().getByID(userIDFromSessionOrDB);
     if (userFromSession == null) {
@@ -209,7 +210,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     }
   }
 
-  protected Project getProject(int projID) {
+  public Project getProject(int projID) {
     return db.getProject(projID);
   }
 
@@ -283,7 +284,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     return securityManager == null ? null : securityManager.getLoggedInUser(getThreadLocalRequest());
   }
 
-  int getSessionUserID() throws DominoSessionException {
+  public int getSessionUserID() throws DominoSessionException {
     return securityManager.getLoggedInUserID(getThreadLocalRequest());
   }
 
@@ -294,17 +295,13 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   }
 
   /**
-   * This is safe!
-   *
+   * @see ResultServiceImpl#fixAudioPaths(int, Collection)
+   * @param project
    * @return
    */
-  protected String getLanguage() throws DominoSessionException {
-    return getLanguage(getProject());
-  }
-
   protected String getLanguage(Project project) {
     if (project == null) {
-      logger.error("getLanguage : no current project ");
+      logger.warn("getLanguage : no current project ");
       return "unset";
     } else {
       return project.getProject().language();
@@ -344,8 +341,9 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
     Language language1;
 
     try {
-      if (language.equalsIgnoreCase(MANDARIN)) language = Language.MANDARIN.name();
-
+      if (language.equalsIgnoreCase(MANDARIN)) {
+        language = Language.MANDARIN.name();
+      }
       language1 = Language.valueOf(language.toUpperCase());
     } catch (IllegalArgumentException e) {
       language1 = Language.UNKNOWN;
@@ -578,7 +576,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
         );*/
       }
 
-      new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(projid, project, iDialog.getExercises());
+      new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(project, iDialog.getExercises());
     }
 
     return iDialog;

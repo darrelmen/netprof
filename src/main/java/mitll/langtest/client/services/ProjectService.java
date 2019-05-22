@@ -42,6 +42,9 @@ import mitll.langtest.shared.project.ProjectProperty;
 
 import java.util.List;
 
+/**
+ * Will only run on netprof instance --
+ */
 @RemoteServiceRelativePath("project-manager")
 public interface ProjectService extends RemoteService {
   /**
@@ -73,19 +76,12 @@ public interface ProjectService extends RemoteService {
 
   boolean delete(int id) throws DominoSessionException, RestrictedOperationException;
 
+
   DominoUpdateResponse addPending(int id, boolean doChange) throws DominoSessionException, RestrictedOperationException;
 
   List<DominoProject> getDominoForLanguage(Language lang) throws DominoSessionException;
 
-/*
-  String getProperty(int projid, ProjectProperty key) throws DominoSessionException, RestrictedOperationException;
-*/
-
   List<String> getListProperty(int projid, ProjectProperty key) throws DominoSessionException, RestrictedOperationException;
-
-/*
-  boolean setProperty(int projid, ProjectProperty key, String newValue) throws DominoSessionException, RestrictedOperationException;
-*/
 
   boolean setListProperty(int projid, ProjectProperty key, List<String> newValue) throws DominoSessionException, RestrictedOperationException;
 }

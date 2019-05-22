@@ -31,6 +31,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.client.bootstrap.ItemSorter;
 import mitll.langtest.server.database.Database;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.*;
 import org.apache.logging.log4j.LogManager;
@@ -143,7 +144,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
       // TODO : I feel like I did this before...?
       // put sound at end...
-   //   reorderTypes(types, );
+      //   reorderTypes(types, );
       // }
       //if (DEBUG)
 //        logger.warn("getTypeOrder types " + types);
@@ -209,9 +210,9 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   @Override
   @NotNull
   public List<String> getUniq(List<String> types) {
-    Set<String> seen= new HashSet<>();
+    Set<String> seen = new HashSet<>();
     List<String> uniq = new ArrayList<>();
-    types.forEach(type->{
+    types.forEach(type -> {
       if (!seen.contains(type)) {
         uniq.add(type);
         seen.add(type);
@@ -804,7 +805,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   /**
    * SectionHelper gets confused if we don't have a complete tree - same number of nodes on path to root
    *
-   *  @param exercise
+   * @param exercise
    * @param attrTypes
    * @param pairs
    * @param onlyIncludeFacetAttributes
@@ -906,6 +907,8 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   }
 
   /**
+   * TODO : figure out why we're seeing : removeExerciseToLesson no lesson for Domino Project/780 in []
+   *
    * @param exercise
    * @param type
    * @param unitName
@@ -920,7 +923,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     } else {
       Lesson<T> tLesson = unit.get(unitName);
       if (tLesson == null) {
-        logger.error("removeExerciseToLesson no lesson for " + type + "/" + unitName + " in " + unit.keySet());
+        logger.warn("removeExerciseToLesson no lesson for type '" + type + "' unit name '" + unitName + "' in '" + unit.keySet() + "'");
         return false;
       } else {
         return tLesson.remove(exercise);

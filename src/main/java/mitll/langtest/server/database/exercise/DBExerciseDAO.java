@@ -31,6 +31,7 @@ package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -57,7 +58,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private final SlickProject project;
   private final Project fullProject;
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_ROOT_TYPE = true;
+  private static final boolean DEBUG_ROOT_TYPE = false;
   private static final boolean DEBUG_USER_CREATED = false;
   private final Map<Integer, CommonExercise> idToContextExercise = new HashMap<>();
   private final Map<Integer, CommonExercise> idToUserExercise = new HashMap<>();
@@ -207,6 +208,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   List<CommonExercise> readExercises() {
     try {
       List<String> typeOrder = getTypeOrderFromProject();
+
+     // logger.info("readExercises vfor  " + project + " " + typeOrder);
       setRootTypes(typeOrder);
 
       int projid = project.id();
@@ -252,8 +255,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           fullProject, allAttributesByProject, exToAttrs,
           true);
 
-      Map<Integer, CommonExercise> idToContext =
-          getIDToExercise(contextByProject);
+      Map<Integer, CommonExercise> idToContext = getIDToExercise(contextByProject);
 
       if (DEBUG_CONTEXT) {
         logger.info("readExercises project " + project +
@@ -411,11 +413,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private List<String> getTypeOrderFromProject() {
     List<String> typeOrder = getBaseTypeOrder();
 
-    logger.info("getTypeOrderFromProject typeOrder " + typeOrder);
-
     Collection<String> attributeTypes = getAttributeTypes();
 
-    logger.info("getTypeOrderFromProject attributeTypes " + attributeTypes);
+    logger.info("getTypeOrderFromProject " +
+        "\n\ttypeOrder      " + typeOrder +
+        "\n\tattributeTypes " + attributeTypes);
 
     if (attributeTypes.contains(SEMESTER.toString())) {
       //  logger.info("found semester ");
@@ -433,7 +435,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     logger.info("getTypeOrderFromProject sortedTypes " + sortedTypes);
 
     Map<String, Facet> nameToFacet = new HashMap<>();
-
 
     for (Facet f : Facet.values()) {
       nameToFacet.put(f.getName(), f);
@@ -555,17 +556,28 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * @param safe
    * @param unsafe
    * @param dictTimestamp
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkForOOV
    */
   public void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp) {
-    int changed = getDao().updateCheckedBulk(safe, true, dictTimestamp);
-    if (changed != safe.size()) {
-      logger.warn("asked to mark " + safe.size() + " but did " + changed);
+    {
+      int changed = getDao().updateCheckedBulk(safe, true, dictTimestamp);
+      if (changed != safe.size()) {
+        logger.warn("markSafeUnsafe asked to mark " + safe.size() + " but did " + changed);
+      } else {
+        logger.info("markSafeUnsafe marked " + safe.size() + " safe");
+      }
     }
-    int i = getDao().updateCheckedBulk(unsafe, false, dictTimestamp);
-    if (i != unsafe.size()) {
-      logger.warn("asked to mark " + unsafe.size() + " but did " + i);
+    {
+      int i = getDao().updateCheckedBulk(unsafe, false, dictTimestamp);
+      if (i != unsafe.size()) {
+        logger.warn("markSafeUnsafe asked to mark " + unsafe.size() + " but did " + i);
+      } else {
+        logger.info("markSafeUnsafe marked " + unsafe.size() + " unsafe");
+
+      }
     }
+
+
   }
 
   /**
@@ -581,6 +593,11 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @Override
   public void updatePhonesBulk(List<SlickExercisePhone> pairs) {
     getDao().updatePhonesBulk(pairs);
+  }
+
+  @Override
+  public void updateNormBulk(List<SlickExerciseNorm> pairs) {
+    getDao().updateNormBulk(pairs);
   }
 
   /**

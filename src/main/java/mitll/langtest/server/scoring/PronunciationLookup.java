@@ -31,11 +31,10 @@ package mitll.langtest.server.scoring;
 
 
 import mitll.langtest.server.audio.AudioFileHelper;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.LTS;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -206,7 +205,7 @@ public class PronunciationLookup implements IPronunciationLookup {
 
   @Override
   public InDictStat getTokenStats(String transcript) {
-    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct, false);
+    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct);
     int total = transcriptTokens.size();
     int inDict = 0;
     for (String word : transcriptTokens) {
@@ -248,7 +247,7 @@ public class PronunciationLookup implements IPronunciationLookup {
       logger.info("getPronunciationsFromDictOrLTS ask for pron for '" + transcript + "'");
     }
 
-    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct, debug);
+    List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct);
 
     if (debug) {
       logger.info("getPronunciationsFromDictOrLTS got              '" + transcriptTokens + "'");

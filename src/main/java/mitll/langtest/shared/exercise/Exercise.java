@@ -60,10 +60,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private List<ClientExercise> directlyRelated = new ArrayList<>();
 
-  /**
-   * @see #setSafeToDecode
-   */
-  private boolean safeToDecode;
   private transient long safeToDecodeLastChecked;
 
   private int creator = UNDEFINED_USER;
@@ -87,7 +83,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   private List<ExerciseAttribute> attributes = new ArrayList<>();
 
-  private String noAccentFL;
+  /**
+   * Just to use when doing decoding and displayed in Fix Item
+   */
+  private String normalizedFL = "";
 
   /**
    *
@@ -103,7 +102,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param altcontext
    * @param projectid
    * @param updateTime
-   * @param noAccentFL
+   * @param normalizedFL
    * @see mitll.langtest.server.database.exercise.ExcelImport#getExercise
    */
   public Exercise(String id,
@@ -113,13 +112,13 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   String meaning,
                   int projectid,
                   long updateTime,
-                  String noAccentFL) {
-    super(-1, projectid, false);
+                  String normalizedFL) {
+    super(-1, projectid, false, false);
     this.oldid = id;
     this.meaning = meaning;
     this.updateTime = updateTime;
     this.isPredef = true;
-    this.noAccentFL = noAccentFL;
+    this.normalizedFL = normalizedFL;
     addContext(context, altcontext, contextTranslation);
   }
 
@@ -143,19 +142,19 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param context
    * @param altcontext
    * @param contextTranslation
-   * @param noAccentFL
+   * @param normalizedFL
    * @param projectid
    * @Deprecated - use related exercise join table
    * @see #addContext
    */
   @Deprecated
-  private Exercise(String id, String context, String altcontext, String contextTranslation, String noAccentFL, int projectid) {
-    super(-1, projectid, true);
+  private Exercise(String id, String context, String altcontext, String contextTranslation, String normalizedFL, int projectid) {
+    super(-1, projectid, true, false);
     this.foreignLanguage = context;
     this.altfl = altcontext;
     this.english = contextTranslation;
     this.oldid = id;
-    this.noAccentFL = noAccentFL;
+    this.normalizedFL = normalizedFL;
   }
 
 
@@ -165,7 +164,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param creator
    * @param englishSentence
    * @param foreignLanguage
-   * @param noAccentFL
+   * @param normalizedFL
    * @param altFL
    * @param meaning
    * @param transliteration
@@ -182,7 +181,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int creator,
                   String englishSentence,
                   String foreignLanguage,
-                  String noAccentFL,
+                  String normalizedFL,
                   String altFL,
                   String meaning,
                   String transliteration,
@@ -190,22 +189,21 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   boolean candecode,
                   long lastChecked,
                   boolean isContext,
-                  int numPhones,
+
                   int dominoID,
                   boolean shouldSwap) {
-    super(exid, projectid, isContext);
+    super(exid, projectid, isContext, candecode);
     this.oldid = oldid;
     this.creator = creator;
     setEnglishSentence(englishSentence);
     this.meaning = meaning;
     setForeignLanguage(foreignLanguage);
-    this.noAccentFL = noAccentFL;
+    this.normalizedFL = normalizedFL;
     setTransliteration(transliteration);
     setAltFL(altFL);
-    this.safeToDecode = candecode;
+
     safeToDecodeLastChecked = lastChecked;
 
-    //   this.numPhones = numPhones;
     this.dominoID = dominoID;
     this.shouldSwap = shouldSwap;
   }
@@ -216,7 +214,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @param creator
    * @param english
    * @param foreignLanguage
-   * @param noAccentFL
+   * @param normalizedFL
    * @param altFL
    * @param meaning
    * @param transliteration
@@ -235,7 +233,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   int creator,
                   String english,
                   String foreignLanguage,
-                  String noAccentFL,
+                  String normalizedFL,
                   String altFL,
                   String meaning,
                   String transliteration,
@@ -246,16 +244,14 @@ public class Exercise extends AudioExercise implements CommonExercise,
                   boolean candecode,
                   long lastChecked,
                   boolean isContext,
-                  int numPhones,
+
                   int dominoID,
                   boolean shouldSwap) {
-    this(uniqueID, exerciseID, creator, english, foreignLanguage, noAccentFL, altFL, meaning, transliteration,
-        projectid, candecode, lastChecked, isContext, numPhones, dominoID, shouldSwap);
+    this(uniqueID, exerciseID, creator, english, foreignLanguage, normalizedFL, altFL, meaning, transliteration,
+        projectid, candecode, lastChecked, isContext, dominoID, shouldSwap);
     setUnitToValue(unitToValue);
     this.isOverride = isOverride;
     this.updateTime = modifiedTimestamp;
-    this.safeToDecode = candecode;
-    //this.numPhones = numPhones;
   }
 
   /**
@@ -265,15 +261,18 @@ public class Exercise extends AudioExercise implements CommonExercise,
    * @see FlexListLayout#getFactory(PagingExerciseList)
    */
   public <T extends CommonExercise> Exercise(T exercise) {
-    super(exercise.getID(), exercise.getProjectID(), exercise.isContext());
+    super(exercise.getID(), exercise.getProjectID(), exercise.isContext(), exercise.isSafeToDecode());
     this.isPredef = exercise.isPredefined();
     this.english = exercise.getEnglish();
     this.foreignLanguage = exercise.getForeignLanguage();
+    this.normalizedFL = exercise.getNormalizedFL();
+
     this.transliteration = exercise.getTransliteration();
     this.meaning = exercise.getMeaning();
     this.dominoID = exercise.getDominoID();
     this.oldid = exercise.getOldID();
     this.tokens = exercise.getTokens();
+    this.parentExerciseID = exercise.getParentExerciseID();
 
     setFieldToAnnotation(exercise.getFieldToAnnotation());
     setUnitToValue(exercise.getUnitToValue());
@@ -286,7 +285,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   public CommonShell getShell() {
-    return new ExerciseShell(english, meaning, foreignLanguage, getID(), isContext(), getDirectlyRelated().size());
+    return new ExerciseShell(english, meaning, foreignLanguage, getID(), isContext(), getDirectlyRelated().size(), isSafeToDecode());
   }
 
   public CommonShell asShell() {
@@ -378,8 +377,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
         .collect(Collectors.toSet()).isEmpty();
   }
 
-  public boolean addAttribute(ExerciseAttribute attribute) {
-    return attributes.add(attribute);
+  public void addAttribute(ExerciseAttribute attribute) {
+    attributes.add(attribute);
   }
 
   /**
@@ -390,7 +389,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   private void addContext(String context, String altcontext, String contextTranslation) {
     if (!context.trim().isEmpty()) {
-      Exercise contextExercise = new Exercise("c" + getID(), context, altcontext, contextTranslation, noAccentFL, getProjectID());
+      Exercise contextExercise = new Exercise("c" + getID(), context, altcontext, contextTranslation, normalizedFL, getProjectID());
       contextExercise.setUpdateTime(getUpdateTime());
       contextExercise.setUnitToValue(getUnitToValue());
       addContextExercise(contextExercise);
@@ -481,17 +480,10 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return directlyRelated;
   }
 
-  /**
-   * @return
-   * @seex mitll.langtest.client.custom.exercise.ContextCommentNPFExercise#getItemContent
-   */
-  public boolean isSafeToDecode() {
-    return safeToDecode;
-  }
 
   /**
    * @param safeToDecode
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkForOOV
    */
   public void setSafeToDecode(boolean safeToDecode) {
     this.safeToDecode = safeToDecode;
@@ -624,6 +616,14 @@ public class Exercise extends AudioExercise implements CommonExercise,
    */
   public void setDominoContextIndex(int dominoContextIndex) {
     this.dominoContextIndex = dominoContextIndex;
+  }
+
+  public String getNormalizedFL() {
+    return normalizedFL;
+  }
+
+  public void setNormalizedFL(String normalizedFL) {
+    this.normalizedFL = normalizedFL;
   }
 
   public String toString() {

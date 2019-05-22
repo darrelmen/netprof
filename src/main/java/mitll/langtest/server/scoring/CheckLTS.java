@@ -29,11 +29,10 @@
 
 package mitll.langtest.server.scoring;
 
-
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.lts.HTKDictionary;
 import mitll.npdata.dao.lts.LTS;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -41,22 +40,22 @@ import java.util.*;
 
 import static mitll.langtest.server.scoring.ASRWebserviceScoring.MAX_FROM_ANY_TOKEN;
 
-class CheckLTS {
+public class CheckLTS {
   private static final Logger logger = LogManager.getLogger(CheckLTS.class);
   private static final int WARN_LTS_COUNT = 1;
 
   private final LTS letterToSoundClass;
-  // private final String language;
 
   private final HTKDictionary htkDictionary;
   private final SmallVocabDecoder smallVocabDecoder;
 
-  private final boolean isAsianLanguage, removeAllAccents;
+  private final boolean isAsianLanguage;
   private final Language languageInfo;
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_OOV = false;
   private static final String POUND = "#";
+  private int shown = 0;
 
   /**
    * @param lts
@@ -68,70 +67,35 @@ class CheckLTS {
     this.letterToSoundClass = lts;
     this.htkDictionary = htkDictionary;
     this.languageInfo = languageInfo;
+    this.isAsianLanguage = isAsianLanguage;
+
     if (htkDictionary == null || (htkDictionary.isEmpty() && hasModel)) {
       logger.warn("CheckLTS : dict is empty? lts = " + lts);
     }
     smallVocabDecoder = new SmallVocabDecoder(htkDictionary, isAsianLanguage, languageInfo);
-    //  this.language = languageInfo != null ? languageInfo.getLanguage() : "";
-    this.isAsianLanguage = isAsianLanguage;
-    removeAllAccents =
-        languageInfo != Language.FRENCH &&
-            languageInfo != Language.TURKISH &&
-            languageInfo != Language.CROATIAN &&
-            languageInfo != Language.SERBIAN
-    ;
-
-//    logger.info("lang " + languageProperty  + " asian " + isAsianLanguage);
-//    if (isAsianLanguage) logger.warn("using mandarin segmentation.");
-  }
-
-  private boolean areAllPhonesValid(String[] pron) {
-    boolean allValid = true;
-    for (String p : pron) {
-      if (checkInvalidPhone(p)) allValid = false;
-    }
-    return allValid;
-  }
-
-  private boolean checkInvalidPhone(String p) {
-    return p.equalsIgnoreCase(POUND);
   }
 
   /**
    * @param foreignLanguagePhrase
    * @return
    * @see Scoring#validLTS(String, String)
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkWithHydra(ClientExercise, Map, Map, Set, Set)
    */
-  Set<String> checkLTS(String foreignLanguagePhrase, String transliteration) {
-    return checkLTS(letterToSoundClass, foreignLanguagePhrase, transliteration, removeAllAccents);
+  public Set<String> checkLTS(String foreignLanguagePhrase, String transliteration) {
+    return checkLTS(letterToSoundClass, foreignLanguagePhrase, transliteration);
   }
 
-  /**
-   * @param foreignLanguagePhrase
-   * @return
-   * @see Scoring#getBagOfPhones
-   */
-  PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
-    return checkLTS2(letterToSoundClass, foreignLanguagePhrase);
-  }
+  //private int spew = 0;
 
-  private int shown = 0;
-
-  private boolean hasUsableTransliteration(Collection<String> foreignTokens, Collection<String> translitTokens) {
-    return (foreignTokens.size() == translitTokens.size()) || (foreignTokens.size() == 1);
-  }
-
-  int spew =0;
   /**
    * So chinese is special -- it doesn't do lts -- it just uses a dictionary
    *
    * @param lts
    * @param foreignLanguagePhrase
-   * @param removeAllAccents
    * @return set of oov tokens
    * @see #checkLTS(String, String)
    */
-  private Set<String> checkLTS(LTS lts, String foreignLanguagePhrase, String transliteration, boolean removeAllAccents) {
+  private Set<String> checkLTS(LTS lts, String foreignLanguagePhrase, String transliteration) {
     boolean isEmptyLTS = LTSFactory.isEmpty(lts);
     if (isDictEmpty() && isEmptyLTS) {
       if (shown++ < WARN_LTS_COUNT) {
@@ -142,10 +106,10 @@ class CheckLTS {
 
 //    if (removeAllAccents) logger.info("checkLTS " +foreignLanguagePhrase);
 
-    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, removeAllAccents, false);
-    Collection<String> translitTokens = transliteration.isEmpty() ? Collections.emptyList() : smallVocabDecoder.getTokens(transliteration, removeAllAccents, false);
+    Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
+  //  Collection<String> translitTokens = transliteration.isEmpty() ? Collections.emptyList() : smallVocabDecoder.getTokens(transliteration);
 
-    boolean translitOk = isTranslitOk(lts, transliteration, tokens, translitTokens);
+    boolean translitOk = false;//isTranslitOk(lts, transliteration, tokens, translitTokens);
 
     //   String language = isAsianLanguage ? " MANDARIN " : "";
 
@@ -248,15 +212,18 @@ class CheckLTS {
       oov.add(e.getMessage());
       return oov;
     }
+
     if (foreignLanguagePhrase.trim().isEmpty()) {
       //logger.warn("huh fl is empty?");
-    } else {
-      if (DEBUG)
-        logger.info("checkLTS : for phrase '" + foreignLanguagePhrase + "' : inlts " + inlts + " indict " + indict);
+    } else if (DEBUG) {
+      logger.info("checkLTS : for phrase '" + foreignLanguagePhrase + "' : inlts " + inlts + " indict " + indict);
     }
+
     if (DEBUG || (DEBUG_OOV && !oov.isEmpty()))
-      logger.info("checkLTS '" + languageInfo + "' tokens : '" + tokens + "' oov " + oov.size() + " : " + oov +
-          " for " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
+      logger.info("checkLTS '" + languageInfo + "'" +
+          "\n\ttokens '" + tokens + "'" +
+          "\n\toov    " + oov.size() + " : " + oov +
+          "\n\tfor    " + foreignLanguagePhrase + " : inlts " + inlts + " indict " + indict);
 
     return oov;
   }
@@ -304,6 +271,10 @@ class CheckLTS {
     return translitOk;
   }
 
+  private boolean hasUsableTransliteration(Collection<String> foreignTokens, Collection<String> translitTokens) {
+    return (foreignTokens.size() == translitTokens.size()) || (foreignTokens.size() == 1);
+  }
+
   private String getCons(String[] tokens) {
     return String.join("-", tokens);
   }
@@ -345,6 +316,18 @@ class CheckLTS {
     return b && valid;
   }
 
+  private boolean areAllPhonesValid(String[] pron) {
+    boolean allValid = true;
+    for (String p : pron) {
+      if (checkInvalidPhone(p)) allValid = false;
+    }
+    return allValid;
+  }
+
+  private boolean checkInvalidPhone(String p) {
+    return p.equalsIgnoreCase(POUND);
+  }
+
   /**
    * Might be n1 x n2 x n3 different possible combinations of pronunciations of a phrase
    * Consider running ASR on all ref audio to get actual phone sequence.
@@ -353,7 +336,7 @@ class CheckLTS {
    * @param foreignLanguagePhrase
    */
   //this seems to be dead code - it's called by a method that isn't so far as I can tell, called by anything else. Going to not mess with trying to get the transliteration in here
-  private PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
+/*  private PhoneInfo checkLTS2(LTS lts, String foreignLanguagePhrase) {
     //   logger.info("lang  " + language + " is asian " + isAsianLanguage);
     SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(htkDictionary, isAsianLanguage, languageInfo);
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase, languageInfo != Language.FRENCH, false);
@@ -429,5 +412,5 @@ class CheckLTS {
     }
     //if (multiple % 1000 == 0) logger.debug("mult " + multiple);
     return new PhoneInfo(firstPron, uphones);
-  }
+  }*/
 }

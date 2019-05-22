@@ -35,7 +35,6 @@ import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.shared.user.*;
@@ -120,7 +119,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
   User getUserByID(String id);
 
   DBUser getDBUser(String userID);
-
+  DBUser lookupDBUser(int id);
   /**
    * TODO : replace with user where or rename
    *
@@ -136,6 +135,8 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    * @see mitll.langtest.server.ScoreServlet#getUser
    */
   User getUserWhere(int userid);
+
+  mitll.hlt.domino.shared.model.user.User lookupDominoUser(int id);
 
   void refreshCacheFor(int userid);
 
@@ -210,6 +211,10 @@ public interface IUserDAO extends IDAO, AutoCloseable {
    */
   boolean changePasswordForToken(String userId, String userKey, String newPassword, String url, String email);
 
+  boolean addTeacherRole(int userid);
+
+  boolean removeTeacherRole(int userid);
+
   SResult<ClientUserDetail> updateUser(DBUser dbUser);
 
   boolean forgotPassword(String user, String url, String optionalEmail);
@@ -244,7 +249,7 @@ public interface IUserDAO extends IDAO, AutoCloseable {
 
   DBUser getDominoAdminUser();
 
-  void setProjectManagement(IProjectManagement projectManagement);
+  //void setProjectManagement(IProjectManagement projectManagement);
 
   Set<Integer> getTeacherIDs();
   <T> Map<Integer, T> getJustTeachers(Map<Integer, T> activeSince);

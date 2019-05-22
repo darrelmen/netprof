@@ -66,6 +66,7 @@ public class DominoExerciseDAO {
   public static final String UNKNOWN = "unknown";
   private boolean shouldSwap;
   private final IUserExerciseDAO userExerciseDAO;
+  public static final boolean DEBUG = false;
 
   public DominoExerciseDAO(IUserExerciseDAO userExerciseDAO) {
     this.userExerciseDAO = userExerciseDAO;
@@ -77,7 +78,7 @@ public class DominoExerciseDAO {
    * @param importDocs
    * @param shouldSwap
    * @return
-   * @see IProjectManagement#getImportFromDomino
+   * @see DominoImport#getImportFromDomino
    */
   public ImportInfo readExercises(int projid,
                                   ImportProjectInfo projectInfo,
@@ -218,7 +219,7 @@ public class DominoExerciseDAO {
       }
     }
     if (!skipped.isEmpty()) {
-      logger.warn("skipped vocab attributes " + skipped + " for " + ex.getID() + " old " + ex.getOldID() + " domino " +ex.getDominoID());
+      logger.warn("addAttributes skipped vocab attributes " + skipped + " for " + ex.getID() + " old " + ex.getOldID() + " domino " + ex.getDominoID());
     }
   }
 
@@ -337,7 +338,7 @@ public class DominoExerciseDAO {
     context.setDominoContextIndex(sample.getNum());
 
     context.setUnitToValue(unitToValue);
-  //  context.setParentDominoID(parentDominoID);
+    //  context.setParentDominoID(parentDominoID);
     return context;
   }
 
@@ -352,6 +353,7 @@ public class DominoExerciseDAO {
    * @param createTime
    * @param exID
    * @return
+   * @see #getExerciseFromVocab(int, int, String, String, int, long, VocabularyItem, Map)
    */
   @NotNull
   private Exercise getExerciseFromVocabularyItem(int projid,
@@ -426,17 +428,18 @@ public class DominoExerciseDAO {
         false,
         0,
         isContext,
-        0,
         dominoID, shouldSwap);
 
 
-    logger.info("getExerciseFromVocabularyItem : made ex" +
-        "\n\tdominoID " + exercise.getDominoID() +
-        "\n\tnpID     " + exercise.getOldID() +
-        "\n\tex id    " + exercise.getID() +
-        "\n\teng      '" + exercise.getEnglish() + "'" +
-        "\n\tfl       '" + exercise.getForeignLanguage() + "'" +
-        "\n\tcontext  " + isContext);
+    if (DEBUG) {
+      logger.info("getExerciseFromVocabularyItem : made ex" +
+          "\n\tdominoID " + exercise.getDominoID() +
+          "\n\tnpID     " + exercise.getOldID() +
+          "\n\tex id    " + exercise.getID() +
+          "\n\teng      '" + exercise.getEnglish() + "'" +
+          "\n\tfl       '" + exercise.getForeignLanguage() + "'" +
+          "\n\tcontext  " + isContext);
+    }
 
     exercise.setPredef(true);
 

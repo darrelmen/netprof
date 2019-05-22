@@ -31,8 +31,8 @@ package mitll.langtest.server.domino;
 
 import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.dialog.IDialogDAO;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.dialog.DialogType;

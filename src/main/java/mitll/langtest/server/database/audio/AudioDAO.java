@@ -32,8 +32,8 @@ package mitll.langtest.server.database.audio;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.Report;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.result.Result;
-import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
@@ -46,9 +46,12 @@ import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickAudio;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.sql.*;
 import java.util.*;
+
+import static mitll.langtest.server.database.user.BaseUserDAO.*;
 
 public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   private static final Logger logger = LogManager.getLogger(AudioDAO.class);
@@ -70,9 +73,15 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   private final Connection connection;
   private final IUserDAO userDAO;
 
+  @Deprecated
+  public static MiniUser DEFAULT_USER = new MiniUser(DEFAULT_USER_ID, 99, true, "default");
+  @Deprecated
+  public static MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 99, true, "Male");
+  @Deprecated
+  public static MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 99, false, "Female");
+
   @Override
   public void deleteForProject(int projID) {
-
   }
 
   @Override
@@ -1099,13 +1108,13 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
     createIndex(database, Database.EXID, AUDIO);
   }
 
-  MiniUser checkDefaultUser(long userID, MiniUser user) {
-    if (userID == BaseUserDAO.DEFAULT_USER_ID) {
-      user = BaseUserDAO.DEFAULT_USER;
-    } else if (userID == BaseUserDAO.DEFAULT_MALE_ID) {
-      user = BaseUserDAO.DEFAULT_MALE;
-    } else if (userID == BaseUserDAO.DEFAULT_FEMALE_ID) {
-      user = BaseUserDAO.DEFAULT_FEMALE;
+  private MiniUser checkDefaultUser(long userID, MiniUser user) {
+    if (userID == DEFAULT_USER_ID) {
+      user = DEFAULT_USER;
+    } else if (userID == DEFAULT_MALE_ID) {
+      user = DEFAULT_MALE;
+    } else if (userID == DEFAULT_FEMALE_ID) {
+      user = DEFAULT_FEMALE;
     }
     return user;
   }
@@ -1118,5 +1127,26 @@ public class AudioDAO extends BaseAudioDAO implements IAudioDAO {
   @Override
   public void copyOne(AudioCopy audioCopy, int audioID, int exid, boolean isContext) {
 
+  }
+
+  @NotNull
+  @Override
+  public List<Integer> getAllAudioIDs(int projectID, boolean hasProjectSpecificAudio) {
+    return null;
+  }
+
+  @Override
+  public void clearAudioCacheForEx(int exid) {
+
+  }
+
+  @Override
+  public void setProjectManagement(IProjectManagement projectManagement) {
+
+  }
+
+  @Override
+  Map<Integer, List<AudioAttribute>> getAllAudioAttributesForExercises(int projID, Map<Integer, MiniUser> idToMini) {
+    return null;
   }
 }

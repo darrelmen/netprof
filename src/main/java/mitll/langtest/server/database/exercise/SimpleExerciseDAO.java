@@ -30,6 +30,7 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;

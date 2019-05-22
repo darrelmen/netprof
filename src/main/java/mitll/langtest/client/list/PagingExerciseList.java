@@ -33,7 +33,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -125,12 +124,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
     addTableWithPager(pagingContainer);
   }
 
-/*
-  private void scheduleWaitTimer() {
-    waitCursorHelper.scheduleWaitTimer();
-  }
-*/
-
   /**
    * @param prefix
    * @return
@@ -138,8 +131,9 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    */
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
     // logger.info("getExerciseListRequest prefix " + prefix);
+
     return new ExerciseListRequest(incrRequest(),
-        controller.getUserState().getUser())
+        controller.getUserState().getUser(), controller.getProjectID())
         .setPrefix(prefix)
         .setUserListID(userListID)
         .setActivityType(getActivityType());

@@ -44,13 +44,13 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public enum Language implements IsSerializable {
   ARABIC(true, "ar", "al"),
   MANDARIN(32, "CHINESE-MANDARIN", "cmn", "cn", "Chinese"),
-  CROATIAN("SERBO-CROATIAN", "hr"),
+  CROATIAN("SERBO-CROATIAN","hr","hr"),
   DARI(true, "PERSIAN-AFGHAN", "prs", "af"),
   EGYPTIAN(true, "ARABIC-EGYPTIAN", "arz", "eg"),
   ENGLISH("en", "us"),
   FARSI(true, "PERSIAN-IRANIAN", "fa", "ir"),
-  FRENCH("fr", "fr"),
-  GERMAN("de", "de"),
+  FRENCH("fr"),
+  GERMAN("de"),
   HINDI("hi", "in"),
   IRAQI(true, "ARABIC-IRAQI", "ar-IQ", "iq"),
   JAPANESE("ja", "jp"),
@@ -59,10 +59,10 @@ public enum Language implements IsSerializable {
   MSA(true, "ARABIC (MODERN STANDARD)", "ar", "al","MSA"),
   PASHTO(true, "PUSHTU-AFGHAN", "ps", "af"),
   PORTUGUESE("PORTUGUESE-BRAZILIAN", "pt", "br"),
-  RUSSIAN("ru", "ru"),
+  RUSSIAN("ru"),
   SERBIAN("SERBO-CROATIAN", "sr", "rs"),
   SORANI(true, "ku", "ku"),
-  SPANISH("es", "es"),
+  SPANISH("es"),
   SUDANESE(true, "ARABIC-SUDANESE", "apd", "sd"),
   TAGALOG("tl", "ph"),
   TURKISH("tr", "tr"),
@@ -81,6 +81,12 @@ public enum Language implements IsSerializable {
     this.isRTL = false;
     this.locale = locale;
     this.cc = cc;
+  }
+
+  Language(String localeAndCC) {
+    this.isRTL = false;
+    this.locale = localeAndCC;
+    this.cc = localeAndCC;
   }
 
   Language(boolean isRTL, String locale, String cc) {

@@ -32,7 +32,6 @@ package mitll.langtest.client.initial;
 import com.github.gwtbootstrap.client.ui.Breadcrumbs;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import com.google.gwt.dom.client.Style;
-import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.project.ProjectChoices;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.project.ProjectStartupInfo;
@@ -139,23 +138,21 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
     crumbs.setVisible(true);
 
     addHomeLink(crumbs);
-    // List<SlimProject> projects = lifecycleSupport.getStartupInfo().getProjects();
-    //  logger.info("addBreadcrumb " + projects.size());
+
     for (SlimProject project : lifecycleSupport.getStartupInfo().getProjects()) {
       if (project.hasChildren() && project.hasChild(currentProject)) {
-        if (DEBUG)
+        if (DEBUG) {
           logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
-        crumbs.add(getLangBreadcrumb(project));
-        INavigation.VIEWS currentView = breadcrumbPartner.getNavigation().getCurrentView();
+        }
 
-        addProjectCrumb(crumbs, project.getChildByMode(currentProject, currentView.getMode()));
-/*        for (int i = 0; i < crumbs.getWidgetCount(); i++) {
-          logger.info("breadcrumb has " + crumbs.getWidget(i));
-        }*/
+        crumbs.add(getLangBreadcrumb(project));
+
+        addProjectCrumb(crumbs, project.getChildByMode(currentProject, breadcrumbPartner.getNavigation().getCurrentView().getMode()));
         break;
       } else if (project.getID() == currentProject) {
-        if (DEBUG)
+        if (DEBUG) {
           logger.info("addBreadcrumbLevels add for " + project.getName() + " children " + project.getChildren().size());
+        }
         addProjectCrumb(crumbs, project);
         break;
       }
@@ -190,12 +187,17 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
    */
   @NotNull
   private NavLink getLangBreadcrumb(SlimProject project) {
-    NavLink lang = new NavLink(project.getLanguage().toDisplay());
+    String text = project.getLanguage().toDisplay();
+    NavLink lang = new NavLink(text);
 
-    if (DEBUG) logger.info("addProjectCrumb  for " + project.getName() + " " + project.getMode());
+    if (DEBUG) {
+      logger.info("getLangBreadcrumb for " + project.getName() + " (" + text + ") : " + project.getMode());
+    }
 
     lang.addClickHandler(clickEvent -> {
-      // logger.info("getLangBreadcrumb got click on " + project.getName());
+      if (DEBUG) {
+        logger.info("getLangBreadcrumb got click on " + project.getName());
+      }
       removeUntilCrumb(2);
       breadcrumbPartner.resetLanguageSelection(2, project);
       //choices.showProject(project);

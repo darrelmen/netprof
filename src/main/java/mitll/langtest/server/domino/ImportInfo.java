@@ -38,7 +38,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import static mitll.langtest.server.database.exercise.Project.MANDARIN;
+import static mitll.langtest.server.database.project.Project.MANDARIN;
 
 /**
  * @see ProjectSync#addPending

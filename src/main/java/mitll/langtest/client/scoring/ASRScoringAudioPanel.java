@@ -113,12 +113,12 @@ public class ASRScoringAudioPanel<T extends HasID> extends ScoringAudioPanel<T> 
 
     AsyncCallback<PretestScore> async = getPretestScoreAsyncCallback(path, wordTranscript, phoneTranscript, t);
 
-    int id = getExerciseID();
+    //int id = getExerciseID();
     ImageOptions imageOptions = new ImageOptions(toUse, height, useScoreToColorBkg, true);
 
     boolean usePhoneToDisplay = controller.getProps().shouldUsePhoneToDisplay();
     controller.getScoringService().getASRScoreForAudio(
-        reqid, resultID, path, refSentence, transliteration, imageOptions, id, usePhoneToDisplay, async);
+        reqid, resultID, path, refSentence, transliteration, imageOptions, getExerciseID(), usePhoneToDisplay, async);
   }
 
   @NotNull

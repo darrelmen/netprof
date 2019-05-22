@@ -42,9 +42,13 @@ import java.util.List;
 public interface IEventDAO extends IDAO {
   boolean addToProject(Event event, int projid);
 
+  /**
+   * JUST FOR TESTING
+   * @return
+   */
   List<Event> getAll();
-  List<Event> getAll(Integer projid);
-  List<Event> getAllMax(int projid);
+  List<Event> getAll(int projid);
+  List<Event> getAllWithLimit(int projid, int limit);
   List<SlickSlimEvent> getAllSlim(int projid);
   List<SlickSlimEvent> getAllSlim();
 

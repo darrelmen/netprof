@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.audio;
 
+import com.sun.management.UnixOperatingSystemMXBean;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.result.AudioTag;
 import mitll.langtest.server.*;
@@ -37,36 +38,46 @@ import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.dialog.IDialogSessionDAO;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProject;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.scoring.*;
+import mitll.langtest.server.trie.TextEntityValue;
+import mitll.langtest.server.trie.Trie;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ModelType;
+import mitll.langtest.shared.project.OOVInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 import mitll.npdata.dao.SlickDialogSession;
+import mitll.npdata.dao.SlickExerciseNorm;
 import mitll.npdata.dao.SlickPerfResult;
 import mitll.npdata.dao.lts.HTKDictionary;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import scala.Option;
+import scala.collection.Iterator;
 
+import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.OperatingSystemMXBean;
 import java.sql.Timestamp;
 import java.text.Collator;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.server.ScoreServlet.GetRequest.HASUSER;
 import static mitll.langtest.server.ScoreServlet.HeaderValue.*;
-import static mitll.langtest.server.database.exercise.Project.WEBSERVICE_HOST_DEFAULT;
+import static mitll.langtest.server.audio.AudioConversion.LANGTEST_IMAGES_NEW_PRO_F_1_PNG;
 
 public class AudioFileHelper implements AlignDecode {
   private static final Logger logger = LogManager.getLogger(AudioFileHelper.class);
@@ -91,8 +102,12 @@ public class AudioFileHelper implements AlignDecode {
   private static final String COOKIE = "Cookie";
   private static final String SCORE_SERVLET = "scoreServlet";
   private static final String DEFAULT_EXID = "2";
-  private static final boolean DO_KALDI_OOV = false;
-  private static final String PERCENT_SYMBOL = "%";
+
+  private static final boolean DEBUG_EDIT = false;
+  //public static final String OOV = "oov";
+
+  private static final int LOG_THRESHOLD = 1000;
+  private static final int WARN_THRESHOLD = 2000;
 
   private final PathHelper pathHelper;
   private final ServerProperties serverProps;
@@ -104,11 +119,6 @@ public class AudioFileHelper implements AlignDecode {
   private final DatabaseServices db;
   private final LogAndNotify logAndNotify;
   private boolean checkedLTS = false;
-
-  /**
-   * TODO : why would we want this?
-   */
-  private Map<String, Integer> phoneToCount;
 
   private final AudioConversion audioConversion;
   private final Language language;
@@ -143,7 +153,9 @@ public class AudioFileHelper implements AlignDecode {
     this.logAndNotify = langTestDatabase;
 
     this.mp3Support = new MP3Support(pathHelper);
-    audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProperties.getMinDynamicRange());
+    ServletContext context = pathHelper.getContext();
+    String realPath = context == null ? LANGTEST_IMAGES_NEW_PRO_F_1_PNG : context.getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG);
+    audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProperties.getMinDynamicRange(), realPath);
 
     this.language = project.getLanguageEnum();
     removeAccents = language != Language.FRENCH;
@@ -190,185 +202,534 @@ public class AudioFileHelper implements AlignDecode {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getExercises
    * @see ProjectManagement#configureProject
    */
-  public void checkLTSAndCountPhones(Collection<CommonExercise> exercises) {
+  public int checkForOOV(Collection<CommonExercise> exercises) {
     if (getASRScoring().isDictEmpty()) {
       logger.info("checkLTSAndCountPhones : not checking lts on exercises for " + project.getLanguage() + " " + project.getName() +
           " since dictionary is empty " +
           "and this is probably the znetprof instance which has no dictionaries.");
+      return 0;
     } else {
       synchronized (this) {
         if (!checkedLTS) {
           checkedLTS = true;
-          int count = 0;
-
-          long now = System.currentTimeMillis();
-          phoneToCount = new HashMap<>();
-          Set<Integer> safe = new HashSet<>();
-          Set<String> oov = new HashSet<>();
-          Set<Integer> unsafe = new HashSet<>();
-          logger.info("checkLTSAndCountPhones : " + language + " checking " + exercises.size() + " exercises...");
-
-          try {
-            count = checkAllExercises(exercises, count, safe, oov, unsafe);
-          } catch (Exception e) {
-            logger.error("got " + e, e);
-          }
-
-          writeOOV(oov, "oov");
-
-          long then = System.currentTimeMillis();
-
-          if (then - now > 100) {
-            logger.warn("checkLTSAndCountPhones took " + (then - now) + " millis to examine " + exercises.size() + " exercises.");
-          }
-
-          if (!safe.isEmpty() || !unsafe.isEmpty()) {
-            logger.info("checkLTSAndCountPhones " + language + " marking " + safe.size() + " safe, " + unsafe.size() + " unsafe");
-          }
-
-          project.getExerciseDAO().markSafeUnsafe(safe, unsafe, dictModified);
-          long now2 = System.currentTimeMillis();
-
-          if (now2 - then > 100) {
-            logger.warn("checkLTSAndCountPhones took " + (now2 - then) + " millis to mark exercises safe/unsafe to decode.");
-          }
-
-          if (count > 0) {
-            logger.warn("checkLTSAndCountPhones NOTE : out of " + exercises.size() + " dict and LTS fails on " + count);
-          } else {
-            logger.info("checkLTSAndCountPhones out of " + exercises.size() + " dict and LTS fails on " + count);
-          }
+          removeStaleOOV(language);
+          return checkOOV(exercises, false).getChecked();
+        } else {
+          return 0;
         }
       }
     }
   }
 
-  private int spew2 = 0;
+  /**
+   * Complicated, with side effects!
+   *
+   * Check exercises to see if they have OOV tokens
+   * Divide exercises into two piles - safe and unsafe
+   * write an OOV file suitable for export to Kaldi or Hydra dictionary prep
+   * Mark exercises with safe or unsafe to decode - db call
+   * Write the scoring-friendly normalized form to the db so we can use it later
+   * Reload the exercise list so it will reflect the safety and normalized form changes
+   * Return a report on whether we need to update the outer netprof instance to keep the exercise
+   * lists in sync.
+   *
+   * @param exercises
+   * @param includeKaldi
+   * @return OOVInfo
+   * @see AudioFileHelper#checkForOOV(Collection)
+   */
+  public OOVInfo checkOOV(Collection<CommonExercise> exercises, boolean includeKaldi) {
+    long now = System.currentTimeMillis();
+    Map<Integer, String> idToNorm = new HashMap<>();
+    Set<String> oov = new HashSet<>();
 
-  private int checkAllExercises(Collection<CommonExercise> exercises, int count, Set<Integer> safe, Set<String> oov, Set<Integer> unsafe) {
-    int checked = 0;
+    {
+      String message = "checkOOV : " + language + " checking " + exercises.size() + " exercises...";
+      if (exercises.isEmpty()) {
+        logger.warn(message);
+      } else {
+        logger.info(message);
+      }
+    }
+
+    Set<Integer> safe = new HashSet<>();
+    Set<Integer> unsafe = new HashSet<>();
+    OOVInfo checkInfo;
+    try {
+      checkInfo = checkAllExercises(exercises, safe, unsafe, oov, idToNorm, includeKaldi);
+      logger.info("checkOOV Got back " + checkInfo);
+    } catch (Exception e) {
+      checkInfo = new OOVInfo();
+      logger.error("got " + e, e);
+    }
+
+    writeOOV(oov);
+
     long then = System.currentTimeMillis();
-    if (dictModified > 0) {
+
+    if (then - now > 100) {
+      logger.warn("checkLTSAndCountPhones took " + (then - now) + " millis to examine " + exercises.size() + " exercises.");
+    }
+
+    // if (!safe.isEmpty() || !unsafe.isEmpty()) {
+    logger.info("checkLTSAndCountPhones " + language + " marking " + safe.size() + " safe, " + unsafe.size() + " unsafe");
+    //}
+
+    if (project.getModelType() == ModelType.HYDRA && !unsafe.isEmpty()) {
+      logger.info("checkLTSAndCountPhones : since hydra - marking all " + unsafe.size() + " to be safe since we can go with the UNK model for OOV.");
+      safe.addAll(unsafe);
+    }
+    project.getExerciseDAO().markSafeUnsafe(safe, unsafe, now);
+
+    List<CommonExercise> changed = new ArrayList<>();
+    {
+      List<SlickExerciseNorm> pairs = getSlickExerciseNorms(idToNorm);
+
+      logger.info("\ncheckOOV updating " + pairs.size() + " exercises");
+
+      project.getExerciseDAO().updateNormBulk(pairs);
+
+      pairs.forEach(p -> {
+        CommonExercise exerciseByID = getExerciseByID(p.id());
+        String foreignlanguagenorm = p.foreignlanguagenorm();
+        if (!exerciseByID.getNormalizedFL().equals(foreignlanguagenorm)) {
+          changed.add(exerciseByID);
+          exerciseByID.getMutable().setNormalizedFL(foreignlanguagenorm);
+        }
+      });
+    }
+
+    {
+      long now2 = System.currentTimeMillis();
+      if (now2 - then > 100) {
+        logger.warn("checkLTSAndCountPhones took " + (now2 - then) + " millis to mark exercises safe/unsafe to decode.");
+      }
+    }
+
+    if (checkInfo.getOovWords() > 0) {
+      logger.warn("checkLTSAndCountPhones NOTE : out of " + exercises.size() + " dict and LTS fails on " + checkInfo.getOovWords());
+    } else {
+      logger.info("checkLTSAndCountPhones out of " + exercises.size() + " dict and LTS fails on " + checkInfo.getOovWords());
+    }
+
+    return checkInfo.setNeedsReload(!changed.isEmpty() || !safe.isEmpty() || !unsafe.isEmpty());
+  }
+
+  @NotNull
+  private List<SlickExerciseNorm> getSlickExerciseNorms(Map<Integer, String> idToNorm) {
+    List<SlickExerciseNorm> pairs = new ArrayList<>();
+    idToNorm.forEach((k, v) -> pairs.add(new SlickExerciseNorm(k, v)));
+    return pairs;
+  }
+
+  /**
+   * Does context sentences too.
+   *
+   * @param count
+   * @param exercises
+   * @param safe
+   * @param unsafe
+   * @param oov
+   * @param includeKaldi
+   * @return
+   * @see #checkOOV(Collection, boolean)
+   */
+  private OOVInfo checkAllExercises(Collection<CommonExercise> exercises,
+
+                                    Set<Integer> safe,
+                                    Set<Integer> unsafe,
+
+                                    Set<String> oov,
+                                    Map<Integer, String> unsafeToNorm,
+                                    boolean includeKaldi) {
+    int checkedVocab = 0;
+    int checkedDirect = 0;
+    int count = 0;
+    int safeChanged = 0;
+    logger.info("checkAllExercises for " + exercises.size() + " ex, force " + includeKaldi);
+
+    Set<ClientExercise> unsafeHighlighted = new TreeSet<>();
+    long then = System.currentTimeMillis();
+    if (dictModified > 0 || includeKaldi) {
+//      Map<String, List<OOV>> oovToEquivalents = getSorted();
+      Map<String, List<OOV>> oovToEquivalents = db.getOOVDAO().getOOVToEquivalents(language);
+
       for (CommonExercise exercise : exercises) {
-        if (isStale(exercise)) {
-          if (spew2++ < 10 || spew2 % 100 == 0)
-            logger.info("for " + exercise.getForeignLanguage() + " last " + exercise.getLastChecked() + " vs " + dictModified);
-//          return exercise.getLastChecked() != dictModified;
+        if ((isStale(exercise) || includeKaldi)) {
+          if (!exercise.hasEnglishAttr()) {
+//          if (spew2++ < 10 || spew2 % 100 == 0)
+//            logger.info("checkAllExercises for " + exercise.getForeignLanguage() + " last checked " + exercise.getLastChecked() + " vs dict modified " + dictModified);
+            boolean validForeignPhrase = isValidForeignPhrase(safe, unsafe, unsafeToNorm, exercise, oov, includeKaldi, oovToEquivalents, unsafeHighlighted);
+            //  logger.info("checkLTSAndCountPhones : " + language + " oov " + oov.size());
 
-          boolean validForeignPhrase = isValidForeignPhrase(safe, unsafe, exercise, oov);
-          //  logger.info("checkLTSAndCountPhones : " + language + " oov " + oov.size());
-          checked++;
-          if (!validForeignPhrase) {
-            if (count < 10 || count % 100 == 0) {
-              logger.warn("checkLTSAndCountPhones : " + language +
-                  " (" + count +
-                  ") (" + oov.size() +
-                  ") not a valid foreign phrase for " +
-                  "\n\tex      " + exercise.getID() +
-                  "\n\tenglish " + exercise.getEnglish() +
-                  "\n\tfl      " + exercise.getForeignLanguage());
+            checkedVocab++;
+            if (!validForeignPhrase) {
+              if (count < 10 || count % 100 == 0) {
+                logger.warn("checkLTSAndCountPhones : " + language +
+                    " (#oov = " + count +
+                    ") (#overall oov = " + oov.size() +
+                    ") not a valid foreign phrase for " +
+                    "\n\tex      " + exercise.getID() +
+                    "\n\tenglish " + exercise.getEnglish() +
+                    "\n\tfl      " + exercise.getForeignLanguage());
+              }
+              count++;
             }
-            count++;
-          }
-          //else {
-          //countPhones(exercise.getMutable());
-          // }
 
-          // check context sentences
-          for (ClientExercise context : exercise.getDirectlyRelated()) {
-            CommonExercise commonExercise = context.asCommon();
-            boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, commonExercise, oov);
-            checked++;
+            // check context sentences
+            for (ClientExercise context : exercise.getDirectlyRelated()) {
+              CommonExercise sentence = context.asCommon();
+              boolean validForeignPhrase2 = isValidForeignPhrase(safe, unsafe, unsafeToNorm, sentence, oov, includeKaldi, oovToEquivalents, unsafeHighlighted);
+              checkedDirect++;
 
-            if (commonExercise.isSafeToDecode() != validForeignPhrase2) {
-              commonExercise.getMutable().setSafeToDecode(validForeignPhrase2);
+              if (sentence.isSafeToDecode() != validForeignPhrase2) {
+                sentence.getMutable().setSafeToDecode(validForeignPhrase2);
+                safeChanged++;
+              }
             }
           }
         }
       }
-      logger.info("checkAllExercises (" + project.getName() +
-          ") checked " + checked + " from " + exercises.size() + " for whether they can be decoded in " + (System.currentTimeMillis() - then) + " millis");
-      return count;
+
+      logger.info("checkAllExercises (" + project.getName() + ") " +
+          "\n\tchecked vocab        " + checkedVocab +
+          "\n\tchecked direct       " + checkedDirect +
+          "\n\tcontext safe changed " + safeChanged +
+          "\n\tunsafeHighlighted    " + unsafeHighlighted.size() +
+          "\n\tfrom                 " + exercises.size() +
+          "\n\tfor whether they can be decoded in " + (System.currentTimeMillis() - then) + " millis");
+
+      return new OOVInfo(checkedVocab + checkedDirect, oov.size(), unsafeHighlighted);
     } else {
       logger.info("checkAllExercises skipped checking exercises since no dictionary.");
-      return 0;
+      return new OOVInfo(0, oov.size(), unsafeHighlighted);
     }
   }
 
-  private void writeOOV(Set<String> oov, String suffix) {
+  /**
+   * Maybe sort by length?
+   * @return
+   */
+/*  @NotNull
+  private Map<String, List<OOV>> getSorted() {
+    Map<String, List<OOV>> oovToEquivalents = db.getOOVDAO().getOOVToEquivalents(language);
+   // logger.info("keys " + oovToEquivalents.keySet());
+
+    SortedMap<String, List<OOV>> sorted = new TreeMap<>((o1, o2) -> {
+      int compare = -1 * Integer.compare(o1.length(), o2.length());
+      return compare == 0 ? o1.compareTo(o2) : compare;
+    });
+    sorted.putAll(oovToEquivalents);
+   // logger.info("sorted keys " + sorted.keySet());
+    return sorted;
+  }*/
+
+  /**
+   * @param oov
+   * @see #checkOOV(Collection, boolean)
+   */
+  private void writeOOV(Set<String> oov) {
     if (!oov.isEmpty()) {
-      try {
-        String fileName = "Project_" + suffix + project.getLanguage() + "_" + project.getName() + ".txt";
-        File file = new File("/tmp/" + fileName);
-        logger.info("writeOOV writing " + oov.size() + " oov items to " + file.getAbsolutePath());
-        FileWriter oovTokens = new FileWriter(file);
-        ArrayList<String> strings = new ArrayList<>(oov);
-        strings.sort(Comparator.naturalOrder());
-        for (String token : strings) {
-          try {
-            oovTokens.write(token + "\n");
-          } catch (IOException e) {
-            break;
-          }
-        }
-        oovTokens.close();
-      } catch (IOException e) {
-        logger.error("writeOOV got " + e);
-      }
+      //try {
+      //writeToFile(oov, suffix);
+      addOOVToOOVTable(oov);
+      //} catch (IOException e) {
+      //   logger.error("writeOOV got " + e);
+      // }
     } else {
       logger.info("writeOOV oov is empty for " + project);
 
       Set<String> oov1 = getPronunciationLookup().getOOV();
       if (!oov1.isEmpty()) {
-        writeOOV(oov1, suffix);
+        addOOVToOOVTable(oov);
+        //    writeOOV(oov1, suffix, removeStale);
       }
     }
   }
 
+  private void writeToFile(Set<String> oov, String suffix) throws IOException {
+    String fileName = "Project_" + suffix + project.getLanguage() + "_" + project.getName() + ".txt";
+    File file = new File("/tmp/" + fileName);
+    logger.info("writeOOV writing " + oov.size() + " oov items to " + file.getAbsolutePath());
+    FileWriter oovTokens = new FileWriter(file);
+    List<String> strings = new ArrayList<>(oov);
+    strings.sort(Comparator.naturalOrder());
+
+    for (String token : strings) {
+      try {
+        oovTokens.write(token + "\n");
+      } catch (IOException e) {
+        break;
+      }
+    }
+    oovTokens.close();
+  }
+
+  /**
+   * Don't step on oov entries with mappings.
+   *
+   * @param oov
+   * @param removeStale
+   */
+  private void addOOVToOOVTable(Set<String> oov) {//}, boolean removeStale) {
+    Language languageEnum = project.getLanguageEnum();
+
+    int defaultUser = db.getUserDAO().getDefaultUser();
+    List<OOV> toAdd = getOOVToAdd(oov, languageEnum, defaultUser);
+//    if (removeStale) {
+//      logger.info("\n\n\naddOOVToOOVTable remove stale entries");
+//      removeStaleOOV(oov, languageEnum);
+//    }
+    logger.info("addOOV adding " + toAdd.size());
+
+    db.getOOVDAO().insertBulk(toAdd, defaultUser, languageEnum);
+  }
+
+  @NotNull
+  private List<OOV> getOOVToAdd(Set<String> oov, Language languageEnum, int defaultUser) {
+    Map<String, List<OOV>> currentOOVToEquivalents = db.getOOVDAO().getOOV(languageEnum);
+
+    logger.info("addOOV to add - " + oov.size() + " known " + currentOOVToEquivalents.size());
+
+    long now = System.currentTimeMillis();
+    List<OOV> toAdd = new ArrayList<>();
+    oov.forEach(oovEntry -> {
+      if (!currentOOVToEquivalents.containsKey(oovEntry)) {
+        toAdd.add(new OOV(-1, defaultUser, now, oovEntry, ""));
+      }
+    });
+    return toAdd;
+  }
+
+  /**
+   * @param languageEnum
+   */
+  private void removeStaleOOV(Language languageEnum) {
+    List<OOV> known = db.getOOVDAO().forLanguage(languageEnum);
+    List<OOV> toRemove = known
+        .stream()
+        .filter(oovEntry ->
+            oovEntry.getEquivalent().isEmpty())
+        .collect(Collectors.toList());
+
+    logger.info("addOOV remove " + toRemove.size() + " : " + toRemove);
+
+    toRemove.forEach(oov1 -> db.getOOVDAO().delete(oov1.getID()));
+  }
 
   /**
    * Call Kaldi all the time for now.
-   *
+   * <p>
    * TODO : Consider what to do with english sentences inside an interpreter dialog...
    *
    * @param safe
    * @param unsafe
    * @param exercise
    * @param oovCumulative
+   * @param includeKaldi
+   * @param oovToEquivalents
+   * @param unsafeHighlighted
    * @return
-   * @see #checkLTSAndCountPhones
+   * @see #checkAllExercises(Collection, Set, Set, Set, Map, boolean)
    */
-  private boolean isValidForeignPhrase(Set<Integer> safe, Set<Integer> unsafe, CommonExercise exercise, Set<String> oovCumulative) {
-    boolean isKaldi = project.getModelType() == ModelType.KALDI;
-    if (isKaldi) {
-      if (DO_KALDI_OOV) {
-        if (!exercise.hasEnglishAttr()) {
-          Collection<String> kaldiOOV = asrScoring.getKaldiOOV(exercise.getForeignLanguage());
-          oovCumulative.addAll(kaldiOOV);
-          return kaldiOOV.isEmpty();
-        } else {
-          return true;
-        }
-      } else {
-        return true;
+  private boolean isValidForeignPhrase(Set<Integer> safe,
+                                       Set<Integer> unsafe,
+
+                                       Map<Integer, String> safeToNorm,
+                                       CommonExercise exercise, Set<String> oovCumulative,
+                                       boolean includeKaldi,
+                                       Map<String, List<OOV>> oovToEquivalents,
+                                       Set<ClientExercise> unsafeHighlighted) {
+    boolean validForeignPhrase = true;
+
+    if (project.getModelType() == ModelType.KALDI) {
+      if (includeKaldi && !exercise.hasEnglishAttr()) {
+        validForeignPhrase = checkWithKaldi(exercise, exercise.getForeignLanguage(), oovToEquivalents, safeToNorm, unsafeHighlighted, oovCumulative);
       }
     } else {
-      boolean validForeignPhrase;// = exercise.isSafeToDecode();
-      // if (isStale(exercise)) {
-      //  logger.info("isValidForeignPhrase STALE ex " + exercise.getProjectID()  + "  " + exercise.getID() + " " + new Date(exercise.getLastChecked()) + " vs " + new Date(dictModified));
-      // int before = oov.size();
-      validForeignPhrase = isValidForeignPhrase(exercise);
-//      if (oov.size() > before) {
-//        logger.info("isValidForeignPhrase " + project.getName() + " oov now " + oov.size());
-//      }
-
-      if (!validForeignPhrase && DEBUG) {
-        logger.info("isValidForeignPhrase valid " + validForeignPhrase + " ex " + exercise.getForeignLanguage());
-      }
-      (validForeignPhrase ? safe : unsafe).add(exercise.getID());
-      //  }
-      return validForeignPhrase;
+      validForeignPhrase = checkWithHydra(exercise, oovToEquivalents, safeToNorm, unsafeHighlighted, oovCumulative);
     }
+
+    (validForeignPhrase ? safe : unsafe).add(exercise.getID());
+
+    return validForeignPhrase;
+  }
+
+  /**
+   * So the set of replaced tokens is all the unique tokens that were replaced.
+   * The oov tokens for this item may have the same OOV token repeated.
+   *
+   * @param exercise
+   * @param foreignLanguage
+   * @param oovToEquivalents
+   * @param safeToNorm
+   * @param unsafeHighlighted
+   * @param oovCumulative
+   * @return
+   */
+  private boolean checkWithKaldi(ClientExercise exercise, String foreignLanguage, Map<String, List<OOV>> oovToEquivalents,
+
+                                 Map<Integer, String> safeToNorm,
+                                 Set<ClientExercise> unsafeHighlighted,
+                                 Set<String> oovCumulative) {
+    // run it once
+    Collection<String> kaldiOOV = getASRScoring().getKaldiOOV(foreignLanguage);
+
+    Set<String> replaced = new HashSet<>();
+    String normalized = "";
+    if (!kaldiOOV.isEmpty()) {  // try again with equivalents
+      normalized = replaceOOVs(oovToEquivalents, foreignLanguage, kaldiOOV, replaced);
+      if (replaced.containsAll(kaldiOOV)) {
+        logger.info("checkWithKaldi : all oov replaced to form " + normalized);
+        // just make sure!
+        kaldiOOV = getASRScoring().getKaldiOOV(normalized);
+
+        if (kaldiOOV.isEmpty()) {
+          safeToNorm.put(exercise.getID(), normalized);
+        }
+      } else {
+        logger.info("checkWithKaldi oov      " + kaldiOOV.size() + " : " + kaldiOOV);
+        if (!replaced.isEmpty()) {
+          logger.info("checkWithKaldi replaced " + replaced.size() + " : " + replaced);
+        }
+      }
+    }
+
+    oovCumulative.addAll(kaldiOOV);
+    if (!kaldiOOV.isEmpty()) {
+      logger.info("checkWithKaldi - remaining OOVs: " +
+          "\n\tfound         " + kaldiOOV.size() + " oov tokens " + kaldiOOV +
+          "\n\treplaced with " + replaced.size() + " tokens " + replaced +
+          "\n\tin   " + foreignLanguage +
+          "\n\tnorm " + normalized
+      );
+
+      unsafeHighlighted.add(exercise);//getHighlighted(foreignLanguage, kaldiOOV));
+    }
+
+    return kaldiOOV.isEmpty();
+  }
+
+  private CommonExercise getExerciseByID(int id) {
+    return project.getExerciseByID(id);
+  }
+
+  /**
+   * @param exercise
+   * @param oovToEquivalents
+   * @param safeToNorm
+   * @param unsafeHighlighted
+   * @param oovCumulative
+   * @return
+   * @see #isValidForeignPhrase(Set, Set, Map, CommonExercise, Set, boolean, Map, Set)
+   */
+  private boolean checkWithHydra(ClientExercise exercise,
+                                 Map<String, List<OOV>> oovToEquivalents,
+
+                                 Map<Integer, String> safeToNorm,
+                                 Set<ClientExercise> unsafeHighlighted,
+                                 Set<String> oovCumulative) {
+    boolean validForeignPhrase = true;
+    String foreignLanguage = exercise.getForeignLanguage();
+    Collection<String> oov = null;
+    if (!foreignLanguage.isEmpty()) {
+      String transliteration = exercise.getTransliteration();
+      oov = getASRScoring().getCheckLTSHelper().checkLTS(foreignLanguage, transliteration);
+
+      if (!oov.isEmpty()) {
+        Set<String> replaced = new HashSet<>();
+        foreignLanguage = replaceOOVs(oovToEquivalents, foreignLanguage, oov, replaced);
+        if (replaced.containsAll(oov)) {
+          logger.info("isValidForeignPhrase all oov replaced for " + foreignLanguage);
+
+          oov = getASRScoring().getCheckLTSHelper().checkLTS(foreignLanguage, transliteration);
+
+          if (oov.isEmpty()) {
+            safeToNorm.put(exercise.getID(), foreignLanguage);
+          } else {
+            unsafeHighlighted.add(exercise);
+          }
+        } else {
+          unsafeHighlighted.add(exercise);
+        }
+      }
+
+      oovCumulative.addAll(oov);
+      validForeignPhrase = oov.isEmpty();
+    }
+
+    if (!validForeignPhrase && DEBUG) {
+      logger.info("isValidForeignPhrase valid " + validForeignPhrase + " ex " + foreignLanguage +
+          " \n\toov " + oov);
+    }
+    return validForeignPhrase;
+  }
+
+  /**
+   * @param oovToEquivalents
+   * @param foreignLanguage
+   * @param oovs
+   * @param replaced
+   * @return
+   * @see #isValidForeignPhrase(Set, Set, Map, CommonExercise, Set, boolean, Map, Set)
+   */
+  private String replaceOOVs(Map<String, List<OOV>> oovToEquivalents, String foreignLanguage, Collection<String> oovs, Set<String> replaced) {
+    logger.info("replaceOOVs got" +
+        "\n\tfl               " + foreignLanguage +
+        "\n\treplaced         " + replaced.size() +
+        "\n\toovs             " + oovs +
+        "\n\toovToEquivalents " + oovToEquivalents.size());
+
+    String orig = foreignLanguage;
+
+    for (String oov : oovs) {
+      List<OOV> equivalents = oovToEquivalents.get(oov);
+      String oovToUse = oov;
+
+      if (equivalents == null) {
+        String key = getSmallVocabDecoder().fromFull(oov);
+
+        if (!key.equals(oov)) {
+          logger.info("replaceOOVs found with " + key + " instead of " + oov);
+          equivalents = oovToEquivalents.get(key);
+          oovToUse = key;
+        }
+      }
+
+      if (equivalents != null && !equivalents.isEmpty()) {
+        OOV oov1 = equivalents.get(0);
+        // add space paddding so we're sure to have a separator
+        String equivalent = " " + oov1.getEquivalent() + " ";
+        if (!foreignLanguage.contains(oovToUse)) {
+//          logger.info("replaceOOVs couldn't find the token " + oovToUse);
+          oovToUse = getSmallVocabDecoder().fromFull(oov);
+          //boolean found = foreignLanguage.contains(oovToUse);
+//          if (found) {
+//            logger.info("replaceOOVs found with " + oovToUse);
+//          }
+        }
+        String foreignLanguage1 = foreignLanguage.replace(oovToUse, equivalent);
+
+        logger.info("replaceOOVs " +
+            "\n\treplace " + oovToUse + "/" + oov +
+            "\n\twith    " + equivalent +
+            "\n\tin      " + foreignLanguage +
+            "\n\t ->     " + foreignLanguage1);
+
+        foreignLanguage = foreignLanguage1;
+        replaced.add(oov);
+      }
+    }
+    foreignLanguage = foreignLanguage.replaceAll("\\s++", " ");
+
+    logger.info("replaceOOVs " +
+        "\n\treplace         " + orig +
+        "\n\twith norm       " + foreignLanguage +
+        "\n\toovs     tokens " + oovs +
+        "\n\treplaced tokens " + replaced
+    );
+
+    return foreignLanguage;
   }
 
   public boolean isValidForeignPhrase(ClientExercise exercise) {
@@ -386,32 +747,13 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   * Why would we want to make a map of phone->childCount?
-   *
-   * @param exercise
-   * @param <T>
-   * @see #checkLTSAndCountPhones
-   */
-/*
-  private <T extends CommonShell & MutableExercise> void countPhones(T exercise) {
-    PhoneInfo bagOfPhones = getASRScoring().getBagOfPhones(exercise.getForeignLanguage());
-    java.util.List<String> firstPron = bagOfPhones.getFirstPron();
-    exercise.setFirstPron(firstPron);
-    for (String phone : firstPron) {
-      Integer integer = getPhoneToCount().get(phone);
-      getPhoneToCount().put(phone, integer == null ? 1 : integer + 1);
-    }
-  }
-*/
-
-  /**
    * @param foreignLanguagePhrase
    * @return
    * @seex mitll.langtest.server.services.ScoringServiceImpl#isValidForeignPhrase
    * @see InDictFilter#isPhraseInDict
    */
   public Collection<String> checkLTSOnForeignPhrase(String foreignLanguagePhrase, String transliteration) {
-    return getASRScoring().getOOV(foreignLanguagePhrase, transliteration);
+    return getASRScoring().getCheckLTSHelper().checkLTS(foreignLanguagePhrase, transliteration);
   }
 
   public SmallVocabDecoder getSmallVocabDecoder() {
@@ -443,6 +785,9 @@ public class AudioFileHelper implements AlignDecode {
                                     AnswerInfo.RecordingInfo recordingInfoInitial,
 
                                     DecoderOptions options) {
+    //  dumpFD("writeAudioFile");
+    long before = getFD();
+
     String wavPath = fileInstead == null ? pathHelper.getAbsoluteToAnswer(audioContext) : fileInstead.getAbsolutePath();
     String relPath = pathHelper.getRelToAnswer(wavPath);
 
@@ -455,6 +800,7 @@ public class AudioFileHelper implements AlignDecode {
     AudioCheck.ValidityAndDur validity = fileInstead == null ?
         audioConversion.convertBase64ToAudioFiles(base64EncodedString, wavFile, options.isRefRecording(), isQuietAudioOK()) :
         audioConversion.getValidityAndDur(fileInstead, options.isRefRecording(), isQuietAudioOK(), then);
+    //  dumpFD("writeAudioFile_afterValidity");
 
     if (logger.isInfoEnabled()) {
       logger.info("writeAudioFile writing" +
@@ -479,8 +825,9 @@ public class AudioFileHelper implements AlignDecode {
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo(recordingInfoInitial, path);
 
     //  logger.info("writeAudioFile recordingInfo " + recordingInfo);
+    //  dumpFD("Before decode");
 
-    return getAudioAnswerDecoding(exercise1,
+    AudioAnswer audioAnswerDecoding = getAudioAnswerDecoding(exercise1,
         audioContext,
         recordingInfo,
 
@@ -490,6 +837,46 @@ public class AudioFileHelper implements AlignDecode {
         validity,
         options
     );
+
+    checkFD(before);
+
+    return audioAnswerDecoding;
+  }
+
+  /**
+   * Fred stress test discovered lots of FD left open...
+   *
+   * @param before
+   */
+  private void checkFD(long before) {
+    long after = getFD();
+
+    if (after > before) {
+      String message = "writeAudioFile : hmmm  now " + after + " open files?";
+      if (after > WARN_THRESHOLD) {
+        logger.warn(message);
+      } else if (after > LOG_THRESHOLD) {
+        logger.info(message);
+      }
+    }
+  }
+
+  private void dumpFD(String message) {
+    OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
+    if (os instanceof UnixOperatingSystemMXBean) {
+      logger.info("writeAudioFile (" + message +
+          ") Number of open fd: " + ((UnixOperatingSystemMXBean) os).getOpenFileDescriptorCount());
+    }
+  }
+
+  private long getFD() {
+    OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
+
+    if (os instanceof UnixOperatingSystemMXBean) {
+      return ((UnixOperatingSystemMXBean) os).getOpenFileDescriptorCount();
+    } else {
+      return 0L;
+    }
   }
 
   /**
@@ -535,6 +922,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param score
    * @param options
    * @param pretestScore
+   * @param validityAndDur
    * @return
    * @see mitll.langtest.server.scoring.JsonScoring#getAnswer
    */
@@ -547,11 +935,12 @@ public class AudioFileHelper implements AlignDecode {
 
       float score,
       DecoderOptions options,
-      PretestScore pretestScore) {
-    AudioCheck.ValidityAndDur validity = audioConversion.getAudioCheck().isValid(file, false, isQuietAudioOK());
-    if (validity.getValidity() == Validity.MIC_DISCONNECTED) {
-      logger.warn("getAnswer : got mic disconnected for " + wavPath + " with dur " + validity.getDurationInMillis() + " range " + validity.getDynamicRange());
-    }
+      PretestScore pretestScore,
+      AudioCheck.ValidityAndDur validity) {
+//    AudioCheck.ValidityAndDur validity = getValidityAndDur(file);
+//    if (validity.getValidity() == Validity.MIC_DISCONNECTED) {
+//      logger.warn("getAnswer : got mic disconnected for " + wavPath + " with dur " + validity.getDurationInMillis() + " range " + validity.getDynamicRange());
+//    }
     AnswerInfo.RecordingInfo recordingInfo = new AnswerInfo.RecordingInfo("", file.getPath(), deviceType, device, "", "");
 
     return options.shouldDoDecoding() ?
@@ -568,6 +957,10 @@ public class AudioFileHelper implements AlignDecode {
             validity,
             score, options, pretestScore)
         ;
+  }
+
+  public AudioCheck.ValidityAndDur getValidityAndDur(File file) {
+    return audioConversion.getAudioCheck().isValid(file, false, isQuietAudioOK());
   }
 
   /**
@@ -624,6 +1017,8 @@ public class AudioFileHelper implements AlignDecode {
     boolean hasScore = pretestScore != null;
     int processDur = hasScore ? pretestScore.getProcessDur() : 0;
 
+    if (processDur == 0) logger.warn("recordInResults proces dur = 0 for " + pretestScore);
+
     AnswerInfo info = new AnswerInfo(
         new AnswerInfo(
             context,
@@ -657,6 +1052,63 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
+
+  public PretestScore recalcRefAudioWithHelper(int projid,
+                                               Integer audioID,
+                                               AudioFileHelper audioFileHelper,
+                                               int userIDFromSession) {
+    AudioAttribute byID = db.getAudioDAO().getByID(audioID, db.getProject(projid).hasProjectSpecificAudio());
+    if (byID != null) {
+      CommonExercise customOrPredefExercise = db.getCustomOrPredefExercise(projid, byID.getExid());
+      //boolean contextAudio = byID.isContextAudio();
+/*
+      if (customOrPredefExercise != null) {
+        logger.info("getAlignmentsFromDB decoding " + audioID +
+            (contextAudio ? " RECORD_CONTEXT" : "") +
+            " for exercise " + byID.getExid() + " : '" +
+            customOrPredefExercise.getEnglish() + "' = '" + customOrPredefExercise.getForeignLanguage() + "'");
+      }
+      */
+
+      // cover for import bug...
+      if (byID.isContextAudio() &&
+          customOrPredefExercise != null &&
+          customOrPredefExercise.getDirectlyRelated() != null &&
+          !customOrPredefExercise.getDirectlyRelated().isEmpty()) {
+        customOrPredefExercise = customOrPredefExercise.getDirectlyRelated().iterator().next().asCommon();
+        //logger.info("getAlignmentsFromDB using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
+      }
+
+      logger.info("recalcRefAudioWithHelper decoding audio #" + audioID + " '" + byID.getTranscript() + "' for exercise #" + byID.getExid() + "...");
+
+      audioFileHelper = getExerciseDependentAudioFileHelper(audioFileHelper, customOrPredefExercise);
+
+      if (customOrPredefExercise != null && customOrPredefExercise.isSafeToDecode()) {
+        return audioFileHelper.decodeAndRemember(customOrPredefExercise, byID, false, userIDFromSession, null, db.getProject(projid).getLanguageEnum());
+      } else {
+        return new PretestScore();
+      }
+    } else {
+      logger.info("recalcRefAudioWithHelper can't find audio id " + audioID);
+      return null;
+    }
+  }
+
+  private AudioFileHelper getExerciseDependentAudioFileHelper(AudioFileHelper audioFileHelper, CommonExercise customOrPredefExercise) {
+    if (customOrPredefExercise != null && customOrPredefExercise.hasEnglishAttr()) {
+      List<Project> matchingProjects = db.getProjectManagement().getMatchingProjects(Language.ENGLISH, false);
+      if (matchingProjects.isEmpty()) {
+        logger.info("no english projects?");
+      } else {
+        Project project = matchingProjects.get(0);
+        audioFileHelper = project.getAudioFileHelper();
+        // logger.info("using english project audio file helper " +project.getID() + " " +project.getName());
+      }
+    }
+    return audioFileHelper;
+  }
+
+
   /**
    * @param exercise
    * @param attribute
@@ -667,9 +1119,9 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#recalcRefAudioWithHelper
    */
-  public PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute,
-                                        boolean doDecode, int userID, File absoluteFile,
-                                        Language projectLanguage) {
+  private PretestScore decodeAndRemember(CommonExercise exercise, AudioAttribute attribute,
+                                         boolean doDecode, int userID, File absoluteFile,
+                                         Language projectLanguage) {
     String audioRef = attribute.getAudioRef();
 
     if (DEBUG) {
@@ -690,12 +1142,8 @@ public class AudioFileHelper implements AlignDecode {
 
     DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(isUsePhoneToDisplay()).setDoDecode(false);
 
-    PrecalcScores precalcScores = null;
-    String transcript = attribute.getTranscript();
-
-    if (!transcript.equalsIgnoreCase(exercise.getForeignLanguage())) {
-      logger.warn("decodeAndRemember hmm, the audio transcript " + transcript + " doesn't match the exercise " + exercise.getForeignLanguage());
-    }
+    PrecalcScores precalcScores;
+    String transcript = getTranscriptMaybeNormalized(exercise, attribute);
 
     try {
       Language language = getLanguage(exercise);
@@ -717,15 +1165,14 @@ public class AudioFileHelper implements AlignDecode {
       return null;
     }
 
-    PretestScore alignmentScore = precalcScores == null ? getAlignmentScore(exercise, absolutePath, options) :
-        getPretestScoreMaybeUseCache(-1,
+    PretestScore alignmentScore = precalcScores == null ? getAlignmentScore(exercise, transcript, absolutePath, options) :
+        getPretestScoreMaybeUseCache(
             absolutePath,
             transcript,
             exercise.getTransliteration(),
-            ImageOptions.getDefault(),
             exercise.getID(),
-            precalcScores,
-            false);
+            precalcScores
+        );
 
     logger.info("decodeAndRemember : returning " + alignmentScore);
     DecodeAlignOutput alignOutput = new DecodeAlignOutput(alignmentScore, false);
@@ -759,6 +1206,23 @@ public class AudioFileHelper implements AlignDecode {
     return alignmentScore;
   }
 
+  @NotNull
+  private String getTranscriptMaybeNormalized(CommonExercise exercise, AudioAttribute attribute) {
+    String transcript = attribute.getTranscript();
+
+    if (!transcript.equalsIgnoreCase(exercise.getForeignLanguage())) {
+      logger.warn("decodeAndRemember hmm, the audio transcript " + transcript + " doesn't match the exercise " + exercise.getForeignLanguage());
+    } else {
+      String normalizedFL = exercise.getNormalizedFL();
+      if (!normalizedFL.isEmpty() && !exercise.getForeignLanguage().equalsIgnoreCase(normalizedFL)) {
+        transcript = normalizedFL;
+        logger.info("decodeAndRemember using normalized transcript " + transcript);
+
+      }
+    }
+    return transcript;
+  }
+
   private Language getLanguage(CommonExercise exercise) {
     boolean b = exercise.hasEnglishAttr();
 /*    if (b)
@@ -766,22 +1230,24 @@ public class AudioFileHelper implements AlignDecode {
     return b ? Language.ENGLISH : this.language;
   }
 
-  private PretestScore getPretestScoreMaybeUseCache(int reqid, String testAudioFile, String sentence,
-                                                    String transliteration, ImageOptions imageOptions, int exerciseID,
-                                                    PrecalcScores precalcScores,
-                                                    boolean usePhoneToDisplay1) {
+  private PretestScore getPretestScoreMaybeUseCache(String testAudioFile,
+                                                    String sentence,
+                                                    String transliteration,
+                                                    int exerciseID,
+                                                    PrecalcScores precalcScores) {
     return getASRScoreForAudio(
-        reqid,
+        -1,
         testAudioFile,
         sentence,
+        Collections.singleton(sentence),
         transliteration,
-        imageOptions,
+        ImageOptions.getDefault(),
         "" + exerciseID,
         precalcScores,
         new DecoderOptions()
             .setDoDecode(false)
             .setCanUseCache(serverProps.useScoreCache())
-            .setUsePhoneToDisplay(usePhoneToDisplay1),
+            .setUsePhoneToDisplay(false),
         isKaldi());
   }
 
@@ -831,7 +1297,7 @@ public class AudioFileHelper implements AlignDecode {
       PretestScore alignmentScore = getAlignmentScore(exercise, absolutePath, serverProps.usePhoneToDisplay(), false);
 //      db.getPhoneDAO().removePhones(uniqueID);
 //      db.getWordDAO().removeWords(uniqueID);
-      db.rememberScore(uniqueID, alignmentScore, alignmentScore.getHydecScore() > 0.25);
+      db.rememberScore(uniqueID, alignmentScore, alignmentScore.getOverallScore() > 0.25);
       logger.info("rememberScore for result " + uniqueID + " : alignment " + alignmentScore);
       *//*
 
@@ -845,7 +1311,7 @@ public class AudioFileHelper implements AlignDecode {
       PretestScore alignmentScore = getEasyAlignment(exercise, absoluteFile.getAbsolutePath());
       db.getPhoneDAO().removeForResult(uniqueID);
       db.getWordDAO().removeForResult(uniqueID);
-      db.rememberScore(exercise.getProjectID(), uniqueID, alignmentScore, alignmentScore.getHydecScore() > 0.25);
+      db.rememberScore(exercise.getProjectID(), uniqueID, alignmentScore, alignmentScore.getOverallScore() > 0.25);
       logger.info("rememberScore for result " + uniqueID + " : alignment " + alignmentScore);
     }
     return true;
@@ -1106,27 +1572,23 @@ public class AudioFileHelper implements AlignDecode {
     String url = pathHelper.ensureForwardSlashes(wavPath);
 
     return (validity.isValid() && hasModel()) ?
-        getAudioAnswer(
-            commonShell,
-            reqid, file, validity, url, decoderOptions, userID) :
-        new AudioAnswer(url, validity.getValidity(), reqid, validity.getDurationInMillis(), commonShell.getID());
+        getAudioAnswer(commonShell, reqid, file, validity, url, decoderOptions, userID) :
+        getAudioAnswer(commonShell, reqid, validity, url);
   }
 
-//  private PretestScore getEasyAlignment(ClientExercise exercise, String testAudioPath) {
-//    DecoderOptions options = new DecoderOptions().setUsePhoneToDisplay(isUsePhoneToDisplay());
-//    return getAlignmentScore(exercise, testAudioPath, options);
-//  }
-
   /**
+   * @param exercise
+   * @param testAudioPath
+   * @param options
    * @return
    * @see #decodeOneAttribute(CommonExercise, AudioAttribute, int, File)
    */
-
-  private PretestScore getAlignmentScore(ClientExercise exercise, String testAudioPath, DecoderOptions options) {
+  private PretestScore getAlignmentScore(ClientExercise exercise, String toDecode, String testAudioPath, DecoderOptions options) {
+    // String foreignLanguage = exercise.getForeignLanguage();
     if (DEBUG) {
       logger.info("getAlignmentScore alignment " +
           "\n\texid    " + exercise.getID() +
-          "\n\tfl      " + exercise.getForeignLanguage() +
+          "\n\tfl      " + toDecode +
           "\n\ten      " + exercise.getEnglish() +
           "\n\tcontext " + exercise.isContext() +
           "\n\tattr    " + testAudioPath);
@@ -1134,7 +1596,8 @@ public class AudioFileHelper implements AlignDecode {
 
 
     return getASRScoreForAudio(0, testAudioPath,
-        exercise.getForeignLanguage(),
+        toDecode,
+        Collections.singleton(toDecode),
         exercise.getTransliteration(),
         NO_IMAGE_PLEASE, "" + exercise.getID(), null,
         options, isKaldi());
@@ -1162,13 +1625,20 @@ public class AudioFileHelper implements AlignDecode {
                                           String transliteration,
                                           DecoderOptions options,
                                           PrecalcScores precalcScores) {
-    String prefix = options.isUsePhoneToDisplay() ? "phoneToDisplay" : "";
-    //String path = testAudioFile.getPath();
     String firstSentence = lmSentences.iterator().next();
-//      logger.info("getASRScoreForAudio audio file path is " + path + " " + firstSentence);
+
+    boolean kaldi = isKaldi();
+    logger.info("getASRScoreForAudio audio file " +
+        "\n\tpath       " + testAudioFile.getPath() +
+        "\n\ttext       " + firstSentence +
+        "\n\tproject    " + project.getID() +
+        "\n\tmodel type " + project.getModelType() +
+        "\n\tisKaldi    " + kaldi
+
+    );
     return getASRScoreForAudio(reqid, testAudioFile.getPath(), firstSentence, lmSentences, transliteration,
-        DEFAULT, prefix, precalcScores,
-        options, isKaldi());
+        DEFAULT, options.isUsePhoneToDisplay() ? "phoneToDisplay" : "", precalcScores,
+        options, kaldi);
   }
 
   private boolean noted = false;
@@ -1197,14 +1667,14 @@ public class AudioFileHelper implements AlignDecode {
     if (!available && !noted) {
       noted = true;
       logger.info("checkForWebservice local webservice not available" +
-          "\n\tfor     " + theFile.getName() +
-          "\n\tproject " + projid +
-          "\n\texid    " + exid +
-          "\n\tenglish " + english +
-          "\n\titem    " + foreignLanguage +
-          "\n\tuser    " + userid +
+          "\n\tfor      " + theFile.getName() +
+          "\n\tproject  " + projid +
+          "\n\texid     " + exid +
+          "\n\tenglish  " + english +
+          "\n\titem     " + foreignLanguage +
+          "\n\tuser     " + userid +
           "\n\tlanguage " + language +
-          "\n\thost    " + hydraHost
+          "\n\thost     " + hydraHost
       );
       if (theFile.getName().endsWith("mp3")) logger.warn("don't send mp3!");
     }
@@ -1249,7 +1719,7 @@ public class AudioFileHelper implements AlignDecode {
                                       String hydraHost,
                                       Language language) {
     if (session == null || session.isEmpty()) {
-      session = getSession(hydraHost, project.getID());
+      session = getSession(hydraHost);
     }
     HTTPClient httpClient = getHttpClientForNetprofServer(english, foreignLanguage, userid, hydraHost, ScoreServlet.PostRequest.ALIGN, language);
 
@@ -1297,7 +1767,7 @@ public class AudioFileHelper implements AlignDecode {
                                                    String hydraHost,
                                                    ScoreServlet.PostRequest requestToServer,
                                                    Language language) {
-    boolean isDefault = project.getWebserviceHost().equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT);
+    boolean isDefault = project.getWebserviceHost().equalsIgnoreCase(IProject.WEBSERVICE_HOST_DEFAULT);
 
     HTTPClient httpClient = getHttpClient(hydraHost, isDefault ? "" : project.getWebserviceHost());
     httpClient.addRequestProperty(REQUEST.toString(), requestToServer.toString());
@@ -1325,7 +1795,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   *
+   * @see #getProxyScore(String, String, int, File, String, Language)
    */
   private String session = null;
 
@@ -1336,26 +1806,27 @@ public class AudioFileHelper implements AlignDecode {
    * We just need some session.
    *
    * @param hydraHost
-   * @param projID
    * @return
    * @see #getProxyScore
    */
-  private String getSession(String hydraHost, int projID) {
+  private String getSession(String hydraHost) {
     try {
-      logger.info("getSession " +
-          "\n\thost   " + hydraHost +
-          "\n\tprojID " + projID +
-          "\n\tuser   " + TEST_USER +
-          "\n\tpass   " + TEST_PASSWORD
-      );
-
       HTTPClient httpClient = getHttpClient(hydraHost, "");
       httpClient.addRequestProperty(REQUEST.toString(), HASUSER.toString());
       httpClient.addRequestProperty(USERID.toString(), TEST_USER);
       httpClient.addRequestProperty(PASS.toString(), TEST_PASSWORD);
 
       String json = httpClient.sendAndReceiveCookie("");
-//      logger.info("getSession response " + json);
+
+      logger.info("getSession " +
+          "\n\thost     " + hydraHost +
+          //  "\n\tprojID   " + projID +
+          "\n\tuser     " + TEST_USER +
+          "\n\tpass     " + TEST_PASSWORD +
+          "\n\tresponse " + json
+      );
+
+      //logger.info("getSession response " + json);
       return json;
     } catch (IOException e) {
       logger.warn("getSession Got " + e, e);
@@ -1383,45 +1854,6 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
-   * For now, we don't use a ref audio file, since we aren't comparing against a ref audio file with the DTW/sv pathway.
-   *
-   * @param reqid
-   * @param testAudioFile
-   * @param sentence        empty string when using lmSentences non empty and vice-versa
-   * @param transliteration for languages we can't do normal LTS on (Kanji characters or similar)
-   * @param prefix
-   * @param options
-   * @param kaldi
-   * @return PretestScore
-   * @paramx precalcResult
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getPretestScore
-   * @see mitll.langtest.server.services.ScoringServiceImpl#getResultASRInfo
-   * @see AlignDecode#getASRScoreForAudio
-   * @see mitll.langtest.client.scoring.ScoringAudioPanel#scoreAudio
-   **/
-  public PretestScore getASRScoreForAudio(int reqid,
-                                          String testAudioFile,
-                                          String sentence,
-                                          String transliteration,
-
-                                          ImageOptions imageOptions,
-
-                                          String prefix,
-                                          PrecalcScores precalcScores,
-
-                                          DecoderOptions options, boolean kaldi) {
-    return getASRScoreForAudio(reqid,
-        testAudioFile,
-        sentence,
-        null,
-        transliteration,
-        imageOptions,
-        prefix,
-        precalcScores,
-        options, kaldi);
-  }
-
-  /**
    * If trying asr webservice and it doesn't work, falls back to using hydec - {@link PretestScore#isRanNormally()}
    * `
    *
@@ -1436,25 +1868,26 @@ public class AudioFileHelper implements AlignDecode {
    * @return
    * @seex #getASRScoreForAudio(int, String, String, String, ImageOptions, String, PrecalcScores, DecoderOptions)
    */
-  private PretestScore getASRScoreForAudio(int reqid,
-                                           String testAudioFile,
-                                           String sentence,
-                                           Collection<String> lmSentences,
-                                           String transliteration,
+  public PretestScore getASRScoreForAudio(int reqid,
+                                          String testAudioFile,
+                                          String sentence,
+                                          Collection<String> lmSentences,
+                                          String transliteration,
 
-                                           ImageOptions imageOptions,
+                                          ImageOptions imageOptions,
 
-                                           String prefix,
-                                           PrecalcScores precalcScores,
-                                           DecoderOptions options,
-                                           boolean kaldi) {
+                                          String prefix,
+                                          PrecalcScores precalcScores,
+                                          DecoderOptions options,
+                                          boolean kaldi) {
     // alignment trumps decoding
     long then = System.currentTimeMillis();
 
     boolean shouldDoDecoding = options.shouldDoDecoding() && !options.shouldDoAlignment();
+
     logger.info("getASRScoreForAudio (" + getLanguage() + ")" +
-            "\n\t" + (shouldDoDecoding ? "Decoding " : "Aligning ") +
-            (kaldi ? "\n\tKALDI!" : "") +
+            (shouldDoDecoding ? "\n\t" + "Decoding " : "") +
+            (kaldi ? "\n\tKALDI : " : "") +
             "" + testAudioFile +
             "\n\twith sentence '" + sentence + "'" +
 //        "\n\treq# " + reqid +
@@ -1510,7 +1943,7 @@ public class AudioFileHelper implements AlignDecode {
       sentence = sentence.toUpperCase();  // hack for English
     }
     sentence = sentence.replaceAll(",", " ");
-    sentence = getSentenceToUse(sentence);
+    // sentence = getSentenceToUse(sentence);
     sentence = sentence.trim();
 
 //    logger.info("getASRScoreForAudio : for " + testAudioName + " sentence '" + sentence + "' lm sentences '" + lmSentences + "'");
@@ -1531,7 +1964,8 @@ public class AudioFileHelper implements AlignDecode {
         shouldDoDecoding,
         options.isCanUseCache(), prefix,
         precalcScores,
-        options.isUsePhoneToDisplay(), kaldi);
+        options.isUsePhoneToDisplay(),
+        kaldi);
 
     pretestScore.setReqid(reqid);
 
@@ -1540,7 +1974,7 @@ public class AudioFileHelper implements AlignDecode {
 
       now = System.currentTimeMillis();
 
-      if (now-then>60) {
+      if (now - then > 60) {
         logger.info("getASRScoreForAudio : for " +
             "\n\ttook    " + (now - then) +
             "\n\tpretest " + pretestScore +
@@ -1551,18 +1985,6 @@ public class AudioFileHelper implements AlignDecode {
     }
 
     return pretestScore;
-  }
-
-  /**
-   * Hack for percent sign in english - must be a better way.
-   * Tried adding it to dict but didn't seem to work.
-   *
-   * @param sentence
-   * @return
-   */
-  private String getSentenceToUse(String sentence) {
-    boolean english = isEnglish() && sentence.equals(PERCENT_SYMBOL) || sentence.equals("％");
-    return english ? "percent" : sentence;
   }
 
   /**
@@ -1607,25 +2029,27 @@ public class AudioFileHelper implements AlignDecode {
       return new AudioAnswer();
     }
 
-    AudioAnswer audioAnswer = new AudioAnswer(url, validity.getValidity(), reqid, validity.getDurationInMillis(), exercise.getID());
-    boolean b = exercise.asCommon().hasEnglishAttr();
+    AudioAnswer audioAnswer = getAudioAnswer(exercise, reqid, validity, url);
+    boolean hasEnglishAttr = exercise.asCommon().hasEnglishAttr();
 
-    Language language = b ? Language.ENGLISH : this.language;
+    Language language = hasEnglishAttr ? Language.ENGLISH : this.language;
     //logger.info("getAudioAnswer Ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " language " + language);
+    String phraseToDecode = getPhraseToDecode(exercise, language);
+
     if (decoderOptions.shouldDoAlignment()) {
       PrecalcScores precalcScores =
           checkForWebservice(
               exercise.getID(),
               exercise.getEnglish(),
-              exercise.getForeignLanguage(),
+              phraseToDecode,
               project.getID(),
               userID,
               file,
               language);
 
-      String phraseToDecode = getChecker().getPhraseToDecode(exercise.getForeignLanguage(), language);
 
-      AudioFileHelper toUse = language == Language.ENGLISH ? getEnglishAudioFileHelper(language) : this;
+      // if the item is marked english but this is not an english project - so we can do interpreter english turns in a korean dialog for instance
+      AudioFileHelper toUse = (hasEnglishAttr && this.language != Language.ENGLISH) ? getEnglishProductionAudioFileHelper(language) : this;
 
       PretestScore asrScoreForAudio = toUse.getASRScoreForAudio(reqid,
           file,
@@ -1648,7 +2072,7 @@ public class AudioFileHelper implements AlignDecode {
           checkForWebservice(
               exercise.getID(),
               exercise.getEnglish(),
-              exercise.getForeignLanguage(),
+              phraseToDecode,
               project.getID(),
               userID,
               file,
@@ -1671,19 +2095,27 @@ public class AudioFileHelper implements AlignDecode {
     return audioAnswer;
   }
 
-  private AudioFileHelper getEnglishAudioFileHelper(Language language) {
-    List<Project> matchingProjects = db.getProjectManagement().getMatchingProjects(language, false);
-    return matchingProjects.isEmpty() ? this : matchingProjects.get(0).getAudioFileHelper();
+  @NotNull
+  private AudioAnswer getAudioAnswer(HasID exercise, int reqid, AudioCheck.ValidityAndDur validity, String url) {
+    return new AudioAnswer(url, validity.getValidity(), validity.getDynamicRange(), validity.getDurationInMillis(), reqid, exercise.getID());
   }
 
-  /**
-   * @return TODO : why would we want this?
-   * @see ScoreServlet#getExerciseSorter(int)
-   * @see AudioFileHelper#countPhones(CommonShell)
-   * @see mitll.langtest.server.database.DatabaseImpl#getJSONExport(int)
-   */
-  public Map<String, Integer> getPhoneToCount() {
-    return phoneToCount;
+  private String getPhraseToDecode(ClientExercise exercise, Language language) {
+    String foreignLanguage = exercise.getForeignLanguage();
+    String phraseToDecode;
+    String normalizedFL = exercise.getNormalizedFL();
+    if (normalizedFL.isEmpty() || normalizedFL.equalsIgnoreCase(foreignLanguage)) {
+      phraseToDecode = getChecker().getPhraseToDecode(foreignLanguage, language);
+    } else {
+      logger.info("getPhraseToDecode using normalized '" + normalizedFL + "' for " + exercise.getID());
+      phraseToDecode = getChecker().getPhraseToDecode(normalizedFL, language);
+    }
+    return phraseToDecode;
+  }
+
+  private AudioFileHelper getEnglishProductionAudioFileHelper(Language language) {
+    List<Project> matchingProjects = db.getProjectManagement().getMatchingProjects(language, false);
+    return matchingProjects.isEmpty() ? this : matchingProjects.get(0).getAudioFileHelper();
   }
 
   /**
@@ -1716,6 +2148,242 @@ public class AudioFileHelper implements AlignDecode {
           project);
     }
   }
+
+  public void makeOneEditMap() {
+    scala.collection.Set<String> words = htkDictionary.keySet();
+    //Iterable<scala.collection.immutable.List<String[]>> prons = htkDictionary.values();
+    Iterator<String> iterator = words.iterator();
+    java.util.Set<String> wset = new HashSet<>();
+    while (iterator.hasNext()) wset.add(iterator.next());
+
+    Map<List<String>, List<WP>> pronsToWords = new HashMap();
+    wset.forEach(w -> {
+      Option<scala.collection.immutable.List<String[]>> listOption = htkDictionary.get(w);
+      if (listOption.isDefined()) {
+        scala.collection.immutable.List<String[]> list = listOption.get();
+        Iterator<String[]> iterator1 = list.iterator();
+        java.util.List<List<String>> jprons = new ArrayList<>();
+        while (iterator1.hasNext()) jprons.add(Arrays.asList(iterator1.next()));
+        jprons.forEach(jp -> {
+          List<WP> wps = pronsToWords.computeIfAbsent(jp, k -> new ArrayList<>());
+          wps.add(new WP(w, jp));
+        });
+      }
+    });
+    Map<Integer, List<List<String>>> lengthToProns = pronsToWords.keySet().stream().collect(Collectors.groupingBy(List::size));
+
+
+//    Set<Integer> inOrder = new TreeSet<>(lengthToProns.keySet());
+    List<Integer> integers = Arrays.asList(2, 3, 4);
+    integers.forEach(len -> {
+      logger.info("len " + len);
+      List<List<String>> pronsOfLength = lengthToProns.get(len);
+
+      Trie<WP> trie = new Trie<>();
+      trie.startMakingNodes();
+
+      pronsOfLength.forEach(pron -> {
+        List<WP> wps = pronsToWords.get(pron);
+        wps.forEach(wp -> trie.addEntryToTrie(new Wrapper<WP>(wp.getEntry(), wp)));
+//        WP wp = new WP(word, pron);
+        // trie.addEntryToTrie(new Wrapper<WP>(wp.getEntry(), wp));
+      });
+      trie.endMakingNodes();
+
+      Trie<WP> rtrie = new Trie<>();
+      rtrie.startMakingNodes();
+
+      pronsOfLength.forEach(pron -> {
+        List<WP> wps = pronsToWords.get(pron);
+        wps.forEach(wp1 -> {
+          List<String> strings = new ArrayList<>(pron);
+          // logger.info("\t" + word + " " + pron);
+          Collections.reverse(strings);
+          WP wp = new WP(wp1.getWord(), strings);
+          rtrie.addEntryToTrie(new Wrapper<>(wp.getEntry(), wp));
+        });
+
+
+      });
+      rtrie.endMakingNodes();
+
+
+      if (len > 1) {
+        Map<Integer, List<WP>> posToMatches = new HashMap<>();
+        // List<List<String>> lists = pronsOfLength.subList(0, 5);
+        pronsOfLength.forEach(pron -> {
+          List<WP> wps = pronsToWords.get(pron);
+          logger.info("for pron (" + len + ") " + pron + " found " + wps.size());
+          wps.forEach(toFind -> {
+            String word = toFind.getWord();
+//            logger.info("\t" + word + " " + pron);
+            for (int i = 1; i < len; i++) {
+              List<String> allButSuffix = pron.subList(0, i);
+              if (DEBUG_EDIT) logger.info(i + " prefix " + allButSuffix);
+
+              List<String> after = pron.subList(i + 1, len);
+              if (!after.isEmpty()) {
+                if (DEBUG_EDIT) logger.info("After " + after);
+              }
+              WP wp = new WP(word, allButSuffix);
+
+              List<WP> collect = matchesNotSelf(trie, wp, toFind.getPron());
+              if (DEBUG_EDIT) logger.info("match (" + i + ") " + wp + " (" + collect.size() + ") " + collect);
+
+              final int fi = i;
+              List<WP> finalList = collect;
+              if (!after.isEmpty()) {
+                finalList = collect.stream().filter(c -> {
+                  List<String> suffix = c.getPron().subList(fi + 1, len);
+                  boolean match = suffix.containsAll(after);
+                  if (DEBUG_EDIT && match) {
+                    logger.info("suffix (" + fi + ") " + suffix + " vs " + after + " = " + match);
+                  }
+                  return match;
+                }).collect(Collectors.toList());
+              }
+
+              if (DEBUG_EDIT)
+                logger.info("for (" + i + ") (" + pron + ") : " + wp + " (" + finalList.size() + ") : " + finalList);
+              List<WP> copy = new ArrayList<>();
+              finalList.forEach(f -> copy.add(new WP(f.getWord(), f.getPron(), fi)));
+              posToMatches.put(fi, finalList);
+            }
+            //logger.info("all for " + word + " " + pron + " : " + posToMatches);
+
+            List<String> prefix = new ArrayList<>(pron.subList(1, pron.size()));
+
+            {
+              Collections.reverse(prefix);
+              WP wp2 = new WP(word, prefix);
+              List<WP> back = new ArrayList<>();
+
+              List<String> pron1 = wp2.getPron(); //??? todo : correct???
+              matchesNotSelf(rtrie, wp2, pron1).forEach(ww -> {
+                List<String> copy = new ArrayList<>(ww.getPron());
+                Collections.reverse(copy);
+                back.add(new WP(ww.getWord(), copy));
+              });
+              if (DEBUG_EDIT) logger.info("r for " + wp2 + " (" + back.size() + ") " + back);
+
+              List<WP> copy = new ArrayList<>();
+              back.forEach(f -> copy.add(new WP(f.getWord(), f.getPron())));
+              posToMatches.put(0, copy);
+            }
+
+            logger.info("for " + word + " " + pron);// + " : " + posToMatches);
+            posToMatches.forEach((k, v) -> logger.info("\t" + k + " (" + v.size() + ") " + v));
+          });
+
+
+        });
+      }
+    });
+
+  }
+
+  @NotNull
+  private List<WP> matchesNotSelf(Trie<WP> trie, WP wp, List<String> overallPron) {
+    String entry = wp.getEntry();
+    Collection<WP> matchesLC = trie.getMatchesLC(entry);
+    //  List<String> pron = wp.getPron();
+    String word = wp.getWord();
+    boolean debug = (word.equalsIgnoreCase("niveau"));
+    if (DEBUG_EDIT || debug) logger.info("match " + word + " " + wp);
+    List<WP> collect = matchesLC.stream()
+        .filter(w ->
+        {
+          boolean diffWord = !w.getWord().equals(word);
+          boolean diffPron = !w.getPron().equals(overallPron);
+          return diffWord &&
+              diffPron;
+        })
+        .collect(Collectors.toList());
+    if (DEBUG_EDIT || debug) logger.info("match for " + entry + " " + collect);
+    return collect;
+  }
+
+  class WP {
+    private final String word;
+    private final List<String> pron;
+    private int pos = -1;
+
+    WP(String word, List<String> pron) {
+      this.word = word;
+      this.pron = pron;
+    }
+
+    WP(String word, List<String> pron, int pos) {
+      this(word, pron);
+      this.pos = pos;
+    }
+
+    String getWord() {
+      return word;
+    }
+
+    List<String> getPron() {
+      return pron;
+    }
+
+    String getEntry() {
+      StringBuilder builder = new StringBuilder();
+      pron.forEach(p -> builder.append(p).append("-"));
+      return builder.toString();
+    }
+
+    public String toString() {
+      String s = pos == -1 ? "" : " at " + pos;
+
+      return getWord() + " " + getPron() + s;
+    }
+
+//    public int getPos() {
+//      return pos;
+//    }
+//
+//    public void setPos(int pos) {
+//      this.pos = pos;
+//    }
+  }
+
+  private static class Wrapper<T extends WP> implements TextEntityValue<T> {
+    private final String value;
+    private final T e;
+
+    Wrapper(String value, T e) {
+      this.value = value;
+      this.e = e;
+    }
+
+    @Override
+    public T getValue() {
+      return e;
+    }
+
+    @Override
+    public String getNormalizedValue() {
+      return value;
+    }
+
+    public String toString() {
+      return "e " + e.getWord() + " : " + value;
+    }
+  }
+
+/*
+  @NotNull
+  private Trie<WP> makePronTrie(Collection<WP> results) {
+    Trie<WP> trie = new Trie<>();
+    trie.startMakingNodes();
+
+    for (WP result : results) {
+      trie.addEntryToTrie(new Wrapper(result.getEntry(), result));
+    }
+    trie.endMakingNodes();
+    return trie;
+  }
+*/
 
   /**
    * JUST FOR TESTING
@@ -1765,22 +2433,27 @@ public class AudioFileHelper implements AlignDecode {
       File file = new File(dictFile);
       this.dictModified = file.lastModified();
 
-      logger.info("makeDict (" + project.getID() + " " + project.getName() + " " + project.getLanguageEnum().toDisplay() +
+      String s = project.getLanguageEnum().toDisplay();
+      logger.info("makeDict (" + project.getID() + " " + project.getName() + " " + s +
           ") read " + file.getAbsolutePath() + " with mod date " + new Date(dictModified));
 
       HTKDictionary htkDictionary = new HTKDictionary(dictFile);
-      long now = System.currentTimeMillis();
-      int size = htkDictionary.size(); // force read from lazy val
-      if (now - then > 10) {
-        logger.info("makeDict for " + getLanguage() + " read" +
-            " dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
+
+      {
+        long now = System.currentTimeMillis();
+        int size = htkDictionary.size(); // force read from lazy val
+        if (now - then > 10) {
+          logger.info("makeDict for " + s + " read" +
+              " dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
+        }
       }
       return htkDictionary;
     } else {
       if (hasModel()) {
         if (new File(serverProps.getMediaDir()).exists()) {
-          logger.warn("\n----->>>> makeDict : Can't find dict file at " + dictFile);
-          logger.warn("\nThis is an error if you see this on hydra or hydra2 and not a problem on netprof.");
+          logger.warn(
+              "makeDict : Can't find dict file at " + dictFile +
+                  "\nThis is an error if you see this on hydra or hydra2 and not a problem on netprof.");
         } else {
           logger.debug("makeDict : NOTE: Can't find dict file at " + dictFile);
         }

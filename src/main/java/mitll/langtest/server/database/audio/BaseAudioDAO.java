@@ -30,14 +30,11 @@
 package mitll.langtest.server.database.audio;
 
 import com.google.common.base.CharMatcher;
-import mitll.langtest.server.ServerProperties;
-import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.server.audio.AudioExportOptions;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
@@ -113,10 +110,10 @@ public abstract class BaseAudioDAO extends DAO {
    * @param projid
    * @param hasProjectSpecificAudio
    * @return
-   * @see mitll.langtest.server.services.ScoringServiceImpl#recalcAlignments(int, Project)
+   * @seex mitll.langtest.server.services.ScoringServiceImpl#recalcAlignments(int, Project)
    * @see mitll.langtest.server.services.ScoringServiceImpl#getAllAudioIDs
    */
-  public Map<Integer, List<AudioAttribute>> getExToAudio(int projid, boolean hasProjectSpecificAudio) {
+  Map<Integer, List<AudioAttribute>> getExToAudio(int projid, boolean hasProjectSpecificAudio) {
     long then = System.currentTimeMillis();
     Map<Integer, List<AudioAttribute>> exToAudio = new HashMap<>();
     Map<Integer, Set<String>> idToPaths = new HashMap<>();
@@ -164,6 +161,7 @@ public abstract class BaseAudioDAO extends DAO {
   final Map<Integer, MiniUser> idToMini = new ConcurrentHashMap<>();
 
   /**
+   * Super expensive - hitting the database over and over only to most of the time do nothing!
    * TODO : consider why doing this all the time
    * TODO : this could be a lot smarter...
    *
@@ -175,7 +173,9 @@ public abstract class BaseAudioDAO extends DAO {
   public <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises, Language language, int projID) {
     Set<Integer> exerciseIDs = getExerciseIDsForAttachment(exercises, language);
 
-    if (DEBUG_ATTACH) logger.info("attachAudioToExercises getting audio for " + new TreeSet<>(exerciseIDs));
+    if (DEBUG_ATTACH) {
+      logger.info("attachAudioToExercises getting audio for " + new TreeSet<>(exerciseIDs));
+    }
 
     //  logger.info("attachAudioToExercises getting audio for " + exerciseIDs.size() + " id->mini " + idToMini.size());
 
@@ -191,6 +191,34 @@ public abstract class BaseAudioDAO extends DAO {
     if (DEBUG_ATTACH) {
       logger.info("attachAudioToExercises finished attach to " + exercises.size() + " exercises for " +
           language + " : " + exerciseIDs.size());
+    }
+  }
+
+  public <T extends ClientExercise> void attachAudioToAllExercises(Collection<T> exercises, Language language, int projID) {
+    long then2 = System.currentTimeMillis();
+    Set<Integer> exerciseIDs = getExerciseIDsForAttachment(exercises, language);
+
+    if (DEBUG_ATTACH) logger.info("attachAudioToExercises getting audio for " + new TreeSet<>(exerciseIDs));
+
+    //  logger.info("attachAudioToExercises getting audio for " + exerciseIDs.size() + " id->mini " + idToMini.size());
+
+    long then = System.currentTimeMillis();
+    Map<Integer, List<AudioAttribute>> audioAttributesForExercises = getAllAudioAttributesForExercises(projID, idToMini);
+    long now = System.currentTimeMillis();
+    if (now - then > 10) {
+      logger.info("attachAudioToExercises took " + (now - then) + " millis to get audio attributes for " + exerciseIDs.size());
+    }
+
+    attachAudioToExercises(exercises, language, audioAttributesForExercises);
+
+    long now2 = System.currentTimeMillis();
+
+    long diff = now2 - then2;
+    if (DEBUG_ATTACH || diff > 100) {
+      logger.info("attachAudioToExercises finished attach " +
+          "\n\tto   " + exercises.size() + " exercises (" + exerciseIDs.size() + ")" +
+          "\n\tfor  " + language +
+          "\n\ttook " + diff);
     }
   }
 
@@ -259,23 +287,23 @@ public abstract class BaseAudioDAO extends DAO {
   /**
    * @param language
    * @param audioAttributesForExercises
-   * @param exercise
+   * @param parentExercise
    * @param smallVocabDecoder
    * @see #attachAudioToExercises(Collection, Language, int)
    */
   private void addContextAudio(Language language,
                                Map<Integer, List<AudioAttribute>> audioAttributesForExercises,
-                               ClientExercise exercise, SmallVocabDecoder smallVocabDecoder) {
-    int id = exercise.getID();
+                               ClientExercise parentExercise, SmallVocabDecoder smallVocabDecoder) {
+    int id = parentExercise.getID();
     boolean doDEBUG = DEBUG_ATTACH;
 
-    Collection<AudioAttribute> onlyContextFromParent = exercise.getContextAudio();
+    Collection<AudioAttribute> onlyContextFromParent = parentExercise.getContextAudio();
 
     if (doDEBUG) {
       logger.info("addContextAudio for ex " + id + " found " + onlyContextFromParent.size() + " to attach ");
     }
 
-    for (ClientExercise contextSentence : exercise.getDirectlyRelated()) {
+    for (ClientExercise contextSentence : parentExercise.getDirectlyRelated()) {
       int contextID = contextSentence.getID();
       List<AudioAttribute> audioAttributes = audioAttributesForExercises.get(contextID);
 
@@ -314,6 +342,8 @@ public abstract class BaseAudioDAO extends DAO {
    * @return
    */
   abstract Map<Integer, List<AudioAttribute>> getAudioAttributesForExercises(int projID, Set<Integer> exids, Map<Integer, MiniUser> idToMini);
+
+  abstract Map<Integer, List<AudioAttribute>> getAllAudioAttributesForExercises(int projID, Map<Integer, MiniUser> idToMini);
 
   /**
    * @param firstExercise
@@ -404,11 +434,13 @@ public abstract class BaseAudioDAO extends DAO {
     }
 
     int n = 0;
+    int attached = 0;
     for (AudioAttribute candidate : audioAttributes) {
       if (!currentPaths.contains(candidate.getAudioRef())) {
         n++;
         boolean didIt = attachAudioAndFixPath(firstExercise, mediaDir, candidate, language, debug, smallVocabDecoder);
         if (didIt) {
+          attached++;
 //          logger.debug("\tadding path '" + candidate.getAudioRef() + "' " + candidate + " to " + firstExercise.getOldID());
           if (doDebug)
             logger.info("attachAudio attach audio " + candidate.getUniqueID() +
@@ -436,15 +468,12 @@ public abstract class BaseAudioDAO extends DAO {
     }
     if (doDebug && n == 0) logger.info("attachAudio didn't attempt any for " + firstExercise.getID());
 
+//    if (n > 0 || attached > 0) {
+//      logger.info("attachAudio examined " + n + " attached " + attached);
+//    }
+
     return allSucceeded;
   }
-
-/*  private Collection<String> getAudioPaths(ClientExercise firstExercise) {
-    Collection<AudioAttribute> audioAttributes1 = firstExercise.getAudioAttributes();
-    synchronized (audioAttributes1) {
-      return audioAttributes1.stream().map(AudioAttribute::getAudioRef).collect(Collectors.toSet());
-    }
-  }*/
 
   /**
    * TODO : Why does this have to be so complicated???
@@ -791,68 +820,7 @@ public abstract class BaseAudioDAO extends DAO {
                                   Set<Integer> idsOfRecordedExercisesForMales,
                                   Set<Integer> idsOfRecordedExercisesForFemales);
 
-  /**
-   * Items that are recorded must have both regular and slow speed audio.
-   *
-   * @param userid
-   * @return
-   * @seex mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
-   */
-/*  public Collection<Integer> getRecordedExForUser(int userid) {
-    try {
-      Set<Integer> validAudioAtReg = getValidAudioOfType(userid, AudioType.REGULAR);
-      Set<Integer> validAudioAtSlow = getValidAudioOfType(userid, AudioType.SLOW);
-      validAudioAtReg.retainAll(validAudioAtSlow);
-      return validAudioAtReg;
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return new HashSet<>();
-  }*/
 
-  /**
-   * TODO make this a like "context=%"
-   *
-   * @param userid
-   * @return
-   * @seex mitll.langtest.server.services.ExerciseServiceImpl#markRecordedState
-   */
-/*  public Collection<Integer> getRecordedExampleForUser(int userid) {
-    try {
-      return getValidAudioOfType(userid, AudioType.CONTEXT_REGULAR);
-    } catch (Exception ee) {
-      logger.error("got " + ee, ee);
-    }
-    return new HashSet<>();
-  }*/
-
-/*
-  abstract Set<Integer> getValidAudioOfType(int userid, AudioType audioType);
-*/
-
-  /**
-   * @param userid
-   * @param exerciseID
-   * @param audioType
-   * @return
-   * @see IAudioDAO#addOrUpdate
-   */
-  protected AudioAttribute getAudioAttribute(int userid, int exerciseID, AudioType audioType, Map<Integer, MiniUser> idToMini) {
-    AudioAttribute audioAttr = null;
-    Collection<AudioAttribute> audioAttributes = getAudioAttributesForExercise(exerciseID, idToMini);
-    //logger.debug("for  " +exerciseID + " found " + audioAttributes);
-
-    for (AudioAttribute audioAttribute : audioAttributes) {
-      AudioType audioType1 = audioAttribute.getAudioType();
-      //logger.debug("\tfor  " +audioAttribute + " against " + userid + "/" + audioType  + " audio type " + audioType1);
-      if (audioAttribute.getUserid() == userid && audioType1 == audioType) {
-        //logger.debug("\tfound  " +audioAttribute + " for " + userid + "/" + audioType );
-        audioAttr = audioAttribute;
-        break;
-      }
-    }
-    return audioAttr;
-  }
 
   /**
    * @param i
@@ -925,30 +893,6 @@ public abstract class BaseAudioDAO extends DAO {
   public int markDefect(AudioAttribute attribute) {
     return markDefect(attribute.getUserid(), attribute.getExid(), attribute.getAudioType());
   }
-
-  /**
-   * TODO : confirm this works...
-   * <p>
-   * Go back and mark gender on really old audio that had no user info on it.
-   *
-   * @param userid
-   * @param projid
-   * @param attr
-   * @return
-   * @see mitll.langtest.server.services.QCServiceImpl#markGender
-   */
-  public void addOrUpdateUser(int userid, int projid, AudioAttribute attr) {
-    long timestamp = attr.getTimestamp();
-    if (timestamp == 0) timestamp = System.currentTimeMillis();
-    ServerProperties serverProps = database.getServerProps();
-    boolean hasProjectSpecificAudio = database.getProject(projid).hasProjectSpecificAudio();
-    float dnr = new AudioCheck(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange()).getDNR(new File(attr.getActualPath()));
-    addOrUpdateUser(new AudioInfo(userid, attr.getExid(), projid, attr.getAudioType(), attr.getAudioRef(), timestamp,
-        (int) attr.getDurationInMillis(), BaseAudioDAO.UNKNOWN, dnr, attr.getResultid(), attr.getRealGender(), hasProjectSpecificAudio)
-    );
-  }
-
-  abstract void addOrUpdateUser(AudioInfo info);
 
   abstract int markDefect(int userid, int exerciseID, AudioType audioType);
 

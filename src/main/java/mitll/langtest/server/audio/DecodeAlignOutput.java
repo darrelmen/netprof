@@ -51,7 +51,7 @@ public class DecodeAlignOutput {
    */
   DecodeAlignOutput(PretestScore alignmentScore, boolean isDecode) {
     this(
-        alignmentScore.getHydecScore(),
+        alignmentScore.getOverallScore(),
         new ScoreToJSON().getJsonObject(alignmentScore).toString(),
         alignmentScore.getProcessDur(),
         false,

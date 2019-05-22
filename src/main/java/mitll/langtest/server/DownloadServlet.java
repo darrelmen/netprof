@@ -30,18 +30,22 @@
 package mitll.langtest.server;
 
 import mitll.langtest.client.download.DownloadHelper;
+import mitll.langtest.server.audio.AudioExport;
 import mitll.langtest.server.audio.AudioExportOptions;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.excel.EventDAOToExcel;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
 import mitll.langtest.server.database.excel.UserPerfToExcel;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.shared.analysis.UserInfo;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.result.MonitorResult;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -52,9 +56,14 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -93,7 +102,10 @@ public class DownloadServlet extends DatabaseServlet {
   private static final String UNIT = "unit";
   private static final String SEARCH = "search";
   private static final String AUDIO1 = "audio";
-  private static final int BUFFER_SIZE = 4096;
+  //private static final int BUFFER_SIZE = 4096;
+  private static final String STUDENT_AUDIO = "studentAudio";
+  private static final String USERID = "userid";
+  private static final String CONTENT_DISPOSITION = "Content-Disposition";
 
   public static final String USER_PERF = "userPerf";
   public static final String LISTID = "listid";
@@ -139,7 +151,7 @@ public class DownloadServlet extends DatabaseServlet {
         }
         //       logger.info("doGet : current session found projid " + project1);
         Project project = getDatabase().getProject(projid);
-        boolean hasProjectSpecificAudio = project.hasProjectSpecificAudio();
+        //boolean hasProjectSpecificAudio = project.hasProjectSpecificAudio();
         String language = project.getLanguageEnum().toDisplay();
 
         String requestURI = request.getRequestURI();
@@ -154,17 +166,24 @@ public class DownloadServlet extends DatabaseServlet {
 
         if (requestURI.toLowerCase().contains(AUDIO)) {
           String queryString = getQuery(request);
-          if (queryString.contains(DIALOG_ARG)) {
-            downloadDialogContent(response, db, projid, hasProjectSpecificAudio, queryString);
-          } else if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
-            downloadAList(response, db, projid, hasProjectSpecificAudio, queryString);
+          if (queryString.startsWith(LIST) || queryString.contains(LISTS)) {
+            logger.info("downloadAList " + requestURI);
+            downloadAList(response, db, projid, queryString);
           } else if (queryString.startsWith(FILE)) {
+            logger.info("returnAudioFile " + requestURI);
             returnAudioFile(response, db, queryString, language, projid);
+          } else if (queryString.startsWith(REQUEST + "=" + STUDENT_AUDIO)) {
+            writeStudentAudio(request, response, db, projid);
           } else if (queryString.startsWith(REQUEST)) {
-            writeAudioZip(response, db, queryString, projid, language);
+            //          logger.info("writeAudioZip " + requestURI);
+            writeAudioZip(response, db, queryString, projid);
+          } else if (queryString.contains(DIALOG_ARG)) {
+            //        logger.info("downloadDialogContent " + requestURI);
+            downloadDialogContent(response, db, projid, queryString);
+          } else {
+            logger.warn("huh? did nothing with " + requestURI);
           }
         } else {
-
           // http://127.0.0.1:8888/downloadResults
 //          if (requestURI.toLowerCase().contains("request=downloadUserPerf")) {
 //
@@ -183,6 +202,45 @@ public class DownloadServlet extends DatabaseServlet {
     closeOutputStream(response);
   }
 
+  private void writeStudentAudio(HttpServletRequest request, HttpServletResponse response, DatabaseImpl db, int projid) throws DominoSessionException {
+    ParamParser invoke = new ParamParser(request.getQueryString().split("&")).invoke(false);
+
+    logger.info("writeStudentAudio Got " + invoke.getSelection());
+    int user = getInt(invoke.getSelection().get(USERID));
+
+    Collection<String> sessionid = invoke.getSelection().get("sessionid");
+//            logger.info("writeStudentAudioZip " + requestURI);
+    String session = sessionid == null || sessionid.isEmpty() ? "-1" : sessionid.iterator().next();
+    Collection<String> from = invoke.getSelection().get("from");
+    long fromTime = getLong(from);
+    Collection<String> to = invoke.getSelection().get("to");
+    long toTime = getLong(to);
+    logger.info("from " + new Date(fromTime));
+    logger.info("to   " + new Date(toTime));
+    writeStudentAudioZip(response, db, user, session, projid, fromTime, toTime,
+        db.getUserSecurityManager().getUserIDFromSessionLight(request));
+  }
+
+  private int getInt(Collection<String> userid) {
+    int user = -1;
+    try {
+      user = userid == null || userid.isEmpty() ? -1 : Integer.parseInt(userid.iterator().next());
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+    }
+    return user;
+  }
+
+  private long getLong(Collection<String> userid) {
+    long user = -1;
+    try {
+      user = userid == null || userid.isEmpty() ? -1 : Long.parseLong(userid.iterator().next());
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+    }
+    return user;
+  }
+
   private String getQuery(HttpServletRequest request) throws UnsupportedEncodingException {
     return request.getQueryString() == null ? "" : URLDecoder.decode(request.getQueryString(), "UTF-8");
   }
@@ -194,26 +252,26 @@ public class DownloadServlet extends DatabaseServlet {
     closeOutputStream(response);
   }
 
-  private void downloadDialogContent(HttpServletResponse response, DatabaseImpl db, int projid, boolean hasProjectSpecificAudio, String queryString) {
+  private void downloadDialogContent(HttpServletResponse response, DatabaseImpl db, int projid, String queryString) {
     String[] split = queryString.split(DIALOG_ARG);
 
     if (split.length == 2) {
       String[] splitArgs = split[1].split(REGEXAMPERSAND);
       String listid = splitArgs[0];
       if (!listid.isEmpty()) {
-        writeDialogList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
+        writeDialogList(response, db, listid, projid, getAudioExportOptions(splitArgs));
       }
     }
   }
 
-  private void downloadAList(HttpServletResponse response, DatabaseImpl db, int projid, boolean hasProjectSpecificAudio, String queryString) {
+  private void downloadAList(HttpServletResponse response, DatabaseImpl db, int projid, String queryString) {
     if (queryString.contains(LISTS)) {
       String s = queryString.split("Lists=\\[")[1];
       String[] split = s.split(("\\]"));
       String listid = split[0];
       if (!listid.isEmpty()) {
         String[] splitArgs = split[1].split(REGEXAMPERSAND);
-        writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
+        writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs));
       }
     } else {
       String[] split = queryString.split("list=");
@@ -222,7 +280,7 @@ public class DownloadServlet extends DatabaseServlet {
         String[] splitArgs = split[1].split(REGEXAMPERSAND);
         String listid = splitArgs[0];
         if (!listid.isEmpty()) {
-          writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs, hasProjectSpecificAudio));
+          writeUserList(response, db, listid, projid, getAudioExportOptions(splitArgs));
         }
       }
     }
@@ -256,12 +314,11 @@ public class DownloadServlet extends DatabaseServlet {
 
   /**
    * @param splitArgs
-   * @param hasProjectSpecificAudio
    * @return
    * @see #doGet(HttpServletRequest, HttpServletResponse)
    */
-  private AudioExportOptions getAudioExportOptions(String[] splitArgs, boolean hasProjectSpecificAudio) {
-    AudioExportOptions options = new AudioExportOptions(hasProjectSpecificAudio);
+  private AudioExportOptions getAudioExportOptions(String[] splitArgs) {
+    AudioExportOptions options = new AudioExportOptions();
     for (String arg : splitArgs) {
       logger.info("getAudioExportOptions arg " + arg);
 
@@ -293,21 +350,14 @@ public class DownloadServlet extends DatabaseServlet {
   private void writeAudioZip(HttpServletResponse response,
                              DatabaseImpl db,
                              String queryString,
-                             int projid,
-                             String language) {
-    logger.debug("writeAudioZip : request " + projid + " " + language + " query " + queryString);
+                             int projid) {
+    //logger.debug("writeAudioZip : request " + projid + " " + language + " query " + queryString);
     String[] split1 = queryString.split(REGEXAMPERSAND);
-    Project project = db.getProject(projid);
-    String unitChapter = getUnitAndChapter(split1);
-
-    Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(unitChapter);
-    AudioExportOptions audioExportOptions =
-        getAudioExportOptions(split1, project.hasProjectSpecificAudio());
-
-    //audioExportOptions.setSkip(typeToSection.isEmpty());// && !audioExportOptions.isAllContext());
+    Map<String, Collection<String>> typeToSection = getTypeToSelectionFromRequest(getUnitAndChapter(split1));
+    AudioExportOptions audioExportOptions = getAudioExportOptions(split1);
 
     {
-      String zipFileName = getZipFileName(db, typeToSection, projid, language, audioExportOptions);
+      String zipFileName = getZipFileName(db, typeToSection, projid, db.getProject(projid).getLanguageEnum().toDisplay(), audioExportOptions.getInfo());
       //logger.info("writeAudioZip zip file name " + zipFileName);
       setHeader(response, zipFileName);
     }
@@ -315,6 +365,38 @@ public class DownloadServlet extends DatabaseServlet {
     writeZip(response, typeToSection, projid, audioExportOptions);
   }
 
+  private void writeStudentAudioZip(HttpServletResponse response,
+                                    DatabaseImpl db,
+                                    int userid,
+                                    String session,
+                                    int projid,
+                                    long from,
+                                    long to,
+                                    int callingUser) {
+    // logger.debug("writeAudioZip : request " + projid + " " + language + " query " + queryString);
+    Project project = db.getProject(projid);
+
+    AudioExportOptions audioExportOptions = new AudioExportOptions();
+
+    String userID = db.getUserDAO().getMiniUser(userid).getUserID();
+    audioExportOptions.setInfo("student_" + userID);
+
+    {
+      String zipFileName = getZipFileName(db, new HashMap<>(), projid, project.getLanguageEnum().toDisplay(), audioExportOptions.getInfo());
+      //logger.info("writeAudioZip zip file name " + zipFileName);
+      setHeader(response, zipFileName);
+    }
+
+    writeStudentZip(response, projid, userid, session, audioExportOptions, from, to, callingUser);
+  }
+
+  /**
+   * TODO : uh... don't assume unit
+   *
+   * @param split1
+   * @return
+   * @see #writeAudioZip(HttpServletResponse, DatabaseImpl, String, int)
+   */
   private String getUnitAndChapter(String[] split1) {
     String unitChapter = "";
     String prefix = UNIT;
@@ -340,19 +422,135 @@ public class DownloadServlet extends DatabaseServlet {
                         int projectid,
                         AudioExportOptions options) {
     try {
-      getDatabase().writeZip(response.getOutputStream(), typeToSection, projectid, options, ensureAudioHelper);
+      Project project = db.getProject(projectid);
+
+      DatabaseImpl database = getDatabase();
+
+      new AudioExport(db.getServerProps(), project.getPathHelper().getContext())
+          .writeZip(response.getOutputStream(),
+              typeToSection,
+              projectid,
+              options,
+              ensureAudioHelper,
+              database,
+              database,
+              database);
+
     } catch (Exception e) {
       logger.error("couldn't write zip?", e);
     }
   }
 
+  private void writeStudentZip(HttpServletResponse response,
+                               int projectid,
+                               int userID,
+                               String sessionID,
+                               AudioExportOptions options,
+                               long from, long to, int callingUser) {
+    try {
+      Timestamp from1 = new Timestamp(from);
+      List<MonitorResult> resultsBySession = sessionID.equalsIgnoreCase("-1") ?
+          db.getResultDAO().getResultsInTimeRange(userID, projectid, from1, new Timestamp(to)) :
+          db.getResultDAO().getResultsBySession(userID, projectid, sessionID);
+
+      logger.info("writeStudentZip for " +
+          "\n\tuser  " + userID +
+          "\n\tsess  " + sessionID +
+          "\n\tfound " + resultsBySession.size());
+
+      Project project = checkTranscripts(projectid, resultsBySession);
+
+      String suffix = getTimestamp(sessionID, from1);
+
+      User subjectWithAudio = db.getUserDAO().getUserWhere(userID);
+
+      new AudioExport(db.getServerProps(), project.getPathHelper().getContext())
+          .writeResultsToStream(
+              project,
+              resultsBySession,
+              getBasename(suffix, subjectWithAudio),
+              project.getTypeOrder(),
+              project.getLanguage(),
+              response.getOutputStream(),
+              options.setIncludeAudio(true),
+              project.isEnglish(),
+              subjectWithAudio,
+              isAdmin(callingUser, subjectWithAudio));
+
+    } catch (Exception e) {
+      logger.error("couldn't write zip?", e);
+    }
+  }
+
+  private Project checkTranscripts(int projectid, List<MonitorResult> resultsBySession) {
+    List<MonitorResult> collect = resultsBySession.stream().filter(monitorResult -> monitorResult.getForeignText().isEmpty()).collect(Collectors.toList());
+
+    if (!collect.isEmpty()) {
+      logger.info("writeStudentZip found " + collect.size() + " without transcripts");
+    }
+
+    Project project = db.getProject(projectid);
+    collect.forEach(monitorResult -> {
+      CommonExercise exerciseByID = project.getExerciseByID(monitorResult.getExID());
+      if (exerciseByID != null) {
+        monitorResult.setForeignText(exerciseByID.getForeignLanguage());
+      }
+    });
+
+    collect = resultsBySession.stream().filter(monitorResult -> monitorResult.getForeignText().isEmpty()).collect(Collectors.toList());
+
+    if (!collect.isEmpty()) {
+      logger.info("writeStudentZip after marrying with exercises, stilll found " + collect.size() + " without transcripts");
+    }
+    return project;
+  }
+
+  @NotNull
+  private String getBasename(String suffix, User subjectWithAudio) {
+    String base = subjectWithAudio.getFirstInitialName() + suffix;
+    return base
+        .replaceAll("\\s++", "_")
+        .replaceAll("\\.", "_");
+  }
+
+  private boolean isAdmin(int callingUser, User subjectWithAudio) {
+    IUserDAO userDAO = db.getUserDAO();
+    userDAO.refreshCacheFor(callingUser);
+    User caller = userDAO.getUserWhere(callingUser);
+
+    boolean admin = caller.isAdmin() || caller.getPermissions().contains(Permission.QUALITY_CONTROL) || caller.getPermissions().contains(Permission.DEVELOP_CONTENT);
+    logger.info("writeStudentZip for" +
+        "\n\tuser        " + subjectWithAudio + "" +
+        "\n\tCaller      " + caller +
+        "\n\tcan get wav " + admin);
+    return admin;
+  }
+
+  @NotNull
+  private String getTimestamp(String sessionID, Timestamp from1) {
+    long start = getSession(sessionID);
+    SimpleDateFormat format = new SimpleDateFormat("MMM d yyyy h mm a");
+
+    return start == -1 ? "_" + format.format(from1) : "_" + format.format(new Date(start));
+  }
+
+  private long getSession(String sessionID) {
+    long start = -1;
+    try {
+      start = Long.parseLong(sessionID);
+    } catch (NumberFormatException e) {
+      e.printStackTrace();
+    }
+    return start;
+  }
 
   private String getZipFileName(DatabaseImpl db,
                                 Map<String, Collection<String>> typeToSection,
-                                int projectid, String language,
+                                int projectid,
+                                String language,
 
-                                AudioExportOptions audioExportOptions) {
-    String name = getBaseName(db, typeToSection, projectid, language, audioExportOptions);
+                                String info) {
+    String name = getBaseName(db, typeToSection, projectid, language, info);
     name += ".zip";
     return name;
   }
@@ -361,11 +559,10 @@ public class DownloadServlet extends DatabaseServlet {
                              Map<String, Collection<String>> typeToSection,
                              int projectid,
                              String language,
-                             AudioExportOptions audioExportOptions) {
+                             String info) {
     String name = typeToSection.isEmpty() ? AUDIO : db.getPrefix(typeToSection, projectid);
     name = name.replaceAll(",", "_");
-
-    name += audioExportOptions.getInfo();
+    name += info;
     name = language + "_" + name;
     return name;
   }
@@ -406,7 +603,7 @@ public class DownloadServlet extends DatabaseServlet {
       logger.debug("returnAudioFile query is " + queryString + " exercise " + exercise +
           " user " + useridString + " so name is " + underscores);
 
-      setResponse(response, underscores);
+      setResponseForAudio(response, underscores);
     }
 
     File fileRef = pathHelper.getAbsoluteAudioFile(file);
@@ -423,10 +620,16 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
-  private void setResponse(HttpServletResponse response, String underscores) {
+  /**
+   * try to prevent browser from complaining that it's getting an expected MIME type.
+   *
+   * @param response
+   * @param underscores
+   */
+  private void setResponseForAudio(HttpServletResponse response, String underscores) {
     response.setContentType("audio/mpeg");
     // response.setCharacterEncoding(UTF_8);
-    response.setHeader("Content-Disposition", "attachment; filename*=UTF-8''" + underscores);
+    response.setHeader(CONTENT_DISPOSITION, "attachment; filename*=UTF-8''" + underscores);
 //    response.setHeader("Content-Disposition", "filename='" + underscores +"'");
   }
 
@@ -531,7 +734,7 @@ public class DownloadServlet extends DatabaseServlet {
       new ResultDAOToExcel().writeExcelToStream(db.getMonitorResults(projectid), db.getTypeOrder(projectid), outputStream);
     } else if (encodedFileName.toLowerCase().contains(EVENTS)) {
       setFilenameHeader(response, prefix + EVENTS_XLSX);
-      new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAll(projectid), outputStream);
+      new EventDAOToExcel(db).toXLSX(db.getEventDAO().getAllWithLimit(projectid, 50000), outputStream);
     } else {
       logger.error("returnSpreadsheet huh? can't handle request " + encodedFileName);
     }
@@ -582,7 +785,7 @@ public class DownloadServlet extends DatabaseServlet {
   }
 
   private void setFilenameHeader(HttpServletResponse response, String filename) {
-    response.setHeader("Content-Disposition", "attachment; filename=" + filename);
+    response.setHeader(CONTENT_DISPOSITION, "attachment; filename=" + filename);
   }
 
   /**
@@ -724,7 +927,7 @@ public class DownloadServlet extends DatabaseServlet {
   @Override
   public void init() throws ServletException {
     super.init();
-    setPaths();
+    setPaths(getServletContext());
   }
 
   /**
@@ -732,10 +935,10 @@ public class DownloadServlet extends DatabaseServlet {
    * @param saveFile
    * @throws IOException
    */
-  void writeToFile(InputStream inputStream, File saveFile) throws IOException {
+/*  void writeToFile(InputStream inputStream, File saveFile) throws IOException {
     // opens an output stream for writing file
     copyToOutput(inputStream, new FileOutputStream(saveFile));
-  }
+  }*/
 
   /**
    * TODO replace with commons call
@@ -744,7 +947,7 @@ public class DownloadServlet extends DatabaseServlet {
    * @param outputStream
    * @throws IOException
    */
-  private void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
+/*  private void copyToOutput(InputStream inputStream, OutputStream outputStream) throws IOException {
     byte[] buffer = new byte[BUFFER_SIZE];
     int bytesRead;
 
@@ -754,5 +957,5 @@ public class DownloadServlet extends DatabaseServlet {
 
     outputStream.close();
     inputStream.close();
-  }
+  }*/
 }

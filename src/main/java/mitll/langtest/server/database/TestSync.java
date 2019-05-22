@@ -29,7 +29,8 @@
 
 package mitll.langtest.server.database;
 
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProject;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.domino.ProjectSync;
@@ -42,12 +43,12 @@ import java.util.*;
 
 import static mitll.langtest.shared.exercise.DominoUpdateItem.ITEM_STATUS.*;
 
-public class TestSync {
+class TestSync {
   private static final Logger logger = LogManager.getLogger(TestSync.class);
 
   final DatabaseImpl db;
 
-  public TestSync(DatabaseImpl db) {
+   TestSync(DatabaseImpl db) {
     this.db = db;
     try {
       syncTests();
@@ -78,7 +79,7 @@ public class TestSync {
 
     // logger.info("Got " + dominoUpdateResponse);
 
-    Project project = getProject(projectid);
+    IProject project = getProject(projectid);
     Iterator<String> iterator = project.getTypeOrder().iterator();
     String unit = iterator.next();
     String chapter = iterator.next();
@@ -128,7 +129,7 @@ public class TestSync {
     {
       List<CommonExercise> changedExercises = new ArrayList<>();
       CommonExercise first = new Exercise(-1, "unkn", importUser, "new add ", "new add trans", "new add trans", "alt fl", "meaning", "transliter", false,
-          new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, false, 0, bogusDominoID, false);
+          new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, false, bogusDominoID, false);
       logger.info("\n\n\nFirst " + first);
       changedExercises.add(first);
       ImportInfo importFromDomino2 = new ImportInfo(importProjectInfo,
@@ -226,7 +227,7 @@ public class TestSync {
       logger.info("--- test deleting context exercise with np id \n\n\n\n");
 
       CommonExercise withNoContext = new Exercise(-1, "" + 612, importUser, "new add ", "new add trans", "new add trans", "alt fl", "meaning", "transliter", false,
-          new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, false, 0, bogusDominoID, false);
+          new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, false, bogusDominoID, false);
 
       CommonExercise parent = project.getExerciseByID(154838);
       HasID context = parent.getDirectlyRelated().iterator().next();
@@ -274,7 +275,7 @@ public class TestSync {
       withAnotherContext.getDirectlyRelated().add(
           new Exercise(-1, "", importUser, "second context " + date, "second context trans", "second context trans",
               "alt fl", "meaning", "transliter", false,
-              new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, true, 0, bogusDominoID, false));
+              new HashMap<>(), System.currentTimeMillis(), projectid, false, 1, true, bogusDominoID, false));
 
       List<CommonExercise> changedExercises = new ArrayList<>();
       changedExercises.add(withAnotherContext);

@@ -33,7 +33,7 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.initial.UILifecycle;
 import mitll.langtest.shared.project.ProjectMode;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.Permission;
 
 import java.util.Collection;
 
@@ -53,13 +53,15 @@ public interface IBanner {
 
   void setVisible(boolean visible);
 
-  void reflectPermissions(Collection<User.Permission> permissions);
+  void reflectPermissions(Collection<Permission> permissions);
 
   void setVisibleChoices(boolean visible);
 
   void setVisibleChoicesByMode(ProjectMode mode);
 
   void setCogVisible(boolean val);
+
+  void setCogTitle();
 
   void reset();
 

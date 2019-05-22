@@ -36,12 +36,18 @@ import mitll.langtest.client.services.UserService;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.user.ActiveUser;
+import mitll.langtest.shared.user.FirstLastUser;
 import mitll.langtest.shared.user.User;
+import mitll.npdata.dao.SlickPendingUser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * These calls require a session.
@@ -113,7 +119,7 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
    * @throws DominoSessionException
    */
   @Override
-  public void sendTeacherRequest() throws DominoSessionException {
+  public ActiveUser.PENDING sendTeacherRequest() throws DominoSessionException {
     User userFromSession = getUserFromSession();
     int id = userFromSession.getID();
     getMailSupport().sendHTMLEmail(serverProps.getHelpEmail(), serverProps.getMailReplyTo(),
@@ -124,20 +130,103 @@ public class UserServiceImpl extends MyRemoteServiceServlet implements UserServi
             "<br/> * user id <b>" + id + "</b>" +
             "<br/> * email   <b>" + userFromSession.getEmail() + "</b>" +
             " has requested instructor permissions in Netprof." +
-            "<br/><br/>If this person is an instructor, please go to " +
-
-            "<a href='https://" + serverProps.getDominoServer() + "'>" + serverProps.getDominoServer() + "</a>" +
-
-            " and " +
-            "<br/> find their user profile, choose Roles, and click on Teacher." +
-            "<br/>Finally, perhaps consider sending them a confirmation email." +
+            "<br/><br/>If this person is an instructor, please choose Pending Teacher Requests under the gear menu and approve them." +
+            "<br/>When this happens, they will see a confirmation email." +
             "<br/>Thanks,<br/> Netprof Administrator"
     );
 
-    db.getPendingUserDAO().insert(id, getProjectIDFromUser(id));
+    return rememberPendingRequest(id);
+  }
+
+  @NotNull
+  private ActiveUser.PENDING rememberPendingRequest(int id) {
+    int projectIDFromUser = getProjectIDFromUser(id);
+
+    List<SlickPendingUser> collect = db.getPendingUserDAO().pendingOnProject(projectIDFromUser).stream().filter(slickPendingUser -> slickPendingUser.id() == id).collect(Collectors.toList());
+    if (collect.isEmpty()) {
+      return (db.getPendingUserDAO().insert(id, projectIDFromUser)) ? ActiveUser.PENDING.REQUESTED : ActiveUser.PENDING.ERROR;
+    } else {
+      try {
+        return ActiveUser.PENDING.valueOf(collect.get(0).state());
+      } catch (IllegalArgumentException e) {
+        return ActiveUser.PENDING.ERROR;
+      }
+    }
   }
 
   private String getBaseURL() {
     return ServletUtil.get().getBaseURL(getThreadLocalRequest());
+  }
+
+  public List<ActiveUser> getPendingUsers(int projid) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    List<ActiveUser> pending = new ArrayList<>();
+
+    db
+        .getPendingUserDAO()
+        .pendingOnProject(projid)
+        .forEach(p -> {
+          User userWhere = db.getUserDAO().getUserWhere(p.userid());
+          String state = p.state();
+          ActiveUser.PENDING pending1 = null;
+          try {
+            pending1 = ActiveUser.PENDING.valueOf(state);
+          } catch (IllegalArgumentException e) {
+            pending1 = ActiveUser.PENDING.REQUESTED;
+          }
+
+          pending.add(new ActiveUser(new FirstLastUser(
+              p.userid(),
+              userWhere.getUserID(),
+              userWhere.getFirst(),
+              userWhere.getLast(),
+              p.changed().getTime(),
+              userWhere.getAffiliation()),
+              p.changed().getTime())
+              .setState(pending1));
+        });
+    return pending;
+  }
+
+  /**
+   * Adds role on domino user.
+   * Sends email to person.
+   *
+   * @param toApproveUser
+   * @throws DominoSessionException
+   */
+  @Override
+  public void approveAndDisapprove(Collection<Integer> approve, Collection<Integer> disapprove) throws DominoSessionException {
+    int userIDFromSession = getUserIDFromSessionOrDB();
+
+    approve.forEach(userid -> {
+      if (db.getPendingUserDAO().update(userid, ActiveUser.PENDING.APPROVED, userIDFromSession)) {
+        logger.info("approveAndDisapprove pending user " + userid + " is approved");
+        db.getUserDAO().addTeacherRole(userid);
+        sendConfirmation(userid);
+      } else {
+        logger.warn("approveAndDisapprove didn't approve " + userid);
+      }
+    });
+    disapprove.forEach(id -> db.getPendingUserDAO().update(id, ActiveUser.PENDING.DENIED, userIDFromSession));
+  }
+
+  private void sendConfirmation(int userid) {
+    User userFromSession = db.getUserDAO().getUserWhere(userid);
+    getMailSupport().sendHTMLEmail(userFromSession.getEmail(), serverProps.getMailReplyTo(),
+        "Instructor Status Request Approved",
+        "<span>Hi " + userFromSession.getFirst() + ",</span><br/>" +
+            "<span>You have been given instructor permissions in Netprof.</span><br/>" +
+            "<span>Note that you can now:</span><br/>" +
+            "<ul>" +
+            "<li>Review student audio and scores in the Progress View.</li>" +
+            "<li>Create quizzes students can take on the website or the iPad.</li>" +
+            "<li>Create your own content with reference audio in the Lists View.</li>" +
+            "<li>Approve other instructor permission requests.</li>" +
+            "</ul>" +
+            "<br/><span>Please tell us if you have any questions or issues.</span>" +
+            "<br/><span>Thanks,</span>" +
+            "<br/><span>Netprof Administrator</span>"
+    );
   }
 }

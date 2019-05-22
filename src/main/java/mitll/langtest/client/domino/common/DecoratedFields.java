@@ -53,7 +53,6 @@ import java.util.logging.Logger;
  * @since May 16, 2013 3:43:26 PM
  */
 public class DecoratedFields {
-
 	private static final Logger log = Logger.getLogger(DecoratedFields.class.getName());
 	
 	private ControlGroup ctrlGroup;
@@ -79,11 +78,13 @@ public class DecoratedFields {
 		init(mainLabel, controls, helpMsg, labelIcon);
 	}
 	
+/*
 	private DecoratedFields(String mainLabel, Widget[] controlArr) {
 		this(mainLabel, controlArr, null, null);
 	}
-	
-	private DecoratedFields(String mainLabel, Widget[] controlArr, String helpMsg, IconType labelIcon) {
+*/
+
+/*	private DecoratedFields(String mainLabel, Widget[] controlArr, String helpMsg, IconType labelIcon) {
 		List<Widget> controls = new ArrayList<>();
 		if (controlArr != null) {
 			for (int i = 0; i < controlArr.length; i++) {
@@ -95,12 +96,14 @@ public class DecoratedFields {
 			}
 		}
 		init(mainLabel, controls, helpMsg, labelIcon);
-	}
+	}*/
 
+/*
 	private DecoratedFields(String mainLabel, List<Widget> controls) {
 		init(mainLabel, controls, null, null);
 	}
-	
+*/
+
 	private void init(String fieldLabelVal, List<Widget> controls,
 										String helpMsg, IconType fieldIconType) {
 		ctrlGroup = new ControlGroup();

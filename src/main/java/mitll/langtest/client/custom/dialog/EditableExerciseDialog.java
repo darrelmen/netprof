@@ -33,6 +33,7 @@ import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
@@ -195,10 +196,14 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
    */
   @Override
   public void setFields(U newUserExercise) {
-    if (DEBUG) logger.info("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
+    if (DEBUG || true) {
+      logger.info("grabInfoFromFormAndStuffInfoExercise : setting fields with " + newUserExercise);
+    }
 
     // foreign lang
     setFL(newUserExercise);
+
+    setFLNorm(newUserExercise);
 
     // translit
     setTranslit(newUserExercise);
@@ -207,13 +212,46 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
     setEnglish(newUserExercise);
 
     setContext(newUserExercise);
-
+    setContextFLNorm(newUserExercise);
     setContextTrans(newUserExercise);
 
+
+    // make sure we check if recording should be allowed.
     if (rap != null) {
       addAudio(instance == INavigation.VIEWS.FIX_SENTENCES ? newUserExercise.getDirectlyRelated().iterator().next() : newUserExercise);
+      rap.setEnabled();
     }
 
+    if (rapSlow != null) {
+      rapSlow.setEnabled();
+    }
+
+    if (rapContext != null) {
+      rapContext.setEnabled();
+    }
+  }
+
+  private void setFLNorm(U newUserExercise) {
+    String normalizedFL = newUserExercise.getNormalizedFL();
+    foreignLangNorm.setText(normalizedFL);
+    boolean show = !normalizedFL.isEmpty() && !normalizedFL.equals(newUserExercise.getFLToShow());
+    if (show)
+      foreignLangNorm.getParent().getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
+    foreignLangNorm.setVisible(show);
+  }
+
+  private void setContextFLNorm(U newUserExercise) {
+    List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();
+    if (!directlyRelated.isEmpty()) {
+      ClientExercise clientExercise = directlyRelated.get(0);
+      String normalizedFL = clientExercise.getNormalizedFL();
+  //    logger.info("setContextFLNorm For " + clientExercise.getID() + " " + clientExercise.getFLToShow() + " = '" + clientExercise.getNormalizedFL() + "'");
+      foreignLangContextNorm.setText(normalizedFL);
+      boolean visible = !normalizedFL.isEmpty() && !normalizedFL.equals(newUserExercise.getFLToShow());
+      if (visible)
+        foreignLangContextNorm.getParent().getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
+      foreignLangContextNorm.setVisible(visible);
+    }
   }
 
   private void addAudio(ClientExercise newUserExercise) {
@@ -273,6 +311,10 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
     useAnnotation(newUserExercise, TRANSLITERATION, translitAnno);
   }
 
+  /**
+   * @param newUserExercise
+   * @see #setFields(ClientExercise)
+   */
   private void setFL(U newUserExercise) {
     foreignLang.box.setText(originalForeign = normalize(newUserExercise.getForeignLanguage()));
     useAnnotation(newUserExercise, FOREIGN_LANGUAGE, foreignAnno);
@@ -291,11 +333,10 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
   private void setContext(U newUserExercise) {
     context.box.setText(originalContext = newUserExercise.getContext().trim());
 
-    String text = context.box.getText();
-   // boolean val = !text.trim().isEmpty();
     if (rapContext != null) {
+      String text = context.box.getText();
       boolean val = !text.trim().isEmpty();
-   //   logger.info("setContext Set context '" + text + "' = " + val);
+      //   logger.info("setContext Set context '" + text + "' = " + val);
       maybeEnableContext(val);
     }
 
@@ -309,7 +350,6 @@ abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExe
   }
 
   private void setContextTrans(U newUserExercise) {
-
     contextTrans.box.setText(originalContextTrans = newUserExercise.getContextTranslation().trim());
     if (!useAnnotation(newUserExercise, CONTEXT_TRANSLATION, contextTransAnno)) {
       List<ClientExercise> directlyRelated = newUserExercise.getDirectlyRelated();

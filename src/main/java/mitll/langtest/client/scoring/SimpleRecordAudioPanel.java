@@ -264,7 +264,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
    * @see #scoreAudio
    */
   private void useScoredResult(PretestScore result, boolean scoredBefore, String path) {
-    float hydecScore = result.getHydecScore();
+    float hydecScore = result.getOverallScore();
     boolean isValid = hydecScore > 0;
     if (!scoredBefore && miniScoreListener != null && isValid) {
       miniScoreListener.gotScore(result, path);
@@ -274,7 +274,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
       List<TranscriptSegment> transcriptSegments = result.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
       if (transcriptSegments != null && transcriptSegments.size() == 1) {
         float wordScore = transcriptSegments.get(0).getScore();
-        //  logger.info("useScoredResult using word score " + wordScore + " instead of hydec score " + hydecScore);
+        //  logger.info("useScoredResult using word score " + wordScore + " instead of hydec score " + overallScore);
         hydecScore = wordScore;
       }
 

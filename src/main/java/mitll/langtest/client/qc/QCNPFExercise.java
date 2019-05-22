@@ -38,7 +38,6 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.constants.ToggleType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -86,22 +85,21 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
    */
   private static final String APPROVED = "Mark Inspected";
   private static final String NO_AUDIO_RECORDED = "No Audio Recorded.";
-  // private static final String COMMENT = "Comment";
 
   private static final String COMMENT_TOOLTIP = "Comments are optional.";
   private static final String CHECKBOX_TOOLTIP = "Check to indicate this field has a defect.";
   private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
 
-  private static final int DEFAULT_MALE_ID = -2;
-  private static final int DEFAULT_FEMALE_ID = -3;
+//  private static final int DEFAULT_MALE_ID = -2;
+//  private static final int DEFAULT_FEMALE_ID = -3;
   private static final String MALE = "Male";
   /**
    * TODO : why ?
    */
-  private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, true, MiniUser.Gender.Male, MALE, false);
+ // private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, true, MiniUser.Gender.Male, MALE, false);
   private static final String FEMALE = "Female";
-  private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, false, MiniUser.Gender.Female, FEMALE, false);
+ // private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, false, MiniUser.Gender.Female, FEMALE, false);
 
   private Set<String> incorrectFields;
   /**
@@ -368,8 +366,8 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
       List<MiniUser> maleUsers = toShow.getSortedUsers(malesMap);
       List<MiniUser> femaleUsers = toShow.getSortedUsers(femalesMap);
 
-      maleUsers.forEach(u->logger.info(u.getUserID() + " male? " +u.getRealGender()));
-      femaleUsers.forEach(u->logger.info(u.getUserID() + " female? " +u.getRealGender()));
+//      maleUsers.forEach(u->logger.info(u.getUserID() + " male? " +u.getRealGender()));
+//      femaleUsers.forEach(u->logger.info(u.getUserID() + " female? " +u.getRealGender()));
 
       tabs = new ArrayList<>();
 

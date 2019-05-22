@@ -65,9 +65,13 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
     boolean isAudioAnswer = answerInfo.getAnswer() == null || answerInfo.getAnswer().length() == 0;
     String answerInserted = isAudioAnswer ? answerInfo.getAudioFile() : answerInfo.getAnswer();
 
+    if (answerInfo.getProcessDur() == 0) {
+      logger.warn("process dur is zero for " + answerInfo);
+    }
 //    String model = answerInfo.getModel() == null ? "" : answerInfo.getModel();
     String device = answerInfo.getDevice();
     if (device == null) device = "";
+    String deviceType = answerInfo.getDeviceType();
     SlickResult res = new SlickResult(-1,
         answerInfo.getUserid(),
         answerInfo.getId(),
@@ -81,7 +85,7 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         answerInfo.getRoundTripDur(),
         answerInfo.isCorrect(),
         answerInfo.getPronScore(),
-        answerInfo.getDeviceType(),
+        deviceType,
         device,
         answerInfo.getScoreJson(),
         false,
@@ -94,12 +98,14 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
     int id = dao.insert(res).id();
 
     if (id % 10 == 0) {
+      String session = device.isEmpty() || device.equalsIgnoreCase("0") ? "" : "\n\tsession " + device;
+      String dt = deviceType.isEmpty() ? "" : "\n\tnum     " + deviceType;
       logger.info("addAnswer inserting answer" +
           "\n\tby      " + answerInfo.getUserid() +
           "\n\tto      " + answerInfo.getId() +
           "\n\tanswer  " + answerInserted +
-          "\n\tsession " + answerInfo.getDevice() +
-          "\n\tnum     " + answerInfo.getDeviceType() +
+          session +
+          dt +
 //        "\n\tslick   " + res +
           "\n\tid      " + id);
     }

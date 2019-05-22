@@ -30,7 +30,7 @@
 package mitll.langtest.shared.dialog;
 
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.HasID;
 
 public interface IDialogSession extends HasID {
   int getUserid();

@@ -55,6 +55,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
   private static final Logger logger = LogManager.getLogger(ResultServiceImpl.class);
 
   private static final int MAX = 30;
+  public static final int LIMIT = 50000;
 
   /**
    * NOTE NOTE NOTE - we skip doing ensure ogg/mp3 on files for now - since this service will likely not be
@@ -315,6 +316,7 @@ public class ResultServiceImpl extends MyRemoteServiceServlet implements ResultS
   /**
    * get cached results... fall back to getting them again...
    *
+   * @see #getResultAlternatives(Map, String, String)
    * @param userid
    * @return
    */

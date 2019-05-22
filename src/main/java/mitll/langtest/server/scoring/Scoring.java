@@ -38,7 +38,8 @@ import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.audio.imagewriter.EventAndFileInfo;
 import mitll.langtest.server.audio.imagewriter.TranscriptWriter;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
+import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.npdata.dao.lts.EmptyLTS;
@@ -75,10 +76,7 @@ public abstract class Scoring {
   final ServerProperties props;
   final LogAndNotify logAndNotify;
 
-  /**
-   * @see SLFFile#createSimpleSLFFile
-   */
-//  public static final String SMALL_LM_SLF = "smallLM.slf";
+  //  public static final String SMALL_LM_SLF = "smallLM.slf";
 
   private final CheckLTS checkLTSHelper;
 
@@ -303,7 +301,6 @@ public abstract class Scoring {
     return pathname;
   }
 
-
   /**
    * @param fl
    * @param transliteration
@@ -315,18 +312,24 @@ public abstract class Scoring {
     if (fl.isEmpty()) {
       return false;
     } else {
-      Collection<String> oovForFL = getOOV(fl, transliteration);
-      return oovForFL.isEmpty();
+     // Collection<String> oovForFL = checkLTSHelper.checkLTS(fl, transliteration);
+      return checkLTSHelper.checkLTS(fl, transliteration).isEmpty();
     }
   }
 
-
-
-  @NotNull
-  public Collection<String> getOOV(String fl, String transliteration) {
+  /**
+   * @see AudioFileHelper#isValidForeignPhrase(Set, Set, CommonExercise, Set, boolean)
+   * @see AudioFileHelper#checkLTSOnForeignPhrase(String, String)
+   *
+   * @param fl
+   * @param transliteration
+   * @return
+   */
+/*  @NotNull
+  private Collection<String> getOOV(String fl, String transliteration) {
     Set<String> oovForFL = checkLTSHelper.checkLTS(fl, transliteration);
 
-    List<String> inOrder = new ArrayList<>(oovForFL);
+ *//*   List<String> inOrder = new ArrayList<>(oovForFL);
 
     //if (oov.addAll(oovForFL)) {
     // logger.info("validLTS : For " + fl + " got " + oovForFL + " now " + oov.size() + " set = " + oov.hashCode());
@@ -342,9 +345,9 @@ public abstract class Scoring {
       } catch (NumberFormatException e) {
         // ok not an int
       }
-    }
-    return inOrder;
-  }
+    }*//*
+    return oovForFL;
+  }*/
 
   /**
    * Must be public.
@@ -353,15 +356,6 @@ public abstract class Scoring {
    */
   public boolean isDictEmpty() {
     return checkLTSHelper.isDictEmpty();
-  }
-
-  /**
-   * @param foreignLanguagePhrase
-   * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
-   */
-  public PhoneInfo getBagOfPhones(String foreignLanguagePhrase) {
-    return checkLTSHelper.getBagOfPhones(foreignLanguagePhrase);
   }
 
   public abstract SmallVocabDecoder getSmallVocabDecoder();
@@ -410,4 +404,10 @@ public abstract class Scoring {
     return b.toString().trim();
   }
 
+  /**
+   * @see SLFFile#createSimpleSLFFile
+   */
+  public CheckLTS getCheckLTSHelper() {
+    return checkLTSHelper;
+  }
 }

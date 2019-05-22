@@ -39,10 +39,10 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
+import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.RecordAudioPanel;
 import mitll.langtest.client.exercise.WaveformPostAudioRecordButton;
@@ -92,7 +92,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
 
   final U newUserExercise;
 
-  final ExerciseController controller;
+  final ExerciseController<?> controller;
 
   String originalForeign = "";
   String originalEnglish = "";
@@ -107,6 +107,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   FormField english;
   FormField foreignLang;
+  HTML foreignLangNorm, foreignLangContextNorm;
   FormField translit;
   FormField context;
   FormField contextTrans;
@@ -185,7 +186,9 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       upper.add(dominoEditInfo);
     }
 
-    makeForeignLangRow(upper);
+    foreignLang = makeForeignLangRow(upper, "foreignLanguageAnnotation");
+    foreignLangNorm = makeForeignLangRow2(upper);
+
 
     {
       //final String id1 = "" + listID;
@@ -238,6 +241,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    */
   private void makeOptionalRows(DivWidget upper) {
     makeContextRow(upper);
+    foreignLangContextNorm = makeForeignLangRow2(upper);
+
     makeContextTransRow(upper);
   }
 
@@ -250,14 +255,14 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     Panel row = new DivWidget();
     container.add(row);
     context = addContext(container, newUserExercise);
-    context.box.addKeyUpHandler(keyUpEvent -> {
-      boolean hasText = hasTextInContextField();
-      //   logger.info("makeContextRow Got key up " + hasText);
-      maybeEnableContext(hasText);
-    });
+    context.box.addKeyUpHandler(keyUpEvent -> maybeEnableContext(hasTextInContextField()));
   }
 
   private boolean hasTextInContextField() {
+    return hasTextInField(this.context);
+  }
+
+  private boolean hasTextInField(FormField context) {
     return !context.box.getText().trim().isEmpty();
   }
 
@@ -273,8 +278,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   /**
-   * @see #addFields(ListInterface, Panel)
    * @return
+   * @see #addFields(ListInterface, Panel)
    */
   @NotNull
   protected DivWidget getDominoEditInfo() {
@@ -322,13 +327,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
    * @see #addFields
    */
   protected abstract void addItemsAtTop(Panel container);
-  //{
- //   new UnitChapterItemHelper<U>(controller.getProjectStartupInfo().getTypeOrder()).addUnitChapterItem(newUserExercise, container);
-  //}
-
-//  protected void addItemsAtTop(Panel container) {
-//    new UnitChapterItemHelper<U>(controller.getProjectStartupInfo().getTypeOrder()).addUnitChapterItem(newUserExercise, container);
-//  }
 
   private void gotBlur() {
     //  logger.info("gotBlur");
@@ -394,53 +392,87 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     english = makeBoxAndAnno(row, "", englishAnno);
     markPlaceholder(english.box, isEnglish() ? newUserExercise.getMeaning() : newUserExercise.getEnglish(), "Translation (optional)");
   }
-//
-//  String getEnglishLabel() {
-//    return isEnglish() ? ENGLISH_LABEL_2 : ENGLISH_LABEL;
-//  }
 
   /**
    * @param container
    * @return
    */
-  private void makeForeignLangRow(Panel container) {
-    //if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
+  private FormField makeForeignLangRow(Panel container, String foreignLanguageAnnotation) {
+    if (true) {
+      logger.info("EditableExerciseDialog.makeForeignLangRow ---> " + foreignLanguageAnnotation);
+    }
+
     Panel row = new DivWidget();
     container.add(row);
 
-    foreignAnno.getElement().setId("foreignLanguageAnnotation");
+    //  String foreignLanguageAnnotation = "foreignLanguageAnnotation";
+    foreignAnno.getElement().setId(foreignLanguageAnnotation);
 //    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
-    foreignLang = makeBoxAndAnno(row, "", foreignAnno);
+    FormField foreignLang = makeBoxAndAnno(row, "", foreignAnno);
     if (getLanguage() == Language.URDU) {
       foreignLang.getWidget().getElement().getStyle().setProperty("fontFamily", "'MyUrduWebFont'");
     }
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
+
+
+    foreignLang.box.addKeyUpHandler(keyUpEvent -> {
+      boolean val = foreignLang.getSafeText().length() > 0 && hasRecordPermission();
+      if (rap != null) {
+        rap.setEnabled(val);
+      }
+      if (rapSlow != null) {
+        rapSlow.setEnabled(val);
+      }
+    });
+
     setFontSize(foreignLang);
     setMarginBottom(foreignLang);
+    return foreignLang;
+  }
+
+  private HTML makeForeignLangRow2(Panel container) {
+    //if (DEBUG) logger.info("EditableExerciseDialog.makeForeignLangRow --->");
+    Panel row = new DivWidget();
+    container.add(row);
+    HTML label = new HTML();
+    row.add(label);
+
+    if (getLanguage() == Language.URDU) {
+      label.getElement().getStyle().setProperty("fontFamily", "'MyUrduWebFont'");
+    }
+    label.setDirectionEstimator(true);   // automatically detect whether text is RTL
+
+    row.addStyleName("leftFiveMargin");
+    //   row.getElement().getStyle().setMarginTop(-10, Style.Unit.PX);
+    setMarginBottom(label);
+    return label;
   }
 
   private void setFontSize(FormField foreignLang) {
-    foreignLang.box.getElement().getStyle().setFontSize(18, Style.Unit.PX);
+    setFontSize(foreignLang.box);
+  }
+
+  private void setFontSize(UIObject box) {
+    box.getElement().getStyle().setFontSize(18, Style.Unit.PX);
+  }
+
+  void setMarginBottom(FormField foreignLang) {
+    setMarginBottom(foreignLang.box);
+  }
+
+  private void setMarginBottom(UIObject box) {
+    box.getElement().getStyle().setMarginBottom(MARGIN_BOTTOM, Style.Unit.PX);
   }
 
   private Language getLanguage() {
     return controller.getLanguageInfo();
   }
 
-  void setMarginBottom(FormField foreignLang) {
-    foreignLang.box.getElement().getStyle().setMarginBottom(MARGIN_BOTTOM, Style.Unit.PX);
-  }
-
   private void makeTranslitRow(Panel container) {
     Panel row = new DivWidget();
     container.add(row);
-    String subtext = "";
-    translit = makeBoxAndAnno(row, subtext, translitAnno);
+    translit = makeBoxAndAnno(row, "", translitAnno);
   }
-
-//  String getTransliterationLabel() {
-//    return TRANSLITERATION_OPTIONAL;
-//  }
 
   /**
    * @param container
@@ -746,7 +778,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
             (refAudio != null && !refAudio.equals(originalRefAudio));
   }
 
-
   /**
    * @param newUserExercise
    * @seex EditItem#addEditOrAddPanel
@@ -774,9 +805,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   protected boolean isEnglish() {
     return controller.getLanguageInfo() == Language.ENGLISH;
   }
-
-//  void formInvalid() {
-//  }
 
   /**
    * Ask the server if the foreign lang text is in our dictionary and can be run through hydec.
@@ -1036,26 +1064,48 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         }
       });
 
-      setEnabled(isOKToEnable(audioType));
+      setEnabled();
       controller.register(getPlayButton(), newExercise.getID());
     }
 
-    private boolean isOKToEnable(AudioType audioType) {
-      boolean b = hasRecordPermission();
-      return audioType != AudioType.CONTEXT_REGULAR ? b && hasTextInContextField() : b;
+    public void setEnabled() {
+      setEnabled(isOKToEnable());
     }
 
     private void disableOthers(boolean b) {
-      logger.info("disableOthers disable others " + b);
-
-
-      boolean enabled = b &= hasRecordPermission();
+     // logger.info("disableOthers disable others " + b);
+      boolean enabled = b && hasRecordPermission();
 
       if (enabled) {
-        enabled = isOKToEnable(audioType);
+        enabled = isOKToEnable();
       }
+
       final boolean val = enabled;
-      otherRAPs.forEach(otherRAP -> otherRAP.setEnabled(val));
+
+      otherRAPs.forEach(otherRAP ->
+          otherRAP.setEnabled(val && otherRAP.isOKToEnable())
+      );
+    }
+
+    @Override
+    public boolean isOKToEnable() {
+      boolean b = hasRecordPermission();
+      boolean b1 =
+          audioType == AudioType.CONTEXT_REGULAR ?
+              b && hasTextInContextField() :
+              b && hasTextInField(foreignLang);
+
+//      logger.info("isOKToEnable " +
+//          "\n\taudioType           " + audioType +
+//          "\n\thasRecordPermission " + b +
+//          "\n\tforeign             " + foreignLang.getSafeText() +
+//          "\n\tforeignLangNorm     " + foreignLangNorm.getText() +
+//          "\n\tenglish             " + english.getSafeText() +
+//          "\n\thasText             " + hasTextInField(foreignLang) +
+//          "\n\tenable              " + b1
+//      );
+
+      return b1;
     }
 
     /**
@@ -1193,7 +1243,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     } else {
       ClientExercise clientExercise = directlyRelated.get(0);
       if (!clientExercise.getMutableAudio().clearRefAudio()) {
-      //  logger.info("clearContext Didn't clear context ref audio?");
+        //  logger.info("clearContext Didn't clear context ref audio?");
       } else {
         originalContextAudio = "";
       }

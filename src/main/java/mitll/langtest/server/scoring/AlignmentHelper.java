@@ -33,7 +33,7 @@ import com.google.gson.JsonObject;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -64,38 +64,48 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
   }
 
   /**
-   * @param projectID
    * @param toAddAudioTo
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
    */
-  public void addAlignmentOutput(int projectID, Project project, Collection<ClientExercise> toAddAudioTo) {
+  public void addAlignmentOutput(Project project, Collection<ClientExercise> toAddAudioTo) {
     if (project != null) {
+      int projectID = project.getID();
       Map<Integer, AlignmentOutput> audioToAlignment = project.getAudioToAlignment();
-      Map<Integer, AudioAttribute> idToAudio = new HashMap<>();
+//      Map<Integer, AudioAttribute> idToAudio = new HashMap<>();
 
       logger.info("addAlignmentOutput : For project " + projectID + " found " + audioToAlignment.size() +
           " audio->alignment entries, trying to marry to " + toAddAudioTo.size() + " exercises");
 
+      Set<Integer> ids = new HashSet<>();
+
       for (ClientExercise exercise : toAddAudioTo) {
-        setAlignmentInfo(audioToAlignment, idToAudio, exercise);
-        exercise.getDirectlyRelated().forEach(context -> setAlignmentInfo(audioToAlignment, idToAudio, context));
+        //  setAlignmentInfo(audioToAlignment, idToAudio, exercise);
+        addAudioIDs(exercise, ids);
+        //  exercise.getDirectlyRelated().forEach(context -> setAlignmentInfo(audioToAlignment, idToAudio, context));
+        exercise.getDirectlyRelated().forEach(context -> addAudioIDs(context, ids));
       }
 
-      Map<Integer, AlignmentAndScore> alignments = rememberAlignments(projectID, idToAudio, project.getLanguageEnum());
+      ids.removeAll(audioToAlignment.keySet());
 
-      synchronized (audioToAlignment) {
-        audioToAlignment.putAll(alignments);
-      }
+      // Map<Integer, AlignmentAndScore> alignments = getAlignmentsFromDB(projectID, idToAudio, project.getLanguageEnum());
+      Map<Integer, AlignmentAndScore> alignments = getAlignmentsFromDB(projectID, ids, project.getLanguageEnum());
+
+      // synchronized (audioToAlignment) {
+      audioToAlignment.putAll(alignments);
+      //}
     }
   }
 
   /**
    * TODO : why not concurrent hash map...
    *
+   * Look in the map of
+   *
    * @param audioToAlignment
-   * @param idToAudio
+   * @param idToAudio        for all that are missing alignment
    * @param exercise
    */
+/*
   private void setAlignmentInfo(Map<Integer, AlignmentOutput> audioToAlignment,
                                 Map<Integer, AudioAttribute> idToAudio,
                                 ClientExercise exercise) {
@@ -103,17 +113,24 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
       AlignmentOutput currentAlignment = audioAttribute.getAlignmentOutput();
       if (currentAlignment == null) {
         synchronized (audioToAlignment) {
-          AlignmentOutput alignmentOutput1 = audioToAlignment.get(audioAttribute.getUniqueID());
+          AlignmentOutput alignmentOutput = audioToAlignment.get(audioAttribute.getUniqueID());
 
-          if (alignmentOutput1 == null) {
+          if (alignmentOutput == null) {
             idToAudio.put(audioAttribute.getUniqueID(), audioAttribute);
           } else {  // not sure how this can happen
-            audioAttribute.setAlignmentOutput(alignmentOutput1);
+            audioAttribute.setAlignmentOutput(alignmentOutput);
           }
         }
       }
     }
   }
+*/
+  private void addAudioIDs(ClientExercise exercise, Set<Integer> ids) {
+    for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
+      ids.add(audioAttribute.getUniqueID());
+    }
+  }
+
 
   /**
    * @param projectID
@@ -122,7 +139,7 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
    * @return
    * @see #addAlignmentOutput
    */
-  private Map<Integer, AlignmentAndScore> rememberAlignments(int projectID,
+/*  private Map<Integer, AlignmentAndScore> rememberAlignments(int projectID,
                                                            Map<Integer, AudioAttribute> idToAudio, Language language) {
     if (!idToAudio.isEmpty() && idToAudio.size() > 50 || DEBUG)
       logger.info("rememberAlignments : asking for " + idToAudio.size() + " alignment outputs from database");
@@ -130,10 +147,10 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
     Map<Integer, AlignmentAndScore> alignments = getAlignmentsFromDB(projectID, idToAudio.keySet(), language);
     addAlignmentToAudioAttribute(idToAudio, alignments);
     return alignments;
-  }
+  }*/
 
 
-  private void addAlignmentToAudioAttribute(Map<Integer, AudioAttribute> idToAudio,
+/*  private void addAlignmentToAudioAttribute(Map<Integer, AudioAttribute> idToAudio,
                                             Map<Integer, AlignmentAndScore> alignments) {
     idToAudio.forEach((k, v) -> {
       AlignmentOutput alignmentOutput = alignments.get(k);
@@ -144,7 +161,7 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
         v.setAlignmentOutput(alignmentOutput);
       }
     });
-  }
+  }*/
 
   /**
    * get alignment from db
@@ -156,7 +173,6 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
    * @see #rememberAlignments
    */
   private Map<Integer, AlignmentAndScore> getAlignmentsFromDB(int projid, Set<Integer> audioIDs, Language language) {
-
     if (DEBUG) logger.info("getAlignmentsFromDB asking for " + audioIDs.size());
 
     if (audioIDs.isEmpty()) {
@@ -179,8 +195,8 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
   }
 
   private Map<Integer, AlignmentAndScore> parseJsonToGetAlignments(Collection<Integer> audioIDs,
-                                                                 Map<Integer, ISlimResult> audioToResult,
-                                                                 Language language) {
+                                                                   Map<Integer, ISlimResult> audioToResult,
+                                                                   Language language) {
     Map<Integer, AlignmentAndScore> idToAlignment = new HashMap<>();
     for (Integer audioID : audioIDs) {
       // do we have alignment for this audio in the map
@@ -201,6 +217,7 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
 
   /**
    * TODO : Mark everything as full match for now...
+   *
    * @param idToAlignment
    * @param audioID
    * @param cachedResult
@@ -214,7 +231,7 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
     Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents, language);
     if (DEBUG)
       logger.info("getCachedAudioRef : cache HIT (" + language + ") for audio id=" + audioID + " returning " + typeToSegments);
-    idToAlignment.put(audioID, new AlignmentAndScore(typeToSegments,cachedResult.getPronScore(),true));
+    idToAlignment.put(audioID, new AlignmentAndScore(typeToSegments, cachedResult.getPronScore(), true));
   }
 
   @NotNull

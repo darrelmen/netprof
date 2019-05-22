@@ -39,7 +39,6 @@ import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotFlashcardFactory;
 import mitll.langtest.client.flashcard.PolyglotPracticePanel;
 import mitll.langtest.client.flashcard.PracticeFacetExerciseList;
@@ -54,9 +53,9 @@ import mitll.langtest.shared.exercise.ScoredExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.logging.Logger;
-
-import static mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE.POLYGLOT;
+import java.util.stream.Collectors;
 
 public class NewQuizHelper<T extends CommonShell & ScoredExercise> extends PracticeHelper<T> {
   private final Logger logger = Logger.getLogger("NewQuizHelper");
@@ -83,15 +82,7 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise> extends Pract
 
   @Override
   protected ExercisePanelFactory<T, ClientExercise> getFactory(PagingExerciseList<T, ClientExercise> exerciseList) {
-    //logger.info("getFactory --  " + History.getToken());
-
     polyglotFlashcardFactory = new PolyglotFlashcardFactory<T, ClientExercise>(controller, exerciseList, INavigation.VIEWS.QUIZ) {
-
-      @Override
-      public PolyglotDialog.MODE_CHOICE getMode() {
-        return POLYGLOT;
-      }
-
       /**
        * @see PolyglotPracticePanel#reallyStartOver
        */
@@ -161,6 +152,30 @@ public class NewQuizHelper<T extends CommonShell & ScoredExercise> extends Pract
           new ListOptions().setInstance(INavigation.VIEWS.QUIZ).setShowPager(false),
           listHeader, INavigation.VIEWS.QUIZ, NewQuizHelper.this
       );
+    }
+
+    /**
+     * Only allow a quiz over items that are safe to decode -- what if all items are bad though?
+     *
+     * @param reqID
+     * @param toShow
+     */
+    @Override
+    protected void gotFullExercises(final int reqID, Collection<ClientExercise> toShow) {
+
+
+      super.gotFullExercises(reqID, toShow
+          .stream()
+          .filter(ClientExercise::isSafeToDecode)
+          .collect(Collectors.toList()));
+    }
+
+    @Override
+    protected void rememberAndLoadFirst(List<T> exercises, String selectionID, String searchIfAny, int exerciseID) {
+      super.rememberAndLoadFirst(exercises
+          .stream()
+          .filter(T::isSafeToDecode)
+          .collect(Collectors.toList()), selectionID, searchIfAny, exerciseID);
     }
 
     @Override

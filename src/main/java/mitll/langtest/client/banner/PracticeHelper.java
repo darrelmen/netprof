@@ -37,7 +37,6 @@ import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.custom.content.FlexListLayout;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
-import mitll.langtest.client.flashcard.PolyglotDialog;
 import mitll.langtest.client.flashcard.PolyglotFlashcardFactory;
 import mitll.langtest.client.flashcard.PracticeFacetExerciseList;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
@@ -57,7 +56,7 @@ public class PracticeHelper<T extends CommonShell & ScoredExercise> extends Simp
   protected Widget outerBottomRow;
 
 
-  private PolyglotDialog.MODE_CHOICE mode;
+//  private PolyglotDialog.MODE_CHOICE mode;
   private INavigation navigation;
   private final INavigation.VIEWS instance;
 
@@ -120,12 +119,12 @@ public class PracticeHelper<T extends CommonShell & ScoredExercise> extends Simp
    * @deprecated get rid of this
    * @param mode
    */
-  void setMode(PolyglotDialog.MODE_CHOICE mode) {
-    this.mode = mode;
-    if (polyglotFlashcardFactory != null) {
-      polyglotFlashcardFactory.setMode(mode);
-    }
-  }
+//  void setMode(PolyglotDialog.MODE_CHOICE mode) {
+//    this.mode = mode;
+//    if (polyglotFlashcardFactory != null) {
+//      polyglotFlashcardFactory.setMode(mode);
+//    }
+//  }
 
   public void setVisible(boolean visible) {
     flexListLayout.setVisible(visible);
@@ -139,9 +138,9 @@ public class PracticeHelper<T extends CommonShell & ScoredExercise> extends Simp
     return polyglotFlashcardFactory;
   }
 
-  public PolyglotDialog.MODE_CHOICE getMode() {
-    return mode;
-  }
+//  public PolyglotDialog.MODE_CHOICE getMode() {
+//    return mode;
+//  }
 
   public void setNavigation(INavigation navigation) {
     this.navigation = navigation;

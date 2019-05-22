@@ -30,13 +30,16 @@
 package mitll.langtest.server.scoring;
 
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.database.audio.IAudioDAO;
+import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
 import java.text.Collator;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 public interface ASR {
   String UNKNOWN_MODEL = "UNKNOWNMODEL";
@@ -49,19 +52,12 @@ public interface ASR {
 
   Collection<String> getKaldiOOV(String fl);
 
-  /**
-   * @see AudioFileHelper#checkLTSOnForeignPhrase(String, String)
-   * @param fl
-   * @param transliteration
-   * @return
-   */
-  Collection<String> getOOV(String fl, String transliteration);
-
-  PhoneInfo getBagOfPhones(String foreignLanguagePhrase);
+  CheckLTS getCheckLTSHelper();
 
   SmallVocabDecoder getSmallVocabDecoder();
 
   boolean isAvailableCheckNow();
+
 
   /**
    * @param testAudioDir
@@ -99,6 +95,18 @@ public interface ASR {
    */
   boolean isAvailable();
 
+  /**
+   * JUST FOR TESTING
+   *
+   * @param audioPath
+   * @param transcript
+   * @param transliteration
+   * @param lmSentences
+   * @param tmpDir
+   * @param decode
+   * @param end
+   * @return
+   */
   HydraOutput runHydra(String audioPath,
                        String transcript,
                        String transliteration,
@@ -116,9 +124,27 @@ public interface ASR {
    */
   TransNormDict getHydraDict(String cleaned, String transliteration, List<WordAndProns> possibleProns);
 
+  /**
+   * @param transcript
+   * @param transliteration
+   * @return
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises(Collection, List, ISection, Project, Map, Map, boolean)
+   */
   List<String> getTokens(String transcript, String transliteration);
+
+  /**
+   * @param transcript
+   * @param transliteration
+   * @return
+   * @see mitll.langtest.server.database.audio.SlickTrainingAudioDAO#checkAndAddAudio(Collection, IAudioDAO)
+   */
   String getNormTranscript(String transcript, String transliteration);
 
+  /**
+   * @param input
+   * @return
+   * @see AudioFileHelper#getSegmented(String)
+   */
   String getSegmented(String input);
 
   IPronunciationLookup getPronunciationLookup();

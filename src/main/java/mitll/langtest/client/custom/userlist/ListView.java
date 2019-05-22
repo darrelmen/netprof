@@ -56,7 +56,7 @@ import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -68,7 +68,8 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 7/3/17.
  */
-public class ListView implements ContentView, CreateListComplete {
+public class ListView extends TableAndPager implements ContentView, CreateListComplete {
+  public static final String FORGET_VISITED_LIST = "Forget visited list.";
   private final Logger logger = Logger.getLogger("ListView");
 
   private static final String QUIZ = "Quiz";
@@ -136,7 +137,6 @@ public class ListView implements ContentView, CreateListComplete {
    */
   private static final String OTHERS_PUBLIC_LISTS = "Public Lists";
 
-  private static final int HEADING_SIZE = 3;
   private static final int VISITED_PAGE_SIZE = 5;
   private static final int VISITED_SHORT_SIZE = 5;
 
@@ -148,7 +148,7 @@ public class ListView implements ContentView, CreateListComplete {
   private static final String EDIT = EDIT1;
 
   /**
-   *
+   * @see #editList()
    */
   private static final String ADD_EDIT_ITEMS = "Add/Edit Items";
 
@@ -237,11 +237,9 @@ public class ListView implements ContentView, CreateListComplete {
             showLearnList(this);
           }
         };
-    Panel tableWithPager = listContainer.getTableWithPager(Collections.emptyList());
-    addPagerAndHeader(tableWithPager, VISITED, top);
-    tableWithPager.addStyleName("rightFiveMargin");
 
-    new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.LEFT);
+    Panel tableWithPager = getTableWithPager(top, listContainer, VISITED, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.LEFT);
+
     tableWithPager.setHeight(VISITED_HEIGHT + "px");
 
     DivWidget ldButtons = new DivWidget();
@@ -350,18 +348,8 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private boolean canMakeQuiz() {
-    Collection<User.Permission> permissions = controller.getPermissions();
-    return permissions.contains(User.Permission.TEACHER_PERM) || permissions.contains(User.Permission.PROJECT_ADMIN);
-  }
-
-  private void addPagerAndHeader(Panel tableWithPager, String visited, DivWidget top) {
-    Heading w = new Heading(HEADING_SIZE, visited);
-    w.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
-    w.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-    top.add(w);
-    top.add(tableWithPager);
-    tableWithPager.getElement().getStyle().setClear(Style.Clear.BOTH);
-    tableWithPager.setWidth("100%");
+    Collection<Permission> permissions = controller.getPermissions();
+    return permissions.contains(Permission.TEACHER_PERM) || permissions.contains(Permission.PROJECT_ADMIN);
   }
 
   private Button share;
@@ -487,12 +475,12 @@ public class ListView implements ContentView, CreateListComplete {
   }
 
   private void editList() {
-    UserList<CommonShell> currentSelectionFromMyLists = getCurrentSelectionFromMyLists();
+    //UserList<CommonShell> currentSelectionFromMyLists = getCurrentSelectionFromMyLists();
     EditItem editItem = new EditItem(controller);
     new DialogHelper(true).show(
         ADD_EDIT_ITEMS + " : " + getListName(),
         Collections.emptyList(),
-        editItem.editItem(currentSelectionFromMyLists),
+        editItem.editItem(getCurrentSelectionFromMyLists()),
         "Done",
         null,
         new MyShownCloseListener(editItem), MAX_HEIGHT, -1, true);
@@ -615,7 +603,6 @@ public class ListView implements ContentView, CreateListComplete {
     add.addClickHandler(event -> gotDelete(add, getCurrentSelectionFromMyLists()));
     add.setType(ButtonType.DANGER);
     addTooltip(add, DELETE_LIST);
-    // add.setEnabled(!myLists.isEmpty());
     myLists.addButton(add);
     return add;
   }
@@ -630,8 +617,7 @@ public class ListView implements ContentView, CreateListComplete {
     add.addStyleName("leftFiveMargin");
     add.addClickHandler(event -> gotDeleteVisitor(add, getCurrentSelection(visited), visited));
     add.setType(ButtonType.DANGER);
-    // add.setEnabled(!visited.isEmpty());
-    addTooltip(add, "Forget visited list.");
+    addTooltip(add, FORGET_VISITED_LIST);
     visited.addButton(add);
     return add;
   }

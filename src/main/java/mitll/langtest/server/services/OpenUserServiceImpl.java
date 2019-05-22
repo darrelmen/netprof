@@ -43,12 +43,13 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
+import java.util.Collection;
 import java.util.List;
 
-import static mitll.langtest.shared.user.ChoosePasswordResult.PasswordResultType.*;
 import static mitll.langtest.shared.user.ChoosePasswordResult.PasswordResultType.Success;
-import static mitll.langtest.shared.user.LoginResult.ResultType.*;
+import static mitll.langtest.shared.user.ChoosePasswordResult.PasswordResultType.*;
 import static mitll.langtest.shared.user.LoginResult.ResultType.Failed;
+import static mitll.langtest.shared.user.LoginResult.ResultType.*;
 
 @SuppressWarnings("serial")
 public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenUserService {
@@ -187,7 +188,7 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
    * I don't think we want to mess with the session until they've logged in with a password!
    *
    * @param url
-   * @return null if existing user
+   * @return null if existing user, result type can only be failed, added, exists, or updated
    * @see mitll.langtest.client.user.SignUpForm#gotSignUp
    */
   @Override
@@ -258,7 +259,14 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
       if (exists) {
         createNewSession(userByID);
       }
-      return new ChoosePasswordResult(userByID, !exists ? NotExists : Success);
+      ChoosePasswordResult choosePasswordResult = new ChoosePasswordResult(userByID, !exists ? NotExists : Success);
+
+      if (exists) {
+        // record last login info for one time users
+        loginUser(userId, newPassword);
+      }
+
+      return choosePasswordResult;
     } else {
       //  log.info(TIMING, "[changePassword, {} ms, for {}", () -> elapsedMS(startMS), () -> success);
       return new ChoosePasswordResult(null, !exists ? NotExists : AlreadySet);
@@ -373,16 +381,17 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
    * - a user can have a browser open so long it's javascript is out of date and should reload.
    *
    * @param projid
+   * @param isTeacher
    * @return false if no session
    * @see InitialUI#confirmCurrentProject
    */
   @Override
-  public HeartbeatStatus setCurrentUserToProject(int projid, String implVersion) {
+  public HeartbeatStatus setCurrentUserToProject(int projid, String implVersion, boolean isTeacher) {
     try {
       int sessionUserID = getSessionUserID();
       if (sessionUserID == -1) { // dude - they have no session
         logger.info("setCurrentProjectForUser : no current session user " + sessionUserID + " for " + projid);
-        return new HeartbeatStatus(false, false);
+        return new HeartbeatStatus();
       } else {
         if (projid == -1) {
           logger.warn("huh? trying to set invalid current project for user #" + sessionUserID);
@@ -408,12 +417,26 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
 
         updateVisitedLater();
 
-        return new HeartbeatStatus(true, checkCodeHasUpdated(projid, implVersion, sessionUserID));
+        return new HeartbeatStatus(true, checkCodeHasUpdated(projid, implVersion, sessionUserID), hasPermChanged(isTeacher, sessionUserID));
       }
     } catch (DominoSessionException e) {
       logger.error("setCurrentProjectForUser got  " + e, e);
-      return new HeartbeatStatus(false, false);
+      return new HeartbeatStatus();
     }
+  }
+
+  private boolean hasPermChanged(boolean isTeacher, int sessionUserID) {
+    User userWhere = db.getUserDAO().getUserWhere(sessionUserID);
+
+    boolean changed = false;
+    if (userWhere != null) {
+      Collection<Permission> permissions = userWhere.getPermissions();
+
+      boolean b = permissions.contains(Permission.TEACHER_PERM) ||
+          permissions.contains(Permission.PROJECT_ADMIN);
+      changed = b != isTeacher;
+    }
+    return changed;
   }
 
   private void updateVisitedLater() {
@@ -442,13 +465,20 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
     return codeHasUpdated;
   }
 
+  /**
+   * When the user hasn't chosen a project yet...
+   *
+   * @param implVersion
+   * @return
+   * @see InitialUI#confirmCurrentProject()
+   */
   @Override
-  public HeartbeatStatus checkHeartbeat(String implVersion) {
+  public HeartbeatStatus checkHeartbeat(String implVersion, boolean isTeacher) {
     try {
       int sessionUserID = getSessionUserID();
       if (sessionUserID == -1) { // dude - they have no session
         logger.info("setCurrentProjectForUser : no current session user " + sessionUserID);
-        return new HeartbeatStatus(false, false);
+        return new HeartbeatStatus();
       } else {
         boolean codeHasUpdated = !implVersion.equalsIgnoreCase(serverProps.getImplementationVersion());
         if (codeHasUpdated) {
@@ -456,11 +486,11 @@ public class OpenUserServiceImpl extends MyRemoteServiceServlet implements OpenU
         }
 
         //      simulateNetworkIssue();
-        return new HeartbeatStatus(true, codeHasUpdated);
+        return new HeartbeatStatus(true, codeHasUpdated, hasPermChanged(isTeacher, sessionUserID));
       }
     } catch (DominoSessionException e) {
       logger.error("setCurrentProjectForUser got  " + e, e);
-      return new HeartbeatStatus(false, false);
+      return new HeartbeatStatus();
     }
   }
 

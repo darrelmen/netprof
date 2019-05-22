@@ -42,7 +42,6 @@ import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @see mitll.langtest.server.database.DatabaseImpl#initializeDAOs
@@ -128,9 +127,6 @@ public class UserProjectDAO implements IUserProjectDAO {
   @Override
   public void upsert(int userid, int projid) {
     dao.upsert(new SlickUserProject(-1, userid, projid, new Timestamp(System.currentTimeMillis())));
-
-    // remember
-    //userToProjectCache.put(userid, projid);
   }
 
   /**
@@ -142,11 +138,10 @@ public class UserProjectDAO implements IUserProjectDAO {
    */
   @Override
   public int getCurrentProjectForUser(int user) {
-    //Integer project = null;//userToProjectCache.get(user);
     if (true) {
-      long then = System.currentTimeMillis();
+//      long then = System.currentTimeMillis();
       List<Integer> slickUserProjects = dao.mostRecentByUser(user);
-      long now = System.currentTimeMillis();
+  //    long now = System.currentTimeMillis();
 //    logger.info("getCurrentProjectForUser : took " + (now - then) + " to get current prpject for user  " + user + " = " + slickUserProjects);
       int i = slickUserProjects.isEmpty() ? -1 : slickUserProjects.iterator().next();
 

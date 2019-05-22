@@ -40,7 +40,6 @@ import mitll.langtest.server.database.user.UserManagement;
 import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.shared.user.*;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -165,8 +164,8 @@ public class RestUserManagement {
       return true;
     } else if (queryString.startsWith(SET_PASSWORD)) {
       String[] split1 = getParams(queryString);
-      if (split1.length < 3) {
-        toReturn.addProperty(ERROR, "expecting 3");
+      if (split1.length < 4) {
+        toReturn.addProperty(ERROR, "expecting 4 parts to request : request, token, ...");
       } else {
         // request=setPassword&token=oaNLq6fnjnrfoVhstj6XtWdWY4iwsU&pass=domino22&userid=14480
         doSetPassword(getBaseURL(request), queryString, toReturn, split1);
@@ -197,18 +196,25 @@ public class RestUserManagement {
     int i = 1;
     String token = getFirst(split1[i++]);
     String passwordH = getArg(split1[i++]);
-    String userID = getArg(split1[i++]);
+    String userID = split1.length < i ? getArg(split1[i++]) : "";
+    boolean isError = false;
     if (token.isEmpty()) {
       toReturn.addProperty(ERROR, "no token in request - expecting it first");
+      isError = true;
     } else if (passwordH.isEmpty()) {
       toReturn.addProperty(ERROR, "no password in request - expecting it second");
+      isError = true;
     }
     if (userID.isEmpty()) {
-      toReturn.addProperty(ERROR, "no user id in request - expecting it first");
+      toReturn.addProperty(ERROR, "no user id in request - expecting it third");
+      isError = true;
     }
-    int user = getUserID(userID);
-    logger.info("setPassword : userid " + userID + " token " + token);// + " pass " +passwordH);
-    toReturn.addProperty(VALID, changePFor(user, passwordH, baseURL, token));
+
+    if (!isError) {
+      int user = getUserID(userID);
+      logger.info("setPassword : userid " + userID + " token " + token);// + " pass " +passwordH);
+      toReturn.addProperty(VALID, changePFor(user, passwordH, baseURL, token));
+    }
   }
 
   private int getUserID(String userID) {

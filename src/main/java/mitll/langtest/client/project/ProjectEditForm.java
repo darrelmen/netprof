@@ -48,7 +48,7 @@ import mitll.langtest.client.services.ProjectService;
 import mitll.langtest.client.services.ProjectServiceAsync;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.client.user.UserDialog;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.langtest.shared.scoring.RecalcResponses;
@@ -99,6 +99,9 @@ public class ProjectEditForm extends UserDialog {
    *
    */
   private static final String ALIGN_REF_AUDIO = "Align ref audio";
+  /**
+   * @see #getCheckAudio(ProjectInfo)
+   */
   private static final String CHECK_AUDIO = "Check Audio";
 
   private static final String ID = "ID";
@@ -107,11 +110,11 @@ public class ProjectEditForm extends UserDialog {
   private static final String HIERARCHY = "Hierarchy";
   private static final String COURSE = "Course";
   private static final String COURSE_OPTIONAL = "Course (optional)";
-  private static final String HYDRA_HOST_PORT = "Hydra Host:Port";
+  private static final String HYDRA_HOST_PORT = "Scoring Host:Port";
   /**
    * @see #getFields
    */
-  private static final String HYDRA_HOST_OPTIONAL = "Hydra Host (optional)";
+  private static final String HYDRA_HOST_OPTIONAL = "Scoring Host (optional)";
 
 
   private static final String PLEASE_ENTER_A_LANGUAGE_MODEL_DIRECTORY = "Please enter a language model directory.";
@@ -142,6 +145,7 @@ public class ProjectEditForm extends UserDialog {
   private ListBox statusBox, typeBox;
   private ProjectInfo info;
   private final ProjectServiceAsync projectServiceAsync = GWT.create(ProjectService.class);
+  private final ExerciseController controller;
 
   private HTML feedback;
   /**
@@ -172,8 +176,12 @@ public class ProjectEditForm extends UserDialog {
     this.lifecycleSupport = lifecycleSupport;
     services = controller;
     messageHelper = controller.getMessageHelper();
-    String userID = controller.getUserManager().getUserID();
-    if (userID != null) isSuperUser = userID.equalsIgnoreCase(GVIDAVER);
+
+    this.controller = controller;
+    {
+      String userID = controller.getUserManager().getUserID();
+      if (userID != null) isSuperUser = userID.equalsIgnoreCase(GVIDAVER);
+    }
   }
 
   /**
@@ -231,7 +239,7 @@ public class ProjectEditForm extends UserDialog {
 
     {
       String selectedValue = modelTypeBox.getSelectedValue();
-      //  logger.info("value is " + selectedValue);
+      logger.info("updateProject : value is " + selectedValue);
       info.setModelType(ModelType.valueOf(selectedValue));
     }
     //  logger.info("updateProject get model type " + info.getModelType());
@@ -265,8 +273,12 @@ public class ProjectEditForm extends UserDialog {
 
       @Override
       public void onSuccess(Boolean result) {
+        if (!result) logger.info("didn't change the project?");
+
+        int projID = info.getID();
+        lifecycleSupport.updateServicesForProject(projID, info.getHost());
+        services.tellOtherServerToRefreshProject(projID);
         lifecycleSupport.refreshStartupInfo(true);
-        services.tellHydraServerToRefreshProject(info.getID());
       }
     });
   }
@@ -278,10 +290,14 @@ public class ProjectEditForm extends UserDialog {
 
   @NotNull
   private Language getLanguage(String selectedValue) {
-    String s = MANDARIN.toDisplay().toUpperCase();
-    String s1 = selectedValue.toUpperCase();
-    boolean b = s1.equalsIgnoreCase(s);
-    return Language.valueOf(b ? MANDARIN.name() : s1);
+    if (isLanguageValid(selectedValue)) {
+      String s = MANDARIN.toDisplay().toUpperCase();
+      String s1 = selectedValue.toUpperCase();
+      boolean b = s1.equalsIgnoreCase(s);
+      return Language.valueOf(b ? MANDARIN.name() : s1);
+    } else {
+      return Language.UNKNOWN;
+    }
   }
 
   private void setPort() {
@@ -344,7 +360,11 @@ public class ProjectEditForm extends UserDialog {
   }
 
   private boolean isLanguageNotValid() {
-    return getLanguageChoice().equalsIgnoreCase(PLEASE_SELECT_A_LANGUAGE);
+    return !isLanguageValid(getLanguageChoice());
+  }
+
+  private boolean isLanguageValid(String languageChoice) {
+    return !languageChoice.equalsIgnoreCase(PLEASE_SELECT_A_LANGUAGE);
   }
 
   private String getLanguageChoice() {
@@ -385,13 +405,19 @@ public class ProjectEditForm extends UserDialog {
           logger.warning("coudn't create project?");
           Window.alert("Sorry, couldn't create a new project.");
         } else {
-          lifecycleSupport.refreshStartupInfo(true);
-          services.tellHydraServerToRefreshProject(projID);
+          lifecycleSupport.refreshStartupInfoAnTell(true, projID);
+//          services.tellOtherServerToRefreshProject(projID);
         }
       }
     });
   }
 
+  /**
+   * @see #getForm(ProjectInfo, boolean)
+   * @param info
+   * @param isNew
+   * @return
+   */
   private Fieldset getFields(ProjectInfo info, boolean isNew) {
     Fieldset fieldset = new Fieldset();
     int id1 = info.getID();
@@ -475,6 +501,8 @@ public class ProjectEditForm extends UserDialog {
       if (isSuperUser) {
         fieldset.add(getRecalcRefAudio(info));
       }
+
+      fieldset.add(getCheckOOV(info));
     }
 
     {
@@ -578,31 +606,7 @@ public class ProjectEditForm extends UserDialog {
     this.language = new ListBox();
     this.language.addStyleName("leftTenMargin");
 
-    this.language.addChangeHandler(event -> projectServiceAsync.getDominoForLanguage(getLanguage(this.language.getSelectedValue()),
-        new AsyncCallback<List<DominoProject>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            logger.warning("got failure asking for " + language.getSelectedValue());
-          }
-
-          @Override
-          public void onSuccess(List<DominoProject> result) {
-            dominoProjectsListBox.clear();
-
-            result.forEach(dominoProject -> {
-              String item = dominoProject.getDominoID() + " : " + dominoProject.getName();
-              dominoProjectsListBox.addItem(item);
-              dominoToProject.put(item, dominoProject);
-
-            });
-
-            Scheduler.get().scheduleDeferred(() -> {
-              if (!result.isEmpty()) {
-                setUnitAndChapter("", result.iterator().next());
-              }
-            });
-          }
-        }));
+    this.language.addChangeHandler(event -> gotLanguageSelection());
 
     name.add(this.language);
 
@@ -618,6 +622,37 @@ public class ProjectEditForm extends UserDialog {
         this.language.setItemSelected(i, true);
       }
       i++;
+    }
+  }
+
+  private void gotLanguageSelection() {
+    String selectedValue = this.language.getSelectedValue();
+    if (isLanguageValid(selectedValue)) {
+      projectServiceAsync.getDominoForLanguage(getLanguage(selectedValue),
+          new AsyncCallback<List<DominoProject>>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              logger.warning("got failure asking for " + language.getSelectedValue());
+            }
+
+            @Override
+            public void onSuccess(List<DominoProject> result) {
+              dominoProjectsListBox.clear();
+
+              result.forEach(dominoProject -> {
+                String item = dominoProject.getDominoID() + " : " + dominoProject.getName();
+                dominoProjectsListBox.addItem(item);
+                dominoToProject.put(item, dominoProject);
+
+              });
+
+              Scheduler.get().scheduleDeferred(() -> {
+                if (!result.isEmpty()) {
+                  setUnitAndChapter("", result.iterator().next());
+                }
+              });
+            }
+          });
     }
   }
 
@@ -642,7 +677,9 @@ public class ProjectEditForm extends UserDialog {
     modelTypeBox.addStyleName("leftTenMargin");
     modelTypeBox.addItem(ModelType.HYDRA.toString());
     modelTypeBox.addItem(ModelType.KALDI.toString());
-    modelTypeBox.setItemSelected(info.getModelType() == ModelType.KALDI ? 1 : 0, true);
+    ModelType modelType = info.getModelType();
+
+    modelTypeBox.setItemSelected(modelType == ModelType.KALDI ? 1 : 0, true);
 
     return modelTypeBox;
   }
@@ -824,9 +861,22 @@ public class ProjectEditForm extends UserDialog {
     return userField;
   }
 
+  /**
+   * @param info
+   * @return
+   * @see #getFields(ProjectInfo, boolean)
+   */
   private Button getCheckAudio(final ProjectInfo info) {
     Button w = new Button(CHECK_AUDIO, IconType.STETHOSCOPE);
     w.addClickHandler(event -> clickCheckAudio(info, w));
+    addBottomMargin(w);
+    return w;
+  }
+
+  private Button getCheckOOV(final ProjectInfo info) {
+    Button w = new Button("Check OOV", IconType.CHECK);
+    w.addClickHandler(event -> clickCheckOOV(info, w));
+    w.addStyleName("leftFiveMargin");
     addBottomMargin(w);
     return w;
   }
@@ -851,8 +901,56 @@ public class ProjectEditForm extends UserDialog {
           public void onSuccess(Void result) {
             w.setEnabled(true);
             feedback.setText(CHECKING_AUDIO);
+
+            controller.getExerciseService().refreshAllAudio(info.getID(), new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable caught) {
+
+              }
+
+              @Override
+              public void onSuccess(Void result) {
+                logger.info("refreshAllAudio complete");
+              }
+            });
           }
         });
+  }
+
+  private void clickCheckOOV(ProjectInfo info, Button w) {
+    w.setEnabled(false);
+    feedback.setText("Please wait, checking items...");
+    showCheckOOV(info, w);
+  }
+
+  private int num = 0;
+  private int offset = 100;
+
+  private void showCheckOOV(ProjectInfo info, Button w) {
+    num = 0;
+    offset = 100;
+    checkOOV(info, w);
+  }
+
+  private void checkOOV(ProjectInfo info, Button w) {
+    controller.getAudioServiceAsyncForHost(info.getHost()).checkOOV(info.getID(), num, offset, new AsyncCallback<OOVInfo>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        messageHelper.handleNonFatalError("Checking OOV...", caught);
+      }
+
+      @Override
+      public void onSuccess(OOVInfo result) {
+        if (num + offset > result.getTotal()) {
+          w.setEnabled(true);
+          feedback.setText("Checked " + result.getChecked() + " items, found " + result.getOovWords() + " OOV words.");
+        } else {
+          feedback.setText("Checking : checked " + num + " items...");
+          num += offset;
+          checkOOV(info, w);
+        }
+      }
+    });
   }
 
   /**

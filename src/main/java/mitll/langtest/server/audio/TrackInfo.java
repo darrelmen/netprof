@@ -29,6 +29,8 @@
 
 package mitll.langtest.server.audio;
 
+import java.util.Map;
+
 /**
  * Created by go22670 on 11/16/16.
  */
@@ -37,12 +39,18 @@ public class TrackInfo {
   private final String artist;
   private final String comment;
   private final String album;
+  private Map<String, String> unitToValue;
 
   public TrackInfo(String title, String artist, String comment, String album) {
     this.title = title;
     this.artist = artist;
     this.comment = comment;
     this.album = album;
+  }
+
+  public TrackInfo(String title, String artist, String comment, String album, Map<String, String> unitToValue) {
+    this(title, artist, comment, album);
+    this.unitToValue = unitToValue;
   }
 
   public String getTitle() {
@@ -63,5 +71,14 @@ public class TrackInfo {
 
   public String toString() {
     return title + " by " + artist + " : " + comment + " on " + album;
+  }
+
+  public Map<String, String> getUnitToValue() {
+    return unitToValue;
+  }
+
+  public TrackInfo setUnitToValue(Map<String, String> unitToValue) {
+    this.unitToValue = unitToValue;
+    return this;
   }
 }

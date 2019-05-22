@@ -31,7 +31,7 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.ITestSection;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.shared.exercise.*;

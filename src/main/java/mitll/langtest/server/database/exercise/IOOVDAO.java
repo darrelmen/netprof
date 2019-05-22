@@ -29,11 +29,39 @@
 
 package mitll.langtest.server.database.exercise;
 
-import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.server.database.IDAO;
+import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.project.Language;
 
-public interface IProject {
-  Language getLanguageEnum();
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
-  CommonExercise getExerciseByID(int id);
+public interface IOOVDAO extends IDAO {
+  void insertBulk(Collection<OOV> oovs, int userid, Language language);
+
+//  boolean insert(int userid, String oov, Language language);
+
+  /**
+   * @see
+   */
+  boolean update(int id, String equivalent, int byUser);
+
+  boolean delete(int id);
+
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#removeStaleOOV
+   * @param language
+   * @return
+   */
+  List<OOV> forLanguage(Language language);
+
+  Map<String, List<OOV>> getOOVToEquivalents(Language language);
+
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#getOOVToAdd
+   * @param language
+   * @return
+   */
+  Map<String, List<OOV>> getOOV(Language language);
 }

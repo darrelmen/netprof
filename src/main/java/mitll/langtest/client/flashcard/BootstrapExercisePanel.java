@@ -52,8 +52,6 @@ import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.recorder.RecordingKeyPressHelper;
-import mitll.langtest.client.scoring.ClickableWords;
-import mitll.langtest.client.scoring.FieldType;
 import mitll.langtest.client.scoring.ScoreFeedbackDiv;
 import mitll.langtest.client.scoring.ScoreProgressBar;
 import mitll.langtest.client.sound.CompressedAudio;
@@ -64,7 +62,6 @@ import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.jetbrains.annotations.NotNull;
@@ -73,7 +70,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.scoring.DialogExercisePanel.BLUE;
 import static mitll.langtest.client.scoring.SimpleRecordAudioPanel.OGG;
 
 public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExercise> //T extends CommonExercise & MutableAnnotationExercise>
@@ -184,9 +180,11 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     // add answer widget to do the recording
     toAddTo.add(getAnswerAndRecordButtonRow(exerciseID, controller));
 
-    if (exercise.hasContext()) {
-      addContextSentenceToShowWhileWaiting(controller, toAddTo);
-    }
+    //
+//    if (exercise.hasContext()) {
+//      addContextSentenceToShowWhileWaiting(controller, toAddTo);
+//    }
+
     scoreFeedbackRow = new DivWidget();
     scoreFeedbackRow.addStyleName("bottomFiveMargin");
     scoreFeedbackRow.setHeight("52px");
@@ -206,16 +204,16 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     toAddTo.add(wrapper);
   }
 
-  private void addContextSentenceToShowWhileWaiting(ExerciseController controller, Panel toAddTo) {
+ /* private void addContextSentenceToShowWhileWaiting(ExerciseController<T> controller, Panel toAddTo) {
     ClientExercise contextSentence = exercise.getDirectlyRelated().iterator().next();
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     if (projectStartupInfo != null) {
       int fontSize = projectStartupInfo.getLanguageInfo().getFontSize();
 
       Language languageInfo = controller.getLanguageInfo();
-      languageInfo.isRTL();
+    //  languageInfo.isRTL();
       ClickableWords commonExerciseClickableWords =
-          new ClickableWords(null, exercise.getID(), languageInfo, fontSize, BLUE, true);
+          new ClickableWords<T>(null, exercise.getID(), languageInfo, fontSize, BLUE, true, controller.getExerciseService(), controller.getUser());
 
       String flToShow = contextSentence.getFLToShow();
       String toHighlight = exercise.getFLToShow();
@@ -235,7 +233,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
       toAddTo.add(contextSentenceWhileWaiting);
     }
   }
-
+*/
   private RecordButtonPanel answerWidget;
   private Widget button;
   private RecordButton realRecordButton;
@@ -470,7 +468,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
 
           @Override
           public void useInvalidResult(int exid, Validity validity, double dynamicRange) {
-            receivedAudioAnswer(new AudioAnswer("", validity, -1, 0, exid));
+            receivedAudioAnswer(new AudioAnswer("", validity, dynamicRange, 0, -1, exid));
           }
         };
 

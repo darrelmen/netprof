@@ -31,14 +31,13 @@ package mitll.langtest.server.database;
 
 import mitll.langtest.server.database.annotation.AnnotationDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.user.UserDAO;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 

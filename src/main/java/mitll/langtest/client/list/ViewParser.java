@@ -42,6 +42,11 @@ public class ViewParser {
   private static final String DRILL = "Drill";
   private static final String PRACTICE = "Practice";
 
+  /**
+   * Do something smarter!
+   * @param instance
+   * @return
+   */
   @NotNull
   public INavigation.VIEWS getView(String instance) {
     try {
@@ -55,6 +60,8 @@ public class ViewParser {
         return INavigation.VIEWS.PERFORM_PRESS_AND_HOLD;
       } else if (rawInstance.equalsIgnoreCase(PERFORM.toString())) {
         return PERFORM;
+      } else if (rawInstance.equalsIgnoreCase(OOV_EDITOR.toString())) {
+        return OOV_EDITOR;
       } else {
         instance = instance.replaceAll(" ", "_");
 

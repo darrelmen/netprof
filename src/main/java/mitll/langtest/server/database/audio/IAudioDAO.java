@@ -32,7 +32,8 @@ package mitll.langtest.server.database.audio;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.UserTimeBase;
@@ -40,6 +41,7 @@ import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.npdata.dao.SlickAudio;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -61,7 +63,9 @@ public interface IAudioDAO extends IDAO {
    * @return
    * @see mitll.langtest.server.services.ScoringServiceImpl#getAllAudioIDs
    */
+/*
   Map<Integer, List<AudioAttribute>> getExToAudio(int projectid, boolean hasProjectSpecificAudio);
+*/
 
   Collection<AudioAttribute> getAudioAttributesByProjectThatHaveBeenChecked(int projid, boolean hasProjectSpecificAudio);
 
@@ -100,6 +104,14 @@ public interface IAudioDAO extends IDAO {
   <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises, Language language, int projID);
 
   /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#configureProject(Project, boolean, boolean)
+   * @param exercises
+   * @param language
+   * @param projID
+   * @param <T>
+   */
+  <T extends ClientExercise> void attachAudioToAllExercises(Collection<T> exercises, Language language, int projID);
+  /**
    * @param userid
    * @param projid
    * @param exToTranscript
@@ -113,15 +125,6 @@ public interface IAudioDAO extends IDAO {
   boolean hasAudio(int exid);
 
   AudioAttribute getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript, AudioCopy audioCopy);
-
-  /**
-   * @deprecated
-   * @see mitll.langtest.server.services.QCServiceImpl#markGender
-   * @param userid
-   * @param projid
-   * @param attr
-   */
-  void addOrUpdateUser(int userid, int projid, AudioAttribute attr);
 
   int markDefect(AudioAttribute attribute);
 
@@ -148,6 +151,9 @@ public interface IAudioDAO extends IDAO {
   String getNativeAudio(Map<Integer, MiniUser.Gender> userToGender, int userid, CommonExercise exercise,
                         Language language, Map<Integer, MiniUser> idToMini, SmallVocabDecoder smallVocabDecoder);
 
+  @NotNull
+  List<Integer> getAllAudioIDs(int projectID, boolean hasProjectSpecificAudio);
+
   Map<String, Integer> getPairs(int projid);
 
   /**
@@ -161,8 +167,8 @@ public interface IAudioDAO extends IDAO {
   int markDefect(int id);
 
   /**
-   * @see mitll.langtest.server.domino.AudioCopy#addCopiesToDatabase
    * @param copies
+   * @see mitll.langtest.server.domino.AudioCopy#addCopiesToDatabase
    */
   void addBulk(List<SlickAudio> copies);
 
@@ -173,4 +179,8 @@ public interface IAudioDAO extends IDAO {
   void copyOne(AudioCopy audioCopy, int audioID, int exid, boolean isContext);
 
   void deleteForProject(int projID);
+
+  void clearAudioCacheForEx(int exid);
+
+  void setProjectManagement(IProjectManagement projectManagement);
 }

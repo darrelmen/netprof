@@ -36,6 +36,7 @@ import java.util.Map;
 public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAttributeExercise {
   /**
    * SERVER
+   *
    * @return
    * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#getRefSentences
    */
@@ -43,14 +44,16 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
 
   /**
    * SERVER
-   * @deprecated - can't guarantee we'll have this on the znetprof instance
+   *
    * @return
    * @see mitll.langtest.server.sorter.ExerciseSorter#phoneCompFirst(CommonExercise, CommonExercise, Map)
+   * @deprecated - can't guarantee we'll have this on the znetprof instance
    */
   List<String> getFirstPron();
 
   /**
    * SERVER
+   *
    * @return
    * @seex mitll.langtest.client.custom.dialog.EditItem#didICreateThisItem
    */
@@ -58,49 +61,55 @@ public interface CommonExercise extends ClientExercise, HasUnitChapter, AudioAtt
 
   /**
    * SERVER
+   *
    * @return
    */
   int getProjectID();
 
   /**
    * SERVER
+   *
    * @return
    */
   long getLastChecked();
 
   /**
    * SERVER
+   *
    * @return
    */
   CommonShell getShell();
 
   /**
    * NOT USED?
+   *
    * @return
    */
   CommonShell asShell();
 
   /**
    * SERVER
+   *
    * @return
    */
   MutableExercise getMutable();
 
   /**
    * SERVER
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addAttributeToExercise
+   *
    * @param exerciseAttributes
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#addAttributeToExercise
    */
   void setAttributes(List<ExerciseAttribute> exerciseAttributes);
 
   /**
-   *
    * @return
    */
   int getParentExerciseID();
 
   /**
    * SERVER
+   *
    * @return
    */
   int getDominoContextIndex();

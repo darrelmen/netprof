@@ -30,9 +30,7 @@
 package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.database.DAOContainer;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.IProjectSync;
-import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectInfo;
 
@@ -59,6 +57,7 @@ public interface ProjectServices {
   Project getProjectForUser(int userid);
 
   Project getProject(int projectid);
+  IProject getIProject(int projectid);
 
   Collection<Project> getProjects();
 

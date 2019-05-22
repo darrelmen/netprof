@@ -30,6 +30,7 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.langtest.server.database.DatabaseServices;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.IDialog;
@@ -42,7 +43,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static mitll.langtest.server.database.exercise.SectionHelper.ANY;
 
@@ -408,7 +408,8 @@ public class FilterResponseHelper implements IResponseFilter {
   }
 
   private List<IDialog> getDialogs(int projectID) {
-    return databaseServices.getProject(projectID).getDialogs();
+    Project project = databaseServices.getProject(projectID);
+    return project == null ? new ArrayList<>() : project.getDialogs();
   }
 
   @NotNull
@@ -462,9 +463,11 @@ public class FilterResponseHelper implements IResponseFilter {
    * @see mitll.langtest.server.database.DatabaseImpl#filterExercises
    */
   public List<CommonExercise> filterExercises(ExerciseListRequest request, List<CommonExercise> exercises, int projid) {
-    logger.info("filterExercises filter " +
-        "\n\treq       " + request +
-        "\n\texercises " + exercises.size());
+    if (DEBUG) {
+      logger.info("filterExercises filter " +
+          "\n\treq       " + request +
+          "\n\texercises " + exercises.size());
+    }
 
     boolean onlyExamples = request.isOnlyExamples();
 
@@ -508,20 +511,23 @@ public class FilterResponseHelper implements IResponseFilter {
       exercises = filterByUninspected(exercises);
       exercises = maybeDoInterpreterFilter(request, exercises);
     } else if (onlyExamples) {
-      logger.info("filterExercises OK doing examples 3");
-      exercises = getContextExercises(exercises);
-    } else {
-      boolean includeLanguage = hasDialogs(projid);
-      if (includeLanguage) {
-//        logger.info("filterExercises remove english - before " + exercises.size());
-        exercises = getCommonExercisesWithoutEnglish(exercises);
-  //      logger.info("filterExercises remove english - after  " + exercises.size());
-      }
-    }
+      if (DEBUG) logger.info("filterExercises OK doing examples 3");
 
-    logger.info("filterExercises" +
-        "\n\tfilter req " + request +
-        "\n\treturn     " + exercises.size());
+      exercises = getContextExercises(exercises);
+    } else if (hasDialogs(projid)) {
+//        logger.info("filterExercises remove english - before " + exercises.size());
+      exercises = getCommonExercisesWithoutEnglish(exercises);
+      //      logger.info("filterExercises remove english - after  " + exercises.size());
+    }
+//    else if (request.isExactMatch()) {
+//      exercises = getExactMatch(request.getPrefix(), databaseServices.getProject(projid).getLanguageEnum(), exercises);
+//    }
+
+    if (DEBUG) {
+      logger.info("filterExercises" +
+          "\n\tfilter req " + request +
+          "\n\treturn     " + exercises.size());
+    }
 
     return exercises;
   }
@@ -561,6 +567,19 @@ public class FilterResponseHelper implements IResponseFilter {
     return exercises;
   }
 
+//  @NotNull
+//  private List<CommonExercise> getExactMatch(String prefix, Language language, List<CommonExercise> exercises) {
+//    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(language);
+//    exercises = exercises
+//        .stream()
+//        .filter(ex ->
+//            smallVocabDecoder.getTokens(ex.getForeignLanguage()).equals(prefix) ||
+//                smallVocabDecoder.getTokens(ex.getContext()).equals(prefix)
+//        )
+//        .collect(Collectors.toList());
+//    return exercises;
+//  }
+
   private List<CommonExercise> getParentChildPairs(List<CommonExercise> exercises, int projid) {
     List<CommonExercise> pairs = new ArrayList<>();
     exercises.forEach(contextEx -> {
@@ -582,11 +601,15 @@ public class FilterResponseHelper implements IResponseFilter {
     for (CommonExercise exercise : exercises) {
       if (audioAnnos.contains(exercise.getID())) {
         copy.add(exercise);
-        logger.info("filterByOnlyAnno for " + exercise.getID() +
-            " parent is " + exercise.getParentExerciseID());
+        if (DEBUG) {
+          logger.info("filterByOnlyAnno for " + exercise.getID() + " parent is " + exercise.getParentExerciseID());
+        }
       }
     }
-    logger.info("filterByOnlyAnno from " + exercises.size() + " to " + copy.size());
+    if (DEBUG) {
+      logger.info("filterByOnlyAnno from " + exercises.size() + " to " + copy.size());
+    }
+
     return copy;
   }
 

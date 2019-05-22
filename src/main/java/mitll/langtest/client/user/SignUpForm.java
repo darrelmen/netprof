@@ -365,11 +365,11 @@ public class SignUpForm extends UserDialog implements SignUp {
   }
 
   private boolean askForDemographic(User user) {
-    Collection<User.Permission> permissions = user.getPermissions();
+    Collection<Permission> permissions = user.getPermissions();
     return
-        permissions.contains(User.Permission.DEVELOP_CONTENT) ||
-            permissions.contains(User.Permission.RECORD_AUDIO) ||
-            permissions.contains(User.Permission.QUALITY_CONTROL);
+        permissions.contains(Permission.DEVELOP_CONTENT) ||
+            permissions.contains(Permission.RECORD_AUDIO) ||
+            permissions.contains(Permission.QUALITY_CONTROL);
   }
 
   private TextBoxBase makeSignUpUsername(Fieldset fieldset) {
@@ -403,7 +403,7 @@ public class SignUpForm extends UserDialog implements SignUp {
 
           @Override
           public void onSuccess(LoginResult found) {
-          //  logger.info("onUserIDBlur for '" + text + "' " + found);
+            //  logger.info("onUserIDBlur for '" + text + "' " + found);
             if (isSuccess(found)) {
               reallyOnUserIDBlur(text);
               //          logger.warning("got no user for " + text);
@@ -867,8 +867,7 @@ public class SignUpForm extends UserDialog implements SignUp {
    * @param email
    * @see #getSignUpButton(TextBoxBase)
    */
-  private void gotSignUp(final String user,
-                         String email) {
+  private void gotSignUp(final String user, String email) {
     signUp.setEnabled(false);
 
     SignUpUser newUser = new SignUpUser(user,
@@ -925,25 +924,29 @@ public class SignUpForm extends UserDialog implements SignUp {
    * - user should provide password, otherwise anyone could take over an account
    * - user is new and needs to be added
    *
-   * @param result
+   * @param result type can only be failed, added, exists, or updated
+   * @param user   just for logging...
    * @see #gotSignUp(String, String)
+   * @see mitll.langtest.server.services.OpenUserServiceImpl#addUser
    */
   private void handleAddUserResponse(LoginResult result, String user) {
     LoginResult.ResultType resultType = result.getResultType();
     if (resultType == LoginResult.ResultType.BadPassword) {
       markErrorBlur(signUp, I_M_SORRY, BAD_PASS, Placement.TOP);
-    } else if (resultType == LoginResult.ResultType.Exists) {
-      eventRegistration.logEvent(signUp, "signing up", "N/A", "Tried to sign up, but existing user (" + user + ").");
+    } else if (
+        resultType == LoginResult.ResultType.Exists ||
+            resultType == LoginResult.ResultType.Failed) {
+      eventRegistration.logEvent(signUp, "signing up", "N/A", "Tried to sign up, but (" + resultType +
+          ") existing user (" + user + ").");
       signUp.setEnabled(true);
       markErrorBlur(signUpUser, USER_EXISTS);
     } else {
-      User theUser = result.getLoggedInUser();
-
       if (resultType == LoginResult.ResultType.Updated) {
         // shift focus to sign in.
         //  userPassLogin.setSignInPasswordFocus();
         userPassLogin.tryLogin();
-      } else {
+      } else if (resultType == LoginResult.ResultType.Added) {
+        User theUser = result.getLoggedInUser();
         userManager.setPendingUserStorage(theUser.getUserID());
         if (theUser.isEnabled()) {
           boolean hasResetKey = theUser.hasResetKey();
@@ -962,6 +965,9 @@ public class SignUpForm extends UserDialog implements SignUp {
           markErrorBlur(signUp, I_M_SORRY,
               "Your account has been deactivated. Please contact help email if needed.", Placement.TOP);
         }
+      } else {
+        eventRegistration.logEvent(signUp, "signing up", "N/A", "but got " + resultType + " for (" + user + ").");
+        markErrorBlur(signUp, I_M_SORRY, "Couldn't sign you up. Please try again.", Placement.TOP);
       }
     }
   }

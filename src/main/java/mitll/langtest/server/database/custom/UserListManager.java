@@ -35,7 +35,8 @@ import mitll.langtest.server.database.DatabaseServices;
 import mitll.langtest.server.database.IDAO;
 import mitll.langtest.server.database.annotation.IAnnotationDAO;
 import mitll.langtest.server.database.annotation.UserAnnotation;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProject;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
@@ -237,7 +238,7 @@ public class UserListManager implements IUserListManager {
           "\n\tfor size      " + reqSize +
           "\n\texercisetypes " + exercisetypes
       );
-      List<CommonExercise> items = getRandomItems(reqSize, databaseServices.getProject(projid), unitChapter,
+      List<CommonExercise> items = getRandomItems(reqSize, databaseServices.getIProject(projid), unitChapter,
           exercisetypes);
 
       List<CommonShell> shells = getShells(items);
@@ -253,8 +254,8 @@ public class UserListManager implements IUserListManager {
     }
   }
 
-  private List<CommonExercise> getRandomItems(int reqSize, Project project, Map<String, String> unitChapter, QuizSpec.EXERCISETYPES exercisetypes) {
-    List<CommonExercise> items = new ArrayList<>();
+  private List<CommonExercise> getRandomItems(int reqSize, IProject project, Map<String, String> unitChapter, QuizSpec.EXERCISETYPES exercisetypes) {
+    List<CommonExercise> items;
     Map<String, Collection<String>> typeToSelection = new HashMap<>();
     unitChapter.forEach((k, v) -> {
       if (!v.equalsIgnoreCase(ALL)) {
@@ -797,21 +798,12 @@ public class UserListManager implements IUserListManager {
   public void newExercise(int userListID, CommonExercise userExercise) {
     Project project = databaseServices.getProject(userExercise.getProjectID());
     List<String> typeOrder = project.getTypeOrder();
-
-//    exercisePhoneInfo = getExercisePhoneInfo(lookup, foreignlanguage, transliteration);
-//    int n2 = getNumPhones(lookup, exercisePhoneInfo, foreignlanguage, transliteration);
-
     int newExerciseID = userExerciseDAO.add(userExercise, false, typeOrder);
-
-    //  setNumPhones(userExercise, project, newExerciseID);
 
     logger.info("newExercise added exercise " + newExerciseID + " from " + userExercise);
 
     project.getExerciseDAO().addUserExercise(userExercise);
 
-    // int contextID = 0;
-    // try {
-    // contextID =
     makeContextExercise(userExercise, typeOrder);
 
     ClientExercise next = userExercise.getDirectlyRelated().iterator().next();
@@ -820,29 +812,9 @@ public class UserListManager implements IUserListManager {
     } else {
       project.getExerciseDAO().addUserExercise(next.asCommon());
     }
-    //   String foreignLanguage = next.getForeignLanguage();
-//      if (!foreignLanguage.isEmpty()) {
-//        setNumPhones(next.asCommon(), project, contextID);
-//      }
-
-//    } catch (Exception e) {
-//      logger.error("Got " + e, e);
-//    }
-
-//    logger.info("newExercise added context exercise " + contextID + " tied to " + newExerciseID + " in " + projectID);
 
     addItemToList(userListID, newExerciseID);
   }
-
-/*
-  private void setNumPhones(CommonExercise userExercise, Project project, int newExerciseID) {
-
-    userExercise.getMutable().setNumPhones(
-        databaseServices.getUserExerciseDAO().getAndRememberNumPhones(project,
-            newExerciseID, userExercise.getForeignLanguage(), userExercise.getTransliteration()
-        ));
-  }
-*/
 
   public UserList getUserListNoExercises(int userListID) {
     logger.info("getUserListNoExercises for " + userListID);
@@ -1075,6 +1047,28 @@ public class UserListManager implements IUserListManager {
     } else {
       logger.warn("addAnnotations : on an empty exercise?");
     }
+  }
+
+  @Override
+  public void addAnnotationsToAll(Collection<ClientExercise> exercises) {
+    Map<Integer, ClientExercise> idToEx = new HashMap<>();
+    exercises.forEach(exercise -> idToEx.put(exercise.getID(), exercise));
+    long then = System.currentTimeMillis();
+    Map<Integer, Map<String, ExerciseAnnotation>> latestByExerciseIDs = annotationDAO.getLatestByExerciseIDs(idToEx.keySet());
+    long now = System.currentTimeMillis();
+
+    if (now - then > 30) {
+      logger.info("addAnnotationsToAll : (" + (now - then) + ") adding annos for " + latestByExerciseIDs.size() + " from " + idToEx.size());
+    }
+
+    idToEx.forEach((id, exercise) -> {
+      Map<String, ExerciseAnnotation> latestByExerciseID = latestByExerciseIDs.get(id);
+      if (latestByExerciseID != null) {
+        MutableAnnotationExercise mutableAnnotation = exercise.getMutableAnnotation();
+    //    logger.info("addAnnotationsToAll : adding annos " + latestByExerciseID);
+        latestByExerciseID.forEach((k, v) -> mutableAnnotation.addAnnotation(k, v.getStatus(), v.getComment()));
+      }
+    });
   }
 
   /**

@@ -29,8 +29,6 @@
 
 package mitll.langtest.server.mail;
 
-import com.google.gwt.util.tools.shared.Md5Utils;
-import com.google.gwt.util.tools.shared.StringUtils;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.rest.RestUserManagement;
 import mitll.langtest.server.services.OpenUserServiceImpl;
@@ -40,25 +38,15 @@ import java.util.List;
 
 public class EmailHelper {
   //private static final Logger logger = LogManager.getLogger(EmailHelper.class);
-
   /**
    *
    */
   private static final String CLOSING = "Regards, Administrator";
-
-  //private static final String PASSWORD_RESET = "Password Reset";
- // private static final String RESET_PASSWORD = "Reset Password";
   private static final String YOUR_USER_NAME = "Your user name";
-
- // private static final String INVALID_PASSWORD_RESET = "Invalid password reset";
   private static final String LOCALHOST = "127.0.0.1";
 
- // private final IUserDAO userDAO;
   private final MailSupport mailSupport;
- // private final ServerProperties serverProperties;
-//  private final PathHelper pathHelper;
   private final String replyTo;
-  //private final String NP_SERVER;
 
   /**
    * @param serverProperties
@@ -69,10 +57,6 @@ public class EmailHelper {
   public EmailHelper(ServerProperties serverProperties, MailSupport mailSupport) {
     this.mailSupport = mailSupport;
     replyTo = serverProperties.getMailReplyTo();
-  }
-
-  private String getHash(String toHash) {
-    return StringUtils.toHexString(Md5Utils.getMd5Digest(toHash.getBytes()));
   }
 
   /**
@@ -116,67 +100,6 @@ public class EmailHelper {
         "<br/><br/>" +
         CLOSING;
   }
-
-  /**
-   * TODO : - update this for domino
-   *
-   * @param user
-   * @param email
-   * @param url
-   * @return true if there's a user with this email
-   * @see mitll.langtest.server.rest.RestUserManagement#resetPassword
-   */
-/*
-  public boolean resetPassword(String user, String email, String url) {
-    logger.debug("resetPassword for " + user + " url " + url);
-    user = user.trim();
-    email = email.trim();
-
-    String hash1 = getHash(email);
-    Integer validUserAndEmail = userDAO.getIDForUserAndEmail(user, hash1);
-
-    if (validUserAndEmail != null) {
-      logger.debug("resetPassword for " + user + " sending reset password email.");
-      String toHash = user + "_" + System.currentTimeMillis();
-      String hash = getHash(toHash);
-
-      String message = "Hi " + user + ",<br/><br/>" +
-          "Click the link below to reset your password." +
-          "<br/>" +
-          "In NetProF, click the login button to enter a new password." +
-          "<br/>" +
-          CLOSING;
-
-      url = trimURL(url);
-      if (!url.startsWith("https")) {
-        url = url.replaceAll("http", "https");
-      }
-      logger.debug("resetPassword url is " + url);
-
-      sendEmail(url + "?" + RP + "=" + hash,
-          email,
-          PASSWORD_RESET,
-          message,
-          RESET_PASSWORD // link text
-      );
-
-      return true;
-    } else {
-      logger.error("resetPassword couldn't find user " + user + " and email " + email + " " + hash1);
-
-      String message = "User " + user + " with email " + email + " tried to reset password - but they're not valid.";
-      String prefixedMessage = "for " + pathHelper.getInstallPath() + " got " + message;
-
-      logger.debug(prefixedMessage);
-
-      mailSupport.email(
-          serverProperties.getEmailAddress(),
-          INVALID_PASSWORD_RESET,
-          prefixedMessage);
-      return false;
-    }
-  }
-*/
 
   /**
    * @param link

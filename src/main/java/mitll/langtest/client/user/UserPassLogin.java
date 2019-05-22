@@ -62,10 +62,12 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
 
   public static final String USER_NAME_BOX = "UserNameBox";
 
+  private static final String NET_PRO_F = "Netprof";
+
   /**
    * @see #showSuggestApp
    */
-  public static final String IPAD_LINE_1 = "Also consider installing the NetProF app, which is available on the DLI App Store.";// or";
+  public static final String IPAD_LINE_1 = "Also consider installing the " + NET_PRO_F + " app, which is available on the DLI App Store.";// or";
   public static final String IPAD_LINE_2 = "Or click this link to install <a href='https://netprof.ll.mit.edu/ios/'>netprof for your iPad/iPhone" + "</a>.";
   private static final String IPAD_LINE_3 = "Otherwise, you will not be able to record yourself practicing vocabulary.";
 

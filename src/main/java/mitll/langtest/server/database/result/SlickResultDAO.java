@@ -32,6 +32,7 @@ package mitll.langtest.server.database.result;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
@@ -47,7 +48,6 @@ import mitll.npdata.dao.SlickPerfResult;
 import mitll.npdata.dao.SlickResult;
 import mitll.npdata.dao.result.ResultDAOWrapper;
 import mitll.npdata.dao.result.SlickCorrectAndScore;
-import mitll.npdata.dao.result.SlickExerciseScore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -276,11 +276,26 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }
 
   @Override
+
+  public List<MonitorResult> getResultsBySession(int userid, int projid, String sessionID) {
+    return getMonitorResults(getDao().resultsBySession(userid, projid, sessionID));
+  }
+
+  @Override
+  public List<MonitorResult> getResultsInTimeRange(int userid, int projectid, Timestamp from, Timestamp to) {
+    return getMonitorResults(getDao().resultsInTimeRange(userid, projectid,  from, to));
+  }
+
   public List<MonitorResult> getMonitorResultsKnownExercises(int projid) {
     return getMonitorResults(dao.getAllByProjectKnownExercises(projid));
   }
 
-  private List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {
+  @Override
+  public List<MonitorResult> getMonitorResultsKnownExercisesWithLimit(int projid, int limit) {
+    return getMonitorResults(dao.getAllByProjectKnownExercisesWithLimit(projid, limit));
+  }
+
+  public List<MonitorResult> getMonitorResults(Collection<SlickResult> all) {
     List<MonitorResult> copy = new ArrayList<>(all.size());
     for (SlickResult result : all) copy.add(fromSlickToMonitorResult(result));
     return copy;
@@ -338,12 +353,13 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @param userid
    * @param ids
    * @param language
+   * @param projid
    * @return
    */
-  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> ids, Language language) {
+  public Map<Integer, CorrectAndScore> getScoreHistories(int userid, Collection<Integer> ids, Language language, int projid) {
     Map<Integer, CorrectAndScore> exidToMaxScoreEver = new HashMap<>(ids.size());
 
-    getResultsForExIDInForUserEasy(ids, userid, language)
+    getResultsForExIDInForUserEasy(ids, userid, language, projid)
         .stream()
         .collect(groupingBy(CorrectAndScore::getExid))
         .forEach((k, v) -> exidToMaxScoreEver.put(k,
@@ -364,23 +380,25 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
    * @param ids
    * @param userid
    * @param language
+   * @param projid
    * @return
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language) {
-    return getResultsForExIDInForUserEasy(ids, userid, language);
+  public List<CorrectAndScore> getResultsForExIDInForUser(Collection<Integer> ids, int userid, Language language, int projid) {
+    return getResultsForExIDInForUserEasy(ids, userid, language, projid);
   }
 
   /**
    * @param ids
    * @param userid
    * @param language
+   * @param projid
    * @return
    * @paramx ignoredSession
    */
   @Override
-  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language) {
-    return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids), language);
+  public List<CorrectAndScore> getResultsForExIDInForUserEasy(Collection<Integer> ids, int userid, Language language, int projid) {
+    return getCorrectAndScores(dao.correctAndScoreWhere(userid, ids, projid), language);
   }
 
   @Override
@@ -609,13 +627,12 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   }*/
 
   /**
-   *
    * @param projid
-   * @param minScore
    * @return
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getUserInfo(IUserDAO, int, int)
    */
-  public Collection<SlickPerfResult> getPerf(int projid, float minScore) {
-    return dao.perf(projid, minScore);
+  public Collection<SlickPerfResult> getPerf(int projid) {
+    return dao.perf(projid);
   }
 
   public Collection<SlickPerfResult> getPerfOnList(int listid, float minScore) {
@@ -732,5 +749,9 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   public int getDefaultResult() {
     return defaultResult.id();
+  }
+
+  private ResultDAOWrapper getDao() {
+    return dao;
   }
 }

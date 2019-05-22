@@ -37,11 +37,12 @@ import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.langtest.shared.scoring.RecalcResponses;
 import mitll.langtest.shared.user.MiniUser;
@@ -53,6 +54,8 @@ import java.io.File;
 import java.util.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import static mitll.langtest.server.audio.AudioConversion.LANGTEST_IMAGES_NEW_PRO_F_1_PNG;
 
 //import mitll.langtest.shared.MiniUser;
 
@@ -96,7 +99,7 @@ public class RefResultDecoder {
     this.serverProps = serverProperties;
     this.pathHelper = pathHelper;
     this.audioFileHelper = audioFileHelper;
-    this.audioConversion = new AudioConversion(serverProperties.shouldTrimAudio(), serverProperties.getMinDynamicRange());
+    this.audioConversion = new AudioConversion(serverProperties.shouldTrimAudio(), serverProperties.getMinDynamicRange(), pathHelper.getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG));
     audioCheck = new AudioCheck(serverProperties.shouldTrimAudio(), serverProperties.getMinDynamicRange());
     defaultUser = db.getUserDAO().getDefaultUser();
 
@@ -426,8 +429,7 @@ public class RefResultDecoder {
    * @param exercises
    * @see Project#ensureAudio
    */
-  public void ensure(String language,
-                     Collection<CommonExercise> exercises) {
+  public void ensure(String language, Collection<CommonExercise> exercises) {
 //      String installPath = pathHelper.getInstallPath();
     int numResults = db.getRefResultDAO().getNumResults();
     logger.debug(language + " writeRefDecode : found " +
@@ -655,7 +657,9 @@ public class RefResultDecoder {
    *
    * @see Project#recalcRefAudio
    */
-  public RecalcRefResponse writeRefDecode(Language language, Collection<CommonExercise> exercises, int projid) {
+  public RecalcRefResponse writeRefDecode(Language language,
+                                          Collection<CommonExercise> exercises, int projid,
+                                          int userIDFromSession) {
     // boolean b = db.getServerProps().shouldDoDecode();
     //logger.warn("writeRefDecode got " + b + " for should do decode");
     //if (false) {
@@ -667,7 +671,16 @@ public class RefResultDecoder {
       return new RecalcRefResponse(RecalcResponses.ERROR);
     }
 
-    db.getAudioDAO().attachAudioToExercises(exercises, language, projid);
+    db.getRefResultDAO().deleteForProject(projid);
+
+    List<Integer> audioIDs = db.getAudioDAO().getAllAudioIDs(projid, db.getProject(projid).hasProjectSpecificAudio());
+
+    recalcAlignments(projid, audioIDs, audioFileHelper,
+        userIDFromSession, db.getProject(projid).hasModel());
+
+    // Map<Integer, ISlimResult> audioIDMap = db.getRefResultDAO().getAudioIDMap(projid, audioIDs);
+
+    // db.getAudioDAO().attachAudioToExercises(exercises, language, projid);
 
 //    int numResults = db.getRefResultDAO().getNumResults();
 //    logger.debug("writeRefDecode : " +
@@ -675,9 +688,8 @@ public class RefResultDecoder {
 //        " in ref results table" +
 //        " vs " + exToAudio.size() + " exercises with audio");
 
-    db.getRefResultDAO().deleteForProject(projid);
 
-    Set<Integer> decodedFiles = getDecodedFiles(projid);
+/*    Set<Integer> decodedFiles = getDecodedFiles(projid);
     logger.info("writeRefDecode for " +
         "\n\tproject  " + projid +
         "\n\tfound    " + decodedFiles.size() + " previous ref results," +
@@ -717,12 +729,41 @@ public class RefResultDecoder {
         "\n\texamined " + exercises.size() + " exercises" +
         "\n\tqueued   " + total + " vocab audio files" +
         "\n\tqueued   " + context + " context audio files"
-    );
+    );*/
 //    logger.debug("writeRefDecode : Out of " + allstats.attrc + " best audio files, " +
 //        allstats.maleAudio + " male, " + allstats.femaleAudio + " female, " +
 //        allstats.defaultAudio + " default " + "decoded " + allstats.count);
 
-    return new RecalcRefResponse(total + context == 0 ? RecalcResponses.COMPLETED : RecalcResponses.WORKING, total + context);
+    return new RecalcRefResponse(audioIDs.size() == 0 ? RecalcResponses.COMPLETED : RecalcResponses.WORKING, audioIDs.size());
+  }
+
+  private Map<Integer, AlignmentAndScore> recalcAlignments(int projid,
+                                                           Collection<Integer> audioIDs,
+                                                           AudioFileHelper audioFileHelper,
+                                                           int userIDFromSession,
+
+                                                           boolean hasModel) {
+    Map<Integer, AlignmentAndScore> idToAlignment = new HashMap<>();
+
+    if (hasModel) {
+//      logger.info("recalcAlignments recalc " + audioIDs.size() + " audio ids for project #" + projid);
+      if (audioIDs.isEmpty()) logger.error("recalcAlignments huh? no audio for " + projid);
+
+      audioIDs.forEach(audioID -> recalcOneOrGetCached(projid, audioID, audioFileHelper, userIDFromSession));
+
+    } else {
+      logger.info("recalcAlignments : no hydra for project " + projid + " so not recalculating alignments.");
+    }
+
+    return idToAlignment;
+  }
+
+
+  private void recalcOneOrGetCached(int projid,
+                                    Integer audioID,
+                                    AudioFileHelper audioFileHelper,
+                                    int userIDFromSession) {
+     audioFileHelper.recalcRefAudioWithHelper(projid, audioID, audioFileHelper, userIDFromSession);
   }
 
   /**
@@ -1018,6 +1059,7 @@ public class RefResultDecoder {
 
   /**
    * TODO : seems wrong...
+   *
    * @param audioAttributes
    * @param title
    * @param comment

@@ -29,9 +29,8 @@
 
 package mitll.langtest.server.database.security;
 
-import mitll.hlt.domino.shared.model.user.UserDescriptor;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.user.ActiveInfo;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.database.user.IUserSessionDAO;
@@ -52,7 +51,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.sql.Timestamp;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.server.services.MyRemoteServiceServlet.X_FORWARDED_FOR;
 
@@ -226,7 +224,7 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     Timestamp modified = new Timestamp(System.currentTimeMillis());
     String id = session.getId();
 
-  //  log.info("setSessionUserAndRemember : set session " + id + " user " + id1);
+    //  log.info("setSessionUserAndRemember : set session " + id + " user " + id1);
 
     userSessionDAO.add(
         new SlickUserSession(-1,
@@ -774,8 +772,10 @@ public class NPUserSecurityManager implements IUserSecurityManager {
     User sessUser = userDAO.getByID(id);
     long now = System.currentTimeMillis();
 
-    if (sessUser != null) {
-      log.info("getUserForID " + id + " is a " + sessUser.getUserKind() + " teacher? " +sessUser.isTeacher());
+    if (DEBUG) {
+      if (sessUser != null) {
+        log.info("getUserForID " + id + " is a " + sessUser.getUserKind() + " teacher? " + sessUser.isTeacher());
+      }
     }
 
     if (now - then > 20) {

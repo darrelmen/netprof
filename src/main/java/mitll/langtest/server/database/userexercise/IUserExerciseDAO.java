@@ -32,9 +32,10 @@ package mitll.langtest.server.database.userexercise;
 import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
-import mitll.langtest.server.database.exercise.*;
+import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectManagement;
-import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
@@ -69,13 +70,6 @@ public interface IUserExerciseDAO extends IDAO {
    */
   Map<Integer, String> getIDToFL(int projid);
 
-  /**
-   * @see DBExerciseDAO#readExercises
-   * @return
-   */
-/*
-  IRefResultDAO getRefResultDAO();
-*/
 
   /**
    * @see mitll.langtest.server.ScoreServlet#getJsonForAudio(HttpServletRequest, ScoreServlet.PostRequest, String, String)
@@ -210,10 +204,6 @@ public interface IUserExerciseDAO extends IDAO {
       boolean isPredef);
 
   Collection<CommonExercise> getOverrides(boolean shouldSwap);
-
-/*
-  Collection<CommonExercise> getByExID(Collection<Integer> exids, boolean shouldSwap);
-*/
 
   List<SlickExercise> getExercisesByIDs(Collection<Integer> exids);
 

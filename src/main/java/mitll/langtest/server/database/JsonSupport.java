@@ -35,8 +35,8 @@ import com.google.gson.JsonParser;
 import mitll.langtest.server.ScoreServlet;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.phone.IPhoneDAO;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.result.IResultDAO;
 import mitll.langtest.shared.analysis.PhoneReportRequest;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -137,8 +137,13 @@ public class JsonSupport {
       idToEx.put(id, exercise);
     }
 
+    int projid = -1;
+    if (!exercisesForState.isEmpty()) {
+      projid = exercisesForState.iterator().next().getProjectID();
+    }
+    
     List<ExerciseCorrectAndScore> exerciseCorrectAndScores =
-        resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, language);
+        resultDAO.getExerciseCorrectAndScoresByPhones(userid, allIDs, idToEx, language, projid);
 
 //    if (true) {
 //     // exerciseCorrectAndScores.sort(Comparator.comparingDouble(ExerciseCorrectAndScore::getLatestScore));

@@ -38,7 +38,10 @@ import mitll.hlt.domino.server.data.DocumentServiceDelegate;
 import mitll.hlt.domino.server.data.IProjectWorkflowDAO;
 import mitll.hlt.domino.server.data.ProjectServiceDelegate;
 import mitll.hlt.domino.server.data.SimpleDominoContext;
+import mitll.hlt.domino.server.extern.importers.ImportResult;
 import mitll.hlt.domino.server.util.Mongo;
+import mitll.hlt.domino.shared.model.project.ClientPMProject;
+import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
@@ -51,8 +54,9 @@ import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.database.result.SlickResultDAO;
+import mitll.langtest.server.database.security.IUserSecurityManager;
+import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.IDominoImport;
 import mitll.langtest.server.domino.ImportInfo;
@@ -62,15 +66,19 @@ import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.user.User;
 import mitll.npdata.dao.SlickProject;
+import org.apache.commons.fileupload.FileItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.servlet.ServletContext;
+import java.io.File;
+import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -87,7 +95,7 @@ import java.util.stream.Collectors;
 
 import static java.lang.Thread.sleep;
 import static mitll.hlt.domino.server.ServerInitializationManager.MONGO_ATT_NAME;
-import static mitll.langtest.server.database.exercise.Project.MANDARIN;
+import static mitll.langtest.server.database.project.Project.MANDARIN;
 
 public class ProjectManagement implements IProjectManagement {
   private static final Logger logger = LogManager.getLogger(ProjectManagement.class);
@@ -117,6 +125,7 @@ public class ProjectManagement implements IProjectManagement {
   private static final String ANSWERS1 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
   private static final Pattern pattern = Pattern.compile(ANSWERS1);
   public static final boolean DEBUG_USER_FOR_FILE = false;
+  public static final boolean CHECK_FOR_OOV_ON_STARTUP = false;
 
   /**
    * JUST FOR TESTING
@@ -161,6 +170,9 @@ public class ProjectManagement implements IProjectManagement {
 
   private final boolean debugOne;
 
+  /**
+   *
+   */
   private final IDominoImport dominoImport;
   private Map<Integer, Integer> oldToNew = new ConcurrentHashMap<>();
 
@@ -207,7 +219,8 @@ public class ProjectManagement implements IProjectManagement {
         workflowDelegate,
         documentDelegate,
         (Mongo) servletContext.getAttribute(MONGO_ATT_NAME),
-        db.getUserExerciseDAO());
+        db.getUserExerciseDAO(),
+        simpleDominoContext);
   }
 
 
@@ -407,8 +420,8 @@ public class ProjectManagement implements IProjectManagement {
 
     // TODO : why would we want to keep going on a project that has no slick project -- if it's new???
 
-    int id = slickProject == null ? -1 : slickProject.id();
     boolean myProject = project.isMyProject();
+    int id = slickProject == null ? -1 : slickProject.id();
     setDependencies(project.getExerciseDAO(), id, myProject);
 
     if (forceReload) {
@@ -417,7 +430,11 @@ public class ProjectManagement implements IProjectManagement {
       if (projectDAO.maybeSetDominoIDs(project)) {
         logger.info("configureProject : updated domino ids on " + project);
       }
+      // remember to put the audio back on the exercises after a reload or else json export will
+      // filter them out since they have no audio!
     }
+
+    new Thread(() -> db.getAudioDAO().attachAudioToAllExercises(project.getRawExercises(), project.getLanguageEnum(), projectID), "attachAllAudio").start();
 
     if (project.getExerciseDAO() == null) {
       setExerciseDAO(project);
@@ -451,9 +468,12 @@ public class ProjectManagement implements IProjectManagement {
               isPolyglot(project))
       );
 
-      if (myProject) {
-        new Thread(() -> project.getAudioFileHelper().checkLTSAndCountPhones(rawExercises), "checkLTSAndCountPhones_" + project.getID()).start();
+      if (CHECK_FOR_OOV_ON_STARTUP) {
+        if (myProject) {
+          new Thread(() -> project.getAudioFileHelper().checkForOOV(rawExercises), "checkLTSAndCountPhones_" + project.getID()).start();
+        }
       }
+
 //      ExerciseTrie<CommonExercise> commonExerciseExerciseTrie = populatePhoneTrie(rawExercises);
 
       //Set<Integer> exids = new HashSet<>();
@@ -563,11 +583,11 @@ public class ProjectManagement implements IProjectManagement {
       }
 
       if (userID == -1) {
-        logger.info("getUserForFile couldn't find recorder of (" +oldUser+ ") " + requestURI);
+        logger.info("getUserForFile couldn't find recorder of (" + oldUser + ") " + requestURI);
       }
       if (oldUser != -1 && userID != -1) {
         if (oldUser != userID) {
-        logger.info("getUserForFile remember " + oldUser + "->" + userID);
+          logger.info("getUserForFile remember " + oldUser + "->" + userID);
         }
         oldToNew.put(oldUser, userID);
       }
@@ -627,7 +647,7 @@ public class ProjectManagement implements IProjectManagement {
           Integer userID = project.getUserForFile(requestURI);
           if (userID != null) {
             if (DEBUG_USER_FOR_FILE) {
-            logger.info("getUserForFile : user in project #" + project.getID() + " for " + requestURI + " is " + userID);
+              logger.info("getUserForFile : user in project #" + project.getID() + " for " + requestURI + " is " + userID);
             }
             return userID;
           }
@@ -911,7 +931,7 @@ public class ProjectManagement implements IProjectManagement {
 
   @Override
   public List<Project> getMatchingProjects(Language languageMatchingGroup, boolean isPoly) {
-    List<Project> projectByLangauge = getProjectByLangauge(languageMatchingGroup);
+    List<Project> projectByLangauge = getProjectByLanguage(languageMatchingGroup);
     return projectByLangauge.stream()
         .filter(project ->
             (!isPoly || isPolyglot(project)) &&
@@ -926,12 +946,17 @@ public class ProjectManagement implements IProjectManagement {
    * @return
    */
   @Override
-  public List<Project> getProjectByLangauge(Language name) {
+  public List<Project> getProjectByLanguage(Language name) {
     return idToProject
         .values()
         .stream()
         .filter(project -> project.getLanguageEnum() == name)
         .collect(Collectors.toList());
+  }
+
+  @Override
+  public IProject getIProject(int projectid, boolean onlyOne) {
+    return getProject(projectid, onlyOne);
   }
 
   /**
@@ -979,6 +1004,7 @@ public class ProjectManagement implements IProjectManagement {
    * @param projectid
    * @param onlyOne   if false loads all the projects
    * @return
+   * @see #getProject(int, boolean)
    */
   private Project lazyGetProject(int projectid, boolean onlyOne) {
     logger.info("lazyGetProject no project with id " + projectid + " in known projects (" + idToProject.keySet() +
@@ -1154,6 +1180,7 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * @return
    * @see LangTestDatabaseImpl#getStartupInfo
+   * @see ProjectHelper#getProjectInfos(DatabaseServices, IUserSecurityManager)
    */
   public List<SlimProject> getNestedProjectInfo() {
     int numProjects = projectDAO.getNumProjects();
@@ -1215,8 +1242,9 @@ public class ProjectManagement implements IProjectManagement {
         String name = DIALOG;
         String cc = DIALOG1;
 
-        if (dialogs.isEmpty()) logger.warn("addModeChoices no dialogs in " + project);
-        else {
+        if (dialogs.isEmpty()) {
+          //logger.warn("addModeChoices no dialogs in " + project);
+        } else {
           IDialog iDialog = dialogs.get(0);
           DialogType kind = iDialog.getKind();
           if (kind == DialogType.INTERPRETER) {
@@ -1224,7 +1252,7 @@ public class ProjectManagement implements IProjectManagement {
             cc = INTERPRETER1;
             // logger.info("addModeChoices : found first interpreter dialog : " + iDialog);
           } else {
-            logger.info("dialog kind is " + kind);
+            // logger.info("dialog kind is " + kind);
           }
         }
         dialog.setName(name);
@@ -1274,11 +1302,10 @@ public class ProjectManagement implements IProjectManagement {
 
     boolean isRTL = addOtherProps(project, info);
 
-    String language = project.language();
-    return new SlimProject(
+    SlimProject slimProject = new SlimProject(
         project.id(),
         project.name(),
-        toEnum(language),
+        toEnum(project.language()),
         project.course(),
         project.countrycode(),
         ProjectStatus.valueOf(project.status()),
@@ -1303,6 +1330,7 @@ public class ProjectManagement implements IProjectManagement {
         project.dominoid(),
         info,
         userid);
+    return slimProject;
   }
 
   private void addCreatedBy(Map<String, String> info, int userid) {
@@ -1441,6 +1469,7 @@ public class ProjectManagement implements IProjectManagement {
    * @param sinceInUTC
    * @return
    * @see mitll.langtest.server.domino.ProjectSync#addPending
+   * @see #getImportFromDomino(int)
    */
   private ImportInfo getImportFromDomino(int projID, int dominoID, String sinceInUTC) {
     boolean shouldSwap = db.getProjectDAO().getDefPropValue(projID, ProjectProperty.SWAP_PRIMARY_AND_ALT).equalsIgnoreCase("TRUE");
@@ -1463,4 +1492,149 @@ public class ProjectManagement implements IProjectManagement {
   public Map<String, Integer> getNpToDomino(int dominoProjectID) {
     return dominoImport == null ? Collections.emptyMap() : dominoImport.getNPIDToDominoID(dominoProjectID);
   }
+
+  @Override
+  public ImportResult doDominoImport(int dominoID, FileItem item, Collection<String> typeOrder, int userID) {
+    logger.info("doDominoImport : file " + item);
+    File filename = getFile(item);
+    logger.info("doDominoImport : file is " + filename);
+    return doDominoImport(dominoID, filename, typeOrder, userID);
+  }
+
+  @Override
+  public ImportResult doDominoImport(int dominoID, File excelFile, Collection<String> typeOrder, int userID) {
+    IUserDAO userDAO = db.getUserDAO();
+
+    DBUser dbUser = userDAO.lookupDBUser(userID);
+
+    logger.info("doDominoImport using user " + dbUser + "\n\tor " + userDAO.getUserWhere(userID));
+    ClientPMProject clientPMProject = dominoImport.getClientPMProject(dominoID, dbUser);
+    logger.info("doDominoImport found domino project " + clientPMProject);
+
+    if (clientPMProject == null) {
+      logger.info("doDominoImport no project for domino ID #" + dominoID);
+      return new ImportResult();
+    } else if (excelFile == null) {
+      logger.warn("doDominoImport : huh? no excel file?");
+      return new ImportResult();
+    } else {
+      mitll.hlt.domino.shared.model.user.User user = userDAO.lookupDominoUser(userID);
+      logger.info("doDominoImport using " +
+          "\n\tuser         " + user +
+          "\n\treading from " + excelFile + " " + excelFile.length());
+
+      MyVocabularyImportCommand iCmd = new MyVocabularyImportCommand(user, excelFile);
+      ImportResult result = new MyExcelVocabularyImporter(this, userID, clientPMProject, typeOrder, dominoImport, userDAO).importDocument(iCmd);
+      logger.info("doDominoImport got result " + result);
+      return result;
+    }
+  }
+
+
+  private File getFile(FileItem item) {
+    try {
+      File tempDir = Files.createTempDirectory("fileUpload_" + item.getName()).toFile();
+      File tempFile = new File(tempDir, "upload_" + System.currentTimeMillis());
+
+      logger.info("write " +
+          "\n\tfile item " + item +
+          "\n\tto        " + tempFile);
+
+      item.write(tempFile);
+
+      logger.info("write wrote " +
+          "\n\tfile item " + item +
+          "\n\tbytes     " + tempFile.length());
+      return tempFile;
+    } catch (Exception e) {
+      logger.error("got " + e, e);
+      return null;
+    }
+
+/*
+    if (item instanceof DiskFileItem) {
+      DiskFileItem dItem = (DiskFileItem) item;
+      // Rename the temporary file to the real filename
+      // as this is required to determine the importer
+      // to run later.
+      if (dItem == null) {
+        logger.error("getFile huh? item is null?");
+        return null;
+      } else {
+
+        try {
+          File tempFile = Files.createTempDirectory("fileUpload_" + item.getName()).toFile();
+          item.write(tempFile);
+        } catch (Exception e) {
+          logger.error("got " + e, e);
+          return null;
+        }
+
+        File storeLocation = dItem.getStoreLocation();
+        if (storeLocation == null) {
+          logger.error("getFile huh? storeLocation is null?");
+          return null;
+        } else {
+          File tmpDir = storeLocation.getParentFile();
+          logger.info("getFile TmpDir: " + tmpDir + ", " + item.getName());
+          File renamedF = new File(tmpDir, item.getName());
+          try {
+            dItem.write(renamedF);
+          } catch (Exception ex) {
+            logger.error("Error renaming file from " + storeLocation +
+                " to " + renamedF, ex);
+          }
+          return renamedF;
+        }
+      }
+    }*/
+    // TODO support writing to temporary file and reading it back out when/
+    // if necessary.
+//    logger.warn("Import servlet does not handle in memory file items! " +
+//        "Item: " + item.getName() + ", inMemory=" + item.isInMemory() +
+//        ", of type " + item.getClass().getSimpleName());
+//    return null;
+  }
+
+  /**
+   * Clear oov table of stale entries when we start over...
+   *
+   * @param id
+   * @param num
+   * @param offset
+   * @return
+   * @see mitll.langtest.server.services.AudioServiceImpl#checkOOV(int, int, int)
+   * @see mitll.langtest.client.banner.OOVViewHelper#checkOOVRepeatedly
+   */
+  @Override
+  public OOVInfo checkOOV(int id, int num, int offset) {
+    Project project = getProject(id, false);
+    List<CommonExercise> rawExercises = project.getRawExercises();
+
+    int total = rawExercises.size();
+
+    logger.info("checkOOV req for " + id + " num " + num + " offset " + offset + " total " + total);
+    if (num < 0) num = 0;
+    if (offset < 1) offset = 100;
+
+    if (num > total) {
+      num = total;
+    }
+    if (num + offset > total) {
+      offset = total - num;
+    }
+
+    List<CommonExercise> commonExercises = rawExercises.subList(num, num + offset);
+
+    logger.info("checkOOV removeStale " + (num == 0) + " for " + commonExercises.size());
+    return project.getAudioFileHelper().checkOOV(commonExercises, true).setTotal(total);
+  }
+
+  public void updateOOV(List<OOV> updates, int user) {
+    for (OOV update : updates) {
+      boolean update1 = db.getOOVDAO().update(update.getID(), update.getEquivalent(), user);
+      if (!update1) logger.warn("updateOOV can't update " + update);
+    }
+  }
+
 }

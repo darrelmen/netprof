@@ -29,6 +29,8 @@
 
 package mitll.langtest.server.domino;
 
+import mitll.hlt.domino.server.data.IDominoContext;
+import mitll.hlt.domino.shared.model.project.ClientPMProject;
 import mitll.hlt.domino.shared.model.user.DBUser;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,4 +46,8 @@ public interface IDominoImport {
   String getDominoProjectName(int id);
 
   Map<String, Integer> getNPIDToDominoID(int projid);
+
+  ClientPMProject getClientPMProject(int dominoID, DBUser dominoAdminUser);
+
+  IDominoContext getDominoContext();
 }

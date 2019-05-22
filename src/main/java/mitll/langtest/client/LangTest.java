@@ -76,21 +76,23 @@ import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.HasID;
-import mitll.langtest.shared.exercise.HasUnitChapter;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.ImageOptions;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.client.banner.NewContentChooser.MODE;
 
 public class LangTest implements
-    EntryPoint, UserFeedback, ExerciseController, UserNotification, LifecycleSupport, UserState {
+    EntryPoint, UserFeedback, ExerciseController<ClientExercise>, UserNotification, LifecycleSupport, UserState {
+  public static final String UNKNOWN1 = "Unknown";
   private final Logger logger = Logger.getLogger("LangTest");
 
   private static final String LOCALHOST = "127.0.0.1";
@@ -104,10 +106,6 @@ public class LangTest implements
    * @see #setPageTitle
    */
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
-
-/*
-  public static final String VERSION_INFO = "3.0.3";
-*/
 
   private static final String UNKNOWN = "unknown";
   public static final String LANGTEST_IMAGES = "langtest/images/";
@@ -135,7 +133,7 @@ public class LangTest implements
   private final LangTestDatabaseAsync service = GWT.create(LangTestDatabase.class);
   private final UserServiceAsync userService = GWT.create(UserService.class);
   private final OpenUserServiceAsync openUserService = GWT.create(OpenUserService.class);
-  private final ExerciseServiceAsync<?> exerciseServiceAsync = GWT.create(ExerciseService.class);
+  private final ExerciseServiceAsync<ClientExercise> exerciseServiceAsync = GWT.create(ExerciseService.class);
   private final DialogServiceAsync dialogServiceAsync = GWT.create(DialogService.class);
   private final ListServiceAsync listServiceAsync = GWT.create(ListService.class);
   private final QCServiceAsync qcServiceAsync = GWT.create(QCService.class);
@@ -165,7 +163,11 @@ public class LangTest implements
   private KeyStorage storage;
 
   private Map<Integer, AudioServiceAsync> projectToAudioService;
+  private final Map<String, AudioServiceAsync> hostToAudioService = new HashMap<>();
+
   private Map<Integer, ScoringServiceAsync> projectToScoringService;
+  private final Map<String, ScoringServiceAsync> hostToScoringService = new HashMap<>();
+
   private final long then = 0;
   private MessageHelper messageHelper;
   private AnnotationHelper annotationHelper;
@@ -192,8 +194,11 @@ public class LangTest implements
 
       public void onSuccess(StartupInfo startupInfo) {
         long now = System.currentTimeMillis();
-        if (startupInfo == null) logger.warning("startup info is null??");
-        rememberStartup(startupInfo, false);
+        if (startupInfo == null) {
+          logger.warning("askForStartupInfo startup info is null??");
+        } else {
+          rememberStartup(startupInfo, false);
+        }
         onModuleLoad2();
 
         if (isLogClientMessages() && (now - then > 500)) {
@@ -216,9 +221,7 @@ public class LangTest implements
           "\nIf you still see this message, clear your cache. (" + caught.getMessage() +
           ")");
     } else {
-      long now = System.currentTimeMillis();
-      String message = "onModuleLoad.getProperties : (failure) took " + (now - then) + " millis";
-
+      String message = "onModuleLoad.getProperties : (failure) took " + (System.currentTimeMillis() - then) + " millis";
       logger.info(message);
       if (!caught.getMessage().trim().equals("0")) {
         logger.info("Exception " + caught.getMessage() + " " + caught + " " + caught.getClass() + " " + caught.getCause());
@@ -246,6 +249,19 @@ public class LangTest implements
     });
   }
 
+  public void refreshStartupInfoAnTell(boolean reloadWindow, int projID) {
+    service.getStartupInfo(new AsyncCallback<StartupInfo>() {
+      public void onFailure(Throwable caught) {
+        LangTest.this.onFailure(caught, then);
+      }
+
+      public void onSuccess(StartupInfo startupInfo) {
+        rememberStartup(startupInfo, reloadWindow);
+        tellOtherServerToRefreshProject(projID);
+      }
+    });
+  }
+
   /**
    * @param startupInfo
    * @param reloadWindow
@@ -259,8 +275,8 @@ public class LangTest implements
     }
 
     List<SlimProject> projects = getAllProjects();
-    projectToAudioService = createHostSpecificServices(projects);
-    projectToScoringService = createHostSpecificServicesScoring(projects);
+    projectToAudioService = createHostSpecificAudioServices(projects, hostToAudioService);
+    projectToScoringService = createHostSpecificServicesScoring(projects, hostToScoringService);
   }
 
   @Override
@@ -275,32 +291,56 @@ public class LangTest implements
    * @param projects
    * @return
    */
-  private Map<Integer, AudioServiceAsync> createHostSpecificServices(List<SlimProject> projects) {
+  private Map<Integer, AudioServiceAsync> createHostSpecificAudioServices(List<SlimProject> projects,
+                                                                          Map<String, AudioServiceAsync> hostToService) {
     Map<Integer, AudioServiceAsync> projectToAudioService = new HashMap<>();
-    Map<String, AudioServiceAsync> hostToService = new HashMap<>();
 
     // first figure out unique set of services...
-    projects.forEach(slimProject ->
-        hostToService.computeIfAbsent(slimProject.getHost(), this::getAudioServiceAsyncForHost));
+    projects.forEach(slimProject -> hostToService.computeIfAbsent(slimProject.getHost(), this::getAudioServiceAsyncForHost));
 
-//    logger.info("createHostSpecificServices " + hostToService.size() + " " + hostToService.keySet());
+//    logger.info("createHostSpecificAudioServices " + hostToScoringService.size() + " " + hostToScoringService.keySet());
 
     // then map project to service
-    projects.forEach(slimProject -> {
-      String host = slimProject.getHost();
-      AudioServiceAsync audioServiceAsync = hostToService.get(host);
-      if (audioServiceAsync == null) {
-        logger.warning("createHostSpecificServices no audio service for " + host + " project " + slimProject);
-      } else {
-        projectToAudioService.put(slimProject.getID(), audioServiceAsync);
-      }
-    });
+    projects.forEach(slimProject ->
+        updateHostToAudioService(hostToService.get(slimProject.getHost()), projectToAudioService, slimProject.getID())
+    );
 
-    //  logger.info("createHostSpecificServices for these projects " + projectToAudioService.keySet());
-
+    //  logger.info("createHostSpecificAudioServices for these projects " + projectToAudioService.keySet());
     return projectToAudioService;
   }
 
+  /**
+   * So if we change where the project is hosted, have to redirect the services to that host.
+   *
+   * @param projID
+   * @param host
+   */
+  public void updateServicesForProject(int projID, String host) {
+    updateAudioServiceForProject(projID, host);
+    updateScoringServiceForProject(projID, host);
+  }
+
+  /**
+   * Lazy update...
+   *
+   * @param projID
+   * @param host
+   */
+  private void updateAudioServiceForProject(int projID, String host) {
+    AudioServiceAsync audioServiceAsync = hostToAudioService.get(host);
+    if (audioServiceAsync == null) {
+      hostToAudioService.put(host, getAudioServiceAsyncForHost(host));
+    }
+    updateHostToAudioService(hostToAudioService.get(host), projectToAudioService, projID);
+  }
+
+  private void updateHostToAudioService(AudioServiceAsync audioServiceAsync, Map<Integer, AudioServiceAsync> projectToAudioService, int projectID) {
+    if (audioServiceAsync == null) {
+      logger.warning("createHostSpecificAudioServices no audio service for  project " + projectID);
+    } else {
+      projectToAudioService.put(projectID, audioServiceAsync);
+    }
+  }
 
   /**
    * Create host specific scoring services -- i.e. scoring for russian, korean, msa, levantine are on h2.
@@ -309,29 +349,37 @@ public class LangTest implements
    * @return
    * @see #rememberStartup
    */
-  private Map<Integer, ScoringServiceAsync> createHostSpecificServicesScoring(List<SlimProject> projects) {
-    Map<Integer, ScoringServiceAsync> projectToAudioService = new HashMap<>();
-    Map<String, ScoringServiceAsync> hostToService = new HashMap<>();
+  private Map<Integer, ScoringServiceAsync> createHostSpecificServicesScoring(List<SlimProject> projects,
+                                                                              Map<String, ScoringServiceAsync> hostToService) {
+    Map<Integer, ScoringServiceAsync> projectIDToService = new HashMap<>();
 
     // first figure out unique set of services...
-    projects.forEach(slimProject ->
-        hostToService.computeIfAbsent(slimProject.getHost(), this::getScoringServiceAsyncForHost));
+    projects.forEach(slimProject -> hostToService.computeIfAbsent(slimProject.getHost(), this::getScoringServiceAsyncForHost));
 
-//    logger.info("createHostSpecificServices num hosts = " + hostToService.size() + " : " + hostToService.keySet());
+//    logger.info("createHostSpecificAudioServices num hosts = " + hostToScoringService.size() + " : " + hostToScoringService.keySet());
     // then map project to service
-    projects.forEach(slimProject -> {
-      String host = slimProject.getHost();
-      ScoringServiceAsync scoringServiceAsync = hostToService.get(host);
+    projects.forEach(slimProject -> updateScoringServiceForProject(hostToService.get(slimProject.getHost()), projectIDToService, slimProject.getID()));
 
-      //    logger.info("createHostSpecificServicesScoring : for project #" + slimProject.getID() + " host = '" +host+ "'");
-      if (scoringServiceAsync == null) {
-        logger.warning("no scoring service for " + host + " project " + slimProject);
-      } else {
-        projectToAudioService.put(slimProject.getID(), scoringServiceAsync);
-      }
-    });
+    return projectIDToService;
+  }
 
-    return projectToAudioService;
+  private void updateScoringServiceForProject(int projID, String host) {
+    ScoringServiceAsync scoringServiceAsync = hostToScoringService.get(host);
+    if (scoringServiceAsync == null) {
+      hostToScoringService.put(host, getScoringServiceAsyncForHost(host));
+    }
+    scoringServiceAsync = hostToScoringService.get(host);
+    updateScoringServiceForProject(scoringServiceAsync, projectToScoringService, projID);
+  }
+
+  private void updateScoringServiceForProject(ScoringServiceAsync scoringServiceAsync,
+                                              Map<Integer, ScoringServiceAsync> projectToAudioService,
+                                              int id) {
+    if (scoringServiceAsync == null) {
+      logger.warning("no scoring service for project " + id);
+    } else {
+      projectToAudioService.put(id, scoringServiceAsync);
+    }
   }
 
   @Override
@@ -348,20 +396,22 @@ public class LangTest implements
     return audioService;
   }
 
+  /**
+   * Put the host at the end - e.g. h2 or s1 or s2
+   *
+   * @param host
+   * @param audioService
+   */
   private void adjustEntryPoint(String host, ServiceDefTarget audioService) {
     if (!isDefault(host)) {
-      String moduleBaseURL = audioService.getServiceEntryPoint();
-      audioService.setServiceEntryPoint(moduleBaseURL + "/" + host);
-      //   logger.info("adjustEntryPoint createHostSpecificServices service now at " + audioService.getServiceEntryPoint());
-    } else {
-      // logger.info("adjustEntryPoint createHostSpecificServices service is at " + audioService.getServiceEntryPoint());
+      audioService.setServiceEntryPoint(audioService.getServiceEntryPoint() + "/" + host);
     }
   }
 
   private boolean isDefault(String host) {
-    boolean isDefault = false;
-    if (host.equals(LOCALHOST)) isDefault = true;
-    return isDefault;
+//    boolean isDefault = false;
+//    if (host.equals(LOCALHOST)) isDefault = true;
+    return host.equals(LOCALHOST);
   }
 
   /**
@@ -374,36 +424,47 @@ public class LangTest implements
   }
 
   private boolean lastWasStackOverflow = false;
+  private boolean lastWasIncompat = false;
 
   public String logException(Throwable throwable) {
-    logger.info("logException got exception " + throwable.getMessage());
+//    if (throwable instanceof IncompatibleRemoteServiceException && !lastWasIncompat) {
+//      lastWasIncompat = true;
+//      logger.info("logException reload browser since " + throwable);
+//      int user = userManager != null ? userManager.getUser() : -1;
+//      String suffix = " browser " + browserCheck.getBrowserAndVersion() + " : " + "doing window reload";
+//      logMessageOnServer(GOT_BROWSER_EXCEPTION + "user #" + user + " exercise " + UNKNOWN1 + suffix, true);
+//      Window.Location.reload();
+//      return "";
+//    } else {
+      logger.info("logException got exception " + throwable.getMessage());
 
-    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(throwable);
-    logger.info("logException stack " + exceptionAsString);
-    boolean isStackOverflow = exceptionAsString.contains("Maximum call stack size exceeded");
-    if (isStackOverflow && lastWasStackOverflow) { // we get overwhelmed by repeated exceptions
-      return ""; // skip repeat exceptions
-    } else {
-      lastWasStackOverflow = isStackOverflow;
-    }
-    logMessageOnServer(exceptionAsString, GOT_BROWSER_EXCEPTION, true);
-    return exceptionAsString;
+      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(throwable);
+      logger.info("logException stack " + exceptionAsString);
+      boolean isStackOverflow = exceptionAsString.contains("Maximum call stack size exceeded");
+      if (isStackOverflow && lastWasStackOverflow) { // we get overwhelmed by repeated exceptions
+        return ""; // skip repeat exceptions
+      } else {
+        lastWasStackOverflow = isStackOverflow;
+      }
+      logMessageOnServer(exceptionAsString, GOT_BROWSER_EXCEPTION, true);
+      return exceptionAsString;
+//    }
   }
 
   public void logMessageOnServer(String message, String prefix, boolean sendEmail) {
     int user = userManager != null ? userManager.getUser() : -1;
-    String exerciseID = "Unknown";
     String suffix = " browser " + browserCheck.getBrowserAndVersion() + " : " + message;
-    logMessageOnServer(prefix + "user #" + user + " exercise " + exerciseID + suffix, sendEmail);
+    logMessageOnServer(prefix + "user #" + user + " exercise " + UNKNOWN1 + suffix, sendEmail);
 
     String toSend = prefix + suffix;
     if (toSend.length() > MAX_EXCEPTION_STRING) {
       toSend = toSend.substring(0, MAX_EXCEPTION_STRING) + "...";
     }
-    getButtonFactory().logEvent(UNKNOWN, UNKNOWN, new EventContext(exerciseID, toSend, user));
+    getButtonFactory().logEvent(UNKNOWN, UNKNOWN, new EventContext(UNKNOWN1, toSend, user));
   }
 
   private void logMessageOnServer(final String message, final boolean sendEmail) {
+
     Scheduler.get().scheduleDeferred(() -> service.logMessage(message, sendEmail,
         new AsyncCallback<Void>() {
           @Override
@@ -413,7 +474,7 @@ public class LangTest implements
 
           @Override
           public void onSuccess(Void result) {
-            logger.info("posted message to server, length " + message.length() + " send email " + sendEmail);
+            logger.info("logMessageOnServer : posted message to server, length " + message.length() + " send email " + sendEmail);
           }
         }
     ));
@@ -441,8 +502,6 @@ public class LangTest implements
     String key = path + DIVIDER + type + DIVIDER + toUse + DIVIDER + height + DIVIDER + exerciseID;
     getImage(reqid, key, client);
   }*/
-
-
   private void getImage(int reqid, String key, AsyncCallback<ImageResponse> client) {
     String[] split = key.split("\\|");
     String path = split[0];
@@ -597,7 +656,7 @@ public class LangTest implements
     Scheduler.get().scheduleDeferred(this::checkInitFlash);
   }
 
-  private boolean showingPlugInNotice = false;
+//  private boolean showingPlugInNotice = false;
 
   /**
    * Hookup feedback for events from Flash generated from the user's response to the Mic Access dialog
@@ -854,29 +913,20 @@ public class LangTest implements
   private void checkLogin() {
     //console("checkLogin");
     //logger.info("checkLogin -- ");
-    // userManager.isUserExpired();
     userManager.checkLogin();
-  }
-
-  public boolean showCompleted() {
-    return isReviewMode() || hasPermission(User.Permission.RECORD_AUDIO);
-  }
-
-  private boolean isReviewMode() {
-    return hasPermission(User.Permission.QUALITY_CONTROL);
   }
 
   /**
    * @return
    */
   @Override
-  public Collection<User.Permission> getPermissions() {
+  public Collection<Permission> getPermissions() {
     User current = getCurrent();
     return current != null ? current.getPermissions() : Collections.emptyList();
   }
 
-  public boolean hasPermission(User.Permission permission) {
-    //  logger.info("hasPermission user permissions " + getPermissions() + " for " + getUser());
+  public boolean hasPermission(Permission permission) {
+    // logger.info("hasPermission user permissions " + getPermissions() + " for " + getUser());
     return getPermissions().contains(permission);
   }
 
@@ -956,18 +1006,24 @@ public class LangTest implements
     return new HashSet<>(projectToAudioService.values());
   }
 
-  public void tellHydraServerToRefreshProject(int projID) {
-    getScoringService().configureAndRefresh(projID, new AsyncCallback<Void>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        messageHelper.handleNonFatalError("Updating project on hydra server.", caught);
-      }
+  public void tellOtherServerToRefreshProject(int projID) {
+    ScoringServiceAsync scoringServiceAsync = getScoringServiceAsync(projID);
 
-      @Override
-      public void onSuccess(Void result) {
-        logger.info("updateProject did update on project #" + projID + " on hydra server (maybe h2).");
-      }
-    });
+    if (scoringServiceAsync == null) {
+      logger.warning("no scoring service for " + projID);
+    } else {
+      scoringServiceAsync.configureAndRefresh(projID, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          messageHelper.handleNonFatalError("Updating project on hydra server.", caught);
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          logger.info("updateProject did update on project #" + projID + " on hydra server (maybe h2 or s1).");
+        }
+      });
+    }
   }
 
   /**
@@ -980,11 +1036,16 @@ public class LangTest implements
     if (projectStartupInfo == null) {
       logger.info("getScoringService has no project yet...");
     }
+
     ScoringServiceAsync audioServiceAsync = projectStartupInfo == null ?
         defaultScoringServiceAsync :
-        projectToScoringService.get(projectStartupInfo.getProjectid());
+        getScoringServiceAsync(projectStartupInfo.getProjectid());
     if (audioServiceAsync == null) logger.warning("getScoringService no audio service for " + projectStartupInfo);
     return audioServiceAsync == null ? defaultScoringServiceAsync : audioServiceAsync;
+  }
+
+  public ScoringServiceAsync getScoringServiceAsync(int projectid) {
+    return projectToScoringService.get(projectid);
   }
 
   /**
@@ -1020,7 +1081,7 @@ public class LangTest implements
     return qcServiceAsync;
   }
 
-  public ExerciseServiceAsync<?> getExerciseService() {
+  public ExerciseServiceAsync<ClientExercise> getExerciseService() {
     return exerciseServiceAsync;
   }
 

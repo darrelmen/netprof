@@ -29,9 +29,17 @@
 
 package mitll.langtest.shared.analysis;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import mitll.langtest.client.analysis.ReqCounter;
+import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.exercise.ExerciseController;
+
 import java.io.Serializable;
 import java.util.Date;
 
+/**
+ * @see mitll.langtest.client.analysis.AnalysisTab#AnalysisTab(ExerciseController, int, DivWidget, int, String, int, boolean, int, ReqCounter, INavigation.VIEWS)
+ */
 public class AnalysisRequest implements Serializable {
   private int userid = -1;
   private int dialogID = -1;
@@ -104,6 +112,10 @@ public class AnalysisRequest implements Serializable {
     return this;
   }
 
+  /**
+   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getSlickPerfResultsForDialog(AnalysisRequest)
+   * @return
+   */
   public int getDialogSessionID() {
     return dialogSessionID;
   }

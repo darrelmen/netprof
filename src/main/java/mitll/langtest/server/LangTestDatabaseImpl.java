@@ -43,6 +43,7 @@ import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.instrumentation.Event;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.project.StartupInfo;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,6 +53,7 @@ import javax.servlet.ServletException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static mitll.hlt.domino.server.ServerInitializationManager.USER_SVC;
 
@@ -139,7 +141,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     if (byID == null) {
       logger.error("huh? no user by " + userIDFromSession);
     } else {
-      boolean hasPerm = byID.getPermissions().contains(User.Permission.PROJECT_ADMIN);
+      boolean hasPerm = byID.getPermissions().contains(Permission.PROJECT_ADMIN);
       if (hasPerm) {
         db.sendReport(userIDFromSession);
       } else {
@@ -200,13 +202,14 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
   }
 
   /**
+   * @param limit
    * @return
    * @see mitll.langtest.client.instrumentation.EventTable#show
    */
-  public List<Event> getEvents() throws DominoSessionException, RestrictedOperationException {
+  public List<Event> getEvents(int limit) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasAdminPerm(userIDFromSessionOrDB)) {
-      return db.getEventDAO().getAll(getProjectIDFromUser(userIDFromSessionOrDB));
+      return db.getEventDAO().getAllWithLimit(getProjectIDFromUser(userIDFromSessionOrDB), limit);
     } else {
       throw getRestricted("getting events");
     }
@@ -279,7 +282,7 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     /**
      * @see
      */
-  //  String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
+    //  String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
     //åString configDir1 = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
     // logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
 

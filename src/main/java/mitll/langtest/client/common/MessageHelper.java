@@ -59,6 +59,7 @@ import static mitll.langtest.client.LangTest.LANGTEST_IMAGES;
 public class MessageHelper {
   private static final Logger log = Logger.getLogger(MessageHelper.class.getName());
   private static final String DOMINO_ERROR = "NetProF Error!";
+  public static final String LAST_EXCEPTION_WAS_INCOMPAT = "lastExceptionWasIncompat";
 
   public enum DDialogType {
     Loading, FatalError, NonFatalError,
@@ -127,6 +128,7 @@ public class MessageHelper {
   }
 
   private Modal handleError(String msg, Throwable throwable, DDialogType dType) {
+   // log.warning("handleError got " + msg + " for " +throwable);
     if (throwable instanceof DominoSessionException) {
       log.warning("Logout for session (" + msg + ") : t=" + throwable);
       parentHelper.logout();
@@ -242,7 +244,7 @@ public class MessageHelper {
             "Please wait a few minutes and reload your browser window.<br/>";
       case Loading:
         return "<br/><br/><img src='" +
-            LANGTEST_IMAGES+
+            LANGTEST_IMAGES +
             "ajax-loader.gif'/>";
       case NonFatalError:
         return "<br/><br/>An administrator has been notified.<br/>" +

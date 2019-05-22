@@ -100,6 +100,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     this.content = html;
     boolean isLTR = dir == HasDirection.Direction.LTR;
     span.getElement().setId("highlight_" + id + "_" + html +"_dir_"+dir);
+ //   getElement().setId("parent_highlight_" + id + "_" + html +"_dir_"+dir);
 
     configureNorth(id, north, isLTR, span, addFloatLeft);
     this.north = north;

@@ -233,7 +233,7 @@ public class ReviewScoringPanel<T extends HasID> extends ScoringAudioPanel<T> {
         if (result != null) {
           useResult(result, wordTranscript, phoneTranscript, false, "");
 
-          float hydecScore = result.getHydecScore();
+          float hydecScore = result.getOverallScore();
           float zeroToHundred = hydecScore * 100f;
           String html = "Score : <b>" + getScore(Math.min(100.0f, zeroToHundred)) + "%</b>";
           scoreInfo.setHTML(html);

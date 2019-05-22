@@ -101,7 +101,7 @@ public class ExcelUtil {
     return isDelete;
   }
 
-  public Map<Integer, CellRangeAddress> getRowToRange(Sheet sheet) {
+  Map<Integer, CellRangeAddress> getRowToRange(Sheet sheet) {
     Map<Integer, CellRangeAddress> rowToRange = new HashMap<>();
     for (int r = 0; r < sheet.getNumMergedRegions(); r++) {
       CellRangeAddress mergedRegion = sheet.getMergedRegion(r);

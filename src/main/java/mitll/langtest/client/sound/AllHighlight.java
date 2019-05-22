@@ -42,8 +42,8 @@ import java.util.logging.Logger;
 public class AllHighlight extends DivWidget implements IHighlightSegment {
   protected final Logger logger = Logger.getLogger("AllHighlight");
 
-  public static final String FLOAT_LEFT = "floatLeft";
-  public static final String INLINE_BLOCK_STYLE_ONLY = "inlineBlockStyleOnly";
+  private static final String FLOAT_LEFT = "floatLeft";
+  private static final String INLINE_BLOCK_STYLE_ONLY = "inlineBlockStyleOnly";
 
   private final Collection<IHighlightSegment> set;
 

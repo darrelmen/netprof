@@ -48,7 +48,10 @@ import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.answer.ActivityType;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.exercise.ExerciseListRequest;
+import mitll.langtest.shared.exercise.ExerciseListWrapper;
+import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -65,6 +68,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
 
   private static final boolean DEBUG_STALE = true;
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_EXCEPTION = true;
 
   private static final String SERVER_ERROR = "Server error";
   private static final String GETTING_EXERCISE = "getting exercise";
@@ -332,20 +336,20 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
         lastSuccessfulRequest = request;
         if (DEBUG) logger.info("onSuccess last req now " + lastSuccessfulRequest);
         setScores(result);
-        gotExercisesResponse(exerciseID, selectionID, searchIfAny, result.getExercises(), result.getFirstExercise());
+        gotExercisesResponse(selectionID, searchIfAny, exerciseID, result.getExercises());
       }
     }
   }
 
-  private void gotExercisesResponse(int exerciseID, String selectionID, String searchIfAny,
-                                    List<T> exercises, ClientExercise firstExercise) {
+  private void gotExercisesResponse(String selectionID, String searchIfAny, int exerciseID,
+                                    List<T> exercises) {
     checkForEmptyExerciseList(exercises.isEmpty());
-    int idToUse = exerciseID == -1 ? firstExercise == null ? -1 : firstExercise.getID() : exerciseID;
+    //   int idToUse = exerciseID == -1 ? firstExercise == null ? -1 : firstExercise.getID() : exerciseID;
 
 
     // TODO : check the current list of exercise ids - if it's not different than the result set, don't blink the UI.
 
-    rememberAndLoadFirst(exercises, selectionID, searchIfAny, idToUse);
+    rememberAndLoadFirst(exercises, selectionID, searchIfAny, exerciseID);
   }
 
   /**
@@ -482,8 +486,8 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   }
 
   /**
-   * @see #setShuffle
    * @param exercises
+   * @see #setShuffle
    */
   private void rememberAndLoadFirst(List<T> exercises) {
     rememberAndLoadFirst(exercises, "All", "", -1);
@@ -508,10 +512,10 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
    * @see ExerciseList.SetExercisesCallback#onSuccess(ExerciseListWrapper)
    * @see #rememberAndLoadFirst
    */
-  void rememberAndLoadFirst(List<T> exercises,
-                            String selectionID,
-                            String searchIfAny,
-                            int exerciseID) {
+  protected void rememberAndLoadFirst(List<T> exercises,
+                                      String selectionID,
+                                      String searchIfAny,
+                                      int exerciseID) {
     if (DEBUG) {
       logger.info("ExerciseList : rememberAndLoadFirst instance '" + //getInstance() +
           "'" +
@@ -1037,7 +1041,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   public void setScore(int id, float hydecScore) {
     T t = byID(id);
     if (t == null) {
-      logger.warning("setScore no exercise found for id " + id + " score " + hydecScore);
+      logger.info("setScore no exercise found for id " + id + " score " + hydecScore);
     } else {
       t.getMutableShell().setScore(hydecScore);
     }

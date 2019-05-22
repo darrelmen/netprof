@@ -45,9 +45,6 @@ import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.userlist.ListView;
 import mitll.langtest.client.dialog.*;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.flashcard.PolyglotDialog;
-import mitll.langtest.client.flashcard.PolyglotDialog.MODE_CHOICE;
-import mitll.langtest.client.flashcard.PolyglotDialog.PROMPT_CHOICE;
 import mitll.langtest.client.flashcard.StatsFlashcardFactory;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.UILifecycle;
@@ -61,13 +58,14 @@ import mitll.langtest.shared.exercise.MatchInfo;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.ProjectType;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
+import static mitll.langtest.shared.project.ProjectMode.VOCABULARY;
 
 /**
  * Created by go22670 on 4/10/17.
@@ -89,9 +87,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private final ListenViewHelper rehearseHelper, coreRehearseHelper;
   private final ListenViewHelper performPressAndHoldHelper, performHelper;
 
+  private final ContentView oovHelper;
+
   private final PracticeHelper practiceHelper;
   private final QuizChoiceHelper quizHelper;
-  private final ExerciseController controller;
+  private final ExerciseController<?> controller;
   private final IBanner banner;
 
   private VIEWS currentSection = VIEWS.NONE;
@@ -118,7 +118,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     coreRehearseHelper = new CoreRehearseViewHelper(controller, CORE_REHEARSE);
     performPressAndHoldHelper = new PerformViewHelper(controller, PERFORM_PRESS_AND_HOLD);
     performHelper = new PerformViewHelper(controller, PERFORM);
-
+    oovHelper = new OOVViewHelper(controller);
     this.controller = controller;
     this.banner = banner;
 
@@ -152,7 +152,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   @NotNull
   public VIEWS getCurrentView() {
     String currentView = getCurrentStoredView();
-    if (DEBUG_VIEW) logger.info("getCurrentView currentView " + currentView);
+    boolean hasStartup = controller.getProjectStartupInfo() != null;
+    if (DEBUG_VIEW) {
+      logger.info("getCurrentView currentView '" + currentView + "' has startup " + hasStartup);
+    }
     VIEWS currentStoredView;
     try {
       currentStoredView = currentView == null ? VIEWS.NONE : // Not sure how this can ever happen but saw exceptions.
@@ -161,34 +164,65 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       currentStoredView = VIEWS.NONE;
     }
 
-    {
-      Set<User.Permission> userPerms = new HashSet<>(controller.getPermissions());
+//    ProjectType projectType = hasStartup ? controller.getProjectStartupInfo().getProjectType() : ProjectType.NP;
 
-      //    logger.info("user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
-      List<User.Permission> requiredPerms = currentStoredView.getPerms();
+    ProjectMode storedMode = VOCABULARY;
+    if (hasStartup) {
+      String value = getStorage().getValue(MODE);
+      if (value != null && !value.isEmpty()) {
+        storedMode = ProjectMode.valueOf(value);
+        //ProjectMode viewMode = currentStoredView.getMode();
+      //  logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
+      }
+    }
+    {
+      Set<Permission> userPerms = new HashSet<>(controller.getPermissions());
+
+      //  logger.info("getCurrentView user userPerms " + userPerms + " vs current view perms " + currentStoredView.getPerms());
+      List<Permission> requiredPerms = currentStoredView.getPerms();
       userPerms.retainAll(requiredPerms);
 
       if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
-        logger.info("getCurrentView : user userPerms " + userPerms + " falling back to learn view");
-        currentStoredView = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
+        logger.info("getCurrentView : user userPerms " + userPerms + " falling back to default view for (" + storedMode + ")");
+        currentStoredView = hasStartup && storedMode == ProjectMode.DIALOG ? DIALOG : LEARN;
+      } else /*if (!userPerms.isEmpty())*/ {
+        if (hasStartup) {
+          //String value = getStorage().getValue(MODE);
+          // logger.info("selected mode is " + value);
+
+          try {
+            //ProjectMode storedMode = ProjectMode.valueOf(value);
+
+            ProjectMode viewMode = currentStoredView.getMode();
+            // logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
+
+            if (viewMode == ProjectMode.DIALOG && storedMode == ProjectMode.VOCABULARY) {
+              // currentStoredView = LEARN;
+              logger.warning("force learn view?");
+            } else if (viewMode == VOCABULARY && storedMode == ProjectMode.DIALOG) {
+              //currentStoredView = DIALOG;
+              logger.warning("force dialog view?");
+            } else {
+              //   logger.info("OK - no inconsistency...");
+            }
+
+          } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+          }
+
+          //ProjectType projectType = controller.getProjectStartupInfo().getProjectType();
+
+        }
       }
     }
 
     if (currentStoredView == NONE) {
-      currentStoredView = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == ProjectType.DIALOG ? DIALOG : LEARN;
+      currentStoredView = hasStartup && storedMode == ProjectMode.DIALOG ? DIALOG : LEARN;
     }
+
     return currentStoredView;
   }
 
-  /* private boolean isNPQUser() {
-     boolean isNPQ = false;
-     String affiliation = controller.getUserState().getCurrent().getAffiliation();
-     if (affiliation != null && affiliation.equalsIgnoreCase("NPQ")) {
-       isNPQ = true;
-     }
-     return isNPQ;
-   }
- */
   @NotNull
   private VIEWS getInitialView() {
     return isPolyglotProject() ? PRACTICE : LEARN;
@@ -225,8 +259,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   public void showView(VIEWS view, boolean isFirstTime, boolean fromClick) {
     String currentStoredView = getCurrentStoredView();
     if (DEBUG) {
-      logger.info("showView : show " + view + " current " + currentStoredView + " from click " + fromClick);
-//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("showView "  + view));
+      logger.info("showView : " +
+          "\n\tshow    " + view +
+          "\n\tcurrent " + currentStoredView + " from click " + fromClick);
+
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("showView " + view));
 //      logger.info("logException stack " + exceptionAsString);
     }
 
@@ -318,6 +355,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           setInstanceHistory(FIX_SENTENCES, true, false);
           new FixNPFHelper(controller, true, FIX_SENTENCES).showNPF(divWidget, FIX_SENTENCES);
           break;
+
+        case OOV_EDITOR:
+          clearPushAndShow(oovHelper, OOV_EDITOR);
+          break;
         case NONE:
           logger.warning("showView skipping choice '" + view + "'");
           break;
@@ -329,10 +370,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
   }
 
-  private void clearPushAndShow(ContentView performHelper, VIEWS perform) {
+  private void clearPushAndShow(ContentView contentView, VIEWS perform) {
     clearAndPushKeep(perform);
     //   logger.info("show perform " + PERFORM);
-    performHelper.showContent(divWidget, perform);
+    contentView.showContent(divWidget, perform);
   }
 
   private boolean shouldKeepList(String currentStoredView) {
@@ -385,16 +426,25 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
   }
 
+  /**
+   * @param views
+   * @see #showView(VIEWS, boolean, boolean)
+   * @see #clearPushAndShow(ContentView, VIEWS)
+   */
   private void clearAndPushKeep(VIEWS views) {
     clear();
 
     SelectionState selectionState = new SelectionState();
     if (selectionState.getView() != views) {
       //   logger.info("setInstanceHistory clearing history for instance " + views);
-      int dialog = selectionState.getDialog();
-      pushItem(getInstanceParam(views) + maybeAddDialogParam(dialog));
+      // int dialog = selectionState.getDialog();
+      pushItem(getInstanceParam(views) + maybeAddDialogParam(selectionState.getDialog()));
     } else {
       logger.info("setInstanceHistory NOT clearing history for instance " + views);
+
+
+      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("views " + views));
+      logger.info("logException stack " + exceptionAsString);
     }
   }
 
@@ -427,9 +477,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   @NotNull
   private String getTypeToSelection() {
-    Map<String, Collection<String>> typeToSection = getURLTypeToSelection();
+    // Map<String, Collection<String>> typeToSection = getURLTypeToSelection();
     //   logger.info("setInstanceHistory clearing history for instance " + views);
-    return getURLParams(typeToSection);
+    return getURLParams(getURLTypeToSelection());
   }
 
   private Map<String, Collection<String>> getURLTypeToSelection() {
@@ -461,11 +511,11 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private void showDrill(PracticeHelper practiceHelper, VIEWS views) {
     clear();
 
-    if (isPolyglotProject()) {
-      showPolyDialog();
-    } else {
-      showPractice(practiceHelper, views);
-    }
+//    if (isPolyglotProject()) {
+//      showPolyDialog();
+//    } else {
+    showPractice(practiceHelper, views);
+//    }
   }
 
   /**
@@ -477,64 +527,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     showQuizForReal(fromClick);
   }
 
-  /**
-   * TODO : remove this - why support something from a year ago?
-   *
-   * @see #showDrill
-   */
-  private void showPolyDialog() {
-    mode = MODE_CHOICE.NOT_YET;
-
-    new PolyglotDialog(
-        new DialogHelper.CloseListener() {
-          @Override
-          public boolean gotYes() {
-            mode = candidateMode;
-            if (mode == MODE_CHOICE.DRY_RUN) {
-              pushFirstUnit();
-            } else if (mode == MODE_CHOICE.POLYGLOT) {
-              pushSecondUnit();
-            } else {
-              return false;
-            }
-
-            return true;
-          }
-
-          @Override
-          public void gotNo() {
-            setBannerVisible(true);
-            PracticeHelper practiceHelper = NewContentChooser.this.practiceHelper;
-            practiceHelper.setVisible(true);
-          }
-
-          @Override
-          public void gotHidden() {
-            if (mode != MODE_CHOICE.NOT_YET) {
-              setBannerVisible(false);
-              PracticeHelper practiceHelper = NewContentChooser.this.practiceHelper;
-              practiceHelper.setVisible(false);
-            }
-//        logger.info("mode is " + mode);
-            showPractice(practiceHelper, PRACTICE);
-          }
-        },
-        new PolyglotDialog.ModeChoiceListener() {
-          @Override
-          public void gotMode(MODE_CHOICE choice) {
-            candidateMode = choice;
-          }
-
-          @Override
-          public void gotPrompt(PROMPT_CHOICE choice) {
-            /*candidatePrompt = choice;*/
-          }
-        }
-    );
-  }
-
   private void showPractice(PracticeHelper toUse, VIEWS views) {
-    toUse.setMode(mode);
+    //  toUse.setMode(mode);
     toUse.setNavigation(this);
     toUse.showContent(divWidget, views);
     toUse.hideList();
@@ -559,9 +553,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
   }
 
-  private MODE_CHOICE candidateMode = MODE_CHOICE.NOT_YET;
-  private MODE_CHOICE mode = MODE_CHOICE.NOT_YET;
-
   private void pushFirstUnit() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
@@ -578,14 +569,14 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void pushUnitOrChapter(String s, MatchInfo next) {
-    logger.info("pushUnitOrChapter ");
+    //  logger.info("pushUnitOrChapter ");
     pushItem(s + "=" + next.getValue());
   }
 
   /**
    * Only for polyglot...
    */
-  private void pushSecondUnit() {
+/*  private void pushSecondUnit() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
 
     if (projectStartupInfo != null) {
@@ -602,7 +593,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         }
       }
     }
-  }
+  }*/
 
   /**
    * So an view specified in the url trumps a stored one in storage, but if there's none in storage, use it.
@@ -655,7 +646,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     storeValue(mode == ProjectMode.DIALOG ? DIALOG : LEARN);
     getStorage().storeValue(MODE, mode.name());
 
-    if (DEBUG) logger.info("storeViewForMode OK mode now = " + controller.getMode());
+    if (DEBUG) {
+      logger.info("storeViewForMode OK mode now = " + controller.getMode());
+    }
   }
 
   @NotNull
@@ -689,7 +682,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private boolean isTeacher() {
-    return controller.getUserManager().hasPermission(User.Permission.TEACHER_PERM);
+    return controller.getUserManager().hasPermission(Permission.TEACHER_PERM);
   }
 
   /**
@@ -767,7 +760,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
   private void pushItem(String url) {
     if (DEBUG_PUSH_ITEM) logger.info("pushItem - " + url);
-
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushItem " + url));
 //    logger.info("logException stack " + exceptionAsString);
 

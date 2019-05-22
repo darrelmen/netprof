@@ -55,7 +55,7 @@ public interface Services<T extends CommonShell & HasUnitChapter> extends EventR
 
   Collection<AudioServiceAsync> getAllAudioServices();
 
-  void tellHydraServerToRefreshProject(int projID);
+  void tellOtherServerToRefreshProject(int projID);
 
   /**
    *
@@ -63,6 +63,7 @@ public interface Services<T extends CommonShell & HasUnitChapter> extends EventR
    */
   ScoringServiceAsync getScoringService();
 
+  ScoringServiceAsync getScoringServiceAsync(int projectid);
 
   LangTestDatabaseAsync getService();
 

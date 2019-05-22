@@ -27,7 +27,7 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.server.database.exercise;
+package mitll.langtest.server.database.project;
 
 import mitll.langtest.server.LogAndNotify;
 import mitll.langtest.server.PathHelper;
@@ -37,10 +37,10 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.JsonSupport;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
-import mitll.langtest.server.database.project.DialogPopulate;
-import mitll.langtest.server.database.project.IProjectManagement;
-import mitll.langtest.server.database.project.ProjectDAO;
-import mitll.langtest.server.database.project.ProjectManagement;
+import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.exercise.IPronunciationLookup;
+import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.userexercise.SlickUserExerciseDAO;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.json.JsonExport;
@@ -60,11 +60,11 @@ import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.npdata.dao.SlickProject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jetty.util.ConcurrentHashSet;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.project.ProjectManagement.logMemory;
@@ -88,12 +88,6 @@ public class Project implements IPronunciationLookup, IProject {
    * @see ProjectDAO#update
    * @see ProjectManagement#getProjectInfo
    */
-  /**
-   * Initially the choices should be hydra and hydra2 (or maybe hydra-dev and hydra2-dev)
-   *
-   * @see #getWebserviceHost
-   */
-  public static final String WEBSERVICE_HOST_DEFAULT = "127.0.0.1";
   public static final String TRUE = Boolean.TRUE.toString();
   public static final String MANDARIN = "Mandarin";
 
@@ -120,7 +114,7 @@ public class Project implements IPronunciationLookup, IProject {
   private DatabaseImpl db;
   private ServerProperties serverProps;
   private boolean isRTL;
-  private final Map<Integer, AlignmentOutput> audioToAlignment = new HashMap<>();
+  private final ConcurrentMap<Integer, AlignmentOutput> audioToAlignment = new ConcurrentHashMap<>();
 
   private Map<String, Integer> fileToRecorder = new ConcurrentHashMap<>();
   private Map<String, Boolean> unknownFiles = new ConcurrentHashMap<>();
@@ -131,6 +125,10 @@ public class Project implements IPronunciationLookup, IProject {
   private List<IDialog> dialogs = new ArrayList<>();
   private final ISection<IDialog> dialogSectionHelper = new SectionHelper<>();
   private JsonExport jsonExport;
+  /**
+   *
+   */
+  private final Map<String, String> propCache = new ConcurrentHashMap<>();
 
   //private ExerciseTrie<CommonExercise> phoneTrie;
   //private Map<Integer, ExercisePhoneInfo> exToPhone;
@@ -213,6 +211,7 @@ public class Project implements IPronunciationLookup, IProject {
     return getModelsDir() == null || getModelsDir().isEmpty();
   }
 
+  @Override
   public SlickProject getProject() {
     return project;
   }
@@ -221,7 +220,7 @@ public class Project implements IPronunciationLookup, IProject {
     return ProjectType.valueOf(project.kind());
   }
 
-  public boolean shouldLoad() {
+  boolean shouldLoad() {
     return project != null && !toSkip.contains(ProjectStatus.valueOf(project.status()));
   }
 
@@ -230,10 +229,11 @@ public class Project implements IPronunciationLookup, IProject {
    *
    * @return
    */
+  @Override
   public List<String> getTypeOrder() {
     ISection<CommonExercise> sectionHelper = getSectionHelper();
 
-    List<String> types = sectionHelper == null ? Collections.EMPTY_LIST : sectionHelper.getTypeOrder();
+    List<String> types = sectionHelper == null ? Collections.emptyList() : sectionHelper.getTypeOrder();
     if (project != null && (types == null || types.isEmpty())) {
       types = new ArrayList<>();
       String first = project.first();
@@ -285,10 +285,12 @@ public class Project implements IPronunciationLookup, IProject {
     return exerciseDAO;
   }
 
+  @Override
   public List<CommonExercise> getRawExercises() {
     return exerciseDAO.getRawExercises();
   }
 
+  @Override
   public ISection<CommonExercise> getSectionHelper() {
     return exerciseDAO == null ? null : exerciseDAO.getSectionHelper();
   }
@@ -297,7 +299,7 @@ public class Project implements IPronunciationLookup, IProject {
     return dialogSectionHelper;
   }
 
-  public void setJsonSupport(JsonSupport jsonSupport) {
+  void setJsonSupport(JsonSupport jsonSupport) {
     this.jsonSupport = jsonSupport;
   }
 
@@ -362,11 +364,12 @@ public class Project implements IPronunciationLookup, IProject {
 
   /**
    * @see AudioServiceImpl#recalcRefAudio
+   * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
    */
-  public RecalcRefResponse recalcRefAudio() {
+  public RecalcRefResponse recalcRefAudio(int userID) {
     Collection<CommonExercise> exercisesForUser = getRawExercises();
     logger.info("recalcRefAudio " + project + " for " + exercisesForUser.size() + " exercises.");
-    return refResultDecoder.writeRefDecode(getLanguageEnum(), exercisesForUser, project.id());
+    return refResultDecoder.writeRefDecode(getLanguageEnum(), exercisesForUser, project.id(), userID);
   }
 
   public SlickAnalysis getAnalysis() {
@@ -388,11 +391,11 @@ public class Project implements IPronunciationLookup, IProject {
     return fullTrie != null;
   }
 
-  ExerciseTrie<CommonExercise> getFullContextTrie() {
+  public ExerciseTrie<CommonExercise> getFullContextTrie() {
     return fullContextTrie;
   }
 
-  public void stopDecode() {
+  void stopDecode() {
     if (refResultDecoder != null) refResultDecoder.setStopDecode(true);
   }
 
@@ -405,7 +408,7 @@ public class Project implements IPronunciationLookup, IProject {
   public String getWebserviceHost() {
     String prop = getProp(WEBSERVICE_HOST);
     if (prop == null || prop.isEmpty()) {
-      prop = WEBSERVICE_HOST_DEFAULT;
+      prop = IProject.WEBSERVICE_HOST_DEFAULT;
     }
     return prop;
   }
@@ -438,7 +441,10 @@ public class Project implements IPronunciationLookup, IProject {
     return getProp(MODELS_DIR);
   }
 
-
+  /**
+   * @return
+   * @see ProjectManagement#getProjectInfo
+   */
   public ModelType getModelType() {
     String prop = getProp(MODEL_TYPE);
 
@@ -446,7 +452,8 @@ public class Project implements IPronunciationLookup, IProject {
       return ModelType.HYDRA;
     } else {
       try {
-        return ModelType.valueOf(prop);
+        ModelType modelType = ModelType.valueOf(prop);
+        return modelType;
       } catch (IllegalArgumentException e) {
         logger.error("couldn't parse '" + prop + "' as model type enum?");
         return ModelType.HYDRA;
@@ -462,7 +469,6 @@ public class Project implements IPronunciationLookup, IProject {
     return getProp(SWAP_PRIMARY_AND_ALT).equalsIgnoreCase(TRUE);
   }
 
-  private final Map<String, String> propCache = new HashMap<>();
 
   /**
    * Re populate cache really.
@@ -473,7 +479,7 @@ public class Project implements IPronunciationLookup, IProject {
     putAllProps();
   }
 
-  public String getProp(ProjectProperty projectProperty) {
+  String getProp(ProjectProperty projectProperty) {
     return getProp(projectProperty.getName());
   }
 
@@ -489,7 +495,7 @@ public class Project implements IPronunciationLookup, IProject {
       putAllProps();
 
       String propValue = db.getProjectDAO().getPropValue(getID(), prop);  // blank if miss, not null
-      //   logger.info("getProp : project " + getID() + " prop " + prop + " = " + propValue);
+      //  logger.info("getProp : project " + getID() + " prop " + prop + " = " + propValue);
 
       if (propValue == null) {
         logger.warn("huh? no prop value for " + prop);
@@ -499,12 +505,15 @@ public class Project implements IPronunciationLookup, IProject {
       }
       return propValue;
     } else {
+      //  logger.info("getProp : project #" + getID() + " : '" + prop + "' = '" + s + "'");
       return s;
     }
   }
 
   private void putAllProps() {
-    propCache.putAll(db.getProjectDAO().getProps(getID()));
+    int id = getID();
+    propCache.putAll(db.getProjectDAO().getProps(id));
+//    logger.info("getProp : project #" + getID() + " props " + propCache);
   }
 
   private int spew = 0;
@@ -727,10 +736,12 @@ public class Project implements IPronunciationLookup, IProject {
   }
 
   /**
+   * ConcurrentHashMap!
+   *
    * @return
-   * @see AlignmentHelper#addAlignmentOutput(int, Project, Collection)
+   * @see AlignmentHelper#addAlignmentOutput(Project, Collection)
    */
-  public Map<Integer, AlignmentOutput> getAudioToAlignment() {
+  public ConcurrentMap<Integer, AlignmentOutput> getAudioToAlignment() {
     return audioToAlignment;
   }
 
@@ -747,8 +758,12 @@ public class Project implements IPronunciationLookup, IProject {
 
     if (hostName.startsWith(HYDRA_2)) {
       myProject = webserviceHost.equalsIgnoreCase(H_2);
+    } else if (hostName.startsWith("score1")) {
+      myProject = webserviceHost.equalsIgnoreCase("s1");
+    } else if (hostName.startsWith("score2")) {
+      myProject = webserviceHost.equalsIgnoreCase("s2");
     } else if (hostName.startsWith(HYDRA)) {
-      myProject = webserviceHost.equalsIgnoreCase(WEBSERVICE_HOST_DEFAULT);
+      myProject = webserviceHost.equalsIgnoreCase(IProject.WEBSERVICE_HOST_DEFAULT);
     }
     if (myProject) {
       logger.info("isMyProject project " + project.id() + " on " + hostName + " will check lts and count phones.");
@@ -812,7 +827,7 @@ public class Project implements IPronunciationLookup, IProject {
     //logger.info("addAnswerToUser project " + getProject().id() + " now has " + fileToRecorder.size());
   }
 
-  public int getPort() {
+  int getPort() {
     try {
       String prop = getProp(WEBSERVICE_HOST_PORT);
       if (prop == null || prop.isEmpty()) return -1;
@@ -898,5 +913,9 @@ public class Project implements IPronunciationLookup, IProject {
 
   public String toString() {
     return "Project\n\t(" + getTypeOrder() + ") : project " + project;// + "\n\ttypes " + getTypeOrder() + " exercise dao " + exerciseDAO;
+  }
+
+  public PathHelper getPathHelper() {
+    return pathHelper;
   }
 }

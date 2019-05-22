@@ -30,14 +30,21 @@
 package mitll.langtest.server;
 
 import com.typesafe.config.ConfigFactory;
+import mitll.langtest.server.audio.AudioConversion;
 import mitll.langtest.server.audio.AudioFileHelper;
+import mitll.langtest.server.audio.ScoreToJSON;
+import mitll.langtest.server.database.copy.CopyToPostgres;
+import mitll.langtest.server.database.copy.CreateProject;
+import mitll.langtest.server.database.exercise.ExcelImport;
+import mitll.langtest.server.database.project.ProjectManagement;
 import mitll.langtest.server.database.user.UserDAO;
+import mitll.langtest.server.mail.EmailHelper;
 import mitll.langtest.server.mail.EmailList;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.property.ServerInitializationManagerNetProf;
+import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.instrumentation.SlimSegment;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectProperty;
 import mitll.langtest.shared.scoring.PretestScore;
@@ -46,6 +53,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
+import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -68,7 +76,7 @@ public class ServerProperties {
    * TODO : good idea????
    * ON THIS BRANCH!
    */
-  private static final String APP_NAME_DEFAULT = "netprof";//dialog";
+  private static final String APP_NAME_DEFAULT = "netprof";
 
   /**
    * As of 8/2/17 we have these languages on the hydra2 server:
@@ -90,6 +98,8 @@ public class ServerProperties {
 
   /**
    * Languages on the hydra2 server.
+   *
+   * @see #getHydra2Languages
    */
   private static final String HYDRA_2_LANGUAGES = "hydra2Languages";
   private static final String HYDRA_2_LANGUAGES_DEFAULT = "korean,levantine,msa,russian";
@@ -142,8 +152,6 @@ public class ServerProperties {
   private static final String NETPROF = "netprof";
 
   private static final String POSTGRES_HYDRA = "postgresHydra";
-//  private static final String POSTGRES_DATA2_DIALOG = "postgresData2Dialog";
-
 
   private static final String ADD_USER_VIA_EMAIL = "addUserViaEmail";
   private static final String SEND_HEARTBEAT = "sendHeartbeat";
@@ -153,14 +161,10 @@ public class ServerProperties {
   private static final String SCORING_MODEL = "scoringModel";
   private static final String TALKS_TO_DOMINO = "talksToDomino";
 
-//  public static final String OUR_FORTH_TONE = "uu4";
-
   private static final String FORTH_U_TONE = "ù";
   private static final String THIRD_U_TONE = "ǔ";
   private static final String SECOND_U_TONE = "ú";
   private static final String FIRST_U_TONE = "ū";
-//  public static final String UU = "uu";
- // public static final String NORMAL_U = "u";
 
   //private List<String> hearbeatRecDef = Arrays.asList(HEARTBEAT_REC.split(","));
 
@@ -189,7 +193,6 @@ public class ServerProperties {
    * For development, from a laptop.
    */
   private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
-//  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof.ll.mit.edu/netprof/";
 
   private static final String USE_SCORE_CACHE = "useScoreCache";
 
@@ -198,7 +201,6 @@ public class ServerProperties {
   private static final String LANGUAGE = "language";
 
   private static final String MEDIA_DIR = "mediaDir";
-  // private static final String IMAGE_DIR = "imageDir";
   private static final String ANSWER_DIR = "answerDir";
   private static final String NETPROF_AUDIO_DIR = "audioDir";
   private static final String DCODR_DIR = "dcodrDir";
@@ -218,8 +220,6 @@ public class ServerProperties {
   private static final String REMOVE_EXERCISES_WITH_MISSING_AUDIO = "removeExercisesWithMissingAudio";
   private static final String DO_DECODE = "dodecode";
   private static final String DO_TRIM = "dotrim";
-
-  //private static final String USE_PHONE_TO_DISPLAY = "usePhoneToDisplay";
 
   // turn down 3 db per Tamas - 03/19/19
   private static final int MIN_DYNAMIC_RANGE_DEFAULT = 18;//21;//24;      // Paul Gatewood 11/24/15 : The bottom line is we should set the minimum Dynamic Range threshold to 20dB for NetProf users
@@ -272,7 +272,7 @@ public class ServerProperties {
   private List<Affiliation> affliations = new ArrayList<>();
 
   /**
-   * @see mitll.langtest.server.database.copy.CreateProject#createProject
+   * @see CreateProject#createProject
    */
   public static final List<ProjectProperty> CORE_PROPERTIES = Arrays.asList(
       MODELS_DIR,
@@ -329,7 +329,7 @@ public class ServerProperties {
     final CharacterIterator it = new StringCharacterIterator(pinyin);
 
     for (char c = it.first(); c != CharacterIterator.DONE; c = it.next()) {
-      String key =  Character.toString(c);
+      String key = Character.toString(c);
       String s = reverse.get(key);
       builder.append(s == null ? key : s);
     }
@@ -340,7 +340,7 @@ public class ServerProperties {
   /**
    * @param props
    * @param configDir
-   * @see mitll.langtest.server.property.ServerInitializationManagerNetProf#getServerProperties
+   * @see ServerInitializationManagerNetProf#getServerProperties
    */
   public ServerProperties(Properties props,
                           Map<String, String> manifest,
@@ -434,7 +434,7 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see LangTestDatabaseImpl#readProperties(javax.servlet.ServletContext)
+   * @see LangTestDatabaseImpl#readProperties(ServletContext)
    * @deprecated
    */
   public String getH2Database() {
@@ -467,7 +467,7 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.exercise.ExcelImport#ExcelImport
+   * @see ExcelImport#ExcelImport
    */
   public int[] getUnitChapterWeek() {
     int[] parsedUCW = new int[]{-1, -1, -1};
@@ -702,7 +702,7 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#writeAudioFile
+   * @see AudioFileHelper#writeAudioFile
    */
   public boolean isQuietAudioOK() {
     return quietAudioOK;
@@ -818,7 +818,7 @@ public class ServerProperties {
    * @param language
    * @param phone
    * @return
-   * @see mitll.langtest.server.audio.ScoreToJSON#getJsonForScore
+   * @see ScoreToJSON#getJsonForScore
    */
   public String getDisplayPhoneme(Language language, String phone) {
     Map<String, String> phoneToDisplay = getPhoneToDisplay(language);
@@ -839,7 +839,7 @@ public class ServerProperties {
    * @seex mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore(String, ImageOptions, boolean, String, String, HydraOutput, double, int, boolean, JsonObject)
    * @see AudioFileHelper#isUsePhoneToDisplay
    * @see AudioFileHelper#getEasyAlignment(ClientExercise, String)
-   * @see mitll.langtest.server.audio.ScoreToJSON#getJsonForScore(PretestScore, boolean, ServerProperties, Language)
+   * @see ScoreToJSON#getJsonForScore(PretestScore, boolean, ServerProperties, Language)
    */
   public boolean usePhoneToDisplay(Language languageEnum) {
     return languageEnum == Language.KOREAN || languageEnum == Language.MANDARIN;
@@ -879,8 +879,8 @@ public class ServerProperties {
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioConversion#AudioConversion(boolean, int)
    * @return
+   * @see AudioConversion#AudioConversion(boolean, int)
    */
   public int getMinDynamicRange() {
     return getIntPropertyDef(MIN_DYNAMIC_RANGE, MIN_DYNAMIC_RANGE_DEFAULT);
@@ -936,7 +936,7 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.project.ProjectManagement#ProjectManagement
+   * @see ProjectManagement#ProjectManagement
    */
   public boolean debugOneProject() {
     return getDefaultFalse(DEBUG_ONE_PROJECT);
@@ -976,7 +976,7 @@ public class ServerProperties {
 
   /**
    * @param optDatabase
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#getDatabaseLight
+   * @see CopyToPostgres#getDatabaseLight
    */
   public void setDBConfig(String optDatabase) {
 
@@ -985,7 +985,7 @@ public class ServerProperties {
   /**
    * These point to config entries in application.conf in the resources directory in npdata.
    *
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#getDatabaseLight
+   * @see CopyToPostgres#getDatabaseLight
    */
   public void setLocalPostgres() {
     props.setProperty(DB_CONFIG, POSTGRES);
@@ -1010,7 +1010,7 @@ public class ServerProperties {
   /**
    * @return
    * @see
-   * @see mitll.langtest.server.mail.EmailHelper#EmailHelper(ServerProperties, MailSupport)
+   * @see EmailHelper#EmailHelper(ServerProperties, MailSupport)
    */
   public String getNPServer() {
     return props.getProperty(SERVER_NAME, NP_SERVER);
@@ -1033,7 +1033,7 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkForWebservice
+   * @see AudioFileHelper#checkForWebservice
    */
   public String getHydraHost() {
     return props.getProperty(HYDRA_HOST, HYDRA_HOST_URL_DEFAULT);
@@ -1045,7 +1045,7 @@ public class ServerProperties {
 
   /**
    * @return
-   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyOneConfigCommand
+   * @see CopyToPostgres#copyOneConfigCommand
    */
   public boolean hasModel() {
     String currentModel = getCurrentModel();
@@ -1077,6 +1077,10 @@ public class ServerProperties {
     return getPropertyMap(uiprops);
   }
 
+  /**
+   * @return
+   * @see ProjectServiceImpl#create
+   */
   public Set<Language> getHydra2Languages() {
     String property = props.getProperty(HYDRA_2_LANGUAGES, HYDRA_2_LANGUAGES_DEFAULT).toUpperCase();
     Set<String> strings = new HashSet<>(Arrays.asList(property.split(",")));
@@ -1110,4 +1114,17 @@ public class ServerProperties {
   public int getHeartbeatPeriod() {
     return getIntPropertyDef(HEARTBEAT_PERIOD, DEFAULT_PERIOD);
   }
+
+  public String getKaldiHost() {
+    return getProp("kaldiHost", "score1-dev");
+  }
+
+  public boolean useWordAvgScoreForKaldi() {
+    return getDefaultTrue("useWordAvgScoreForKaldi");
+  }
+
+  public boolean usePhoneAvgScoreForKaldi() {
+    return getDefaultFalse("usePhoneAvgScoreForKaldi");
+  }
+
 }

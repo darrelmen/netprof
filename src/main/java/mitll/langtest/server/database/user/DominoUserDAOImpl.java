@@ -50,15 +50,14 @@ import mitll.langtest.server.database.Report;
 import mitll.langtest.server.database.analysis.Analysis;
 import mitll.langtest.server.database.audio.AudioDAO;
 import mitll.langtest.server.database.audio.BaseAudioDAO;
-import mitll.langtest.server.database.exercise.Project;
-import mitll.langtest.server.database.project.IProjectManagement;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.user.*;
 import mitll.langtest.shared.user.LoginResult;
 import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.*;
 import org.apache.ignite.Ignite;
 import org.apache.ignite.IgniteException;
 import org.apache.ignite.Ignition;
@@ -92,7 +91,7 @@ import static mitll.hlt.domino.server.ServerInitializationManager.*;
 import static mitll.hlt.domino.server.user.MongoUserServiceDelegate.USERS_C;
 import static mitll.hlt.domino.server.util.ServerProperties.CACHE_ENABLED_PROP;
 import static mitll.hlt.domino.server.util.ServerProperties.EVT_URL_BASE_MAP_PROP;
-import static mitll.langtest.server.database.exercise.Project.MANDARIN;
+import static mitll.langtest.server.database.project.Project.MANDARIN;
 import static mitll.langtest.shared.user.Kind.*;
 
 /**
@@ -112,7 +111,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final String LOCALHOST = "127.0.0.1";
   private static final boolean USE_DOMINO_IGNITE = true;
   private static final boolean USE_DOMINO_CACHE = false;
+
   private static final String TCHR = "TCHR";
+
   private static final int CACHE_TIMEOUT = 1;
   private static final String UNSET = "UNSET";
 
@@ -120,7 +121,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private static final boolean DEBUG_TEACHERS = false;
   private static final String F_LAST = "F. Last";
 
-  private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
   private static final List<String> DOMAINS =
       Arrays.asList(
@@ -167,9 +167,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 */
 
   private static final long STALE_DUR = 24L * 60L * 60L * 1000L;
-  private static final boolean SWITCH_USER_PROJECT = false;
+  // private static final boolean SWITCH_USER_PROJECT = false;
   private static final String ACTIVE = "active";
   private static final String EMAIL = "email";
+  public static final String UNKNOWN = "Unknown";
+  public static final String MALE = "Male";
+  private static final String FEMALE = "Female";
 
   /**
    * If false, don't use email to set the initial user password via email.
@@ -202,14 +205,12 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   private Ignite ignite = null;
 
   private JSONSerializer serializer = null;
-  private IUserProjectDAO userProjectDAO;
 
-  private IProjectManagement projectManagement;
   private Group primaryGroup = null;
   private static final boolean DEBUG_USER_CACHE = false;
 
   /**
-   * @see #lookupUser
+   * @see #lookupDBUser
    * @see #refreshCacheFor
    */
   private final LoadingCache<Integer, DBUser> idToDBUser = CacheBuilder.newBuilder()
@@ -224,12 +225,17 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
               if (dbUser == null) {
                 logger.warn("idToDBUser no db user with id " + key);
                 dbUser = getStandIn(key);
-                //dbUser = delegate.lookupDBUser(getDefaultUser());
               }
               return dbUser;
             }
           });
 
+  /**
+   * Try to deal in a way that doesn't collapse multiple users into one.
+   *
+   * @param key
+   * @return
+   */
   @NotNull
   private DBUser getStandIn(Integer key) {
     return new DBUser(key,
@@ -242,7 +248,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         new HashSet<>(),
 
         new Group(),
-        new HashSet<Group>(),
+        new HashSet<>(),
         null,
         new HashSet<>());
   }
@@ -259,9 +265,11 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             @Override
             public User load(Integer key) {
               //    logger.info("idToUser Load " + key);
-              return getUser(lookupUser(key));
+              return getUser(lookupDBUser(key));
             }
           });
+
+  private final ConcurrentHashMap<Integer, FirstLastUser> idToFirstLastCache = new ConcurrentHashMap<>(EST_NUM_USERS);
 
 
   private final LoadingCache<Integer, FirstLastUser> idToFirstLastUser = CacheBuilder.newBuilder()
@@ -272,7 +280,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             @Override
             public User load(Integer key) {
               //    logger.info("idToUser Load " + key);
-              return getUser(lookupUser(key));
+              return getUser(lookupDBUser(key));
             }
           });
 
@@ -293,7 +301,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (attribute != null) {
       delegate = (IUserServiceDelegate) attribute;
       pool = (Mongo) servletContext.getAttribute(MONGO_ATT_NAME);
-      logger.info("DominoUserDAOImpl got pool reference " + pool);
+      logger.info("DominoUserDAOImpl got " +
+          "\n\tpool reference " + pool +
+          "\n\tdelegate       " + delegate.getClass()
+      );
       serializer = (JSONSerializer) servletContext.getAttribute(JSON_SERIALIZER);
 
       makeUserService(database, props);
@@ -363,7 +374,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     props.setProperty(EVT_URL_BASE_MAP_PROP, "a,b");
     pool = Mongo.createPool(new DBProperties(props));
     serializer = Mongo.makeSerializer();
-    logger.info("connectToMongo : OK made serializer " + serializer);
+    logger.info("noServletContextSetup connectToMongo : OK made serializer " + serializer);
     Mailer mailer = new Mailer(new MailerProperties(props));
     ServerProperties dominoProps = getDominoProps(database, props);
     //String appName = dominoProps.getAppName();
@@ -384,10 +395,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     delegate = UserServiceFacadeImpl.makeServiceDelegate(dominoProps, mailer, pool, serializer, ignite);
     makeUserService(database, props);
 
-    logger.debug("made" +
+    logger.info("noServletContextSetup made" +
         "\ndelegate " + delegate.getClass() +
-        "\nignite = " + ignite +
-        "\nisCacheEnabled = " + dominoProps.isCacheEnabled());
+        "\nignite   " + ignite +
+        "\nisCacheEnabled " + dominoProps.isCacheEnabled());
   }
 
   @NotNull
@@ -418,7 +429,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (contains) {
       return true;
     } else {
-      InetAddress byName = null;
+      InetAddress byName;
       try {
         byName = InetAddress.getByName(host);
       } catch (Exception e) {
@@ -430,10 +441,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
   }
 
+  /**
+   * Hack for group admins to map to project admin....
+   */
   private void populateRoles() {
     for (Kind kind : Kind.values()) {
       roleToKind.put(kind.getRole(), kind);
     }
+    roleToKind.put(GROUP_ADMIN.getRole(), PROJECT_ADMIN);
   }
 
   @Override
@@ -527,10 +542,10 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
       if (adminUser.getPrimaryGroup() == null) {
         logger.warn("\n\n\nensureDefaultUsers no group for " + adminUser);
-        //  adminUser.setPrimaryGroup(makePrimaryGroup(PRIMARY));
       }
 
       dominoImportUser = delegate.getUser(IMPORT_USER);
+      //  DBUser defaultDBUser = delegate.lookupDBUser(defaultUser);
     }
   }
 
@@ -546,8 +561,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     this.beforeLoginUser = getOrAdd(BEFORE_LOGIN_USER, "Before", "Login", Kind.STUDENT);
     this.importUser = getOrAdd(IMPORT_USER, "Import", USER, Kind.CONTENT_DEVELOPER);
     this.defaultUser = getOrAdd(DEFAULT_USER1, DEFAULT, USER, Kind.AUDIO_RECORDER);
-    this.defaultMale = getOrAdd(DEFAULT_MALE_USER, DEFAULT, "Male", Kind.AUDIO_RECORDER);
-    this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, DEFAULT, "Female", Kind.AUDIO_RECORDER);
+    this.defaultMale = getOrAdd(DEFAULT_MALE_USER, DEFAULT, MALE, Kind.AUDIO_RECORDER);
+    this.defaultFemale = getOrAdd(DEFAULT_FEMALE_USER, DEFAULT, FEMALE, Kind.AUDIO_RECORDER);
     //  logger.info("ensureDefaultUsersLocal defaultUser " + defaultUser);
 
     this.defaultUsers = new HashSet<>(Arrays.asList(DEFECT_DETECTOR, BEFORE_LOGIN_USER, IMPORT_USER, DEFAULT_USER1, DEFAULT_FEMALE_USER, DEFAULT_MALE_USER, "beforeLoginUser"));
@@ -650,7 +665,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
                              String dialect,
                              String userID,
                              boolean enabled,
-                             Collection<User.Permission> permissions,
+                             Collection<Permission> permissions,
                              Kind kind,
 
                              String emailH,
@@ -698,7 +713,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
             ") : no email token for " + clientUserDetail);
       }
       return new LoginResult(clientUserDetail == null ? -1 : clientUserDetail.getDocumentDBID(),
-          useUsualLogin ? "" : emailToken);
+          useUsualLogin ? "" : emailToken).setResultType(LoginResult.ResultType.Added);
     }
   }
 
@@ -839,7 +854,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @see #changePasswordWithCurrent
    */
   private DBUser savePasswordAndGetUser(int id, String currentPassword, String newHashedPassword, String baseURL) {
-    DBUser dbUser = lookupUser(id);
+    DBUser dbUser = lookupDBUser(id);
     if (dbUser != null) {
       boolean b = delegate.changePassword(adminUser, dbUser, currentPassword, newHashedPassword, baseURL);
       if (!b) {
@@ -1183,7 +1198,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       return idToUser.get(id);
     } catch (ExecutionException e) {
       logger.warn("getByID got " + e);
-      return getUser(lookupUser(id));
+      return getUser(lookupDBUser(id));
     }
   }
 
@@ -1200,17 +1215,29 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    * @see #idToDBUser
    */
-  private DBUser lookupUser(int id) {
+  public DBUser lookupDBUser(int id) {
     try {
-      return idToDBUser.get(id);
+      DBUser dbUser = idToDBUser.get(id);
+      if (dbUser == null) {
+        logger.warn("lookupDBUser can't find user by id " + id);
+        //     dbUser = idToDBUser.get(defaultUser);
+      }
+      return dbUser;
     } catch (ExecutionException e) {
-      logger.warn("lookupUser got " + e);
+      logger.warn("lookupDBUser got " + e);
       return delegate.lookupDBUser(id);
     }
   }
 
+/*
   public String lookupUserId(int id) {
     return delegate.lookupUserId(id);
+  }
+*/
+
+  @Override
+  public mitll.hlt.domino.shared.model.user.User lookupDominoUser(int id) {
+    return delegate.lookupUser(id);
   }
 
   public void refreshCacheFor(int userid) {
@@ -1266,25 +1293,15 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
     if (first == null) first = userID;
     String last = user.getLast();
-    if (last == null) last = "Unknown";
+    if (last == null) last = UNKNOWN;
     String email = user.getEmail();
-//    if (email == null || email.isEmpty()) {
-//      email = user.getEmailHash();
-//    }
 
     Kind userKind = user.getUserKind();
 
     Set<String> roleAbbreviations = Collections.singleton(userKind.getRole());
     // logger.info("toClientUserDetail " + user.getUserID() + " role is " + roleAbbreviations + " email " +email);
 
-    boolean copyGender = user.getPermissions().contains(User.Permission.RECORD_AUDIO) ||
-        user.getPermissions().contains(User.Permission.DEVELOP_CONTENT) ||
-        userID.equalsIgnoreCase("FernandoM01");
-
-    mitll.hlt.domino.shared.model.user.User.Gender gender =
-        userKind ==
-            STUDENT && !copyGender ? UNSPECIFIED :
-            user.isMale() ? DMALE : DFEMALE;
+    mitll.hlt.domino.shared.model.user.User.Gender gender = getGender(user, userID, userKind);
 
     if (gender == UNSPECIFIED) {
       logger.info("toClientUserDetail for " + user.getID() + " '" + userID + "' " + user.getUserKind() + " gender is unspecified.");
@@ -1321,6 +1338,16 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     return clientUserDetail;
   }
 
+  private mitll.hlt.domino.shared.model.user.User.Gender getGender(User user, String userID, Kind userKind) {
+    boolean copyGender = user.getPermissions().contains(Permission.RECORD_AUDIO) ||
+        user.getPermissions().contains(Permission.DEVELOP_CONTENT) ||
+        userID.equalsIgnoreCase("FernandoM01");
+
+    return userKind ==
+        STUDENT && !copyGender ? UNSPECIFIED :
+        user.isMale() ? DMALE : DFEMALE;
+  }
+
   /**
    * Convert domino user into a netprof user.
    * <p>
@@ -1350,7 +1377,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
     //   logger.debug("toUser : user " + dominoUser.getUserId() + " email " + email);//, new Exception());
 
-    Set<User.Permission> permissionSet = new HashSet<>();
+    Set<Permission> permissionSet = new HashSet<>();
 //    String emailHash = email == null ? "" : isValidEmailGrammar(email) ? Md5Hash.getHash(email) : email;
     boolean isMale = isMaleHardChoice(dominoUser);
 
@@ -1383,7 +1410,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     user.setFirst(dominoUser.getFirstName());
     user.setLast(dominoUser.getLastName());
     if (user.isAdmin()) {
-      permissionSet.add(User.Permission.PROJECT_ADMIN); // a little redundant with isAdmin...
+      permissionSet.add(Permission.PROJECT_ADMIN); // a little redundant with isAdmin...
     }
 
  /*   if (user.isPoly()) {
@@ -1406,8 +1433,8 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @param isPoly
    * @see #toUser
    */
-  private void handleAffiliationUser(DBUser dominoUser, Set<User.Permission> permissionSet, User user, boolean isPoly) {
-    if (isPoly) permissionSet.add(User.Permission.POLYGLOT);
+/*  private void handleAffiliationUser(DBUser dominoUser, Set<Permission> permissionSet, User user, boolean isPoly) {
+    if (isPoly) permissionSet.add(Permission.POLYGLOT);
 
     int id = user.getID();
     int mostRecentByUser = userProjectDAO.getCurrentProjectForUser(id);
@@ -1425,7 +1452,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
         userProjectDAO.setCurrentProjectForUser(id, projectAssignment);
       }
     }
-  }
+  }*/
 
   /**
    * Get language from secondary group, then try to match language to a polyglot project.
@@ -1436,7 +1463,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    * @see #handleAffiliationUser
    */
-  private int getProjectAssignment(DBUser dominoUser, int id, boolean isPoly) {
+/*  private int getProjectAssignment(DBUser dominoUser, int id, boolean isPoly) {
     Collection<Group> secondaryGroups = dominoUser.getSecondaryGroups();
     int projID = -1;
     if (!secondaryGroups.isEmpty()) {
@@ -1462,14 +1489,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       logger.info("getProjectAssignment no groups for user id " + id);
     }
     return projID;
-  }
+  }*/
 
   /**
    * @param next
    * @return
    * @see #getProjectAssignment
    */
-  private Language getLanguageMatchingGroup(Group next) {
+/*  private Language getLanguageMatchingGroup(Group next) {
     //logger.info("getLanguageMatchingGroup : found secondary " + next);
     String name = next.getName();
     Language language = getLanguage(name);
@@ -1483,8 +1510,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
       }
     }
     return language;
-  }
-
+  }*/
   private Language getLanguage(String lang) {
     Language language = Language.UNKNOWN;
     try {
@@ -1550,7 +1576,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    * @see
    */
-  private Kind getUserKind(mitll.hlt.domino.shared.model.user.User dominoUser, Set<User.Permission> permissionSet) {
+  private Kind getUserKind(mitll.hlt.domino.shared.model.user.User dominoUser, Set<Permission> permissionSet) {
     Set<String> roleAbbreviations = dominoUser.getRoleAbbreviations();
 
     Kind kindToUse = Kind.STUDENT;
@@ -1571,7 +1597,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    */
   @NotNull
-  private Set<Kind> setPermissions(Set<User.Permission> permissionSet, Set<String> roleAbbreviations) {
+  private Set<Kind> setPermissions(Set<Permission> permissionSet, Set<String> roleAbbreviations) {
     Set<Kind> seen = new HashSet<>();
     //    logger.warn("getUserKind user " + userId + " has multiple roles - choosing first one... " + roleAbbreviations.size());
     for (String role : roleAbbreviations) {
@@ -1597,7 +1623,9 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   @NotNull
   private Kind getKindForRole(String firstRole) {
-    if (firstRole.equals(PO_M)) firstRole = Kind.PROJECT_ADMIN.getRole();
+    if (firstRole.equals(PO_M)) {
+      firstRole = Kind.PROJECT_ADMIN.getRole();
+    }
     Kind kind = roleToKind.get(firstRole);
     if (kind == null) {
       try {
@@ -1705,16 +1733,13 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @deprecated
    */
   public List<DBUser> getAll() {
-    long then = System.currentTimeMillis();
     logger.info("getAll calling get all users");
-    FindOptions<UserColumn> opts = getUserColumnFindOptions();
-    List<DBUser> users = Collections.emptyList();
-
     if (delegate == null) {
-      logger.warn("getAll delegate is null?");
+      logger.warn("\n\ngetAll delegate is null?\n\n");
     }
 
-    users = delegate.getUsers(-1, opts);
+    long then = System.currentTimeMillis();
+    List<DBUser> users = delegate == null ? Collections.emptyList() : delegate.getUsers(-1, getUserColumnFindOptions());
     long now = System.currentTimeMillis();
     if (now - then > 20) logger.warn("getAll took " + (now - then) + " to get " + users.size() + " users");
     return users;
@@ -1730,7 +1755,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 
   @Override
   public MiniUser getMiniUser(int userid) {
-    DBUser byID = lookupUser(userid);
+    DBUser byID = lookupDBUser(userid);
     return byID == null ? null : getMini(byID);
   }
 
@@ -1761,6 +1786,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     Set<Integer> toAskFor = getMissingOrStale(userDBIds, now);
     if (!toAskFor.isEmpty()) {
       long then = System.currentTimeMillis();
+
       Map<Integer, UserDescriptor> idToUserD = delegate.lookupUserDescriptors(toAskFor);
 //      Map<Integer, DBUser> idToUserD = delegate.lookupDBUsers(toAskFor);
       long now2 = System.currentTimeMillis();
@@ -1869,7 +1895,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    * @return
    */
   public boolean isMale(int userid) {
-    return lookupUser(userid).getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Male;
+    return lookupDBUser(userid).getGender() == mitll.hlt.domino.shared.model.user.User.Gender.Male;
   }
 
   /**
@@ -1937,7 +1963,7 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
    */
   @Override
   public void update(User toUpdate) {
-    DBUser dbUser = lookupUser(toUpdate.getID());
+    DBUser dbUser = lookupDBUser(toUpdate.getID());
 
     if (dbUser != null) {
       dbUser.setEmail(toUpdate.getEmail());
@@ -1953,6 +1979,78 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
 //      logger.info("after update\n" + byID);
     } else {
       logger.error("huh? couldn't find user to update " + toUpdate.getID() + "\n" + toUpdate);
+    }
+  }
+
+  @Override
+  public boolean addTeacherRole(int userid) {
+    DBUser dbUser = lookupDBUser(userid);
+
+    if (dbUser != null) {
+      Set<String> roleAbbreviations = dbUser.getRoleAbbreviations();
+      boolean hasTeacher = roleAbbreviations.contains(TCHR);
+      if (hasTeacher) {
+        logger.info("addTeacherRole user " + dbUser + " already has teacher role.");
+        return false;
+      } else {
+        roleAbbreviations.add(TCHR);
+        boolean b = doUpdate(dbUser);
+        if (b) {
+          refresh(userid);
+        } else {
+          logger.warn("addTeacherRole couldn't update " + dbUser);
+        }
+        return b;
+      }
+
+    } else {
+      logger.error("addTeacherRole huh? couldn't find user to update " + userid);
+      return false;
+    }
+  }
+
+  private void refresh(int userid) {
+    idToDBUser.refresh(userid);
+    idToUser.refresh(userid);
+    idToFirstLastUser.refresh(userid);
+    refreshUserCache(Collections.singleton(userid));
+  }
+
+  @Override
+  public boolean removeTeacherRole(int userid) {
+    DBUser dbUser = lookupDBUser(userid);
+
+    if (dbUser != null) {
+      Set<String> roleAbbreviations = dbUser.getRoleAbbreviations();
+      boolean hasTeacher = roleAbbreviations.contains(TCHR);
+      if (hasTeacher) {
+//        logger.info("user " + dbUser + " already has teacher role.");
+        roleAbbreviations.remove(TCHR);
+
+        boolean b = doUpdate(dbUser);
+        if (b) {
+          refresh(userid);
+        }
+
+        return b;
+      } else {
+        logger.warn("user " + dbUser + " doesn't have teacher role.");
+        return false;
+      }
+    } else {
+      logger.error("addTeacherRole huh? couldn't find user to update " + userid);
+      return false;
+    }
+  }
+
+  private boolean doUpdate(DBUser dbUser) {
+    SResult<ClientUserDetail> clientUserDetailSResult = updateUser(dbUser);
+
+    if (clientUserDetailSResult.isSuccess()) {
+      return true;
+    } else {
+      logger.warn("doUpdate error " + clientUserDetailSResult);
+      return false;
     }
   }
 
@@ -1983,12 +2081,14 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     if (updateUser.getEmail().isEmpty()) logger.error("updateUser empty email for " + updateUser);
     if (updateUser.getPrimaryGroup() == null) logger.error("no primary group for " + updateUser);
     if (updateUser.getAffiliation() == null) logger.warn("updateUser no affiliation for " + updateUser);
-    else if (updateUser.getAffiliation().isEmpty()) {
-      //logger.warn("updateUser empty affiliation for " + updateUser);
-    }
+
+//    else if (updateUser.getAffiliation().isEmpty()) {
+//      //logger.warn("updateUser empty affiliation for " + updateUser);
+//    }
 
     return delegate.updateUser(adminUser, getClientUserDetail(updateUser));
   }
+
 
   public boolean isValidAsEmail(String text) {
     return text.trim().toUpperCase().matches(VALID_EMAIL);
@@ -2071,14 +2171,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
   @Override
   public DBUser getDominoAdminUser() {
     return dominoAdminUser;
-  }
-
-  public void setUserProjectDAO(IUserProjectDAO userProjectDAO) {
-    this.userProjectDAO = userProjectDAO;
-  }
-
-  public void setProjectManagement(IProjectManagement projectManagement) {
-    this.projectManagement = projectManagement;
   }
 
   @Override

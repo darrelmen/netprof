@@ -1076,6 +1076,10 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>
       moveEnglishForComment(englishPhrase);
 
       englishPhrase.setWidth("100%");
+      if (foreignSentence.equalsIgnoreCase(englishTranslations)) {
+        englishPhrase.setVisible(false);
+       // englishPhrase.getElement().getStyle().setColor("white");
+      }
 
       if (!usedForeign) {
         div.add(englishPhrase);
@@ -1110,7 +1114,7 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>
   }
 
   private boolean isSiteEnglish() {
-    return getLanguage().equals("English");
+    return controller.getLanguageInfo() == Language.ENGLISH;
   }
 
   /**

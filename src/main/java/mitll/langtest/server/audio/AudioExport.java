@@ -30,28 +30,41 @@
 package mitll.langtest.server.audio;
 
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.DAOContainer;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.audio.IEnsureAudioHelper;
 import mitll.langtest.server.database.excel.ExcelExport;
+import mitll.langtest.server.database.excel.ResultDAOToExcel;
+import mitll.langtest.server.database.exercise.ExerciseServices;
 import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.exercise.Search;
+import mitll.langtest.server.database.exercise.TripleExercises;
+import mitll.langtest.server.database.project.IProject;
+import mitll.langtest.server.database.project.Project;
+import mitll.langtest.server.database.project.ProjectServices;
 import mitll.langtest.server.scoring.LTSFactory;
-import mitll.langtest.server.sorter.ExerciseSorter;
 import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
-import mitll.langtest.shared.exercise.CommonShell;
+import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.result.MonitorResult;
 import mitll.langtest.shared.user.MiniUser;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
+import javax.servlet.ServletContext;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import static mitll.langtest.server.audio.AudioConversion.LANGTEST_IMAGES_NEW_PRO_F_1_PNG;
 
 public class AudioExport {
   private static final Logger logger = LogManager.getLogger(AudioExport.class);
@@ -61,16 +74,69 @@ public class AudioExport {
   private static final String MP3 = ".mp3";
   private static final String CNTXT_ = "_cntxt_";
   private static final String BLANK = "Blank";
+  private static final boolean DEBUG_COPY_AUDIO = true;
 
   private Collection<String> typeOrder;
   private final ServerProperties props;
+
+  private final ServletContext servletContext;
 
   /**
    * @param props
    * @see DatabaseImpl#writeZip(OutputStream, Map, int, AudioExportOptions, mitll.langtest.server.database.audio.IEnsureAudioHelper)
    */
-  public AudioExport(ServerProperties props) {
+  public AudioExport(ServerProperties props, ServletContext servletContext) {
     this.props = props;
+    this.servletContext = servletContext;
+  }
+
+  public void writeZip(OutputStream out,
+                       Map<String, Collection<String>> typeToSection,
+                       int projectid,
+                       AudioExportOptions options,
+                       IEnsureAudioHelper ensureAudioHelper,
+                       ExerciseServices exerciseServices,
+                       ProjectServices projectServices,
+                       DAOContainer daoContainer) throws Exception {
+    Project project = projectServices.getProject(projectid);
+    ISection<CommonExercise> sectionHelper = project.getSectionHelper();
+    Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
+        exerciseServices.getExercises(projectid, false) :
+        sectionHelper.getExercisesForSelectionState(typeToSection);
+
+    if (!options.getSearch().isEmpty()) {
+      TripleExercises<CommonExercise> exercisesForSearch = new Search<>(projectServices)
+          .getExercisesForSearch(
+              options.getSearch(),
+              exercisesForSelectionState, !options.isUserList() && typeToSection.isEmpty(), projectid, true);
+      exercisesForSelectionState = exercisesForSearch.getByExercise();
+    }
+
+    // Project project = getProject(projectid);
+
+    String language = project.getLanguage();// getLanguage(project);
+
+//    if (!typeToSection.isEmpty()) {
+    logger.info("writeZip for project " + projectid +
+        "\n\tensure audio for " + exercisesForSelectionState.size() +
+        "\n\texercises for " + language +
+        "\n\tselection " + typeToSection);
+
+    if (options.getIncludeAudio()) {
+      Language languageEnum = project.getLanguageEnum();
+      daoContainer.getAudioDAO().attachAudioToExercises(exercisesForSelectionState, languageEnum, projectid);
+      ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, languageEnum);
+    }
+
+    //new AudioExport(getServerProps(), pathHelper.getContext())
+    writeZip(out,
+        typeToSection,
+        sectionHelper,
+        exercisesForSelectionState,
+        language,
+        false,
+        options,
+        project.isEnglish());
   }
 
   /**
@@ -206,22 +272,77 @@ public class AudioExport {
     ZipOutputStream zOut = new ZipOutputStream(out);
 
     String baseName = baseName(language1, name).replaceAll(",", "_");
-    String overallName = baseName + options.getInfo();
 
-    logger.info("writeToStream overall name " + overallName);
-    if (options.getIncludeAudio()) {
-      writeFolderContents(zOut,
-          toWrite,
-          overallName,
-          isEnglish(language1),
-          getCountryCode(language1),
-          options,
-          language1);
-    } else {
-      logger.info("writeToStream skip audio export.");
+    {
+      String overallName = baseName + options.getInfo();
+
+      logger.info("writeToStream overall name " + overallName);
+      if (options.getIncludeAudio()) {
+        writeFolderContents(zOut,
+            toWrite,
+            overallName,
+            isEnglish(language1),
+            getCountryCode(language1),
+            options,
+            language1);
+      } else {
+        logger.info("writeToStream skip audio export.");
+      }
     }
 
     addSpreadsheetToZip(toWrite, typeOrder, language1, zOut, baseName, isDefectList);
+  }
+
+  /**
+   * @param project
+   * @param toWrite
+   * @param name
+   * @param typeOrder
+   * @param language1
+   * @param out
+   * @param options
+   * @param isEnglish
+   * @param user
+   * @param isCallerAdmin
+   * @throws Exception
+   */
+  public void writeResultsToStream(IProject project,
+                                   Collection<MonitorResult> toWrite,
+                                   String name,
+                                   Collection<String> typeOrder,
+                                   String language1,
+                                   OutputStream out,
+                                   AudioExportOptions options,
+                                   boolean isEnglish,
+                                   MiniUser user,
+                                   boolean isCallerAdmin) throws Exception {
+    ZipOutputStream zOut = new ZipOutputStream(out);
+
+    String baseName = baseName(language1, name).replaceAll(",", "_");
+
+    {
+      String overallName = baseName + options.getInfo();
+
+      logger.info("writeToStream overall name " + overallName);
+      if (options.getIncludeAudio()) {
+        writeStudentFolderContents(zOut,
+            toWrite,
+            project,
+            overallName,
+            isEnglish,
+            language1, user, isCallerAdmin);
+      } else {
+        logger.info("writeToStream skip audio export.");
+      }
+    }
+
+    toWrite.forEach(monitorResult -> {
+      CommonExercise exerciseByID = project.getExerciseByID(monitorResult.getExID());
+      if (exerciseByID != null) {
+        monitorResult.setUnitToValue(exerciseByID.getUnitToValue());
+      }
+    });
+    addResultSpreadsheetToZip(toWrite, typeOrder, zOut, baseName);
   }
 
   private String baseName(String language1, String name) {
@@ -237,11 +358,19 @@ public class AudioExport {
     return LTSFactory.getLocale(language1);
   }
 
+
   private void addSpreadsheetToZip(Collection<CommonExercise> toWrite, Collection<String> typeOrder,
                                    String language1, ZipOutputStream zOut, String overallName,
                                    boolean isDefectList) throws IOException {
     zOut.putNextEntry(new ZipEntry(overallName + File.separator + overallName + ".xlsx"));
     new ExcelExport(props).writeExcelToStream(toWrite, zOut, typeOrder, language1, isDefectList);
+  }
+
+  private void addResultSpreadsheetToZip(Collection<MonitorResult> toWrite,
+                                         Collection<String> typeOrder,
+                                         ZipOutputStream zOut, String overallName) throws IOException {
+    zOut.putNextEntry(new ZipEntry(overallName + File.separator + overallName + ".xlsx"));
+    new ResultDAOToExcel().writeExcelToStream(toWrite, typeOrder, zOut);
   }
 
   private boolean isEnglish(String language1) {
@@ -283,20 +412,22 @@ public class AudioExport {
 //    int numAttach = attachAudio(toWrite, audioDAO, language, hasProjectSpecificAudio);
 
     boolean justContext = options.isJustContext();// || options.isAllContext();
-    MiniUser majorityUser = null;
+    //  MiniUser majorityUser = null;
     //if (justContext) {
     //List<CommonExercise> contextEx = new ArrayList<>(toWrite.size());
     //toWrite.forEach(exercise -> contextEx.addAll(exercise.getDirectlyRelated()));
     //populateGenderToCount(contextEx, maleToCount, femaleToCount);
     //} else {
-    populateGenderToCount(toWrite, maleToCount, femaleToCount);
-    majorityUser = options.isJustMale() ? getMaxUser(maleToCount) : getMaxUser(femaleToCount);
+    //   populateGenderToCount(toWrite, maleToCount, femaleToCount);
+    //majorityUser =
+
+    //    options.isJustMale() ? getMaxUser(maleToCount) : getMaxUser(femaleToCount);
     // }
     // find the pref Male and pref Female with most recordings for this exercise set
 //    MiniUser prefMale   = getMaxUser(maleToCount);
 //    MiniUser prefFemale = getMaxUser(femaleToCount);
 
-    AudioConversion audioConversion = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange());
+    AudioConversion audioConversion = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange(), servletContext.getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG));
 
     int numMissing = 0;
     Set<String> names = new HashSet<>();
@@ -325,7 +456,8 @@ public class AudioExport {
         if (options.isUserList()) {
           AudioAttribute audioAttribute = getLatest(ex, true);
           if (audioAttribute != null) {
-            copyAudioForExercise(zOut, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute, language);
+            copyAudioForExercise(zOut, overallName, isEnglish, audioConversion, names, speed, language,
+                audioAttribute.getAudioRef(), audioAttribute.getUser(), ex.getID(), audioAttribute.getResultid(), ex.getEnglish(), ex.getForeignLanguage(), false, audioAttribute.isMale());
             someAudio = true;
           } else {
             logger.info("writeFolder : no   male audio for " + ex.getID());
@@ -333,16 +465,19 @@ public class AudioExport {
 
           audioAttribute = getLatest(ex, false);
           if (audioAttribute != null) {
-            copyAudioForExercise(zOut, overallName, isEnglish, audioConversion, names, ex, speed, audioAttribute, language);
+            copyAudioForExercise(zOut, overallName, isEnglish, audioConversion, names, speed, language,
+                audioAttribute.getAudioRef(), audioAttribute.getUser(), ex.getID(), audioAttribute.getResultid(), ex.getEnglish(), ex.getForeignLanguage(), false, audioAttribute.isMale());
+
             someAudio = true;
           } else {
             logger.info("writeFolder : no female audio for " + ex.getID());
           }
         } else {
-          AudioAttribute recording = getAudioAttribute(majorityUser, ex, options.isJustMale(), speed);
+          AudioAttribute recording = getAudioAttribute(ex, options.isJustMale(), speed);
           if (recording != null) {
             // logger.debug("found " + recording + " by " + recording.getUser());
-            copyAudioForExercise(zOut, overallName, isEnglish, audioConversion, names, ex, speed, recording, language);
+            copyAudioForExercise(zOut, overallName, isEnglish, audioConversion, names, speed, language,
+                recording.getAudioRef(), recording.getUser(), ex.getID(), recording.getResultid(), ex.getEnglish(), ex.getForeignLanguage(), false, recording.isMale());
             someAudio = true;
           }
         }
@@ -369,6 +504,52 @@ public class AudioExport {
     //  }
   }
 
+  /**
+   * @param options
+   * @param isAdmin
+   * @param zOut
+   * @param toWrite
+   * @param overallName
+   * @param isEnglish
+   * @param language
+   * @param isCallerAdmin
+   * @throws Exception
+   * @see #writeResultsToStream(IProject, Collection, String, Collection, String, OutputStream, AudioExportOptions, boolean, boolean)
+   */
+  private void writeStudentFolderContents(ZipOutputStream zOut,
+                                          Collection<MonitorResult> toWrite,
+                                          IProject project,
+                                          String overallName,
+                                          boolean isEnglish,
+                                          String language,
+                                          MiniUser user,
+                                          boolean isCallerAdmin) throws Exception {
+    long then = System.currentTimeMillis();
+
+    AudioConversion audioConversion = new AudioConversion(props.shouldTrimAudio(), props.getMinDynamicRange(), servletContext.getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG));
+
+    Set<String> names = new HashSet<>();
+
+    boolean isMale = user.isMale();
+    logger.info("writeStudentFolderContents for " + toWrite.size());
+    for (MonitorResult monitorResult : toWrite) {
+      CommonExercise ex = project.getExerciseByID(monitorResult.getExID());
+      logger.info("\tfor " + monitorResult.getAnswer());
+      String english = ex == null ? "" : ex.getEnglish();
+      String foreignLanguage = ex == null ? monitorResult.getForeignText() : ex.getForeignLanguage();
+      copyAudioForExercise(zOut, overallName, isEnglish, audioConversion, names, "", language, monitorResult.getAnswer(), user,
+          monitorResult.getExID(), monitorResult.getUniqueID(), english, foreignLanguage, isCallerAdmin, isMale);
+    }
+    long now = System.currentTimeMillis();
+    long diff = now - then;
+    if (diff > 1000) {
+      logger.info("writeStudentFolderContents : " +
+          "took " + diff + " millis " +
+          "to export " + toWrite.size() + " items.");
+    }
+  }
+
+
   private AudioAttribute getLatest(CommonExercise ex, boolean isMale) {
     long latestTime = 0;
     AudioAttribute latest = null;
@@ -391,15 +572,19 @@ public class AudioExport {
   }
 
   /**
+   * @param ex
+   * @param audioAttribute
    * @param zOut
    * @param overallName
    * @param isEnglish
    * @param audioConversion
    * @param names
-   * @param ex
    * @param speed
-   * @param audioAttribute
    * @param language
+   * @param audioRef
+   * @param resultID
+   * @param isCallerAdmin
+   * @param isMale
    * @throws IOException
    * @see #writeFolderContents(ZipOutputStream, Collection, String, boolean, String, AudioExportOptions, String)
    */
@@ -408,19 +593,32 @@ public class AudioExport {
                                     boolean isEnglish,
                                     AudioConversion audioConversion,
                                     Set<String> names,
-                                    CommonShell ex,
+
                                     String speed,
-                                    AudioAttribute audioAttribute,
-                                    String language) throws IOException {
-    String name = overallName + File.separator + getUniqueName(ex, !isEnglish);
-    String mp3File = getMP3(audioConversion, audioAttribute, language);
+                                    String language,
+                                    String audioRef,
+                                    MiniUser user,
+                                    int exid,
+                                    int resultID, String english,
+                                    String fl,
+                                    boolean isCallerAdmin, boolean isMale) throws IOException {
+    String name = overallName + File.separator + getUniqueName(english, fl, !isEnglish);
+    String absFilePath = getAbsFilePath(audioConversion, audioRef, language);
 
 //    logger.info("ex " + ex.getID() + "  " + ex.getEnglish() + " name " + name + " path " + s);
-    copyAudioAtPath(zOut, names, name, speed, audioAttribute, ex.getID(), mp3File);
+
+    copyAudioAtPath(zOut, names, name, speed, user, exid, resultID, audioConversion.getMP3ForWav(absFilePath), true, isMale);
+
+    // copy the wav as is
+    if (isCallerAdmin) {
+      logger.info("copyAudioForExercise caller is admin so writing " + audioRef);
+      copyAudioAtPath(zOut, names, audioRef, speed, null, exid, resultID, absFilePath, false, isMale);
+    }
   }
 
-  private String getMP3(AudioConversion audioConversion, AudioAttribute audioAttribute, String language) {
-    return audioConversion.getMP3ForWav(getAbsFilePath(audioConversion, audioAttribute, language));
+  private String getMP3(AudioConversion audioConversion, String audioRef, String language) {
+    String absFilePath = getAbsFilePath(audioConversion, audioRef, language);
+    return audioConversion.getMP3ForWav(absFilePath);
   }
 
   /**
@@ -471,7 +669,7 @@ public class AudioExport {
       for (AudioAttribute attr : ex.getAudioAttributes()) {
         MiniUser user = attr.getUser();
 
-        Map<MiniUser, Integer> userToCount = (user.isMale()) ? maleToCount : femaleToCount;
+        Map<MiniUser, Integer> userToCount = (attr.isMale()) ? maleToCount : femaleToCount;
         Integer count = userToCount.get(user);
         userToCount.put(user, (count == null) ? 1 : count + 1);
       }
@@ -514,13 +712,14 @@ public class AudioExport {
 
     int id = ex.getID();
     if (countryCode.isEmpty()) {
-      name = folder + getUniqueName(ex, !isEnglish) + "_context";
+      name = folder + getUniqueName(ex.getEnglish(), ex.getForeignLanguage(), !isEnglish) + "_context";
     } else {
       // make a name that looks like: ae_cntxt_c01_u01_e0003. Mp3
       name = buildFileName(folder, countryCode, unitToValue, id);
     }
 
-    copyAudioAtPath(zOut, namesSoFar, name, speed, latestContext, id, getMP3(audioConversion, latestContext, language));
+    copyAudioAtPath(zOut, namesSoFar, name, speed, latestContext.getUser(), id, latestContext.getResultid(),
+        getMP3(audioConversion, latestContext.getAudioRef(), language), true, latestContext.isMale());
   }
 
   @NotNull
@@ -532,9 +731,7 @@ public class AudioExport {
     for (String type : typeOrder) {
       String typeValue = unitToValue.get(type);
       typeValue = typeValue.replaceAll(",", "");
-      if (typeValue.equalsIgnoreCase(BLANK)) {
-
-      } else {
+      if (!typeValue.equalsIgnoreCase(BLANK)) {
         builder.append(type.toLowerCase(), 0, 1);
         builder.append(typeValue);
         builder.append("_");
@@ -572,8 +769,8 @@ public class AudioExport {
    * @return
    * @see #writeFolderContents
    */
-  private AudioAttribute getAudioAttribute(MiniUser majorityUser, CommonExercise ex, boolean isMale, String speed) {
-    AudioAttribute recordingAtSpeed = majorityUser != null ? ex.getRecordingsBy(majorityUser.getID(), speed) : null;
+  private AudioAttribute getAudioAttribute(/*MiniUser majorityUser, */CommonExercise ex, boolean isMale, String speed) {
+    AudioAttribute recordingAtSpeed = null;//majorityUser != null ? ex.getRecordingsBy(majorityUser.getID(), speed) : null;
 
     if (recordingAtSpeed == null) {  // can't find majority user or nothing by this person at that speed
       Collection<AudioAttribute> byGender = ex.getByGender(isMale);
@@ -598,13 +795,18 @@ public class AudioExport {
    * @return
    * @see #writeFolderContents
    */
-  private String getUniqueName(CommonShell ex, boolean includeFL) {
-    String trim = ex.getEnglish().trim();
-    String foreignLanguage = ex.getForeignLanguage();
+  private String getUniqueName(String english, String foreignLanguage1, boolean includeFL) {
+    String trim = english.trim();
 
-    String name = trim.equals("N/A") ? foreignLanguage : trim + (includeFL ? "_" + foreignLanguage : "");
+    String name = trim.equals("N/A") ? foreignLanguage1 : trim + (includeFL ? "_" + foreignLanguage1 : "");
+    name = StringUtils.stripAccents(name);
     name = name.trim();
-    name = name.replaceAll("\"", "\\'").replaceAll("\\?", "").replaceAll(":", "").replaceAll("/", " or ").replaceAll("\\\\", " or ");
+    name = name
+        .replaceAll("\"", "\\'")
+        .replaceAll("\\?", "")
+        .replaceAll(":", "")
+        .replaceAll("/", " or ")
+        .replaceAll("\\\\", " or ");
     name = name.replaceAll(",", "_");
     return name;
   }
@@ -612,30 +814,59 @@ public class AudioExport {
   private int spew = 0;
 
   /**
+   * Don't change name for .wav files.
+   *
+   * @param attribute
    * @param zOut
    * @param names
    * @param parent
    * @param speed
-   * @param attribute
    * @param exid
-   * @param s
+   * @param resultID
+   * @param filePath
+   * @param isMP3
+   * @param isMale
    * @throws IOException
    */
-  private void copyAudioAtPath(ZipOutputStream zOut, Set<String> names, String parent, String speed,
-                               AudioAttribute attribute, int exid, String s) throws IOException {
-    File mp3 = new File(s);
+  private void copyAudioAtPath(ZipOutputStream zOut,
+                               Set<String> names,
+                               String parent,
+                               String speed,
+                               MiniUser user,
+                               int exid,
+                               int resultID,
+                               String filePath,
+                               boolean isMP3,
+                               boolean isMale) throws IOException {
+    File mp3 = new File(filePath);
     if (mp3.exists()) {
 //      logger.debug("copyAudioAtPath found mp3 " + mp3.getAbsolutePath());
-      String name = getName(parent, speed, attribute);
+      String name = user == null ? parent : getName(parent, speed, user, isMale);
+      if (!isMP3 && user != null) {
+        name += "_wav";
+      }
       if (names.contains(name)) {
         name += "_" + exid;
       }
 
       boolean add = names.add(name);
-      name = name.replaceAll(" ", "_");
-      name += MP3;
+      if (!add) {
+//        logger.info("copyAudioAtPath already made " + name);
+        name += "_" + resultID;
+        //      logger.info("copyAudioAtPath try          " + name);
+        add = names.add(name);
+      }
 
-      //    logger.debug("copyAudioAtPath : mp3 name is " + name);
+      name = name.replaceAll(" ", "_");
+      if (isMP3) {
+        name += MP3;
+      }
+      //else {
+      //  name += isMP3 ? MP3 : ".wav";
+      // }
+
+      if (DEBUG_COPY_AUDIO) logger.info("copyAudioAtPath : audio file name is " + name);
+
       if (add) {
         addZipEntry(zOut, mp3, name);
       } else {
@@ -649,10 +880,8 @@ public class AudioExport {
     }
   }
 
-  private String getAbsFilePath(AudioConversion audioConversion, AudioAttribute attribute, String language) {
-    String audioRef = attribute.getAudioRef();
-    String audioBaseDir = props.getAudioBaseDir();
-    String absPathForAudio = audioConversion.getAbsPathForAudio(audioRef, language, "", audioBaseDir);
+  private String getAbsFilePath(AudioConversion audioConversion, String audioRef, String language) {
+    String absPathForAudio = audioConversion.getAbsPathForAudio(audioRef, language, "", props.getAudioBaseDir());
 //    logger.info("getAbsFilePath audioBaseDir " + audioBaseDir + " " + absPathForAudio);
     return absPathForAudio;
   }
@@ -678,11 +907,8 @@ public class AudioExport {
    * @return
    * @see #copyContextAudio
    */
-  private String getName(String parent, String speed, AudioAttribute attribute) {
-    MiniUser user = attribute.getUser();
-    String userInfo = user.isDefault() ?
-        "" :
-        (attribute.isMale() ? MALE : FEMALE);
+  private String getName(String parent, String speed, MiniUser user, boolean isMale) {
+    String userInfo = (isMale ? MALE : FEMALE);
     String speedSuffix = speed.equals(AudioAttribute.REGULAR) || speed.isEmpty() ? "" : "_" + speed;
     return parent + (user.isDefault() ? "" : "_" + userInfo) + speedSuffix;
   }

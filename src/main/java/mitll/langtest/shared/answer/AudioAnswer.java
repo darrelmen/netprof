@@ -29,9 +29,14 @@
 
 package mitll.langtest.shared.answer;
 
+import com.google.gwt.json.client.JSONObject;
+import mitll.langtest.server.audio.AudioCheck;
 import mitll.langtest.server.autocrt.DecodeCorrectnessChecker;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.shared.exercise.AudioAttribute;
+import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.scoring.AudioContext;
+import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.PretestScore;
 
 /**
@@ -62,32 +67,41 @@ public class AudioAnswer extends SimpleAudioAnswer {
   public AudioAnswer() {
   }
 
+
   /**
    * @param path
    * @param validity
-   * @param reqid
+   * @param dynamicRange
    * @param duration
+   * @param reqid
    * @param exid
    * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswer
    */
-  public AudioAnswer(String path, Validity validity, int reqid, long duration, int exid) {
+  public AudioAnswer(String path, Validity validity, double dynamicRange, long duration, int reqid, int exid) {
     this.path = path;
     this.validity = validity;
     this.reqid = reqid;
     this.durationInMillis = duration;
     this.exid = exid;
+    this.dynamicRange = dynamicRange;
   }
 
   /**
-   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyWaveformPostAudioRecordButton#useResult
    * @return
+   * @see mitll.langtest.client.exercise.RecordAudioPanel.MyWaveformPostAudioRecordButton#useResult
    */
   public double getDynamicRange() {
     return dynamicRange;
   }
 
-  public void setDynamicRange(double dynamicRange) {
+  /**
+   * @param dynamicRange
+   * @see mitll.langtest.client.scoring.JSONAnswerParser#getAudioAnswer(JSONObject)
+   * @see mitll.langtest.server.audio.AudioFileHelper#getAudioAnswerDecoding(ClientExercise, AudioContext, AnswerInfo.RecordingInfo, String, java.io.File, AudioCheck.ValidityAndDur, DecoderOptions)
+   */
+  public AudioAnswer setDynamicRange(double dynamicRange) {
     this.dynamicRange = dynamicRange;
+    return this;
   }
 
   public void setDecodeOutput(String decodeOutput) {
@@ -142,6 +156,7 @@ public class AudioAnswer extends SimpleAudioAnswer {
   /**
    * Not really used very much anymore ...
    * Maybe on iOS???
+   *
    * @return
    */
   public boolean isSaidAnswer() {
@@ -157,8 +172,8 @@ public class AudioAnswer extends SimpleAudioAnswer {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.PostAudioRecordButton#onPostSuccess
    * @return
+   * @see mitll.langtest.client.scoring.PostAudioRecordButton#onPostSuccess
    */
   public int getReqid() {
     return reqid;
@@ -185,8 +200,9 @@ public class AudioAnswer extends SimpleAudioAnswer {
 
   /**
    * Audio information that is attached to the exercise.
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise.MyRecordAudioPanel#makePostAudioRecordButton
+   *
    * @return
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise.MyRecordAudioPanel#makePostAudioRecordButton
    */
   public AudioAttribute getAudioAttribute() {
     return audioAttribute;
@@ -204,7 +220,7 @@ public class AudioAnswer extends SimpleAudioAnswer {
    */
   public void setPretestScore(PretestScore pretestScore) {
     this.pretestScore = pretestScore;
-    this.score = pretestScore.getHydecScore();
+    this.score = pretestScore.getOverallScore();
   }
 
   public String getTranscript() {
@@ -220,8 +236,8 @@ public class AudioAnswer extends SimpleAudioAnswer {
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#rememberAnswer
    * @param timestamp
+   * @see mitll.langtest.server.audio.AudioFileHelper#rememberAnswer
    */
   public void setTimestamp(long timestamp) {
     this.timestamp = timestamp;
@@ -237,8 +253,8 @@ public class AudioAnswer extends SimpleAudioAnswer {
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#receivedAudioAnswer
    * @return
+   * @see mitll.langtest.client.flashcard.PolyglotPracticePanel#receivedAudioAnswer
    */
   public long getRoundTripMillis() {
     return 0;//roundTripMillis;
@@ -269,7 +285,7 @@ public class AudioAnswer extends SimpleAudioAnswer {
         "\n\tscore       " + score +
         "\n\tsaid answer " + saidAnswer +
         "\n\tpretest     " + pretestScore +
-        "\n\ttranscript  '" + transcript +"'"+
+        "\n\ttranscript  '" + transcript + "'" +
         "\n\tnormTrans   " + normTranscript;
   }
 }

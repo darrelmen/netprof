@@ -45,5 +45,8 @@ interface IBreadcrumbHelper {
   @NotNull
   NavLink makeBreadcrumb(String name);
 
+  /**
+   * @see InitialUI#clickOnParentCrumb
+   */
   void removeLastCrumb();
 }

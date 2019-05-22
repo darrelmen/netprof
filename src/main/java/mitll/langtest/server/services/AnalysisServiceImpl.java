@@ -32,7 +32,7 @@ package mitll.langtest.server.services;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.services.AnalysisService;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.*;
@@ -42,6 +42,7 @@ import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectType;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -104,7 +105,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
           .getUserInfo(db.getUserDAO(), MIN_RECORDINGS, -1);
       long now = System.currentTimeMillis();
       if (now - then > 100) {
-        logger.info("took " + (now - then) + " millis to get " + userInfo.size() + " user infos.");
+        logger.info("getUsersWithRecordings took " + (now - then) + " millis to get " + userInfo.size() + " user infos.");
       }
       return userInfo;
     } else {
@@ -243,10 +244,10 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
       logger.error("no user in session?");
       throw new DominoSessionException();
     }
-    Collection<User.Permission> permissions = userFromSession.getPermissions();
+    Collection<Permission> permissions = userFromSession.getPermissions();
     return
-        permissions.contains(User.Permission.TEACHER_PERM) ||
-            permissions.contains(User.Permission.PROJECT_ADMIN);
+        permissions.contains(Permission.TEACHER_PERM) ||
+            permissions.contains(Permission.PROJECT_ADMIN);
   }
 
   /**

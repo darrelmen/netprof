@@ -29,6 +29,7 @@
 
 package mitll.langtest.client.user;
 
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 
 import java.util.Collection;
@@ -42,7 +43,7 @@ public interface UserNotification {
    * @param user
    */
   void gotUser(User user);
-  Collection<User.Permission> getPermissions();
+  Collection<Permission> getPermissions();
   void setProjectStartupInfo(User user);
   void reallySetTheProject(int projectid);
 }

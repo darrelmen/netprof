@@ -38,7 +38,7 @@ import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.SlickAnalysis;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.security.NPUserSecurityManager;
@@ -448,10 +448,11 @@ public class EasyReportTest extends BaseTest {
     waitUntilMongo(db);
 
     {
+      int id = project.getID();
       {
         FilterRequest request = new FilterRequest().setRecordRequest(true);
         project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
-        db.getTypeToValues(request, project.getID(), 6);
+        db.getTypeToValues(request, id, 6);
       }
 
       FilterRequest request = new FilterRequest().setRecordRequest(true);
@@ -465,10 +466,10 @@ public class EasyReportTest extends BaseTest {
 
       logger.info("Request is " + request);
 
-      FilterResponse typeToValues = db.getTypeToValues(request, project.getID(), 6);
+      FilterResponse typeToValues = db.getTypeToValues(request, id, 6);
       logger.info("\n\n\nGot " + typeToValues);
 
-      ExerciseListRequest request1 = new ExerciseListRequest(-1, 6);
+      ExerciseListRequest request1 = new ExerciseListRequest(-1, 6, id);
       request1.setOnlyUnrecordedByMe(true);
       {
         Map<String, Collection<String>> typeToSelection = new HashMap<>();
@@ -477,19 +478,19 @@ public class EasyReportTest extends BaseTest {
       }
 
       List<CommonExercise> exercisesForSelectionState =
-          db.getFilterResponseHelper().getExercisesForSelectionState(request1, project.getID());
+          db.getFilterResponseHelper().getExercisesForSelectionState(request1, id);
 
       dumpExercises(exercisesForSelectionState);
 
 
       request.setExampleRequest(true);
-      typeToValues = db.getTypeToValues(request, project.getID(), 6);
+      typeToValues = db.getTypeToValues(request, id, 6);
       logger.info("\n\n\nGot examples " + typeToValues);
 
       request1.setOnlyExamples(true);
 
       exercisesForSelectionState =
-          db.getFilterResponseHelper().getExercisesForSelectionState(request1, project.getID());
+          db.getFilterResponseHelper().getExercisesForSelectionState(request1, id);
 
       dumpExercises(exercisesForSelectionState);
     }
@@ -539,11 +540,12 @@ public class EasyReportTest extends BaseTest {
     waitUntilMongo(db);
 
     {
+      int id = project.getID();
       if (false) {
         FilterRequest request = new FilterRequest().setOnlyWithAnno(true);
         project.getTypeOrder().forEach(type -> request.addPair(new Pair(type, SectionHelper.ANY)));
         /*FilterResponse typeToValues =*/
-        db.getTypeToValues(request, project.getID(), 6);
+        db.getTypeToValues(request, id, 6);
       }
 
       FilterRequest request = new FilterRequest().setOnlyWithAnno(true);
@@ -557,10 +559,10 @@ public class EasyReportTest extends BaseTest {
 
       logger.info("Request is " + request);
 
-      FilterResponse typeToValues = db.getTypeToValues(request, project.getID(), 6);
+      FilterResponse typeToValues = db.getTypeToValues(request, id, 6);
       logger.info("\n\n\nGot " + typeToValues);
 
-      ExerciseListRequest request1 = new ExerciseListRequest(-1, 6);
+      ExerciseListRequest request1 = new ExerciseListRequest(-1, 6, id);
 
       request1.setOnlyWithAnno(true);
       {
@@ -570,19 +572,19 @@ public class EasyReportTest extends BaseTest {
       }
 
       List<CommonExercise> exercisesForSelectionState =
-          db.getFilterResponseHelper().getExercisesForSelectionState(request1, project.getID());
+          db.getFilterResponseHelper().getExercisesForSelectionState(request1, id);
 
       dumpExercises(exercisesForSelectionState);
 
 
       request.setExampleRequest(true);
-      typeToValues = db.getTypeToValues(request, project.getID(), 6);
+      typeToValues = db.getTypeToValues(request, id, 6);
       logger.info("\n\n\nGot examples " + typeToValues);
 
       request1.setOnlyExamples(true);
 
       exercisesForSelectionState =
-          db.getFilterResponseHelper().getExercisesForSelectionState(request1, project.getID());
+          db.getFilterResponseHelper().getExercisesForSelectionState(request1, id);
 
       dumpExercises(exercisesForSelectionState);
     }
@@ -605,10 +607,11 @@ public class EasyReportTest extends BaseTest {
       request.addPair("Content", SENTENCES_ONLY);
       logger.info("Request is " + request);
 
-      FilterResponse typeToValues = db.getTypeToValues(request, project.getID(), 6);
+      int id = project.getID();
+      FilterResponse typeToValues = db.getTypeToValues(request, id, 6);
       logger.info("\n\n\nGot " + typeToValues);
 
-      ExerciseListRequest request1 = new ExerciseListRequest(-1, 6);
+      ExerciseListRequest request1 = new ExerciseListRequest(-1, 6, id);
 
       {
         Map<String, Collection<String>> typeToSelection = new HashMap<>();
@@ -617,7 +620,7 @@ public class EasyReportTest extends BaseTest {
       }
 
       List<CommonExercise> exercisesForSelectionState =
-          db.getFilterResponseHelper().getExercisesForSelectionState(request1, project.getID());
+          db.getFilterResponseHelper().getExercisesForSelectionState(request1, id);
 
 
       dumpExercises(exercisesForSelectionState);
@@ -1072,7 +1075,7 @@ public class EasyReportTest extends BaseTest {
     DatabaseImpl db = getAndPopulate();
     int projectid = 7;
     Project project = db.getProject(projectid);
-    project.getAudioFileHelper().checkLTSAndCountPhones(project.getRawExercises());
+    project.getAudioFileHelper().checkForOOV(project.getRawExercises());
 
     try {
       Thread.sleep(20000);
@@ -1086,7 +1089,7 @@ public class EasyReportTest extends BaseTest {
     DatabaseImpl db = getAndPopulate();
     int projectid = 8;
     Project project = db.getProject(projectid);
-    project.getAudioFileHelper().checkLTSAndCountPhones(project.getRawExercises());
+    project.getAudioFileHelper().checkForOOV(project.getRawExercises());
   }
 
   @Test

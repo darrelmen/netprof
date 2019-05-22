@@ -32,6 +32,7 @@ package mitll.langtest.server.database.phone;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import mitll.langtest.server.ServerProperties;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.word.Word;
 import mitll.langtest.shared.analysis.PhoneReport;
 import mitll.langtest.shared.analysis.PhoneStats;
@@ -86,7 +87,7 @@ public class PhoneJSON {
    *
    * @param worstPhonesAndScore
    * @return
-   * @see IPhoneDAO#getWorstPhonesJson(Collection, mitll.langtest.server.database.exercise.Project, mitll.langtest.shared.analysis.PhoneReportRequest)
+   * @see IPhoneDAO#getWorstPhonesJson(Collection, Project, mitll.langtest.shared.analysis.PhoneReportRequest)
    */
   JsonObject getWorstPhonesJson(PhoneReport worstPhonesAndScore) {
     JsonObject jsonObject = new JsonObject();

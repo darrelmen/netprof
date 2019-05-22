@@ -39,12 +39,12 @@ import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
+import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.TwoColumnExercisePanel;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.scoring.AlignmentOutput;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -102,8 +102,7 @@ public class EditItem {
 
     userListID = originalList.getID();
     userListName = originalList.getName();
-    EditableExerciseList exerciseList = new EditableExerciseList(controller, right, INavigation.VIEWS.LISTS, originalList);
-    this.exerciseList = exerciseList;
+    this.exerciseList = new EditableExerciseList(controller, right, INavigation.VIEWS.LISTS, originalList);
     setFactory(this.exerciseList);
     this.exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
     // logger.info("setting vertical on " +exerciseList.getElement().getExID());
@@ -149,7 +148,7 @@ public class EditItem {
         // logger.info("unit " + exercise.getUnitToValue());
 
         if (exercise.isPredefined() || exercise.isContext()) {
-          TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<>(exercise,
+          TwoColumnExercisePanel<ClientExercise> widgets = new TwoColumnExercisePanel<ClientExercise>(exercise,
               controller,
               exerciseList,
               alignments, true, new IListenView() {
@@ -163,8 +162,8 @@ public class EditItem {
               return -1;
             }
           },
-              false, () -> "");
-          widgets.addWidgets(getFLChoice(), false, getPhoneChoices());
+              () -> "");
+          widgets.addWidgets(getFLChoice(), false, getPhoneChoices(), EnglishDisplayChoices.SHOW);
           return widgets;
         } else {
           // logger.info("getExercisePanel got " + exercise.getID() + " " + exercise.getEnglish() + " - " + exercise.getForeignLanguage() + " predef " + exercise.isPredefined());
@@ -194,7 +193,6 @@ public class EditItem {
     //  logger.info("not adding items at top?");
     }
 
-    @NotNull
     @Override
     protected DivWidget getDominoEditInfo() {
       return null;

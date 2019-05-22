@@ -37,9 +37,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.text.Normalizer;
 import java.util.*;
-import java.util.regex.Pattern;
 
-public class SmallVocabDecoder extends  TextNormalizer {
+public class SmallVocabDecoder extends TextNormalizer {
   private static final Logger logger = LogManager.getLogger(SmallVocabDecoder.class);
 
   /**
@@ -52,8 +51,8 @@ public class SmallVocabDecoder extends  TextNormalizer {
    * FF1B - full semi
    * 002D - hyphen
    */
-  private static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193\\u2026\\uFF01\\uFF1B\\u002D;~/']";
-  private static final String REPLACE_ME_OE = "[\\u0152\\u0153]";
+//  private static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193\\u2026\\uFF01\\uFF1B\\u002D;~/']";
+//  private static final String REPLACE_ME_OE = "[\\u0152\\u0153]";
 
   /**
    * u00B7 = middle dot
@@ -66,21 +65,22 @@ public class SmallVocabDecoder extends  TextNormalizer {
   /**
    * @see #getTrimmedLeaveAccents
    */
-  private static final String FRENCH_PUNCT = "[,.?!]";
+//  private static final String FRENCH_PUNCT = "[,.?!]";
   private static final boolean WARN_ABOUT_BAD_CHINESE = false;
 
-  private static final String P_P = "\\p{P}";
-  private static final String INTERNAL_PUNCT_REGEX = "(?:(?<!\\S)\\p{Punct}+)|(?:\\p{Punct}+(?!\\S))";
+//  private static final String P_P = "\\p{P}";
+//  private static final String INTERNAL_PUNCT_REGEX = "(?:(?<!\\S)\\p{Punct}+)|(?:\\p{Punct}+(?!\\S))";
 
   private HTKDictionary htkDictionary;
   private boolean isAsianLanguage;
 
   private static final int TOO_LONG = 8;
 
-  private static final boolean DEBUG = false;
+  // private static final boolean DEBUG = false;
   private static final boolean DEBUG_PREFIX = false;
   private static final boolean DEBUG_SEGMENT = false;
-  private static final boolean DEBUG_MANDARIN = true;
+  // private static final boolean DEBUG_MANDARIN = true;
+  private final boolean removeAllAccents;
 
   /**
    * Compiles some handy patterns.
@@ -89,6 +89,12 @@ public class SmallVocabDecoder extends  TextNormalizer {
    */
   public SmallVocabDecoder(Language language) {
     super(language.name());
+    removeAllAccents =
+        language != Language.FRENCH &&
+
+            language != Language.TURKISH &&
+            language != Language.CROATIAN &&
+            language != Language.SERBIAN;
   }
 
   /**
@@ -101,7 +107,12 @@ public class SmallVocabDecoder extends  TextNormalizer {
     this(language);
     this.htkDictionary = htkDictionary;
     this.isAsianLanguage = isAsianLanguage;
+
 //    logger.info("SmallVocabDecoder dict now " + ((htkDictionary != null) ? htkDictionary.size() : " null dict") + " asian " + isAsianLanguage);
+  }
+
+  public List<String> getTokens(String sentence) {
+    return getTokens(sentence, removeAllAccents);
   }
 
   /**
@@ -127,7 +138,7 @@ public class SmallVocabDecoder extends  TextNormalizer {
   List<String> getSimpleVocab(Collection<String> sentences, int vocabSizeLimit) {
     // childCount the tokens
     final Map<String, Integer> sc = new HashMap<>();
-    sentences.forEach(sent -> getTokens(sent, false, false).forEach(token -> {
+    sentences.forEach(sent -> getTokens(sent, false).forEach(token -> {
       Integer c = sc.get(token);
       sc.put(token, (c == null) ? 1 : c + 1);
     }));
@@ -162,7 +173,7 @@ public class SmallVocabDecoder extends  TextNormalizer {
   }
 
   public String getSegmented(String longPhrase, boolean removeAllAccents) {
-    Collection<String> tokens = getTokens(longPhrase, removeAllAccents, false);
+    Collection<String> tokens = getTokens(longPhrase, removeAllAccents);
     StringBuilder builder = new StringBuilder();
     tokens.forEach(token -> {
       String trim = token.trim();
@@ -187,7 +198,7 @@ public class SmallVocabDecoder extends  TextNormalizer {
    * @see mitll.langtest.server.autocrt.DecodeCorrectnessChecker#isCorrect(Collection, String, boolean, boolean)
    */
   public List<String> getTokensAllLanguages(boolean isMandarin, String fl, boolean removeAllAccents) {
-    return isMandarin ? getMandarinTokens(fl) : getTokens(fl, removeAllAccents, false);
+    return isMandarin ? getMandarinTokens(fl) : getTokens(fl, removeAllAccents);
   }
 
   /**
@@ -199,7 +210,7 @@ public class SmallVocabDecoder extends  TextNormalizer {
   private List<String> getMandarinTokens(String foreignLanguage) {
     String segmentation = segmentation(foreignLanguage);
 //    if (DEBUG_MANDARIN) logger.info("getMandarinTokens '" + foreignLanguage + "' = '" + segmentation + "'");
-    return getTokens(segmentation, false, false);
+    return getTokens(segmentation, false);
   }
 
   /**
@@ -351,10 +362,10 @@ public class SmallVocabDecoder extends  TextNormalizer {
   }
 
   /**
-   * @see #segmentation(String)
-   * @see #longest_prefix(String, int, Map)
    * @param token
    * @return
+   * @see #segmentation(String)
+   * @see #longest_prefix(String, int, Map)
    */
   private boolean inDict(String token) {
     try {

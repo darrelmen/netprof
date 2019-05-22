@@ -146,6 +146,8 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
     Button actual = (Button) widget;
     actual.setEnabled(false);
 
+    //logger.info("makePlayButton " + getId() );
+
     addChoices(playButton, includeContext, actual, false);
 
     return actual;
@@ -273,11 +275,11 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
       // logger.info("addChoices current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
       if (tellListener) {
         //   logger.info("addChoices tellListener : current audio is " + toUse.getUniqueID() + " : " + toUse.getAudioType() + " : " + toUse.getRealGender());
-        listener.audioChangedWithAlignment(toUse.getUniqueID(), toUse.getDurationInMillis(), toUse.getAlignmentOutput());
+        listener.audioChangedWithAlignment(toUse.getUniqueID(), toUse.getDurationInMillis());
       }
       rememberAudio(toUse.getAudioRef());
     } else {
-      // logger.info("addChoices has no audio for " + exercise.getID() + " context " + includeContext);
+   //  logger.info("addChoices has no audio for " + exercise.getID() + " context " + includeContext);
     }
   }
 

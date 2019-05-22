@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.services;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -49,7 +50,7 @@ import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.audio.IEnsureAudioHelper;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectHelper;
 import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.server.scoring.JsonScoring;
@@ -57,9 +58,11 @@ import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.OOVInfo;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
@@ -171,7 +174,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   @Override
   public void init() {
     super.init();
-    pathWriter = new PathWriter(serverProps);
+    pathWriter = new PathWriter(serverProps, getServletContext());
     ensureAudioHelper = new EnsureAudioHelper(db, pathHelper);
     audioCheck = new AudioCheck(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange());
     pathWriter.doSanityCheckOnDir(new File(serverProps.getAnswerDir()), " answers dir ");
@@ -248,8 +251,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * been reached...
    * TODO : add a parameter for expected VAD duration
    * TODO : add a parameter specifying duration of final silence segment
-   *
-   *
+   * <p>
+   * <p>
    * The client is reading the responses generated here at gotPacketResponse
    *
    * @param request
@@ -534,6 +537,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @return
    * @throws IOException
    * @throws DominoSessionException
+   * @see #getJSONForStream(HttpServletRequest, ScoreServlet.PostRequest, String, String)
    */
   private JsonObject getJsonObject(String deviceType, String device,
                                    int userIDFromSession, int realExID, int reqid, int projid,
@@ -614,7 +618,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   /**
    * so we get a packet - if it's the next one in the sequence, combine it with the current one and replace it
    * otherwise, we'll have to make a list and combine them...
-   *
+   * <p>
    * deals with gaps
    * <p>
    * Wait for arrival?
@@ -637,14 +641,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
 
     AudioChunk combined = audioChunks.get(0);
-    logger.info("getCombinedAudioChunk Stop - combine " + combined + " with " + (audioChunks.size()-1) + " following chunks.");
+    logger.info("getCombinedAudioChunk Stop - combine " + combined + " with " + (audioChunks.size() - 1) + " following chunks.");
 
     if (combined.getPacket() != 0) {
       logger.warn("\n\n\n\n\n\n getCombinedAudioChunk huh? first packet is " + combined);
     }
 
     for (int i = 1; i < audioChunks.size(); i++) {
-     // AudioChunk next = getNextAudioChunk(audioChunks, combined.getPacket(), i, session);
       combined = combined.concat(getNextAudioChunk(audioChunks, combined.getPacket(), i, session));
       //      logger.info("\tStop - 2 combine " + combined);
     }
@@ -731,7 +734,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     // ordering check...
     {
-     // int packet = combined.getPacket();
+      // int packet = combined.getPacket();
       int nextPacketID = next.getPacket();
       if (packet != nextPacketID - 1) {
         logger.warn("getNextAudioChunk : session " + session +
@@ -849,10 +852,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
      * can't return a null chunk - that would stop the combining pipeline
      *
      * @param other
-     * @return this chunk if we can't read the one where supposed to combine it with - this really should never happen
-     * @see #getCombinedAudioChunk
+     * @return
+     * @see #getCombinedAudioChunk(List)
      */
-
     AudioChunk concat(AudioChunk other) {
       if (other.getValidity() == INVALID) {
         return new AudioChunk(other.getPacket(), true, this.wavFile);
@@ -913,7 +915,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
      */
     Validity calcValid(AudioCheck audioCheck, boolean useSensitiveTooLoudCheck, boolean quietAudioOK) {
       try {
-
         int length = wavFile.length;
         if (length < WAV_HEADER_LEN) {
           validityAndDur = new AudioCheck.ValidityAndDur();
@@ -932,7 +933,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             audioCheck.maybeAddDNR("" + packet, getAudioInputStream(), validityAndDur);
           }
         }
-
         //      long now = System.currentTimeMillis();
         //    logger.info("dnr took " + (now - then) + " millis");
       } catch (Exception e) {
@@ -1112,6 +1112,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
                                      File fileInstead,
                                      int projectID) {
     Project project = db.getProject(projectID);
+   // logger.info("getAudioAnswer : project " +project);
     boolean hasProjectSpecificAudio = project.hasProjectSpecificAudio();
     AudioFileHelper audioFileHelper = getAudioFileHelper(project);
 
@@ -1223,6 +1224,39 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
+   *
+   * @param id
+   * @param num
+   * @param offset
+   * @return
+   * @throws DominoSessionException
+   * @throws RestrictedOperationException
+   * @see mitll.langtest.client.banner.OOVViewHelper#checkOOVRepeatedly(DivWidget, int)
+   */
+  @Override
+  public OOVInfo checkOOV(int id, int num, int offset) throws DominoSessionException, RestrictedOperationException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasAdminOrCDPerm(userIDFromSessionOrDB)) {
+      OOVInfo oovInfo = db.getProjectManagement().checkOOV(id, num, offset);
+      db.getAudioDAO().attachAudioToExercises(oovInfo.getUnsafe(), db.getLanguageEnum(id), id);
+      return oovInfo;
+    } else {
+      throw getRestricted("Check OOV on a project.");
+    }
+  }
+
+  @Override
+  public void updateOOV(int projectID, List<OOV> updates) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+    if (hasAdminOrCDPerm(userIDFromSessionOrDB)) {
+       db.getProjectManagement().updateOOV(updates, userIDFromSessionOrDB);
+    } else {
+      throw getRestricted("Check OOV on a project.");
+    }
+  }
+
+
+  /**
    * @param projectid
    * @see mitll.langtest.client.project.ProjectEditForm#getCheckAudio
    */
@@ -1265,6 +1299,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @return AudioAttribute that represents the audio that has been added to the exercise
    * @paramx realGender
    * @see #writeAudioFile
+   * @see #getAudioAnswer(String, AudioContext, String, String, DecoderOptions, File, int)
+   * @see #getJsonObject(String, String, int, int, int, int, int, boolean, AudioType, JsonObject, AudioChunk)
    */
   private AudioAttribute addToAudioTable(int user,
                                          AudioType audioType,
@@ -1297,6 +1333,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     String context = noExistingExercise ? "" : isContext ? getEnglish(exercise1) : exercise1.getEnglish();
 
     if (!absoluteFile.exists()) logger.error("addToAudioTable huh? no file at " + absoluteFile.getAbsolutePath());
+    Map<String, String> unitToValue = exercise1 == null ? Collections.emptyMap() : exercise1.getUnitToValue();
     String permanentAudioPath = pathWriter.
         getPermanentAudioPath(
             absoluteFile,
@@ -1305,7 +1342,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
             language,
             idToUse,
             serverProps,
-            new TrackInfo(audioTranscript, getArtist(user), context, language.getLanguage()));
+            new TrackInfo(audioTranscript, getArtist(user), context, language.getLanguage(), unitToValue));
 
     AudioAttribute audioAttribute = null;
     try {
@@ -1490,7 +1527,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       relativeImagePath = relativeImagePath.substring(1);
     }
     String imageURL = relativeImagePath;
-    double duration = new AudioCheck(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange()).getDurationInSeconds(wavAudioFile);
+
+    double duration;
+    try {
+      duration = new AudioCheck(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange()).getDurationInSeconds(wavAudioFile);
+    } catch (UnsupportedAudioFileException e) {
+      logger.warn("not a wav file " + wavAudioFile, e);
+      return new ImageResponse();
+    }
     if (duration == 0) {
       logger.error("huh? " + wavAudioFile + " has zero duration???");
     }
@@ -1505,8 +1549,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     return new ImageResponse(reqid, imageURL, duration);
   }
 
-  public RecalcRefResponse recalcRefAudio(int projid) {
-    return db.getProject(projid).recalcRefAudio();
+  /**
+   * @param projid
+   * @return
+   * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
+   */
+  public RecalcRefResponse recalcRefAudio(int projid) throws DominoSessionException {
+
+    return db.getProject(projid).recalcRefAudio(getUserIDFromSessionOrDB());
   }
 
   /**

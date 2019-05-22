@@ -30,7 +30,6 @@
 package mitll.langtest.shared.grade;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.server.database.result.Result;
 
 public class Grade implements IsSerializable {
   private static final int UNASSIGNED = -1;

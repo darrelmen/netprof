@@ -38,9 +38,12 @@ import org.jetbrains.annotations.NotNull;
  */
 class LinkAndTitle {
   private final ClickHandler clickHandler;
-  private final String title;
+  private String title;
   private final String linkURL;
   private NavLink myLink;
+  private boolean isAdmin;
+  private boolean isTeacher;
+  private boolean mustHaveProject;
 
   /**
    * @param title
@@ -66,7 +69,6 @@ class LinkAndTitle {
   }
 
   /**
-   *
    * @return
    */
   @NotNull
@@ -86,8 +88,60 @@ class LinkAndTitle {
     return myLink;
   }
 
+  void setVisible(boolean vis) {
+    getMyLink().setVisible(vis);
+  }
+
+  void setVisible(boolean admin, boolean teacher, boolean hasProject) {
+    boolean vis = true;
+
+    if (isAdmin) {
+      vis = admin;
+    }
+    if (isTeacher) {
+      vis = teacher;
+    }
+    if (vis && isMustHaveProject()) {
+      vis = hasProject;
+    }
+
+    setVisible(vis);
+  }
+
+  public void setTitle(String title) {
+    this.title = title;
+    myLink.setText(title);
+  }
+
   @Override
   public String toString() {
     return "Nav " + title;
+  }
+
+  public boolean isAdmin() {
+    return isAdmin;
+  }
+
+  public LinkAndTitle setAdmin(boolean admin) {
+    isAdmin = admin;
+    return this;
+  }
+
+  public boolean isTeacher() {
+    return isTeacher;
+  }
+
+  public LinkAndTitle setTeacher(boolean teacher) {
+    isTeacher = teacher;
+    return this;
+  }
+
+  private boolean isMustHaveProject() {
+    return mustHaveProject;
+  }
+
+   LinkAndTitle setMustHaveProject(boolean mustHaveProject) {
+    this.mustHaveProject = mustHaveProject;
+    return this;
   }
 }

@@ -33,7 +33,6 @@ import mitll.langtest.client.analysis.AudioExampleContainer;
 import mitll.langtest.client.analysis.PhoneExampleContainer;
 import mitll.langtest.client.analysis.WordContainerAsync;
 import mitll.langtest.server.database.analysis.Analysis;
-
 import mitll.langtest.shared.instrumentation.SlimSegment;
 import mitll.langtest.shared.scoring.NetPronImageType;
 

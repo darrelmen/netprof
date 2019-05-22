@@ -35,13 +35,12 @@ import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.IPronunciationLookup;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.ProjectSync;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectProperty;
@@ -214,7 +213,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         shared.getEnglish(),
         shared.getMeaning(),
         shared.getForeignLanguage(),
-        "",
+        shared.getNormalizedFL(),
         shared.getAltFL(),
         shared.getTransliteration(),
         shared.isOverride(),
@@ -239,7 +238,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    * @param isContext
    * @param typeOrder
    * @return
-   * @seex #add
+   * @see #add(CommonExercise, boolean, Collection)
    * @see #update(CommonExercise, boolean, Collection)
    */
   private SlickExercise toSlick(CommonExercise shared, boolean isContext, Collection<String> typeOrder) {
@@ -265,11 +264,13 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
                                boolean isContext,
                                Collection<String> typeOrder) {
     Map<String, String> unitToValue = shared.getUnitToValue();
+
     if (typeOrder.isEmpty()) {
       if (spew++ < 100 || spew % 100 == 0)
-        logger.error("toSlick type order is empty? (" + spew + " )");
-      return null;
+        logger.warn("toSlick (project " + projectID + ") type order is empty? (" + spew + " )");
+      //  return null;
     }
+
     Iterator<String> iterator = typeOrder.iterator();
     String first = iterator.hasNext() ? iterator.next() : "";
     String second = iterator.hasNext() ? iterator.next() : "";
@@ -285,10 +286,9 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     String secondType = unitToValue.getOrDefault(second, "");
     if (secondType.isEmpty()) secondType = unitToValue.getOrDefault(second.toLowerCase(), "");
 
-/*    logger.info("toSlick for " + shared.getID() + " "+shared.getOldID()+
-        " : " +first +
-        " = '" + firstType + "' " +
-        "" + second + " = '" + secondType + "'");*/
+    logger.info("toSlick for " + shared.getID() + " " + shared.getOldID() +
+        "\n\tfirst  " + first + " = '" + firstType + "' " +
+        "\n\tsecond " + second + " = '" + secondType + "'");
 
     String english = shared.getEnglish();
     if (english.length() > MAX_LENGTH) {
@@ -296,14 +296,18 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       logger.warn("toSlick " + shared.getID() + " truncate english " + english);
     }
 
+    String fl = getFL(shared);
+    String foreignLanguageNorm1 = shared.getNormalizedFL();
+    String foreignLanguageNorm = foreignLanguageNorm1 == null ? fl : foreignLanguageNorm1;
+
     return new SlickExercise(shared.getID() > 0 ? shared.getID() : -1,
         creator,
         shared.getOldID(),
         new Timestamp(updateTime),
         english,
         shared.getMeaning(),
-        getFL(shared),
-        "",
+        fl,
+        getCleaned(foreignLanguageNorm),
         shared.getAltFL(),
         shared.getTransliteration(),
         false,
@@ -314,13 +318,18 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         isContext,
         false,
         shared.getDominoID(),
-        false,
+        shared.isSafeToDecode(),
         never,
         0);//shared.getNumPhones());
   }
 
   private String getFL(CommonExercise shared) {
     String foreignLanguage = shared.getForeignLanguage();
+    return getCleaned(foreignLanguage);
+  }
+
+  @NotNull
+  private String getCleaned(String foreignLanguage) {
     if (foreignLanguage.contains(QUOT)) {
       String convert = foreignLanguage.replaceAll(QUOT, "\"");
       //logger.info("toSlick : convert\nfrom "+ foreignLanguage + "\nto  " + convert);
@@ -436,13 +445,16 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     String altfl = slick.altfl();
     String foreignlanguage = slick.foreignlanguage();
 
+    String foreignLanguageNorm = slick.foreignlanguagenorm();
+    if (foreignLanguageNorm.isEmpty()) foreignLanguageNorm = foreignlanguage;
+    String s = StringUtils.stripAccents(foreignLanguageNorm);
     Exercise userExercise = new Exercise(
         slick.id(),
         slick.exid(),
         slick.userid(),
         english,
         foreignlanguage,
-        StringUtils.stripAccents(foreignlanguage),
+        s,
         altfl,
         slick.meaning(),
         slick.transliteration(),
@@ -453,7 +465,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         slick.candecode(),
         slick.candecodechecked().getTime(),
         slick.iscontext(),
-        slick.numphones(),
+//        slick.numphones(),
         slick.legacyid(),
         shouldSwap);
 
@@ -477,16 +489,24 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
    */
   @NotNull
   private Exercise makeExercise(SlickExercise slick, boolean shouldSwap, List<String> typeOrder) {
-    // int id = slick.id();
     String foreignlanguage = getTruncated(slick.foreignlanguage());
-    String noAccentFL = StringUtils.stripAccents(foreignlanguage);
+    String foreignlanguageNorm = getTruncated(slick.foreignlanguagenorm());
+
+    if (foreignlanguageNorm.isEmpty()) foreignlanguageNorm = foreignlanguage;
+
+    //  String noAccentFL = StringUtils.stripAccents(foreignlanguageNorm);
+    String noAccentFL = foreignlanguageNorm;
     String english = getTruncated(slick.english());
     String meaning = getTruncated(slick.meaning());
 
     Map<String, String> unitToValue = getUnitToValue(slick, typeOrder);
 
-    if (slick.projid() == 16 && slick.id() == 153010) logger.info("makeExercise ex (" + slick.id() +
-        ") " + typeOrder + " - " + unitToValue);
+    if (slick.projid() == 15 && slick.id() == 129640) {
+      logger.info("makeExercise ex (" + slick.id() +
+          ") " + typeOrder + " - " + unitToValue);
+      logger.info("makeExercise ex (" + slick.id() +
+          ") " + foreignlanguage + " " + english + " - " + meaning + " '" + noAccentFL + "'");
+    }
 
     Exercise exercise = new Exercise(
         slick.id(),
@@ -502,7 +522,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         slick.candecode(),
         slick.candecodechecked().getTime(),
         slick.iscontext(),
-        slick.numphones(),
         slick.legacyid(), // i.e. dominoID
         shouldSwap);
 
@@ -885,14 +904,17 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
   private void insertDefault(int projID, String newUserExercise) {
     int beforeLoginUser = userDAO.getBeforeLoginUser();
     Timestamp now = new Timestamp(System.currentTimeMillis());
-    SlickExercise userExercise = new SlickExercise(-1,
+    SlickExercise userExercise = new SlickExercise(
+        -1,
         beforeLoginUser,
         newUserExercise,
         now,
         "",
         "",
-        "", "",
-        "", "", false, "", "", projID, true, false,
+        "",
+        "",
+        "",
+        "", false, "", "", projID, true, false,
         false, -1, false, now, 0);
 
     logger.info("insert default " + userExercise);
@@ -1080,7 +1102,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         "\n\tisPredef = " + isPredef);
 
     return getExercises(allContextPredefByProject, typeOrder, sectionHelper,
-        lookup, allByProject, exToAttrs, /*attributeTypes,*/ false);
+        lookup, allByProject, exToAttrs, false);
   }
 
   @Override

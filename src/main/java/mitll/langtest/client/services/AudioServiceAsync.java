@@ -33,14 +33,17 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.OOVInfo;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.scoring.AudioContext;
 import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 
+import java.util.List;
 import java.util.Set;
 
 public interface AudioServiceAsync {
@@ -90,7 +93,7 @@ public interface AudioServiceAsync {
    * @param asyncCallback
    * @see mitll.langtest.client.project.ProjectEditForm#recalcRefAudio
    */
-  void recalcRefAudio(int id, AsyncCallback<RecalcRefResponse> asyncCallback);
+  void recalcRefAudio(int id, AsyncCallback<RecalcRefResponse> asyncCallback) ;
 
   void logMessage(String subject, String message, boolean sendEmail, AsyncCallback<Void> async);
 
@@ -106,4 +109,8 @@ public interface AudioServiceAsync {
   void refreshExercises(int projid, Set<Integer> exids, AsyncCallback<Void> async);
 
   void getTranscriptMatch(int projID, int exid, int audioID, boolean isContext, String transcript, AsyncCallback<AudioAttribute> async);
+
+  void checkOOV(int id, int num, int offset, AsyncCallback<OOVInfo> async);
+
+  void updateOOV(int projectID, List<OOV> updates, AsyncCallback<Void> async);
 }

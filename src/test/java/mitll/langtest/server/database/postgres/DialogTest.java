@@ -33,8 +33,11 @@ import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.shared.analysis.AnalysisReport;
+import mitll.langtest.shared.analysis.AnalysisRequest;
+import mitll.langtest.shared.analysis.PhoneSession;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
@@ -83,6 +86,31 @@ public class DialogTest extends BaseTest {
     Project project = andPopulate.getProject(12);
     report(andPopulate, project);
   }
+
+  @Test
+  public void testSessions() {
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = andPopulate.getProject(21,true);
+    try {
+      Thread.sleep(2000);
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }
+
+    AnalysisReport performanceReportForUser = project.getAnalysis().getPerformanceReportForUser(new AnalysisRequest().setUserid(6));
+
+    logger.info("Got " +performanceReportForUser);
+    Map<Long, List<PhoneSession>> granularityToSessions = performanceReportForUser.getUserPerformance().getGranularityToSessions();
+    logger.info("keys " + granularityToSessions.keySet());
+
+    granularityToSessions.forEach((k,v)->logger.info(" " + k + " = " + v));
+//    List<PhoneSession> phoneSessions = granularityToSessions.get(-1);
+
+  //  phoneSessions.forEach(phoneSession -> logger.info("Got " +phoneSession));
+
+    //  report(andPopulate, project);
+  }
+
 
 
   @Test
@@ -230,7 +258,7 @@ public class DialogTest extends BaseTest {
 
     logger.info("typeToValues " + typeToValues);
 
-    ExerciseListRequest request1 = new ExerciseListRequest(1, 6).setMode(DIALOG);
+    ExerciseListRequest request1 = new ExerciseListRequest(1, 6, projectid).setMode(DIALOG);
     request1.setOnlyUnrecordedByMe(true);
     HashMap<String, Collection<String>> typeToSelection = new HashMap<>();
     typeToSelection.put(UNIT1, Collections.singleton("1"));

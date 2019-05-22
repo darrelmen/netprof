@@ -34,7 +34,6 @@ import mitll.hlt.domino.shared.model.user.ClientUserDetail;
 import mitll.hlt.domino.shared.model.user.DBUser;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.AudioDAO;
-import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.shared.user.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -85,7 +84,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   public void ensureDefaultUsers() {
   }
 
-   @Override
+  @Override
   public Set<Integer> getTeacherIDs() {
     return null;
   }
@@ -130,7 +129,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   @Override
   public LoginResult addUser(int age, MiniUser.Gender gender, int experience, String userAgent,
                              String trueIP, String nativeLang, String dialect, String userID, boolean enabled,
-                             Collection<User.Permission> permissions,
+                             Collection<Permission> permissions,
                              Kind kind,
                              //String freeTextPassword,
                              //String passwordH,
@@ -180,7 +179,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       statement.setString(i++, userID);
       statement.setBoolean(i++, enabled);
       StringBuilder builder = new StringBuilder();
-      for (User.Permission permission : permissions) builder.append(permission).append(",");
+      for (Permission permission : permissions) builder.append(permission).append(",");
       statement.setString(i++, builder.toString());
 
       statement.setString(i++, kind.toString());
@@ -573,7 +572,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     while (rs.next()) {
       String userid = rs.getString("userid"); // userid
 
-      Collection<User.Permission> permissions = getPermissions(rs, userid);
+      Collection<Permission> permissions = getPermissions(rs, userid);
       boolean isAdmin = isAdmin(userid);
       String userKind = rs.getString(KIND);
 
@@ -640,9 +639,9 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return userKind1;
   }
 
-  private Collection<User.Permission> getPermissions(ResultSet rs, String userid) throws SQLException {
+  private Collection<Permission> getPermissions(ResultSet rs, String userid) throws SQLException {
     String perms = rs.getString(PERMISSIONS);
-    Collection<User.Permission> permissions = new ArrayList<>();
+    Collection<Permission> permissions = new ArrayList<>();
 
     if (perms != null) {
 //      logger.info("For " + userid + " " + perms);
@@ -652,7 +651,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
         perm = perm.trim();
         try {
           if (!perm.isEmpty()) {
-            permissions.add(User.Permission.valueOf(perm));
+            permissions.add(Permission.valueOf(perm));
           }
         } catch (IllegalArgumentException e) {
           logger.warn(language + " : huh, for user " + userid +
@@ -740,16 +739,32 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
     return null;
   }
 
-  @Override
-  public void setProjectManagement(IProjectManagement projectManagement) {
+//  @Override
+//  public void setProjectManagement(IProjectManagement projectManagement) {
+//  }
 
+  @Override
+  public boolean forgotPassword(String user, String url, String optionalEmail) {
+    return false;
   }
 
   @Override
-  public boolean forgotPassword(String user
-      , String url,
-                                //    ,                              String emailForLegacy
-                                String optionalEmail) {
+  public boolean addTeacherRole(int userid) {
     return false;
+  }
+
+  @Override
+  public boolean removeTeacherRole(int userid) {
+    return false;
+  }
+
+  @Override
+  public DBUser lookupDBUser(int id) {
+    return null;
+  }
+
+  @Override
+  public mitll.hlt.domino.shared.model.user.User lookupDominoUser(int id) {
+    return null;
   }
 }

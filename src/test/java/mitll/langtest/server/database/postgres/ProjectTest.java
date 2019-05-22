@@ -35,7 +35,7 @@ import mitll.langtest.server.audio.AudioFileHelper;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.analysis.IAnalysis;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.IProjectDAO;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.user.IUserDAO;

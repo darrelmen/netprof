@@ -36,10 +36,10 @@ import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
+import mitll.npdata.dao.SlickExerciseNorm;
 import mitll.npdata.dao.SlickExercisePhone;
 import mitll.npdata.dao.SlickUpdateDominoPair;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -59,12 +59,13 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   List<CommonExercise> getUserDefinedByProjectExactMatch(String fl, int userIDFromSession);
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkForOOV
    * @param safe
    * @param unsafe
    * @param dictTimestamp
    */
   void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp);
+
 
   /**
    * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict
@@ -78,6 +79,7 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
    * @param pairs
    */
   void updatePhonesBulk(List<SlickExercisePhone> pairs);
+  void updateNormBulk(List<SlickExerciseNorm> pairs);
 
   int updateDominoBulk(List<SlickUpdateDominoPair> pairs);
 
@@ -86,6 +88,4 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   int getParentFor(int exid);
 
   boolean refresh(int exid);
-
- // void bulkImport();
 }

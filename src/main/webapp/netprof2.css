@@ -20,8 +20,8 @@ h1 {
     /*background: -moz-linear-gradient(top,  #ffffff,  #b4b4b4);*/ /* for firefox 3.6+ */
 }
 
-html, body{
-    height:100%;
+html, body {
+    height: 100%;
 }
 
 body {
@@ -283,15 +283,16 @@ body {
 }
 
 /**
+ Users wanted more space between words.
  added padding bottom so we don't cut off bottom of turn text
  */
 .wordSpacerRight {
-    margin-right: 4px;
+    margin-right: 6px;
     padding-bottom: 1px;
 }
 
 .wordSpacerLeft {
-    margin-left: 4px;
+    margin-left: 6px;
 }
 
 .rtlMarginBottom {
@@ -1914,8 +1915,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .phoneWidth {
-    width: 25px;
+    min-width: 25px;
     font-size: 14pt;
+    padding-left: 4px;
+    padding-right: 4px;
 }
 
 .navbar-inner .breadcrumb {
@@ -2096,14 +2099,21 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .phoneStyle {
-    /*
-    padding-right: 3px;
-    */
     background-color: #EEF3E2;
     cursor: pointer;
     text-align: center;
     font-size: 16pt;
-    margin-right: -6px;
+
+    padding-right: 2px;
+}
+
+.rtlphoneStyle {
+    background-color: #EEF3E2;
+    cursor: pointer;
+    text-align: center;
+    font-size: 16pt;
+
+    padding-left: 2px;
 }
 
 .lastPhoneStyle {
@@ -2111,9 +2121,6 @@ h1, h2, h3, h4, h5, h6 {
     cursor: pointer;
     text-align: center;
     font-size: 16pt;
-   /*
-    margin-right: -3px;
-   */
 }
 
 .twoColumnStyle {
@@ -2292,7 +2299,7 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
 .middlebubble {
     margin-left: 20px;
     margin-right: 75px;
-    width:100%;
+    width: 100%;
     background-color: rgba(0, 128, 0, 0.35);
 }
 

@@ -464,7 +464,10 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     if (audioRef != null) {
       audioRef = CompressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
     }
-    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, exercise.getFLToShow(),
+
+    String flToShow = exercise.getFLToShow();
+
+    final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<X>(audioRef, flToShow,
         "",
         controller,
         controller.getProps().showSpectrogram(), 70, audio.isRegularSpeed() ? REGULAR_SPEED : SLOW_SPEED,
@@ -515,6 +518,17 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
         @Override
         public void onSuccess(Void result) {
           widgets.getParent().setVisible(false);
+          controller.getExerciseService().refreshAudio(exercise.getID(), new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+              logger.info("refreshed audio " + audio + " on " + exercise.getID());
+            }
+          });
           //LangTest.EVENT_BUS.fireEvent(new AudioChangedEvent(instance.toString()));
         }
       });
@@ -911,6 +925,17 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
           public void onSuccess(Void result) {
             getWaveform().setVisible(false);
             setEnabled(false);
+            controller.getExerciseService().refreshAudio(id, new AsyncCallback<Void>() {
+              @Override
+              public void onFailure(Throwable caught) {
+
+              }
+
+              @Override
+              public void onSuccess(Void result) {
+                logger.info("refresh audio defect for " + getAudioAttribute() + " on " + id);
+              }
+            });
             if (comment != null) {
               comment.setVisible(false);
             }

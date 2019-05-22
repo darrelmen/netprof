@@ -45,6 +45,7 @@ import mitll.langtest.client.common.MessageHelper;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
+import mitll.langtest.client.domino.common.UploadViewBase;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.LifecycleSupport;
@@ -57,21 +58,22 @@ import mitll.langtest.client.user.UserNotification;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.exercise.DominoUpdateResponse;
 import mitll.langtest.shared.project.*;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
-import mitll.langtest.shared.user.User.Permission;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static mitll.langtest.server.database.project.ProjectManagement.NUM_ITEMS;
-import static mitll.langtest.shared.user.User.Permission.*;
+import static mitll.langtest.shared.project.ProjectProperty.MODEL_TYPE;
+import static mitll.langtest.shared.user.Permission.*;
 
 /**
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices extends ThumbnailChoices {
+  public static final int THUMB_WIDTH = 181;
   private final Logger logger = Logger.getLogger("ProjectChoices");
 
 
@@ -84,6 +86,10 @@ public class ProjectChoices extends ThumbnailChoices {
   private static final String GVIDAVER = "gvidaver";
 
   public static final String PLEASE_WAIT = "Please wait...";
+
+  /**
+   * @see #getImportButton
+   */
   private static final String SYNCHRONIZE_CONTENT_WITH_DOMINO = "Synchronize content with domino.";
   private static final String START_TO_DELETE_THIS_PROJECT = "Start to delete this project.";
   private static final String DELETE_PROJECT = "delete project";
@@ -93,7 +99,7 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private static final boolean ALLOW_SYNC_WITH_DOMINO = true;
 
-  private static final int DIALOG_HEIGHT = 595;
+  private static final int DIALOG_HEIGHT = 598;
   private static final String COURSE1 = " course";
   /**
    * @see #getLabel
@@ -126,6 +132,9 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private static final int NORMAL_MIN_HEIGHT = 91;
 
+  /**
+   * @see #getCreateNewButton
+   */
   private static final String NEW_PROJECT = "New Project";
 
   private static final int LANGUAGE_SIZE = 3;
@@ -147,7 +156,7 @@ public class ProjectChoices extends ThumbnailChoices {
   private final UILifecycle uiLifecycle;
 
   private final LifecycleSupport lifecycleSupport;
-  private final ExerciseController controller;
+  private final ExerciseController<?> controller;
   private final UserNotification userNotification;
 
   private final OpenUserServiceAsync userService;
@@ -183,6 +192,11 @@ public class ProjectChoices extends ThumbnailChoices {
     this.userNotification = langTest;
     this.uiLifecycle = uiLifecycle;
     userService = langTest.getOpenUserService();
+  }
+
+  @Override
+  protected int getChoiceWidth() {
+    return THUMB_WIDTH;
   }
 
   /**
@@ -233,7 +247,7 @@ public class ProjectChoices extends ThumbnailChoices {
     List<SlimProject> filtered = new ArrayList<>();
     Collection<Permission> permissions = controller.getPermissions();
     boolean canRecord = isCanRecord(permissions);
-    boolean isPoly = permissions.contains(POLYGLOT);
+    //boolean isPoly = permissions.contains(POLYGLOT);
 //    logger.info("isPoly " + isPoly + " startup " + projectStartupInfo);
 
     /*    logger.info("getVisibleProjects : Examining  " + projects.size() + " projects," +
@@ -258,21 +272,17 @@ public class ProjectChoices extends ThumbnailChoices {
       }
     }
 
-    List<SlimProject> filtered2 = new ArrayList<>();
-    if (isPoly) {
-      for (SlimProject project : filtered) {
-        if (isPolyglot(project) || project.hasChildren()) {
-          filtered2.add(project);
-        }
-      }
-    } else {
-      filtered2 = filtered;
-    }
-    return filtered2;
-  }
-
-  private boolean isPolyglot(SlimProject project) {
-    return project.getProjectType() == ProjectType.POLYGLOT;
+//    List<SlimProject> filtered2 = new ArrayList<>();
+//    if (isPoly) {
+//      for (SlimProject project : filtered) {
+//        if (isPolyglot(project) || project.hasChildren()) {
+//          filtered2.add(project);
+//        }
+//      }
+//    } else {
+//      filtered2 = filtered;
+//    }
+    return filtered;
   }
 
   private boolean isCanRecord(Collection<Permission> permissions) {
@@ -301,7 +311,9 @@ public class ProjectChoices extends ThumbnailChoices {
    * @see #showProject(SlimProject)
    */
   private Section showProjectChoices(List<SlimProject> result, int nest) {
-    if (DEBUG) logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
+    if (DEBUG) {
+      logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
+    }
 
     final Section section = getScrollingSection();
     section.add(getHeader(result, nest));
@@ -376,13 +388,14 @@ public class ProjectChoices extends ThumbnailChoices {
    * @param result
    * @param nest
    * @return
-   * @see #showProjectChoices
+   * @see #showProjectChoices(List, int)
    */
   @NotNull
   private DivWidget getHeader(List<SlimProject> result, int nest) {
     DivWidget header = new DivWidget();
     header.addStyleName("container");
 
+    //   logger.info("getHeader " + result.size() + " : " + nest);
     {
       DivWidget left = new DivWidget();
       left.addStyleName("floatLeftAndClear");
@@ -394,23 +407,26 @@ public class ProjectChoices extends ThumbnailChoices {
       header.add(left);
     }
 
-    {
+    if (nest == 0) {
       DivWidget topBottom = new DivWidget();
       topBottom.addStyleName("floatRight");
+      topBottom.getElement().getStyle().setMarginBottom(18, Style.Unit.PX);
       header.add(topBottom);
 
-      DivWidget right = new DivWidget();
-      right.addStyleName("floatRight");
-      right.addStyleName("inlineFlex");
-      right.addStyleName("topMargin");
+      {
+        DivWidget right = new DivWidget();
+        right.addStyleName("floatRight");
+        right.addStyleName("inlineFlex");
+        right.addStyleName("topMargin");
 
-      topBottom.add(right);
-      if (isQC()) {
-        right.add(getCreateNewButton());
-      }
+        topBottom.add(right);
+        if (isQC()) {
+          right.add(getCreateNewButton());
+        }
 
-      if (controller.getUserState().isAdmin()) {
-        topBottom.add(addAdminControls(right));
+        if (controller.getUserState().isAdmin()) {
+          topBottom.add(addAdminControls(right));
+        }
       }
     }
 
@@ -418,10 +434,10 @@ public class ProjectChoices extends ThumbnailChoices {
   }
 
   /**
-   * @see #getHeader
    * @param result
    * @param nest
    * @return
+   * @see #getHeader
    */
   @NotNull
   private String getPromptText(List<SlimProject> result, int nest) {
@@ -459,6 +475,10 @@ public class ProjectChoices extends ThumbnailChoices {
     return status;
   }
 
+  /**
+   * @return
+   * @see #getHeader
+   */
   private DivWidget getCreateNewButton() {
     com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button(NEW_PROJECT);
 
@@ -502,6 +522,7 @@ public class ProjectChoices extends ThumbnailChoices {
     } else {
       ProjectInfo remove = projects.remove(0);
       status.setText("Checking " + remove.getName() + "...");
+
       controller.getAudioServiceAsyncForHost(remove.getHost())
           .checkAudio(remove.getID(), new AsyncCallback<Void>() {
             @Override
@@ -513,6 +534,19 @@ public class ProjectChoices extends ThumbnailChoices {
             @Override
             public void onSuccess(Void result) {
               status.setText(remove.getName() + " checked...");
+
+              controller.getExerciseService().refreshAllAudio(remove.getID(), new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                  logger.info("refreshAllAudio complete");
+                }
+              });
+
               checkAudio(projects, status);
             }
           });
@@ -569,6 +603,7 @@ public class ProjectChoices extends ThumbnailChoices {
    * Do some validity checking...
    */
   private void showNewProjectDialog() {
+
     ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
 
     new DialogHelper(true)
@@ -640,7 +675,7 @@ public class ProjectChoices extends ThumbnailChoices {
         boolean hasChildren = projectForLang.hasChildren();
         if (isQC) {
           if (!hasChildren) {
-            addPopover(button, projectForLang);
+            addPopover(button, getProps(projectForLang));
           }
         } else {
           if (projectForLang.getCourse().isEmpty()) {
@@ -694,20 +729,18 @@ public class ProjectChoices extends ThumbnailChoices {
   }
 
   private void addPopoverUsual(FocusWidget button, SlimProject projectForLang) {
-    logger.info("addPopoverUsual " + projectForLang);
-
+    // logger.info("addPopoverUsual " + projectForLang);
     Set<String> typeOrder = new HashSet<>(Collections.singletonList(COURSE));
     UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
-    button.addMouseOverHandler(event -> showPopoverUsual(projectForLang, button, typeOrder, ClientExerciseUnitChapterItemHelper));
+    button.addMouseOverHandler(event -> showPopoverUsual(projectForLang.getCourse(), button, typeOrder, ClientExerciseUnitChapterItemHelper));
   }
 
-
-  private void showPopoverUsual(SlimProject projectForLang,
+  private void showPopoverUsual(String course,
                                 Widget button,
                                 Set<String> typeOrder,
                                 UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper) {
     Map<String, String> value = new HashMap<>();
-    value.put(COURSE, projectForLang.getCourse());
+    value.put(COURSE, course);
     showPopover(value, button, typeOrder, ClientExerciseUnitChapterItemHelper, Placement.RIGHT);
   }
 
@@ -716,9 +749,13 @@ public class ProjectChoices extends ThumbnailChoices {
    * @param projectForLang
    * @see #getImageAnchor
    */
-  private void addPopover(FocusWidget button, SlimProject projectForLang) {
-    //logger.info("addPopover " + projectForLang);
-    addPopover(button, getProps(projectForLang), Placement.RIGHT);
+  private void addPopover(FocusWidget button, Map<String, String> origProps) {
+    Map<String, String> props = new HashMap<>(origProps);
+
+    props.remove(MODEL_TYPE.toString());
+
+    //logger.info("addPopover " + projectForLang + " : " + props);
+    addPopover(button, props, Placement.RIGHT);
   }
 
   private Map<String, String> getProps(SlimProject projectForLang) {
@@ -775,6 +812,12 @@ public class ProjectChoices extends ThumbnailChoices {
     }
   }
 
+  /**
+   * @param projectForLang
+   * @param label
+   * @return
+   * @see #getContainerWithButtons
+   */
   private DivWidget getQCButtons(SlimProject projectForLang, Heading label) {
     DivWidget horiz2 = new DivWidget();
     horiz2.addStyleName("inlineFlex");
@@ -785,12 +828,18 @@ public class ProjectChoices extends ThumbnailChoices {
       importButtonContainer.addStyleName("leftFiveMargin");
       horiz2.add(importButtonContainer);
       importButtonContainer.setVisible(projectForLang.getDominoID() > 0);
-
     }
 
     {
-      if (isAllowedToDelete(projectForLang)) {
+      boolean allowedToDelete = isAllowedToDelete(projectForLang);
+      if (allowedToDelete) {
         Button deleteButton = getDeleteButton(projectForLang, label);
+        deleteButton.addStyleName("leftFiveMargin");
+        horiz2.add(getButtonContainer(deleteButton));
+      }
+
+      if (controller.getUserManager().isAdmin()) {
+        Button deleteButton = getUploadButton(projectForLang.getID());
         deleteButton.addStyleName("leftFiveMargin");
         horiz2.add(getButtonContainer(deleteButton));
       }
@@ -806,11 +855,27 @@ public class ProjectChoices extends ThumbnailChoices {
    * @return
    */
   private boolean isAllowedToDelete(SlimProject projectForLang) {
-    ProjectStatus status = projectForLang.getStatus();
-    return
-        status != ProjectStatus.PRODUCTION &&
-            (projectForLang.isMine(sessionUser) ||
-                controller.getUserManager().isAdmin());
+    return (projectForLang.getStatus() != ProjectStatus.PRODUCTION) && isOwnerOrAdmin(projectForLang);
+  }
+
+  private boolean didSpew = false;
+
+  private boolean isOwnerOrAdmin(SlimProject projectForLang) {
+    boolean mine = projectForLang.isMine(sessionUser);
+    boolean admin = controller.getUserManager().isAdmin();
+    boolean b = mine || admin;
+
+    if (b) {
+      if (mine) {
+        logger.info("isOwnerOrAdmin : project is mine (" + sessionUser + ")");
+      }
+
+      if (admin && !didSpew) {
+        logger.info("isOwnerOrAdmin : " + controller.getUserManager().getUserID() + " is an admin");
+        didSpew = true;
+      }
+    }
+    return b;
   }
 
   @NotNull
@@ -818,6 +883,11 @@ public class ProjectChoices extends ThumbnailChoices {
     return getButtonContainer(getEditButton(projectForLang, label));
   }
 
+  /**
+   * @param projectForLang
+   * @return
+   * @see #getQCButtons
+   */
   @NotNull
   private DivWidget getImportButtonContainer(SlimProject projectForLang) {
     return getButtonContainer(getImportButton(projectForLang));
@@ -855,6 +925,7 @@ public class ProjectChoices extends ThumbnailChoices {
    *
    * @param projectForLang
    * @return
+   * @see #getImportButtonContainer
    */
   @NotNull
   private com.github.gwtbootstrap.client.ui.Button getImportButton(SlimProject projectForLang) {
@@ -882,10 +953,34 @@ public class ProjectChoices extends ThumbnailChoices {
     return w;
   }
 
+  @NotNull
+  private com.github.gwtbootstrap.client.ui.Button getUploadButton(int projid) {
+    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
+
+    w.setIcon(IconType.UPLOAD);
+    w.setType(ButtonType.WARNING);
+
+    addTooltip(w, "Upload excel into domino.");
+
+    if (w != null) {
+      w.addClickHandler(event -> {
+        UploadViewBase widgets = new UploadViewBase(projid, controller.getUser());
+        widgets.showModal();
+      });
+    }
+
+    return w;
+  }
+
   private void addTooltip(Widget w, String tip) {
     new TooltipHelper().createAddTooltip(w, tip, Placement.TOP);
   }
 
+  /**
+   * @param projectForLang
+   * @param label
+   * @see #getEditButton
+   */
   private void showEditDialog(SlimProject projectForLang, Heading label) {
     ProjectEditForm projectEditForm = new ProjectEditForm(lifecycleSupport, controller);
     DialogHelper.CloseListener listener = new DialogHelper.CloseListener() {
@@ -921,8 +1016,8 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private void showImportDialog(SlimProject projectForLang, Button button, boolean doChange) {
     //  logger.info("showImport " + doChange);
-    String s = getProps(projectForLang).get(NUM_ITEMS);
-    logger.info("showImportDialog # items = " + s);
+    //   String s = getProps(projectForLang).get(NUM_ITEMS);
+    //   logger.info("showImportDialog # items = " + s);
     final Object waitToken = messageHelper.startWaiting(PLEASE_WAIT);
 
     int id = projectForLang.getID();
@@ -953,7 +1048,7 @@ public class ProjectChoices extends ThumbnailChoices {
           /**
            * Make sure the other servers internally know that the project has changed and should go look at the database again.
            */
-          controller.tellHydraServerToRefreshProject(id);
+          controller.tellOtherServerToRefreshProject(id);
         }
       }
     });
@@ -1048,6 +1143,7 @@ public class ProjectChoices extends ThumbnailChoices {
         DIALOG_HEIGHT, -1);
   }
 
+
   private boolean isQC() {
     UserState userState = controller.getUserState();
     return userState.hasPermission(QUALITY_CONTROL) || userState.isAdmin();
@@ -1119,7 +1215,7 @@ public class ProjectChoices extends ThumbnailChoices {
    * @see #gotClickOnFlag
    */
   private void setProjectForUser(int projectid, ProjectMode mode) {
-    logger.info("setProjectForUser set project for " + projectid + " mode " + mode);
+    //   logger.info("setProjectForUser set project for " + projectid + " mode " + mode);
     uiLifecycle.clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override

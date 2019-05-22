@@ -66,8 +66,8 @@ public class AudioExercise extends ExerciseShell {
    * @param isContext
    * @paramx shouldSwap
    */
-  AudioExercise(int id, int projectid, boolean isContext) {
-    super(id, isContext);
+  AudioExercise(int id, int projectid, boolean isContext,boolean safeToDecode) {
+    super(id, isContext, safeToDecode);
     this.projectid = projectid;
   }
 
@@ -550,15 +550,17 @@ public class AudioExercise extends ExerciseShell {
     return userToAudio;
   }
 
+  /**
+   * Only use the gender marking on the audio itself, not the user, trying to not depend on the user's
+   * validity...
+   *
+   * @param isMale
+   * @return
+   */
   @NotNull
   private List<AudioAttribute> simpleByGender(boolean isMale) {
     List<AudioAttribute> males = new ArrayList<>();
     for (AudioAttribute audioAttribute : audioAttributes.values()) {
-      //  MiniUser user = audioAttribute.getUser();
-      // if (user == null) {
-        //logger.error ("getByGender : huh? there's no user attached to " + audioAttribute);
-      // } else
-
       if (isMale && audioAttribute.isMale() || (!isMale && !audioAttribute.isMale())) {
         males.add(audioAttribute);
       }

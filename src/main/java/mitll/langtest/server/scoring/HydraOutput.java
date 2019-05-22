@@ -40,13 +40,12 @@ import java.util.Map;
 public class HydraOutput {
   private static final Logger logger = LogManager.getLogger(HydraOutput.class);
 
-  enum STATUS_CODES {SUCCESS, OOV_IN_TRANS, FAILURE, ERROR}
+  enum STATUS_CODES {SUCCESS, OOV_IN_TRANS, FAILURE, TEXT_NORM_FAILED, ERROR}
 
   private Scores scores;
   private final String wordLab;
   private final String phoneLab;
   private final List<WordAndProns> wordAndProns;
-  private final TransNormDict transNormDict;
 
   /**
    * DEFAULT status is success!
@@ -55,8 +54,8 @@ public class HydraOutput {
   private String message = "";
   private String log;
 
-  HydraOutput(Scores scores, List<WordAndProns> wordAndProns, TransNormDict transNormDict) {
-    this(scores, null, null, wordAndProns, transNormDict);
+  HydraOutput(Scores scores, List<WordAndProns> wordAndProns) {
+    this(scores, null, null, wordAndProns);
   }
 
   /**
@@ -69,13 +68,11 @@ public class HydraOutput {
   HydraOutput(Scores scores,
               String wordLab,
               String phoneLab,
-              List<WordAndProns> wordAndProns,
-              TransNormDict transNormDict) {
+              List<WordAndProns> wordAndProns) {
     this.scores = scores;
     this.wordLab = wordLab;
     this.phoneLab = phoneLab;
     this.wordAndProns = wordAndProns;
-    this.transNormDict = transNormDict;
   }
 
   public Scores getScores() {
@@ -148,10 +145,6 @@ public class HydraOutput {
   List<WordAndProns> getWordAndProns() {
     return wordAndProns;
   }
-
-//  public TransNormDict getTransNormDict() {
-//    return transNormDict;
-//  }
 
   public STATUS_CODES getStatus() {
     return status;

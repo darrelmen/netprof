@@ -31,8 +31,9 @@ package mitll.langtest.client.custom;
 
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ShowTab;
+import mitll.langtest.client.banner.NewBanner;
 import mitll.langtest.shared.project.ProjectMode;
-import mitll.langtest.shared.user.User;
+import mitll.langtest.shared.user.Permission;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,13 +41,15 @@ import java.util.List;
 
 import static mitll.langtest.shared.project.ProjectMode.EITHER;
 import static mitll.langtest.shared.project.ProjectMode.VOCABULARY;
-import static mitll.langtest.shared.user.User.Permission.*;
+import static mitll.langtest.shared.user.Permission.*;
 
 /**
- * Closely related to {@link mitll.langtest.shared.user.User.Permission}
+ * Closely related to {@link Permission}
  * Created by go22670 on 4/10/17.
  */
 public interface INavigation extends IViewContaner {
+  List<Permission> QC_PERMISSIONS = Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN);
+
   enum VIEWS {
     NONE("", EITHER),
 
@@ -69,6 +72,9 @@ public interface INavigation extends IViewContaner {
     STUDY("Study", ProjectMode.DIALOG),
     LISTEN("Listen", ProjectMode.DIALOG),
 
+    /**
+     *
+     */
     REHEARSE("Rehearse", ProjectMode.DIALOG, true),
     CORE_REHEARSE("Rehearse (auto play)", ProjectMode.DIALOG, false),
 
@@ -80,17 +86,21 @@ public interface INavigation extends IViewContaner {
      */
     SCORES("Scores", ProjectMode.DIALOG),
 
-
+    /**
+     * @see NewBanner#getRecNav
+     */
     RECORD_ENTRIES("Record Entries", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
     RECORD_SENTENCES("Record Sentences", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
 
 
-    QC_ENTRIES("QC Entries", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, false),
-    FIX_ENTRIES("Fix Entries", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, false),
-    QC_SENTENCES("QC Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), true, false, true),
-    FIX_SENTENCES("Fix Sentences", Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN), false, true, true);
+    QC_ENTRIES("QC Entries", QC_PERMISSIONS, true, false, false),
+    FIX_ENTRIES("Fix Entries", QC_PERMISSIONS, false, true, false),
+    QC_SENTENCES("QC Sentences", QC_PERMISSIONS, true, false, true),
+    FIX_SENTENCES("Fix Sentences", QC_PERMISSIONS, false, true, true),
 
-    private final List<User.Permission> perms;
+    OOV_EDITOR("Missing In Dictionary", VOCABULARY, QC_PERMISSIONS);
+
+    private final List<Permission> perms;
     private final ProjectMode mode;
     private boolean isQC;
     private boolean isFix;
@@ -99,13 +109,13 @@ public interface INavigation extends IViewContaner {
 
     final String display;
 
-    VIEWS(String display, List<User.Permission> perms) {
+    VIEWS(String display, List<Permission> perms) {
       this.display = display;
       this.perms = perms;
       this.mode = EITHER;
     }
 
-    VIEWS(String display, List<User.Permission> perms, boolean isQC, boolean isFix, boolean isContext) {
+    VIEWS(String display, List<Permission> perms, boolean isQC, boolean isFix, boolean isContext) {
       this.display = display;
       this.perms = perms;
       this.mode = EITHER;
@@ -118,6 +128,12 @@ public interface INavigation extends IViewContaner {
       this.display = display;
       this.perms = Collections.emptyList();
       this.mode = mode;
+    }
+
+    VIEWS(String display, ProjectMode mode, List<Permission> perms) {
+      this.display = display;
+      this.mode = mode;
+      this.perms = perms;
     }
 
     VIEWS(String display, ProjectMode mode, boolean isPressAndHold) {
@@ -137,7 +153,7 @@ public interface INavigation extends IViewContaner {
       return vals[(this.ordinal() + 1) % vals.length];
     }
 
-    public List<User.Permission> getPerms() {
+    public List<Permission> getPerms() {
       return perms;
     }
 

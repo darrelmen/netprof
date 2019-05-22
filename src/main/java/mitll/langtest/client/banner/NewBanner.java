@@ -32,16 +32,13 @@ package mitll.langtest.client.banner;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.Alignment;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.constants.LabelType;
-import com.github.gwtbootstrap.client.ui.constants.NavbarPosition;
+import com.github.gwtbootstrap.client.ui.constants.*;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.HasClickHandlers;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.initial.InitialUI;
@@ -51,13 +48,14 @@ import mitll.langtest.client.list.ViewParser;
 import mitll.langtest.client.user.UserManager;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
+import mitll.langtest.shared.user.ActiveUser;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.banner.NewContentChooser.MODE;
 import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
 import static mitll.langtest.shared.project.ProjectType.DIALOG;
@@ -69,15 +67,12 @@ import static mitll.langtest.shared.project.ProjectType.DIALOG;
 public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
 
-  //  private static final String DRILL = "Drill";
-//  private static final String PRACTICE = "Practice";
-  private static final String DIALOG_PRACTICE = "Practice";//"Rehearse";
+  private static final String DIALOG_PRACTICE = "Practice";
 
   private static final String RECORD = "Record";
   private static final String QC = "QC";
 
-  private static final List<VIEWS> STANDARD_VIEWS =
-      Arrays.asList(LEARN, VIEWS.PRACTICE, QUIZ, PROGRESS, LISTS);
+  private static final List<VIEWS> STANDARD_VIEWS = Arrays.asList(LEARN, VIEWS.PRACTICE, QUIZ, PROGRESS, LISTS);
 
   private static final List<VIEWS> DIALOG_VIEWS_IN_DROPDOWN =
       Arrays.asList(
@@ -86,7 +81,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
           REHEARSE,
           CORE_REHEARSE,
           PERFORM_PRESS_AND_HOLD,
-          PERFORM);//, VIEWS.SCORES);
+          PERFORM);
 
   private static final List<VIEWS> DIALOG_VIEWS =
       Arrays.asList(
@@ -107,8 +102,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   static {
     BOTH.addAll(DIALOG_VIEWS);
   }
-
-  private static final List<VIEWS> POLY_VIEWS = Arrays.asList(LEARN, VIEWS.PRACTICE, PROGRESS);
 
   private static final String appNameToUse = "netprof";
   private static final String NETPROF = appNameToUse + (PropertyHandler.IS_BETA ? "BETA" : "");
@@ -138,7 +131,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private ComplexWidget recnav, defectnav, dialognav;
   private Dropdown dialogPracticeNav;
 
+  /**
+   *
+   */
   private Nav lnav;
+  /**
+   * @see #setCogVisible(boolean)
+   */
   private Dropdown cog;
 
   private INavigation navigation;
@@ -149,11 +148,15 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   private final Map<VIEWS, NavLink> viewToLink = new HashMap<>();
 
-  private final ExerciseController controller;
+  private final ExerciseController<?> controller;
   private Label subtitle;
 
   private ViewParser viewParser = new ViewParser();
+  private final List<LinkAndTitle> teacherReq = new ArrayList<>();
 
+  /**
+   * @see #setCogVisible
+   */
   private static final boolean DEBUG = false;
 
   /**
@@ -214,7 +217,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     }
     defectMenuVisible();
 
-    navCollapse.add(getRightSideChoices(userManager, userMenu));
+    navCollapse.add(getRightSideChoices(userMenu));
 
     setCogVisible(userManager.hasUser());
   }
@@ -253,6 +256,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Dropdown nav = new Dropdown(RECORD);
     rememberViewAndLink(nav, RECORD_ENTRIES);
     rememberViewAndLink(nav, RECORD_SENTENCES);
+    rememberViewAndLink(nav, OOV_EDITOR);
 
     recnav.add(nav);
     return recnav;
@@ -309,41 +313,72 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     return lnav;
   }
 
+  private UserMenu userMenu;
+  private List<LinkAndTitle> allChoices = new ArrayList<>();
+
   /**
-   * @param userManager
    * @param userMenu
    * @return
    * @see #addWidgets
    */
   @NotNull
-  private Nav getRightSideChoices(UserManager userManager, UserMenu userMenu) {
+  private Nav getRightSideChoices(UserMenu userMenu) {
+    this.userMenu = userMenu;
+
     Nav rnav = new Nav();
     rnav.setAlignment(Alignment.RIGHT);
     addSubtitle(rnav);
     rnav.getElement().getStyle().setMarginRight(-10, Style.Unit.PX);
 
-    addUserMenu(userManager, userMenu, rnav);
+    addUserMenu(userMenu, rnav);
 
     {
       cog = new Dropdown("");
       cog.setIcon(IconType.COG);
 
-      userMenu.getCogMenuChoicesForAdmin().forEach(lt -> cog.add(lt.makeNewLink()));
+      allChoices.clear();
 
-      hasProjectChoices = userMenu.getProjectSpecificChoices();
+      List<LinkAndTitle> cogMenuChoicesForAdmin = userMenu.getCogMenuChoicesForAdmin();
+      cogMenuChoicesForAdmin.forEach(lt -> cog.add(lt.makeNewLink()));
+      allChoices.addAll(cogMenuChoicesForAdmin);
+
+      List<LinkAndTitle> hasProjectChoices = userMenu.getProjectSpecificChoices();
       hasProjectChoices.forEach(lt -> cog.add(lt.makeNewLink()));
+      allChoices.addAll(hasProjectChoices);
 
       rnav.add(cog);
     }
 
     getInfoMenu(userMenu, rnav);
+
     return rnav;
   }
 
   /**
-   * @see #setCogVisible
+   * @see #setUserName(String)
    */
-  private List<LinkAndTitle> hasProjectChoices;
+  public void setCogTitle() {
+//    logger.info("setCogTitle  project " + controller.getProjectID());
+    if (controller.getProjectID() > -1) {
+      controller.getUserService().getPendingUsers(controller.getProjectID(), new AsyncCallback<List<ActiveUser>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+
+        }
+
+        @Override
+        public void onSuccess(List<ActiveUser> result) {
+          cog.setText(result.isEmpty() ? "" : "(" + result.size() + ")");
+          userMenu.setPendingTitle(result.size());
+        }
+      });
+    } else {
+   //   logger.info("setCogTitle : no project");
+      setChoicesVisibility(isAdmin(), isTeacher());
+      setVisibleChoices(false);
+    }
+  }
+
 
   private void addSubtitle(Nav rnav) {
     rnav.add(subtitle = new Label());
@@ -355,16 +390,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     subtitle.setVisible(!controller.isRecordingEnabled());
   }
 
-  private final List<LinkAndTitle> teacherReq = new ArrayList<>();
 
   /**
-   * @param userManager
    * @param userMenu
    * @param rnav
    * @see #getRightSideChoices
    */
-  private void addUserMenu(UserManager userManager, UserMenu userMenu, Nav rnav) {
-    userDrop = new Dropdown(userManager.getUserID());
+  private void addUserMenu(UserMenu userMenu, Nav rnav) {
+    userDrop = new Dropdown("");
     userDrop.setIcon(IconType.USER);
     rnav.add(userDrop);
 
@@ -372,7 +405,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     userDrop.addClickHandler(event -> {
       userDrop.clear();
       userMenu.getStandardUserMenuChoices(teacherReq).forEach(linkAndTitle -> userDrop.add(linkAndTitle.makeNewLink()));
-      hasProjectChoices.addAll(teacherReq);
+      // hasProjectChoices.addAll(teacherReq);
     });
   }
 
@@ -403,15 +436,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see #addWidgets
    */
   private void addChoicesForUser(ComplexWidget nav) {
-    boolean isPoly = controller.getPermissions().size() == 1 && controller.getPermissions().iterator().next() == User.Permission.POLYGLOT;
+    //boolean isPoly = controller.getPermissions().size() == 1 && controller.getPermissions().iterator().next() == Permission.POLYGLOT;
     boolean isDialog = controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == DIALOG;
-    List<VIEWS> toShow = isPoly ?
-        POLY_VIEWS :
-        (isDialog ?
-            DIALOG_VIEWS :
-            STANDARD_VIEWS);
+    List<VIEWS> toShow = (isDialog ? DIALOG_VIEWS : STANDARD_VIEWS);
 
-    if (DEBUG) logger.info("addChoicesForUser " + toShow.size());
+    if (DEBUG) {
+      logger.info("addChoicesForUser " + toShow.size() + " : startup : " + controller.getProjectStartupInfo() + " : " + toShow);
+    }
 
     boolean first = true;
     for (VIEWS choice : toShow) {
@@ -430,11 +461,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     String viewName = views.toString();
 
     NavLink learn = getLink(nav, viewName);
+
     learn.addClickHandler(event -> {
       //   logger.info("getChoice got click on " + viewName);
       controller.logEvent(viewName, "NavLink", "N/A", "click on view");
       gotClickOnChoice(viewName, learn, true);
     });
+
     return learn;
   }
 
@@ -529,7 +562,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see InitialUI#showUserPermissions
    */
   @Override
-  public void reflectPermissions(Collection<User.Permission> permissions) {
+  public void reflectPermissions(Collection<Permission> permissions) {
     recordMenuVisible();
     defectMenuVisible();
 
@@ -540,10 +573,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private void setDialogNavVisible(boolean visible) {
-    ProjectMode mode = controller.getMode();
-    dialognav.setVisible(visible && mode == ProjectMode.DIALOG);
+    dialognav.setVisible(visible && controller.getMode() == ProjectMode.DIALOG);
   }
 
+  /**
+   * @see #addWidgets(UserManager, UserMenu, Breadcrumbs)
+   * @see #reset
+   * @param val
+   */
   @Override
   public void setCogVisible(boolean val) {
     userDrop.setVisible(val);
@@ -551,17 +588,25 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     viewToLink.values().forEach(choice -> choice.setVisible(val));
 
     if (val && navigation != null) {
+      // VIEWS currentView = navigation.getCurrentView();
+      //logger.info("setCogVisible current view " + currentView);
       setVisibleChoicesByMode(navigation.getCurrentView().getMode());
     }
 
-    cog.setVisible(isAdmin());
-    boolean hasProject = controller.getProjectStartupInfo() != null;
-    //  if (DEBUG) logger.info("setCogVisible " + val + " has project " + hasProject + " for " + hasProjectChoices.size());
+    boolean admin = isAdmin();
+    boolean teacher = isTeacher();
+    cog.setVisible(admin || teacher);
 
-    hasProjectChoices.forEach(linkAndTitle -> {
-      linkAndTitle.getMyLink().setVisible(hasProject);
-      // logger.info("setCogVisible " + hasProject + " for " + linkAndTitle);
-    });
+    setChoicesVisibility(admin, teacher);
+  }
+
+  private void setChoicesVisibility(boolean admin, boolean teacher) {
+    boolean hasProject = controller.getProjectStartupInfo() != null;
+    allChoices.forEach(linkAndTitle -> linkAndTitle.setVisible(admin, teacher, hasProject));
+  }
+
+  private boolean isTeacher() {
+    return controller.getUserState().hasPermission(Permission.TEACHER_PERM);
   }
 
   /**
@@ -570,16 +615,45 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @Override
   public void reset() {
     setCogVisible(false);
+
     setRecNavVisible(false);
     setDefectNavVisible(false);
     setDialogNavVisible(false);
   }
 
+  /**
+   * @param name
+   * @see InitialUI#gotUser
+   */
   @Override
   public void setUserName(String name) {
-    userDrop.setTitle(name);
     userDrop.setText(name);
+    User current = controller.getUserManager().getCurrent();
+
+    if (current != null) {
+      String tip = current.getFullName() + " (" + current.getUserID() + ") " + getUserSuffix(current);
+      userDrop.setTitle(tip);
+//      logger.info("setUserName suffix " + suffix);
+      new TooltipHelper().createAddTooltip(userDrop, tip, Placement.LEFT);
+    }
+
     recordMenuVisible();
+
+    setCogTitle();
+  }
+
+  @NotNull
+  private String getUserSuffix(User current) {
+    List<String> perms = new ArrayList<>();
+//      logger.info("setUserName " + name + " kind " + current.getUserKind());
+//      logger.info("setUserName perms " + current.getPermissions());
+    String suffix = "";//current.getUserKind() != Kind.STUDENT ? "( " + current.getUserKind().getName() + ")" : "";
+
+    current.getPermissions().forEach(permission -> perms.add(permission.getKind().getName()));
+    if (!perms.isEmpty()) {
+      suffix += " " + perms;
+    }
+    return suffix;
   }
 
   private boolean hasProjectChoice() {
@@ -587,11 +661,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private void defectMenuVisible() {
-    boolean qc = isQC();
-    boolean b = hasProjectChoice();
-//    logger.info("is QC " + controller.getUser() + " : " + qc + " has choice " + b);
-    boolean visible = qc && b;
-    setDefectNavVisible(visible);
+    setDefectNavVisible(isQC() && hasProjectChoice());
   }
 
   private void setDefectNavVisible(boolean visible) {
@@ -599,7 +669,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private boolean isPermittedToRecord() {
-    return controller.getUserState().hasPermission(User.Permission.RECORD_AUDIO) || isAdmin();
+    return controller.getUserState().hasPermission(Permission.RECORD_AUDIO) || isAdmin();
   }
 
   private boolean isAdmin() {
@@ -610,17 +680,20 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     // logger.info("isQC " + controller.getUserState().getPermissions() + " is admin " + isAdmin());
     boolean admin = isAdmin();
     // logger.info("is admin " + admin);
-    boolean canDoQC = controller.getUserState().hasPermission(User.Permission.QUALITY_CONTROL);
+    boolean canDoQC = controller.getUserState().hasPermission(Permission.QUALITY_CONTROL);
     // logger.info("is canDoQC " + canDoQC);
     return canDoQC || admin;
   }
 
   /**
-   * @see UILifecycle#showInitialState
+   * @see InitialUI#showInitialState
    */
   @Override
   public void checkProjectSelected() {
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+
+ //   logger.info("checkProjectSelected " + projectStartupInfo);
+
     setVisibleChoices(projectStartupInfo != null);
 
     VIEWS currentView = navigation.getCurrentView();
@@ -649,8 +722,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   public void setVisibleChoices(boolean show) {
     lnav.setVisible(show);
-
-    //logger.info("setVisibleChoices " +show);
+    if (DEBUG) logger.info("setVisibleChoices " + show);
     reflectPermissions(controller.getPermissions());
   }
 
@@ -688,11 +760,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private void recordMenuVisible() {
     if (recnav != null) {
-      boolean visible = isPermittedToRecord() && hasProjectChoice();
-//      boolean learnVisible = viewToLink.get(VIEWS.LEARN).isVisible();
-      //    logger.info("recordMenuVisible learn vis " + learnVisible);
-      //    visible &= learnVisible;
-      setRecNavVisible(visible);
+      setRecNavVisible(isPermittedToRecord() && hasProjectChoice());
     }
   }
 

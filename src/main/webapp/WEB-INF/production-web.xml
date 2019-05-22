@@ -125,10 +125,15 @@
         <url-pattern>/langtest/audio-manager/h2</url-pattern>
     </servlet-mapping>
 
-    <!--    <servlet-mapping>
-            <servlet-name>amasService</servlet-name>
-            <url-pattern>/langtest/amas-manager</url-pattern>
-        </servlet-mapping>-->
+    <servlet-mapping>
+        <servlet-name>audioService</servlet-name>
+        <url-pattern>/langtest/audio-manager/s1</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>audioService</servlet-name>
+        <url-pattern>/langtest/audio-manager/s2</url-pattern>
+    </servlet-mapping>
 
     <servlet>
         <servlet-name>qcService</servlet-name>
@@ -156,6 +161,17 @@
         <servlet-name>scoringService</servlet-name>
         <url-pattern>/langtest/scoring-manager/h2</url-pattern>
     </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>scoringService</servlet-name>
+        <url-pattern>/langtest/scoring-manager/s1</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>scoringService</servlet-name>
+        <url-pattern>/langtest/scoring-manager/s2</url-pattern>
+    </servlet-mapping>
+
 
     <servlet>
         <servlet-name>dliClassService</servlet-name>
@@ -262,6 +278,8 @@
     </servlet>
 
 
+
+
     <servlet-mapping>
         <servlet-name>downloadServlet</servlet-name>
         <url-pattern>/downloadUsers/*</url-pattern>
@@ -287,6 +305,17 @@
         <url-pattern>/downloadAudio/h2/*</url-pattern>
     </servlet-mapping>
 
+
+    <servlet-mapping>
+        <servlet-name>downloadServlet</servlet-name>
+        <url-pattern>/downloadAudio/s1/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>downloadServlet</servlet-name>
+        <url-pattern>/downloadAudio/s2/*</url-pattern>
+    </servlet-mapping>
+
     <servlet-mapping>
         <servlet-name>scoreServlet</servlet-name>
         <url-pattern>/scoreServlet/*</url-pattern>
@@ -295,6 +324,16 @@
     <servlet-mapping>
         <servlet-name>scoreServlet</servlet-name>
         <url-pattern>/scoreServlet/h2/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>scoreServlet</servlet-name>
+        <url-pattern>/scoreServlet/s1/*</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>scoreServlet</servlet-name>
+        <url-pattern>/scoreServlet/s2/*</url-pattern>
     </servlet-mapping>
 
     <!-- ==================================================================== -->

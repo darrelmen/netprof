@@ -71,6 +71,10 @@ public class PathHelper {
     this.realContextPathTest = realContextPathTest;
   }
 
+  public String getRealPath(String path) {
+    return getContext() == null ? path : getContext().getRealPath(path);
+  }
+
   public String ensureForwardSlashes(String wavPath) {
     return wavPath.replaceAll("\\\\", "/");
   }
@@ -88,7 +92,7 @@ public class PathHelper {
 //    logger.info("getAbsoluteFile " + installPath + "/" +filePath);
     File absolute = getAbsolute(installPath, filePath);
     if (!absolute.exists()) {
-      logger.warn("\t getAbsoluteFile doesn't exist: " + absolute.getAbsolutePath());
+      logger.info("\t getAbsoluteFile doesn't exist: " + absolute.getAbsolutePath());
     }
     return absolute;
   }
@@ -178,7 +182,6 @@ public class PathHelper {
   }
 
   /**
-   *
    * @param language
    * @param exercise
    * @param question - vestigial
@@ -258,5 +261,9 @@ public class PathHelper {
 
   public void setProperties(ServerProperties properties) {
     this.properties = properties;
+  }
+
+  public ServletContext getContext() {
+    return context;
   }
 }

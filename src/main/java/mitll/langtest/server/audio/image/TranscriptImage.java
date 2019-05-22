@@ -30,8 +30,8 @@
 package mitll.langtest.server.audio.image;
 
 import java.awt.*;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 public class TranscriptImage extends AudioImage {
   private static final List<Integer> FONT_SIZES = Arrays.asList(14, 12, 10, 9);

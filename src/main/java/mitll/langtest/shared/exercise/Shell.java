@@ -35,17 +35,4 @@ interface Shell extends HasID {
    * @return
    */
   STATE getState();
-  void setState(STATE state);
-
-  /**
-   * @seex PagingContainer#getEnglishColumn
-   * @return
-   */
- // STATE getSecondState();
-
-  /**
-   * @seex mitll.langtest.server.database.custom.StateManager#setSecondState(Shell, STATE, long)
-   * @param state
-   */
-//  void setSecondState(STATE state);
 }

@@ -29,7 +29,7 @@
 
 package mitll.langtest.server.trie;
 
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -129,7 +129,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
       String meaning = exercise.getMeaning().trim();
       if (!meaning.isEmpty()) {
         smallVocabDecoder
-            .getTokens(getTrimmed(meaning), false, debug)
+            .getTokens(getTrimmed(meaning), false)
             .forEach(token -> addEntry(exercise, token));
       }
     }
@@ -179,7 +179,7 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   }
 
   private void addTransliteration(String transliteration, T exercise) {
-    for (String token : smallVocabDecoder.getTokens(transliteration, false, debug)) {
+    for (String token : smallVocabDecoder.getTokens(transliteration, false)) {
       addEntry(exercise, token);
       String noAccents = StringUtils.stripAccents(token);
 
@@ -243,11 +243,10 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   }
 
   private void addSuffixes(T exercise, String trimmed) {
-    Collection<String> tokens = smallVocabDecoder.getTokens(trimmed, false, debug);
-
-    trimmed = trimmed.toLowerCase();
+    Collection<String> tokens = smallVocabDecoder.getTokens(trimmed, false);
 
     if (tokens.size() > 1) {
+      trimmed = trimmed.toLowerCase();
       for (String token : tokens) {
         if (token.length() > trimmed.length()) {
           logger.error("token   " + token);

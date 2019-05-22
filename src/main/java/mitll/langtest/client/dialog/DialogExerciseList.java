@@ -69,9 +69,6 @@ class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
    */
   private static final int CHOICES_WIDTH = 762;//970;//800;//970;
 
-
-
-
   private static final int MAX_LENGTH_ID = 19;
   private static final int MAX_LENGTH_ID1 = 2 * MAX_LENGTH_ID + 12;
   private static final int NORMAL_MIN_HEIGHT = 101;// 67;

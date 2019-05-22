@@ -47,7 +47,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -105,7 +108,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
 
         setDialogScores(dialogList, scoreHistoryPerExercise);
 
-        return new ExerciseListWrapper<>(request.getReqID(), dialogList, null, scoreHistoryPerExercise);
+        return new ExerciseListWrapper<>(request.getReqID(), dialogList, scoreHistoryPerExercise, new HashMap<>());
       } else {
         logger.info("getDialogs no user?");
         return new ExerciseListWrapper<>();

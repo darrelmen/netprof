@@ -32,7 +32,6 @@ package mitll.langtest.server.services;
 import mitll.langtest.client.custom.dialog.ReviewEditableExercise;
 import mitll.langtest.client.services.QCService;
 import mitll.langtest.server.LangTestDatabaseImpl;
-import mitll.langtest.server.database.user.BaseUserDAO;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.AudioAttribute;

@@ -49,6 +49,7 @@ import java.io.File;
 import java.util.*;
 
 import static mitll.langtest.server.audio.AudioConversion.FILE_MISSING;
+import static mitll.langtest.server.audio.AudioConversion.LANGTEST_IMAGES_NEW_PRO_F_1_PNG;
 
 public class EnsureAudioHelper implements IEnsureAudioHelper {
   private static final Logger logger = LogManager.getLogger(EnsureAudioHelper.class);
@@ -82,7 +83,10 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     if (db != null) {
       serverProps = db.getServerProps();
       this.pathHelper = pathHelper;
-      audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange());
+     // servletContext.getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG)
+      String realPath = pathHelper.getRealPath(LANGTEST_IMAGES_NEW_PRO_F_1_PNG);
+   //   logger.info("EnsureAudioHelper path to image " + realPath);
+      audioConversion = new AudioConversion(serverProps.shouldTrimAudio(), serverProps.getMinDynamicRange(), realPath);
     }
   }
 
@@ -203,7 +207,8 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
                                       String path,
                                       AudioType audioType,
                                       Language language,
-                                      Map<Integer, User> idToUser, boolean waitToFinish) {
+                                      Map<Integer, User> idToUser,
+                                      boolean waitToFinish) {
     if (checkedExists.contains(path)) {
       return path;
     }
@@ -233,7 +238,7 @@ public class EnsureAudioHelper implements IEnsureAudioHelper {
     }
 
     String language1 = language.getLanguage();
-    String filePath = ensureMP3(path, new TrackInfo(title, userID, comment, language1), language1, waitToFinish);
+    String filePath = ensureMP3(path, new TrackInfo(title, userID, comment, language1, commonShell == null?Collections.emptyMap(): commonShell.getUnitToValue()), language1, waitToFinish);
 
     {
       boolean isMissing = filePath.equals(FILE_MISSING);

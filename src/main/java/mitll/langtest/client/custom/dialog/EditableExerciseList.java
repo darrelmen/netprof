@@ -135,7 +135,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
   @NotNull
   private DivWidget getAddButtonContainer() {
     DivWidget addW = new DivWidget();
-    addW.getElement().setId("buttonContainer");
+    addW.getElement().setId("typeAheadContainer");
     addW.addStyleName("topMargin");
     addW.addStyleName("inlineFlex");
 
@@ -218,7 +218,6 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
       searchTypeahead.clearCurrentExercise();
       message.setText("");
       checkForKeyUpDown(event);
-
     });
 
     this.searchTypeahead = new SearchTypeahead(controller, add);
@@ -243,7 +242,10 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
     } else if (keyCode == 38) loadPrev();
   }
 
-  public void grabFocus() {
+  /**
+   * @see EditItem#grabFocus()
+   */
+  void grabFocus() {
     Scheduler.get().scheduleDeferred((Command) () -> quickAddText.setFocus(true));
   }
 
@@ -468,7 +470,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
     delete.setEnabled(enabled);
   }
 
-  public void getTypeAheadGrabFocus() {
-    searchTypeahead.grabFocus();
-  }
+//  public void getTypeAheadGrabFocus() {
+//    searchTypeahead.grabFocus();
+//  }
 }

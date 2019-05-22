@@ -32,7 +32,6 @@ package mitll.langtest.server.database;
 import com.google.gson.JsonObject;
 import mitll.npdata.dao.SlickProject;
 
-
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -85,11 +84,11 @@ public class ReportStats {
   }
 
   private void mergeKeyToValue(Map<INFO, Integer> intKeyToValue, Map<INFO, Integer> otherMap) {
-    otherMap.forEach((k, v) -> intKeyToValue.merge(k, v, (a, b) -> a + b));
+    otherMap.forEach((k, v) -> intKeyToValue.merge(k, v, Integer::sum));
   }
 
   private void mergeKeyToValue2(Map<String, Integer> intKeyToValue, Map<String, Integer> otherMap) {
-    otherMap.forEach((k, v) -> intKeyToValue.merge(k, v, (a, b) -> a + b));
+    otherMap.forEach((k, v) -> intKeyToValue.merge(k, v, Integer::sum));
   }
 
   /**
@@ -116,7 +115,6 @@ public class ReportStats {
 
     intKeyToValue.putAll(toCopy.intKeyToValue);
 
-
     Map<INFO, Map<String, Integer>> intMultiKeyToValue = toCopy.intMultiKeyToValue;
 
     intMultiKeyToValue.forEach((k, v) -> {
@@ -126,7 +124,7 @@ public class ReportStats {
     this.html = toCopy.html;
   }
 
-  ReportStats(SlickProject project, int year) {
+  public ReportStats(SlickProject project, int year) {
     this(project.id(), project.language(), project.name(), year, new JsonObject());
   }
 
@@ -152,11 +150,12 @@ public class ReportStats {
 
   /**
    * Little hack to deal with mandarin renaming...
+   *
    * @return
    */
   public String getLanguage() {
     String language = this.language;
-    if (language.equalsIgnoreCase("Mandarin")) language="Chinese";
+    if (language.equalsIgnoreCase("Mandarin")) language = "Chinese";
     return language;
   }
 

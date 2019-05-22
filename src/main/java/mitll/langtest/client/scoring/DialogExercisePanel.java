@@ -33,10 +33,10 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
-import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.TextNorm;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.*;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -68,11 +68,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   private static final Set<String> TO_IGNORE = new HashSet<>(Arrays.asList("sil", "SIL", "<s>", "</s>"));
   public static final String BLUE = "#2196F3";
 
-  private static final char FULL_WIDTH_ZERO = '\uFF10';
-  private static final char FULL_WIDTH_NINE = '\uFF10' + 9;
-
   final T exercise;
-  final ExerciseController controller;
+  final ExerciseController<T> controller;
   DivWidget flClickableRow;
   ClickableWords clickableWords;
   /**
@@ -91,6 +88,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   HeadlessPlayAudio playAudio;
 
   static final boolean DEBUG = false;
+  static final boolean DEBUG_SHOW_ALIGNMENT = false;
   private static final boolean DEBUG_PLAY_PAUSE = false;
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
@@ -105,6 +103,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   private final boolean isMandarin;
   final IListenView listenView;
 
+  private final TextNorm textNorm = new TextNorm();
+
   /**
    * Has a left side -- the question content (Instructions and audio panel (play button, waveform)) <br></br>
    * and a right side --
@@ -118,7 +118,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see ListenViewHelper#getTurnPanel
    */
   DialogExercisePanel(final T commonExercise,
-                      final ExerciseController controller,
+                      final ExerciseController<T> controller,
                       final ListInterface<?, ?> listContainer,
                       Map<Integer, AlignmentOutput> alignments,
                       IListenView listenView) {
@@ -129,7 +129,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     isMandarin = projectStartupInfo != null && projectStartupInfo.getLanguageInfo() == Language.MANDARIN;
     this.isRTL = !isEngAttr() && projectStartupInfo != null && projectStartupInfo.getLanguageInfo().isRTL();
-  //  logger.info("isRTL " + isRTL);
+    //  logger.info("isRTL " + isRTL);
 
     this.alignmentFetcher = new AlignmentFetcher(exercise.getID(),
         controller, listContainer,
@@ -140,7 +140,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       }
 
       @Override
-      public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
+      public void audioChangedWithAlignment(int id, long duration) {
       }
     });
     Style style = getElement().getStyle();
@@ -153,7 +153,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   @Override
-  public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices) {
+  public void addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
 
     if (projectStartupInfo != null) {
@@ -184,9 +184,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   private boolean isEngAttr() {
     List<ExerciseAttribute> language =
-        exercise.getAttributes()
-            .stream()
-            .filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(LANGUAGE)).collect(Collectors.toList());
+        exercise == null ? Collections.emptyList() :
+            exercise.getAttributes()
+                .stream()
+                .filter(exerciseAttribute -> exerciseAttribute.getProperty().equalsIgnoreCase(LANGUAGE)).collect(Collectors.toList());
     return !language.isEmpty() && language.get(0).getValue().equalsIgnoreCase(Language.ENGLISH.toString());
   }
 
@@ -214,7 +215,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @see TwoColumnExercisePanel#makeFirstRow
    */
   void makePlayAudio(T e, DivWidget flContainer) {
-    //if (hasAudio(e)) {
     playAudio = new HeadlessPlayAudio(controller.getSoundManager(), listenView);
     alignmentFetcher.setPlayAudio(playAudio);
     rememberAudio(getRegularSpeedIfAvailable(e));
@@ -223,6 +223,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 //    }
   }
 
+  /**
+   * @param next
+   * @see
+   */
   void rememberAudio(AudioAttribute next) {
     //  logger.info("rememberAudio audio for " + this + "  " + next);
     playAudio.rememberAudio(next);
@@ -231,11 +235,20 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   /**
    * @param next
+   * @see #rememberAudio
    */
   private void maybeShowAlignment(AudioAttribute next) {
-    if (next != null && next.getAlignmentOutput() != null) {
-      //   logger.info("maybeShowAlignment audio for " + this + "  " + next);
-      showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
+//    AlignmentOutput alignmentOutput = alignmentFetcher.getAlignment(next.getUniqueID());
+//    if (next != null && next.getAlignmentOutput() != null) {
+//      //   logger.info("maybeShowAlignment audio for " + this + "  " + next);
+//      showAlignment(next.getUniqueID(), next.getDurationInMillis(), next.getAlignmentOutput());
+//    }
+    if (next != null) {
+      AlignmentOutput alignmentOutput = alignmentFetcher.getAlignment(next.getUniqueID());
+      if (alignmentOutput != null) {
+        //   logger.info("maybeShowAlignment audio for " + this + "  " + next);
+        showAlignment(next.getUniqueID(), next.getDurationInMillis(), alignmentOutput);
+      }
     }
   }
 
@@ -245,13 +258,12 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
-    Language languageInfo = isEngAttr() ? Language.ENGLISH: projectStartupInfo.getLanguageInfo();
-  //  boolean addFloatLeft = shouldAddFloatLeft();
+    Language languageInfo = isEngAttr() ? Language.ENGLISH : projectStartupInfo.getLanguageInfo();
+    // logger.info("makeClickableWords " + exercise.getID() + " " + exercise.getFLToShow() + " add float left " + addFloatLeft);
 
-   // logger.info("makeClickableWords " + exercise.getID() + " " + exercise.getFLToShow() + " add float left " + addFloatLeft);
-
-    clickableWords = new ClickableWords(listContainer, exercise.getID(),
-        languageInfo, languageInfo.getFontSize(), BLUE, shouldAddFloatLeft());
+    clickableWords = new ClickableWords<T>(listContainer, exercise.getID(),
+        languageInfo, languageInfo.getFontSize(), BLUE, shouldAddFloatLeft(),
+        controller.getExerciseService(), controller.getUser());
   }
 
   protected boolean shouldAddFloatLeft() {
@@ -267,9 +279,19 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     alignmentFetcher.getRefAudio(listener);
   }
 
-  Set<Integer> getReqAudio() {
-    return alignmentFetcher.getReqAudio();
+  @Override
+  public Set<Integer> getReqAudioIDs() {
+    return alignmentFetcher.getReqAudioIDs();
   }
+
+  Set<Integer> getReqAudio() {
+    return alignmentFetcher.getAllReqAudioIDs();
+  }
+
+/*  @Override
+  public void getAndRememberCachedAlignents(RefAudioListener listener, Set<Integer> req) {
+    alignmentFetcher.getAndRememberCachedAlignents(listener, req);
+  }*/
 
   /**
    * @param req
@@ -288,14 +310,18 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   /**
    * @param id
    * @param duration
-   * @param alignmentOutputFromAudio
    * @see TwoColumnExercisePanel#makeFirstRow
    */
   @Override
-  public void audioChangedWithAlignment(int id, long duration, AlignmentOutput alignmentOutputFromAudio) {
+  public void audioChangedWithAlignment(int id, long duration) {
+    AlignmentOutput alignmentOutputFromAudio = alignmentFetcher.getAlignment(id);
+
     if (alignmentOutputFromAudio != null) {
       alignmentFetcher.rememberAlignment(id, alignmentOutputFromAudio);
     }
+    //else {
+//      logger.warning("audioChangedWithAlignment : no alignment info for audio #" + id);
+    //}
     if (DEBUG) logger.info("audioChangedWithAlignment " + id + " : " + alignmentOutputFromAudio);
     audioChanged(id, duration);
   }
@@ -327,19 +353,19 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     if (alignmentOutput != null) {
       if (currentAudioDisplayed != id) {
         currentAudioDisplayed = id;
-        if (DEBUG) {
+        if (DEBUG_SHOW_ALIGNMENT) {
           logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
         }
 
         return matchSegmentsToClickables(id, duration, alignmentOutput, flclickables, this.playAudio, flClickableRow, flClickableRowPhones);
       } else {
-        if (DEBUG) {
+        if (DEBUG_SHOW_ALIGNMENT) {
           logger.info("showAlignment SKIP for ex " + exercise.getID() + " audio id " + id + " vs " + currentAudioDisplayed);
         }
         return null;
       }
     } else {
-      if (DEBUG || true)
+      if (DEBUG_SHOW_ALIGNMENT)
         logger.warning("showAlignment no alignment info for " + this + " id " + id + " dur " + duration);
       return null;
     }
@@ -471,6 +497,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   @NotNull
   protected AllHighlight getAllHighlight(Collection<IHighlightSegment> flclickables) {
+    // boolean addFloatLeft = shouldAddFloatLeft();
+    //  logger.info("addFloatLeft " + addFloatLeft + " on " + flclickables.size());
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("please don't"));
+//    logger.info("logException stack " + exceptionAsString);
+
     return new AllHighlight(flclickables, shouldAddFloatLeft());
   }
 
@@ -572,7 +603,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                 }
 //                String event = wordSegment.getEvent();
 //                phonesInWordAll.forEach(ph -> logger.info(event + " " + ph.toString()));
-                showPhones(combinedTranscriptSegment, phonesInWordAll, audioControl, phoneMap, clickablePhones, simpleLayout);
+                showPhones(combinedTranscriptSegment, phonesInWordAll, audioControl, phoneMap, clickablePhones, simpleLayout, current);
               }
 
               if (DEBUG_MATCH) {
@@ -669,11 +700,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   private String getLCSegment(TranscriptSegment wordSegment) {
-    return removePunct(wordSegment.getEvent().toLowerCase());
+    return textNorm.removePunct(wordSegment.getEvent().toLowerCase());
   }
 
   private String getLCClickable(IHighlightSegment current) {
-    return removePunct(current.getContent().toLowerCase());
+    return textNorm.removePunct(current.getContent().toLowerCase());
   }
 
   private void addFloatLeft(IHighlightSegment current) {
@@ -682,7 +713,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
   protected void addFloatLeft(Widget w) {
     if (!isRTL) {
-  //    logger.info("addFloatLeft to (" + isRTL + ") elem '" + w.getElement().getId() + "'");
+      //    logger.info("addFloatLeft to (" + isRTL + ") elem '" + w.getElement().getId() + "'");
       w.addStyleName(FLOAT_LEFT);
     }
   }
@@ -807,7 +838,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
 
     if (lcSegment.equalsIgnoreCase(lcClickable)) {  // easy match -
       if (showPhones) {
-        showPhones(wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, simpleLayout);
+        showPhones(wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, simpleLayout, clickable);
       }
 
       return clickable;
@@ -819,7 +850,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       } else { // all clickables match this segment
         AllHighlight allHighlight = getAllHighlight(bulk);
         if (showPhones) {
-          showPhones(wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, simpleLayout);
+          showPhones(wordSegment, phonesInWord, audioControl, phoneMap, clickablePhones, simpleLayout, allHighlight);
         }
 
         if (DEBUG || DEBUG_MATCH)
@@ -835,8 +866,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
                           AudioControl audioControl,
                           TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
                           DivWidget clickablePhones,
-                          boolean simpleLayout) {
-    addSouthClickable(clickablePhones, getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap, simpleLayout));
+                          boolean simpleLayout,
+                          IHighlightSegment wordHighlight) {
+    addSouthClickable(clickablePhones, getPhoneDivBelowWord(wordSegment, phonesInWord, audioControl, phoneMap, simpleLayout, wordHighlight));
   }
 
   private void addSouthClickable(DivWidget clickablePhones, DivWidget phoneDivBelowWord) {
@@ -848,17 +880,18 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
    * @param wordSegment
    * @param phonesInWord
    * @param audioControl
-   * @param phoneMap
    * @param simpleLayout
-   * @return
+   * @param wordHighlight
+   * @return DivWidget "phoneContainer"
    * @see #doOneToManyMatch
    */
   @NotNull
   protected DivWidget getPhoneDivBelowWord(TranscriptSegment wordSegment,
                                            List<TranscriptSegment> phonesInWord,
                                            AudioControl audioControl,
-                                           TreeMap<TranscriptSegment, IHighlightSegment> phoneMap, boolean simpleLayout) {
-    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, true);
+                                           TreeMap<TranscriptSegment, IHighlightSegment> phoneMap,
+                                           boolean simpleLayout, IHighlightSegment wordHighlight) {
+    return new WordTable().getPhoneDivBelowWord(audioControl, phoneMap, phonesInWord, simpleLayout, wordSegment, !isRTL, wordHighlight, isRTL);
   }
 
   /**
@@ -940,7 +973,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 */
 
-  private void dumpMatchComparison(List<IHighlightSegment> clickables, List<TranscriptSegment> segments, int c) {
+/*  private void dumpMatchComparison(List<IHighlightSegment> clickables, List<TranscriptSegment> segments, int c) {
     logger.info("transcriptMatchesOneToOne  clickables " + c + " segments " + segments.size());
     StringBuilder builder = new StringBuilder();
     for (IHighlightSegment clickable : clickables) {
@@ -955,7 +988,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
       builder2.append(segment.getEvent()).append(" ");
     }
     logger.info("transcriptMatchesOneToOne align    : " + builder2);
-  }
+  }*/
 
   private int getNumClickable(List<IHighlightSegment> clickables) {
     int c = 0;
@@ -968,58 +1001,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
     }
     //logger.info("found " + c + " clickables " + sb);
     return c;
-  }
-
-  /**
-   * Remove arabic full stop
-   * Remove arabic comma
-   * Remove arabic question mark...
-   * exclamation point
-   * chinese fill with comma
-   * ideographic comma
-   * right double quote
-   * double quote
-   * <p>
-   * 2d = dash like in twenty-first
-   *
-   * left quote and right quote : LEFT SINGLE QUOTATION MARK and RIGHT SINGLE QUOTATION MARK
-   *
-   * @param t
-   * @return
-   * @see #doOneToManyMatch
-   */
-  private String removePunct(String t) {
-    return fromFull(t
-        .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
-        .replaceAll("['%\\u06D4\\u060C\\u0022\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3001\\u3002\\u003F\\u00A1\\u00BF\\u002E\\u002C\\u002D\\u0021\\u2026\\u005C\\u2013\\u061F\\uFF0C\\u201D\\u2018\\u2019]", ""));
-  }
-
-  /**
-   * Go from full width numbers to normal width
-   *
-   * @param s
-   * @return
-   */
-  private String fromFull(String s) {
-    StringBuilder builder = new StringBuilder();
-    for (int i = 0; i < s.length(); i++) {
-      char c = s.charAt(i);
-      if (c >= FULL_WIDTH_ZERO && c <= FULL_WIDTH_NINE) {
-        int offset = c - FULL_WIDTH_ZERO;
-        int full = '0' + offset;
-        builder.append(Character.valueOf((char) full).toString());
-      } else {
-        builder.append(c);
-      }
-    }
-    String s1 = builder.toString();
-//    if (!s.isEmpty() && !s.equalsIgnoreCase(s1)) {
-//      logger.warning("fromFull before '" +
-//          s +
-//          "' after '" + s1 +
-//          "'");
-//    }
-    return s1;
   }
 
   @NotNull
@@ -1039,7 +1020,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   /**
    * @param e
    * @return
-   * @see #addWidgets(boolean, boolean, PhonesChoices)
+   * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    * @see TwoColumnExercisePanel#makeFirstRow
    */
   @NotNull
@@ -1071,7 +1052,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends DivWidget
   }
 
   void contextAudioChanged(int id, long duration) {
-    logger.info("contextAudioChanged : audio changed for " + id + " - " + duration);
+    if (DEBUG_SHOW_ALIGNMENT) logger.info("contextAudioChanged : audio changed for " + id + " - " + duration);
+
     audioChanged(id, duration);
   }
 

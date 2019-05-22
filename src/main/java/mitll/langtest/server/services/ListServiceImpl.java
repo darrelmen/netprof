@@ -36,7 +36,7 @@ import mitll.langtest.client.custom.userlist.ListContainer;
 import mitll.langtest.client.services.ListService;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.exercise.BulkImport;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.*;
@@ -272,16 +272,9 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   public CommonExercise newExercise(int userListID, String initialText) throws DominoSessionException {
     if (isValidForeignPhrase(initialText).isEmpty()) {
       int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
-      int projectIDFromUser = getProjectIDFromUser();
-//    if (DEBUG) logger.debug("newExercise : made user exercise " + userExercise + " on list " + userListID);
-
-//    CommonExercise exercise = getExerciseIfKnown(userExercise);
-//    if (exercise != null) {
-//      addItemToUserList(userListID, exercise.getID());
-//      return exercise;
-//    } else {
-
-      CommonExercise exercise = makeNewExercise(userIDFromSessionOrDB, projectIDFromUser, initialText);
+      CommonExercise exercise = makeNewExercise(userIDFromSessionOrDB, getProjectIDFromUser(userIDFromSessionOrDB), initialText);
+      // if we got here, it's got to be valid!
+      exercise.getMutable().setSafeToDecode(true);
       getUserListManager().newExercise(userListID, exercise);
       if (DEBUG) {
         logger.info("\tnewExercise : made user exercise " + exercise + " on list " + userListID);
@@ -296,12 +289,6 @@ public class ListServiceImpl extends MyRemoteServiceServlet implements ListServi
   private Collection<String> isValidForeignPhrase(String foreign) throws DominoSessionException {
     return getAudioFileHelper().checkLTSOnForeignPhrase(foreign, "");
   }
-
-/*
-  private boolean isValid(Project project, String foreign) {
-    return isValidForeignPhrase(project, foreign).isEmpty();
-  }
-*/
 
   private Collection<String> isValidForeignPhrase(Project project, String foreign) {
     return project.getAudioFileHelper().checkLTSOnForeignPhrase(foreign, "");

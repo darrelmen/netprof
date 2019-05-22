@@ -53,6 +53,7 @@ import mitll.langtest.client.banner.NewBanner;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.banner.UserMenu;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -66,10 +67,12 @@ import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.HeartbeatStatus;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.User;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
@@ -84,9 +87,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
   private static final boolean DEBUG = false;
 
-
   private static final boolean DO_HEARTBEAT = true;
-
 
   private static final int TOP_OF_ROOT = 52;//58;//48;//58;
 
@@ -156,12 +157,14 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     this.controller = langTest;
     this.choices = new ProjectChoices(langTest, this);
     this.breadcrumbHelper = new BreadcrumbHelper(userManager, lifecycleSupport, this);
+    UserMenu userMenu = new UserMenu(langTest, userManager, this);
     banner =
         new NewBanner(userManager,
             this,
-            new UserMenu(langTest, userManager, this),
+            userMenu,
             breadcrumbHelper.getBreadcrumbs(),
             controller);
+    userMenu.setBanner(banner);
   }
 
   public INavigation getNavigation() {
@@ -282,7 +285,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    * @see #makeHeaderRow()
    */
   private String getGreeting() {
-    return userManager.getUserID() == null ? "" : ("" + userManager.getUserID());
+    return userManager.getUserID() == null ? "" : ("" + userManager.getAbbreviation());
   }
 
   /**
@@ -322,7 +325,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   }
 
   private void pushClearHistory() {
-  //  logger.info("pushClearHistory -");
+    //  logger.info("pushClearHistory -");
     History.newItem("");
   }
 
@@ -362,6 +365,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     style.setBottom(0, Style.Unit.PX);
     style.setOverflowY(Style.Overflow.AUTO);
     style.setPosition(Style.Position.FIXED);
+    //   style.setPaddingRight(225, Style.Unit.PX);
 
     return verticalContainer;
   }
@@ -380,33 +384,15 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     if (userManager.getCurrent() != null) {
       ProjectStartupInfo projectStartupInfo = lifecycleSupport.getProjectStartupInfo();
       String implementationVersion = lifecycleSupport.getStartupInfo().getImplementationVersion();
+      boolean teacher = isTeacher(userManager.getCurrent());
       if (projectStartupInfo == null) {
-        long then = System.currentTimeMillis();
-        Timer timer = getWifiTimer();
-
-        controller.getOpenUserService().checkHeartbeat(implementationVersion, new AsyncCallback<HeartbeatStatus>() {
-          @Override
-          public void onFailure(Throwable caught) {
-            cancelHeartbeatTimer(timer);
-          }
-
-          @Override
-          public void onSuccess(HeartbeatStatus result) {
-            cancelHeartbeatTimer(timer);
-            long now = System.currentTimeMillis();
-            //logger.info("1 waited " + (now - then));
-            if (result.isCodeHasUpdated()) {
-              logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
-              Window.Location.reload();
-            }
-          }
-        });
+        checkHearbeat(implementationVersion, teacher);
       } else {
         if (DO_HEARTBEAT) {
           long then = System.currentTimeMillis();
 
           Timer timer = getWifiTimer();
-          controller.getOpenUserService().setCurrentUserToProject(projectStartupInfo.getProjectid(), implementationVersion, new AsyncCallback<HeartbeatStatus>() {
+          controller.getOpenUserService().setCurrentUserToProject(projectStartupInfo.getProjectid(), implementationVersion, teacher, new AsyncCallback<HeartbeatStatus>() {
             @Override
             public void onFailure(Throwable caught) {
               cancelHeartbeatTimer(timer);
@@ -423,11 +409,74 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
               } else if (!result.isHasSession()) {
                 logger.info("confirmCurrentProject : took " + (now - then) + " millis to check on user - logging out!");
                 logout();
+              } else if (result.isPermissionsChanged()) {
+                logger.info("confirmCurrentProject : 2 took " + (now - then) + " millis - perm changed!");
+                Window.Location.reload();
               }
             }
           });
         }
       }
+    }
+  }
+
+  public void checkAndTell(CheckHeartbeatComplete complete) {
+    String implementationVersion = lifecycleSupport.getStartupInfo().getImplementationVersion();
+    boolean teacher = isTeacher(userManager.getCurrent());
+    long then = System.currentTimeMillis();
+    controller.getOpenUserService().checkHeartbeat(implementationVersion, teacher, new AsyncCallback<HeartbeatStatus>() {
+      @Override
+      public void onFailure(Throwable caught) {
+
+      }
+
+      @Override
+      public void onSuccess(HeartbeatStatus result) {
+        if (result.isCodeHasUpdated()) {
+          long now = System.currentTimeMillis();
+          logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
+          Window.Location.reload();
+        }
+        complete.complete();
+      }
+    });
+  }
+
+  private void checkHearbeat(String implementationVersion, boolean teacher) {
+    long then = System.currentTimeMillis();
+    Timer timer = getWifiTimer();
+    checkHeartbeat(implementationVersion, teacher, then, timer);
+  }
+
+  private void checkHeartbeat(String implementationVersion, boolean teacher, long then, Timer timer) {
+    controller.getOpenUserService().checkHeartbeat(implementationVersion, teacher, new AsyncCallback<HeartbeatStatus>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        cancelHeartbeatTimer(timer);
+      }
+
+      @Override
+      public void onSuccess(HeartbeatStatus result) {
+        cancelHeartbeatTimer(timer);
+        long now = System.currentTimeMillis();
+        //logger.info("1 waited " + (now - then));
+        if (result.isCodeHasUpdated()) {
+          logger.info("confirmCurrentProject : took " + (now - then) + " millis to check : CODE HAS CHANGED!");
+          Window.Location.reload();
+        } else if (result.isPermissionsChanged()) {
+          logger.info("confirmCurrentProject : 1  took " + (now - then) + " millis - perm changed!");
+          Window.Location.reload();
+        }
+      }
+    });
+  }
+
+  private boolean isTeacher(User userWhere) {
+    if (userWhere == null) {
+      return false;
+    } else {
+      Collection<Permission> permissions = userWhere.getPermissions();
+      return permissions.contains(Permission.TEACHER_PERM) || permissions.contains(Permission.PROJECT_ADMIN);
     }
   }
 
@@ -470,10 +519,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    */
   private void populateBelowHeader(DivWidget verticalContainer) {
     RootPanel.get().add(verticalContainer);
-
-    /**
-     */
-    //  contentRow.add(lifecycleSupport.getFlashRecordPanel());
 
     {
       child = new Heading(3, PLEASE_ALLOW_RECORDING);
@@ -518,7 +563,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     }
   }
 
-
   @Override
   public void resetLanguageSelection(int levelToRemove, SlimProject project) {
     pushClearHistory();
@@ -536,21 +580,21 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     if (userManager.hasUser()) {
       // logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
 
-      if (userManager.isPolyglot()) {
-        logger.info("\tpolyglot users don't get to change projects.");
-      } else {
-        forgetProjectForUser();
+//      if (userManager.isPolyglot()) {
+//        logger.info("\tpolyglot users don't get to change projects.");
+//      } else {
+      forgetProjectForUser();
 
-        pushClearHistory();
-        clearStartupInfo();
+      pushClearHistory();
+      clearStartupInfo();
 
-        breadcrumbHelper.clearBreadcrumbs();
-        breadcrumbHelper.addCrumbs(true);
+      breadcrumbHelper.clearBreadcrumbs();
+      breadcrumbHelper.addCrumbs(true);
 
-        clearContent();
-        addProjectChoices(0, null);
-        showCogMenu();
-      }
+      clearContent();
+      addProjectChoices(0, null);
+      showCogMenu();
+//      }
     } else {
       logger.warning("chooseProjectAgain no user --- ");
     }
@@ -625,10 +669,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     return false;
   }
 
-  public void showCogMenu() {
-    banner.setCogVisible(true);
-  }
-
   private void showLogin(EventRegistration eventRegistration) {
     contentRow.add(new UserPassLogin(props, userManager, eventRegistration, lifecycleSupport.getStartupInfo()).getContent());
     contentRow.getElement().getStyle().setPosition(Style.Position.RELATIVE);
@@ -636,6 +676,10 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
     hideCogMenu();
+  }
+
+  public void showCogMenu() {
+    banner.setCogVisible(true);
   }
 
   private void hideCogMenu() {
@@ -653,7 +697,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
                                final Panel firstRow,
                                final EventRegistration eventRegistration,
                                final String resetPassToken) {
-   // logger.info("handleResetPass token '" + resetPassToken + "' for password reset");
+    // logger.info("handleResetPass token '" + resetPassToken + "' for password reset");
 
     {
       Panel resetPassword =
@@ -778,7 +822,9 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private void addProjectChoices(int level, SlimProject parent) {
     clearContent();
 
-    if (DEBUG) logger.info("addProjectChoices level " + level + " parent " + parent);
+    if (DEBUG) {
+      logger.info("addProjectChoices level " + level + " parent " + parent);
+    }
 
     breadcrumbHelper.addCrumbs(level == 0);
 
@@ -812,9 +858,15 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    */
   @Override
   public void clickOnParentCrumb(SlimProject parent) {
+    if (DEBUG) {
+      logger.info("clickOnParentCrumb click on parent : " + parent);
+    }
+
     pushClearHistory(); // clear history!
     breadcrumbHelper.removeLastCrumb();
     addProjectChoices(1, parent);
+
+    banner.reset();
   }
 
   /**
@@ -833,5 +885,10 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   @Override
   public void setSplash(String message) {
     banner.setSubtitle(message);
+  }
+
+  @Override
+  public KeyStorage getStorage() {
+    return controller.getStorage();
   }
 }

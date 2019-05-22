@@ -35,6 +35,7 @@ import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.MiniUser;
+import mitll.langtest.shared.user.Permission;
 import mitll.langtest.shared.user.SimpleUser;
 import mitll.langtest.shared.user.User;
 
@@ -149,8 +150,8 @@ public class UserManager {
         !result.isEnabled() ||
         !result.isValid() ||
         !result.isHasAppPermission() ||
-        ((result.getPermissions().contains(User.Permission.RECORD_AUDIO) ||
-            result.getPermissions().contains(User.Permission.DEVELOP_CONTENT)) &&
+        ((result.getPermissions().contains(Permission.RECORD_AUDIO) ||
+            result.getPermissions().contains(Permission.DEVELOP_CONTENT)) &&
             result.getRealGender() == MiniUser.Gender.Unspecified)
     ) {
       clearUser();
@@ -292,18 +293,34 @@ public class UserManager {
   private void gotNewUser(User result) {
     if (DEBUG) logger.info("UserManager.gotNewUser " + result);
     if (result != null) {
+      setAbbreviation(result);
       this.current = result;
-      // logger.info("\tgotNewUser current user " + current);
+//      logger.info("gotNewUser ab " + abbreviation +
+//          " current user " + current);
       userNotification.gotUser(result);
     }
   }
 
-  public boolean isMale() {
-    return current.isMale();
+  private void setAbbreviation(User result) {
+    String first = result.getFirst();
+    String last = result.getLast();
+
+    boolean fvalid = !first.isEmpty() && !first.equalsIgnoreCase("First");
+    boolean lvalid = !last.isEmpty() && !last.equalsIgnoreCase("Last");
+
+    abbreviation = fvalid && lvalid ?
+        first.substring(0, 1).toUpperCase() + last.substring(0, 1).toUpperCase() :
+        getUserID();
   }
 
-  public boolean isTeacher() {
-    return current.isTeacher() || current.isCD();
+  private String abbreviation;
+
+  public String getAbbreviation() {
+    return abbreviation;
+  }
+
+  public boolean isMale() {
+    return current.isMale();
   }
 
   public boolean isAdmin() {
@@ -314,21 +331,12 @@ public class UserManager {
     return current;
   }
 
-  public boolean hasPermission(User.Permission permission) {
-    Collection<User.Permission> permissions = getPermissions();
+  public boolean hasPermission(Permission permission) {
+    Collection<Permission> permissions = getPermissions();
     return permissions != null && permissions.contains(permission);
   }
 
-  public Collection<User.Permission> getPermissions() {
+  public Collection<Permission> getPermissions() {
     return current.getPermissions();
-  }
-
-  /**
-   * Only one perm = polyglot
-   *
-   * @return
-   */
-  public boolean isPolyglot() {
-    return getCurrent() != null && getPermissions().size() == 1 && getPermissions().iterator().next() == User.Permission.POLYGLOT;
   }
 }

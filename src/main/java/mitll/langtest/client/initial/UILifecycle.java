@@ -32,6 +32,7 @@ package mitll.langtest.client.initial;
 import com.github.gwtbootstrap.client.ui.NavLink;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.project.SlimProject;
 import org.jetbrains.annotations.NotNull;
@@ -89,4 +90,6 @@ public interface UILifecycle {
   INavigation getNavigation();
 
   void showCogMenu();
+
+  KeyStorage getStorage();
 }

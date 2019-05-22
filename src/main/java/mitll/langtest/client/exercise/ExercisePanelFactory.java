@@ -32,12 +32,16 @@ package mitll.langtest.client.exercise;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.list.DisplayMenu;
 import mitll.langtest.client.list.ListInterface;
+import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.shared.exercise.HasID;
+import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Map;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.list.DisplayMenu.SHOW_ENGLISH;
 import static mitll.langtest.client.list.DisplayMenu.SHOW_PHONES;
 
 public abstract class ExercisePanelFactory<T extends HasID, U extends HasID> {
@@ -46,6 +50,7 @@ public abstract class ExercisePanelFactory<T extends HasID, U extends HasID> {
    * Fix for bug #115 : <a href='https://gh.ll.mit.edu/DLI-LTEA/netprof2/issues/115'>Bug #115 : Remove the transliteration </a>
    */
   private final PhonesChoices SHOW_CHOICE_DEFAULT = PhonesChoices.HIDE;
+  private final EnglishDisplayChoices ENGLISH_CHOICE_DEFAULT = EnglishDisplayChoices.SHOW;
 
   protected final ExerciseController controller;
   protected ListInterface<T, U> exerciseList;
@@ -60,10 +65,8 @@ public abstract class ExercisePanelFactory<T extends HasID, U extends HasID> {
     this.exerciseList = exerciseList;
   }
 
- /* public void setExerciseList(ListInterface<T, U> exerciseList) {
-    this.exerciseList = exerciseList;
-  }
-*/
+  public void addToCache(Map<Integer, AlignmentAndScore> toAdd){}
+
   /**
    * @param e
    * @return
@@ -74,9 +77,9 @@ public abstract class ExercisePanelFactory<T extends HasID, U extends HasID> {
   @NotNull
   public boolean getFLChoice() {
     String show = controller.getStorage().getValue(DisplayMenu.SHOWFL);
-    Boolean showFL = true;
+    boolean showFL = true;
     if (show != null) {
-      showFL = Boolean.valueOf(show);
+      showFL = Boolean.parseBoolean(show);
     }
     return showFL;
   }
@@ -84,7 +87,7 @@ public abstract class ExercisePanelFactory<T extends HasID, U extends HasID> {
   @NotNull
   public boolean getALTFLChoice() {
     String show = controller.getStorage().getValue(DisplayMenu.SHOWALT);
-    Boolean showFL = false;
+    boolean showFL = false;
     if (show != null) {
       showFL = Boolean.valueOf(show);
     }
@@ -102,6 +105,22 @@ public abstract class ExercisePanelFactory<T extends HasID, U extends HasID> {
         //    logger.info("ExercisePanelFactory got " + choices);
       } catch (IllegalArgumentException ee) {
         logger.warning("getPhoneChoices for '" + show + "' got " + ee);
+      }
+    }
+    return choices;
+  }
+
+  @NotNull
+  public EnglishDisplayChoices getEnglishChoices() {
+    EnglishDisplayChoices choices = ENGLISH_CHOICE_DEFAULT;
+
+    String show = controller.getStorage().getValue(SHOW_ENGLISH);
+    if (show != null && !show.isEmpty()) {
+      try {
+        choices = EnglishDisplayChoices.valueOf(show);
+        //    logger.info("ExercisePanelFactory got " + choices);
+      } catch (IllegalArgumentException ee) {
+        logger.warning("getEnglishChoices for '" + show + "' got " + ee);
       }
     }
     return choices;

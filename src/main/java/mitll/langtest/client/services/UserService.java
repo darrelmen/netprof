@@ -38,13 +38,12 @@ import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.user.ActiveUser;
 import mitll.langtest.shared.user.User;
 
+import java.util.Collection;
 import java.util.List;
 
 @RemoteServiceRelativePath("user-manager")
 public interface UserService extends RemoteService {
-
   /**
-   *
    * @return
    * @see UserManager#getPermissionsAndSetUser
    */
@@ -53,7 +52,14 @@ public interface UserService extends RemoteService {
   List<ActiveUser> getUsersSince(long when) throws DominoSessionException, RestrictedOperationException;
 
   List<ActiveUser> getActiveTeachers() throws DominoSessionException, RestrictedOperationException;
+
   List<ActiveUser> getTeachers() throws DominoSessionException, RestrictedOperationException;
+
+  List<ActiveUser> getPendingUsers(int projid) throws DominoSessionException;
+
+//  void approve(int toApproveUser) throws DominoSessionException;
+//  void disapprove(int toApproveUser) throws DominoSessionException;
+//
 
   void logout() throws DominoSessionException;
 
@@ -65,5 +71,7 @@ public interface UserService extends RemoteService {
    */
   boolean changePasswordWithCurrent(String currentHashedPassword, String newHashedPassword) throws DominoSessionException;
 
-  void sendTeacherRequest() throws DominoSessionException;
+  ActiveUser.PENDING sendTeacherRequest() throws DominoSessionException;
+
+  void approveAndDisapprove(Collection<Integer> approve, Collection<Integer> disapprove) throws  DominoSessionException;
 }

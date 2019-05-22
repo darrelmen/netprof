@@ -38,7 +38,6 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.dialog.*;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.dialog.Dialog;
@@ -87,7 +86,7 @@ public class DialogPopulate {
 
   public DialogPopulate(DatabaseImpl db, PathHelper pathHelper) {
     this.db = db;
-    pathWriter = new PathWriter(db.getServerProps());
+    pathWriter = new PathWriter(db.getServerProps(), pathHelper.getContext());
     this.pathHelper = pathHelper;
   }
 
@@ -147,6 +146,7 @@ public class DialogPopulate {
    * Loads data for any excel file we find under
    *
    * /opt/netprof/dialog/LANG/interpreter.xlsx
+   *
    * @param project
    * @param dialogDAO
    * @param keepAudio
@@ -167,7 +167,7 @@ public class DialogPopulate {
 
       String aShort = excel.startsWith("short") ? "Short Interpreter" : InterpreterReader.DEFAULT_CHAPTER;
 
-      logger.info("chapter is " +aShort);
+      logger.info("chapter is " + aShort);
 
       Map<Dialog, SlickDialog> dialogToSlick = new InterpreterReader(InterpreterReader.DEFAULT_UNIT,
           aShort).getInterpreterDialogs(defaultUser, project, engProject, excel);
@@ -564,7 +564,7 @@ public class DialogPopulate {
             languageEnum,
             exid,
             db.getServerProps(),
-            new TrackInfo(foreignLanguage, getArtist(defaultUser), k.getEnglish(), languageEnum.getLanguage()));
+            getTrackInfo(defaultUser, k, languageEnum, foreignLanguage));
 
     db.getAudioDAO().addOrUpdate(new AudioInfo(
         defaultUser,
@@ -579,6 +579,11 @@ public class DialogPopulate {
         resultID,
         MiniUser.Gender.Male,
         false));
+  }
+
+  @NotNull
+  private TrackInfo getTrackInfo(int defaultUser, ClientExercise k, Language languageEnum, String foreignLanguage) {
+    return new TrackInfo(foreignLanguage, getArtist(defaultUser), k.getEnglish(), languageEnum.getLanguage(), k.getUnitToValue());
   }
 
   private String getPermanentName(int user, AudioType audioType) {

@@ -48,8 +48,6 @@ import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
-import mitll.langtest.shared.sorter.IExerciseComparator;
-import mitll.langtest.shared.sorter.SimpleExerciseComparator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -82,7 +80,6 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
     if (startupInfo == null) {
       logger.warning("PagingContainer huh? no startup info?");
     }
-  //  sorter = getSorter();
 
     language = startupInfo == null ? Language.UNKNOWN : startupInfo.getLanguageInfo();
 
@@ -95,23 +92,25 @@ class NPExerciseListContainer<T extends CommonShell, U extends HasID> extends Cl
     int pageSize = exerciseList.getPageSize();
     return (pageSize == -1) ? super.getNumTableRowsGivenScreenHeight() : pageSize;
   }
-
-  @NotNull
-  private IExerciseComparator getSorter() {
-    return new SimpleExerciseComparator();
-  }
+//
+//  @NotNull
+//  private IExerciseComparator getSorter() {
+//    return new SimpleExerciseComparator();
+//  }
 
   /**
+   * i guess we don't want english to be sortable?
+   * in the edit list dialog?
    * @see #configureTable
    */
-  protected void addColumnsToTable(boolean sortEnglish) {
+  protected void addColumnsToTable() {
     Column<T, SafeHtml> flColumn = addFLColumn();
 
     Column<T, SafeHtml> englishCol = getEnglishColumn();
-    if (sortEnglish) {
-      //   logger.warning("addColumnsToTable sorting " + this);
-      englishCol.setSortable(true);
-    }
+//    if (sortEnglish) {
+//      //   logger.warning("addColumnsToTable sorting " + this);
+//      englishCol.setSortable(true);
+//    }
     addColumn(englishCol, new TextHeader(ENGLISH));
 
     List<T> dataList = getList();

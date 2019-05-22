@@ -29,21 +29,23 @@
 
 package mitll.langtest.server.database.project;
 
+import mitll.hlt.domino.server.extern.importers.ImportResult;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
-import mitll.langtest.server.database.exercise.Project;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.services.OpenUserServiceImpl;
 import mitll.langtest.server.services.ProjectServiceImpl;
 import mitll.langtest.shared.exercise.CommonExercise;
+import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.OOVInfo;
 import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.User;
-import mitll.npdata.dao.SlickProject;
-import org.jetbrains.annotations.NotNull;
+import org.apache.commons.fileupload.FileItem;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -85,8 +87,9 @@ public interface IProjectManagement {
   List<CommonExercise> getExercises(int projectid, boolean onlyOne);
 
   Project getProject(int projectid, boolean onlyOne);
+  IProject getIProject(int projectid, boolean onlyOne);
   Project getProjectByName(String name);
-  List<Project> getProjectByLangauge(Language name);
+  List<Project> getProjectByLanguage(Language name);
   Project getProductionByLanguage(Language language);
   List<Project> getMatchingProjects(Language languageMatchingGroup, boolean isPoly);
   boolean exists(int projectid);
@@ -145,4 +148,12 @@ public interface IProjectManagement {
   List<ImportProjectInfo> getVocabProjects();
 
   Map<String,Integer> getNpToDomino(int dominoProjectID);
+
+  ImportResult doDominoImport(int dominoID, FileItem item, Collection<String> typeOrder, int userID);
+
+  ImportResult doDominoImport(int dominoID, File excelFile, Collection<String> typeOrder, int userID);
+
+  OOVInfo checkOOV(int id, int num, int offset);
+
+  void updateOOV(List<OOV> updates, int user);
 }

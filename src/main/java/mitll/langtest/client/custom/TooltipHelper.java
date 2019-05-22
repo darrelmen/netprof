@@ -33,11 +33,8 @@ import com.github.gwtbootstrap.client.ui.Tooltip;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.user.client.ui.Widget;
 
-import java.util.logging.Logger;
-
 public class TooltipHelper {
-  private final Logger logger = Logger.getLogger("TooltipHelper");
-
+  //private final Logger logger = Logger.getLogger("TooltipHelper");
   /**
    * @param w
    * @param tip

@@ -52,6 +52,7 @@ public class HTTPClient {
   private static final String GET = "GET";
   private static final String POST = "POST";
   public static final String UTF_8 = "UTF8";
+  private static final String SENDING = "sending";
 
   private HttpURLConnection httpConn;
 
@@ -120,7 +121,7 @@ public class HTTPClient {
       logger.debug("isAvailable for " + webserviceIP + " " + webservicePort + " " + service + " :" + fnf);
       return true;
     } catch (IOException e) {
-      logger.warn("isAvailable for " +url+ " : Got " + e);
+      logger.warn("isAvailable for " + url + " : Got " + e);
       return false;
     }
   }
@@ -130,7 +131,7 @@ public class HTTPClient {
    * @return
    * @see #isAvailable
    */
-  public String readFromGET(String url) throws IOException {
+  private String readFromGET(String url) throws IOException {
     HttpURLConnection httpConn = setupGetHttpConn(url);
     String receive = receive(httpConn);
     httpConn.disconnect();
@@ -146,6 +147,12 @@ public class HTTPClient {
     return httpConn;
   }
 
+  /**
+   * @param url
+   * @return
+   * @throws IOException
+   * @see #HTTPClient(String)
+   */
   private HttpURLConnection setupPostHttpConn(String url) throws IOException {
     HttpURLConnection httpConn = getHttpURLConnection(url);
     httpConn.setRequestMethod(POST);
@@ -249,8 +256,7 @@ public class HTTPClient {
       send(input);
       //logger.info("sending END   " + input.length());
     } catch (ConnectException ce) {
-      String sending = "sending";
-      logError(input, ce, sending);
+      logError(input, ce, SENDING);
       return "";
     } catch (IOException e) {
       logger.error("sendAndReceive sending " + input + " got " + e, e);
@@ -266,19 +272,23 @@ public class HTTPClient {
       logError(input, ce, "receiving");
       return "";
     } catch (IOException e) {
-      logger.error("sendAndReceive receiving from " + input + " got " + e, e);
+      logger.error("sendAndReceive receiving " +
+              "\n\tfrom    " + input +
+              "\n\tcode    " + httpConn.getResponseCode() +
+              "\n\tmessage " + httpConn.getResponseMessage() +
+              "\n\tgot     " + e,
+          e);
       throw e;
     }
   }
 
-  public String sendAndReceiveCookie(String input) throws IOException {
+  String sendAndReceiveCookie(String input) throws IOException {
     try {
       //logger.info("sending START " + input.length());
       send(input);
       //logger.info("sending END   " + input.length());
     } catch (ConnectException ce) {
-      String sending = "sending";
-      logError(input, ce, sending);
+      logError(input, ce, SENDING);
       return "";
     } catch (IOException e) {
       logger.error("sendAndReceive sending " + input + " got " + e, e);

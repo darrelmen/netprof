@@ -172,9 +172,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   /**
+   * @see SimplePagingContainer#configureTable(boolean)
    */
   @Override
-  protected void addColumnsToTable(boolean sortEnglish) {
+  protected void addColumnsToTable() {
     List<T> list = getList();
     addItemID(list, getMaxLengthId());
     addDateCol(list);
@@ -236,7 +237,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @param users
    * @see #getTableWithPager
    */
-  public void populateTable(Collection<T> users) {
+  public MemoryItemContainer<T> populateTable(Collection<T> users) {
     int i = 0;
     int index = 0;
     T userToSelect = null;
@@ -261,6 +262,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     scrollIntoView(index);
 
     makeInitialSelectionFromSet(users, userToSelect);
+
+    return this;
   }
 
   protected void makeInitialSelectionFromSet(Collection<T> users, T userToSelect) {
@@ -329,7 +332,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     table.setSelectionModel(selectionModel);
   }
 
-  private ColumnSortEvent.ListHandler<T> getUserSorter(Column<T, SafeHtml> englishCol,
+  protected ColumnSortEvent.ListHandler<T> getUserSorter(Column<T, SafeHtml> englishCol,
                                                        List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, this::getIDCompare);

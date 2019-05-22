@@ -30,7 +30,7 @@
 package mitll.langtest.shared.project;
 
 import mitll.langtest.client.project.ProjectEditForm;
-import mitll.langtest.server.database.exercise.Project;
+import mitll.langtest.server.database.project.IProject;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,7 +53,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
   private long lastImport = 0;
   private long lastNetprof = 0;
 
-  private String host = Project.WEBSERVICE_HOST_DEFAULT;
+  private String host = IProject.WEBSERVICE_HOST_DEFAULT;
   private int port = -1;
   private String modelsDir = "";
 
@@ -91,7 +91,8 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
                      String secondType,
                      boolean showOniOS,
                      int dominoID,
-                     int userID, Map<String, String> props) {
+                     int userID,
+                     Map<String, String> props) {
     super(dominoID, name, first, secondType);
     this.language = language;
     this.id = projectid;
@@ -282,6 +283,8 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
         "\ndomino    " + getDominoID() +
         "\nown audio " + audioPerProject +
         "\nshowOniOS " + showOniOS +
+        "\nmodel     " + getModelType() +
+        "\nproperties " + getPropertyValue() +
         "\nimported  " + new Date(lastImport) +
         "\nupdated   " + new Date(lastNetprof)
         ;

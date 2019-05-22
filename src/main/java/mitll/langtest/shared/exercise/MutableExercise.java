@@ -41,7 +41,7 @@ public interface MutableExercise extends CommonShell, MutableShell {
   void setRefSentences(Collection<String> orDefault);
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkLTSAndCountPhones
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkForOOV
    * @param isSafeToDecode
    */
   void setSafeToDecode(boolean isSafeToDecode);
@@ -75,5 +75,5 @@ public interface MutableExercise extends CommonShell, MutableShell {
 
   void setDominoID(int dominoID);
 
-//  void setNumPhones(int numPhones);
+  void setNormalizedFL(String normalizedFL);
 }

@@ -64,25 +64,6 @@ public class Trie<T> {
   }
 
   /**
-   * @param toMatch
-   * @return
-   * @see #getMatches(String)
-   */
-  private List<EmitValue<T>> getEmits(String toMatch) {
-    TrieNode<T> start = root;
-
-    for (String c : getChars(toMatch)) {
-//      logger.info("char " + toMatch+ " = '" +c +"'");
-      //TrieNode<T> nextState = start.getNextState(c);
-      //    logger.info(" explain "+ start.explain(c));
-      start = start.getNextState(c);
-      if (start == null) break;
-    }
-
-    return (start == null) ? Collections.emptyList() : start.getEmitsBelow();
-  }
-
-  /**
    * Start building
    *
    * @see ExerciseTrie#ExerciseTrie(Collection, String, SmallVocabDecoder, boolean, boolean)
@@ -101,6 +82,25 @@ public class Trie<T> {
 
   public void addEntryToTrie(TextEntityValue<T> textEntityDescription) {
     addEntryToTrie(textEntityDescription, tempCache);
+  }
+
+  /**
+   * @param toMatch
+   * @return
+   * @see #getMatches(String)
+   */
+  private List<EmitValue<T>> getEmits(String toMatch) {
+    TrieNode<T> start = root;
+
+    for (String c : getChars(toMatch)) {
+//      logger.info("char " + toMatch+ " = '" +c +"'");
+      //TrieNode<T> nextState = start.getNextState(c);
+      //    logger.info(" explain "+ start.explain(c));
+      start = start.getNextState(c);
+      if (start == null) break;
+    }
+
+    return (start == null) ? Collections.emptyList() : start.getEmitsBelow();
   }
 
   /**
@@ -190,9 +190,9 @@ public class Trie<T> {
       if (moreThanMax || (size > WINDOW_SIZE && Character.isWhitespace(c))) {
 
         if (moreThanMax) {
-          if (DEBUG) logger.warn("max vs " + length + " : '" + getWindow(slidingWindow) + "'");
+          if (DEBUG) logger.warn("getChars max vs " + length + " : '" + getWindow(slidingWindow) + "'");
         } else if (DEBUG && (size > WINDOW_SIZE && Character.isWhitespace(c)))
-          logger.warn("break '" + getWindow(slidingWindow) + "'");
+          logger.warn("getChars break '" + getWindow(slidingWindow) + "'");
 
         Character first = slidingWindow.peekFirst();
         while (
@@ -214,7 +214,7 @@ public class Trie<T> {
     return toAdd;
   }
 
-  String getWindow(Deque<?> window) {
+  private String getWindow(Deque<?> window) {
     StringBuilder sb = new StringBuilder();
     window.forEach(sb::append);
     return sb.toString();

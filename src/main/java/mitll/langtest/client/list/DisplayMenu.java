@@ -37,6 +37,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.PhonesChoices;
 import org.jetbrains.annotations.NotNull;
 
@@ -48,16 +49,17 @@ import java.util.logging.Logger;
  * @see FacetExerciseList#getPagerAndSort(ExerciseController)
  */
 public class DisplayMenu {
-  private static final int OPTIONS_WIDTH = 161;//85
   private final Logger logger = Logger.getLogger("DisplayMenu");
+
+  private static final int OPTIONS_WIDTH = 161;
 
   private static final String SHOW_CM_SIMPLIFIED = "Show CM Simplified";
   private static final String SHOW_CM_TRADITIONAL = "Show CM Traditional";
 
-  private static final String SHOW1 = "Show and Download";//"Options";
+  private static final String SHOW1 = "Show and Download";
   private static final String DOWNLOAD = "Download Content";
   private static final String SHOW_ALTERNATE_TEXT = "Show Alternate text";
-  private static final String SHOW_PRIMARY_TEXT = "Show Primary text";
+  // private static final String SHOW_PRIMARY_TEXT = "Show Primary text";
 
   /**
    * @see #getShowSounds
@@ -69,6 +71,7 @@ public class DisplayMenu {
    * @see DisplayMenu#storePhoneChoices
    */
   public static final String SHOW_PHONES = "showPhones";
+  public static final String SHOW_ENGLISH = "showEnglish";
 
   private static final IconType CHECK = IconType.CHECK;
 
@@ -103,10 +106,10 @@ public class DisplayMenu {
     view.setWidth(OPTIONS_WIDTH + "px");
 
     view.add(getShowSounds());
-    String toUse = isMandarin ? getPrimaryMandarinChoice() : SHOW_PRIMARY_TEXT;
+    view.add(getShowEnglish());
 
     if (isMandarin) {
-      NavLink primary = new NavLink(toUse);
+      NavLink primary = new NavLink(getPrimaryMandarinChoice());
       view.add(primary);
       view.add(flTextChoices(primary));
     }
@@ -140,6 +143,25 @@ public class DisplayMenu {
       fireShowEvent();
     });
     return phoneChoice;
+  }
+
+  private NavLink getShowEnglish() {
+    NavLink showEnglish = new NavLink("Show English");
+    if (getEnglishDisplay() == EnglishDisplayChoices.SHOW) {
+      showEnglish.setIcon(CHECK);
+    }
+
+    showEnglish.addClickHandler(event -> {
+      if (getEnglishDisplay() == EnglishDisplayChoices.SHOW) {
+        showEnglish.setIcon(null);
+        storeEnglishChoices(EnglishDisplayChoices.HIDE.toString());
+      } else {
+        showEnglish.setIcon(CHECK);
+        storeEnglishChoices(EnglishDisplayChoices.SHOW.toString());
+      }
+      fireShowEvent();
+    });
+    return showEnglish;
   }
 
   private NavLink flTextChoices(NavLink primary) {
@@ -217,9 +239,9 @@ public class DisplayMenu {
   }
 
   private boolean getStored(String show, boolean defaultVal) {
-    Boolean showFL = defaultVal;
+    boolean showFL = defaultVal;
     if (show != null) {
-      showFL = Boolean.valueOf(show);
+      showFL = Boolean.parseBoolean(show);
     }
     return showFL;
   }
@@ -229,8 +251,11 @@ public class DisplayMenu {
     storage.storeValue(SHOW_PHONES, toStore);
   }
 
+  private void storeEnglishChoices(String toStore) {
+    storage.storeValue(SHOW_ENGLISH, toStore);
+  }
+
   private void fireShowEvent() {
-//    LangTest.EVENT_BUS.fireEvent(new ShowEvent());
     showEventListener.gotShow();
   }
 
@@ -240,14 +265,30 @@ public class DisplayMenu {
    */
   @NotNull
   private PhonesChoices getPhonesDisplay() {
-    PhonesChoices choices = PhonesChoices.HIDE;
     String show = storage.getValue(SHOW_PHONES);
+
+    PhonesChoices choices = PhonesChoices.HIDE;
     if (show != null && !show.isEmpty()) {
       try {
         choices = PhonesChoices.valueOf(show);
         //   logger.info("getPhonesDisplay got " + choices);
       } catch (IllegalArgumentException ee) {
         logger.warning("getPhonesDisplay got " + ee);
+      }
+    }
+    return choices;
+  }
+
+  private EnglishDisplayChoices getEnglishDisplay() {
+    String show = storage.getValue(SHOW_ENGLISH);
+
+    EnglishDisplayChoices choices = EnglishDisplayChoices.SHOW;
+    if (show != null && !show.isEmpty()) {
+      try {
+        choices = EnglishDisplayChoices.valueOf(show);
+        //   logger.info("getPhonesDisplay got " + choices);
+      } catch (IllegalArgumentException ee) {
+        logger.warning("getEnglishDisplay got " + ee);
       }
     }
     return choices;
