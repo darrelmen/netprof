@@ -49,6 +49,7 @@ import static mitll.langtest.shared.user.Permission.*;
  */
 public interface INavigation extends IViewContaner {
   List<Permission> QC_PERMISSIONS = Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN);
+  List<Permission> QC_PERMISSIONS_PLUS_TEACHER = Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN, TEACHER_PERM);
 
   enum VIEWS {
     NONE("", EITHER),
@@ -105,8 +106,8 @@ public interface INavigation extends IViewContaner {
     /**
      * @see NewBanner#getDialogNav
      */
-    DIALOG_EDITOR("Dialog Editor", ProjectMode.DIALOG, QC_PERMISSIONS),
-    TURN_EDITOR("Turn Editor", ProjectMode.DIALOG, QC_PERMISSIONS);
+    DIALOG_EDITOR("Dialog Editor", ProjectMode.DIALOG, QC_PERMISSIONS_PLUS_TEACHER),
+    TURN_EDITOR("Turn Editor", ProjectMode.DIALOG, QC_PERMISSIONS_PLUS_TEACHER);
 
     private final List<Permission> perms;
     private final ProjectMode mode;

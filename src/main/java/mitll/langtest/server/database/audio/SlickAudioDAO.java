@@ -1026,7 +1026,7 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
 
       if (!exercise.hasRefAudio()) {
 //        logger.info("getNativeAudio trying to attach audio to " + exercise.getID());
-        attachAudioToExercise(exercise, language, idToMini, smallVocabDecoder, false);
+        attachAudioToExercise(exercise, language, idToMini, smallVocabDecoder, false, true);
       }
 
       AudioAttribute audioAttributePrefGender = exercise.getAudioAttributePrefGender(genderOfUser == Male, true);

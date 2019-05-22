@@ -184,7 +184,10 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       userPerms.retainAll(requiredPerms);
 
       if (userPerms.isEmpty() && !requiredPerms.isEmpty()) { // if no overlap, you don't have permission
-        logger.info("getCurrentView : user userPerms " + userPerms + " falling back to default view for (" + storedMode + ")");
+        logger.info("getCurrentView : no overlap of " +
+            "\n\tuser userPerms " + controller.getPermissions() +
+            "\n\trequired perms " + currentStoredView.getPerms() + " from " + currentStoredView +
+            " falling back to default view for (" + storedMode + ")");
         currentStoredView = hasStartup && storedMode == ProjectMode.DIALOG ? DIALOG : LEARN;
       } else /*if (!userPerms.isEmpty())*/ {
         if (hasStartup) {
@@ -833,7 +836,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
   /**
    * Do forward/back between DIALOG and LISTEN.
-   *
+   * <p>
    * TODO : add more views - STUDY, SCORE.
    *
    * @param event

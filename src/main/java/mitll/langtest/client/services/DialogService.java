@@ -60,6 +60,14 @@ public interface DialogService extends RemoteService {
    */
   ExerciseListWrapper<IDialog> getDialogs(ExerciseListRequest request) throws DominoSessionException;
 
+  /**
+   * @see mitll.langtest.client.dialog.ListenViewHelper#showContent
+   * @param id
+   * @return
+   * @throws DominoSessionException
+   */
+  IDialog getDialog(int id) throws DominoSessionException;
+
   IDialog addDialog(IDialog dialog) throws DominoSessionException;
 
   void update(IDialog dialog) throws DominoSessionException;
@@ -74,14 +82,6 @@ public interface DialogService extends RemoteService {
   boolean delete(int projid, int id) throws DominoSessionException;
 
   DialogExChangeResponse addEmptyExercises(int projid, int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException;
-
-  /**
-   * @see mitll.langtest.client.dialog.ListenViewHelper#showContent
-   * @param id
-   * @return
-   * @throws DominoSessionException
-   */
-  IDialog getDialog(int id) throws DominoSessionException;
 
   /**
    * @see RehearseViewHelper#setSession

@@ -473,6 +473,16 @@ public class DialogPopulate {
     return relatedExercises;
   }
 
+  /**
+   * @see #addDialogs(Project, Project, IDialogDAO, Map, int, DialogType, Map, boolean) 
+   * @param project
+   * @param projid
+   * @param exToAudio
+   * @param defaultUser
+   * @param now
+   * @param audioCheck
+   * @param allImportExToID
+   */
   private void addAudio(Project project,
                         int projid,
                         Map<ClientExercise, String> exToAudio,

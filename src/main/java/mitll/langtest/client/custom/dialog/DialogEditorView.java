@@ -121,6 +121,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
   /**
    * Unless you're an admin you can only see dialogs you made.
+   *
    * @param left
    */
   private void addYours(DivWidget left) {
@@ -221,7 +222,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
         listContent,
         "Done",
         null,
-        new MyShownCloseListener(editorTurnDialogEditor, selectedItem.getID()), 710, -1, true);
+        new MyShownCloseListener(editorTurnDialogEditor, selectedItem.getID()), 720, -1, true);
 
   }
 
@@ -297,8 +298,16 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   private String getListName() {
     T originalList = getCurrentSelectionFromMyLists();
     boolean hasDescrip = !originalList.getEnglish().isEmpty();
-    return originalList.getName() +
-        (hasDescrip ? " (" + originalList.getEnglish() + ")" : "");
+    int maxLengthId = 30;
+    return truncate(originalList.getName(), 35) +
+        (hasDescrip ? " (" + truncate(originalList.getEnglish(), maxLengthId) + ")" : "");
+  }
+
+
+  @NotNull
+  protected String truncate(String columnText, int maxLengthId) {
+    if (columnText.length() > maxLengthId) columnText = columnText.substring(0, maxLengthId - 3) + "...";
+    return columnText;
   }
 
   @Override

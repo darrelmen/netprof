@@ -724,17 +724,17 @@ public class ProjectChoices extends ThumbnailChoices {
   private void addPopoverUsual(FocusWidget button, SlimProject projectForLang) {
     // logger.info("addPopoverUsual " + projectForLang);
     Set<String> typeOrder = new HashSet<>(Collections.singletonList(COURSE));
-    UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
-    button.addMouseOverHandler(event -> showPopoverUsual(projectForLang.getCourse(), button, typeOrder, ClientExerciseUnitChapterItemHelper));
+    UnitChapterItemHelper<?> clientExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(typeOrder);
+    button.addMouseOverHandler(event -> showPopoverUsual(projectForLang.getCourse(), button, typeOrder, clientExerciseUnitChapterItemHelper));
   }
 
   private void showPopoverUsual(String course,
                                 Widget button,
                                 Set<String> typeOrder,
-                                UnitChapterItemHelper<?> ClientExerciseUnitChapterItemHelper) {
+                                UnitChapterItemHelper<?> clientExerciseUnitChapterItemHelper) {
     Map<String, String> value = new HashMap<>();
     value.put(COURSE, course);
-    showPopover(value, button, typeOrder, ClientExerciseUnitChapterItemHelper, Placement.RIGHT);
+    showPopover(value, button, typeOrder, clientExerciseUnitChapterItemHelper, Placement.RIGHT);
   }
 
   /**

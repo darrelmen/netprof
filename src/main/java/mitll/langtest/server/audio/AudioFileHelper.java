@@ -902,6 +902,7 @@ public class AudioFileHelper implements AlignDecode {
     }
   }
 
+/*
   private void dumpFD(String message) {
     OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
     if (os instanceof UnixOperatingSystemMXBean) {
@@ -909,6 +910,7 @@ public class AudioFileHelper implements AlignDecode {
           ") Number of open fd: " + ((UnixOperatingSystemMXBean) os).getOpenFileDescriptorCount());
     }
   }
+*/
 
   private long getFD() {
     OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();

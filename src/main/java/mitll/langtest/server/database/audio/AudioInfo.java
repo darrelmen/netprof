@@ -49,6 +49,8 @@ public class AudioInfo {
   private final float dnr;
   private final int gender;
   private final boolean hasProjectSpecificAudio;
+  private boolean useUserIDInUpdateCheck;
+
 
   /**
    * @see BaseAudioDAO#addOrUpdateUser(int, int, AudioAttribute)

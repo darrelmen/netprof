@@ -231,7 +231,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     {
       FluidRow row = new FluidRow();
       child.add(row);
-      addTitle(row);
+      titleBox = addTitle(row);
     }
 
     addDescription(child);
@@ -372,8 +372,8 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     Scheduler.get().scheduleDeferred(() -> titleBox.box.setFocus(true));
   }
 
-  private void addTitle(FluidRow row) {
-    titleBox = addControlFormField(row, "", "");
+  protected FormField addTitle(FluidRow row) {
+    FormField titleBox = addControlFormField(row, "", "", getMaxTitleLength(),getTitleWidth());
     titleBox.getWidget().getElement().getStyle().setMarginTop(10, Style.Unit.PX);
 
     final TextBoxBase box = titleBox.box;
@@ -382,6 +382,15 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     box.getElement().setId("CreateListDialog_Title");
     box.addKeyUpHandler(this::checkEnter);
     box.addBlurHandler(event -> controller.logEvent(box, TEXT_BOX, CREATE_NEW_LIST, "Title = " + box.getValue()));
+    return titleBox;
+  }
+
+  protected int getTitleWidth() {
+    return -1;
+  }
+
+  protected int getMaxTitleLength() {
+    return 30;
   }
 
   protected void addDescription(Panel child) {
@@ -491,7 +500,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
         grid.setWidget(row, col++, getLabel(type));
       }
 
-     // logger.info("invoke unit " + unit + " chapter " + chapter);
+      // logger.info("invoke unit " + unit + " chapter " + chapter);
 
       row++;
       col = 0;
@@ -526,7 +535,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
           first = false;
         }
         int i1 = typeOrder.indexOf(type);
-       // logger.info("For " + type + " : " + i1);
+        // logger.info("For " + type + " : " + i1);
 
         if (unit != null && i1 == 0) {
           listBox.setSelectedValue(unit);
@@ -537,7 +546,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
       if (chapter != null && typeOrder.size() > 1) {
         String type = typeOrder.get(0);
         gotChangeFor(type, allUnitChapter.get(0), all, addAll, () -> {
-        //  logger.info("OK, type->values done for " + type);
+          //  logger.info("OK, type->values done for " + type);
           setChapter(chapter, allUnitChapter.get(1));
         });
       }
@@ -548,6 +557,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
 
   /**
    * Gotta wait until type->values has come back.
+   *
    * @param chapter
    * @param listBox
    */

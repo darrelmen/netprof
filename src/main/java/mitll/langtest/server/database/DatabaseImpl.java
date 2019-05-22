@@ -1799,7 +1799,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       for (CommonExercise ex : copyAsExercises) {
         userListManager.addAnnotations(ex);
         if (smallVocabDecoder != null) {
-          int i = getAudioDAO().attachAudioToExercise(ex, language, idToMini, smallVocabDecoder,false);
+          int i = getAudioDAO().attachAudioToExercise(ex, language, idToMini, smallVocabDecoder,false, true);
 
           if (DEBUG_AUDIO_EXPORT) {
             logger.info("doAudioExport attached " + i + " cuts to " + ex.getID());
@@ -1825,6 +1825,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   /**
    * TODO : Expensive ?
+   * TODO : thread collision waiting to happen here.
    *
    * @param projectid
    * @see #getJSONExport

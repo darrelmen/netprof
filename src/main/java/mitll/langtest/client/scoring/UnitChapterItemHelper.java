@@ -246,7 +246,8 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
       String subtext = unitToValue.get(type);
       // logger.info("type " + type + " = " + subtext);
       if (subtext != null && !subtext.isEmpty()) {
-        builder.append(getTypeAndValue(type, subtext));
+        String subtext1 = truncate(subtext,25);
+        builder.append(getTypeAndValue(type, subtext1));
       }
     }
     if (id > 0) {
@@ -265,6 +266,12 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
       builder.append(getTypeAndValue(TIME, updateTime));
     }
     return builder.toString();
+  }
+
+  @NotNull
+  protected String truncate(String columnText, int maxLengthId) {
+    if (columnText.length() > maxLengthId) columnText = columnText.substring(0, maxLengthId - 3) + "...";
+    return columnText;
   }
 
   @NotNull

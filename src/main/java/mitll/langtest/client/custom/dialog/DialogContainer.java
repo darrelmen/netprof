@@ -70,10 +70,11 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
     addID(list);
     addUnit(list, 10);
     addChapter(list, 10);
-    addItemID(list, getMaxLengthId());
+    int maxLengthId = getMaxLengthId();
+    addItemID(list, maxLengthId);
 
-    addEnglish(list, 50);
-    addOrientation(list, 50);
+    addEnglish(list, maxLengthId); //50
+    addOrientation(list, maxLengthId);
 
     Column<T, SafeHtml> tSafeHtmlColumn = addDateCol(list);
 
@@ -303,7 +304,7 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
   }
 
   protected int getMaxLengthId() {
-    return 100;
+    return 30;
   }
 
   @Override

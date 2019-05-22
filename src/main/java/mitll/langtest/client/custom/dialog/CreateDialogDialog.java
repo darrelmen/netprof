@@ -32,6 +32,7 @@ package mitll.langtest.client.custom.dialog;
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.ListBox;
+import com.github.gwtbootstrap.client.ui.base.TextBox;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
@@ -82,6 +83,22 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     super(null, names, false, controller, listView);
   }
 
+  @Override
+  protected FormField addTitle(FluidRow row) {
+    FormField formField = super.addTitle(row);
+    // formField.getWidget().setWidth("300px");
+    // ((TextBox)formField.box).setVisibleLength(40);
+    return formField;
+  }
+
+  @Override
+  protected int getMaxTitleLength() {
+    return 35;
+  }
+
+  protected int getTitleWidth() {
+    return 325;
+  }
 
   /**
    * add en title
@@ -146,12 +163,12 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
   protected void addDescription(Panel child) {
     FluidRow row = new FluidRow();
     child.add(row);
-    addEnTitle(row);
+    entitleBox = addEnTitle(row);
     super.addDescription(child);
   }
 
-  private void addEnTitle(FluidRow row) {
-    entitleBox = addControlFormField(row, "", "");
+  private FormField addEnTitle(FluidRow row) {
+    FormField entitleBox = addControlFormField(row, "", "", getMaxTitleLength(), getTitleWidth());
     //   entitleBox.getWidget().getElement().getStyle().setMarginTop(10, Style.Unit.PX);
 
     final TextBoxBase box = entitleBox.box;
@@ -162,6 +179,8 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     box.getElement().setId("En_Title");
     box.addKeyUpHandler(this::checkEnter);
     box.addBlurHandler(event -> controller.logEvent(box, TEXT_BOX, CREATE_NEW_LIST, "English Title = " + box.getValue()));
+
+    return entitleBox;
   }
 
   @Override

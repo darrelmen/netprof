@@ -71,11 +71,16 @@ public class BasicDialog {
     return addControlFormField(dialogBox, label, false, 0, 30, -1, hint);
   }
 
+  protected FormField addControlFormField(Panel dialogBox, String label, String hint, int maxLength,int optWidth) {
+    return addControlFormField(dialogBox, label, false, 0, maxLength, optWidth, hint);
+  }
+
   private FormField addControlFormField(Panel dialogBox, String label, boolean isPassword,
                                         int minLength, int maxLength, int optWidth, String hint) {
     final TextBox user = isPassword ? new PasswordTextBox() : new TextBox();
     if (optWidth > 0) user.setWidth(optWidth + "px");
     user.setMaxLength(maxLength);
+    user.setVisibleLength(maxLength);
     return getSimpleFormField(dialogBox, label, user, minLength, hint);
   }
 

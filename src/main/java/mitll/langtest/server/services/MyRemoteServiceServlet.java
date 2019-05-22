@@ -65,7 +65,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.UnknownHostException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.project.Project.MANDARIN;
 
@@ -576,9 +575,10 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
         dialog.getExercises().forEach(clientExercise ->
             db.getAudioDAO()
                 .attachAudioToExercise(clientExercise, language, new HashMap<>(),
-                    project.getAudioFileHelper().getSmallVocabDecoder(), true)
+                    project.getAudioFileHelper().getSmallVocabDecoder(), true, false)
         );
 
+        // sanity check...
         dialog.getExercises().forEach(clientExercise -> {
               AudioAttribute latestAudio = getLatestAudio(clientExercise);
               String info = latestAudio == null ? "" : latestAudio.getUniqueID() + " : " + latestAudio.getTranscript() + " : " + latestAudio.getAudioRef();
