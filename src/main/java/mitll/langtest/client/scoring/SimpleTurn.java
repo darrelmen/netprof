@@ -37,26 +37,34 @@ import mitll.langtest.shared.exercise.ClientExercise;
 
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.MIDDLE;
-
 public class SimpleTurn extends DivWidget implements ISimpleTurn {
   private final Logger logger = Logger.getLogger("SimpleTurn");
 
   private ClientExercise exercise;
   private TurnPanelDelegate turnPanelDelegate;
-  private ITurnContainer.COLUMNS columns;
+  //private ITurnContainer.COLUMNS columns;
 
   public SimpleTurn(ClientExercise exercise, ITurnContainer.COLUMNS columns, boolean rightJustify) {
     this.exercise = exercise;
-    this.columns = columns;
+   // this.columns = columns;
     turnPanelDelegate = new TurnPanelDelegate(exercise, this, columns, rightJustify);
+
+//    if (columns == MIDDLE) {
+//      if (exercise.hasEnglishAttr()) {
+//        addStyleName("floatRight");
+//      } else {
+//        addStyleName("floatRight");
+//        getElement().getStyle().setClear(Style.Clear.BOTH);
+//      }
+//    }
   }
 
   private void styleMe(DivWidget wrapper) {
     turnPanelDelegate.styleMe(wrapper);
-    if (columns == MIDDLE) {
-      wrapper.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
-    }
+//    if (columns == MIDDLE) {
+//      wrapper.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
+//    }
+
   }
 
   @Override
@@ -74,7 +82,7 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn {
     HTML html = new HTML(exercise.getForeignLanguage());
     html.addStyleName("flfont");
     html.getElement().getStyle().setPadding(10, Style.Unit.PX);
-  //  logger.info("got " + exercise.getForeignLanguage());
+    //  logger.info("got " + exercise.getForeignLanguage());
     DivWidget widgets = new DivWidget();
     widgets.add(html);
     styleMe(widgets);

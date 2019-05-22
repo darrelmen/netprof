@@ -30,6 +30,7 @@
 package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -37,10 +38,13 @@ import mitll.langtest.client.scoring.IFocusable;
 import mitll.langtest.client.scoring.SimpleTurn;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.Exercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.stream.Collectors;
+
+import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
 
 public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocusable {
   private final boolean isInModal;
@@ -51,6 +55,11 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
     isInModal = theDialog != null;
   }
 
+  @NotNull
+  protected INavigation.VIEWS getNextView() {
+    return LISTEN;
+  }
+
   @Override
   protected void addDialogHeader(IDialog dialog, Panel child) {
     child.add(dialogHeader =
@@ -58,13 +67,31 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
             INavigation.VIEWS.CORE_EDITOR, isInModal ? null : getPrevView(), isInModal ? null : getNextView()).getHeader(dialog));
   }
 
-  protected void addControls(DivWidget controlAndSpeakers) {
+  @NotNull
+  protected DivWidget getTurns(IDialog dialog) {
+    DivWidget turns = super.getTurns(dialog);
+    DivWidget leftRight = new DivWidget();
+    leftRight.setWidth("100%");
+    leftRight.addStyleName("inlineFlex");
+
+    leftRight.add(turns);
+    turns.setWidth("60%");
+    DivWidget right = new DivWidget();
+    right.setWidth("40%");
+    styleTurnContainer(right);
+
+    leftRight.add(right);
+    dialog.getCoreVocabulary().forEach(vocab -> {
+      right.add(new MySimpleTurn(vocab));
+    });
+    if (dialog.getCoreVocabulary().isEmpty()) {
+      right.add(new SimpleTurn(new Exercise(), ITurnContainer.COLUMNS.RIGHT, false));
+
+    }
+    return leftRight;
   }
 
-  @NotNull
-  @Override
-  protected SimpleTurn reallyGetTurnPanel(ClientExercise clientExercise, ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
-    return new SimpleTurn(clientExercise, columns, false);
+  protected void addControls(DivWidget controlAndSpeakers) {
   }
 
   @Override
@@ -86,5 +113,31 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
     exercises = exercises.stream().filter(exercise ->
         !exercise.hasEnglishAttr() && !exercise.getForeignLanguage().isEmpty()).collect(Collectors.toList());
     addTurnForEachExercise(rowOne, left, right, exercises);
+  }
+
+  @NotNull
+  @Override
+  protected SimpleTurn reallyGetTurnPanel(ClientExercise clientExercise, ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
+    return new SimpleTurn(clientExercise, columns, false);
+  }
+
+  private static class MySimpleTurn extends SimpleTurn {
+    public MySimpleTurn(ClientExercise vocab) {
+      super(vocab, ITurnContainer.COLUMNS.RIGHT, false);
+    }
+
+    /**
+     * TODO : use EditableTurnHelper to do text box and events
+     *
+     * @return
+     */
+    @NotNull
+    private DivWidget getTextBox() {
+      DivWidget textBoxContainer = new DivWidget();
+      textBoxContainer.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+      //textBoxContainer.add(contentTextBox = addTextBox());
+      // textBoxContainer.add(getTurnFeedback());
+      return textBoxContainer;
+    }
   }
 }

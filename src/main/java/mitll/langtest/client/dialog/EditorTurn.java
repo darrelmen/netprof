@@ -65,13 +65,10 @@ import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.MIDDLE;
 import static mitll.langtest.client.dialog.TurnViewHelper.SPEAKER_A;
 import static mitll.langtest.client.dialog.TurnViewHelper.SPEAKER_B;
 
-//import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_A;
-//import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_B;
-
 /**
  *
  */
-public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IRehearseView, IRecordingTurnPanel {
+public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IRehearseView, IRecordingTurnPanel, IFocusListener {
   private final Logger logger = Logger.getLogger("EditorTurn");
 
   private static final int TURN_WIDTH = 97;
@@ -274,7 +271,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       playAudioPanel.showPlayButton();
 
       Widget playButton = playAudioPanel.getPlayButton();
-      ((Focusable) playButton).setTabIndex(-1);
+      removeFromTabSequence((Focusable) playButton);
 
       buttonContainer.add(playButton);
       playButton.addStyleName("floatRight");
@@ -285,15 +282,10 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     wrapper.add(buttonContainer);
 
     addPressAndHoldStyleForRecordButton(postAudioRecordButton);
-    ((Focusable) postAudioRecordButton).setTabIndex(-1);
+    removeFromTabSequence(postAudioRecordButton);
 
-    DivWidget textBoxContainer = new DivWidget();
-    textBoxContainer.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
-    textBoxContainer.add(contentTextBox = addTextBox());
+    wrapper.add(getTextBox());
 
-    wrapper.add(textBoxContainer);
-
-    textBoxContainer.add(getTurnFeedback());
 
     styleMe(wrapper);
     wrapper.addStyleName("inlineFlex");
@@ -306,6 +298,19 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       addOtherTurn();
     }
     return wrapper;
+  }
+
+  private void removeFromTabSequence(Focusable postAudioRecordButton) {
+    postAudioRecordButton.setTabIndex(-1);
+  }
+
+  @NotNull
+  protected DivWidget getTextBox() {
+    DivWidget textBoxContainer = new DivWidget();
+    textBoxContainer.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+    textBoxContainer.add(contentTextBox = addTextBox());
+    textBoxContainer.add(getTurnFeedback());
+    return textBoxContainer;
   }
 
   private AudioAttribute getLatestAudio() {
@@ -439,7 +444,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   private void tripleButtonStyle(Button w) {
     tripleFirstStyle(w);
     //   w.addFocusHandler(event -> turnContainer.moveFocusToNext());
-    w.setTabIndex(-1);
+    removeFromTabSequence(w);
 //    logger.info("aftr " + getExID() + " " + w.getTabIndex());
   }
 
@@ -482,7 +487,6 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     style.setHeight(19, Style.Unit.PX);
   }
 
-
   /**
    * @param wrapper
    * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
@@ -516,10 +520,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     w.addStyleName("topFiveMargin");
 
     return w;
-
   }
 
-  private void gotFocus() {
+  public void gotFocus() {
     if (DEBUG) {
       logger.info("gotFocus " + getExID());
     }
@@ -532,12 +535,11 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
    *
    * @param event
    */
-  private void gotKey(KeyUpEvent event) {
+  public void gotKey(KeyUpEvent event) {
     NativeEvent ne = event.getNativeEvent();
-    int keyCode = ne.getKeyCode();
-    boolean isEnter = keyCode == KeyCodes.KEY_ENTER;
+
     String s = SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
-    if (isEnter) {
+    if (ne.getKeyCode() == KeyCodes.KEY_ENTER) {
       ne.preventDefault();
       ne.stopPropagation();
 
@@ -572,31 +574,15 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
    * Tell container we lost the focus so we can maybe pre-empt the natural sequence and move
    * it to the first turn.
    */
-  private void gotBlur() {
+  public void gotBlur() {
     turnContainer.gotBlur(this);
     String s = SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
     if (s.equals(prev)) {
       if (DEBUG) logger.info("gotBlur " + getExID() + " skip unchanged " + prev);
     } else {
       prev = s;
-
       int audioID = getAudioID();
       if (DEBUG || true) logger.info("gotBlur " + getExID() + " = " + prev + " audio " + audioID);
-
-//      controller.getExerciseService().updateText(projid, dialogID, getExID(), audioID, s, new AsyncCallback<OOVWordsAndUpdate>() {
-//        @Override
-//        public void onFailure(Throwable caught) {
-//          controller.handleNonFatalError("updating text...", caught);
-//        }
-//
-//        @Override
-//        public void onSuccess(OOVWordsAndUpdate result) {
-//          showOOVResult(result);
-//          //logger.info("OK, update was " + result);
-//        }
-//      });
-
-
       updateText(s, this, audioID, false);
     }
   }

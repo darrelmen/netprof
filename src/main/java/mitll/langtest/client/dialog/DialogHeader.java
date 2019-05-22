@@ -392,8 +392,12 @@ public class DialogHeader {
       buttonDiv.add(rightButton);
     }
 
-    if (shouldShowDialogEditor(mine) && thisView == LISTEN) {
+    boolean b = shouldShowDialogEditor(mine);
+    if (b && thisView == LISTEN) {
       buttonDiv.add(getTurnEditor());
+    }
+    if (b && thisView == TURN_EDITOR) {
+      buttonDiv.add(getEditorButton(CORE_EDITOR));
     }
 
     if (thisView == LISTEN || thisView == TURN_EDITOR) {
@@ -416,8 +420,13 @@ public class DialogHeader {
 
   @NotNull
   private Button getTurnEditor() {
-    Button editButton = new Button(getCapitalized(TURN_EDITOR.toString()), IconType.ARROW_RIGHT, event -> controller.getNavigation().show(TURN_EDITOR));
-    new TooltipHelper().createAddTooltip(editButton, "Go to "+TURN_EDITOR.toString(), Placement.LEFT);
+    return getEditorButton(TURN_EDITOR);
+  }
+
+  @NotNull
+  private Button getEditorButton(INavigation.VIEWS turnEditor) {
+    Button editButton = new Button(getCapitalized(turnEditor.toString()), IconType.ARROW_RIGHT, event -> controller.getNavigation().show(turnEditor));
+    new TooltipHelper().createAddTooltip(editButton, "Go to " + turnEditor.toString(), Placement.LEFT);
     styleButton(editButton);
     editButton.addStyleName("floatRight");
     editButton.addStyleName("topFiftyMargin");

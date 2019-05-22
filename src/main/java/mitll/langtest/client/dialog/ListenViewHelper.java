@@ -483,7 +483,6 @@ public class ListenViewHelper<T extends ITurnPanel>
         if (DEBUG_BLUR) logger.info("gotBlur ignore blur of " + widgets.getExID());
 
       } else {
-
 //        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("gotBlur"));
 //        logger.info("logException stack " + exceptionAsString);
 
@@ -491,7 +490,6 @@ public class ListenViewHelper<T extends ITurnPanel>
           logger.info("gotBlur got blur of '" + widgets.getText() +
               " : " + widgets.isDeleting());
         }
-
 
         moveFocusToNext();
       }
