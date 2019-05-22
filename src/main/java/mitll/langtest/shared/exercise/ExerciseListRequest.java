@@ -378,12 +378,18 @@ public class ExerciseListRequest implements IsSerializable, IRequest {
     return this;
   }
 
+  public ExerciseListRequest setProjID(int projectID) {
+    this.projID = projectID;
+    return this;
+  }
+
   /**
    * @return
    */
   public String toString() {
     return
         "req #" + getReqID() + " " +
+            (projID == -1 ? "" : "\n\tprojID                  '" + projID + "'") +
             (limit == -1 ? "" : "\n\tlimit                  '" + limit + "'") +
             (prefix.isEmpty() ? "" : "\n\tprefix                  '" + prefix + "'") +
             (getTypeToSelection().isEmpty() ? "" : "\n\tselection           " + getTypeToSelection()) +

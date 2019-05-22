@@ -654,19 +654,19 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
   }
 
   /**
-   * @param userIDFromSessionOrDB
+   * @param projid
    * @return
-   * @see DialogServiceImpl#getDialogs(int)
+   * @see MyRemoteServiceServlet#getDialogs(int)
    */
-  protected Collection<IDialog> getDialogs(int userIDFromSessionOrDB) {
-    int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
-    if (projectIDFromUser == -1) {
-      logger.warn("getDialogs: no project id?");
-    }
-    return getDialogsForProject(projectIDFromUser);
-  }
+//  protected Collection<IDialog> getDialogs(int projid) {
+////    int projectIDFromUser = getProjectIDFromUser(userIDFromSessionOrDB);
+////    if (projectIDFromUser == -1) {
+////      logger.warn("getDialogs: no project id?");
+////    }
+//    return getDialogsForProject(projid);
+//  }
 
-  private Collection<IDialog> getDialogsForProject(int projectIDFromUser) {
+  protected Collection<IDialog> getDialogs(int projectIDFromUser) {
     Collection<IDialog> dialogList = new ArrayList<>();
     {
       if (projectIDFromUser != -1) {

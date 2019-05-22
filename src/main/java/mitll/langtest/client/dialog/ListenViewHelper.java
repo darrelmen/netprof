@@ -92,11 +92,6 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   private static final String MIDDLE_COLOR = "#00800059";
 
-  T getTurnByID(int exid) {
-    List<T> collect = allTurns.stream().filter(turn -> turn.getExID() == exid).collect(Collectors.toList());
-    return collect.isEmpty() ? null : collect.get(0);
-  }
-
   public enum COLUMNS {LEFT, MIDDLE, RIGHT, UNK}
 
   private static final String VALUE = "value";
@@ -154,7 +149,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   private static final boolean DEBUG_BLUR = true;
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_NEXT = false;
-  private static final boolean DEBUG_PLAY = false;
+  private static final boolean DEBUG_PLAY = true;
 
   /**
    * @param controller
@@ -524,28 +519,6 @@ public class ListenViewHelper<T extends ITurnPanel>
     styleLabel(checkBox);
   }
 
-  /**
-   * @param checkBox
-   * @return
-   */
-//  @NotNull
-//  DivWidget getLeftSpeakerDiv(CheckBox checkBox) {
-//    DivWidget rightDiv = new DivWidget();
-//    rightDiv.add(checkBox);
-//    return rightDiv;
-//  }
-
-//  CheckBox addRightSpeaker(DivWidget rowOne, String label) {
-//    CheckBox checkBox = new CheckBox(label, true);
-//
-//    // setRightTurnInitialValue(checkBox);
-//    styleRightSpeaker(checkBox);
-//
-//    //   checkBox.addValueChangeHandler(event -> speakerTwoCheck(event.getValue()));
-//
-//    rowOne.add(getRightSpeakerDiv(checkBox));
-//    return checkBox;
-//  }
   private void styleRightSpeaker(UIObject checkBox) {
     styleLabel(checkBox);
   }
@@ -553,14 +526,6 @@ public class ListenViewHelper<T extends ITurnPanel>
   private void styleLabel(UIObject checkBox) {
     checkBox.getElement().getStyle().setFontSize(32, PX);
   }
-
-//  @NotNull
-//  DivWidget getRightSpeakerDiv(CheckBox checkBox) {
-//    DivWidget rightDiv = new DivWidget();
-//    rightDiv.add(checkBox);
-//    return rightDiv;
-//  }
-
 
   DivWidget turnContainer;
 
@@ -576,9 +541,6 @@ public class ListenViewHelper<T extends ITurnPanel>
       @Override
       protected void onUnload() {
         super.onUnload();
-
-       // logger.info("getTurns : on unload");
-
         outer.onUnload();
       }
     };
@@ -679,7 +641,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @param index
    * @see #addTurnForEachExercise(DivWidget, String, String, List)
    */
-   T addTurn(DivWidget rowOne, ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
+  T addTurn(DivWidget rowOne, ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
     T turn = getTurnPanel(clientExercise, columns, prevColumn, index);
 
     allTurns.add(index, turn);
@@ -749,6 +711,16 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
 
     return newCurrentTurn;
+  }
+
+  /**
+   * @see DialogEditor#getNextTurn(int)
+   * @param exid
+   * @return
+   */
+  T getTurnByID(int exid) {
+    List<T> collect = allTurns.stream().filter(turn -> turn.getExID() == exid).collect(Collectors.toList());
+    return collect.isEmpty() ? null : collect.get(0);
   }
 
   void removeFromContainer(T toRemove) {
@@ -1548,10 +1520,9 @@ public class ListenViewHelper<T extends ITurnPanel>
   void setPlayButtonToPlay() {
     getPlayButtonToUse().setIcon(IconType.PLAY);
     sessionGoingNow = false;
-
-    if (currentTurn != null && currentTurn.isPlaying()) {
-      currentTurn.doPause();
-    }
+//    if (currentTurn != null && currentTurn.isPlaying()) {
+//      currentTurn.doPause();
+//    }
   }
 
   private boolean sessionGoingNow;

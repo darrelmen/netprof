@@ -99,6 +99,10 @@ public class DialogPopulate {
    */
   boolean addDialogInfo(Project project) {
     List<IDialog> dialogs1 = db.getDialogDAO().getDialogs(project.getID());
+    return addDialog(project, dialogs1);
+  }
+
+  private boolean addDialog(Project project, List<IDialog> dialogs1) {
     if (dialogs1.isEmpty()) {
       logger.info("addDialogInfo no dialog info yet loaded for " + project);
       return false;
@@ -115,14 +119,7 @@ public class DialogPopulate {
    * @return
    */
   boolean addDialogInfo(Project project, int dialogID) {
-    List<IDialog> dialogs1 = db.getDialogDAO().getOneDialog(dialogID);
-    if (dialogs1.isEmpty()) {
-      logger.info("addDialogInfo no dialog info yet loaded for " + project);
-      return false;
-    } else {
-      project.setDialogs(dialogs1);
-      return true;
-    }
+    return addDialog(project, db.getDialogDAO().getOneDialog(dialogID));
   }
 
   /**

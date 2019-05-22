@@ -128,6 +128,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     showYours(Collections.emptyList(), left);
 
     int user = controller.getUser();
+    logger.info("addYours project " +controller.getProjectID());
     ExerciseListRequest request =
         new ExerciseListRequest(0, user, controller.getProjectID()).setSortByDate(true);
 

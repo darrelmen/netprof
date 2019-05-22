@@ -171,7 +171,7 @@ public class ProjectChoices extends ThumbnailChoices {
 
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_CLICK = true;
+  private static final boolean DEBUG_CLICK = false;
 
   /**
    * @param langTest
@@ -864,7 +864,7 @@ public class ProjectChoices extends ThumbnailChoices {
 //      }
 
       if (admin && !didSpew) {
-        logger.info("isOwnerOrAdmin : " + controller.getUserManager().getUserID() + " is an admin");
+       if (DEBUG) logger.info("isOwnerOrAdmin : " + controller.getUserManager().getUserID() + " is an admin");
         didSpew = true;
       }
     }

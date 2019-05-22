@@ -493,8 +493,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
                 logger.info("addExercises (" + dialogID + ") child - " +
                     "\n\tex #   " + childExOrig.getID() +
                     "\n\tfl     '" + childExOrig.getForeignLanguage() + "'" +
-                    "\n\ttokens " + childExOrig.getTokens() +
-
+                    //"\n\ttokens " + childExOrig.getTokens() +
                     "\n\tattr   " + childExOrig.getAttributes()
                 );
               }

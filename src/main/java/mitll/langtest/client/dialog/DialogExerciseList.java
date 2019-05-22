@@ -63,9 +63,10 @@ import java.util.stream.Collectors;
  * A facet list display of dialogs.
  */
 public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
+  private final Logger logger = Logger.getLogger("DialogExerciseList");
+
   public static final String INTERP_COLOR = "#f0fff7";
   public static final String ENGLISH = "english";
-  private final Logger logger = Logger.getLogger("DialogExerciseList");
 
   /**
    * Gah - doesn't really work very well as me make the window narrower or wider
@@ -121,15 +122,22 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     }
   }
 
+  /**
+   * @param typeToSection
+   * @param prefix
+   * @param exerciseID
+   * @param request
+   */
   protected void getExerciseIDs(Map<String, Collection<String>> typeToSection,
                                 String prefix,
                                 int exerciseID,
                                 ExerciseListRequest request) {
     waitCursorHelper.scheduleWaitTimer();
-/*
+
     logger.info("getExerciseIDs " +
         "\n\trequest " + request +
-        "\n\t ex     " + exerciseID + " type " + typeToSection);*/
+        "\n\t ex     " + exerciseID + " type " + typeToSection);
+
     if (controller.getUser() > 0) {
       controller.getDialogService().getDialogs(request,
           new SetExercisesCallback("" + "_" + typeToSection.toString(), prefix, exerciseID, request));
@@ -139,10 +147,24 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private Map<Integer, CorrectAndScore> scoreHistoryPerExercise;
 
   @Override
-  protected void getFullExercises(Collection<Integer> visibleIDs, int currentReq,
-                                  Collection<Integer> requested, List<IDialog> alreadyFetched) {
-    //  logger.info("getFullExercises " + visibleIDs);
-    controller.getDialogService().getDialogs(new ExerciseListRequest(),
+  protected void setScores(ExerciseListWrapper<IDialog> result) {
+    super.setScores(result);
+    scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
+  }
+
+  @Override
+  protected void getFullExercises(Collection<Integer> visibleIDs,
+                                  int currentReq,
+                                  Collection<Integer> requested,
+                                  List<IDialog> alreadyFetched) {
+//    logger.info("getFullExercises " + visibleIDs);
+//    logger.info("getFullExercises " + requested);
+//    logger.info("getFullExercises " + alreadyFetched.size());
+//    logger.info("getFullExercises " + getInOrder().size());
+
+    showDialogs(visibleIDs, getInOrder());
+
+   /* controller.getDialogService().getDialogs(new ExerciseListRequest(1, controller.getUser(), controller.getProjectID()),
         new AsyncCallback<ExerciseListWrapper<IDialog>>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -151,13 +173,22 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
           @Override
           public void onSuccess(ExerciseListWrapper<IDialog> result) {
-            List<IDialog> toShow = result.getExercises().stream().filter(iDialog -> visibleIDs.contains(iDialog.getID())).collect(Collectors.toList());
-            scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
-
-            sortDialogs(toShow, visibleIDs);
-            showExercisesForCurrentReq(toShow, incrReq());
+            showDialogs(result, visibleIDs);
           }
-        });
+        });*/
+  }
+/*
+  private void showDialogs(ExerciseListWrapper<IDialog> result, Collection<Integer> visibleIDs) {
+    List<IDialog> exercises = result.getExercises();
+    showDialogs(visibleIDs, exercises);
+  }*/
+
+  private void showDialogs(Collection<Integer> visibleIDs, List<IDialog> exercises) {
+    List<IDialog> toShow = exercises.stream().filter(iDialog -> visibleIDs.contains(iDialog.getID())).collect(Collectors.toList());
+    //scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
+
+    sortDialogs(toShow, visibleIDs);
+    showExercisesForCurrentReq(toShow, incrReq());
   }
 
   private void sortDialogs(List<IDialog> toShow, Collection<Integer> visibleIDs) {

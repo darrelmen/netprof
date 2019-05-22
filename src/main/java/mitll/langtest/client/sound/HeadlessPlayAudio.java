@@ -129,7 +129,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    */
   @Override
   public boolean doPlayPauseToggle() {
-    if (DEBUG_PLAY)  logger.info("PlayAudioPanel doPlayPauseToggle " + playing + " " + currentPath);
+    if (DEBUG_PLAY) logger.info("PlayAudioPanel doPlayPauseToggle " + playing + " " + currentPath);
 
     if (hasSound()) {
       if (isPlaying()) {
@@ -173,10 +173,10 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   }
 
   /**
+   * @return true if paused
    * @see PlayAudioExercisePanel#doPause
    * @see #cleanUp()
    * @see #loadAudio(String)
-   * @return true if paused
    */
   @Override
   public boolean doPause() {
@@ -268,6 +268,10 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    */
   protected void pause() {
     if (DEBUG_PLAY) logger.info("HeadlessPlayAudioPanel :pause");
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pause " + currentPath));
+//    logger.info("logException stack " + exceptionAsString);
+
     markNotPlaying();
 
     if (soundManager != null) {
@@ -561,7 +565,7 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
 //      logger.info("no listener for song loaded " + duration);
 //    }
     // setEnabled(true);
-    if (DEBUG_DETAIL) logger.info("song loaded : reinit");
+    if (DEBUG_DETAIL) logger.info("HeadlessPlayAudio songLoaded");
     reinitialize();
   }
 
@@ -610,6 +614,9 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
   }
 
   private void markPlaying() {
+    if (DEBUG_DETAIL) {
+      logger.info("HeadlessPlayAudio markPlaying : playing now = " + isPlaying() + " path " + currentPath);
+    }
     playing = true;
   }
 
@@ -617,6 +624,9 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
    * @see #pause
    */
   private void markNotPlaying() {
+    if (DEBUG_DETAIL) {
+      logger.info("HeadlessPlayAudio markNotPlaying : playing now = " + isPlaying() + " path " + currentPath);
+    }
     playing = false;
   }
 

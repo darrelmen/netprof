@@ -881,8 +881,17 @@ public class Project implements IPronunciationLookup, IProject {
    * @see DialogPopulate#addDialogInfo
    */
   public void setDialogs(List<IDialog> dialogs) {
+    // precondition - sanity check
+    dialogs.forEach(dialog -> {
+      if (dialog.getProjid() != getID()) {
+        logger.error("setDialogs huh? dialog " + dialog.getID() + " project = " + dialog.getProjid() + " vs expected " + getID(), new IllegalArgumentException("huh?"));
+      }
+    });
+
+
     dialogs.forEach(dialog -> idToDialog.put(dialog.getID(), dialog));
-    // this.dialogs = dialogs;
+
+
     createDialogSectionHelper(idToDialog.values());
   }
 

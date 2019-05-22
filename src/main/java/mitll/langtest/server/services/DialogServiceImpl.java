@@ -76,7 +76,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    * @param request
    * @return
    * @throws DominoSessionException
-   * @see mitll.langtest.client.banner.DialogExerciseList#getExerciseIDs(Map, String, int, ExerciseListRequest)
+   * @see mitll.langtest.client.dialog.DialogExerciseList#getExerciseIDs(Map, String, int, ExerciseListRequest)
    * @see ExerciseListRequest#getPrefix()
    */
   @Override
@@ -92,7 +92,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
 
       if (userIDFromSessionOrDB != -1) {
-        List<IDialog> dialogList = getDialogsForRequest(request, sectionHelper, userIDFromSessionOrDB);
+        List<IDialog> dialogList = getDialogsForRequest(request, sectionHelper);
 
         Map<Integer, CorrectAndScore> scoreHistoryPerExercise = getScoreHistoryForDialogs(userIDFromSessionOrDB, dialogList);
 
@@ -111,13 +111,12 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   /**
    * @param request
    * @param sectionHelper
-   * @param userIDFromSessionOrDB
    * @return
    * @see #getDialogs(ExerciseListRequest)
    */
   @NotNull
-  private List<IDialog> getDialogsForRequest(ExerciseListRequest request, ISection<IDialog> sectionHelper, int userIDFromSessionOrDB) {
-    List<IDialog> dialogList = new ArrayList<>(getDialogs(request, sectionHelper, userIDFromSessionOrDB));
+  private List<IDialog> getDialogsForRequest(ExerciseListRequest request, ISection<IDialog> sectionHelper) {
+    List<IDialog> dialogList = new ArrayList<>(getDialogs(request, sectionHelper));
 
     dialogList = getFilteredBySearchTerm(request, dialogList);
     if (request.isSortByDate()) {
@@ -225,9 +224,9 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     return db.getDialogSessionDAO().add(dialogSession);
   }
 
-  private Collection<IDialog> getDialogs(ExerciseListRequest request, ISection<IDialog> sectionHelper, int userIDFromSessionOrDB) {
+  private Collection<IDialog> getDialogs(ExerciseListRequest request, ISection<IDialog> sectionHelper) {
     return (request.getTypeToSelection().isEmpty()) ?
-        getDialogs(userIDFromSessionOrDB) :
+        getDialogs(request.getProjID()) :
         new ArrayList<>(sectionHelper.getExercisesForSelectionState(request.getTypeToSelection()));
   }
 

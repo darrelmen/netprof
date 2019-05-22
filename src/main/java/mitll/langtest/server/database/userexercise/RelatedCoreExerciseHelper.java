@@ -68,7 +68,6 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
     return daoWrapper.contextExercises(exid);
   }
 
-
   @Override
   public void addBulkRelated(List<SlickRelatedExercise> relatedExercises) {
     daoWrapper.addBulk(relatedExercises);
@@ -128,6 +127,4 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
   public Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelatedForDialog(int dialogID) {
     return daoWrapper.byProjectForOneDialog(dialogID);
   }
-
-
 }

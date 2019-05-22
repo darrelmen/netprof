@@ -60,6 +60,8 @@ public class PronunciationLookup implements IPronunciationLookup {
   private static final boolean DEBUG_PARTS = false;
   private static final int TOO_MANY_PRONS = 50;
 
+  private static final boolean WARN_ABOUT_LTS = false;
+
 
   private SmallVocabDecoder svDecoderHelper = null;
   private final HTKDictionary htkDictionary;
@@ -373,7 +375,7 @@ public class PronunciationLookup implements IPronunciationLookup {
       } else {
 //                logger.info("can't use transliteration");
         if (!seen.contains(key)) {
-          logger.warn("getPronunciationsFromDictOrLTS couldn't get letter to sound map from " + lts +
+          if (WARN_ABOUT_LTS) logger.warn("getPronunciationsFromDictOrLTS couldn't get letter to sound map from " + lts +
               "\n\tfor '" + word1 + "'" +
               "\n\tin  '" + transcript + "'");
         }

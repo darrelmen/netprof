@@ -132,8 +132,10 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
     // logger.info("getExerciseListRequest prefix " + prefix);
 
-    return new ExerciseListRequest(incrRequest(),
-        controller.getUserState().getUser(), controller.getProjectID())
+    return new ExerciseListRequest(
+        incrRequest(),
+        controller.getUserState().getUser(),
+        controller.getProjectID())
         .setPrefix(prefix)
         .setUserListID(userListID)
         .setActivityType(getActivityType());
@@ -322,12 +324,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
   }
 
   public void clear() {
-   // logger.info(getInstance() + " : clear");
+    // logger.info(getInstance() + " : clear");
     pagingContainer.clear();
   }
 
   private void flush() {
-   // logger.info(getInstance() + " : flush");
+    // logger.info(getInstance() + " : flush");
     pagingContainer.flush();
     onResize();
   }
