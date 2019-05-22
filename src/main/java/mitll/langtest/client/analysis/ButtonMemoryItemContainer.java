@@ -62,7 +62,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class ButtonMemoryItemContainer<T extends HasID & IPublicPrivate> extends MemoryItemContainer<T> {
- // private final Logger logger = Logger.getLogger("ButtonMemoryItemContainer");
+  // private final Logger logger = Logger.getLogger("ButtonMemoryItemContainer");
   /**
    * @see #addIsPublic
    */
@@ -70,7 +70,6 @@ public abstract class ButtonMemoryItemContainer<T extends HasID & IPublicPrivate
   protected static final String NO = "No";
   protected static final String YES = "Yes";
   private final List<Button> buttons = new ArrayList<>();
-
 
   /**
    * @param controller
@@ -88,7 +87,6 @@ public abstract class ButtonMemoryItemContainer<T extends HasID & IPublicPrivate
     super(controller, selectedUserKey, header, pageSize, shortPageSize);
   }
 
-
   public void addButton(Button button) {
     buttons.add(button);
   }
@@ -96,7 +94,6 @@ public abstract class ButtonMemoryItemContainer<T extends HasID & IPublicPrivate
   public void enableAll() {
     buttons.forEach(button -> button.setEnabled(true));
   }
-
   public void disableAll() {
     buttons.forEach(button -> button.setEnabled(false));
   }
@@ -119,14 +116,12 @@ public abstract class ButtonMemoryItemContainer<T extends HasID & IPublicPrivate
 
       @Override
       public SafeHtml getValue(T shell) {
-        // logger.info("shell " + shell);
         return getSafeHtml(shell.isPrivate() ? NO : YES);
       }
     };
   }
 
-  private ColumnSortEvent.ListHandler<T> getPublicSorted(Column<T, SafeHtml> englishCol,
-                                                         List<T> dataList) {
+  private ColumnSortEvent.ListHandler<T> getPublicSorted(Column<T, SafeHtml> englishCol, List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, Comparator.comparing(T::isPrivate));
     return columnSortHandler;

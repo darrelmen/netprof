@@ -375,6 +375,14 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
             }
           }, TURN_EDITOR);
           break;
+        case CORE_EDITOR:
+          clearPushAndShow(new CoreVocabEditor(controller, CORE_EDITOR, null) {
+            @Override
+            protected int getDialogFromURL() {
+              return new SelectionState().getDialog();
+            }
+          }, CORE_EDITOR);
+          break;
         case NONE:
           logger.warning("showView skipping choice '" + view + "'");
           break;
@@ -430,12 +438,14 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     DialogHeader dialogHeader = new DialogHeader(controller, SCORES, PERFORM, next) {
       @Override
       protected void setRowWidth(DivWidget row) {
-        //
       }
     };
-    DivWidget header = dialogHeader.getHeader(dialog);
-    header.addStyleName("bottomFiveMargin");
-    divWidget.add(header);
+
+    {
+      DivWidget header = dialogHeader.getHeader(dialog);
+      header.addStyleName("bottomFiveMargin");
+      divWidget.add(header);
+    }
     divWidget.add(isTeacher() ?
         new StudentScores(controller) :
         new SessionAnalysis(controller, controller.getUser(), null));

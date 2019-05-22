@@ -50,6 +50,7 @@ import mitll.langtest.client.scoring.*;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -134,6 +135,9 @@ public class ListenViewHelper<T extends ITurnPanel>
   public ListenViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     super(controller, thisView);
   }
+  public boolean isInterpreter() {
+    return dialog.getKind() == DialogType.INTERPRETER;
+  }
 
   @Override
   protected void clearTurnLists() {
@@ -155,10 +159,6 @@ public class ListenViewHelper<T extends ITurnPanel>
     markFirstTurn();
     return turns;
   }
-//
-//  void onUnload() {
-//
-//  }
 
   /**
    * @param exid

@@ -29,23 +29,6 @@
 
 package mitll.langtest.client.scoring;
 
-import com.google.gwt.user.client.ui.IsWidget;
-import mitll.langtest.client.dialog.ListenViewHelper;
-import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.shared.exercise.ClientExercise;
-
-/**
- * A turn in a dialog.
- */
-public interface ITurnPanel extends ISimpleTurn, ITurnMarking, RefAudioGetter, IPlayAudioExercise {
-
-  void clearHighlight();
-
+public interface IFocusable {
   void grabFocus();
-
-  String getText();
-
-  boolean isDeleting();
-
-  void setDeleting(boolean deleting);
 }

@@ -32,6 +32,7 @@ package mitll.langtest.client.custom.dialog;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -40,10 +41,12 @@ import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.dialog.CoreVocabEditor;
 import mitll.langtest.client.dialog.DialogEditor;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
+import mitll.langtest.client.scoring.IFocusable;
 import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
@@ -62,7 +65,7 @@ import static mitll.langtest.client.custom.INavigation.QC_PERMISSIONS;
 /**
  * Created by go22670 on 7/3/17.
  */
-public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
+public class DialogEditorView<T extends IDialog> extends ContentEditorView<T>  {
   private final Logger logger = Logger.getLogger("DialogEditorView");
 
   private static final String LIST = "dialog";
@@ -94,11 +97,11 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     addYours(left);
   }
 
-
   @NotNull
   @Override
   protected DivWidget getButtons(ButtonMemoryItemContainer<T> container) {
     DivWidget buttons = super.getButtons(container);
+    buttons.add(getCoreVocabButton(container));
     buttons.add(getListenButton(container));
     return buttons;
   }
@@ -109,6 +112,18 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     learn.setType(ButtonType.INFO);
     learn.addClickHandler(event -> showLearnList(container));
     addTooltip(learn, "Listen to the dialog.");
+    //learn.setEnabled(!container.isEmpty());
+    container.addButton(learn);
+    return learn;
+  }
+
+  @NotNull
+  private Button getCoreVocabButton(ButtonMemoryItemContainer<T> container) {
+    Button learn = getSuccessButton("Core Vocab");
+    learn.setIcon(IconType.PENCIL);
+    learn.setType(ButtonType.INFO);
+    learn.addClickHandler(event -> editCoreVocabList(getCurrentSelection()));
+    addTooltip(learn, "Edit the core vocab to the dialog.");
     //learn.setEnabled(!container.isEmpty());
     container.addButton(learn);
     return learn;
@@ -223,14 +238,30 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
         "Done",
         null,
         new MyShownCloseListener(editorTurnDialogEditor, selectedItem.getID()), 720, -1, true);
+  }
+//  @Override
+  protected void editCoreVocabList(T selectedItem) {
+    DivWidget listContent = new DivWidget();
 
+    CoreVocabEditor editorTurnDialogEditor = new CoreVocabEditor(controller, INavigation.VIEWS.CORE_EDITOR, selectedItem);
+    editorTurnDialogEditor.showContent(listContent, INavigation.VIEWS.CORE_EDITOR);
+
+    //  logger.info("list content " + listContent);
+
+    new DialogHelper(true).show(
+        "Add/Edit Core Vocab" + " : " + getListName(),
+        Collections.emptyList(),
+        listContent,
+        "Done",
+        null,
+        new MyShownCloseListener(editorTurnDialogEditor, selectedItem.getID()), 740, -1, true);
   }
 
   private class MyShownCloseListener implements DialogHelper.ShownCloseListener {
-    DialogEditor editItem;
+    IFocusable editItem;
     int dialogID;
 
-    MyShownCloseListener(DialogEditor editItem, int dialogID) {
+    MyShownCloseListener(IFocusable editItem, int dialogID) {
       this.editItem = editItem;
       this.dialogID = dialogID;
     }

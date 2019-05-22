@@ -48,7 +48,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.EnglishDisplayChoices;
-import mitll.langtest.client.scoring.ITurnPanel;
+import mitll.langtest.client.scoring.ISimpleTurn;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.DialogType;
@@ -65,9 +65,9 @@ import java.util.stream.Collectors;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
 
-public abstract class TurnViewHelper<T extends ITurnPanel>
+public abstract class TurnViewHelper<T extends ISimpleTurn>
     extends DialogView
-    implements ContentView, ITurnContainer<T> {
+    implements ContentView {
   private final Logger logger = Logger.getLogger("TurnViewHelper");
 
   private static final String ENGLISH_SPEAKER = "English Speaker";
@@ -96,7 +96,7 @@ public abstract class TurnViewHelper<T extends ITurnPanel>
   boolean isInterpreter = false;
   DivWidget turnContainer;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_NEXT = false;
 
 
@@ -145,10 +145,6 @@ public abstract class TurnViewHelper<T extends ITurnPanel>
   }
 
 
-  @Override
-  public boolean isInterpreter() {
-    return dialog.getKind() == DialogType.INTERPRETER;
-  }
 
   public IDialog getDialog() {
     return dialog;
@@ -264,20 +260,7 @@ public abstract class TurnViewHelper<T extends ITurnPanel>
       DivWidget controlAndSpeakers = new DivWidget();
       styleControlRow(controlAndSpeakers);
 
-      {
-        DivWidget outer = new DivWidget();
-        outer.addStyleName("inlineFlex");
-        outer.setWidth("100%");
-
-        {
-          DivWidget controls = getControls();
-          controls.setWidth("100%");
-
-          // only if flags
-          outer.add(controls);
-        }
-        controlAndSpeakers.add(outer);
-      }
+      addControls(controlAndSpeakers);
 
       controlAndSpeakers.add(speakerRow = getSpeakerRow(dialog));
 
@@ -289,8 +272,24 @@ public abstract class TurnViewHelper<T extends ITurnPanel>
     }
   }
 
+  protected void addControls(DivWidget controlAndSpeakers) {
+    DivWidget outer = new DivWidget();
+    outer.addStyleName("inlineFlex");
+    outer.setWidth("100%");
+
+    {
+      DivWidget controls = getControls();
+      controls.setWidth("100%");
+
+      // only if flags
+      outer.add(controls);
+    }
+    controlAndSpeakers.add(outer);
+  }
+
   DivWidget getControls() {
-    return new DivWidget();
+    DivWidget widgets = new DivWidget();
+    return widgets;
   }
 
   @NotNull
@@ -562,7 +561,7 @@ public abstract class TurnViewHelper<T extends ITurnPanel>
     rowOne.getElement().getStyle().setMarginBottom(10, PX);
   }
 
-  private void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
+  protected void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
     rowOne.clear();
     addTurnForEachExercise(rowOne, left, right, dialog.getExercises());
   }
@@ -570,9 +569,10 @@ public abstract class TurnViewHelper<T extends ITurnPanel>
   protected void addTurnForEachExercise(DivWidget rowOne, String left, String right, List<ClientExercise> exercises) {
     ClientExercise prev = null;
     int index = 0;
+    logger.info("addTurnForEachExercise got " + exercises.size());
     for (ClientExercise clientExercise : exercises) {
-      COLUMNS currentCol = getColumnForEx(left, right, clientExercise);
-      COLUMNS prevCol = prev == null ? COLUMNS.UNK : getColumnForEx(left, right, prev);
+      ITurnContainer.COLUMNS currentCol = getColumnForEx(left, right, clientExercise);
+      ITurnContainer.COLUMNS prevCol = prev == null ? ITurnContainer.COLUMNS.UNK : getColumnForEx(left, right, prev);
       addTurn(rowOne, clientExercise, currentCol, prevCol, index);
       prev = clientExercise;
       index++;
@@ -588,26 +588,26 @@ public abstract class TurnViewHelper<T extends ITurnPanel>
 //        (turn.isLeft() ? COLUMNS.LEFT : turn.isRight() ? COLUMNS.RIGHT : COLUMNS.MIDDLE), turn));
 //  }
 
-  COLUMNS getColumnForEx(String left, String right, ClientExercise clientExercise) {
+  ITurnContainer.COLUMNS getColumnForEx(String left, String right, ClientExercise clientExercise) {
     String speaker = clientExercise == null ? "" : clientExercise.getSpeaker();
     if (speaker.isEmpty()) {
       logger.info("getColumnForEx : no speaker, ex = " + clientExercise);
-      return COLUMNS.UNK;
+      return ITurnContainer.COLUMNS.UNK;
     } else {
       return getColumnForSpeaker(left, right, speaker);
     }
   }
 
   @NotNull
-  private COLUMNS getColumnForSpeaker(String left, String right, String speaker) {
-    COLUMNS columns;
+  private ITurnContainer.COLUMNS getColumnForSpeaker(String left, String right, String speaker) {
+    ITurnContainer.COLUMNS columns;
 
     if (speaker.equalsIgnoreCase(left) || speaker.equalsIgnoreCase(SPEAKER_A)) {
-      columns = COLUMNS.LEFT;
+      columns = ITurnContainer.COLUMNS.LEFT;
     } else if (speaker.equalsIgnoreCase(right) || speaker.equalsIgnoreCase(SPEAKER_B)) {
-      columns = COLUMNS.RIGHT;
+      columns = ITurnContainer.COLUMNS.RIGHT;
     } else {
-      columns = COLUMNS.MIDDLE;
+      columns = ITurnContainer.COLUMNS.MIDDLE;
     }
 
     //  logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs " + speaker + " => " + columns);
@@ -621,7 +621,8 @@ public abstract class TurnViewHelper<T extends ITurnPanel>
    * @param index
    * @see #addTurnForEachExercise(DivWidget, String, String, List)
    */
-  T addTurn(DivWidget rowOne, ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
+  T addTurn(DivWidget rowOne, ClientExercise clientExercise,
+            ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
     T turn = getTurnPanel(clientExercise, columns, prevColumn, index);
 
     allTurns.add(index, turn);
@@ -632,14 +633,15 @@ public abstract class TurnViewHelper<T extends ITurnPanel>
   }
 
   @NotNull
-  T getTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
+  T getTurnPanel(ClientExercise clientExercise, ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
     T turn = reallyGetTurnPanel(clientExercise, columns, prevColumn, index);
     turn.addWidgets(true, false, PhonesChoices.HIDE, EnglishDisplayChoices.SHOW);
     return turn;
   }
 
   @NotNull
-  protected abstract T reallyGetTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index);
+  protected abstract T reallyGetTurnPanel(ClientExercise clientExercise,
+                                          ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index);
 
   List<T> getAllTurns() {
     return allTurns;
@@ -668,7 +670,7 @@ public abstract class TurnViewHelper<T extends ITurnPanel>
     List<T> seq = getAllTurns();
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
-    if (DEBUG_NEXT) logger.info("getNext current of " + currentTurn.getExID() + " " + currentTurn.getText() +
+    if (DEBUG_NEXT) logger.info("getNext current of " + currentTurn.getExID() + //" " + currentTurn.getText() +
         " : " + i + " next " + i1);
 
     if (i1 > seq.size() - 1) {

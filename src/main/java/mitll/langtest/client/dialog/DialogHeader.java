@@ -298,6 +298,13 @@ public class DialogHeader {
             PRESS_AND_HOLD_HINT +
             "</i>"));
         break;
+      case CORE_EDITOR:
+        row.add(getHint("<i><b>Edit</b> the core vocabulary of the turns. " +
+//            "<br/><b>Record</b> audio for each turn. " +
+//            "<br/>" +
+//            PRESS_AND_HOLD_HINT +
+            "</i>"));
+        break;
       default:
         break;
     }
@@ -386,22 +393,8 @@ public class DialogHeader {
     }
 
     if (shouldShowDialogEditor(mine) && thisView == LISTEN) {
-      Button editButton = new Button(getCapitalized(TURN_EDITOR.toString()), IconType.ARROW_RIGHT, event -> controller.getNavigation().show(TURN_EDITOR));
-      new TooltipHelper().createAddTooltip(editButton, getNextTooltip(), Placement.LEFT);
-      styleButton(editButton);
-      editButton.addStyleName("floatRight");
-      editButton.addStyleName("topFiftyMargin");
-      editButton.setType(ButtonType.WARNING);
-
-      buttonDiv.add(editButton);
+      buttonDiv.add(getTurnEditor());
     }
-
-    //if (thisView == LISTEN || thisView == TURN_EDITOR) {
-    //  new Button("Download", IconType.DOWNLOAD, event -> gotDownload());
-
-    //  buttonDiv.add(new Anchor("Download", new DownloadHelper().getSimpleDialogDownload()));
-    //  SafeHtml download = getAnchorHTML(new DownloadHelper().getSimpleDialogDownload(), "Download");
-    //  logger.info("url " + download);
 
     if (thisView == LISTEN || thisView == TURN_EDITOR) {
       DivWidget widgets = new DivWidget();
@@ -417,20 +410,22 @@ public class DialogHeader {
 
       buttonDiv.add(widgets);
     }
-    //}
 
     return buttonDiv;
   }
 
-//  private SafeHtml getAnchorHTML(String href, String label) {
-//    SafeHtmlBuilder sb = new SafeHtmlBuilder();
-//    sb.appendHtmlConstant("<a href='" + href + "'" + ">");
-//    sb.appendEscaped(label);
-//    sb.appendHtmlConstant("</a>");
-//    return sb.toSafeHtml();
-//  }
+  @NotNull
+  private Button getTurnEditor() {
+    Button editButton = new Button(getCapitalized(TURN_EDITOR.toString()), IconType.ARROW_RIGHT, event -> controller.getNavigation().show(TURN_EDITOR));
+    new TooltipHelper().createAddTooltip(editButton, "Go to "+TURN_EDITOR.toString(), Placement.LEFT);
+    styleButton(editButton);
+    editButton.addStyleName("floatRight");
+    editButton.addStyleName("topFiftyMargin");
+    editButton.setType(ButtonType.WARNING);
+    return editButton;
+  }
 
-  void gotDownload() {
+  private void gotDownload() {
     new DownloadHelper().doSimpleDialogDownload(controller.getHost(), new SelectionState());
   }
 

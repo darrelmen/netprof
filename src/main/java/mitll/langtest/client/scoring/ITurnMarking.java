@@ -36,7 +36,7 @@ public interface ITurnMarking {
   /**
    * @return
    */
-  void makeVisible();
+ // void makeVisible();
 
   boolean hasCurrentMark();
 

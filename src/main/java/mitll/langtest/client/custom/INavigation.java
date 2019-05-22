@@ -107,7 +107,9 @@ public interface INavigation extends IViewContaner {
      * @see NewBanner#getDialogNav
      */
     DIALOG_EDITOR("Dialog Editor", ProjectMode.DIALOG, QC_PERMISSIONS_PLUS_TEACHER),
-    TURN_EDITOR("Turn Editor", ProjectMode.DIALOG, QC_PERMISSIONS_PLUS_TEACHER);
+    TURN_EDITOR("Turn Editor", ProjectMode.DIALOG, QC_PERMISSIONS_PLUS_TEACHER),
+    CORE_EDITOR("Core Vocabulary Editor", ProjectMode.DIALOG, QC_PERMISSIONS_PLUS_TEACHER)
+    ;
 
     private final List<Permission> perms;
     private final ProjectMode mode;

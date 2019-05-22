@@ -29,23 +29,56 @@
 
 package mitll.langtest.client.scoring;
 
-import com.google.gwt.user.client.ui.IsWidget;
-import mitll.langtest.client.dialog.ListenViewHelper;
-import mitll.langtest.client.sound.PlayListener;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.HTML;
+import mitll.langtest.client.dialog.ITurnContainer;
 import mitll.langtest.shared.exercise.ClientExercise;
 
-/**
- * A turn in a dialog.
- */
-public interface ITurnPanel extends ISimpleTurn, ITurnMarking, RefAudioGetter, IPlayAudioExercise {
+import java.util.logging.Logger;
 
-  void clearHighlight();
+import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.MIDDLE;
 
-  void grabFocus();
+public class SimpleTurn extends DivWidget implements ISimpleTurn {
+  private final Logger logger = Logger.getLogger("SimpleTurn");
 
-  String getText();
+  private ClientExercise exercise;
+  private TurnPanelDelegate turnPanelDelegate;
+  private ITurnContainer.COLUMNS columns;
 
-  boolean isDeleting();
+  public SimpleTurn(ClientExercise exercise, ITurnContainer.COLUMNS columns, boolean rightJustify) {
+    this.exercise = exercise;
+    this.columns = columns;
+    turnPanelDelegate = new TurnPanelDelegate(exercise, this, columns, rightJustify);
+  }
 
-  void setDeleting(boolean deleting);
+  private void styleMe(DivWidget wrapper) {
+    turnPanelDelegate.styleMe(wrapper);
+    if (columns == MIDDLE) {
+      wrapper.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
+    }
+  }
+
+  @Override
+  public int getExID() {
+    return exercise.getID();
+  }
+
+  @Override
+  public void makeVisible() {
+
+  }
+
+  @Override
+  public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
+    HTML html = new HTML(exercise.getForeignLanguage());
+    html.addStyleName("flfont");
+    html.getElement().getStyle().setPadding(10, Style.Unit.PX);
+  //  logger.info("got " + exercise.getForeignLanguage());
+    DivWidget widgets = new DivWidget();
+    widgets.add(html);
+    styleMe(widgets);
+    add(widgets);
+    return widgets;
+  }
 }

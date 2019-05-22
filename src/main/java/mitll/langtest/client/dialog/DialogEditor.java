@@ -40,6 +40,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.dialog.DialogEditorView;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.flashcard.SessionStorage;
+import mitll.langtest.client.scoring.IFocusable;
 import mitll.langtest.shared.dialog.DialogExChangeResponse;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -54,7 +55,7 @@ import java.util.logging.Logger;
 import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
 import static mitll.langtest.client.custom.INavigation.VIEWS.SCORES;
 
-public class DialogEditor extends ListenViewHelper<EditorTurn> implements SessionManager {
+public class DialogEditor extends ListenViewHelper<EditorTurn> implements SessionManager, IFocusable {
   private final Logger logger = Logger.getLogger("DialogEditor");
 
   private static final int FIXED_HEIGHT = 390;
@@ -76,7 +77,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   }
 
   @Override
-
   void onUnload() {
     int projectID = controller.getProjectID();
     if (projectID != -1) {

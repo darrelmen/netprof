@@ -37,7 +37,7 @@ import java.util.logging.Logger;
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
 
 public class ViewParser {
-  private final Logger logger = Logger.getLogger("SelectionState");
+  private final Logger logger = Logger.getLogger("ViewParser");
 
   private static final String DRILL = "Drill";
   private static final String PRACTICE = "Practice";
@@ -65,6 +65,8 @@ public class ViewParser {
         return OOV_EDITOR;
       } else if (rawInstance.equalsIgnoreCase(DIALOG_EDITOR.toString())) {
         return DIALOG_EDITOR;
+      } else if (rawInstance.equalsIgnoreCase(CORE_EDITOR.toString())) {
+        return CORE_EDITOR;
       } else {
         instance = instance.replaceAll(" ", "_");
 

@@ -85,7 +85,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
           PERFORM_PRESS_AND_HOLD,
           PERFORM,
           SCORES,
-          TURN_EDITOR);
+          TURN_EDITOR,
+          CORE_EDITOR);
 
   private static final List<VIEWS> DIALOG_VIEWS =
       Arrays.asList(
@@ -97,7 +98,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
           PERFORM_PRESS_AND_HOLD,
           PERFORM,
           SCORES,
-          TURN_EDITOR);
+          TURN_EDITOR,
+          CORE_EDITOR);
 
   /**
    * @see #hideOrShowByMode
