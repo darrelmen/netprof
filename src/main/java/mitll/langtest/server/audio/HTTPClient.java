@@ -48,7 +48,7 @@ import java.util.List;
 public class HTTPClient {
   private static final Logger logger = LogManager.getLogger(HTTPClient.class);
   private static final int CONNECT_TIMEOUT = 5000;
-  private static final int READ_TIMEOUT = 10000;
+  private static final int READ_TIMEOUT = 30000;
   private static final String GET = "GET";
   private static final String POST = "POST";
   public static final String UTF_8 = "UTF8";
