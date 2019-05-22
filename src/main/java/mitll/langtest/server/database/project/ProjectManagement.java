@@ -1601,7 +1601,8 @@ public class ProjectManagement implements IProjectManagement {
     return project.getAudioFileHelper().checkOOV(commonExercises, true).setTotal(total);
   }
 
-  public void checkOOVForDialog(int projectID, int dialogID) {
+  public void checkOOVForDialog(int dialogID) {
+    int projectID = db.getDialogDAO().getProjectForDialog(dialogID);
     addDialogInfo(projectID, dialogID);
     Project project = getProject(projectID, false);
     IDialog dialog = project.getDialog(dialogID);

@@ -666,7 +666,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   @Override
-  public void gotForward(EditorTurn editorTurn) {
+  public void gotForward(T editorTurn) {
     super.gotForward(editorTurn);
     safeStopRecording();
   }
@@ -700,7 +700,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   protected T getRecordingTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
     T widgets = makeRecordingTurnPanel(clientExercise, columns);
 
-    if (columns == COLUMNS.MIDDLE) {
+    if (columns == ITurnContainer.COLUMNS.MIDDLE) {
       widgets.addStyleName("inlineFlex");
     }
 

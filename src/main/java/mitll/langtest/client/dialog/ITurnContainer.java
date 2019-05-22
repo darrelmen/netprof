@@ -32,7 +32,7 @@ package mitll.langtest.client.dialog;
 import mitll.langtest.client.scoring.ITurnPanel;
 
 public interface ITurnContainer<T extends ITurnPanel> {
-  void gotForward(EditorTurn editorTurn);
+  void gotForward(T editorTurn);
 
   void addTurnForSameSpeaker(T editorTurn);
 
@@ -51,4 +51,6 @@ public interface ITurnContainer<T extends ITurnPanel> {
   void gotBlur(T widgets);
 
   boolean isLast(T test);
+
+  enum COLUMNS {LEFT, MIDDLE, RIGHT, UNK}
 }

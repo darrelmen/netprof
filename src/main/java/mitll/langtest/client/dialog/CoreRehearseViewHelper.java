@@ -95,7 +95,7 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscu
     T turnPanel = super.getTurnPanel(clientExercise, columns, prevColumn, index);
 
     if (isInterpreter) {
-      if (columns == COLUMNS.MIDDLE) {
+      if (columns == ITurnContainer.COLUMNS.MIDDLE) {
         if (!clientExercise.hasEnglishAttr()) {
           turnPanel.maybeSetObscure(exidToShell);
         }
@@ -103,7 +103,7 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscu
         turnPanel.obscureTextAndPhones();
       }
     } else {
-      if (columns == COLUMNS.RIGHT) {
+      if (columns == ITurnContainer.COLUMNS.RIGHT) {
         turnPanel.maybeSetObscure(exidToShell);
       } else {
         turnPanel.obscureTextAndPhones();

@@ -33,7 +33,6 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -256,7 +255,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
       int projectID = controller.getProjectID();
       if (projectID != -1) {
-        controller.getAudioService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
+        controller.getAudioService().reloadDialog(dialogID, new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
             controller.handleNonFatalError("reloading dialog on hydra/score1", caught);

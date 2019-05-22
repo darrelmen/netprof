@@ -34,6 +34,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.dialog.ITurnContainer;
 import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.sound.AllHighlight;
 import mitll.langtest.client.sound.IHighlightSegment;
@@ -81,8 +82,8 @@ public class TurnPanelDelegate implements ITurnMarking {
     style.setOverflow(Style.Overflow.HIDDEN);
     style.setClear(Style.Clear.BOTH);
 
-    if (columns == ListenViewHelper.COLUMNS.RIGHT) widget.addStyleName("floatRight");
-    else if (columns == ListenViewHelper.COLUMNS.LEFT) widget.addStyleName(FLOAT_LEFT);
+    if (columns == ITurnContainer.COLUMNS.RIGHT) widget.addStyleName("floatRight");
+    else if (columns == ITurnContainer.COLUMNS.LEFT) widget.addStyleName(FLOAT_LEFT);
   }
 
   /**
@@ -96,9 +97,9 @@ public class TurnPanelDelegate implements ITurnMarking {
 
     // decide on left right or middle justify
     {
-      if (columns == ListenViewHelper.COLUMNS.LEFT) wrapper.addStyleName("leftbubble");
-      else if (columns == ListenViewHelper.COLUMNS.RIGHT) wrapper.addStyleName("rightbubble");
-      else if (columns == ListenViewHelper.COLUMNS.MIDDLE) {
+      if (columns == ITurnContainer.COLUMNS.LEFT) wrapper.addStyleName("leftbubble");
+      else if (columns == ITurnContainer.COLUMNS.RIGHT) wrapper.addStyleName("rightbubble");
+      else if (columns == ITurnContainer.COLUMNS.MIDDLE) {
         Style style = wrapper.getElement().getStyle();
 
         String middlebubble2 = "middlebubble2";
@@ -135,27 +136,27 @@ public class TurnPanelDelegate implements ITurnMarking {
 
   @Override
   public boolean shouldAddFloatLeft() {
-    return (columns != ListenViewHelper.COLUMNS.MIDDLE);
+    return (columns != ITurnContainer.COLUMNS.MIDDLE);
   }
 
   @NotNull
   protected AllHighlight getAllHighlight(Collection<IHighlightSegment> flclickables) {
-    return new AllHighlight(flclickables, columns != ListenViewHelper.COLUMNS.MIDDLE);
+    return new AllHighlight(flclickables, columns != ITurnContainer.COLUMNS.MIDDLE);
   }
 
   @Override
   public boolean isMiddle() {
-    return columns == ListenViewHelper.COLUMNS.MIDDLE;
+    return columns == ITurnContainer.COLUMNS.MIDDLE;
   }
 
   @Override
   public boolean isLeft() {
-    return columns == ListenViewHelper.COLUMNS.LEFT;
+    return columns == ITurnContainer.COLUMNS.LEFT;
   }
 
   @Override
   public boolean isRight() {
-    return columns == ListenViewHelper.COLUMNS.RIGHT;
+    return columns == ITurnContainer.COLUMNS.RIGHT;
   }
 
   /**

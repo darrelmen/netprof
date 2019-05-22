@@ -31,7 +31,6 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.IconSize;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -39,6 +38,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.IListenView;
+import mitll.langtest.client.dialog.ITurnContainer;
 import mitll.langtest.client.dialog.ListenViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
@@ -86,7 +86,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
                    boolean rightJustify) {
     super(clientExercise, controller, listContainer, alignments, listenView);
 
-    if (columns == ListenViewHelper.COLUMNS.MIDDLE) {
+    if (columns == ITurnContainer.COLUMNS.MIDDLE) {
       addStyleName("inlineFlex");
       setWidth("100%");
       // TODO : why?

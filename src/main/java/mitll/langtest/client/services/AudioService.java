@@ -35,7 +35,6 @@ import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.dialog.DialogEditorView;
 import mitll.langtest.client.dialog.DialogEditor;
-import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
 import mitll.langtest.shared.exercise.AudioAttribute;
@@ -43,8 +42,6 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.OOV;
 import mitll.langtest.shared.image.ImageResponse;
 import mitll.langtest.shared.project.*;
-import mitll.langtest.shared.scoring.AudioContext;
-import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 
@@ -124,7 +121,7 @@ public interface AudioService extends RemoteService {
 
   OOVInfo checkOOV(int id, int num, int offset) throws DominoSessionException;
 
-  void checkOOVForDialog(int projID, int dialogID) throws DominoSessionException;
+  void checkOOVForDialog(int dialogID) throws DominoSessionException;
 
   void updateOOV(int projectID, List<OOV> updates) throws DominoSessionException;
 
@@ -133,9 +130,8 @@ public interface AudioService extends RemoteService {
   /**
    * @see DialogEditorView.MyShownCloseListener#gotHidden()
    * @see DialogEditor#onUnload()
-   * @param projectID
    * @param dialogID
    * @throws DominoSessionException
    */
-  void reloadDialog(int projectID, int dialogID) throws DominoSessionException;
+  void reloadDialog(int dialogID) throws DominoSessionException;
 }

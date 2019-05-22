@@ -167,5 +167,5 @@ public interface IProjectManagement {
 
   boolean addDialogInfo(int projID, int dialogID);
 
-  void checkOOVForDialog(int projectID, int dialogID);
+  void checkOOVForDialog(int dialogID);
 }

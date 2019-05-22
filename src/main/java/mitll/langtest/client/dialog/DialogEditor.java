@@ -76,13 +76,14 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   }
 
   @Override
+
   void onUnload() {
     int projectID = controller.getProjectID();
     if (projectID != -1) {
       int dialogID = getDialogID();
 
       logger.info("onUnload - reload the dialog on hydra/score1");
-      controller.getAudioService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
+      controller.getAudioService().reloadDialog(dialogID, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("reloading dialog.", caught);
@@ -131,7 +132,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   protected EditorTurn makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn,
                                      boolean rightJustify, int index) {
     int i = getDialog().getExercises().indexOf(clientExercise);
-    boolean isFirst = i == 0 && columns == COLUMNS.LEFT || i == 1 && columns == COLUMNS.MIDDLE;
+    boolean isFirst = i == 0 && columns == ITurnContainer.COLUMNS.LEFT || i == 1 && columns == ITurnContainer.COLUMNS.MIDDLE;
     EditorTurn widgets = new EditorTurn(
         clientExercise,
         columns,
@@ -269,13 +270,13 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   private boolean isLeftSpeaker(COLUMNS columns, EditorTurn prevTurn) {
     boolean isLeftSpeaker;
     if (isInterpreter) {
-      if (columns == COLUMNS.MIDDLE) {
-        isLeftSpeaker = (prevTurn == null || prevTurn.getColumn() == COLUMNS.LEFT);
+      if (columns == ITurnContainer.COLUMNS.MIDDLE) {
+        isLeftSpeaker = (prevTurn == null || prevTurn.getColumn() == ITurnContainer.COLUMNS.LEFT);
       } else {
-        isLeftSpeaker = columns == COLUMNS.LEFT;//duh
+        isLeftSpeaker = columns == ITurnContainer.COLUMNS.LEFT;//duh
       }
     } else {
-      isLeftSpeaker = columns == COLUMNS.LEFT;//duh
+      isLeftSpeaker = columns == ITurnContainer.COLUMNS.LEFT;//duh
     }
     return isLeftSpeaker;
   }
@@ -402,7 +403,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
     for (ClientExercise clientExercise : changed) {
       COLUMNS currentCol = getColumnForEx(left, right, clientExercise);
-      COLUMNS prevCol = prev == null ? COLUMNS.UNK : getColumnForEx(left, right, prev);
+      COLUMNS prevCol = prev == null ? ITurnContainer.COLUMNS.UNK : getColumnForEx(left, right, prev);
       EditorTurn turn = addTurn(turnContainer, clientExercise, currentCol, prevCol, updatedExercises.indexOf(clientExercise));
       turn.addStyleName("opacity-target");
       prev = clientExercise;

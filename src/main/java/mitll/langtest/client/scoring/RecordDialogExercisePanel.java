@@ -36,7 +36,7 @@ import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.Emoticon;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.dialog.IRehearseView;
-import mitll.langtest.client.dialog.ListenViewHelper.COLUMNS;
+import mitll.langtest.client.dialog.ITurnContainer;
 import mitll.langtest.client.dialog.PerformViewHelper;
 import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -117,7 +117,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
                                    Map<Integer, AlignmentOutput> alignments,
                                    IRehearseView listenView,
                                    SessionManager sessionManager,
-                                   COLUMNS columns) {
+                                   ITurnContainer.COLUMNS columns) {
     super(commonExercise, controller, listContainer, alignments, listenView, columns, false);
     this.rehearseView = listenView;
     setMinExpectedDur(commonExercise);

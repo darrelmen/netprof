@@ -61,10 +61,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.LEFT;
-import static mitll.langtest.client.dialog.ListenViewHelper.COLUMNS.MIDDLE;
-import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_A;
-import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_B;
+import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.MIDDLE;
+import static mitll.langtest.client.dialog.TurnViewHelper.SPEAKER_A;
+import static mitll.langtest.client.dialog.TurnViewHelper.SPEAKER_B;
+
+//import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_A;
+//import static mitll.langtest.client.dialog.ListenViewHelper.SPEAKER_B;
 
 /**
  *
@@ -83,8 +85,8 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   private final ITurnContainer<EditorTurn> turnContainer;
   private final int dialogID;
   private String prev = "";
-  private final ListenViewHelper.COLUMNS columns;
-  private final ListenViewHelper.COLUMNS prevColumn;
+  private final ITurnContainer.COLUMNS columns;
+  private final ITurnContainer.COLUMNS prevColumn;
   private final boolean isFirstTurn;
   /**
    * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
@@ -107,8 +109,8 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
    * @see DialogEditor#makeTurnPanel(ClientExercise, ListenViewHelper.COLUMNS, ListenViewHelper.COLUMNS, boolean, int)
    */
   EditorTurn(final ClientExercise clientExercise,
-             ListenViewHelper.COLUMNS columns,
-             ListenViewHelper.COLUMNS prevColumn,
+             ITurnContainer.COLUMNS columns,
+             ITurnContainer.COLUMNS prevColumn,
              boolean rightJustify,
              ExerciseController<?> controller,
              ITurnContainer<EditorTurn> turnContainer,
@@ -137,7 +139,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       @Override
       protected void addMarginStyle(Style style2) {
         style2.setMarginLeft(15, Style.Unit.PX);
-        boolean useBigRightMargin = columns == ListenViewHelper.COLUMNS.RIGHT && turnContainer.isInterpreter();
+        boolean useBigRightMargin = columns == ITurnContainer.COLUMNS.RIGHT && turnContainer.isInterpreter();
         style2.setMarginRight(useBigRightMargin ? RIGHT_TURN_RIGHT_MARGIN : 10, Style.Unit.PX);
         // style2.setMarginTop(7, Style.Unit.PX);
         style2.setMarginBottom(0, Style.Unit.PX);
@@ -154,7 +156,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     this.turnContainer = turnContainer;
     setId("EditorTurn_" + getExID());
 
-    if (columns == ListenViewHelper.COLUMNS.MIDDLE) {
+    if (columns == MIDDLE) {
       if (clientExercise.hasEnglishAttr()) {
         addStyleName("floatRight");
       } else {
@@ -191,7 +193,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
    * @return
    * @see DialogEditor#addTurnForSameSpeaker
    */
-  public ListenViewHelper.COLUMNS getColumn() {
+  public ITurnContainer.COLUMNS getColumn() {
     return columns;
   }
 
@@ -425,9 +427,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
     w.addClickHandler(event -> gotOtherSpeaker());
 
-    ListenViewHelper.COLUMNS toUseForArrow = columns == MIDDLE ? prevColumn : columns;
+    ITurnContainer.COLUMNS toUseForArrow = columns == MIDDLE ? prevColumn : columns;
     //  logger.info("the column is " + toUseForArrow);
-    w.setIcon(toUseForArrow == LEFT ? IconType.ARROW_RIGHT : IconType.ARROW_LEFT);
+    w.setIcon(toUseForArrow == ITurnContainer.COLUMNS.LEFT ? IconType.ARROW_RIGHT : IconType.ARROW_LEFT);
 
     tripleButtonStyle(w);
 
@@ -498,7 +500,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
           ")" : language.toDisplay() + " translation (" + getExID() +
           ")";
       if (!turnContainer.isInterpreter()) {
-        placeholder = (columns == LEFT ? SPEAKER_A : SPEAKER_B) + " says...";
+        placeholder = (columns == ITurnContainer.COLUMNS.LEFT ? SPEAKER_A : SPEAKER_B) + " says...";
       }
       w.setPlaceholder(placeholder);
     } else {

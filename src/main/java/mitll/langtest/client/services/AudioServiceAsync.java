@@ -30,7 +30,6 @@
 package mitll.langtest.client.services;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.OOV;
@@ -39,8 +38,6 @@ import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVInfo;
 import mitll.langtest.shared.project.OOVWordsAndUpdate;
 import mitll.langtest.shared.project.StartupInfo;
-import mitll.langtest.shared.scoring.AudioContext;
-import mitll.langtest.shared.scoring.DecoderOptions;
 import mitll.langtest.shared.scoring.ImageOptions;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 
@@ -115,9 +112,9 @@ public interface AudioServiceAsync {
 
   void updateOOV(int projectID, List<OOV> updates, AsyncCallback<Void> async);
 
-  void reloadDialog(int projectID, int dialogID, AsyncCallback<Void> async);
+  void reloadDialog(int dialogID, AsyncCallback<Void> async);
 
-  void checkOOVForDialog(int projID, int dialogID, AsyncCallback<Void> async);
+  void checkOOVForDialog(int dialogID, AsyncCallback<Void> async);
 
   void isValid(int projid, int exid, String text, AsyncCallback<OOVWordsAndUpdate> async);
 }

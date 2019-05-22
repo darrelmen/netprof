@@ -51,6 +51,7 @@ import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
 import mitll.langtest.server.database.audio.IEnsureAudioHelper;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectHelper;
 import mitll.langtest.server.domino.AudioCopy;
@@ -1261,9 +1262,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     }
   }
 
-  public void checkOOVForDialog(int projID, int dialogID) throws DominoSessionException {
+  public void checkOOVForDialog(int dialogID) throws DominoSessionException {
     getUserIDFromSessionOrDB();
-    db.getProjectManagement().checkOOVForDialog(projID, dialogID);
+    db.getProjectManagement().checkOOVForDialog(dialogID);
   }
 
   @Override
@@ -1683,16 +1684,13 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
-   * @param projectID
    * @param dialogID
    * @throws DominoSessionException
-   * @see mitll.langtest.server.database.project.ProjectManagement#checkOOVForDialog(int, int)
+   * @see IProjectManagement#checkOOVForDialog(int)
    */
   @Override
-  public void reloadDialog(int projectID, int dialogID) throws DominoSessionException {
+  public void reloadDialog(int dialogID) throws DominoSessionException {
     getUserIDFromSessionOrDB();
-    db.getProjectManagement().checkOOVForDialog(projectID, dialogID);
-
-    //  db.getProjectManagement().addDialogInfo(projectID, dialogID);
+    db.getProjectManagement().checkOOVForDialog(dialogID);
   }
 }

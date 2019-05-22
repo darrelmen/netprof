@@ -306,7 +306,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @see #getDialogs(int)
    */
   private Dialog makeDialog(SlickDialog slickDialog) {
-   // boolean isprivate = slickDialog.isprivate();
+    // boolean isprivate = slickDialog.isprivate();
     //  logger.info("makeDialog : " + isprivate + " " + slickDialog.id());
 
     Dialog dialog = new Dialog(
@@ -1107,5 +1107,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
   @Override
   public DialogAttributeJoinHelper getDialogAttributeJoinHelper() {
     return dialogAttributeJoinHelper;
+  }
+
+  @Override
+  public int getProjectForDialog(int dialogID) {
+    Collection<SlickDialog> byID = getByID(dialogID);
+    return (byID.isEmpty()) ? -1 : byID.iterator().next().projid();
   }
 }
