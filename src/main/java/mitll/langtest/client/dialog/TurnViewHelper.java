@@ -42,6 +42,7 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
@@ -60,6 +61,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -517,7 +519,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    * @see #showDialog
    */
   @NotNull
-  protected DivWidget getTurns(IDialog dialog) {
+  public DivWidget getTurns(IDialog dialog) {
     TurnViewHelper outer = this;
     DivWidget rowOne = new DivWidget() {
       @Override
@@ -636,6 +638,45 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   @NotNull
   protected abstract T reallyGetTurnPanel(ClientExercise clientExercise,
                                           ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index);
+
+
+  /**
+   * @param exid
+   * @see DialogEditor#deleteCurrentTurnOrPair
+   */
+  T deleteTurn(int exid, Set<T> toRemoves) {
+    T toRemove = getTurnByID(exid);
+    T newCurrentTurn = null;
+    if (toRemove == null) {
+      logger.warning("huh? can't find " + exid);
+
+    } else {
+      // fade it out for a second to show it disappearing...
+      ((Widget) toRemove).addStyleName("opacity-out-target");
+
+//      logger.info("deleteTurn removing current turn " + currentTurn.getExID());
+
+      T prev = getPrev(toRemove);
+      if (prev == null) {
+        T next = getNext(toRemove);
+        logger.info("deleteTurn now next " + (next == null ? " NULL " : next.getExID()));
+        newCurrentTurn = next;
+      } else {
+        logger.info("deleteTurn now prev " + prev.getExID());
+        newCurrentTurn = prev;
+      }
+
+      allTurns.remove(toRemove);
+
+      removeFromAllPanels(toRemove);
+
+      toRemoves.add(toRemove);
+    }
+
+    return newCurrentTurn;
+  }
+
+  protected void removeFromAllPanels(T toRemove) {}
 
   List<T> getAllTurns() {
     return allTurns;

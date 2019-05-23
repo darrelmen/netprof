@@ -30,6 +30,7 @@
 package mitll.langtest.server.services;
 
 import mitll.langtest.client.custom.dialog.CreateDialogDialog;
+import mitll.langtest.client.dialog.EditorTurn;
 import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.services.DialogService;
 import mitll.langtest.server.database.exercise.ISection;
@@ -256,10 +257,16 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    * @param exid
    * @return
    * @throws DominoSessionException
+   * @see mitll.langtest.client.dialog.DialogEditor#deleteCurrentTurnOrPair(EditorTurn)
    */
   public List<Integer> deleteATurnOrPair(int projid, int dialogID, int exid) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     return db.getDialogDAO().deleteExercise(projid, dialogID, exid);
+  }
+
+  public boolean deleteCoreExercise(int dialogID, int exid) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    return db.getDialogDAO().deleteCoreExercise(dialogID, exid);
   }
 
   /**

@@ -53,6 +53,9 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
   private TurnAddDelete turnAddDelete;
   private ExerciseController<?> controller;
   private  int dialogID;
+
+  public static final int WIDTH_TO_USE = 210;
+
   private static final boolean DEBUG = false;
 
   CoreEditorTurn(ExerciseController<?> controller,
@@ -72,7 +75,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     this.editableTurnHelper = new EditableTurnHelper(language, this, vocab, this) {
       @Override
       protected int getTextBoxWidth() {
-        return 270;
+        return WIDTH_TO_USE;
       }
     };
     editableTurnHelper.setPlaceholder(isInterpreter, ITurnContainer.COLUMNS.RIGHT);

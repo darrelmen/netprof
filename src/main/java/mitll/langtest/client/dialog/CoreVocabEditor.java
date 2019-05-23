@@ -32,26 +32,31 @@ package mitll.langtest.client.dialog;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.user.client.Timer;
+import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.IFocusable;
-import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.SimpleTurn;
+import mitll.langtest.shared.dialog.DialogExChangeResponse;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.client.custom.INavigation.VIEWS.CORE_EDITOR;
 import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
+import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.UNK;
 
-public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocusable, IFocusListener, IEditableTurnContainer<CoreEditorTurn> {
+public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn> implements IFocusable, IFocusListener, IEditableTurnContainer<CoreEditorTurn> {
   private final Logger logger = Logger.getLogger("CoreVocabEditor");
 
   private final boolean isInModal;
@@ -108,29 +113,31 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
   }
 
   @NotNull
-  protected DivWidget getTurns(IDialog dialog) {
-    DivWidget turns = super.getTurns(dialog);
+  public DivWidget getTurns(IDialog dialog) {
     DivWidget leftRight = new DivWidget();
     leftRight.setWidth("100%");
     leftRight.addStyleName("inlineFlex");
 
-    leftRight.add(turns);
-    turns.setWidth("60%");
+    {
+      TurnViewHelper<SimpleTurn> leftHelper = getLeftHelper();
+      DivWidget turns = leftHelper.getTurns(dialog);
+      turns.setWidth("60%");
+      leftRight.add(turns);
+    }
 
-    DivWidget right = new DivWidget();
-    right.setWidth("40%");
+//    leftRight.add(coreVocabTurns);
+    DivWidget coreVocabTurns = super.getTurns(dialog);
+    coreVocabTurns.setWidth("40%");
+    styleTurnContainer(coreVocabTurns);
+    leftRight.add(coreVocabTurns);
 
-    styleTurnContainer(right);
-
-    leftRight.add(right);
-
-
-    List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
-    List<ClientExercise> toUse = coreVocabulary.isEmpty() ? new ArrayList<>() : coreVocabulary;
-    if (toUse.isEmpty()) toUse.add(new Exercise());
-
-    allTurns.clear();
-    addTurnForEachCoreExercise(right, coreVocabulary);
+//
+//    List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
+//    List<ClientExercise> toUse = coreVocabulary.isEmpty() ? new ArrayList<>() : coreVocabulary;
+//    if (toUse.isEmpty()) toUse.add(new Exercise());
+//
+//    allTurns.clear();
+//    addTurnForEachCoreExercise(right, coreVocabulary);
 
 /*
     Language languageInfo = controller.getLanguageInfo();
@@ -150,10 +157,41 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
     return leftRight;
   }
 
+  private TurnViewHelper<SimpleTurn> getLeftHelper() {
+
+    return new TurnViewHelper<SimpleTurn>(controller, CORE_EDITOR) {
+      @NotNull
+      @Override
+      protected SimpleTurn reallyGetTurnPanel(ClientExercise clientExercise, ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
+        return new SimpleTurn(clientExercise, columns, false);
+      }
+
+      @Override
+      protected void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
+        rowOne.clear();
+        List<ClientExercise> exercises = dialog.getExercises();
+        exercises = exercises.stream().filter(exercise ->
+            !exercise.hasEnglishAttr() && !exercise.getForeignLanguage().isEmpty()).collect(Collectors.toList());
+        addTurnForEachExercise(rowOne, left, right, exercises);
+      }
+
+    };
+  }
+
 
   @Override
   public void addTurnForSameSpeaker(CoreEditorTurn editorTurn) {
+    controller.getDialogService().addEmptyCoreExercise(getDialogID(), -1, new AsyncCallback<DialogExChangeResponse>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("adding core vocab to a dialog.", caught);
+      }
 
+      @Override
+      public void onSuccess(DialogExChangeResponse result) {
+        addTurns(result.getUpdated(), result.getChanged(), -1, turnContainer);
+      }
+    });
   }
 
   @Override
@@ -163,7 +201,60 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
 
   @Override
   public void deleteCurrentTurnOrPair(CoreEditorTurn currentTurn) {
+    int exID = currentTurn.getExID();
+    logger.info("deleteCurrentTurnOrPair : " + "\n\tcurrent turn " + exID);
+    currentTurn.getElement().getStyle().setOpacity(0.5);
 
+    controller.getDialogService().deleteCoreExercise(
+        getDialogID(),
+        exID,
+        new AsyncCallback<Boolean>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("deleting turns in a dialog.", caught);
+          }
+
+          @Override
+          public void onSuccess(Boolean resp) {
+            if (resp) {
+              gotDeleteResponse(exID);
+            } else logger.warning("huh?");
+          }
+        });
+  }
+
+  private void gotDeleteResponse(int exid) {
+    Set<CoreEditorTurn> toRemove = new HashSet<>();
+
+    CoreEditorTurn newCurrentTurnCandidate = null;
+
+
+    CoreEditorTurn newCurrentTurn = deleteTurn(exid, toRemove);
+    if (newCurrentTurnCandidate == null) newCurrentTurnCandidate = newCurrentTurn;
+
+
+    // we deleted the current turn!
+    final CoreEditorTurn fnewCurrentTurnCandidate = newCurrentTurnCandidate;
+    final Set<CoreEditorTurn> ftoRemove = toRemove;
+
+    // wait for animation to run before blowing it away...
+    com.google.gwt.user.client.Timer currentTimer = new Timer() {
+      @Override
+      public void run() {
+        ftoRemove.forEach(CoreVocabEditor.this::removeFromContainer);
+
+        if (fnewCurrentTurnCandidate != null) {
+          logger.info("new current now " + fnewCurrentTurnCandidate.getExID());// + " " + fnewCurrentTurnCandidate.getText());
+//          removeMarkCurrent();
+//          setCurrentTurn(fnewCurrentTurnCandidate);
+//          markCurrent();
+          fnewCurrentTurnCandidate.grabFocus();
+        } else {
+          logger.info("not messing with current turn...");
+        }
+      }
+    };
+    currentTimer.schedule(500);
   }
 
   /**
@@ -177,21 +268,21 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
     List<ClientExercise> updatedExercises = updated.getExercises();
 
     for (ClientExercise clientExercise : changed) {
-      CoreEditorTurn turn = addCoreTurn(turnContainer, clientExercise, updatedExercises.indexOf(clientExercise));
+      CoreEditorTurn turn = addTurn(turnContainer, clientExercise, UNK, UNK, updatedExercises.indexOf(clientExercise));
       turn.addStyleName("opacity-target");
     }
 
     // makeNextTheCurrentTurn(getNextTurn(exid));
   }
 
-  private void addTurnForEachCoreExercise(DivWidget rowOne, List<ClientExercise> exercises) {
+ /* private void addTurnForEachCoreExercise(DivWidget rowOne, List<ClientExercise> exercises) {
     int index = 0;
     logger.info("addTurnForEachExercise got " + exercises.size());
     for (ClientExercise clientExercise : exercises) {
       addCoreTurn(rowOne, clientExercise, index);
       index++;
     }
-  }
+  }*/
 
   /**
    * @param rowOne
@@ -199,7 +290,7 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
    * @param index
    * @see #addTurnForEachExercise(DivWidget, String, String, List)
    */
-  private CoreEditorTurn addCoreTurn(DivWidget rowOne,
+/*  private CoreEditorTurn addCoreTurn(DivWidget rowOne,
                                      ClientExercise clientExercise,
                                      int index) {
     CoreEditorTurn turn = getCoreTurnPanel(clientExercise);
@@ -209,9 +300,9 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
     rowOne.insert(turn, index);
 
     return turn;
-  }
+  }*/
 
-  @NotNull
+/*  @NotNull
   CoreEditorTurn getCoreTurnPanel(ClientExercise clientExercise) {
     CoreEditorTurn turn = new CoreEditorTurn(
         controller,
@@ -222,8 +313,7 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
         getDialogID());
     turn.addWidgets(true, false, PhonesChoices.HIDE, EnglishDisplayChoices.SHOW);
     return turn;
-  }
-
+  }*/
   protected void addControls(DivWidget controlAndSpeakers) {
   }
 
@@ -243,15 +333,23 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
   @Override
   protected void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
     rowOne.clear();
-    List<ClientExercise> exercises = dialog.getExercises();
-    exercises = exercises.stream().filter(exercise ->
-        !exercise.hasEnglishAttr() && !exercise.getForeignLanguage().isEmpty()).collect(Collectors.toList());
-    addTurnForEachExercise(rowOne, left, right, exercises);
+    List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
+    List<ClientExercise> toUse = coreVocabulary.isEmpty() ? new ArrayList<>() : coreVocabulary;
+    if (toUse.isEmpty()) toUse.add(new Exercise());
+
+    addTurnForEachExercise(rowOne, left, right, toUse);
   }
+
 
   @NotNull
   @Override
-  protected SimpleTurn reallyGetTurnPanel(ClientExercise clientExercise, ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
-    return new SimpleTurn(clientExercise, columns, false);
+  protected CoreEditorTurn reallyGetTurnPanel(ClientExercise clientExercise, ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
+    return new CoreEditorTurn(
+        controller,
+        this,
+        clientExercise,
+        controller.getLanguageInfo(),
+        false,
+        getDialogID());
   }
 }

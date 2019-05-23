@@ -59,7 +59,7 @@ public class PerformViewHelper<T extends ObscureRecordDialogExercisePanel> exten
    */
   @NotNull
   @Override
-  protected DivWidget getTurns(IDialog dialog) {
+  public DivWidget getTurns(IDialog dialog) {
     DivWidget turns = super.getTurns(dialog);
     Scheduler.get().scheduleDeferred(this::obscureRespTurns);
     return turns;

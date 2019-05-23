@@ -287,7 +287,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
         });
   }
 
-  protected void gotDeleteResponse(List<Integer> ids) {
+  private void gotDeleteResponse(List<Integer> ids) {
     Set<EditorTurn> toRemove = new HashSet<>();
 
     EditorTurn newCurrentTurnCandidate = null;

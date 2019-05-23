@@ -66,7 +66,7 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscu
    */
   @NotNull
   @Override
-  protected DivWidget getTurns(IDialog dialog) {
+  public DivWidget getTurns(IDialog dialog) {
     dialog.getCoreVocabulary().forEach(clientExercise -> exidToShell.put(clientExercise.getOldID(), clientExercise));
     DivWidget turns = super.getTurns(dialog);
     Scheduler.get().scheduleDeferred(this::obscureRespTurns);

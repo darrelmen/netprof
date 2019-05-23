@@ -82,6 +82,7 @@ public interface DialogService extends RemoteService {
   boolean delete(int projid, int id) throws DominoSessionException;
 
   DialogExChangeResponse addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException;
+  DialogExChangeResponse addEmptyCoreExercise(int dialogID, int afterExid) throws DominoSessionException;
 
   /**
    * @see RehearseViewHelper#setSession
@@ -101,4 +102,5 @@ public interface DialogService extends RemoteService {
   List<IDialogSession> getDialogSessions(int userid, int dialogid) throws DominoSessionException;
 
   List<Integer> deleteATurnOrPair(int projid, int dialogID, int exid) throws DominoSessionException;
+  boolean deleteCoreExercise(int dialogID, int exid) throws DominoSessionException;
 }

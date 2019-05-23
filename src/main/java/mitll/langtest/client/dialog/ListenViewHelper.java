@@ -157,7 +157,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   @NotNull
-  protected DivWidget getTurns(IDialog dialog) {
+  public DivWidget getTurns(IDialog dialog) {
     DivWidget turns = super.getTurns(dialog);
     markFirstTurn();
     return turns;
@@ -167,8 +167,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @param exid
    * @see DialogEditor#deleteCurrentTurnOrPair
    */
-  T deleteTurn(int exid, Set<T> toRemoves) {
-    // List<T> collect = allTurns.stream().filter(t -> t.getExID() == exid).limit(1).collect(Collectors.toList());
+ /* T deleteTurn(int exid, Set<T> toRemoves) {
     T toRemove = getTurnByID(exid);
     T newCurrentTurn = null;
     if (toRemove == null) {
@@ -178,9 +177,6 @@ public class ListenViewHelper<T extends ITurnPanel>
       // fade it out for a second to show it disappearing...
       ((Widget) toRemove).addStyleName("opacity-out-target");
 
-//      T currentTurn = getCurrentTurn();
-//
-//      if (toRemove == currentTurn) {
       logger.info("deleteTurn removing current turn " + currentTurn.getExID());
 
       T prev = getPrev(toRemove);
@@ -192,25 +188,22 @@ public class ListenViewHelper<T extends ITurnPanel>
         logger.info("deleteTurn now prev " + prev.getExID());
         newCurrentTurn = prev;
       }
-//        T currentTurn1 = getCurrentTurn();
-//        logger.info("deleteTurn now current turn " + (currentTurn1 == null ? "NULL" : currentTurn1.getExID()));
-//      } else {
-//        logger.info("deleteTurn skip since current turn " + currentTurn.getExID() + " : " +currentTurn.getText());
-//
-//        //newCurrentTurn = currentTurn;
-//      }
 
       allTurns.remove(toRemove);
-      leftTurnPanels.remove(toRemove);
-      rightTurnPanels.remove(toRemove);
-      promptTurns.remove(toRemove);
-      middleTurnPanels.remove(toRemove);
+
+      removeFromAllPanels(toRemove);
 
       toRemoves.add(toRemove);
-      //removeFromContainer(toRemove);
     }
 
     return newCurrentTurn;
+  }*/
+
+  @Override protected void removeFromAllPanels(T toRemove) {
+    leftTurnPanels.remove(toRemove);
+    rightTurnPanels.remove(toRemove);
+    promptTurns.remove(toRemove);
+    middleTurnPanels.remove(toRemove);
   }
 
   /**

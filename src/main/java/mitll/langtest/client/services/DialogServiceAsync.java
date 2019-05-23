@@ -59,4 +59,8 @@ public interface DialogServiceAsync {
   void addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker, AsyncCallback<DialogExChangeResponse> async);
 
   void deleteATurnOrPair(int projid, int dialogID, int exid, AsyncCallback<List<Integer>> async);
+
+  void deleteCoreExercise(int dialogID, int exid, AsyncCallback<Boolean> async);
+
+  void addEmptyCoreExercise(int dialogID, int afterExid, AsyncCallback<DialogExChangeResponse> async);
 }
