@@ -99,17 +99,17 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn> implements I
 
   @Override
   public void gotBlur() {
-
+    logger.info("gotBlur");
   }
 
   @Override
   public void gotFocus() {
-
+    logger.info("gotFocus");
   }
 
   @Override
   public void gotKey(KeyUpEvent event) {
-
+    logger.info("gotKey");
   }
 
   @NotNull
@@ -158,7 +158,6 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn> implements I
   }
 
   private TurnViewHelper<SimpleTurn> getLeftHelper() {
-
     return new TurnViewHelper<SimpleTurn>(controller, CORE_EDITOR) {
       @NotNull
       @Override
@@ -174,14 +173,14 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn> implements I
             !exercise.hasEnglishAttr() && !exercise.getForeignLanguage().isEmpty()).collect(Collectors.toList());
         addTurnForEachExercise(rowOne, left, right, exercises);
       }
-
     };
   }
 
-
   @Override
   public void addTurnForSameSpeaker(CoreEditorTurn editorTurn) {
-    controller.getDialogService().addEmptyCoreExercise(getDialogID(), -1, new AsyncCallback<DialogExChangeResponse>() {
+    int exID = editorTurn.getExID();
+    int index = allTurns.indexOf(editorTurn);
+    controller.getDialogService().addEmptyCoreExercise(getDialogID(), exID, new AsyncCallback<DialogExChangeResponse>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("adding core vocab to a dialog.", caught);
@@ -189,7 +188,7 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn> implements I
 
       @Override
       public void onSuccess(DialogExChangeResponse result) {
-        addTurns(result.getUpdated(), result.getChanged(), -1, turnContainer);
+        addTurns(result.getUpdated(), result.getChanged(), index+1, turnContainer);
       }
     });
   }
@@ -260,15 +259,13 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn> implements I
   /**
    * @param exercises
    * @param afterThisTurn
-   * @see DialogEditor#getAsyncForNewTurns
+   * @see #getAsyncForNewTurns
    */
-  private void addTurns(IDialog updated, List<ClientExercise> changed, int exid, DivWidget turnContainer) {
+  private void addTurns(IDialog updated, List<ClientExercise> changed, int index, DivWidget turnContainer) {
     this.setDialog(updated);
 
-    List<ClientExercise> updatedExercises = updated.getExercises();
-
     for (ClientExercise clientExercise : changed) {
-      CoreEditorTurn turn = addTurn(turnContainer, clientExercise, UNK, UNK, updatedExercises.indexOf(clientExercise));
+      CoreEditorTurn turn = addTurn(turnContainer, clientExercise, UNK, UNK, index);
       turn.addStyleName("opacity-target");
     }
 
@@ -334,10 +331,16 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn> implements I
   protected void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
     rowOne.clear();
     List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
-    List<ClientExercise> toUse = coreVocabulary.isEmpty() ? new ArrayList<>() : coreVocabulary;
-    if (toUse.isEmpty()) toUse.add(new Exercise());
 
-    addTurnForEachExercise(rowOne, left, right, toUse);
+    if (coreVocabulary == null) {
+      logger.warning("huh? core vocab is null???");
+    } else {
+      coreVocabulary.forEach(clientExercise -> logger.info("Got " + clientExercise.getID() + " " + clientExercise.getForeignLanguage()));
+      List<ClientExercise> toUse = coreVocabulary.isEmpty() ? new ArrayList<>() : coreVocabulary;
+      if (toUse.isEmpty()) toUse.add(new Exercise());
+
+      addTurnForEachExercise(rowOne, left, right, toUse);
+    }
   }
 
 

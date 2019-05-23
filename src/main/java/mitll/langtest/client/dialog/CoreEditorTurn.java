@@ -38,6 +38,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.SimpleTurn;
+import mitll.langtest.shared.dialog.DialogExChangeResponse;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVWordsAndUpdate;
@@ -46,17 +47,17 @@ import org.jetbrains.annotations.NotNull;
 import java.util.logging.Logger;
 
 class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteListener {
-  private final Logger logger = Logger.getLogger("MySimpleTurn");
+  private final Logger logger = Logger.getLogger("CoreEditorTurn");
 
   private CoreVocabEditor coreVocabEditor;
   private EditableTurnHelper editableTurnHelper;
   private TurnAddDelete turnAddDelete;
   private ExerciseController<?> controller;
-  private  int dialogID;
+  private int dialogID;
 
   public static final int WIDTH_TO_USE = 210;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   CoreEditorTurn(ExerciseController<?> controller,
                  CoreVocabEditor coreVocabEditor,
@@ -68,6 +69,8 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     this.controller = controller;
     this.coreVocabEditor = coreVocabEditor;
     this.dialogID = dialogID;
+
+    logger.info("core " + vocab.getID() + " " + vocab.getForeignLanguage());
 
     prev = vocab.getForeignLanguage();
     this.turnAddDelete = new TurnAddDelete(this);
@@ -92,8 +95,11 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     styleMe(widgets);
     add(widgets);
     addStyleName("inlineFlex");
-    add(turnAddDelete.addAddTurnButton());
-    add(turnAddDelete.addDeleteButton(false));
+    DivWidget buttons = new DivWidget();
+    add(buttons);
+    buttons.addStyleName("inlineFlex");
+    buttons.add(turnAddDelete.addAddTurnButton());
+    buttons.add(turnAddDelete.addDeleteButton(false));
     return widgets;
   }
 
@@ -151,7 +157,32 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       prev = s;
       //  int audioID = getAudioID();
       if (DEBUG) logger.info("gotBlur " + getExID() + " = " + prev);
-      updateText(s, this, false);
+      maybeCreateFirst(s, this, false);
+    }
+  }
+
+  private void maybeCreateFirst(String s, CoreEditorTurn outer, boolean moveToNextTurn) {
+    if (getExID() == -1) {
+      controller.getDialogService().addEmptyCoreExercise(dialogID, -1, new AsyncCallback<DialogExChangeResponse>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("addEmptyCoreExercise ?", caught);
+        }
+
+        @Override
+        public void onSuccess(DialogExChangeResponse result) {
+          if (result.getChanged().isEmpty()) {
+            logger.warning("huh? didn't add");
+          } else {
+            exercise = result.getChanged().get(0);
+            logger.info("ex now " + exercise);
+            updateText(s, outer, false);
+          }
+        }
+      });
+    }
+    else {
+      updateText(s, outer, false);
     }
   }
 
@@ -217,11 +248,6 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
   }
 
   @Override
-  public void gotFocus() {
-    logger.info("gotFocus...");
-  }
-
-  @Override
   public void gotKey(KeyUpEvent event) {
     NativeEvent ne = event.getNativeEvent();
 
@@ -233,12 +259,18 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       logger.info("gotKey : got enter on " + this.getExID());// + " : " + columns);
 
       if (s.equals(prev)) {
-//        turnContainer.gotForward(this);
+        logger.warning("deal with making a new ex");
+//        coreVocabEditor.gotForward(this);
       } else {
         prev = s;
         logger.info("gotBlur " + getExID() + " = " + prev);
-        updateText(s, this, true);
+        maybeCreateFirst(s, this, true);
       }
     }
+  }
+
+  @Override
+  public void gotFocus() {
+    logger.info("gotFocus...");
   }
 }
