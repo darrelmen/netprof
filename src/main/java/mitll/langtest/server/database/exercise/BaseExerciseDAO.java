@@ -36,14 +36,21 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.shared.common.DominoSessionException;
+import mitll.langtest.shared.dialog.IDialog;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.project.ModelType;
+import mitll.langtest.shared.project.OOVWordsAndUpdate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private static final Logger logger = LogManager.getLogger(BaseExerciseDAO.class);
@@ -53,6 +60,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   private static final boolean DEBUG = false;
   private static final String SEMI = ";";
   private static final int MAX_WARNS = Integer.MAX_VALUE;
+  private static final String REGEX = " ";  // no break space!
+  private static final String TIC_REGEX = "&#39;";
 
   /**
    * @see
@@ -631,5 +640,71 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
   public boolean update(CommonExercise toChange) {
     return false;
+  }
+
+  /**
+   *
+   * @param project
+   * @param dialogID
+   * @param exid
+   * @param audioID
+   * @param content
+   * @return
+   */
+  public OOVWordsAndUpdate updateText(Project project, int dialogID, int exid, int audioID, String content) {
+    CommonExercise exerciseByID = project.getExerciseByID(exid);
+    if (exerciseByID == null) {
+      logger.warn("updateText " + "can't find " + exid);
+
+      return new OOVWordsAndUpdate();
+    } else {
+      content = getTrim(content);
+
+      exerciseByID.getMutable().setForeignLanguage(content);
+
+      boolean update = project.getExerciseDAO().update(exerciseByID);
+
+      if (update) {
+        CommonExercise exerciseByID1 = project.getExerciseByID(exid);
+        logger.info("updateText " +
+            "\n\tnow        '" + exerciseByID1.getForeignLanguage() + "'" +
+            "\n\tnormalized '" + exerciseByID1.getNormalizedFL() + "'");
+
+        IDialog dialog = project.getDialog(dialogID);
+        if (dialog == null) {
+          logger.warn("updateText can't find dialog ID " + dialogID);
+        } else {
+          List<ClientExercise> collect1 = dialog.getExercises().stream().filter(exercise -> exercise.getID() == exid).collect(Collectors.toList());
+          if (collect1.isEmpty()) {
+            logger.warn("updateText can't find ex id  " + exid);
+          } else {
+            // not really sure this is needed
+            collect1.get(0).asCommon().getMutable().setForeignLanguage(content);
+//
+//            if (audioID != -1) {  // maybe we have text before the audio...
+//              if (!audioDAO.updateTranscript(audioID, content)) {
+//                logger.warn("updateText didn't update audio id# " + audioID + " with " + content);
+//              }
+//            } else {
+//              logger.info("updateText no audio id...");
+//            }
+          }
+
+          if (audioID != -1) {  // maybe we have text before the audio...
+            if (!audioDAO.updateTranscript(audioID, content)) {
+              logger.warn("updateText didn't update audio id# " + audioID + " with " + content);
+            }
+          } else {
+            logger.info("updateText no audio id...");
+          }
+        }
+      }
+
+      return new OOVWordsAndUpdate(update, new HashSet<>(), project.getModelType() == ModelType.HYDRA);
+    }
+  }
+
+  private String getTrim(String part) {
+    return part.replaceAll(REGEX, " ").replaceAll(TIC_REGEX, "'").trim();
   }
 }

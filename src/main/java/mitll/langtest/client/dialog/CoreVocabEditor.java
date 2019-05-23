@@ -32,7 +32,6 @@ package mitll.langtest.client.dialog;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -40,20 +39,19 @@ import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.IFocusable;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.SimpleTurn;
-import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.Exercise;
-import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
 
-public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocusable {
+public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocusable, IFocusListener, IEditableTurnContainer<CoreEditorTurn> {
   private final Logger logger = Logger.getLogger("CoreVocabEditor");
 
   private final boolean isInModal;
@@ -64,9 +62,27 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
     isInModal = theDialog != null;
   }
 
+  @Override
+  protected int getDialogFromURL() {
+    return getDialogID();
+  }
+
   @NotNull
   protected INavigation.VIEWS getNextView() {
     return LISTEN;
+  }
+
+  @Override
+  protected void styleTurnContainer(DivWidget rowOne) {
+    super.styleTurnContainer(rowOne);
+    if (isInModal) {
+      rowOne.getElement().getStyle().setOverflow(Style.Overflow.SCROLL);
+      setFixedHeight(rowOne);
+    }
+  }
+
+  private void setFixedHeight(DivWidget rowOne) {
+    rowOne.setHeight(390 + "px");
   }
 
   @Override
@@ -74,6 +90,21 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
     child.add(dialogHeader =
         new DialogHeader(controller,
             INavigation.VIEWS.CORE_EDITOR, isInModal ? null : getPrevView(), isInModal ? null : getNextView()).getHeader(dialog));
+  }
+
+  @Override
+  public void gotBlur() {
+
+  }
+
+  @Override
+  public void gotFocus() {
+
+  }
+
+  @Override
+  public void gotKey(KeyUpEvent event) {
+
   }
 
   @NotNull
@@ -85,12 +116,23 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
 
     leftRight.add(turns);
     turns.setWidth("60%");
+
     DivWidget right = new DivWidget();
     right.setWidth("40%");
+
     styleTurnContainer(right);
 
     leftRight.add(right);
 
+
+    List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
+    List<ClientExercise> toUse = coreVocabulary.isEmpty() ? new ArrayList<>() : coreVocabulary;
+    if (toUse.isEmpty()) toUse.add(new Exercise());
+
+    allTurns.clear();
+    addTurnForEachCoreExercise(right, coreVocabulary);
+
+/*
     Language languageInfo = controller.getLanguageInfo();
     boolean isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
 
@@ -104,8 +146,82 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
       right.add(w);
       w.addWidgets(true, false, PhonesChoices.SHOW, EnglishDisplayChoices.SHOW);
 
-    }
+    }*/
     return leftRight;
+  }
+
+
+  @Override
+  public void addTurnForSameSpeaker(CoreEditorTurn editorTurn) {
+
+  }
+
+  @Override
+  public void addTurnForOtherSpeaker(CoreEditorTurn editorTurn) {
+
+  }
+
+  @Override
+  public void deleteCurrentTurnOrPair(CoreEditorTurn currentTurn) {
+
+  }
+
+  /**
+   * @param exercises
+   * @param afterThisTurn
+   * @see DialogEditor#getAsyncForNewTurns
+   */
+  private void addTurns(IDialog updated, List<ClientExercise> changed, int exid, DivWidget turnContainer) {
+    this.setDialog(updated);
+
+    List<ClientExercise> updatedExercises = updated.getExercises();
+
+    for (ClientExercise clientExercise : changed) {
+      CoreEditorTurn turn = addCoreTurn(turnContainer, clientExercise, updatedExercises.indexOf(clientExercise));
+      turn.addStyleName("opacity-target");
+    }
+
+    // makeNextTheCurrentTurn(getNextTurn(exid));
+  }
+
+  private void addTurnForEachCoreExercise(DivWidget rowOne, List<ClientExercise> exercises) {
+    int index = 0;
+    logger.info("addTurnForEachExercise got " + exercises.size());
+    for (ClientExercise clientExercise : exercises) {
+      addCoreTurn(rowOne, clientExercise, index);
+      index++;
+    }
+  }
+
+  /**
+   * @param rowOne
+   * @param clientExercise
+   * @param index
+   * @see #addTurnForEachExercise(DivWidget, String, String, List)
+   */
+  private CoreEditorTurn addCoreTurn(DivWidget rowOne,
+                                     ClientExercise clientExercise,
+                                     int index) {
+    CoreEditorTurn turn = getCoreTurnPanel(clientExercise);
+
+    allTurns.add(index, turn);
+
+    rowOne.insert(turn, index);
+
+    return turn;
+  }
+
+  @NotNull
+  CoreEditorTurn getCoreTurnPanel(ClientExercise clientExercise) {
+    CoreEditorTurn turn = new CoreEditorTurn(
+        controller,
+        this,
+        clientExercise,
+        controller.getLanguageInfo(),
+        false,
+        getDialogID());
+    turn.addWidgets(true, false, PhonesChoices.HIDE, EnglishDisplayChoices.SHOW);
+    return turn;
   }
 
   protected void addControls(DivWidget controlAndSpeakers) {
@@ -113,6 +229,7 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
 
   @Override
   public void grabFocus() {
+    if (!getAllTurns().isEmpty()) getAllTurns().iterator().next().grabFocus();
   }
 
   /**
@@ -136,58 +253,5 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
   @Override
   protected SimpleTurn reallyGetTurnPanel(ClientExercise clientExercise, ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
     return new SimpleTurn(clientExercise, columns, false);
-  }
-
-  private static class MySimpleTurn extends SimpleTurn implements IFocusListener {
-    private final Logger logger = Logger.getLogger("MySimpleTurn");
-    private EditableTurnHelper editableTurnHelper;
-
-     MySimpleTurn(ClientExercise vocab, Language language, boolean isInterpreter) {
-      super(vocab, ITurnContainer.COLUMNS.RIGHT, false);
-
-      this.editableTurnHelper = new EditableTurnHelper(language, this, vocab, this) {
-        @Override
-        protected int getTextBoxWidth() {
-          return 270;
-        }
-      };
-      editableTurnHelper.setPlaceholder(isInterpreter, ITurnContainer.COLUMNS.RIGHT);
-    }
-
-    @Override
-    public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
-//      HTML html = new HTML(exercise.getForeignLanguage());
-//      html.addStyleName("flfont");
-//      html.getElement().getStyle().setPadding(10, Style.Unit.PX);
-      logger.info("addWidgets : got '" + exercise.getForeignLanguage() + "' for " + exercise.getID());
-      DivWidget widgets = new DivWidget();
-      widgets.add(getTextBox());
-      styleMe(widgets);
-      add(widgets);
-      return widgets;
-    }
-
-    @NotNull
-    protected DivWidget getTextBox() {
-      DivWidget textBoxContainer = editableTurnHelper.getTextBox();
-      // textBoxContainer.add(getTurnFeedback());
-      return textBoxContainer;
-    }
-
-
-    @Override
-    public void gotBlur() {
-
-    }
-
-    @Override
-    public void gotFocus() {
-
-    }
-
-    @Override
-    public void gotKey(KeyUpEvent event) {
-
-    }
   }
 }

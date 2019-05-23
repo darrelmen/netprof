@@ -306,6 +306,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     child.add(dialogHeader = new DialogHeader(controller, thisView, getPrevView(), getNextView()).getHeader(dialog));
   }
 
+
   /**
    * @param dialog
    * @return
@@ -571,22 +572,12 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     int index = 0;
     logger.info("addTurnForEachExercise got " + exercises.size());
     for (ClientExercise clientExercise : exercises) {
-      ITurnContainer.COLUMNS currentCol = getColumnForEx(left, right, clientExercise);
       ITurnContainer.COLUMNS prevCol = prev == null ? ITurnContainer.COLUMNS.UNK : getColumnForEx(left, right, prev);
-      addTurn(rowOne, clientExercise, currentCol, prevCol, index);
+      addTurn(rowOne, clientExercise, getColumnForEx(left, right, clientExercise), prevCol, index);
       prev = clientExercise;
       index++;
     }
-
-    // populateColumnTurnLists();
-
-    // addToColumnPanelLists(columns, turn);
   }
-
-//  void populateColumnTurnLists() {
-//    allTurns.forEach(turn -> addToColumnPanelLists(
-//        (turn.isLeft() ? COLUMNS.LEFT : turn.isRight() ? COLUMNS.RIGHT : COLUMNS.MIDDLE), turn));
-//  }
 
   ITurnContainer.COLUMNS getColumnForEx(String left, String right, ClientExercise clientExercise) {
     String speaker = clientExercise == null ? "" : clientExercise.getSpeaker();
@@ -621,8 +612,11 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    * @param index
    * @see #addTurnForEachExercise(DivWidget, String, String, List)
    */
-  T addTurn(DivWidget rowOne, ClientExercise clientExercise,
-            ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
+  T addTurn(DivWidget rowOne,
+            ClientExercise clientExercise,
+            ITurnContainer.COLUMNS columns,
+            ITurnContainer.COLUMNS prevColumn,
+            int index) {
     T turn = getTurnPanel(clientExercise, columns, prevColumn, index);
 
     allTurns.add(index, turn);
@@ -689,4 +683,46 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     int i1 = i - 1;
     return i1 < 0 ? null : seq.get(i1);
   }
+
+  protected void reloadDialog() {
+    int projectID = controller.getProjectID();
+    if (projectID != -1) {
+      int dialogID = getDialogID();
+
+      logger.info("onUnload - reload the dialog on hydra/score1");
+      controller.getAudioService().reloadDialog(dialogID, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("reloading dialog.", caught);
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          logger.info("did reload on other server!");
+          controller.getExerciseService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              controller.handleNonFatalError("reloading dialog on netprof", caught);
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+              logger.info("did reload on netprof.");
+            }
+          });
+        }
+      });
+    }
+  }
+
+  @Nullable
+  protected ClientExercise getPrev(int exid, List<ClientExercise> updatedExercises) {
+    ClientExercise prev = null;
+    for (ClientExercise turn : updatedExercises) {
+      if (turn.getID() == exid) break;
+      prev = turn;
+    }
+    return prev;
+  }
+
 }

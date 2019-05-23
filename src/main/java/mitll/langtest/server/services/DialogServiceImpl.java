@@ -279,13 +279,14 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     db.getDialogDAO().update(dialog);
   }
 
-  public DialogExChangeResponse addEmptyExercises(int projid, int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException {
-    IDialog dialog = getProject(projid).getDialog(dialogID);
-//    IDialog oneDialog = getOneDialog(dialogID);
+  public DialogExChangeResponse addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
 
+    int projectForDialog = db.getDialogDAO().getProjectForDialog(dialogID);
+    IDialog dialog = getProject(projectForDialog).getDialog(dialogID);
     int before = dialog.getExercises().size();
 
-    List<ClientExercise> added = db.getDialogDAO().addEmptyExercises(dialog, getUserIDFromSessionOrDB(), afterExid, isLeftSpeaker, System.currentTimeMillis());
+    List<ClientExercise> added = db.getDialogDAO().addEmptyExercises(dialog, userIDFromSessionOrDB, afterExid, isLeftSpeaker, System.currentTimeMillis());
 
     int after = dialog.getExercises().size();
     if (dialog.getKind() == DialogType.INTERPRETER) {
@@ -295,5 +296,24 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     }
 
     return new DialogExChangeResponse(dialog, added);
+  }
+
+  public DialogExChangeResponse addEmptyCoreExercise(int dialogID, int afterExid) throws DominoSessionException {
+    int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
+
+    int projectForDialog = db.getDialogDAO().getProjectForDialog(dialogID);
+    IDialog dialog = getProject(projectForDialog).getDialog(dialogID);
+    int before = dialog.getCoreVocabulary().size();
+
+    ClientExercise added = db.getDialogDAO().addCoreVocab(dialog, userIDFromSessionOrDB, afterExid, System.currentTimeMillis());
+
+    int after = dialog.getCoreVocabulary().size();
+
+    if (after - before != 1) logger.error("before there were " + before + " but after add only " + after);
+
+    List<ClientExercise> objects = new ArrayList<>();
+    objects.add(added);
+
+    return new DialogExChangeResponse(dialog, objects);
   }
 }

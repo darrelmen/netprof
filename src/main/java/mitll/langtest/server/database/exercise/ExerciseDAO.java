@@ -32,10 +32,12 @@ package mitll.langtest.server.database.exercise;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
+import mitll.langtest.shared.project.OOVWordsAndUpdate;
 import mitll.npdata.dao.SlickExerciseNorm;
 import mitll.npdata.dao.SlickExercisePhone;
 import mitll.npdata.dao.SlickUpdateDominoPair;
@@ -97,4 +99,6 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   boolean update(CommonExercise toChange);
 
   CommonExercise forget(int id);
+
+  OOVWordsAndUpdate updateText(Project project, int dialogID, int exid, int audioID, String content);
 }

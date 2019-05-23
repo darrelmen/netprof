@@ -30,7 +30,6 @@
 package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -39,7 +38,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Focusable;
@@ -54,7 +52,6 @@ import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVWordsAndUpdate;
 import org.jetbrains.annotations.NotNull;
 
@@ -62,13 +59,12 @@ import java.util.Collection;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.MIDDLE;
-import static mitll.langtest.client.dialog.TurnViewHelper.SPEAKER_A;
-import static mitll.langtest.client.dialog.TurnViewHelper.SPEAKER_B;
 
 /**
  *
  */
-public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IRehearseView, IRecordingTurnPanel, IFocusListener {
+public class EditorTurn extends PlayAudioExercisePanel
+    implements ITurnPanel, IRehearseView, IRecordingTurnPanel, IFocusListener, AddDeleteListener {
   private final Logger logger = Logger.getLogger("EditorTurn");
 
   private static final int TURN_WIDTH = 97;
@@ -77,9 +73,10 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   private final TurnPanelDelegate turnPanelDelegate;
   private final ClientExercise clientExercise;
 
-  private final Language language;
+  //private final Language language;
   private final ExerciseController<?> controller;
   private final ITurnContainer<EditorTurn> turnContainer;
+  //private final IEditableTurnContainer<EditorTurn> editableTurnContainer;
   private final int dialogID;
   private String prev = "";
   private final ITurnContainer.COLUMNS columns;
@@ -96,8 +93,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   private boolean isDeleting = false;
 
   private EditableTurnHelper editableTurnHelper;
+  private TurnAddDelete turnAddDelete;
   private static final boolean DEBUG = false;
-
+  IEditableTurnContainer<EditorTurn> editableTurnContainer;
   /**
    * @param clientExercise
    * @param columns
@@ -112,6 +110,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
              boolean rightJustify,
              ExerciseController<?> controller,
              ITurnContainer<EditorTurn> turnContainer,
+             IEditableTurnContainer<EditorTurn> editableTurnContainer,
              int dialogID,
              boolean isFirstTurn,
              SessionManager sessionManager) {
@@ -133,6 +132,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
     this.isFirstTurn = isFirstTurn;
 
+    this.turnAddDelete = new TurnAddDelete(this);
     this.editableTurnHelper = new EditableTurnHelper(controller.getLanguageInfo(), this, clientExercise, this);
     editableTurnHelper.setPlaceholder(turnContainer.isInterpreter(), columns);
 
@@ -152,9 +152,10 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
     this.dialogID = dialogID;
     this.clientExercise = clientExercise;
-    this.language = controller.getLanguageInfo();
+    //this.language = controller.getLanguageInfo();
     this.controller = controller;
     this.turnContainer = turnContainer;
+    this.editableTurnContainer = editableTurnContainer;
     setId("EditorTurn_" + getExID());
 
     if (columns == MIDDLE) {
@@ -273,19 +274,14 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       }
       playAudioPanel.showPlayButton();
 
-      Widget playButton = playAudioPanel.getPlayButton();
-      removeFromTabSequence((Focusable) playButton);
-
-      buttonContainer.add(playButton);
-      playButton.addStyleName("floatRight");
-      addPressAndHoldStyleForRecordButton(playButton);
+      buttonContainer.add(getPlayButton(playAudioPanel));
       buttonContainer.getElement().getStyle().setMarginTop(3, Style.Unit.PX);
     }
 
     wrapper.add(buttonContainer);
 
     addPressAndHoldStyleForRecordButton(postAudioRecordButton);
-    removeFromTabSequence(postAudioRecordButton);
+    turnAddDelete.removeFromTabSequence(postAudioRecordButton);
 
     wrapper.add(getTextBox());
 
@@ -296,19 +292,29 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
     if (columns == MIDDLE || !turnContainer.isInterpreter()) {
       addStyleName("inlineFlex");
-      addAddTurnButton();
-      addDeleteButton();
+      add(turnAddDelete.addAddTurnButton());
+      add(turnAddDelete.addDeleteButton(isFirstTurn));
       addOtherTurn();
     }
     return wrapper;
   }
 
-  private void removeFromTabSequence(Focusable postAudioRecordButton) {
-    postAudioRecordButton.setTabIndex(-1);
+  @NotNull
+  private Widget getPlayButton(RecorderPlayAudioPanel playAudioPanel) {
+    Widget playButton = playAudioPanel.getPlayButton();
+    turnAddDelete.removeFromTabSequence((Focusable) playButton);
+
+    playButton.addStyleName("floatRight");
+    addPressAndHoldStyleForRecordButton(playButton);
+    return playButton;
   }
 
+//  private void removeFromTabSequence(Focusable postAudioRecordButton) {
+//    postAudioRecordButton.setTabIndex(-1);
+//  }
+
   @NotNull
-  protected DivWidget getTextBox() {
+  private DivWidget getTextBox() {
     DivWidget textBoxContainer = editableTurnHelper.getTextBox();
     textBoxContainer.add(getTurnFeedback());
     return textBoxContainer;
@@ -358,7 +364,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     recordAudioPanel.cancelRecording();
   }
 
-  private void addAddTurnButton() {
+/*  private void addAddTurnButton() {
     Button w = getTripleButton();
 
     w.addClickHandler(event -> gotPlus());
@@ -368,23 +374,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     tripleButtonStyle(w);
 
     add(w);
-  }
+  }*/
 
-  @NotNull
-  private Button getTripleButton() {
-    return new Button() {
-      @Override
-      protected void onAttach() {
-        int tabIndex = getTabIndex();
-        super.onAttach();
-
-        if (-1 == tabIndex) {
-          setTabIndex(-1);
-        }
-      }
-    };
-  }
-
+/*
   private void addDeleteButton() {
     Button w = getTripleButton();
 
@@ -401,12 +393,28 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     w.addBlurHandler(event -> deleteGotBlur());
     add(w);
   }
+*/
+
+/*  @NotNull
+  private Button getTripleButton() {
+    return new Button() {
+      @Override
+      protected void onAttach() {
+        int tabIndex = getTabIndex();
+        super.onAttach();
+
+        if (-1 == tabIndex) {
+          setTabIndex(-1);
+        }
+      }
+    };
+  }*/
 
   /**
    * So, if you get the focus and you're not last, move on to next
    * How can we distinguish between delete getting focus, just before buttton press
    */
-  private void deleteGotFocus() {
+  public void deleteGotFocus() {
     if (turnContainer.isLast(this)) {  // since you may be about to click it
       if (DEBUG) logger.info("deleteGotFocus - ");
       grabFocus();
@@ -415,6 +423,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     }
   }
 
+/*
   private void deleteGotBlur() {
     if (turnContainer.isLast(this)) {  // since you may be about to click it
       if (DEBUG) logger.info("deleteGotBlur - ");
@@ -424,10 +433,11 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       //  turnContainer.moveFocusToNext();
     }
   }
+*/
 
 
   private void addOtherTurn() {
-    Button w = getTripleButton();
+    Button w = turnAddDelete.getTripleButton();
 
     w.setType(ButtonType.INFO);
 
@@ -437,38 +447,42 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     //  logger.info("the column is " + toUseForArrow);
     w.setIcon(toUseForArrow == ITurnContainer.COLUMNS.LEFT ? IconType.ARROW_RIGHT : IconType.ARROW_LEFT);
 
-    tripleButtonStyle(w);
+    turnAddDelete.tripleButtonStyle(w);
 
     add(w);
   }
 
-  private void tripleButtonStyle(Button w) {
+ /* private void tripleButtonStyle(Button w) {
     tripleFirstStyle(w);
     //   w.addFocusHandler(event -> turnContainer.moveFocusToNext());
     removeFromTabSequence(w);
 //    logger.info("aftr " + getExID() + " " + w.getTabIndex());
-  }
+  }*/
 
+/*
   private void tripleFirstStyle(Button w) {
     addPressAndHoldStyle(w);
 
     w.addStyleName("topFiveMargin");
     w.addStyleName("leftFiveMargin");
   }
+*/
 
-  private void gotPlus() {
-    turnContainer.addTurnForSameSpeaker(this);
+  @Override
+  public void gotPlus() {
+    editableTurnContainer.addTurnForSameSpeaker(this);
   }
 
-  private void gotMinus() {
-    logger.info("gotMinus Got click on delete!");
-    turnContainer.deleteCurrentTurnOrPair(this);
+  @Override
+  public void gotMinus() {
+    editableTurnContainer.deleteCurrentTurnOrPair(this);
   }
 
   private void gotOtherSpeaker() {
-    turnContainer.addTurnForOtherSpeaker(this);
+    editableTurnContainer.addTurnForOtherSpeaker(this);
   }
 
+/*
   private void addPressAndHoldStyle(UIObject postAudioRecordButton) {
     Style style = postAudioRecordButton.getElement().getStyle();
     style.setProperty("borderRadius", 21 + "px");
@@ -477,6 +491,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     style.setMarginRight(5, Style.Unit.PX);
     style.setHeight(20, Style.Unit.PX);
   }
+*/
 
   private void addPressAndHoldStyleForRecordButton(UIObject postAudioRecordButton) {
     Style style = postAudioRecordButton.getElement().getStyle();
@@ -492,6 +507,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
    * @param wrapper
    * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
+/*
   private TextBox addTextBox() {
     // TODO : instead, make this a div contenteditable!
     TextBox w = new TextBox();
@@ -522,7 +538,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
     return w;
   }
-
+*/
   public void gotFocus() {
     if (DEBUG) {
       logger.info("gotFocus " + getExID());

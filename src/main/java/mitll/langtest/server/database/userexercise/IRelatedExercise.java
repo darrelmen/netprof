@@ -30,6 +30,7 @@
 package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.project.Project;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickRelatedExercise;
 
@@ -61,6 +62,11 @@ public interface IRelatedExercise extends IDAO {
 
   boolean insertPair(int after, int first, int second);
 
+  /**
+   * @see mitll.langtest.server.database.project.DialogPopulate#cleanDialog(Project)
+   * @param dialog
+   * @return
+   */
   int deleteRelatedForDialog(int dialog);
 
   /**

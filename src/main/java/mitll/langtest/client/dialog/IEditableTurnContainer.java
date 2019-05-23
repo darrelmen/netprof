@@ -27,36 +27,15 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.client.services;
+package mitll.langtest.client.dialog;
 
-import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.shared.dialog.DialogExChangeResponse;
-import mitll.langtest.shared.dialog.DialogSession;
-import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.dialog.IDialogSession;
-import mitll.langtest.shared.exercise.*;
+import mitll.langtest.client.scoring.ISimpleTurn;
+import mitll.langtest.client.scoring.ITurnPanel;
 
-import java.util.List;
+public interface IEditableTurnContainer<T extends ISimpleTurn> {
+  void addTurnForSameSpeaker(T editorTurn);
 
-public interface DialogServiceAsync {
-  void getTypeToValues(FilterRequest request, AsyncCallback<FilterResponse> async);
+  void addTurnForOtherSpeaker(T editorTurn);
 
-  <T extends IDialog> void getDialogs(ExerciseListRequest request, AsyncCallback<ExerciseListWrapper<T>> async);
-
-  void getDialog(int id, AsyncCallback<IDialog> async);
-
-  void addSession(DialogSession dialogSession, AsyncCallback<Integer> async);
-
-  void getDialogSessions(int userid, int dialogid, AsyncCallback<List<IDialogSession>> async);
-
-  void delete(int projid, int id, AsyncCallback<Boolean> async);
-
-
-  void addDialog(IDialog dialog, AsyncCallback<IDialog> async);
-
-  void update(IDialog dialog,AsyncCallback<Void> async);
-
-  void addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker, AsyncCallback<DialogExChangeResponse> async);
-
-  void deleteATurnOrPair(int projid, int dialogID, int exid, AsyncCallback<List<Integer>> async);
+  void deleteCurrentTurnOrPair(T currentTurn);
 }

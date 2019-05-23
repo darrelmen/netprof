@@ -30,7 +30,6 @@
 package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -45,7 +44,6 @@ import mitll.langtest.shared.dialog.DialogExChangeResponse;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.List;
@@ -55,7 +53,7 @@ import java.util.logging.Logger;
 import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
 import static mitll.langtest.client.custom.INavigation.VIEWS.SCORES;
 
-public class DialogEditor extends ListenViewHelper<EditorTurn> implements SessionManager, IFocusable {
+public class DialogEditor extends ListenViewHelper<EditorTurn> implements SessionManager, IFocusable, IEditableTurnContainer<EditorTurn> {
   private final Logger logger = Logger.getLogger("DialogEditor");
 
   private static final int FIXED_HEIGHT = 390;
@@ -78,34 +76,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
   @Override
   void onUnload() {
-    int projectID = controller.getProjectID();
-    if (projectID != -1) {
-      int dialogID = getDialogID();
-
-      logger.info("onUnload - reload the dialog on hydra/score1");
-      controller.getAudioService().reloadDialog(dialogID, new AsyncCallback<Void>() {
-        @Override
-        public void onFailure(Throwable caught) {
-          controller.handleNonFatalError("reloading dialog.", caught);
-        }
-
-        @Override
-        public void onSuccess(Void result) {
-          logger.info("did reload on other server!");
-          controller.getExerciseService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              controller.handleNonFatalError("reloading dialog on netprof", caught);
-            }
-
-            @Override
-            public void onSuccess(Void result) {
-              logger.info("did reload on netprof.");
-            }
-          });
-        }
-      });
-    }
+    reloadDialog();
   }
 
   @Override
@@ -139,6 +110,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
         prevColumn,
         rightJustify,
         controller,
+        this,
         this,
         getDialogID(),
         isFirst,
@@ -180,14 +152,15 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
    */
   @Override
   protected void gotTurnClick(EditorTurn turn) {
-    EditorTurn currentTurn = getCurrentTurn();
-    if (DEBUG) logger.info("gotTurnClick currentTurn  " + blurb(currentTurn));
+//    EditorTurn currentTurn = getCurrentTurn();
+//    if (DEBUG) logger.info("gotTurnClick currentTurn  " + blurb(currentTurn));
   }
 
-  @NotNull
+ /* @NotNull
   private String blurb(EditorTurn turn) {
     return turn.getExID() + " : " + turn.getText();
   }
+*/
 
   @Override
   protected void styleTurnContainer(DivWidget rowOne) {
@@ -247,7 +220,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     // if prev turn is null we're on the first turn
     controller
         .getDialogService()
-        .addEmptyExercises(getDialog().getProjid(), getDialogID(), exID, isLeftSpeaker(columns, getPrev(turn)), getAsyncForNewTurns(exID));
+        .addEmptyExercises(getDialogID(), exID, isLeftSpeaker(columns, getPrev(turn)), getAsyncForNewTurns(exID));
   }
 
   @Override
@@ -264,7 +237,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     removeMarkCurrent();
 
     boolean isLeftSpeaker = isLeftSpeaker(columns, getPrev(editorTurn));
-    controller.getDialogService().addEmptyExercises(getDialog().getProjid(), getDialogID(), exID, !isLeftSpeaker, getAsyncForNewTurns(exID));
+    controller.getDialogService().addEmptyExercises(getDialogID(), exID, !isLeftSpeaker, getAsyncForNewTurns(exID));
   }
 
   private boolean isLeftSpeaker(COLUMNS columns, EditorTurn prevTurn) {
@@ -297,7 +270,6 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
       }
     }
 
-    // todo :return both turns
     controller.getDialogService().deleteATurnOrPair(
         getDialog().getProjid(),
         getDialogID(),
@@ -310,39 +282,43 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
           @Override
           public void onSuccess(List<Integer> ids) {
-            Set<EditorTurn> toRemove = new HashSet<>();
-
-            EditorTurn newCurrentTurnCandidate = null;
-
-            for (Integer exid : ids) {
-              EditorTurn newCurrentTurn = deleteTurn(exid, toRemove);
-              if (newCurrentTurnCandidate == null) newCurrentTurnCandidate = newCurrentTurn;
-            }
-
-            // we deleted the current turn!
-            final EditorTurn fnewCurrentTurnCandidate = newCurrentTurnCandidate;
-            final Set<EditorTurn> ftoRemove = toRemove;
-
-            // wait for animation to run before blowing it away...
-            Timer currentTimer = new Timer() {
-              @Override
-              public void run() {
-                ftoRemove.forEach(DialogEditor.this::removeFromContainer);
-
-                if (fnewCurrentTurnCandidate != null) {
-                  logger.info("new current now " + fnewCurrentTurnCandidate.getExID() + " " + fnewCurrentTurnCandidate.getText());
-                  removeMarkCurrent();
-                  setCurrentTurn(fnewCurrentTurnCandidate);
-                  markCurrent();
-                  fnewCurrentTurnCandidate.grabFocus();
-                } else {
-                  logger.info("not messing with current turn...");
-                }
-              }
-            };
-            currentTimer.schedule(500);
+            gotDeleteResponse(ids);
           }
         });
+  }
+
+  protected void gotDeleteResponse(List<Integer> ids) {
+    Set<EditorTurn> toRemove = new HashSet<>();
+
+    EditorTurn newCurrentTurnCandidate = null;
+
+    for (Integer exid : ids) {
+      EditorTurn newCurrentTurn = deleteTurn(exid, toRemove);
+      if (newCurrentTurnCandidate == null) newCurrentTurnCandidate = newCurrentTurn;
+    }
+
+    // we deleted the current turn!
+    final EditorTurn fnewCurrentTurnCandidate = newCurrentTurnCandidate;
+    final Set<EditorTurn> ftoRemove = toRemove;
+
+    // wait for animation to run before blowing it away...
+    com.google.gwt.user.client.Timer currentTimer = new Timer() {
+      @Override
+      public void run() {
+        ftoRemove.forEach(DialogEditor.this::removeFromContainer);
+
+        if (fnewCurrentTurnCandidate != null) {
+          logger.info("new current now " + fnewCurrentTurnCandidate.getExID() + " " + fnewCurrentTurnCandidate.getText());
+          removeMarkCurrent();
+          setCurrentTurn(fnewCurrentTurnCandidate);
+          markCurrent();
+          fnewCurrentTurnCandidate.grabFocus();
+        } else {
+          logger.info("not messing with current turn...");
+        }
+      }
+    };
+    currentTimer.schedule(500);
   }
 
   @NotNull
@@ -412,50 +388,4 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     makeNextTheCurrentTurn(getNextTurn(exid));
   }
 
-  private void makeNextTheCurrentTurn(EditorTurn fnext) {
-    setCurrentTurn(fnext);
-
-    Scheduler.get().scheduleDeferred(() -> {
-      if (DEBUG) {
-        logger.info("addTurns : focus will be on " + (fnext == null ? "NULL" : fnext.getExID()));
-      }
-
-      markCurrent();
-
-      if (fnext != null) {
-        fnext.grabFocus();
-      }
-    });
-  }
-
-  private EditorTurn getNextTurn(int exid) {
-    EditorTurn current = getTurnByID(exid);
-
-    EditorTurn next = getCurrentTurn();
-    if (current == null) {
-      logger.warning("addTurns : can't find exid " + exid);
-    } else {
-      int i = allTurns.indexOf(current) + 1;
-      next = allTurns.get(i);
-
-      if (DEBUG_ADD_TURN) {
-        logger.info("addTurns : num turns " + allTurns.size() +
-            "\n\texid    " + exid +
-            "\n\tcurrent " + current.getExID() +
-            "\n\tnext    " + next.getExID()
-        );
-      }
-    }
-    return next;
-  }
-
-  @Nullable
-  private ClientExercise getPrev(int exid, List<ClientExercise> updatedExercises) {
-    ClientExercise prev = null;
-    for (ClientExercise turn : updatedExercises) {
-      if (turn.getID() == exid) break;
-      prev = turn;
-    }
-    return prev;
-  }
 }

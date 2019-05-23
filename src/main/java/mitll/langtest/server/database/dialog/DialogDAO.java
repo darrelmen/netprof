@@ -264,7 +264,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     }
 
     // add core vocab
-    addCoreVocab(dialogIDToCoreRelated.get(dialogID), project, dialog);
+    addCoreVocabNoSort(dialogIDToCoreRelated.get(dialogID), project, dialog);
 
     // add images
     addImage(projid, dialog);
@@ -296,6 +296,20 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
       List<CommonExercise> inOrder = new ArrayList<>(uniq);
       inOrder.sort(Comparator.comparing(CommonShell::getForeignLanguage));
+      dialog.getCoreVocabulary().addAll(inOrder);
+    }
+  }
+
+  private void addCoreVocabNoSort(List<SlickRelatedExercise> relatedExercises, IProject project, Dialog dialog) {
+    if (relatedExercises != null) {
+      List<CommonExercise> inOrder = new ArrayList<>(relatedExercises.size());
+
+      relatedExercises.forEach(slickRelatedExercise ->
+          inOrder
+              .add(project
+                  .getExerciseByID(slickRelatedExercise.exid()))
+      );
+
       dialog.getCoreVocabulary().addAll(inOrder);
     }
   }
@@ -446,9 +460,9 @@ public class DialogDAO extends DAO implements IDialogDAO {
           if (exercise != null) {
             boolean safeToDecode = exercise.isSafeToDecode();
             if (safeToDecode) {
-              if (DEBUG) logger.info("ex " + exercise.getID() + " safe " + safeToDecode);
+              if (DEBUG) logger.info("addExercises ex " + exercise.getID() + " safe " + safeToDecode);
             } else {
-              logger.warn("ex " + exercise.getID() + " safe " + safeToDecode);
+              logger.warn("addExercises ex " + exercise.getID() + " is not safe to decode");
             }
           }
 
@@ -463,10 +477,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
           if (exercise != null) {
             if (DEBUG_ADD_EXERCISE) {
               logger.info("addExercises (" + dialogID + ") " +
-                  "\n\tex #   " + exercise.getID() +
-                  "\n\tfl     '" + exercise.getForeignLanguage() + "'" +
+                      "\n\tex #   " + exercise.getID() +
+                      "\n\tfl     '" + exercise.getForeignLanguage() + "'" +
 //                  "\n\ttokens " + exercise.getTokens() +
-                  "\n\tattr   " + exercise.getAttributes()
+                      "\n\tattr   " + exercise.getAttributes()
               );
             }
             before = exercise.getAttributes().size();
@@ -681,6 +695,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     // refresh dialogs on project
     databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
 
+    // report on changes
     List<ClientExercise> exercises = databaseImpl.getProject(projid).getDialog(dialogID).getExercises();
 
 
@@ -691,7 +706,55 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return clientExercises;
   }
 
-/*  private void sanityCheckLanguageAndSpeaker(IDialog toAdd, int afterExid, List<ClientExercise> clientExercises) {
+  @Override
+  public ClientExercise addCoreVocab(IDialog toAdd, int userid, int afterExid, long now) {
+    int projid = toAdd.getProjid();
+    Project project = databaseImpl.getProject(projid);
+    List<String> typeOrder = project.getTypeOrder();
+
+    if (afterExid == -1) {
+      if (!toAdd.getCoreVocabulary().isEmpty()) {
+        logger.warn("\n\n\naddCoreVocab : after id is -1 but dialog has " + toAdd.getCoreVocabulary().size() + " exercises");
+      }
+    }
+
+    ClientExercise coreVocab = getCoreVocab(toAdd, typeOrder);
+    List<ClientExercise> clientExercises = Collections.singletonList(coreVocab);
+
+
+    DialogPopulate dialogPopulate = new DialogPopulate(databaseImpl, project.getPathHelper());
+
+    int dialogID = toAdd.getID();
+    if (afterExid == -1) {
+      dialogPopulate.addCoreExercises(projid,
+          userid,
+          typeOrder,
+          new Timestamp(now),
+          dialogID,
+          clientExercises);
+
+    } else {
+      Map<CommonExercise, Integer> commonExerciseIntegerMap = dialogPopulate.addExercisesAndSetID(projid, userid, typeOrder, clientExercises);
+      CommonExercise newEx = commonExerciseIntegerMap.keySet().iterator().next();
+
+      IRelatedExercise relatedExercise = databaseImpl.getUserExerciseDAO().getRelatedCoreExercise();
+
+      logger.info("addCoreVocab : insert " + clientExercises.size() + " after " + afterExid);
+
+      if (!relatedExercise.insertAfter(afterExid, newEx.getID())) {
+        logger.warn("addCoreVocab : didn't insert " + newEx.getID() + " after " + afterExid);
+      }
+    }
+
+    refreshExercises(clientExercises, project);
+
+    // refresh dialogs on project
+    databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
+
+    return coreVocab;
+  }
+
+  /*  private void sanityCheckLanguageAndSpeaker(IDialog toAdd, int afterExid, List<ClientExercise> clientExercises) {
     if (toAdd.getKind() == DialogType.INTERPRETER) {
       ClientExercise currentEx = toAdd.getExByID(afterExid);
       ClientExercise nextEx = clientExercises.get(0);
@@ -852,6 +915,24 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return deletedIDs;
   }
 
+  @Override
+  public boolean deleteCoreExercise(int dialogID, int exid) {
+    int projid = databaseImpl.getDialogDAO().getProjectForDialog(dialogID);
+    Project project = databaseImpl.getProject(projid);
+    //IDialog dialog = project.getDialog(dialogID);
+
+    IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
+    IRelatedExercise relatedExercise = userExerciseDAO.getRelatedCoreExercise();
+
+    if (relatedExercise.deleteAndFixForEx(exid)) {
+      logger.info("deleteExercise : deleteAndFixForEx success for " + exid);
+      deleteTheExercise(projid, dialogID, exid, project, userExerciseDAO);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   /**
    * Blow it away in the exercise table -
    * tell the project to forget about it
@@ -913,13 +994,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     BaseDialogReader baseDialogReader = new BaseDialogReader(null, null);
 
-    Map<String, String> defaultUnitAndChapter = new HashMap<>();
-    if (!typeOrder.isEmpty()) {
-      defaultUnitAndChapter.put(typeOrder.get(0), toAdd.getUnit());
-    }
-    if (typeOrder.size() > 1) {
-      defaultUnitAndChapter.put(typeOrder.get(1), toAdd.getChapter());
-    }
+    Map<String, String> defaultUnitAndChapter = getDefaultUnitAndChapter(toAdd, typeOrder);
 
     List<ClientExercise> newEx = new ArrayList<>();
 
@@ -960,6 +1035,27 @@ public class DialogDAO extends DAO implements IDialogDAO {
     }
 
     return newEx;
+  }
+
+  private ClientExercise getCoreVocab(IDialog toAdd, List<String> typeOrder) {
+    Map<String, String> defaultUnitAndChapter = getDefaultUnitAndChapter(toAdd, typeOrder);
+
+    Exercise exercise = new Exercise();
+    exercise.setUnitToValue(defaultUnitAndChapter);
+
+    return exercise;
+  }
+
+  @NotNull
+  private Map<String, String> getDefaultUnitAndChapter(IDialog toAdd, List<String> typeOrder) {
+    Map<String, String> defaultUnitAndChapter = new HashMap<>();
+    if (!typeOrder.isEmpty()) {
+      defaultUnitAndChapter.put(typeOrder.get(0), toAdd.getUnit());
+    }
+    if (typeOrder.size() > 1) {
+      defaultUnitAndChapter.put(typeOrder.get(1), toAdd.getChapter());
+    }
+    return defaultUnitAndChapter;
   }
 
   private int getIndexOfEx(int exidAfter, List<ClientExercise> exercises) {

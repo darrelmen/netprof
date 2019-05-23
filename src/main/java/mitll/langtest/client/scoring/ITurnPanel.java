@@ -38,7 +38,6 @@ import mitll.langtest.shared.exercise.ClientExercise;
  * A turn in a dialog.
  */
 public interface ITurnPanel extends ISimpleTurn, ITurnMarking, RefAudioGetter, IPlayAudioExercise {
-
   void clearHighlight();
 
   void grabFocus();

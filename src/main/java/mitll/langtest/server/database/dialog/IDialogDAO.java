@@ -41,16 +41,18 @@ import java.util.List;
 
 public interface IDialogDAO extends IDAO {
   /**
-   * @see CreateDialogDialog#doCreate
-   * @see mitll.langtest.server.services.DialogServiceImpl#addDialog
    * @param toAdd
    * @return
+   * @see CreateDialogDialog#doCreate
+   * @see mitll.langtest.server.services.DialogServiceImpl#addDialog
    */
   IDialog add(IDialog toAdd);
 
   boolean update(IDialog toAdd);
 
   List<ClientExercise> addEmptyExercises(IDialog toAdd, int userid, int afterExid, boolean isLeft, long now);
+
+  ClientExercise addCoreVocab(IDialog toAdd, int userid, int afterExid, long now);
 
   int add(int userid,
           int projid,
@@ -76,19 +78,21 @@ public interface IDialogDAO extends IDAO {
   List<IDialog> getOneDialog(int id);
 
   /**
-   * @see DatabaseImpl#createTables
    * @return
+   * @see DatabaseImpl#createTables
    */
   DialogAttributeJoinHelper getDialogAttributeJoinHelper();
 
   /**
    * For when we want to drop the current dialog data and reload
-   * @see mitll.langtest.server.database.project.DialogPopulate#cleanDialog
+   *
    * @param id
+   * @see mitll.langtest.server.database.project.DialogPopulate#cleanDialog
    */
   void removeForProject(int id);
 
   List<Integer> deleteExercise(int projid, int dialogID, int exid);
+  boolean deleteCoreExercise( int dialogID, int exid);
 
   int getProjectForDialog(int dialogID);
 }

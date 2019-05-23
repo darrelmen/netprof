@@ -46,7 +46,9 @@ import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.scoring.*;
+import mitll.langtest.client.scoring.ITurnPanel;
+import mitll.langtest.client.scoring.RefAudioGetter;
+import mitll.langtest.client.scoring.TurnPanel;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
@@ -135,6 +137,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   public ListenViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     super(controller, thisView);
   }
+
   public boolean isInterpreter() {
     return dialog.getKind() == DialogType.INTERPRETER;
   }
@@ -232,6 +235,43 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   T getCurrentTurn() {
     return currentTurn;
+  }
+
+  protected void makeNextTheCurrentTurn(T fnext) {
+    setCurrentTurn(fnext);
+
+    Scheduler.get().scheduleDeferred(() -> {
+      if (DEBUG) {
+        logger.info("addTurns : focus will be on " + (fnext == null ? "NULL" : fnext.getExID()));
+      }
+
+      markCurrent();
+
+      if (fnext != null) {
+        fnext.grabFocus();
+      }
+    });
+  }
+
+  protected T getNextTurn(int exid) {
+    T current = getTurnByID(exid);
+
+    T next = getCurrentTurn();
+    if (current == null) {
+      logger.warning("getNextTurn : can't find exid " + exid);
+    } else {
+      int i = allTurns.indexOf(current) + 1;
+      next = allTurns.get(i);
+
+      if (DEBUG_NEXT) {
+        logger.info("getNextTurn : num turns " + allTurns.size() +
+            "\n\texid    " + exid +
+            "\n\tcurrent " + current.getExID() +
+            "\n\tnext    " + next.getExID()
+        );
+      }
+    }
+    return next;
   }
 
   protected void showDialog(int dialogID, IDialog dialog, Panel child) {
@@ -1058,25 +1098,4 @@ public class ListenViewHelper<T extends ITurnPanel>
 //  protected T getPrev(T currentTurn) {
 //    getAllTurns().stream().filter()
 //  }
-
-  /**
-   * TODO : don't put this here
-   *
-   * @param exidForTurn
-   * @param columns
-   */
-
-  @Override
-  public void addTurnForSameSpeaker(T editorTurn) {
-
-  }
-
-  @Override
-  public void addTurnForOtherSpeaker(T editorTurn) {
-
-  }
-
-  @Override
-  public void deleteCurrentTurnOrPair(T currentTurn) {
-  }
 }

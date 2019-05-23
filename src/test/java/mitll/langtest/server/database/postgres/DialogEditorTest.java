@@ -40,6 +40,7 @@ import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.project.Language;
+import mitll.langtest.shared.project.OOVWordsAndUpdate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -62,6 +63,8 @@ public class DialogEditorTest extends BaseTest {
 
   private static final int USERID = 6;
   private static final int PROJECTID = 21;//5;//21;//5;//21;
+  public static final String SECOND = "second";
+  public static final String FIRST = "first";
 
   @Test
   public void testNewDialog() {
@@ -132,11 +135,138 @@ public class DialogEditorTest extends BaseTest {
   }
 
 
-
   private Project getProject(DatabaseImpl andPopulate) {
     Project project = andPopulate.getProject(PROJECTID, true);
     andPopulate.waitForSetupComplete();
     return project;
+  }
+
+  @Test
+  public void testCoreVocab() {
+    DatabaseImpl andPopulate = getDatabase();
+    logger.warn("testCoreVocab START ==--------- ");
+
+    Project project = getProject(andPopulate);
+
+    // do create!
+    IDialog toAdd = addDialog(andPopulate, PROJECTID, DialogType.DIALOG);
+    int id = toAdd.getID();
+    logger.info("new dialog " + toAdd);
+    IDialogDAO dialogDAO = andPopulate.getDialogDAO();
+
+    List<ClientExercise> coreVocabulary = toAdd.getCoreVocabulary();
+    Assert.assertEquals(0, coreVocabulary.size());
+
+    ClientExercise exercise = dialogDAO.addCoreVocab(toAdd, USERID, -1, System.currentTimeMillis());
+
+    Assert.assertTrue("Expecting non zero id", exercise.getID() > 0);
+
+//    coreVocabulary = toAdd.getCoreVocabulary();
+//    Assert.assertEquals(1, coreVocabulary.size());
+
+    // get it again
+    toAdd = getiDialog(andPopulate, PROJECTID, id);
+
+    // better be only one at the end
+    coreVocabulary = toAdd.getCoreVocabulary();
+    Assert.assertEquals(1, coreVocabulary.size());
+
+    boolean success = dialogDAO.deleteCoreExercise(id, exercise.getID());
+    Assert.assertTrue("Expecting success", success);
+
+    // get it again
+    toAdd = getiDialog(andPopulate, PROJECTID, id);
+
+    // better be only one at the end
+    coreVocabulary = toAdd.getCoreVocabulary();
+    Assert.assertEquals(0, coreVocabulary.size());
+  }
+
+  @Test
+  public void testCoreVocabInsertAfter() {
+    DatabaseImpl andPopulate = getDatabase();
+    logger.warn("testCoreVocabInsertAfter START ==--------- ");
+
+    Project project = getProject(andPopulate);
+
+    // do create!
+    IDialog toAdd = addDialog(andPopulate, PROJECTID, DialogType.DIALOG);
+    int dialogID = toAdd.getID();
+    logger.info("new dialog " + toAdd);
+    IDialogDAO dialogDAO = andPopulate.getDialogDAO();
+
+    List<ClientExercise> coreVocabulary = toAdd.getCoreVocabulary();
+    Assert.assertEquals(0, coreVocabulary.size());
+
+    ClientExercise exercise = dialogDAO.addCoreVocab(toAdd, USERID, -1, System.currentTimeMillis());
+
+    int id1 = exercise.getID();
+    Assert.assertTrue("Expecting non zero dialogID", id1 > 0);
+
+    OOVWordsAndUpdate first = andPopulate.getExerciseDAO(PROJECTID).updateText(project, dialogID, id1, -1, FIRST);
+    logger.info("got 1 " + first);
+    Assert.assertTrue("Expecting it to update", first.isDidUpdate());
+
+//    coreVocabulary = toAdd.getCoreVocabulary();
+//    Assert.assertEquals(1, coreVocabulary.size());
+
+    // get it again
+    toAdd = getiDialog(andPopulate, PROJECTID, dialogID);
+
+    // better be only one at the end
+    coreVocabulary = toAdd.getCoreVocabulary();
+    Assert.assertEquals(1, coreVocabulary.size());
+
+    Assert.assertTrue("Expecting it to be the text I set it to before", coreVocabulary.get(0).getForeignLanguage().equalsIgnoreCase(FIRST));
+
+    ClientExercise exercise2 = dialogDAO.addCoreVocab(toAdd, USERID, id1, System.currentTimeMillis());
+
+    OOVWordsAndUpdate second = andPopulate.getExerciseDAO(PROJECTID).updateText(project, dialogID, exercise2.getID(), -1, SECOND);
+    logger.info("got 2 " + second);
+    Assert.assertTrue("Expecting it to update", second.isDidUpdate());
+
+    // get it again
+    toAdd = getiDialog(andPopulate, PROJECTID, dialogID);
+
+    // better be only one at the end
+    coreVocabulary = toAdd.getCoreVocabulary();
+    Assert.assertEquals(2, coreVocabulary.size());
+    Assert.assertTrue("Expecting it to be the text I set it to before", coreVocabulary.get(1).getForeignLanguage().equalsIgnoreCase(SECOND));
+
+    // better be first ex
+    Assert.assertEquals(0, coreVocabulary.indexOf(exercise));
+
+    // better be second ex
+    Assert.assertEquals(1, coreVocabulary.indexOf(exercise2));
+
+
+    coreVocabulary.forEach(clientExercise -> logger.info("2 ex " + clientExercise.getID() + " " + clientExercise.getForeignLanguage()));
+    logger.info("Add new ex after " + id1);
+    ClientExercise exercise3 = dialogDAO.addCoreVocab(toAdd, USERID, id1, System.currentTimeMillis());
+
+    OOVWordsAndUpdate third = andPopulate.getExerciseDAO(PROJECTID).updateText(project, dialogID, exercise3.getID(), -1, "third");
+    logger.info("got 3 " + third);
+    Assert.assertTrue("Expecting it to update", third.isDidUpdate());
+
+
+    // get it again
+    toAdd = getiDialog(andPopulate, PROJECTID, dialogID);
+
+    // better be only one at the end
+    coreVocabulary = toAdd.getCoreVocabulary();
+    Assert.assertEquals(3, coreVocabulary.size());
+    coreVocabulary.forEach(clientExercise -> logger.info("3 ex " + clientExercise.getID() + " " + clientExercise.getForeignLanguage()));
+
+//    Assert.assertTrue("Expecting it to be the text I set it to before", coreVocabulary.get(1).getForeignLanguage().equalsIgnoreCase(SECOND));
+
+    // better be first ex
+    Assert.assertEquals(0, coreVocabulary.indexOf(exercise));
+
+    // better be second ex
+    Assert.assertEquals(1, coreVocabulary.indexOf(exercise3));
+
+    // better be third ex
+    Assert.assertEquals(2, coreVocabulary.indexOf(exercise2));
   }
 
   @Test

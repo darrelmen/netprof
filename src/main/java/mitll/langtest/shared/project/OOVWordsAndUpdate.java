@@ -40,7 +40,7 @@ import java.util.Set;
  */
 public class OOVWordsAndUpdate implements IsSerializable {
   private Set<String> oov = new HashSet<>();
-  private boolean didUpdate;
+  private boolean didUpdate = false;
   private boolean isPossible = true;
   private boolean foundExercise = true;
 
@@ -86,6 +86,11 @@ public class OOVWordsAndUpdate implements IsSerializable {
   }
 
   public String toString() {
-    return "OOVWordsAndUpdate : " + getOov();
+    return "OOVWordsAndUpdate : " +
+        "\n\toov        " + getOov() +
+        "\n\tdidUpdate  " + isDidUpdate() +
+        "\n\tisPossible " + isPossible() +
+        "\n\tisFound    " + isFoundExercise()
+        ;
   }
 }

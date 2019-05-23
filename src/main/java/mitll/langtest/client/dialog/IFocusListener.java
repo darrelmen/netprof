@@ -30,9 +30,11 @@
 package mitll.langtest.client.dialog;
 
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import mitll.langtest.client.scoring.ISimpleTurn;
 
-public interface IFocusListener {
+public interface IFocusListener<T extends ISimpleTurn> {
   void gotBlur();
+  //void gotBlur(T widgets);
 
   void gotFocus();
 

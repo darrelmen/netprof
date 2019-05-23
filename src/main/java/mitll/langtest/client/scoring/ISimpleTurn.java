@@ -42,6 +42,8 @@ public interface ISimpleTurn extends IsWidget {
 
   void makeVisible();
 
+  void grabFocus();
+
   DivWidget addWidgets(boolean showFL,
                        boolean showALTFL,
                        PhonesChoices phonesChoices,

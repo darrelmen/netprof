@@ -32,6 +32,7 @@ package mitll.langtest.server.database.userexercise;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickRelatedExercise;
 import mitll.npdata.dao.userexercise.RelatedCoreExerciseDAOWrapper;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.List;
@@ -95,17 +96,15 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
 
   @Override
   public int deleteRelatedForDialog(int dialog) {
-    return 0;
+    return daoWrapper.deleteRelatedForDialog(dialog);
   }
 
-  @Override
-  public Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(int projid) {
-    return daoWrapper.byProjectForDialog(projid);
-  }
 
   @Override
   public boolean deleteAndFixForEx(int exid) {
-    return false;
+    int i = daoWrapper.deleteAndFix(exid);
+    //logger.info("deleted " + i + " rows for " + exid);
+    return i > 0;
   }
 
   @Override
@@ -115,7 +114,7 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
 
   @Override
   public boolean insertAfter(int after, int exid) {
-    return false;
+    return daoWrapper.insertAfter(after, exid) > 0;
   }
 
   @Override
@@ -124,7 +123,17 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
   }
 
   @Override
+  public Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(int projid) {
+    return getDialogIDToRelated(daoWrapper.byProjectForDialog(projid));
+  }
+
+  @Override
   public Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelatedForDialog(int dialogID) {
-    return daoWrapper.byProjectForOneDialog(dialogID);
+    return getDialogIDToRelated(daoWrapper.byProjectForOneDialog(dialogID));
+  }
+
+  @NotNull
+  private Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(Map<Integer, List<SlickRelatedExercise>> dialogToRelations) {
+    return new SortedRelations().getDialogIDToRelated(dialogToRelations);
   }
 }

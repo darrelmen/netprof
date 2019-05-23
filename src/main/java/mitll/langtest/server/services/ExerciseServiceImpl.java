@@ -1190,9 +1190,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   }
 
   /**
-   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getDeleteButton(Panel, AudioAttribute, HasID, String)
    * @param exid
    * @throws DominoSessionException
+   * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getDeleteButton(Panel, AudioAttribute, HasID, String)
    */
   @Override
   public void refreshAudio(int exid) throws DominoSessionException {
@@ -1413,50 +1413,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   public OOVWordsAndUpdate updateText(int projid, int dialogID, int exid, int audioID, String content) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     Project project = getProject(projid);
-    CommonExercise exerciseByID = project.getExerciseByID(exid);
-    if (exerciseByID == null) {
-      logger.warn("updateText " + "can't find " + exid);
-
-      return new OOVWordsAndUpdate();
-    } else {
-      content = getTrim(content);
-
-      exerciseByID.getMutable().setForeignLanguage(content);
-
-      //OOVInfo oovInfo = project.getAudioFileHelper().checkOOV(Collections.singleton(exerciseByID), true, new HashSet<String>());
-
-     // Set<String> oov = project.getAudioFileHelper().isValid(exerciseByID);
-
-      boolean update = project.getExerciseDAO().update(exerciseByID);
-
-      if (update) {
-        CommonExercise exerciseByID1 = project.getExerciseByID(exid);
-        logger.info("updateText " +
-            "\n\tnow        '" + exerciseByID1.getForeignLanguage() + "'" +
-            "\n\tnormalized '" + exerciseByID1.getNormalizedFL() + "'");
-
-        IDialog dialog = project.getDialog(dialogID);
-        if (dialog == null) {
-          logger.warn("updateText can't find dialog ID " + dialogID);
-        } else {
-          List<ClientExercise> collect1 = dialog.getExercises().stream().filter(exercise -> exercise.getID() == exid).collect(Collectors.toList());
-          if (collect1.isEmpty()) {
-            logger.warn("updateText can't find ex id  " + exid);
-          } else {
-            collect1.get(0).asCommon().getMutable().setForeignLanguage(content);
-            if (audioID != -1) {  // maybe we have text before the audio...
-              if (!db.getAudioDAO().updateTranscript(audioID, content)) {
-                logger.warn("updateText didn't update audio id# " + audioID + " with " + content);
-              }
-            } else {
-              logger.info("updateText  no audio id...");
-            }
-          }
-        }
-      }
-
-      return new OOVWordsAndUpdate(update, new HashSet<>(), project.getModelType() == ModelType.HYDRA);
-    }
+    return project.getExerciseDAO().updateText(project, dialogID, exid, audioID, content);
   }
 
   private String getTrim(String part) {

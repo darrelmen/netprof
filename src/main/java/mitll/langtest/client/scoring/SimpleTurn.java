@@ -33,7 +33,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.dialog.ITurnContainer;
-import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 
 import java.util.logging.Logger;
@@ -67,6 +66,11 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn {
 
   @Override
   public void makeVisible() {
+
+  }
+
+  @Override
+  public void grabFocus() {
 
   }
 

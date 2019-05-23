@@ -98,8 +98,17 @@ public class DialogPopulate {
    * @see ProjectManagement#addDialogInfo
    */
   boolean addDialogInfo(Project project) {
-    List<IDialog> dialogs1 = db.getDialogDAO().getDialogs(project.getID());
-    return addDialog(project, dialogs1);
+    return addDialog(project, db.getDialogDAO().getDialogs(project.getID()));
+  }
+
+  /**
+   * @param project
+   * @param dialogID
+   * @return
+   * @see ProjectManagement#addDialogInfo(Project, int)
+   */
+  boolean addDialogInfo(Project project, int dialogID) {
+    return addDialog(project, db.getDialogDAO().getOneDialog(dialogID));
   }
 
   private boolean addDialog(Project project, List<IDialog> dialogs1) {
@@ -110,16 +119,6 @@ public class DialogPopulate {
       project.setDialogs(dialogs1);
       return true;
     }
-  }
-
-  /**
-   * @see ProjectManagement#addDialogInfo(Project, int)
-   * @param project
-   * @param dialogID
-   * @return
-   */
-  boolean addDialogInfo(Project project, int dialogID) {
-    return addDialog(project, db.getDialogDAO().getOneDialog(dialogID));
   }
 
   /**
@@ -311,6 +310,20 @@ public class DialogPopulate {
     return importExToID;
   }
 
+  public Map<CommonExercise, Integer> addCoreExercises(int projid, int defaultUser,
+                                                       List<String> typeOrder, Timestamp modified,
+                                                       int dialogID,
+                                                       List<ClientExercise> exercises) {
+    Map<CommonExercise, Integer> importExToID = addExercisesAndSetID(projid, defaultUser, typeOrder, exercises);
+
+    logger.info("addCoreExercises made " + importExToID.size() + " exercises for " + dialogID);
+
+    db.getUserExerciseDAO().getRelatedCoreExercise().addBulkRelated(
+        getSlickRelatedExercises(projid, modified, exercises, dialogID, importExToID));
+
+    return importExToID;
+  }
+
   @NotNull
   public Map<CommonExercise, Integer> addExercisesAndSetID(int projid, int defaultUser, List<String> typeOrder, List<ClientExercise> exercises) {
     Map<CommonExercise, Integer> importExToID = addExercises(projid, defaultUser, typeOrder, toCommon(exercises));
@@ -471,7 +484,6 @@ public class DialogPopulate {
   }
 
   /**
-   * @see #addDialogs(Project, Project, IDialogDAO, Map, int, DialogType, Map, boolean) 
    * @param project
    * @param projid
    * @param exToAudio
@@ -479,6 +491,7 @@ public class DialogPopulate {
    * @param now
    * @param audioCheck
    * @param allImportExToID
+   * @see #addDialogs(Project, Project, IDialogDAO, Map, int, DialogType, Map, boolean)
    */
   private void addAudio(Project project,
                         int projid,
@@ -654,6 +667,7 @@ public class DialogPopulate {
    *
    * @param project
    * @return
+   * @deprecated we don't do this anymore...
    */
   public boolean cleanDialog(Project project) {
     int id = project.getID();
