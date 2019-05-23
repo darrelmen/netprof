@@ -31,22 +31,31 @@ package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.IFocusable;
+import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.SimpleTurn;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.Exercise;
+import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
 
 public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocusable {
+  private final Logger logger = Logger.getLogger("CoreVocabEditor");
+
   private final boolean isInModal;
 
   public CoreVocabEditor(ExerciseController controller, INavigation.VIEWS thisView, IDialog theDialog) {
@@ -81,11 +90,19 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
     styleTurnContainer(right);
 
     leftRight.add(right);
+
+    Language languageInfo = controller.getLanguageInfo();
+    boolean isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
+
     dialog.getCoreVocabulary().forEach(vocab -> {
-      right.add(new MySimpleTurn(vocab));
+      right.add(new MySimpleTurn(vocab, languageInfo, isInterpreter));
     });
+
+    logger.info("found " + dialog.getCoreVocabulary().size());
     if (dialog.getCoreVocabulary().isEmpty()) {
-      right.add(new SimpleTurn(new Exercise(), ITurnContainer.COLUMNS.RIGHT, false));
+      SimpleTurn w = new MySimpleTurn(new Exercise(), languageInfo, isInterpreter);
+      right.add(w);
+      w.addWidgets(true, false, PhonesChoices.SHOW, EnglishDisplayChoices.SHOW);
 
     }
     return leftRight;
@@ -121,23 +138,56 @@ public class CoreVocabEditor extends TurnViewHelper<SimpleTurn> implements IFocu
     return new SimpleTurn(clientExercise, columns, false);
   }
 
-  private static class MySimpleTurn extends SimpleTurn {
-    public MySimpleTurn(ClientExercise vocab) {
+  private static class MySimpleTurn extends SimpleTurn implements IFocusListener {
+    private final Logger logger = Logger.getLogger("MySimpleTurn");
+    private EditableTurnHelper editableTurnHelper;
+
+     MySimpleTurn(ClientExercise vocab, Language language, boolean isInterpreter) {
       super(vocab, ITurnContainer.COLUMNS.RIGHT, false);
+
+      this.editableTurnHelper = new EditableTurnHelper(language, this, vocab, this) {
+        @Override
+        protected int getTextBoxWidth() {
+          return 270;
+        }
+      };
+      editableTurnHelper.setPlaceholder(isInterpreter, ITurnContainer.COLUMNS.RIGHT);
     }
 
-    /**
-     * TODO : use EditableTurnHelper to do text box and events
-     *
-     * @return
-     */
+    @Override
+    public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
+//      HTML html = new HTML(exercise.getForeignLanguage());
+//      html.addStyleName("flfont");
+//      html.getElement().getStyle().setPadding(10, Style.Unit.PX);
+      logger.info("addWidgets : got '" + exercise.getForeignLanguage() + "' for " + exercise.getID());
+      DivWidget widgets = new DivWidget();
+      widgets.add(getTextBox());
+      styleMe(widgets);
+      add(widgets);
+      return widgets;
+    }
+
     @NotNull
-    private DivWidget getTextBox() {
-      DivWidget textBoxContainer = new DivWidget();
-      textBoxContainer.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
-      //textBoxContainer.add(contentTextBox = addTextBox());
+    protected DivWidget getTextBox() {
+      DivWidget textBoxContainer = editableTurnHelper.getTextBox();
       // textBoxContainer.add(getTurnFeedback());
       return textBoxContainer;
+    }
+
+
+    @Override
+    public void gotBlur() {
+
+    }
+
+    @Override
+    public void gotFocus() {
+
+    }
+
+    @Override
+    public void gotKey(KeyUpEvent event) {
+
     }
   }
 }

@@ -33,6 +33,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.dialog.ITurnContainer;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 
 import java.util.logging.Logger;
@@ -40,15 +41,15 @@ import java.util.logging.Logger;
 public class SimpleTurn extends DivWidget implements ISimpleTurn {
   private final Logger logger = Logger.getLogger("SimpleTurn");
 
-  private ClientExercise exercise;
+  protected ClientExercise exercise;
   private TurnPanelDelegate turnPanelDelegate;
   //private ITurnContainer.COLUMNS columns;
 
   public SimpleTurn(ClientExercise exercise, ITurnContainer.COLUMNS columns, boolean rightJustify) {
     this.exercise = exercise;
-   // this.columns = columns;
+    // this.columns = columns;
     turnPanelDelegate = new TurnPanelDelegate(exercise, this, columns, rightJustify);
-
+    ;
 //    if (columns == MIDDLE) {
 //      if (exercise.hasEnglishAttr()) {
 //        addStyleName("floatRight");
@@ -57,14 +58,6 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn {
 //        getElement().getStyle().setClear(Style.Clear.BOTH);
 //      }
 //    }
-  }
-
-  private void styleMe(DivWidget wrapper) {
-    turnPanelDelegate.styleMe(wrapper);
-//    if (columns == MIDDLE) {
-//      wrapper.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
-//    }
-
   }
 
   @Override
@@ -77,16 +70,32 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn {
 
   }
 
+  /**
+   * @param showFL
+   * @param showALTFL
+   * @param phonesChoices
+   * @param englishDisplayChoices
+   * @return
+   * @see mitll.langtest.client.dialog.TurnViewHelper#getTurnPanel(ClientExercise, ITurnContainer.COLUMNS, ITurnContainer.COLUMNS, int)
+   */
   @Override
   public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
     HTML html = new HTML(exercise.getForeignLanguage());
     html.addStyleName("flfont");
     html.getElement().getStyle().setPadding(10, Style.Unit.PX);
-    //  logger.info("got " + exercise.getForeignLanguage());
+    logger.info("addWidgets : got '" + exercise.getForeignLanguage() + "' for " + exercise.getID());
     DivWidget widgets = new DivWidget();
     widgets.add(html);
     styleMe(widgets);
     add(widgets);
     return widgets;
+  }
+
+  protected void styleMe(DivWidget wrapper) {
+    turnPanelDelegate.styleMe(wrapper);
+//    if (columns == MIDDLE) {
+//      wrapper.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
+//    }
+
   }
 }

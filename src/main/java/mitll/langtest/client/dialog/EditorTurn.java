@@ -88,13 +88,14 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   /**
    * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
-  private TextBox contentTextBox;
+  //private TextBox contentTextBox;
   private HTML turnFeedback;
   private NoFeedbackRecordAudioPanel<ClientExercise> recordAudioPanel;
 
   private final SessionManager sessionManager;
   private boolean isDeleting = false;
 
+  private EditableTurnHelper editableTurnHelper;
   private static final boolean DEBUG = false;
 
   /**
@@ -131,6 +132,9 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
     this.prevColumn = prevColumn;
 
     this.isFirstTurn = isFirstTurn;
+
+    this.editableTurnHelper = new EditableTurnHelper(controller.getLanguageInfo(), this, clientExercise, this);
+    editableTurnHelper.setPlaceholder(turnContainer.isInterpreter(), columns);
 
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify) {
       @Override
@@ -230,7 +234,6 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
             //logger.info("startRecording...");
             super.startRecording();
             turnFeedback.setHTML("");
-
           }
 
           @Override
@@ -306,9 +309,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
 
   @NotNull
   protected DivWidget getTextBox() {
-    DivWidget textBoxContainer = new DivWidget();
-    textBoxContainer.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
-    textBoxContainer.add(contentTextBox = addTextBox());
+    DivWidget textBoxContainer = editableTurnHelper.getTextBox();
     textBoxContainer.add(getTurnFeedback());
     return textBoxContainer;
   }
@@ -538,7 +539,7 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
   public void gotKey(KeyUpEvent event) {
     NativeEvent ne = event.getNativeEvent();
 
-    String s = SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
+    String s = editableTurnHelper.getContent();//SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
     if (ne.getKeyCode() == KeyCodes.KEY_ENTER) {
       ne.preventDefault();
       ne.stopPropagation();
@@ -558,13 +559,16 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
       //  logger.info("num tokens " + length);
 
       if (length > 10) {
-        contentTextBox.getElement().getStyle().setBackgroundColor("red");
+        //contentTextBox.getElement().getStyle().setBackgroundColor("red");
+        editableTurnHelper.setBackgroundColor("red");
         turnFeedback.setText("Really avoid long phrases.");
       } else if (length > 7) {
-        contentTextBox.getElement().getStyle().setBackgroundColor("yellow");
+        // contentTextBox.getElement().getStyle().setBackgroundColor("yellow");
+        editableTurnHelper.setBackgroundColor("yellow");
         turnFeedback.setText("Avoid long phrases.");
       } else {
-        contentTextBox.getElement().getStyle().setBackgroundColor("white");
+        //  contentTextBox.getElement().getStyle().setBackgroundColor("white");
+        editableTurnHelper.setBackgroundColor("white");
         turnFeedback.setText("");
       }
     }
@@ -576,13 +580,13 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
    */
   public void gotBlur() {
     turnContainer.gotBlur(this);
-    String s = SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
+    String s = editableTurnHelper.getContent();//SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
     if (s.equals(prev)) {
       if (DEBUG) logger.info("gotBlur " + getExID() + " skip unchanged " + prev);
     } else {
       prev = s;
       int audioID = getAudioID();
-      if (DEBUG || true) logger.info("gotBlur " + getExID() + " = " + prev + " audio " + audioID);
+      if (DEBUG) logger.info("gotBlur " + getExID() + " = " + prev + " audio " + audioID);
       updateText(s, this, audioID, false);
     }
   }
@@ -659,12 +663,13 @@ public class EditorTurn extends PlayAudioExercisePanel implements ITurnPanel, IR
    */
   @Override
   public void grabFocus() {
-    if (contentTextBox == null) {
-      logger.info("grabFocus no contentTextBox yet for " + getText());
-    } else {
-      logger.info("grabFocus on " + getText());
-      contentTextBox.setFocus(true);
-    }
+    editableTurnHelper.grabFocus();
+//    if (contentTextBox == null) {
+//      logger.info("grabFocus no contentTextBox yet for " + getText());
+//    } else {
+//      logger.info("grabFocus on " + getText());
+//      contentTextBox.setFocus(true);
+//    }
   }
 
   @Override
