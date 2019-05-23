@@ -177,7 +177,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       iHighlightSegment.clearHighlight();
     });
 
-   // rememberAudio(getRegularSpeedIfAvailable(exercise));
+    // rememberAudio(getRegularSpeedIfAvailable(exercise));
     rememberAudio();
   }
 
@@ -247,16 +247,28 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @see PerformViewHelper#getTurnPanel
    * Or should we use exact match?
    */
-  public void maybeSetObscure(Map<String, ClientExercise> turnToEx) {
-    String oldID = exercise.getOldID();
-    ClientExercise clientExercise = turnToEx.get(oldID);
-    if (clientExercise == null) {
-      logger.info("maybeSetObscure : couldn't find core for " + oldID);
-    } else {
-      Set<String> coreVocab = Collections.singleton(clientExercise.getForeignLanguage());
-      //  logger.info("got " + clientExercise.getForeignLanguage() + " for " + exercise.getForeignLanguage());
-      getObscureCandidates(coreVocab).forEach(IHighlightSegment::setObscurable);
-    }
+  public void maybeSetObscure(List<ClientExercise> coreVocabs) {
+//    String oldID = exercise.getOldID();
+//    ClientExercise clientExercise = turnToEx.get(oldID);
+//    if (clientExercise == null) {
+//      logger.info("maybeSetObscure : couldn't find core for " + oldID);
+//    } else {
+//      Set<String> coreVocab = Collections.singleton(clientExercise.getForeignLanguage());
+//      //  logger.info("got " + clientExercise.getForeignLanguage() + " for " + exercise.getForeignLanguage());
+//      getObscureCandidates(coreVocab).forEach(IHighlightSegment::setObscurable);
+//    }
+
+    Set<String> coreVocab = new HashSet<>();
+
+    coreVocabs.forEach(ex -> {
+      //  coreVocab.addAll(Arrays.asList(ex.getForeignLanguage().split(" ")));
+      coreVocab.add(ex.getForeignLanguage().trim());
+    });
+
+//    logger.info("got " + coreVocab);
+
+    getObscureCandidates(coreVocab).forEach(IHighlightSegment::setObscurable);
+
   }
 
   private Collection<IHighlightSegment> getObscureCandidates(Collection<String> coreVocab) {
@@ -402,8 +414,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       }
     }
     //else {
-      //logger.warning("addWidgets : hide record button for " + getText());
-   // }
+    //logger.warning("addWidgets : hide record button for " + getText());
+    // }
 
     add(flContainer);
 

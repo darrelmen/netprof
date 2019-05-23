@@ -97,7 +97,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
 
   protected void rememberAudio() {
     AudioAttribute latestAudio = getLatestAudio();
-    logger.info("rememberAudio : turn " + getText() + " audio is " + latestAudio);
+   // logger.info("rememberAudio : turn " + getText() + " audio is " + latestAudio);
     rememberAudio(latestAudio);
   }
 
