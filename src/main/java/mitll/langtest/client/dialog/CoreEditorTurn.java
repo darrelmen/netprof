@@ -51,6 +51,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
 
   private CoreVocabEditor coreVocabEditor;
   private EditableTurnHelper editableTurnHelper;
+  private EditableTurnHelper englishEditableTurnHelper;
   private TurnAddDelete turnAddDelete;
   private ExerciseController<?> controller;
   private int dialogID;
@@ -76,20 +77,36 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     prev = vocab.getForeignLanguage();
     this.turnAddDelete = new TurnAddDelete(this, 21);
 
-    this.editableTurnHelper = new EditableTurnHelper(language, this, vocab, this) {
+    this.editableTurnHelper = new EditableTurnHelper(language, this, vocab.hasEnglishAttr(), vocab.getForeignLanguage(),
+        this) {
       @Override
       protected int getTextBoxWidth() {
         return WIDTH_TO_USE;
       }
     };
     editableTurnHelper.setPlaceholder(isInterpreter, ITurnContainer.COLUMNS.RIGHT);
+    editableTurnHelper.setPlaceholder("Core Vocabulary");
+
+    this.englishEditableTurnHelper = new EditableTurnHelper(language, this, true, vocab.getEnglish(),
+        this) {
+      @Override
+      protected int getTextBoxWidth() {
+        return WIDTH_TO_USE;
+      }
+    };
+    englishEditableTurnHelper.setPlaceholder("English Translation...");
   }
 
   @Override
   public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
     //logger.info("addWidgets : got '" + exercise.getForeignLanguage() + "' for " + exercise.getID());
     DivWidget widgets = new DivWidget();
-    widgets.add(getTextBox());
+    DivWidget textBox1 = getTextBox();
+    textBox1.addStyleName("topFiveMargin");
+    widgets.add(textBox1);
+    DivWidget textBox = englishEditableTurnHelper.getTextBox(false);
+
+    widgets.add(textBox);
     styleMe(widgets);
     add(widgets);
     addStyleName("inlineFlex");
@@ -137,12 +154,13 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
    */
   @NotNull
   private DivWidget getTextBox() {
-    DivWidget textBoxContainer = editableTurnHelper.getTextBox();
+    DivWidget textBoxContainer = editableTurnHelper.getTextBox(false);
     // textBoxContainer.add(getTurnFeedback());
     return textBoxContainer;
   }
 
   private String prev = "";
+  private String engprev = "";
 
   @Override
   public void gotBlur() {
@@ -150,12 +168,24 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
 
     String s = getContent();
     if (s.equals(prev)) {
-      if (DEBUG) logger.info("gotBlur " + getExID() + " skip unchanged " + prev);
+      if (DEBUG) logger.info("gotBlur " + getExID() + " maybe skip unchanged " + prev);
+
+      String eng = englishEditableTurnHelper.getContent();
+      if (!eng.equals(engprev)) {
+        engprev = eng;
+        maybeCreateFirst(s, false, true);
+      }
     } else {
       prev = s;
-      //  int audioID = getAudioID();
       if (DEBUG) logger.info("gotBlur " + getExID() + " = " + prev);
-      maybeCreateFirst(s, this, false);
+      maybeCreateFirst(s, false, false);
+    }
+  }
+
+  private void updateEnglish(boolean moveOn) {
+    int projectID = controller.getProjectID();
+    if (projectID != -1) {
+      updateEnglishText(projectID, getExID(), englishEditableTurnHelper.getContent(), moveOn);
     }
   }
 
@@ -168,7 +198,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
   public void gotKey(KeyUpEvent event) {
     NativeEvent ne = event.getNativeEvent();
 
-    String s = getContent();//SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
+    String s = getContent();
     if (ne.getKeyCode() == KeyCodes.KEY_ENTER) {
       ne.preventDefault();
       ne.stopPropagation();
@@ -176,18 +206,23 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       if (DEBUG) logger.info("gotKey : got enter on " + this.getExID());// + " : " + columns);
 
       if (s.equals(prev)) {
-        // logger.warning("deal with making a new ex");
-        coreVocabEditor.gotForward(this);
+        String eng = englishEditableTurnHelper.getContent();
+        if (!eng.equals(engprev)) {
+          engprev = eng;
+          maybeCreateFirst(s, false, true);
+        } else {
+          // logger.warning("deal with making a new ex");
+          coreVocabEditor.gotForward(this);
+        }
       } else {
         prev = s;
         if (DEBUG) logger.info("gotBlur " + getExID() + " = " + prev);
-        maybeCreateFirst(s, this, true);
+        maybeCreateFirst(s, true, false);
       }
     }
   }
 
-
-  private void maybeCreateFirst(String s, CoreEditorTurn outer, boolean moveToNextTurn) {
+  private void maybeCreateFirst(String s, boolean moveToNextTurn, boolean isEnglish) {
     if (getExID() == -1) {
       controller.getDialogService().addEmptyCoreExercise(dialogID, -1, new AsyncCallback<DialogExChangeResponse>() {
         @Override
@@ -200,19 +235,27 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
           if (result.getChanged().isEmpty()) {
             logger.warning("huh? didn't add");
           } else {
-            exercise = result.getChanged().get(0);
-            if (DEBUG) logger.info("ex now " + exercise + " move turn to next " + moveToNextTurn);
-            updateText(s, outer, moveToNextTurn);
+//            exercise = result.getChanged().get(0);
+//            if (DEBUG) logger.info("ex now " + exercise + " move turn to next " + moveToNextTurn);
+
+            if (isEnglish) {
+              updateEnglish(moveToNextTurn);
+            } else {
+              updateText(s, moveToNextTurn);
+            }
           }
         }
       });
     } else {
-      updateText(s, outer, moveToNextTurn);
+      if (isEnglish) {
+        updateEnglish(moveToNextTurn);
+      } else {
+        updateText(s, moveToNextTurn);
+      }
     }
   }
 
-
-  private void updateText(String s, CoreEditorTurn outer, boolean moveToNextTurn) {
+  private void updateText(String s, boolean moveToNextTurn) {
     int projectID = controller.getProjectID();
     if (projectID != -1) {
       final int exID = getExID();
@@ -235,7 +278,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
 
           showOOVResult(result);
 
-          updateTextViaExerciseService(projectID, exID, s, moveToNextTurn, outer);
+          updateTextViaExerciseService(projectID, exID, s, moveToNextTurn);
         }
       });
     }
@@ -250,7 +293,8 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
    * @param moveToNextTurn
    * @param outer
    */
-  private void updateTextViaExerciseService(int projectID, int exID, String s, boolean moveToNextTurn, CoreEditorTurn outer) {
+  private void updateTextViaExerciseService(int projectID, int exID, String s, boolean moveToNextTurn) {
+    CoreEditorTurn outer = this;
     controller.getExerciseService().updateText(projectID, dialogID, exID, -1, s, new AsyncCallback<OOVWordsAndUpdate>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -273,6 +317,34 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     });
   }
 
+  private void updateEnglishText(int projectID, int exID, String s, boolean moveToNextTurn) {
+    CoreEditorTurn outer = this;
+    controller.getExerciseService().updateEnglishText(projectID, dialogID, exID, s, new AsyncCallback<Boolean>() {
+      @Override
+      public void onFailure(Throwable caught) {
+        controller.handleNonFatalError("updating english text...", caught);
+
+        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(caught);
+        logger.info("logException stack " + exceptionAsString);
+      }
+
+      @Override
+      public void onSuccess(Boolean result) {
+        // showOOVResult(result);
+        logger.info("updateEnglishText OK, update was " + result);
+        //coreVocabEditor.setHighlights();
+        if (moveToNextTurn) {
+          coreVocabEditor.gotForward(outer);
+        }
+      }
+    });
+  }
+
+  /**
+   * TODO : actually show oov?
+   *
+   * @param result
+   */
   private void showOOVResult(OOVWordsAndUpdate result) {
     if (!result.getOov().isEmpty()) {
       StringBuilder builder = new StringBuilder();
@@ -287,6 +359,5 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
   @Override
   public void gotFocus() {
     coreVocabEditor.setCurrentTurnTo(this);
-//    logger.info("gotFocus...");
   }
 }

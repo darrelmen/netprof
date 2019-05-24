@@ -34,6 +34,7 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.WaitCursorHelper;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
@@ -84,7 +85,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
 
     // add record feedback
     {
-      recordFeedback = makePlayAudioPanel().getRecordFeedback(null);
+      recordFeedback = makePlayAudioPanel().getRecordFeedback(null);;//makeWaitCursor().getWaitCursor());
       Style style = recordFeedback.getElement().getStyle();
       style.setMarginTop(7, Style.Unit.PX);
       style.setProperty("minWidth", CONTEXT_INDENT + "px");
@@ -102,6 +103,24 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     //scoreFeedback.getElement().setId("scoreFeedbackRow");
   }
 
+  private WaitCursorHelper waitCursorHelper;
+
+  private WaitCursorHelper makeWaitCursor() {
+    if (waitCursorHelper == null) {
+      waitCursorHelper = new WaitCursorHelper();
+      waitCursorHelper.showFinished();
+    }
+    return waitCursorHelper;
+  }
+
+  void showWaitCursor() {
+    waitCursorHelper.showAnimated();
+  }
+
+  void hideWaitCursor() {
+    waitCursorHelper.showFinished();
+  }
+
   /**
    * So here we're trying to make the record and play buttons know about each other
    * to the extent that when we're recording, we can't play audio, and when we're playing
@@ -112,7 +131,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
    * @see AudioPanel#getPlayButtons
    */
   RecorderPlayAudioPanel makePlayAudioPanel() {
-   // long then = System.currentTimeMillis();
+    // long then = System.currentTimeMillis();
     NoFeedbackRecordAudioPanel outer = this;
     postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller) {
       /**
@@ -187,7 +206,9 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     return false;
   }
 
-  protected AudioType getAudioType() { return AudioType.LEARN; }
+  protected AudioType getAudioType() {
+    return AudioType.LEARN;
+  }
 
   protected boolean useMicrophoneIcon() {
     return false;

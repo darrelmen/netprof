@@ -50,7 +50,6 @@ import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.Language;
-import mitll.langtest.shared.project.ModelType;
 import mitll.langtest.shared.project.OOVWordsAndUpdate;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
@@ -1416,9 +1415,17 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     return project.getExerciseDAO().updateText(project, dialogID, exid, audioID, content);
   }
 
+  @Override
+  public boolean updateEnglishText(int projid, int dialogID, int exid, String content) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+    Project project = getProject(projid);
+    return project.getExerciseDAO().updateEnglishText(project, dialogID, exid, content);
+  }
+/*
   private String getTrim(String part) {
     return part.replaceAll(REGEX, " ").replaceAll(TIC_REGEX, "'").trim();
   }
+*/
 
   /**
    * Make sure that if the audio service on score1 or hydra has marked an exercise safe or unsafe it's reflected here.

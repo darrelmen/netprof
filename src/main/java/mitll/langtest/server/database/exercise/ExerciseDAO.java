@@ -101,4 +101,6 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   CommonExercise forget(int id);
 
   OOVWordsAndUpdate updateText(Project project, int dialogID, int exid, int audioID, String content);
+
+  boolean updateEnglishText(Project project, int dialogID, int exid, String content);
 }

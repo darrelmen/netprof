@@ -53,7 +53,7 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
 import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.UNK;
 
 public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
-    implements IFocusable, /*IFocusListener,*/ IEditableTurnContainer<CoreEditorTurn>, ITurnContainer<CoreEditorTurn> {
+    implements IFocusable, IEditableTurnContainer<CoreEditorTurn>, ITurnContainer<CoreEditorTurn> {
   private final Logger logger = Logger.getLogger("CoreVocabEditor");
   private static final boolean DEBUG_BLUR = false;
 
@@ -95,8 +95,7 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
             INavigation.VIEWS.CORE_EDITOR, isInModal ? null : getPrevView(), isInModal ? null : getNextView()).getHeader(dialog));
   }
 
-
-  TurnViewHelper<SimpleTurn> leftHelper;
+  private TurnViewHelper<SimpleTurn> leftHelper;
 
   @NotNull
   public DivWidget getTurns(IDialog dialog) {
@@ -125,12 +124,12 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
     return leftRight;
   }
 
-   void setHighlights() {
+  void setHighlights() {
     Set<String> allText = new HashSet<>();
     getAllTurns().forEach(turn -> allText.add(turn.getContent()));
 //    leftHelper.getAllTurns().forEach(SimpleTurn::restoreText);
 
-  //  logger.info("core " +allText);
+    //  logger.info("core " +allText);
     leftHelper.getAllTurns().forEach(turn -> {
       turn.restoreText();
       turn.maybeObscure(allText);

@@ -65,7 +65,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
   private static final boolean DEBUG_PARTIAL = false;
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_OVERLAP = false;
+//  private static final boolean DEBUG_OVERLAP = false;
 
   private static final long MOVE_ON_DUR = 3000L;
   private static final long END_SILENCE = 300L;
@@ -686,7 +686,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     start = System.currentTimeMillis();
     boolean pushToTalk = isPushToTalk();
 
-    logger.info("startRecording " +
+    if (DEBUG) logger.info("startRecording " +
         "\n\tfor  " + getExID() + " " +
         "\n\tat   " + start + " or " + new Date(start) +
         "\n\tpush " + pushToTalk
@@ -732,6 +732,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     if (doPushToTalk) {
       return false;
     } else {
+
       long now = System.currentTimeMillis();
 
       long diff = now - start;
@@ -743,6 +744,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
       boolean shouldStop = vadCheck || diff > minDurPlusMoveOn;// || doPushToTalk;
       if (shouldStop) {
+       // recordAudioPanel.showWaitCursor();
+
         logger.info("gotEndSilenceMaybeStopRecordingTurn " + this +
             "\n\tvadCheck  " + vadCheck +
             "\n\tgotStreamStop " + gotStreamStop +
@@ -764,6 +767,8 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       }
     }
   }
+
+  public void hideWaitCursor() { recordAudioPanel.hideWaitCursor(); }
 
   /**
    * @return

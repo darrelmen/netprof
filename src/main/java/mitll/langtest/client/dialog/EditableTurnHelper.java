@@ -34,11 +34,9 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
-import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.ISimpleTurn;
 import mitll.langtest.client.scoring.PhonesChoices;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
@@ -49,32 +47,39 @@ public class EditableTurnHelper {
   private TextBox contentTextBox;
   //private HTML turnFeedback;
   private final Language language;
-  private ISimpleTurn simpleTurn;
+  // private ISimpleTurn simpleTurn;
   //  boolean isInterpreter;
   private String placeholder;
-  private ClientExercise clientExercise;
-
+  // private ClientExercise clientExercise;
+  private boolean hasEnglishAttr;
+  private String initialContent;
   private IFocusListener focusListener;
   //private String prev = "";
 
 
-  public EditableTurnHelper(Language language,
-                            ISimpleTurn simpleTurn,
-                            //  boolean isInterpreter,
-                            //  String placeholder,
-                            ClientExercise clientExercise,
-                            IFocusListener focusListener
+  EditableTurnHelper(Language language,
+                     ISimpleTurn simpleTurn,
+
+                     // ClientExercise clientExercise,
+                     boolean hasEnglishAttr,
+                     String initialContent,
+                     IFocusListener focusListener
   ) {
     this.language = language;
-    this.simpleTurn = simpleTurn;
-    // this.isInterpreter = isInterpreter;
-    // this.placeholder = placeholder;
-    this.clientExercise = clientExercise;
+    //  this.simpleTurn = simpleTurn;
+
+    //   this.clientExercise = clientExercise;
     this.focusListener = focusListener;
+    this.hasEnglishAttr = hasEnglishAttr;
+    this.initialContent = initialContent;
   }
 
   public void setPlaceholder(boolean isInterpreter, ITurnContainer.COLUMNS columns) {
     this.placeholder = getPlaceholder(isInterpreter, columns);
+  }
+
+  public void setPlaceholder(String placeholder) {
+    this.placeholder = placeholder;
   }
 
   public void grabFocus() {
@@ -88,14 +93,15 @@ public class EditableTurnHelper {
 
   public void setBackgroundColor(String color) {
     contentTextBox.getElement().getStyle().setBackgroundColor(color);
-
   }
 
   @NotNull
-  public DivWidget getTextBox() {
+  public DivWidget getTextBox(boolean addMargin) {
     DivWidget textBoxContainer = new DivWidget();
-    textBoxContainer.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
-    textBoxContainer.add(contentTextBox = addTextBox());
+    if (addMargin) {
+      textBoxContainer.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+    }
+    textBoxContainer.add(contentTextBox = addTextBox(addMargin));
     //  textBoxContainer.add(getTurnFeedback());
     return textBoxContainer;
   }
@@ -115,16 +121,17 @@ public class EditableTurnHelper {
 
   /**
    * @param wrapper
+   * @param addTopMargin
    * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
-  private TextBox addTextBox() {
+  private TextBox addTextBox(boolean addTopMargin) {
     // TODO : instead, make this a div contenteditable!
     TextBox w = new TextBox();
     w.getElement().getStyle().setFontSize(16, Style.Unit.PX);
 //    w.setId("TextBox_" + getExID());
     w.setWidth(getTextBoxWidth() + "px");
 
-    String foreignLanguage = clientExercise.getForeignLanguage();
+    String foreignLanguage = getBoxContent();
     if (foreignLanguage.isEmpty()) {
 //      String placeholder = clientExercise.hasEnglishAttr() ? "English... (" + simpleTurn.getExID() +
 //          ")" : language.toDisplay() + " translation (" + simpleTurn.getExID() +
@@ -146,9 +153,14 @@ public class EditableTurnHelper {
 
     w.addStyleName("leftTenMargin");
     w.addStyleName("rightTenMargin");
-    w.addStyleName("topFiveMargin");
+    if (addTopMargin)
+      w.addStyleName("topFiveMargin");
 
     return w;
+  }
+
+  private String getBoxContent() {
+    return initialContent;
   }
 
   protected int getTextBoxWidth() {
@@ -156,28 +168,26 @@ public class EditableTurnHelper {
   }
 
   private String getPlaceholder(boolean isInterpreter, ITurnContainer.COLUMNS columns) {
-    String placeholder = clientExercise.hasEnglishAttr() ? "English... (" + simpleTurn.getExID() +
-        ")" : language.toDisplay() + " translation (" + simpleTurn.getExID() +
-        ")";
+    String placeholder = hasEnglishAttr ? "English..." //+" (" + simpleTurn.getExID() + ")"
+        :
+        language.toDisplay() + " translation" //+        " (" + simpleTurn.getExID() + ")"
+        ;
     return isInterpreter ? (columns == ITurnContainer.COLUMNS.LEFT ? SPEAKER_A : SPEAKER_B) + " says..." : placeholder;
-  }
-
-  private void gotBlur() {
-    focusListener.gotBlur();
-    // call focus listener
   }
 
   public String getContent() {
     return SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
   }
 
-  void gotFocus() {
-    // call focus listener
+  private void gotBlur() {
+    focusListener.gotBlur();
+  }
+
+  private void gotFocus() {
     focusListener.gotFocus();
   }
 
-  void gotKey(KeyUpEvent event) {
-    // call focus listener
+  private void gotKey(KeyUpEvent event) {
     focusListener.gotKey(event);
   }
 }

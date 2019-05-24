@@ -85,11 +85,15 @@ public class WaitCursorHelper {
       @Override
       public void run() {
      //   logger.info("scheduleWaitTimer timer expired..." + outer);
-        waitCursor.setUrl(animated);
-        show();
+        showAnimated();
       }
     };
     waitTimer.schedule(delayMillis);
+  }
+
+  public void showAnimated() {
+    waitCursor.setUrl(animated);
+    show();
   }
 
   private void hide() {

@@ -63,7 +63,7 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * @see ListenViewHelper#addDialogHeader(IDialog, Panel)
  */
 public class DialogHeader {
-  private final Logger logger = Logger.getLogger("DialogHeader");
+ // private final Logger logger = Logger.getLogger("DialogHeader");
   private static final String HEIGHT = 100 + "px";
 
   /**
@@ -310,14 +310,15 @@ public class DialogHeader {
     Widget child = new HTML(keyBindings);
 
     child.addStyleName("cardBorderShadow");
-    child.addStyleName("floatRight");
+    child.addStyleName("floatLeft");
     Style style = child.getElement().getStyle();
-    style.setProperty("marginLeft", "auto");
+
     style.setPaddingLeft(5, PX);
     style.setBackgroundColor("aliceblue");
 
     style.setMarginTop(-5, PX);
-    style.setMarginRight(50, PX);
+
+    style.setMarginLeft(89, PX);
     style.setPaddingRight(27, PX);
     style.setClear(Style.Clear.BOTH);
     return child;
@@ -330,7 +331,6 @@ public class DialogHeader {
     image.setWidth(HEIGHT);
     return image;
   }
-
 
   @NotNull
   private Heading getFLTitle(IDialog dialog) {

@@ -643,7 +643,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   }
 
   /**
-   *
    * @param project
    * @param dialogID
    * @param exid
@@ -665,10 +664,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       boolean update = project.getExerciseDAO().update(exerciseByID);
 
       if (update) {
-        CommonExercise exerciseByID1 = project.getExerciseByID(exid);
+  /*      CommonExercise exerciseByID1 = project.getExerciseByID(exid);
         logger.info("updateText " +
             "\n\tnow        '" + exerciseByID1.getForeignLanguage() + "'" +
-            "\n\tnormalized '" + exerciseByID1.getNormalizedFL() + "'");
+            "\n\tnormalized '" + exerciseByID1.getNormalizedFL() + "'");*/
 
         IDialog dialog = project.getDialog(dialogID);
         if (dialog == null) {
@@ -684,14 +683,6 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
           } else {
             // not really sure this is needed
             collect1.get(0).asCommon().getMutable().setForeignLanguage(content);
-//
-//            if (audioID != -1) {  // maybe we have text before the audio...
-//              if (!audioDAO.updateTranscript(audioID, content)) {
-//                logger.warn("updateText didn't update audio id# " + audioID + " with " + content);
-//              }
-//            } else {
-//              logger.info("updateText no audio id...");
-//            }
           }
 
           if (audioID != -1) {  // maybe we have text before the audio...
@@ -705,6 +696,33 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       }
 
       return new OOVWordsAndUpdate(update, new HashSet<>(), project.getModelType() == ModelType.HYDRA);
+    }
+  }
+
+  public boolean updateEnglishText(Project project, int dialogID, int exid, String content) {
+    CommonExercise exerciseByID = project.getExerciseByID(exid);
+    if (exerciseByID == null) {
+      logger.warn("updateEnglishText " + "can't find " + exid);
+
+      return false;
+    } else {
+      content = getTrim(content);
+
+      exerciseByID.getMutable().setEnglish(content);
+
+      boolean update = project.getExerciseDAO().update(exerciseByID);
+      if (update) {
+        IDialog dialog = project.getDialog(dialogID);
+        List<ClientExercise> collect1 = dialog.getCoreVocabulary().stream().filter(exercise -> exercise.getID() == exid).collect(Collectors.toList());
+        if (collect1.isEmpty()) {
+          logger.warn("updateText can't find ex id  " + exid);
+          return false;
+        } else {
+          // not really sure this is needed
+          collect1.get(0).asCommon().getMutable().setEnglish(content);
+          return true;
+        }
+      } else return false;
     }
   }
 

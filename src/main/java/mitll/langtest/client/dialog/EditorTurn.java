@@ -134,7 +134,7 @@ public class EditorTurn extends PlayAudioExercisePanel
     this.isFirstTurn = isFirstTurn;
 
     this.turnAddDelete = new TurnAddDelete(this, 26);
-    this.editableTurnHelper = new EditableTurnHelper(controller.getLanguageInfo(), this, clientExercise, this);
+    this.editableTurnHelper = new EditableTurnHelper(controller.getLanguageInfo(), this, clientExercise.hasEnglishAttr(), clientExercise.getForeignLanguage(), this);
     editableTurnHelper.setPlaceholder(turnContainer.isInterpreter(), columns);
 
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify) {
@@ -321,7 +321,7 @@ public class EditorTurn extends PlayAudioExercisePanel
 
   @NotNull
   private DivWidget getTextBox() {
-    DivWidget textBoxContainer = editableTurnHelper.getTextBox();
+    DivWidget textBoxContainer = editableTurnHelper.getTextBox(true);
     textBoxContainer.add(getTurnFeedback());
     return textBoxContainer;
   }
