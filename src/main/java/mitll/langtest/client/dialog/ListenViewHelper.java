@@ -163,42 +163,6 @@ public class ListenViewHelper<T extends ITurnPanel>
     return turns;
   }
 
-  /**
-   * @param exid
-   * @see DialogEditor#deleteCurrentTurnOrPair
-   */
- /* T deleteTurn(int exid, Set<T> toRemoves) {
-    T toRemove = getTurnByID(exid);
-    T newCurrentTurn = null;
-    if (toRemove == null) {
-      logger.warning("huh? can't find " + exid);
-
-    } else {
-      // fade it out for a second to show it disappearing...
-      ((Widget) toRemove).addStyleName("opacity-out-target");
-
-      logger.info("deleteTurn removing current turn " + currentTurn.getExID());
-
-      T prev = getPrev(toRemove);
-      if (prev == null) {
-        T next = getNext(toRemove);
-        logger.info("deleteTurn now next " + (next == null ? " NULL " : next.getExID()));
-        newCurrentTurn = next;
-      } else {
-        logger.info("deleteTurn now prev " + prev.getExID());
-        newCurrentTurn = prev;
-      }
-
-      allTurns.remove(toRemove);
-
-      removeFromAllPanels(toRemove);
-
-      toRemoves.add(toRemove);
-    }
-
-    return newCurrentTurn;
-  }*/
-
   @Override protected void removeFromAllPanels(T toRemove) {
     leftTurnPanels.remove(toRemove);
     rightTurnPanels.remove(toRemove);
@@ -230,7 +194,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     return currentTurn;
   }
 
-  protected void makeNextTheCurrentTurn(T fnext) {
+  void makeNextTheCurrentTurn(T fnext) {
     setCurrentTurn(fnext);
 
     Scheduler.get().scheduleDeferred(() -> {
@@ -246,7 +210,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     });
   }
 
-  protected T getNextTurn(int exid) {
+  T getNextTurn(int exid) {
     T current = getTurnByID(exid);
 
     T next = getCurrentTurn();

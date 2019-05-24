@@ -180,9 +180,9 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     if (dialog != null) {
       isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
       showDialog(dialogID, dialog, child);
-
     } else {
-      logger.info("showDialogGetRef no dialog for " + dialogID);
+      controller.getNavigation().showView(INavigation.VIEWS.DIALOG);
+ /*     logger.info("showDialogGetRef no dialog for " + dialogID);
       Label child1 = new Label(LabelType.INFO, "Please choose a dialog first under Dialogs.");
       child1.getElement().getStyle().setFontSize(16, PX);
       child1.addStyleName("topFiveMargin");
@@ -199,13 +199,13 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
         widgets.addStyleName("floatLeft");
         widgets.getElement().getStyle().setClear(Style.Clear.BOTH);
         child.add(widgets);
-      }
+      }*/
     }
   }
 
-  private void gotJumpToDialog() {
-    controller.getNavigation().showView(INavigation.VIEWS.DIALOG);
-  }
+//  private void gotJumpToDialog() {
+//    controller.getNavigation().showView(INavigation.VIEWS.DIALOG);
+//  }
 
   /**
    * @param exid

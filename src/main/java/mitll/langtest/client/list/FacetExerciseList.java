@@ -1593,19 +1593,25 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #gotFullExercises
    */
   protected void hidePrevNextWidgets() {
+ //   logger.info("hidePrevNextWidgets");
+
     pageSizeContainer.setVisible(false);
     setSortBoxVisible(false);
     setPagerRowVisible(false);
   }
 
   protected void showOnlySortBox() {
+    //logger.info("showOnlySortBox");
+
     pageSizeContainer.setVisible(false);
     setSortBoxVisible(true);
     setDownloadVisible(false);
     setPagerRowVisible(true);
   }
 
-  private void showPrevNext() {
+  protected void showPrevNext() {
+   // logger.info("showPrevNext");
+
     pageSizeContainer.setVisible(true);
     setSortBoxVisible(true);
     setProgressVisible(true);
@@ -1620,11 +1626,16 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     sortBox.setVisible(b);
   }
 
+  /**
+   * @see mitll.langtest.client.flashcard.StatsPracticePanel#setListHeaderVisible(boolean)
+   * @param b
+   */
   public void setListHeaderVisible(boolean b) {
     listHeader.setVisible(b);
   }
 
-  private void setDownloadVisible(boolean b) {
+  protected void setDownloadVisible(boolean b) {
+   // logger.info("setDownloadVisible ");
     showAndDownload.setVisible(b);
   }
 

@@ -33,7 +33,6 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.PushButton;
@@ -63,6 +62,7 @@ import java.util.stream.Collectors;
  * A facet list display of dialogs.
  */
 public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
+  public static final String TYPE = "Type";
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
   public static final String INTERP_COLOR = "#f0fff7";
@@ -91,17 +91,26 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, INavigation.VIEWS.DIALOG);
   }
 
+  /**
+   * Don't show the show options
+   */
+  @Override
+  protected void showPrevNext() {
+    super.showPrevNext();
+    setDownloadVisible(false);
+  }
+
   @Override
   protected List<String> getTypeOrderSimple() {
-    ArrayList<String> strings = new ArrayList<>(getStartupInfo().getTypeOrder());
-    strings.add("Type");
+    List<String> strings = new ArrayList<>(getStartupInfo().getTypeOrder());
+    strings.add(TYPE);
     return strings;
   }
 
   @Override
   protected Set<String> getRootNodes(ProjectStartupInfo projectStartupInfo) {
-    HashSet<String> strings = new HashSet<>(projectStartupInfo.getRootNodes());
-    strings.add("Type");
+    Set<String> strings = new HashSet<>(projectStartupInfo.getRootNodes());
+    strings.add(TYPE);
     return strings;
   }
 

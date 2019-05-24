@@ -55,6 +55,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static mitll.langtest.client.LangTest.RED_X_URL;
 import static mitll.langtest.client.scoring.RecorderPlayAudioPanel.BLUE_INACTIVE_COLOR;
@@ -64,6 +65,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
   private static final boolean DEBUG_PARTIAL = false;
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_OVERLAP = false;
 
   private static final long MOVE_ON_DUR = 3000L;
   private static final long END_SILENCE = 300L;
@@ -248,69 +250,124 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * Or should we use exact match?
    */
   public void maybeSetObscure(List<ClientExercise> coreVocabs) {
-//    String oldID = exercise.getOldID();
-//    ClientExercise clientExercise = turnToEx.get(oldID);
-//    if (clientExercise == null) {
-//      logger.info("maybeSetObscure : couldn't find core for " + oldID);
-//    } else {
-//      Set<String> coreVocab = Collections.singleton(clientExercise.getForeignLanguage());
-//      //  logger.info("got " + clientExercise.getForeignLanguage() + " for " + exercise.getForeignLanguage());
-//      getObscureCandidates(coreVocab).forEach(IHighlightSegment::setObscurable);
-//    }
-
     Set<String> coreVocab = new HashSet<>();
 
-    coreVocabs.forEach(ex -> {
-      //  coreVocab.addAll(Arrays.asList(ex.getForeignLanguage().split(" ")));
-      coreVocab.add(ex.getForeignLanguage().trim());
-    });
+    coreVocabs.forEach(ex -> coreVocab.add(ex.getForeignLanguage().trim()));
 
-//    logger.info("got " + coreVocab);
+    Collection<IHighlightSegment> obscureCandidates = getObscureCandidates(coreVocab);
 
-    getObscureCandidates(coreVocab).forEach(IHighlightSegment::setObscurable);
+    if (DEBUG_OVERLAP) logger.info("maybeSetObscure got " + coreVocab + " found " + obscureCandidates);
 
+    obscureCandidates.forEach(IHighlightSegment::setObscurable);
   }
 
+  /**
+   * Get all segments that need to be blacked out.
+   *
+   * @param coreVocab
+   * @return
+   */
   private Collection<IHighlightSegment> getObscureCandidates(Collection<String> coreVocab) {
-    Collection<IHighlightSegment> candidates = new ArrayList<>();
+    if (DEBUG_OVERLAP) logger.info("getCandidates for " + exercise.getID() + " " + exercise.getForeignLanguage());
 
-    String coreMatch = null;
+    Set<IHighlightSegment> candidates = new HashSet<>();
+
+    String foreignLanguage = exercise.getForeignLanguage();
+    List<String> overlaps = coreVocab.stream().filter(foreignLanguage::contains).collect(Collectors.toList());
+
+    Set<IHighlightSegment> toObscure = new HashSet<>();
+
+    if (DEBUG_OVERLAP)
+      logger.info("getObscureCandidates : from " + coreVocab.size() + " found " + overlaps.size() + " overlaps");
+
+    overlaps.forEach(overlap -> {
+      List<IHighlightSegment> clickableWordsHighlight = getClickableWordsHighlight(flclickables, overlap);
+      if (!clickableWordsHighlight.isEmpty()) {
+        if (DEBUG_OVERLAP) logger.info("\tgetObscureCandidates : match " + overlap + " =  " + clickableWordsHighlight);
+      }
+      toObscure.addAll(clickableWordsHighlight);
+    });
+
     for (IHighlightSegment segment : flclickables) {
-      //   logger.warning("no match for " + segment.getContent() + " in " + coreVocab);
-      String content = segment.getContent();
-
-      if (!content.isEmpty()) {
-        for (String core : coreVocab) {
-          if (core.contains(content) || content.contains(core)) {
-            coreMatch = core;
-            //candidate = segment;
-          }
-          if (coreMatch != null) break;
-        }
-        if (coreMatch != null) break;
+      if (toObscure.contains(segment)) {
+        candidates.add(segment);
       }
     }
 
-    if (coreMatch != null) {
-      for (IHighlightSegment segment : flclickables) {
-        String content = segment.getContent();
-
-        if (coreMatch.startsWith(content)) {
-          candidates.add(segment);
-          coreMatch = coreMatch.substring(content.length());
-          //   logger.info("getObscureCandidate core match now " + coreMatch + " against " + content);
-          if (coreMatch.isEmpty()) break;
-        } else if (content.startsWith(coreMatch)) {
-          candidates.add(segment);
-          logger.info("getObscureCandidate partial match for " + coreMatch + " against " + content);
-          break;
-        } else {
-          //   logger.info("getObscureCandidate no match for " + coreMatch + " against " + content);
-        }
-      }
-    }
+    if (DEBUG_OVERLAP) logger.info("getObscureCandidates : return " + candidates);
 
     return candidates;
+  }
+
+  private List<IHighlightSegment> getClickableWordsHighlight(List<IHighlightSegment> candidates, String highlight) {
+    boolean isChineseCharacter = false; // TODO : check language
+
+    SearchTokenizer searchTokenizer = new SearchTokenizer();
+
+    List<String> tokens = new ArrayList<>();
+    for (IHighlightSegment candidate : candidates) {
+      tokens.add(candidate.getContent());
+    }
+    if (DEBUG_OVERLAP) {
+      logger.info("getClickableWordsHighlight " +
+          //    "\n\tcontextSentence     '" + contextSentence + "'" +
+          "\n\thighlight '" + highlight + "'" +
+          "\n\ttokens    " + tokens +
+          "\n\t# tokens  " + candidates.size());
+    }
+
+    // if the highlight token is not in the display, skip over it -
+
+    List<String> highlightTokens = searchTokenizer.getTokens(highlight, isChineseCharacter, new ArrayList<>());
+
+    if (DEBUG_OVERLAP) {
+      logger.info("getClickableWordsHighlight " +
+          //    "\n\tcontextSentence     '" + contextSentence + "'" +
+          "\n\thighlight '" + highlightTokens + "'");
+    }
+    int highlightStartIndex = searchTokenizer.getMatchingHighlightAll(tokens, highlightTokens);
+
+    Iterator<String> highlightIterator = highlightTokens.iterator();
+    String highlightToFind = highlightIterator.hasNext() ? highlightIterator.next() : null;
+
+    if (DEBUG_OVERLAP) {
+      logger.info("getClickableWordsHighlight highlight start " + highlightStartIndex + " find " + highlightToFind);
+    }
+
+    List<IHighlightSegment> overlaps = new ArrayList<>();
+
+    if (highlightStartIndex == -1 || highlightToFind == null) {
+
+    } else {
+      boolean isHighlightMatch = true;
+      boolean maybeFoundAllTokens = false;
+      while (isHighlightMatch && !maybeFoundAllTokens) {
+        String token = tokens.get(highlightStartIndex);
+
+        isHighlightMatch = searchTokenizer.isMatch(token, highlightToFind);
+
+        if (isHighlightMatch) {
+          if (DEBUG_OVERLAP)
+            logger.info("getClickableWordsHighlight *highlight* '" + highlightToFind + "' = '" + token + "'");
+
+          overlaps.add(candidates.get(highlightStartIndex));
+
+          if (highlightIterator.hasNext()) {
+            highlightToFind = highlightIterator.next();
+            highlightStartIndex++;
+          } else {
+            maybeFoundAllTokens = true;
+            // OK match
+          }
+        } else {
+          maybeFoundAllTokens = true;
+        }
+      }
+    }
+    if (DEBUG_OVERLAP)
+      logger.info("getClickableWordsHighlight maybeFoundAllTokens " + overlaps.size() + " vs " + highlightTokens.size());
+
+    return (overlaps.size() == highlightTokens.size()) ? overlaps : Collections.emptyList();
   }
 
   /**

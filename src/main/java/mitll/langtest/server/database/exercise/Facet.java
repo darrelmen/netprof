@@ -48,7 +48,7 @@ public enum Facet implements Comparator<Facet> {
   private final String name;
   private String alt;
   private final int order;
-  private boolean alsoProjectType = false;
+//  private boolean alsoProjectType = false;
 
   Facet(String name, int order) {
     this.name = name;

@@ -55,11 +55,9 @@ import java.util.logging.Logger;
 /**
  * Created by go22670 on 3/23/17.
  */
-public class ClickableWords<T extends CommonShell & HasUnitChapter> {
+public class ClickableWords<T extends CommonShell & HasUnitChapter> extends SearchTokenizer {
   private final Logger logger = Logger.getLogger("ClickableWords");
 
-  private static final boolean DEBUG_CHINESE = false;
-  private static final boolean DEBUG_CHINESE2 = false;
   private static final String SEARCHMATCH = "searchmatch";
 
   private static final String CLICKABLE_ROW = "clickableRow";
@@ -68,9 +66,6 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> {
   private static final String STRONG = "strong";
   private static final String END_STRONG = "</" + STRONG + ">";
   private static final String START_STRONG = "<" + STRONG + ">";
-
-  private static final char FULL_WIDTH_ZERO = '\uFF10';
-  private static final char ZERO = '0';
 
   private boolean isJapanese;
   private boolean isUrdu;
@@ -103,10 +98,14 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> {
    * @see DialogExercisePanel#makeClickableWords
    */
   ClickableWords(ListInterface listContainer,
-                        int exercise, Language language, int fontSize,
-                        String highlightColor, boolean addFloatLeft,
-                        ExerciseServiceAsync<T> exerciseServiceAsync,
-                        int userID) {
+                 int exercise,
+                 Language language,
+                 int fontSize,
+                 String highlightColor,
+                 boolean addFloatLeft,
+
+                 ExerciseServiceAsync<T> exerciseServiceAsync,
+                 int userID) {
     this.listContainer = listContainer;
     this.exercise = exercise;
     this.highlightColor = highlightColor;
@@ -301,21 +300,17 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> {
    * @see TwoColumnExercisePanel#getContext
    */
   DivWidget getClickableWordsHighlight(String contextSentence,
-                                              String highlight,
-                                              FieldType fieldType,
-                                              List<IHighlightSegment> clickables,
-                                              boolean addClickableProps,
-                                              List<String> contextTokensOpt,
-                                              List<String> highlightTokensOpt,
-                                              boolean isRTL) {
-    DivWidget horizontal = new DivWidget();
+                                       String highlight,
+                                       FieldType fieldType,
+                                       List<IHighlightSegment> clickables,
+                                       boolean addClickableProps,
+                                       List<String> contextTokensOpt,
+                                       List<String> highlightTokensOpt,
+                                       boolean isRTL) {
+    HasDirection.Direction dir = isRTL ? HasDirection.Direction.RTL : HasDirection.Direction.LTR;
+    DivWidget horizontal = getClickableHighlightRow(fieldType, dir);
 
-    horizontal.getElement().setId("clickableWordsHighlightRow");
-    horizontal.setWidth("100%");
-
-    boolean isFL = fieldType == FieldType.FL;
-    boolean flLine = isFL || (isJapanese && fieldType == FieldType.TRANSLIT);
-    boolean isChineseCharacter = flLine && hasClickableAsian;
+    boolean isChineseCharacter = isChineseCharacter(fieldType);
 
     List<String> tokens = getTokens(contextSentence, isChineseCharacter, contextTokensOpt);
 
@@ -336,16 +331,7 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> {
     if (DEBUG)
       logger.info("getClickableWordsHighlight highlight start " + highlightStartIndex + " find " + highlightToFind);
 
-    HasDirection.Direction dir = isRTL ? HasDirection.Direction.RTL : HasDirection.Direction.LTR;
 
-    if (DEBUG) {
-      logger.info("getClickableWordsHighlight exercise " + exercise + " dir " + dir +
-          " isfL " + fieldType);
-    }
-    if ((dir == HasDirection.Direction.RTL) && isFL) {
-      if (DEBUG) logger.info("\texercise " + exercise + " is RTL ");
-      setDirectionToRTL(horizontal);
-    }
     int id = 0;
 
     List<String> searchTokens = getSearchTokens(isChineseCharacter);
@@ -398,87 +384,36 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> {
 //      }
     }
 
+    return horizontal;
+  }
+
+  private boolean isChineseCharacter(FieldType fieldType) {
+    boolean isFL = fieldType == FieldType.FL;
+    boolean flLine = isFL || (isJapanese && fieldType == FieldType.TRANSLIT);
+    return flLine && hasClickableAsian;
+  }
+
+  @NotNull
+  private DivWidget getClickableHighlightRow(FieldType fieldType, HasDirection.Direction dir) {
+    DivWidget horizontal = new DivWidget();
+
+    horizontal.getElement().setId("clickableWordsHighlightRow");
+    horizontal.setWidth("100%");
     horizontal.addStyleName("leftFiveMargin");
+
+    if (DEBUG) {
+      logger.info("getClickableWordsHighlight exercise " + exercise + " dir " + dir +
+          " isfL " + fieldType);
+    }
+    if ((dir == HasDirection.Direction.RTL) && fieldType == FieldType.FL) {
+      if (DEBUG) logger.info("\texercise " + exercise + " is RTL ");
+      setDirectionToRTL(horizontal);
+    }
     return horizontal;
   }
 
   void setDirectionToRTL(DivWidget horizontal) {
     horizontal.getElement().getStyle().setProperty("direction", "rtl");
-  }
-
-  /**
-   * Korean feedback said no partial matches
-   *
-   * @param tokens
-   * @param highlightTokens
-   * @return
-   */
-  @NotNull
-  private int getMatchingHighlightAll(List<String> tokens, List<String> highlightTokens) {
-    List<String> realHighlight = new ArrayList<>();
-    int numToFind = highlightTokens.size();
-
-    int searchStart = 0;
-    int startIndex = -1;
-
-    int numTokens = tokens.size();
-    while (realHighlight.size() < numToFind && searchStart < numTokens - realHighlight.size()) {
-      Iterator<String> hIter = highlightTokens.iterator();
-      String toFind = hIter.next();
-
-      //  logger.info("getMatchingHighlightAll : find '" + toFind + "'");
-      for (int i = searchStart; i < numTokens && startIndex == -1; i++) {
-        String longer = tokens.get(i);
-        if (isMatch(longer, toFind)) {
-          startIndex = i;
-        } else {
-          //        logger.info("\tno match for '" + longer + "'");
-        }
-      }
-
-      if (startIndex > -1) { // found first match
-//        logger.info("getMatchingHighlightAll at " + startIndex);
-        while (toFind != null &&
-            startIndex < numTokens &&
-            isMatch(tokens.get(startIndex++), toFind)) {
-          realHighlight.add(toFind);
-          toFind = hIter.hasNext() ? hIter.next() : null;
-        }
-      }
-
-      if (realHighlight.size() < numToFind) {
-        realHighlight.clear();
-        searchStart++;
-      }
-    }
-
-    return searchStart;
-  }
-
-  /**
-   * @param longer
-   * @param shorter
-   * @return
-   * @see #getClickableWordsHighlight
-   * @see #getMatchingHighlightAll
-   * @see #makeClickableText
-   */
-  private boolean isMatch(String longer, String shorter) {
-    if (shorter.isEmpty()) {
-      return false;
-    } else {
-      String context = removePunct(longer.toLowerCase());
-      String vocab = removePunct(shorter.toLowerCase());
-      // if (DEBUG) logger.info("context " + context + " longer " + longer);
-      boolean equals = context.equals(vocab);
-      //   if (DEBUG) logger.info("isMatch : context '" + context + "' vocab '" + longer +"' = " + equals);
-
-      boolean b = equals || (context.contains(vocab) && !vocab.isEmpty());
-/*      if (b && DEBUG)
-        logger.info("isMatch match '" + longer + "' '" + shorter + "' context '" + context + "' vocab '" + vocab + "'");
-     */
-      return b;
-    }
   }
 
   private boolean isSearchMatch(String first, String toSearchFor) {
@@ -497,148 +432,6 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> {
 //    String lcSearch = removePunct(toSearchFor.toLowerCase());
 //    return (context.equalsIgnoreCase(lcSearch));
 //  }
-
-  /**
-   * @param value
-   * @param dictTokens
-   * @return
-   * @see #getClickableWords(String, FieldType, List, boolean, List)
-   * @see #getClickableWordsHighlight(String, String, FieldType, List, boolean, List)
-   */
-  @NotNull
-  private List<String> getTokens(String value, boolean isChineseCharacter, List<String> dictTokens) {
-    List<String> tokens = new ArrayList<>();
-    if (isChineseCharacter) {
-      if (dictTokens == null) {
-        for (int i = 0, n = value.length(); i < n; i++) {
-          char character = value.charAt(i);
-          tokens.add(Character.toString(character));
-        }
-      } else {
-        tokens = getChineseMatches(value, dictTokens);
-      }
-    } else {
-      value = value.replaceAll("/", " / ");  // so X/Y becomes X / Y
-      tokens = getTokensOnSpace(value);
-    }
-
-    return tokens;
-  }
-
-  private static final String P_Z = "\\p{Z}+";
-
-  /**
-   * xy? ab?
-   * xy|ab
-   * <p>
-   * efgh
-   * ef|gh
-   *
-   * @param value
-   * @param dictTokens
-   * @return
-   */
-  private List<String> getChineseMatches(String value, List<String> dictTokens) {
-    List<String> tokens = new ArrayList<>();
-    int d = 0;
-    int dd = 0;
-    String prodToken = "";
-    if (DEBUG_CHINESE) logger.info("getChineseMatches " + value + " vs " + dictTokens);
-    for (int i = 0, n = value.length(); i < n; i++) {
-      Character character = value.charAt(i);
-      if (DEBUG_CHINESE) logger.info("getChineseMatches " + character + " at " + i + "/" + n);
-
-      String dict = d < dictTokens.size() ? dictTokens.get(d) : null;
-      if (dict != null) {
-        Character dc = dict.charAt(dd);
-
-        int length = dict.length();
-        if (isMatch(character, dc)) {
-
-          if (DEBUG_CHINESE) logger.info("match " + character + " = " + dc);
-
-          if (!prodToken.isEmpty() && dd == 0) {
-            tokens.add(prodToken);
-            if (DEBUG_CHINESE) logger.info("start over, addToken " + prodToken);
-            prodToken = "";
-          }
-          prodToken += character;
-          dd++;
-
-          if (dd == length) {  // end of the dict token
-            d++;
-            dd = 0;
-            dict = d < dictTokens.size() ? dictTokens.get(d) : null;
-            if (DEBUG_CHINESE) logger.info("dict token now " + dict);
-
-            if (dict != null) {
-              dc = dict.charAt(dd);
-              Character next = i + 1 < n ? value.charAt(i + 1) : null;
-              if (DEBUG_CHINESE) logger.info("2 compare " + next + " vs " + dc);
-              if (next != null && isMatch(next, dc)) {  // match on next token
-                tokens.add(prodToken);
-                if (DEBUG_CHINESE) logger.info("addToken " + prodToken);
-                prodToken = "";
-              }
-            }
-//            tokens.add(prodToken);
-//            prodToken = "";
-//
-//            d++;
-//            dd = 0;
-          }
-        } else {  // e.g. ? vs chinese character
-          if (DEBUG_CHINESE) logger.info("no match " + character + " != " + dc);
-
-          String test = "" + character;
-          if (test.replaceAll(P_Z, "").isEmpty()) {
-            tokens.add(prodToken);
-            if (DEBUG_CHINESE) logger.info("got space, add token " + prodToken);
-
-            prodToken = "";
-//          } else if (removePunct(test).isEmpty()) { // it's a punct!
-//            prodToken += character;
-          } else {// it's a punct!
-            prodToken += character;
-            if (DEBUG_CHINESE) logger.info("prodToken now " + prodToken);
-
-          }
-        }
-      } else {
-        prodToken += character;
-      }
-
-      //tokens.add(character.toString());
-    }
-    if (!prodToken.isEmpty())
-      tokens.add(prodToken);
-
-    if (DEBUG_CHINESE2) logger.info("getChineseMatches " + value + " vs " + dictTokens + " = " + tokens);
-    return tokens;
-  }
-
-  private boolean isMatch(Character character, Character dc) {
-    boolean equals = character.equals(dc);
-    if (!equals && isNumber(character)) {
-      equals = getFullCharacter(character).equals(dc);
-      if (DEBUG_CHINESE) logger.info("isMatch " + character + " vs " + dc + " = " + equals);
-    }
-    return equals;
-  }
-
-  private Character getFullCharacter(char c) {
-    int full = FULL_WIDTH_ZERO + (c - ZERO);
-    return (char) full;
-  }
-
-  private boolean isNumber(char c) {
-    return c >= ZERO && c <= '9';
-  }
-
-  @NotNull
-  private List<String> getTokensOnSpace(String value) {
-    return Arrays.asList(value.split(GoodwaveExercisePanel.SPACE_REGEX));
-  }
 
   /**
    * @param dir               text direction
@@ -855,28 +648,4 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> {
     return s1.split(GoodwaveExercisePanel.SPACE_REGEX)[0].toLowerCase();
   }
 
-  /**
-   * Not sure why we're doing this... again...
-   * <p>
-   * First is russian accent mark.
-   * russian hyphen
-   * Chinese punctuation marks, spanish punct marks
-   * horizontal ellipsis...
-   * reverse solidus
-   * aprostophe...
-   * <p>
-   * right single quote
-   *
-   * @param t
-   * @return
-   */
-  private String removePunct(String t) {
-    return t
-        .replaceAll(GoodwaveExercisePanel.PUNCT_REGEX, "")
-        .replaceAll(GoodwaveExercisePanel.SPACE_REGEX, "")
-        .replaceAll("\\u00ED", "i")
-        // .replaceAll("\\u00E9", "\\u0435")
-
-        .replaceAll("[\\u0301\\u0022\\u0027\\uFF01-\\uFF0F\\uFF1A-\\uFF1F\\u3002\\u300A\\u300B\\u003F\\u00BF\\u002E\\u002C\\u002D\\u0021\\u20260\\u005C\\u2013\\u2019]", "");
-  }
 }
