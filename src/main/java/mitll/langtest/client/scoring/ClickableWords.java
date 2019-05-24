@@ -85,6 +85,8 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> extends Sear
 //  private ExerciseServiceAsync<T> exerciseServiceAsync;
 //  private int userID;
 
+  private boolean areSegmentsClickable = true;
+
   /**
    * @param listContainer
    * @param exercise
@@ -209,7 +211,7 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> extends Sear
     for (String token : tokens) {
       boolean searchMatch = isSearchMatch(token, searchToken);
 
-      segments.add(makeClickableText(dir, token, searchMatch ? searchToken : null, false, id++, fieldType, true));
+      segments.add(makeClickableText(dir, token, searchMatch ? searchToken : null, false, id++, fieldType, isAreSegmentsClickable()));
 
       if (searchMatch) {
         if (searchIterator.hasNext()) {
@@ -444,6 +446,7 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> extends Sear
    * @return
    * @see #getClickableWords
    * @see #getClickableWordsHighlight
+   * @see #getSegmentsForTokens(List, List, HasDirection.Direction, FieldType)
    */
   private IHighlightSegment makeClickableText(
       HasDirection.Direction dir,
@@ -648,4 +651,11 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> extends Sear
     return s1.split(GoodwaveExercisePanel.SPACE_REGEX)[0].toLowerCase();
   }
 
+  public boolean isAreSegmentsClickable() {
+    return areSegmentsClickable;
+  }
+
+  public void setAreSegmentsClickable(boolean areSegmentsClickable) {
+    this.areSegmentsClickable = areSegmentsClickable;
+  }
 }

@@ -96,6 +96,7 @@ public class EditorTurn extends PlayAudioExercisePanel
   private TurnAddDelete turnAddDelete;
   private static final boolean DEBUG = false;
   private IEditableTurnContainer<EditorTurn> editableTurnContainer;
+
   /**
    * @param clientExercise
    * @param columns
@@ -132,7 +133,7 @@ public class EditorTurn extends PlayAudioExercisePanel
 
     this.isFirstTurn = isFirstTurn;
 
-    this.turnAddDelete = new TurnAddDelete(this,26);
+    this.turnAddDelete = new TurnAddDelete(this, 26);
     this.editableTurnHelper = new EditableTurnHelper(controller.getLanguageInfo(), this, clientExercise, this);
     editableTurnHelper.setPlaceholder(turnContainer.isInterpreter(), columns);
 
@@ -152,7 +153,7 @@ public class EditorTurn extends PlayAudioExercisePanel
 
     this.dialogID = dialogID;
     this.clientExercise = clientExercise;
-    //this.language = controller.getLanguageInfo();
+
     this.controller = controller;
     this.turnContainer = turnContainer;
     this.editableTurnContainer = editableTurnContainer;
@@ -175,6 +176,11 @@ public class EditorTurn extends PlayAudioExercisePanel
   protected void onUnload() {
     super.onUnload();
     gotBlur();
+  }
+
+  @Override
+  public String getContent() {
+    return clientExercise.getForeignLanguage();
   }
 
   @Override

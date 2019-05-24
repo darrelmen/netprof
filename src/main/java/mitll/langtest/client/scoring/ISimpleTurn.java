@@ -40,6 +40,8 @@ public interface ISimpleTurn extends IsWidget, ISimpleTurnMarking {
    */
   int getExID();
 
+  String getContent();
+
   void makeVisible();
 
   void grabFocus();

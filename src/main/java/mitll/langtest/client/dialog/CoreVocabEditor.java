@@ -31,8 +31,6 @@ package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
@@ -55,7 +53,7 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
 import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.UNK;
 
 public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
-    implements IFocusable, IFocusListener, IEditableTurnContainer<CoreEditorTurn>, ITurnContainer<CoreEditorTurn> {
+    implements IFocusable, /*IFocusListener,*/ IEditableTurnContainer<CoreEditorTurn>, ITurnContainer<CoreEditorTurn> {
   private final Logger logger = Logger.getLogger("CoreVocabEditor");
   private static final boolean DEBUG_BLUR = false;
 
@@ -97,74 +95,49 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
             INavigation.VIEWS.CORE_EDITOR, isInModal ? null : getPrevView(), isInModal ? null : getNextView()).getHeader(dialog));
   }
 
-  @Override
-  public void gotBlur() {
-    logger.info("gotBlur");
-  }
 
-  @Override
-  public void gotFocus() {
-    logger.info("gotFocus");
-  }
-
-  @Override
-  public void gotKey(KeyUpEvent event) {
-    logger.info("gotKey");
-  }
+  TurnViewHelper<SimpleTurn> leftHelper;
 
   @NotNull
   public DivWidget getTurns(IDialog dialog) {
+    if (getDialog() == null) {
+      logger.info("getTurns set dialog " + dialog);
+      setDialog(dialog);
+    }
     DivWidget leftRight = new DivWidget();
     leftRight.setWidth("100%");
     leftRight.addStyleName("inlineFlex");
 
     {
       TurnViewHelper<SimpleTurn> leftHelper = getLeftHelper();
+      leftHelper.setDialog(dialog);
+      this.leftHelper = leftHelper;
       DivWidget turns = leftHelper.getTurns(dialog);
       turns.setWidth("60%");
       leftRight.add(turns);
     }
 
-//    leftRight.add(coreVocabTurns);
     DivWidget coreVocabTurns = super.getTurns(dialog);
     coreVocabTurns.setWidth("40%");
     styleTurnContainer(coreVocabTurns);
     leftRight.add(coreVocabTurns);
 
-//
-//    List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
-//    List<ClientExercise> toUse = coreVocabulary.isEmpty() ? new ArrayList<>() : coreVocabulary;
-//    if (toUse.isEmpty()) toUse.add(new Exercise());
-//
-//    allTurns.clear();
-//    addTurnForEachCoreExercise(right, coreVocabulary);
-
-/*
-    Language languageInfo = controller.getLanguageInfo();
-    boolean isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
-
-    dialog.getCoreVocabulary().forEach(vocab -> {
-      right.add(new MySimpleTurn(vocab, languageInfo, isInterpreter));
-    });
-
-    logger.info("found " + dialog.getCoreVocabulary().size());
-    if (dialog.getCoreVocabulary().isEmpty()) {
-      SimpleTurn w = new MySimpleTurn(new Exercise(), languageInfo, isInterpreter);
-      right.add(w);
-      w.addWidgets(true, false, PhonesChoices.SHOW, EnglishDisplayChoices.SHOW);
-
-    }*/
     return leftRight;
+  }
+
+  public void setHighlights() {
+    Set<String> allText = new HashSet<>();
+    getAllTurns().forEach(turn -> allText.add(turn.getContent()));
+//    leftHelper.getAllTurns().forEach(SimpleTurn::restoreText);
+    leftHelper.getAllTurns().forEach(turn -> {
+      turn.restoreText();
+      turn.maybeObscure(allText);
+      turn.obscureText();
+    });
   }
 
   private TurnViewHelper<SimpleTurn> getLeftHelper() {
     return new TurnViewHelper<SimpleTurn>(controller, CORE_EDITOR) {
-      @NotNull
-      @Override
-      protected SimpleTurn reallyGetTurnPanel(ClientExercise clientExercise, ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
-        return new SimpleTurn(clientExercise, columns, false);
-      }
-
       @Override
       protected void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
         rowOne.clear();
@@ -172,6 +145,28 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
         exercises = exercises.stream().filter(exercise ->
             !exercise.hasEnglishAttr() && !exercise.getForeignLanguage().isEmpty()).collect(Collectors.toList());
         addTurnForEachExercise(rowOne, left, right, exercises);
+      }
+
+      @NotNull
+      @Override
+      SimpleTurn getTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
+        SimpleTurn turnPanel = super.getTurnPanel(clientExercise, columns, prevColumn, index);
+
+        IDialog dialog = getDialog();
+        if (dialog == null) {
+          logger.warning("no dialog?");
+        } else {
+          turnPanel.maybeSetObscure(this.dialog.getCoreVocabulary());
+          turnPanel.obscureText();
+        }
+
+        return turnPanel;
+      }
+
+      @NotNull
+      @Override
+      protected SimpleTurn reallyGetTurnPanel(ClientExercise clientExercise, ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
+        return new SimpleTurn(clientExercise, columns, false, controller.getLanguageInfo());
       }
     };
   }
@@ -201,8 +196,7 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   @Override
   public void deleteCurrentTurnOrPair(CoreEditorTurn currentTurn) {
     int exID = currentTurn.getExID();
-    logger.info("deleteCurrentTurnOrPair : " + "\n\tcurrent turn " + exID);
-    // currentTurn.getElement().getStyle().setOpacity(0.5);
+    //logger.info("deleteCurrentTurnOrPair : " + "\n\tcurrent turn " + exID);
     startDelete(currentTurn);
 
     controller.getDialogService().deleteCoreExercise(
@@ -222,40 +216,6 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
           }
         });
   }
-
-//  private void gotDeleteResponse(int exid) {
-//    Set<CoreEditorTurn> toRemove = new HashSet<>();
-//
-//    CoreEditorTurn newCurrentTurnCandidate = null;
-//
-//
-//    CoreEditorTurn newCurrentTurn = deleteTurn(exid, toRemove);
-//    if (newCurrentTurnCandidate == null) newCurrentTurnCandidate = newCurrentTurn;
-//
-//
-//    // we deleted the current turn!
-//    final CoreEditorTurn fnewCurrentTurnCandidate = newCurrentTurnCandidate;
-//    final Set<CoreEditorTurn> ftoRemove = toRemove;
-//
-//    // wait for animation to run before blowing it away...
-//    com.google.gwt.user.client.Timer currentTimer = new Timer() {
-//      @Override
-//      public void run() {
-//        ftoRemove.forEach(CoreVocabEditor.this::removeFromContainer);
-//
-//        if (fnewCurrentTurnCandidate != null) {
-//          logger.info("new current now " + fnewCurrentTurnCandidate.getExID());// + " " + fnewCurrentTurnCandidate.getText());
-//          removeMarkCurrent();
-//          setCurrentTurn(fnewCurrentTurnCandidate);
-//          markCurrent();
-//          fnewCurrentTurnCandidate.grabFocus();
-//        } else {
-//          logger.info("not messing with current turn...");
-//        }
-//      }
-//    };
-//    currentTimer.schedule(500);
-//  }
 
   /**
    * @param exercises
@@ -277,7 +237,13 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
 
   @Override
   public void grabFocus() {
-    if (!getAllTurns().isEmpty()) getAllTurns().iterator().next().grabFocus();
+    //if (!getAllTurns().isEmpty()) getAllTurns().iterator().next().grabFocus();
+
+    if (getCurrentTurn() != null) {
+      // logger.info("give focus to turn for ex #" + getCurrentTurn().getExID());
+      getCurrentTurn().grabFocus();
+      // markCurrent();
+    }
   }
 
   /**
@@ -326,11 +292,6 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
       getCurrentTurn().grabFocus();
     }
   }
-
-//  @Override
-//  public void setCurrentTurnTo(CoreEditorTurn newTurn) {
-//
-//  }
 
   @Override
   public boolean isInterpreter() {

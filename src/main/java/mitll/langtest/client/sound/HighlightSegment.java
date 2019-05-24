@@ -99,8 +99,8 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
 
     this.content = html;
     boolean isLTR = dir == HasDirection.Direction.LTR;
-    span.getElement().setId("highlight_" + id + "_" + html +"_dir_"+dir);
- //   getElement().setId("parent_highlight_" + id + "_" + html +"_dir_"+dir);
+    span.getElement().setId("highlight_" + id + "_" + html + "_dir_" + dir);
+    //   getElement().setId("parent_highlight_" + id + "_" + html +"_dir_"+dir);
 
     configureNorth(id, north, isLTR, span, addFloatLeft);
     this.north = north;
@@ -127,13 +127,18 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   }
 
   @Override
+  public boolean isObscurable() {
+    return shouldObscure;
+  }
+
+  @Override
   public boolean obscureText() {
     if (shouldObscure) {
       Style style = this.span.getElement().getStyle();
       style.setColor("gray");
       style.setBackgroundColor("gray");
 
-     // logger.info("obscureText did obscure on " +this);
+      // logger.info("obscureText did obscure on " +this);
       didObscure = true;
     }
     return didObscure;
@@ -142,7 +147,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   @Override
   public void restoreText() {
     if (shouldObscure && didObscure) {
-    //  logger.info("restoreText on " +this);
+      //  logger.info("restoreText on " +this);
       Style style = this.span.getElement().getStyle();
       style.setColor(RGB_51_51_51);
       style.clearBackgroundColor();
@@ -150,7 +155,7 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     }
     //else {
 //      logger.warning("no restore color?");
-   // }
+    // }
   }
 
   private HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {

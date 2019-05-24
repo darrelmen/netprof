@@ -65,7 +65,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
                  Language language,
                  boolean isInterpreter,
                  int dialogID) {
-    super(vocab, ITurnContainer.COLUMNS.RIGHT, false);
+    super(vocab, ITurnContainer.COLUMNS.RIGHT, false, controller.getLanguageInfo());
     this.controller = controller;
     this.coreVocabEditor = coreVocabEditor;
     this.dialogID = dialogID;
@@ -124,7 +124,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       if (DEBUG) logger.info("deleteGotFocus - ");
       grabFocus();
     } else {
-      logger.warning("move focus???");
+    //  logger.warning("move focus???");
       coreVocabEditor.moveFocusToNext();
     }
   }
@@ -147,7 +147,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
   public void gotBlur() {
     coreVocabEditor.gotBlur(this);
 
-    String s = editableTurnHelper.getContent();
+    String s = getContent();
     if (s.equals(prev)) {
       if (DEBUG) logger.info("gotBlur " + getExID() + " skip unchanged " + prev);
     } else {
@@ -158,11 +158,15 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     }
   }
 
+  @Override public String getContent() {
+    return editableTurnHelper.getContent();
+  }
+
   @Override
   public void gotKey(KeyUpEvent event) {
     NativeEvent ne = event.getNativeEvent();
 
-    String s = editableTurnHelper.getContent();//SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
+    String s = getContent();//SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
     if (ne.getKeyCode() == KeyCodes.KEY_ENTER) {
       ne.preventDefault();
       ne.stopPropagation();
@@ -235,6 +239,15 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     }
   }
 
+  /**
+   * TODO : consider handling OOV.
+   *
+   * @param projectID
+   * @param exID
+   * @param s
+   * @param moveToNextTurn
+   * @param outer
+   */
   private void updateTextViaExerciseService(int projectID, int exID, String s, boolean moveToNextTurn, CoreEditorTurn outer) {
     controller.getExerciseService().updateText(projectID, dialogID, exID, -1, s, new AsyncCallback<OOVWordsAndUpdate>() {
       @Override
@@ -248,7 +261,8 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       @Override
       public void onSuccess(OOVWordsAndUpdate result) {
         // showOOVResult(result);
-        logger.info("OK, update was " + result);
+        logger.info("updateTextViaExerciseService OK, update was " + result);
+        coreVocabEditor.setHighlights();
         if (moveToNextTurn) {
           coreVocabEditor.gotForward(outer);
         }

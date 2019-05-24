@@ -98,11 +98,11 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   boolean isInterpreter = false;
   DivWidget turnContainer;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_NEXT = false;
-  private static final boolean DEBUG_BLUR = false;
-  private static final boolean DEBUG_DETAIL = false;
-  private static final boolean DEBUG_PLAY = false;
+//  private static final boolean DEBUG_BLUR = false;
+//  private static final boolean DEBUG_DETAIL = false;
+//  private static final boolean DEBUG_PLAY = false;
 
   TurnViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     this.controller = controller;
@@ -653,7 +653,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   ITurnContainer.COLUMNS getColumnForEx(String left, String right, ClientExercise clientExercise) {
     String speaker = clientExercise == null ? "" : clientExercise.getSpeaker();
     if (speaker.isEmpty()) {
-      logger.info("getColumnForEx : no speaker, ex = " + clientExercise);
+      //logger.info("getColumnForEx : no speaker, ex = " + clientExercise);
       return ITurnContainer.COLUMNS.UNK;
     } else {
       return getColumnForSpeaker(left, right, speaker);

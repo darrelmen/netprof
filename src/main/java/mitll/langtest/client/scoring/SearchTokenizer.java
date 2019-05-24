@@ -193,10 +193,10 @@ public class SearchTokenizer {
    * @param tokens
    * @param highlightTokens
    * @return index of first matching token
-   * @see RecordDialogExercisePanel#getClickableWordsHighlight
+   * @see ObscureRecordDialogExercisePanel#getClickableWordsHighlight
    */
   @NotNull
-  protected int getMatchingHighlightAll(List<String> tokens, List<String> highlightTokens) {
+  int getMatchingHighlightAll(List<String> tokens, List<String> highlightTokens) {
     List<String> realHighlight = new ArrayList<>();
     int numToFind = highlightTokens.size();
 

@@ -575,7 +575,7 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
         dialog.getExercises().forEach(clientExercise ->
             db.getAudioDAO()
                 .attachAudioToExercise(clientExercise, language, new HashMap<>(),
-                    project.getAudioFileHelper().getSmallVocabDecoder(), true, false)
+                    project.getAudioFileHelper().getSmallVocabDecoder(), false, false)
         );
 
         // sanity check...

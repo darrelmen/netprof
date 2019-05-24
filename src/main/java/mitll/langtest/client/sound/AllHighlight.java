@@ -167,8 +167,8 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.WordTable#getDivWord
    * @param widget
+   * @see mitll.langtest.client.scoring.WordTable#getDivWord
    */
   public void setSouthScore(DivWidget widget) {
     setSouth(widget);
@@ -190,9 +190,21 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   }
 
   @Override
+  public boolean isObscurable() {
+    boolean all = true;
+    for (IHighlightSegment seg : set) {
+      if (!seg.isObscurable()) {
+        all = false;
+        break;
+      }
+    }
+    return all;
+  }
+
+  @Override
   public boolean obscureText() {
-    boolean didIt=true;
-    for (IHighlightSegment segment:set) {
+    boolean didIt = true;
+    for (IHighlightSegment segment : set) {
       didIt &= segment.obscureText();
     }
     return didIt;

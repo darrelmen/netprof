@@ -53,6 +53,7 @@ public interface IHighlightSegment {
   boolean isHighlighted();
 
   void setObscurable();
+  boolean isObscurable();
   boolean obscureText();
   void restoreText();
 

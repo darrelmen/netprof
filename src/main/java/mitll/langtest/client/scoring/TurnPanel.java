@@ -47,6 +47,7 @@ import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 
@@ -95,9 +96,14 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify);
   }
 
+  void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
+    super.makeClickableWords(projectStartupInfo, listContainer);
+    clickableWords.setAreSegmentsClickable(false);
+  }
+
   protected void rememberAudio() {
     AudioAttribute latestAudio = getLatestAudio();
-   // logger.info("rememberAudio : turn " + getText() + " audio is " + latestAudio);
+    // logger.info("rememberAudio : turn " + getText() + " audio is " + latestAudio);
     rememberAudio(latestAudio);
   }
 
@@ -140,13 +146,13 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
   boolean shouldShowPhones() {
     List<ExerciseAttribute> speaker = exercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equals("SPEAKER")).collect(Collectors.toList());
     boolean hasEnglishAttr = exercise.hasEnglishAttr();
-    boolean b = !hasEnglishAttr && isInterpreterTurn(speaker);
+    boolean b = !hasEnglishAttr && false;//isInterpreterTurn(speaker);
 //    if (b)
 //      logger.info("ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " Got show phones " + b);
     return b;
   }
 
-  private boolean isInterpreterTurn(List<ExerciseAttribute> speaker) {
+ /* private boolean isInterpreterTurn(List<ExerciseAttribute> speaker) {
     boolean isInterpreterTurn = false;
 
     if (!speaker.isEmpty()) {
@@ -154,7 +160,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
     }
 
     return isInterpreterTurn;
-  }
+  }*/
 
   /**
    * @param wrapper
@@ -235,6 +241,11 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
 
   @Override
   public void setDeleting(boolean deleting) {
+      logger.warning("don't call me");
+  }
 
+  @Override
+  public String getContent() {
+    return exercise.getForeignLanguage();
   }
 }

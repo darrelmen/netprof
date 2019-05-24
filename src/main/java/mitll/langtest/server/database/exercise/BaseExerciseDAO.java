@@ -676,6 +676,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
         } else {
           List<ClientExercise> collect1 = dialog.getExercises().stream().filter(exercise -> exercise.getID() == exid).collect(Collectors.toList());
           if (collect1.isEmpty()) {
+            collect1 = dialog.getCoreVocabulary().stream().filter(exercise -> exercise.getID() == exid).collect(Collectors.toList());
+          }
+
+          if (collect1.isEmpty()) {
             logger.warn("updateText can't find ex id  " + exid);
           } else {
             // not really sure this is needed

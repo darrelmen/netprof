@@ -31,22 +31,33 @@ package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.user.client.ui.HTML;
 import mitll.langtest.client.dialog.ITurnContainer;
+import mitll.langtest.client.sound.HighlightSegment;
+import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.project.Language;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 
-public class SimpleTurn extends DivWidget implements ISimpleTurn {
+public class SimpleTurn extends DivWidget implements ISimpleTurn, IObscurable {
   private final Logger logger = Logger.getLogger("SimpleTurn");
 
   protected ClientExercise exercise;
   private TurnPanelDelegate turnPanelDelegate;
+  private Language language;
+  private boolean isChinese;
+  boolean deleting;
 
-
-  public SimpleTurn(ClientExercise exercise, ITurnContainer.COLUMNS columns, boolean rightJustify) {
+  public SimpleTurn(ClientExercise exercise, ITurnContainer.COLUMNS columns, boolean rightJustify, Language language) {
     this.exercise = exercise;
     turnPanelDelegate = new TurnPanelDelegate(exercise, this, columns, rightJustify);
+    this.language = language;
+    isChinese = language == Language.MANDARIN || language == Language.JAPANESE;
   }
 
   @Override
@@ -56,7 +67,7 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn {
 
   @Override
   public void makeVisible() {
-
+    turnPanelDelegate.makeVisible();
   }
 
   @Override
@@ -66,28 +77,67 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn {
 
   @Override
   public boolean isDeleting() {
-    return false;
+    return deleting;
   }
 
   @Override
   public void setDeleting(boolean deleting) {
-
+    this.deleting = deleting;
   }
 
   @Override
   public boolean hasCurrentMark() {
-    return false;
+    return turnPanelDelegate.hasCurrentMark();
   }
 
   @Override
   public void markCurrent() {
-
+    turnPanelDelegate.markCurrent();
   }
 
   @Override
   public void removeMarkCurrent() {
+    turnPanelDelegate.removeMarkCurrent();
+  }
+
+  @Override
+  public void obscureTextAndPhones() {
+    obscureText();
+  }
+
+  @Override
+  public void obscureText() {
+    segments.forEach(iHighlightSegment -> {
+      if (iHighlightSegment.isObscurable()) {
+        iHighlightSegment.showHighlight();
+      }
+    });
 
   }
+
+  @Override
+  public void restoreText() {
+//    segments.forEach(IHighlightSegment::restoreText);
+
+    segments.forEach(iHighlightSegment -> {
+      // if (iHighlightSegment.isObscurable()) {
+      iHighlightSegment.restoreText();
+      iHighlightSegment.clearHighlight();
+      // }
+    });
+  }
+
+  @Override
+  public void maybeSetObscure(List<ClientExercise> coreVocabs) {
+    new ObscureHelper(exercise.getID(), exercise.getForeignLanguage(), segments).maybeSetObscure(coreVocabs);
+  }
+
+  @Override
+  public void maybeObscure(Set<String> coreVocabs) {
+    new ObscureHelper(exercise.getID(), exercise.getForeignLanguage(), segments).maybeObscure(coreVocabs);
+  }
+
+  private List<IHighlightSegment> segments = new ArrayList<>();
 
   /**
    * @param showFL
@@ -100,11 +150,30 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn {
   @Override
   public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
     HTML html = new HTML(exercise.getForeignLanguage());
-    html.addStyleName("flfont");
-    html.getElement().getStyle().setPadding(10, Style.Unit.PX);
-  //  logger.info("addWidgets : got '" + exercise.getForeignLanguage() + "' for " + exercise.getID());
+//    html.addStyleName("flfont");
+//    html.getElement().getStyle().setPadding(10, Style.Unit.PX);
+    //  logger.info("addWidgets : got '" + exercise.getForeignLanguage() + "' for " + exercise.getID());
     DivWidget widgets = new DivWidget();
-    widgets.add(html);
+    segments.clear();
+//    widgets.addStyleName("topFiveMargin");
+    widgets.getElement().getStyle().setPaddingTop(10, Style.Unit.PX);
+    widgets.getElement().getStyle().setPaddingLeft(10, Style.Unit.PX);
+    widgets.addStyleName("flfont");
+
+    List<String> tokens = new SearchTokenizer().getTokens(exercise.getForeignLanguage(), isChinese, new ArrayList<>());
+    HasDirection.Direction direction = language.isRTL() ? HasDirection.Direction.RTL : HasDirection.Direction.LTR;
+
+    tokens.forEach(token -> {
+      HighlightSegment blue = new HighlightSegment(
+          widgets.getWidgetCount(),
+          token,
+          direction,
+          false, false, IHighlightSegment.DEFAULT_HIGHLIGHT, true);
+      widgets.add(blue);
+      segments.add(blue);
+    });
+
+    // widgets.add(html);
     styleMe(widgets);
     add(widgets);
     return widgets;
@@ -112,5 +181,9 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn {
 
   protected void styleMe(DivWidget wrapper) {
     turnPanelDelegate.styleMe(wrapper);
+  }
+
+  public String getContent() {
+    return exercise.getForeignLanguage();
   }
 }

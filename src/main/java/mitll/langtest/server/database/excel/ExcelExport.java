@@ -145,7 +145,8 @@ public class ExcelExport {
       if (normalMode) {
         row.createCell(j++).setCellValue(english1);
       }
-      if (!english && normalMode) {
+
+      if (!english || !normalMode) {
         row.createCell(j++).setCellValue(exercise.getForeignLanguage());
       }
 
@@ -308,7 +309,8 @@ public class ExcelExport {
     }
   }
 
-  private boolean addHeaderRow(String language, Collection<String> typeOrder, Row headerRow, boolean isDefectList, boolean addProps) {
+  private boolean addHeaderRow(String language, Collection<String> typeOrder, Row headerRow,
+                               boolean isDefectList, boolean addProps) {
     List<String> columns = new ArrayList<>();
     columns.add(ID);
 
@@ -318,19 +320,23 @@ public class ExcelExport {
     }
 
     boolean english = isEnglish(language);
-    if (!english) {
+    if (!english || !addProps) {
       columns.add(language);
     }
+
     if (!addProps) {
       columns.add(english ? MEANING : TRANSLITERATION);
       columns.add("alt" + language);
     }
+
     columns.addAll(typeOrder);
-    columns.add(CONTEXT_SENTENCE);
+
     if (!addProps) {
+      columns.add(CONTEXT_SENTENCE);
       columns.add("alt" + CONTEXT_SENTENCE);
       columns.add(CONTEXT_TRANSLATION);
     }
+
     if (isDefectList) {
       //  logger.debug("adding defect columns");
       columns.add(WORD_EXPRESSION + "_comment");

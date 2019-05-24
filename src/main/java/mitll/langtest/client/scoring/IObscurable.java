@@ -32,9 +32,9 @@ package mitll.langtest.client.scoring;
 import mitll.langtest.shared.exercise.ClientExercise;
 
 import java.util.List;
+import java.util.Set;
 
 public interface IObscurable {
-
   void obscureTextAndPhones();
 
   void obscureText();
@@ -42,4 +42,6 @@ public interface IObscurable {
   void restoreText();
 
   void maybeSetObscure(List<ClientExercise> coreVocabs);
+
+  void maybeObscure(Set<String> coreVocabs);
 }

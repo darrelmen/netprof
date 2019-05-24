@@ -34,7 +34,6 @@ import mitll.langtest.client.scoring.ISimpleTurn;
 
 public interface IFocusListener<T extends ISimpleTurn> {
   void gotBlur();
-  //void gotBlur(T widgets);
 
   void gotFocus();
 

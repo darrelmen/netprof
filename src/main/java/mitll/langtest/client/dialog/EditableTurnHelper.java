@@ -163,10 +163,8 @@ public class EditableTurnHelper {
   }
 
   private void gotBlur() {
-
     focusListener.gotBlur();
     // call focus listener
-
   }
 
   public String getContent() {
