@@ -137,10 +137,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   private ComplexWidget recnav, defectnav, dialognav;
 
-  /**
-   * @see #getDialogNav
-   */
- // private Dropdown dialogPracticeNav;
 
   /**
    *
@@ -621,6 +617,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   /**
    * Having any of the required permissions allows you access to the dialog editor.
    *
+   *
    * @param visible
    * @see #reflectPermissions
    */
@@ -629,7 +626,21 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     boolean hasProjectChoice = hasProject && controller.getProjectID() != -1;
     dialognav.setVisible(visible && hasProjectChoice && controller.getMode() == ProjectMode.DIALOG);
 
-  //  logger.info("dialog nav " + dialognav.isVisible());
+  //  logger.info("setDialogNavVisible dialog nav " + dialognav.isVisible());
+
+    NavLink widgets = viewToLink.get(DIALOG_EDITOR);
+    if (widgets != null) {
+      widgets.setVisible(shouldShowDialogEditor());
+    }
+//    logger.info("setDialogNavVisible dialog nav " + dialognav.isVisible());
+  }
+
+  private boolean shouldShowDialogEditor() {
+    boolean isDialogMode = controller.getMode() == ProjectMode.DIALOG;
+    List<Permission> temp = new ArrayList<>(DIALOG_EDITOR.getPerms());
+    temp.retainAll(controller.getPermissions());
+    //  logger.info("permission overlap is " + temp);
+    return isDialogMode && !temp.isEmpty();
   }
 
   /**

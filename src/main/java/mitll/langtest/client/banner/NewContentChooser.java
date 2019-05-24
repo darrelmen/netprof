@@ -81,8 +81,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private final DivWidget divWidget = new DivWidget();
   private final ExerciseListContent learnHelper;
 
-//  private final ExerciseListContent studyHelper;
-
   private final DialogViewHelper dialogHelper;
   private final ListenViewHelper listenHelper;
   private final ListenViewHelper rehearseHelper, coreRehearseHelper;
@@ -434,22 +432,26 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
    */
 
   private void showScores(DivWidget divWidget, IDialog dialog) {
-    VIEWS next = shouldShowDialogEditor() ? TURN_EDITOR : null;
-    DialogHeader dialogHeader = new DialogHeader(controller, SCORES, PERFORM, next) {
-      @Override
-      protected void setRowWidth(DivWidget row) {
-      }
-    };
+    if (dialog == null) {
+      showView(DIALOG, false, true);
+    } else {
+      VIEWS next = shouldShowDialogEditor() ? TURN_EDITOR : null;
+      DialogHeader dialogHeader = new DialogHeader(controller, SCORES, PERFORM, next) {
+        @Override
+        protected void setRowWidth(DivWidget row) {
+        }
+      };
 
-    {
-      DivWidget header = dialogHeader.getHeader(dialog);
-      header.addStyleName("bottomFiveMargin");
-      divWidget.add(header);
+      {
+        DivWidget header = dialogHeader.getHeader(dialog);
+        header.addStyleName("bottomFiveMargin");
+        divWidget.add(header);
+      }
+      divWidget.add(isTeacher() ?
+          new StudentScores(controller) :
+          new SessionAnalysis(controller, controller.getUser(), null));
+      currentSection = SCORES;
     }
-    divWidget.add(isTeacher() ?
-        new StudentScores(controller) :
-        new SessionAnalysis(controller, controller.getUser(), null));
-    currentSection = SCORES;
   }
 
   private boolean shouldShowDialogEditor() {

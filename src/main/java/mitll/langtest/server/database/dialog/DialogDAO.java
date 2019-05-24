@@ -62,16 +62,16 @@ public class DialogDAO extends DAO implements IDialogDAO {
   /**
    * @see #configureDialog
    */
-  private static final String FLTITLE = DialogMetadata.FLTITLE.toString().toLowerCase();//"fltitle";
+  private static final String FLTITLE = DialogMetadata.FLTITLE.toString().toLowerCase();
   public static final String ENGLISH_FIRST_TURN = "E-0";
   public static final String INTERPRETER_FIRST_TURN = "I-0";
   public static final String SPEAKER_A_TURN = "A-0";
-  public static final String SPEAKER_A = BaseDialogReader.SPEAKER_A;
-  public static final String SPEAKER_B = BaseDialogReader.SPEAKER_B;
-  public static final String SPEAKER_PREFIX = "S-";
+  private static final String SPEAKER_A = BaseDialogReader.SPEAKER_A;
+  private static final String SPEAKER_B = BaseDialogReader.SPEAKER_B;
+  private static final String SPEAKER_PREFIX = "S-";
 
   public static final boolean DEBUG = false;
-  private static final boolean DEBUG_ADD_EXERCISE = true;
+  private static final boolean DEBUG_ADD_EXERCISE = false;
 
   private final DialogDAOWrapper dao;
 
