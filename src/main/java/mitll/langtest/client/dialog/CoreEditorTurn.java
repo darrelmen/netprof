@@ -57,7 +57,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
 
   private static final int WIDTH_TO_USE = 210;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   CoreEditorTurn(ExerciseController<?> controller,
                  CoreVocabEditor coreVocabEditor,
@@ -70,7 +70,8 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     this.coreVocabEditor = coreVocabEditor;
     this.dialogID = dialogID;
 
-    logger.info("core " + vocab.getID() + " " + vocab.getForeignLanguage());
+    if (DEBUG) logger.info("core " + vocab.getID() + " " + vocab.getForeignLanguage());
+    if (coreVocabEditor == null) logger.warning("huh? how can that be??\n\n\n");
 
     prev = vocab.getForeignLanguage();
     this.turnAddDelete = new TurnAddDelete(this, 21);
@@ -124,7 +125,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       if (DEBUG) logger.info("deleteGotFocus - ");
       grabFocus();
     } else {
-    //  logger.warning("move focus???");
+      //  logger.warning("move focus???");
       coreVocabEditor.moveFocusToNext();
     }
   }
@@ -158,7 +159,8 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     }
   }
 
-  @Override public String getContent() {
+  @Override
+  public String getContent() {
     return editableTurnHelper.getContent();
   }
 
@@ -262,6 +264,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       public void onSuccess(OOVWordsAndUpdate result) {
         // showOOVResult(result);
         logger.info("updateTextViaExerciseService OK, update was " + result);
+
         coreVocabEditor.setHighlights();
         if (moveToNextTurn) {
           coreVocabEditor.gotForward(outer);

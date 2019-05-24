@@ -43,8 +43,6 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
   /**
    * @see #showHighlight
    */
-  // private static final String DEFAULT_HIGHLIGHT = "#2196F3";
-
   private String highlightColor;
   private final int length;
   private String background = null;
@@ -105,10 +103,20 @@ public class SimpleHighlightSegment extends InlineHTML implements IHighlightSegm
   public void clearHighlight() {
     highlighted = false;
     if (background == null) {
-      getElement().getStyle().clearBackgroundColor();
+      forceClearHighlight();
     } else {
       getElement().getStyle().setBackgroundColor(background);
     }
+  }
+
+  @Override
+  public void forceClearHighlight() {
+    getElement().getStyle().clearBackgroundColor();
+  }
+
+  @Override
+  public void clearObscurable() {
+
   }
 
   @Override

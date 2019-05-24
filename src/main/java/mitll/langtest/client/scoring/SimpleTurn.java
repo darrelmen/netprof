@@ -92,12 +92,12 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn, IObscurable {
 
   @Override
   public void markCurrent() {
-    turnPanelDelegate.markCurrent();
+    //turnPanelDelegate.markCurrent();
   }
 
   @Override
   public void removeMarkCurrent() {
-    turnPanelDelegate.removeMarkCurrent();
+  //  turnPanelDelegate.removeMarkCurrent();
   }
 
   @Override
@@ -109,6 +109,7 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn, IObscurable {
   public void obscureText() {
     segments.forEach(iHighlightSegment -> {
       if (iHighlightSegment.isObscurable()) {
+       // logger.info("highlight " + iHighlightSegment);
         iHighlightSegment.showHighlight();
       }
     });
@@ -119,10 +120,12 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn, IObscurable {
   public void restoreText() {
 //    segments.forEach(IHighlightSegment::restoreText);
 
+
     segments.forEach(iHighlightSegment -> {
       // if (iHighlightSegment.isObscurable()) {
-      iHighlightSegment.restoreText();
-      iHighlightSegment.clearHighlight();
+      iHighlightSegment.clearObscurable();
+    //  iHighlightSegment.restoreText();
+      iHighlightSegment.forceClearHighlight();
       // }
     });
   }

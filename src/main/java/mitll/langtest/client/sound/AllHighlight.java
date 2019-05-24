@@ -113,6 +113,16 @@ public class AllHighlight extends DivWidget implements IHighlightSegment {
   }
 
   @Override
+  public void forceClearHighlight() {
+    set.forEach(IHighlightSegment::forceClearHighlight);
+  }
+
+  @Override
+  public void clearObscurable() {
+    set.forEach(IHighlightSegment::clearObscurable);
+  }
+
+  @Override
   public void checkClearHighlight() {
     set.forEach(IHighlightSegment::checkClearHighlight);
   }

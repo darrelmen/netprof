@@ -50,9 +50,11 @@ public interface IHighlightSegment {
   void showHighlight();
   void checkClearHighlight();
   void clearHighlight();
+  void forceClearHighlight();
   boolean isHighlighted();
 
   void setObscurable();
+  void clearObscurable();
   boolean isObscurable();
   boolean obscureText();
   void restoreText();

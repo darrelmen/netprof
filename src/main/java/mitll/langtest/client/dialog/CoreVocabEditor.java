@@ -125,10 +125,12 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
     return leftRight;
   }
 
-  public void setHighlights() {
+   void setHighlights() {
     Set<String> allText = new HashSet<>();
     getAllTurns().forEach(turn -> allText.add(turn.getContent()));
 //    leftHelper.getAllTurns().forEach(SimpleTurn::restoreText);
+
+  //  logger.info("core " +allText);
     leftHelper.getAllTurns().forEach(turn -> {
       turn.restoreText();
       turn.maybeObscure(allText);
@@ -212,6 +214,7 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
           public void onSuccess(Boolean resp) {
             if (resp) {
               gotDeleteResponse(Collections.singletonList(exID));
+              setHighlights();
             } else logger.warning("huh?");
           }
         });

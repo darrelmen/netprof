@@ -48,10 +48,11 @@ import java.util.logging.Logger;
  * Created by go22670 on 4/25/17.
  */
 public class HighlightSegment extends DivWidget implements IHighlightSegment {
-  public static final String FLOAT_RIGHT = "floatRight";
   protected final Logger logger = Logger.getLogger("HighlightSegment");
 
-  public static final String RGB_51_51_51 = "rgb(51, 51, 51)";
+  public static final String FLOAT_RIGHT = "floatRight";
+
+  private static final String RGB_51_51_51 = "rgb(51, 51, 51)";
   private static final String FLOAT_LEFT = "floatLeft";
   private static final String INLINE_BLOCK_STYLE_ONLY = "inlineBlockStyleOnly";
 
@@ -127,6 +128,11 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   }
 
   @Override
+  public void clearObscurable() {
+    shouldObscure = false;
+  }
+
+  @Override
   public boolean isObscurable() {
     return shouldObscure;
   }
@@ -147,15 +153,14 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   @Override
   public void restoreText() {
     if (shouldObscure && didObscure) {
-      //  logger.info("restoreText on " +this);
+     // logger.info("restoreText on " + this);
       Style style = this.span.getElement().getStyle();
       style.setColor(RGB_51_51_51);
       style.clearBackgroundColor();
       didObscure = false;
+    } else {
+      //logger.warning("no restore color?");
     }
-    //else {
-//      logger.warning("no restore color?");
-    // }
   }
 
   private HandlerRegistration addMouseOutHandler(MouseOutHandler handler) {
@@ -237,7 +242,8 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
     highlighted = false;
     if (background == null) {
       if (!didObscure) {
-        getSpanStyle().clearBackgroundColor();
+//        getSpanStyle().clearBackgroundColor();
+        forceClearHighlight();
       }
     } else {
       getSpanStyle().setBackgroundColor(background);
@@ -247,6 +253,11 @@ public class HighlightSegment extends DivWidget implements IHighlightSegment {
   @Override
   public void checkClearHighlight() {
     if (isHighlighted()) clearHighlight();
+  }
+
+  public void forceClearHighlight() {
+  //  logger.info("forceClearHighlight " + this);
+    getSpanStyle().clearBackgroundColor();
   }
 
   private Style getSpanStyle() {

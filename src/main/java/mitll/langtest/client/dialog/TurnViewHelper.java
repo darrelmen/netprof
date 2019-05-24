@@ -745,8 +745,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return newCurrentTurn;
   }
 
-
-  protected void gotDeleteResponse(List<Integer> ids) {
+  void gotDeleteResponse(List<Integer> ids) {
     Set<T> toRemove = new HashSet<>();
 
     T newCurrentTurnCandidate = null;
