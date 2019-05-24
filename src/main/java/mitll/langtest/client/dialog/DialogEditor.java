@@ -257,16 +257,14 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   @Override
   public void deleteCurrentTurnOrPair(EditorTurn currentTurn) {
     logger.info("deleteCurrentTurnOrPair : " + "\n\tcurrent turn " + currentTurn.getExID());
-    currentTurn.setDeleting(true);
-    currentTurn.getElement().getStyle().setOpacity(0.5);
+    startDelete(currentTurn);
 
     if (isInterpreter) {
       EditorTurn prev = getPrev(currentTurn);
       if (prev == null) {
         logger.warning("no prev????");
       } else {
-        prev.setDeleting(true);
-        prev.getElement().getStyle().setOpacity(0.5);
+        startDelete(prev);
       }
     }
 
@@ -287,39 +285,39 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
         });
   }
 
-  private void gotDeleteResponse(List<Integer> ids) {
-    Set<EditorTurn> toRemove = new HashSet<>();
-
-    EditorTurn newCurrentTurnCandidate = null;
-
-    for (Integer exid : ids) {
-      EditorTurn newCurrentTurn = deleteTurn(exid, toRemove);
-      if (newCurrentTurnCandidate == null) newCurrentTurnCandidate = newCurrentTurn;
-    }
-
-    // we deleted the current turn!
-    final EditorTurn fnewCurrentTurnCandidate = newCurrentTurnCandidate;
-    final Set<EditorTurn> ftoRemove = toRemove;
-
-    // wait for animation to run before blowing it away...
-    com.google.gwt.user.client.Timer currentTimer = new Timer() {
-      @Override
-      public void run() {
-        ftoRemove.forEach(DialogEditor.this::removeFromContainer);
-
-        if (fnewCurrentTurnCandidate != null) {
-          logger.info("new current now " + fnewCurrentTurnCandidate.getExID() + " " + fnewCurrentTurnCandidate.getText());
-          removeMarkCurrent();
-          setCurrentTurn(fnewCurrentTurnCandidate);
-          markCurrent();
-          fnewCurrentTurnCandidate.grabFocus();
-        } else {
-          logger.info("not messing with current turn...");
-        }
-      }
-    };
-    currentTimer.schedule(500);
-  }
+  //  private void gotDeleteResponse(List<Integer> ids) {
+//    Set<EditorTurn> toRemove = new HashSet<>();
+//
+//    EditorTurn newCurrentTurnCandidate = null;
+//
+//    for (Integer exid : ids) {
+//      EditorTurn newCurrentTurn = deleteTurn(exid, toRemove);
+//      if (newCurrentTurnCandidate == null) newCurrentTurnCandidate = newCurrentTurn;
+//    }
+//
+//    // we deleted the current turn!
+//    final EditorTurn fnewCurrentTurnCandidate = newCurrentTurnCandidate;
+//    final Set<EditorTurn> ftoRemove = toRemove;
+//
+//    // wait for animation to run before blowing it away...
+//    com.google.gwt.user.client.Timer currentTimer = new Timer() {
+//      @Override
+//      public void run() {
+//        ftoRemove.forEach(DialogEditor.this::removeFromContainer);
+//
+//        if (fnewCurrentTurnCandidate != null) {
+//          logger.info("new current now " + fnewCurrentTurnCandidate.getExID() + " " + fnewCurrentTurnCandidate.getText());
+//          removeMarkCurrent();
+//          setCurrentTurn(fnewCurrentTurnCandidate);
+//          markCurrent();
+//          fnewCurrentTurnCandidate.grabFocus();
+//        } else {
+//          logger.info("not messing with current turn...");
+//        }
+//      }
+//    };
+//    currentTimer.schedule(500);
+//  }
 
   @NotNull
   private AsyncCallback<DialogExChangeResponse> getAsyncForNewTurns(int exid) {

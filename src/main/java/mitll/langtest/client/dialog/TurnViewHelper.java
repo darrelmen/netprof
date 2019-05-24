@@ -29,15 +29,12 @@
 
 package mitll.langtest.client.dialog;
 
-import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
-import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.constants.LabelType;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Element;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -50,6 +47,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.ISimpleTurn;
+import mitll.langtest.client.scoring.ITurnPanel;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.DialogType;
@@ -60,6 +58,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -87,6 +86,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   protected final ExerciseController controller;
 
   protected INavigation.VIEWS prev, next;
+  private T currentTurn;
   private INavigation.VIEWS thisView;
   protected IDialog dialog;
   final List<T> allTurns = new ArrayList<>();
@@ -100,7 +100,9 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
   private static final boolean DEBUG = true;
   private static final boolean DEBUG_NEXT = false;
-
+  private static final boolean DEBUG_BLUR = false;
+  private static final boolean DEBUG_DETAIL = false;
+  private static final boolean DEBUG_PLAY = false;
 
   TurnViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     this.controller = controller;
@@ -162,6 +164,13 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
   protected void clearTurnLists() {
     allTurns.clear();
+  }
+
+  protected void startDelete(ISimpleTurn currentTurn) {
+    currentTurn.setDeleting(true);
+    if (currentTurn instanceof UIObject) {
+      ((UIObject)currentTurn).getElement().getStyle().setOpacity(0.5);
+    }
   }
 
   protected int getDialogFromURL() {
@@ -241,6 +250,67 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     }
   }
 
+  T getCurrentTurn() {
+    return currentTurn;
+  }
+
+  /**
+   * @param toMakeCurrent
+   * @see #markFirstTurn()
+   */
+  void setCurrentTurn(T toMakeCurrent) {
+    this.currentTurn = toMakeCurrent;
+  }
+
+  /**
+   * @see #ifOnLastJumpBackToFirst
+   */
+  protected void markFirstTurn() {
+    if (!allTurns.isEmpty()) {
+      setCurrentTurn(allTurns.get(0));
+      logger.info("markFirstTurn : markCurrent ");
+      markCurrent();
+      makeVisible(currentTurn);
+    }
+  }
+
+  void makeNextTheCurrentTurn(T fnext) {
+    setCurrentTurn(fnext);
+
+    Scheduler.get().scheduleDeferred(() -> {
+      if (DEBUG) {
+        logger.info("addTurns : focus will be on " + (fnext == null ? "NULL" : fnext.getExID()));
+      }
+
+      markCurrent();
+
+      if (fnext != null) {
+        fnext.grabFocus();
+      }
+    });
+  }
+
+  T getNextTurn(int exid) {
+    T current = getTurnByID(exid);
+
+    T next = getCurrentTurn();
+    if (current == null) {
+      logger.warning("getNextTurn : can't find exid " + exid);
+    } else {
+      int i = allTurns.indexOf(current) + 1;
+      next = allTurns.get(i);
+
+      if (DEBUG_NEXT) {
+        logger.info("getNextTurn : num turns " + allTurns.size() +
+            "\n\texid    " + exid +
+            "\n\tcurrent " + current.getExID() +
+            "\n\tnext    " + next.getExID()
+        );
+      }
+    }
+    return next;
+  }
+
   /**
    * Main method for showing the three sections
    * <p>
@@ -307,7 +377,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   protected void addDialogHeader(IDialog dialog, Panel child) {
     child.add(dialogHeader = new DialogHeader(controller, thisView, getPrevView(), getNextView()).getHeader(dialog));
   }
-
 
   /**
    * @param dialog
@@ -676,6 +745,41 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return newCurrentTurn;
   }
 
+
+  protected void gotDeleteResponse(List<Integer> ids) {
+    Set<T> toRemove = new HashSet<>();
+
+    T newCurrentTurnCandidate = null;
+
+    for (Integer exid : ids) {
+      T newCurrentTurn = deleteTurn(exid, toRemove);
+      if (newCurrentTurnCandidate == null) newCurrentTurnCandidate = newCurrentTurn;
+    }
+
+    // we deleted the current turn!
+    final T fnewCurrentTurnCandidate = newCurrentTurnCandidate;
+    final Set<T> ftoRemove = toRemove;
+
+    // wait for animation to run before blowing it away...
+    com.google.gwt.user.client.Timer currentTimer = new Timer() {
+      @Override
+      public void run() {
+        ftoRemove.forEach(TurnViewHelper.this::removeFromContainer);
+
+        if (fnewCurrentTurnCandidate != null) {
+          logger.info("new current now " + fnewCurrentTurnCandidate.getExID());// + " " + fnewCurrentTurnCandidate.getText());
+          removeMarkCurrent();
+          setCurrentTurn(fnewCurrentTurnCandidate);
+          markCurrent();
+          fnewCurrentTurnCandidate.grabFocus();
+        } else {
+          logger.info("not messing with current turn...");
+        }
+      }
+    };
+    currentTimer.schedule(500);
+  }
+
   protected void removeFromAllPanels(T toRemove) {}
 
   List<T> getAllTurns() {
@@ -766,4 +870,159 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return prev;
   }
 
+  public void setCurrentTurnTo(T newTurn) {
+    if (DEBUG_NEXT) logger.info("setCurrentTurnTo - " + newTurn.getExID());
+
+    /*int i = */
+    beforeChangeTurns();
+    setCurrentTurn(newTurn);
+    markCurrent();
+    //   logger.info("setCurrentTurnTo ex #" + currentTurn.getExID());
+    // afterChangeTurns(isPlaying);
+  }
+
+  public void gotForward(T editorTurn) {
+    int i = beforeChangeTurns();
+
+    // maybe do wrap
+    {
+      int i1 = i + 1;
+      List<T> seq = getAllTurns();
+      if (i1 > seq.size() - 1) {
+        setCurrentTurn(seq.get(0));
+      } else {
+        setCurrentTurn(seq.get(i1));
+      }
+    }
+  }
+
+ protected int beforeChangeTurns() {
+    int i = getIndexOfCurrentTurn();
+
+    if (!makeNextVisible()) {
+      if (DEBUG_NEXT) {
+        logger.info("beforeChangeTurns : make header visible");
+      }
+      if (dialogHeader == null) {
+        makeVisible(speakerRow);
+        //  logger.info("no dialog header?");
+      } else {
+        makeVisible(dialogHeader);  // make the top header visible...
+      }
+    }
+    return i;
+  }
+
+  public void moveFocusToNext() {
+    T next = getNext();
+    if (next != null) {
+      logger.info("moveFocusToNext - have " + next.getExID() + " grab focus.");
+      next.grabFocus();
+    } else if (!getAllTurns().isEmpty()) {
+      logger.info("moveFocusToNext - to first - let's not!");
+      //getAllTurns().get(0).grabFocus();
+    }
+  }
+
+  protected int getIndexOfCurrentTurn() {
+    return getAllTurns().indexOf(currentTurn);
+  }
+
+  protected int getExID() {
+    return currentTurn.getExID();// + " : " +currentTurn.getText();
+  }
+
+  /**
+   * TODO : not sure if this is right?
+   * Wrap around if on last turn.
+   */
+  void setNextTurnForSide() {
+    removeMarkCurrent();
+    int i = allTurns.indexOf(currentTurn);
+
+    if (currentTurn == null) {
+      logger.warning("setNextTurnForSide no current turn");
+    } else {
+      if (DEBUG) logger.info("setNextTurnForSide current turn for ex " + getExID());
+    }
+
+    int nextIndex = (i + 1 == allTurns.size()) ? 0 : i + 1;
+
+    if (DEBUG) logger.info("setNextTurnForSide " + i + " next " + nextIndex);
+
+    setCurrentTurn(allTurns.get(nextIndex));
+  }
+
+  /**
+   * @return
+   * @see #setNextTurnForSide()
+   */
+  boolean onLastTurn() {
+    return isLast(currentTurn);
+  }
+
+  void makeCurrentTurnVisible() {
+    makeVisible(currentTurn);
+  }
+
+  protected boolean makeNextVisible() {
+    T next = getNext();
+    if (next != null) {
+      if (DEBUG_NEXT) logger.info("makeNextVisible " + next.getExID());// + " : " + next.getText());
+      makeVisible((T) next);
+      return true;
+    } else {
+      if (DEBUG_NEXT) logger.info("makeNextVisible - no next?");
+      return false;
+    }
+  }
+
+  protected boolean makePrevVisible() {
+    T next = getPrev();
+    if (next != null) {
+      makeVisible((T) next);
+      return true;
+    } else return false;
+  }
+
+  /**
+   * @see DialogEditor#gotTurnClick(EditorTurn)
+   * @see #gotTurnClick(ITurnPanel)
+   * @see #clearHighlightAndRemoveMark()
+   * @see #setNextTurnForSide()
+   * @see #playStopped()
+   * @see #currentTurnPlayEnded()
+   */
+  void removeMarkCurrent() {
+  //  if (DEBUG) logger.info("removeMarkCurrent on " + blurb());
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
+//    logger.info("logException stack:\n" + exceptionAsString);
+
+    currentTurn.removeMarkCurrent();
+  }
+
+  void markCurrent() {
+  //  if (ListenViewHelper.DEBUG) logger.info("markCurrent on " + blurb());
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("markCurrent on " + currentTurn.getExID()));
+//    logger.info("logException stack:\n" + exceptionAsString);
+
+    currentTurn.markCurrent();
+  }
+
+  /**
+   * @return null if on last turn
+   */
+  T getNext() {
+    return getNext(this.currentTurn);
+  }
+
+  /**
+   * @return null if there is no previous turn
+   * @see
+   */
+  protected T getPrev() {
+    return getPrev(this.currentTurn);
+  }
 }

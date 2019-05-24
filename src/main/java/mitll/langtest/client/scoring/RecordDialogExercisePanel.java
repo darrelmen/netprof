@@ -364,8 +364,10 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
         }
       }
     }
-    if (DEBUG_OVERLAP)
+
+    if (DEBUG_OVERLAP) {
       logger.info("getClickableWordsHighlight maybeFoundAllTokens " + overlaps.size() + " vs " + highlightTokens.size());
+    }
 
     return (overlaps.size() == highlightTokens.size()) ? overlaps : Collections.emptyList();
   }

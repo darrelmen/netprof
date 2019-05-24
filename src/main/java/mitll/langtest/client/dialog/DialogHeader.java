@@ -37,10 +37,6 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -53,7 +49,6 @@ import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.user.Permission;
-import org.apache.xpath.operations.Div;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -397,6 +392,9 @@ public class DialogHeader {
       buttonDiv.add(getTurnEditor());
     }
     if (b && thisView == TURN_EDITOR) {
+      buttonDiv.add(getEditorButton(CORE_EDITOR));
+    }
+    if (b && thisView == CORE_REHEARSE) {
       buttonDiv.add(getEditorButton(CORE_EDITOR));
     }
 

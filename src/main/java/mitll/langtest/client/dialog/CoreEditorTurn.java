@@ -55,7 +55,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
   private ExerciseController<?> controller;
   private int dialogID;
 
-  public static final int WIDTH_TO_USE = 210;
+  private static final int WIDTH_TO_USE = 210;
 
   private static final boolean DEBUG = true;
 
@@ -86,10 +86,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
 
   @Override
   public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
-//      HTML html = new HTML(exercise.getForeignLanguage());
-//      html.addStyleName("flfont");
-//      html.getElement().getStyle().setPadding(10, Style.Unit.PX);
-    logger.info("addWidgets : got '" + exercise.getForeignLanguage() + "' for " + exercise.getID());
+    //logger.info("addWidgets : got '" + exercise.getForeignLanguage() + "' for " + exercise.getID());
     DivWidget widgets = new DivWidget();
     widgets.add(getTextBox());
     styleMe(widgets);
@@ -128,7 +125,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       grabFocus();
     } else {
       logger.warning("move focus???");
-      //   coreVocabEditor.moveFocusToNext();
+      coreVocabEditor.moveFocusToNext();
     }
   }
 
@@ -138,7 +135,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
    * @return
    */
   @NotNull
-  protected DivWidget getTextBox() {
+  private DivWidget getTextBox() {
     DivWidget textBoxContainer = editableTurnHelper.getTextBox();
     // textBoxContainer.add(getTurnFeedback());
     return textBoxContainer;
@@ -148,9 +145,9 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
 
   @Override
   public void gotBlur() {
-//    coreVocabEditor.gotBlur(this);
+    coreVocabEditor.gotBlur(this);
 
-    String s = editableTurnHelper.getContent();//SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
+    String s = editableTurnHelper.getContent();
     if (s.equals(prev)) {
       if (DEBUG) logger.info("gotBlur " + getExID() + " skip unchanged " + prev);
     } else {
@@ -160,6 +157,29 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       maybeCreateFirst(s, this, false);
     }
   }
+
+  @Override
+  public void gotKey(KeyUpEvent event) {
+    NativeEvent ne = event.getNativeEvent();
+
+    String s = editableTurnHelper.getContent();//SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
+    if (ne.getKeyCode() == KeyCodes.KEY_ENTER) {
+      ne.preventDefault();
+      ne.stopPropagation();
+
+      logger.info("gotKey : got enter on " + this.getExID());// + " : " + columns);
+
+      if (s.equals(prev)) {
+       // logger.warning("deal with making a new ex");
+        coreVocabEditor.gotForward(this);
+      } else {
+        prev = s;
+        logger.info("gotBlur " + getExID() + " = " + prev);
+        maybeCreateFirst(s, this, true);
+      }
+    }
+  }
+
 
   private void maybeCreateFirst(String s, CoreEditorTurn outer, boolean moveToNextTurn) {
     if (getExID() == -1) {
@@ -175,16 +195,16 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
             logger.warning("huh? didn't add");
           } else {
             exercise = result.getChanged().get(0);
-            logger.info("ex now " + exercise);
-            updateText(s, outer, false);
+            logger.info("ex now " + exercise + " move turn to next " + moveToNextTurn);
+            updateText(s, outer, moveToNextTurn);
           }
         }
       });
-    }
-    else {
-      updateText(s, outer, false);
+    } else {
+      updateText(s, outer, moveToNextTurn);
     }
   }
+
 
   private void updateText(String s, CoreEditorTurn outer, boolean moveToNextTurn) {
     int projectID = controller.getProjectID();
@@ -230,7 +250,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
         // showOOVResult(result);
         logger.info("OK, update was " + result);
         if (moveToNextTurn) {
-          // turnContainer.gotForward(outer);
+          coreVocabEditor.gotForward(outer);
         }
       }
     });
@@ -248,29 +268,8 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
   }
 
   @Override
-  public void gotKey(KeyUpEvent event) {
-    NativeEvent ne = event.getNativeEvent();
-
-    String s = editableTurnHelper.getContent();//SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
-    if (ne.getKeyCode() == KeyCodes.KEY_ENTER) {
-      ne.preventDefault();
-      ne.stopPropagation();
-
-      logger.info("gotKey : got enter on " + this.getExID());// + " : " + columns);
-
-      if (s.equals(prev)) {
-        logger.warning("deal with making a new ex");
-//        coreVocabEditor.gotForward(this);
-      } else {
-        prev = s;
-        logger.info("gotBlur " + getExID() + " = " + prev);
-        maybeCreateFirst(s, this, true);
-      }
-    }
-  }
-
-  @Override
   public void gotFocus() {
-    logger.info("gotFocus...");
+    coreVocabEditor.setCurrentTurnTo(this);
+//    logger.info("gotFocus...");
   }
 }

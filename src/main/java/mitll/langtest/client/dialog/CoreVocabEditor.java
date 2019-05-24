@@ -40,15 +40,13 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.IFocusable;
 import mitll.langtest.client.scoring.SimpleTurn;
 import mitll.langtest.shared.dialog.DialogExChangeResponse;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -56,8 +54,10 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.CORE_EDITOR;
 import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
 import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.UNK;
 
-public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn> implements IFocusable, IFocusListener, IEditableTurnContainer<CoreEditorTurn> {
+public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
+    implements IFocusable, IFocusListener, IEditableTurnContainer<CoreEditorTurn>, ITurnContainer<CoreEditorTurn> {
   private final Logger logger = Logger.getLogger("CoreVocabEditor");
+  private static final boolean DEBUG_BLUR = false;
 
   private final boolean isInModal;
 
@@ -188,7 +188,7 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn> implements I
 
       @Override
       public void onSuccess(DialogExChangeResponse result) {
-        addTurns(result.getUpdated(), result.getChanged(), index+1, turnContainer);
+        addTurns(result.getUpdated(), result.getChanged(), index + 1, turnContainer, exID);
       }
     });
   }
@@ -202,7 +202,8 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn> implements I
   public void deleteCurrentTurnOrPair(CoreEditorTurn currentTurn) {
     int exID = currentTurn.getExID();
     logger.info("deleteCurrentTurnOrPair : " + "\n\tcurrent turn " + exID);
-    currentTurn.getElement().getStyle().setOpacity(0.5);
+    // currentTurn.getElement().getStyle().setOpacity(0.5);
+    startDelete(currentTurn);
 
     controller.getDialogService().deleteCoreExercise(
         getDialogID(),
@@ -216,101 +217,61 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn> implements I
           @Override
           public void onSuccess(Boolean resp) {
             if (resp) {
-              gotDeleteResponse(exID);
+              gotDeleteResponse(Collections.singletonList(exID));
             } else logger.warning("huh?");
           }
         });
   }
 
-  private void gotDeleteResponse(int exid) {
-    Set<CoreEditorTurn> toRemove = new HashSet<>();
-
-    CoreEditorTurn newCurrentTurnCandidate = null;
-
-
-    CoreEditorTurn newCurrentTurn = deleteTurn(exid, toRemove);
-    if (newCurrentTurnCandidate == null) newCurrentTurnCandidate = newCurrentTurn;
-
-
-    // we deleted the current turn!
-    final CoreEditorTurn fnewCurrentTurnCandidate = newCurrentTurnCandidate;
-    final Set<CoreEditorTurn> ftoRemove = toRemove;
-
-    // wait for animation to run before blowing it away...
-    com.google.gwt.user.client.Timer currentTimer = new Timer() {
-      @Override
-      public void run() {
-        ftoRemove.forEach(CoreVocabEditor.this::removeFromContainer);
-
-        if (fnewCurrentTurnCandidate != null) {
-          logger.info("new current now " + fnewCurrentTurnCandidate.getExID());// + " " + fnewCurrentTurnCandidate.getText());
+//  private void gotDeleteResponse(int exid) {
+//    Set<CoreEditorTurn> toRemove = new HashSet<>();
+//
+//    CoreEditorTurn newCurrentTurnCandidate = null;
+//
+//
+//    CoreEditorTurn newCurrentTurn = deleteTurn(exid, toRemove);
+//    if (newCurrentTurnCandidate == null) newCurrentTurnCandidate = newCurrentTurn;
+//
+//
+//    // we deleted the current turn!
+//    final CoreEditorTurn fnewCurrentTurnCandidate = newCurrentTurnCandidate;
+//    final Set<CoreEditorTurn> ftoRemove = toRemove;
+//
+//    // wait for animation to run before blowing it away...
+//    com.google.gwt.user.client.Timer currentTimer = new Timer() {
+//      @Override
+//      public void run() {
+//        ftoRemove.forEach(CoreVocabEditor.this::removeFromContainer);
+//
+//        if (fnewCurrentTurnCandidate != null) {
+//          logger.info("new current now " + fnewCurrentTurnCandidate.getExID());// + " " + fnewCurrentTurnCandidate.getText());
 //          removeMarkCurrent();
 //          setCurrentTurn(fnewCurrentTurnCandidate);
 //          markCurrent();
-          fnewCurrentTurnCandidate.grabFocus();
-        } else {
-          logger.info("not messing with current turn...");
-        }
-      }
-    };
-    currentTimer.schedule(500);
-  }
+//          fnewCurrentTurnCandidate.grabFocus();
+//        } else {
+//          logger.info("not messing with current turn...");
+//        }
+//      }
+//    };
+//    currentTimer.schedule(500);
+//  }
 
   /**
    * @param exercises
    * @param afterThisTurn
    * @see #getAsyncForNewTurns
    */
-  private void addTurns(IDialog updated, List<ClientExercise> changed, int index, DivWidget turnContainer) {
+  private void addTurns(IDialog updated, List<ClientExercise> changed, int index, DivWidget turnContainer, int exid) {
     this.setDialog(updated);
 
     for (ClientExercise clientExercise : changed) {
       CoreEditorTurn turn = addTurn(turnContainer, clientExercise, UNK, UNK, index);
       turn.addStyleName("opacity-target");
     }
-
-    // makeNextTheCurrentTurn(getNextTurn(exid));
+    makeNextTheCurrentTurn(getNextTurn(exid));
   }
 
- /* private void addTurnForEachCoreExercise(DivWidget rowOne, List<ClientExercise> exercises) {
-    int index = 0;
-    logger.info("addTurnForEachExercise got " + exercises.size());
-    for (ClientExercise clientExercise : exercises) {
-      addCoreTurn(rowOne, clientExercise, index);
-      index++;
-    }
-  }*/
-
-  /**
-   * @param rowOne
-   * @param clientExercise
-   * @param index
-   * @see #addTurnForEachExercise(DivWidget, String, String, List)
-   */
-/*  private CoreEditorTurn addCoreTurn(DivWidget rowOne,
-                                     ClientExercise clientExercise,
-                                     int index) {
-    CoreEditorTurn turn = getCoreTurnPanel(clientExercise);
-
-    allTurns.add(index, turn);
-
-    rowOne.insert(turn, index);
-
-    return turn;
-  }*/
-
-/*  @NotNull
-  CoreEditorTurn getCoreTurnPanel(ClientExercise clientExercise) {
-    CoreEditorTurn turn = new CoreEditorTurn(
-        controller,
-        this,
-        clientExercise,
-        controller.getLanguageInfo(),
-        false,
-        getDialogID());
-    turn.addWidgets(true, false, PhonesChoices.HIDE, EnglishDisplayChoices.SHOW);
-    return turn;
-  }*/
   protected void addControls(DivWidget controlAndSpeakers) {
   }
 
@@ -343,7 +304,6 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn> implements I
     }
   }
 
-
   @NotNull
   @Override
   protected CoreEditorTurn reallyGetTurnPanel(ClientExercise clientExercise, ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
@@ -354,5 +314,52 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn> implements I
         controller.getLanguageInfo(),
         false,
         getDialogID());
+  }
+
+  @Override
+  public void gotForward(CoreEditorTurn editorTurn) {
+    if (isLast(editorTurn)) {
+      // make either one or two more turns and add to end of dialog
+      addTurnForSameSpeaker(editorTurn);
+    } else {
+      super.gotForward(editorTurn);
+      getCurrentTurn().grabFocus();
+    }
+  }
+
+//  @Override
+//  public void setCurrentTurnTo(CoreEditorTurn newTurn) {
+//
+//  }
+
+  @Override
+  public boolean isInterpreter() {
+    return dialog.getKind() == DialogType.INTERPRETER;
+  }
+
+  @Override
+  public int getVolume() {
+    return 0;
+  }
+
+  @Override
+  public void gotBlur(CoreEditorTurn widgets) {
+    boolean last = isLast(widgets);
+    if (last) {
+      if (widgets.isDeleting()) {
+        if (DEBUG_BLUR) logger.info("gotBlur ignore blur of " + widgets.getExID());
+
+      } else {
+//        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("gotBlur"));
+//        logger.info("logException stack " + exceptionAsString);
+
+        if (DEBUG_BLUR) {
+          logger.info("gotBlur got blur of '" + //widgets.getText() +
+              " : " + widgets.isDeleting());
+        }
+
+        moveFocusToNext();
+      }
+    }
   }
 }

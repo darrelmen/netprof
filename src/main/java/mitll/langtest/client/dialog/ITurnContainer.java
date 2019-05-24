@@ -29,9 +29,9 @@
 
 package mitll.langtest.client.dialog;
 
-import mitll.langtest.client.scoring.ITurnPanel;
+import mitll.langtest.client.scoring.ISimpleTurn;
 
-public interface ITurnContainer<T extends ITurnPanel> {
+public interface ITurnContainer<T extends ISimpleTurn> {
   void gotForward(T editorTurn);
 
   void setCurrentTurnTo(T newTurn);

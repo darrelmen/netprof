@@ -42,21 +42,11 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn {
 
   protected ClientExercise exercise;
   private TurnPanelDelegate turnPanelDelegate;
-  //private ITurnContainer.COLUMNS columns;
+
 
   public SimpleTurn(ClientExercise exercise, ITurnContainer.COLUMNS columns, boolean rightJustify) {
     this.exercise = exercise;
-    // this.columns = columns;
     turnPanelDelegate = new TurnPanelDelegate(exercise, this, columns, rightJustify);
-    ;
-//    if (columns == MIDDLE) {
-//      if (exercise.hasEnglishAttr()) {
-//        addStyleName("floatRight");
-//      } else {
-//        addStyleName("floatRight");
-//        getElement().getStyle().setClear(Style.Clear.BOTH);
-//      }
-//    }
   }
 
   @Override
@@ -74,6 +64,31 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn {
 
   }
 
+  @Override
+  public boolean isDeleting() {
+    return false;
+  }
+
+  @Override
+  public void setDeleting(boolean deleting) {
+
+  }
+
+  @Override
+  public boolean hasCurrentMark() {
+    return false;
+  }
+
+  @Override
+  public void markCurrent() {
+
+  }
+
+  @Override
+  public void removeMarkCurrent() {
+
+  }
+
   /**
    * @param showFL
    * @param showALTFL
@@ -87,7 +102,7 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn {
     HTML html = new HTML(exercise.getForeignLanguage());
     html.addStyleName("flfont");
     html.getElement().getStyle().setPadding(10, Style.Unit.PX);
-    logger.info("addWidgets : got '" + exercise.getForeignLanguage() + "' for " + exercise.getID());
+  //  logger.info("addWidgets : got '" + exercise.getForeignLanguage() + "' for " + exercise.getID());
     DivWidget widgets = new DivWidget();
     widgets.add(html);
     styleMe(widgets);
@@ -97,9 +112,5 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn {
 
   protected void styleMe(DivWidget wrapper) {
     turnPanelDelegate.styleMe(wrapper);
-//    if (columns == MIDDLE) {
-//      wrapper.getElement().getStyle().setMarginRight(0, Style.Unit.PX);
-//    }
-
   }
 }

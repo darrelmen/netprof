@@ -69,17 +69,6 @@ public class ListenViewHelper<T extends ITurnPanel>
     implements ContentView, PlayListener, IListenView, ITurnContainer<T> {
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
-//  private static final String ENGLISH_SPEAKER = "English Speaker";
-//
-//  private static final String INTERPRETER = "Interpreter";
-//  static final String SPEAKER_A = "A";
-//  static final String SPEAKER_B = "B";
-//
-//  private static final int INTERPRETER_WIDTH = 165;//235;
-//  private static final int PADDING_LOZENGE = 14;
-//
-//  private static final String MIDDLE_COLOR = "#00800059";
-
   private static final String VALUE = "value";
   private static final String SLIDER_MAX = "100";
   private static final String MAX = "max";
@@ -91,18 +80,12 @@ public class ListenViewHelper<T extends ITurnPanel>
   private static final String RANGE = "range";
   private static final String INPUT = "input";
 
-//  private static final String RIGHT_BKG_COLOR = "#4aa8eeb0";
-//  private static final String LEFT_COLOR = "#e7e6ec";
-
-  // final ExerciseController controller;
   final Map<Integer, AlignmentOutput> alignments = new HashMap<>();
 
   private final List<T> promptTurns = new ArrayList<>();
   final List<T> leftTurnPanels = new ArrayList<>();
   private final List<T> middleTurnPanels = new ArrayList<>();
   private final List<T> rightTurnPanels = new ArrayList<>();
-
-  private T currentTurn;
 
   private ComplexWidget slider;
   /**
@@ -118,16 +101,11 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   private boolean doRehearse = true;
 
-
-  //  private INavigation.VIEWS prev, next;
-//  private INavigation.VIEWS thisView;
-
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_BLUR = false;
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_PLAY = false;
   private static final boolean DEBUG_NEXT = false;
-
 
   /**
    * @param controller
@@ -146,7 +124,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   protected void clearTurnLists() {
     super.clearTurnLists();
     clearColumnTurnLists();
-    currentTurn = null;
+    setCurrentTurn(null);
   }
 
   void clearColumnTurnLists() {
@@ -163,72 +141,12 @@ public class ListenViewHelper<T extends ITurnPanel>
     return turns;
   }
 
-  @Override protected void removeFromAllPanels(T toRemove) {
+  @Override
+  protected void removeFromAllPanels(T toRemove) {
     leftTurnPanels.remove(toRemove);
     rightTurnPanels.remove(toRemove);
     promptTurns.remove(toRemove);
     middleTurnPanels.remove(toRemove);
-  }
-
-  /**
-   * @see #ifOnLastJumpBackToFirst
-   */
-  private void markFirstTurn() {
-    if (!allTurns.isEmpty()) {
-      setCurrentTurn(allTurns.get(0));
-      logger.info("markFirstTurn : markCurrent ");
-      markCurrent();
-      makeVisible(currentTurn);
-    }
-  }
-
-  /**
-   * @param toMakeCurrent
-   * @see #markFirstTurn()
-   */
-  void setCurrentTurn(T toMakeCurrent) {
-    this.currentTurn = toMakeCurrent;
-  }
-
-  T getCurrentTurn() {
-    return currentTurn;
-  }
-
-  void makeNextTheCurrentTurn(T fnext) {
-    setCurrentTurn(fnext);
-
-    Scheduler.get().scheduleDeferred(() -> {
-      if (DEBUG) {
-        logger.info("addTurns : focus will be on " + (fnext == null ? "NULL" : fnext.getExID()));
-      }
-
-      markCurrent();
-
-      if (fnext != null) {
-        fnext.grabFocus();
-      }
-    });
-  }
-
-  T getNextTurn(int exid) {
-    T current = getTurnByID(exid);
-
-    T next = getCurrentTurn();
-    if (current == null) {
-      logger.warning("getNextTurn : can't find exid " + exid);
-    } else {
-      int i = allTurns.indexOf(current) + 1;
-      next = allTurns.get(i);
-
-      if (DEBUG_NEXT) {
-        logger.info("getNextTurn : num turns " + allTurns.size() +
-            "\n\texid    " + exid +
-            "\n\tcurrent " + current.getExID() +
-            "\n\tnext    " + next.getExID()
-        );
-      }
-    }
-    return next;
   }
 
   protected void showDialog(int dialogID, IDialog dialog, Panel child) {
@@ -347,7 +265,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   }
 
-  void populateColumnTurnLists() {
+  private void populateColumnTurnLists() {
     allTurns.forEach(turn -> addToColumnPanelLists(
         (turn.isLeft() ? COLUMNS.LEFT : turn.isRight() ? COLUMNS.RIGHT : COLUMNS.MIDDLE), turn));
   }
@@ -494,18 +412,6 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   @Override
-  public void moveFocusToNext() {
-    T next = getNext();
-    if (next != null) {
-      logger.info("moveFocusToNext - have " + next.getExID() + " grab focus.");
-      next.grabFocus();
-    } else if (!getAllTurns().isEmpty()) {
-      logger.info("moveFocusToNext - to first - let's not!");
-      //getAllTurns().get(0).grabFocus();
-    }
-  }
-
-  @Override
   public int getDialogSessionID() {
     return -1;
   }
@@ -515,10 +421,10 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     List<T> seq = getAllTurns();
 
-    int i = seq.indexOf(currentTurn);
+    int i = getIndexOfCurrentTurn();
     int i1 = i - 1;
 
-    boolean isPlaying = currentTurn.doPause();
+    boolean isPlaying = getCurrentTurn().doPause();
 
     clearHighlightAndRemoveMark();
 
@@ -547,21 +453,8 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   @Override
   public void gotForward(T editorTurn) {
-    boolean isPlaying = currentTurn.doPause();
-
-    int i = beforeChangeTurns();
-
-    // maybe do wrap
-    {
-      int i1 = i + 1;
-      List<T> seq = getAllTurns();
-      if (i1 > seq.size() - 1) {
-        setCurrentTurn(seq.get(0));
-      } else {
-        setCurrentTurn(seq.get(i1));
-      }
-    }
-
+    boolean isPlaying = getCurrentTurn().doPause();
+    super.gotForward(editorTurn);
     afterChangeTurns(isPlaying);
   }
 
@@ -576,25 +469,28 @@ public class ListenViewHelper<T extends ITurnPanel>
     //  setGotTurnClick(true);
     setPlayButtonToPlay();
 
-    boolean isPlaying = currentTurn.doPause();
+    boolean isPlaying = getCurrentTurn().doPause();
     if (DEBUG_NEXT) logger.info("setCurrentTurnTo current turn paused " + isPlaying);
 
     /*int i = */
-    beforeChangeTurns();
-    setCurrentTurn(newTurn);
-    markCurrent();
+//    beforeChangeTurns();
+//    setCurrentTurn(newTurn);
+//    markCurrent();
     //   logger.info("setCurrentTurnTo ex #" + currentTurn.getExID());
     // afterChangeTurns(isPlaying);
+
+    super.setCurrentTurnTo(newTurn);
   }
 
   /**
    * @return
    * @see #setCurrentTurnTo
    */
-  int beforeChangeTurns() {
+  @Override
+  protected int beforeChangeTurns() {
     setPlayButtonToPlay();
 
-    int i = getAllTurns().indexOf(currentTurn);
+    int i = getIndexOfCurrentTurn();
 
     if (DEBUG_NEXT) {
       logger.info("beforeChangeTurns current at #" + i + " : " + blurb());
@@ -602,25 +498,23 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     clearHighlightAndRemoveMark();
 
-    if (!makeNextVisible()) {
-      if (DEBUG_NEXT) {
-        logger.info("beforeChangeTurns : make header visible");
-      }
-      if (dialogHeader == null) {
-        makeVisible(speakerRow);
-        //  logger.info("no dialog header?");
-      } else {
-        makeVisible(dialogHeader);  // make the top header visible...
-      }
-    }
-    return i;
+//    if (!makeNextVisible()) {
+//      if (DEBUG_NEXT) {
+//        logger.info("beforeChangeTurns : make header visible");
+//      }
+//      if (dialogHeader == null) {
+//        makeVisible(speakerRow);
+//        //  logger.info("no dialog header?");
+//      } else {
+//        makeVisible(dialogHeader);  // make the top header visible...
+//      }
+//    }
+
+    return super.beforeChangeTurns();
+//    return i;
   }
 
-  private int getExID() {
-    return currentTurn.getExID();// + " : " +currentTurn.getText();
-  }
-
-  private void afterChangeTurns(boolean isPlaying) {
+  protected void afterChangeTurns(boolean isPlaying) {
     if (DEBUG) logger.info("afterChangeTurns isPlaying " + isPlaying);
     markCurrent();
     if (isPlaying) playCurrentTurn();
@@ -633,8 +527,8 @@ public class ListenViewHelper<T extends ITurnPanel>
   private void clearHighlightAndRemoveMark() {
     if (DEBUG) logger.info("clearHighlight on " + getExID());
 
-    currentTurn.resetAudio();
-    currentTurn.clearHighlight();
+    getCurrentTurn().resetAudio();
+    getCurrentTurn().clearHighlight();
     removeMarkCurrent();
   }
 
@@ -738,37 +632,8 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
 
-  /**
-   * TODO : not sure if this is right?
-   * Wrap around if on last turn.
-   */
-  void setNextTurnForSide() {
-    removeMarkCurrent();
-    int i = allTurns.indexOf(currentTurn);
-
-    if (currentTurn == null) {
-      logger.warning("setNextTurnForSide no current turn");
-    } else {
-      if (DEBUG) logger.info("setNextTurnForSide current turn for ex " + getExID());
-    }
-
-    int nextIndex = (i + 1 == allTurns.size()) ? 0 : i + 1;
-
-    if (DEBUG) logger.info("setNextTurnForSide " + i + " next " + nextIndex);
-
-    setCurrentTurn(allTurns.get(nextIndex));
-  }
-
-  /**
-   * @return
-   * @see #setNextTurnForSide()
-   */
-  boolean onLastTurn() {
-    return isLast(currentTurn);
-  }
-
   boolean onFirstPromptTurn() {
-    return getPromptSeq().indexOf(currentTurn) == 0;
+    return getPromptSeq().indexOf(getCurrentTurn()) == 0;
   }
 
   /**
@@ -829,6 +694,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #gotClickOnPlay()
    */
   void playCurrentTurn() {
+    T currentTurn = getCurrentTurn();
     if (currentTurn != null) {
       if (DEBUG_PLAY) logger.info("playCurrentTurn " + blurb());
       if (currentTurn.hasAudio()) {
@@ -862,7 +728,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   @Override
   public void playStarted() {
-    if (currentTurn != null) {
+    if (getCurrentTurn() != null) {
       if (DEBUG) {
         logger.info("playStarted - turn " + blurb());
       }
@@ -881,7 +747,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   @Override
   public void playStopped() {
-    if (currentTurn != null) {
+    if (getCurrentTurn() != null) {
       if (DEBUG) {
         logger.info("playStopped for turn " + blurb());
       }
@@ -927,37 +793,13 @@ public class ListenViewHelper<T extends ITurnPanel>
       if (DEBUG) logger.info("currentTurnPlayEnded OK stop");
       if (DEBUG) logger.info("currentTurnPlayEnded : markCurrent ");
       markCurrent();
-      makeVisible(currentTurn);
+      makeVisible(getCurrentTurn());
       setPlayButtonToPlay();
     } else {
       removeMarkCurrent();
       setCurrentTurn(next);
       playCurrentTurn();
     }
-  }
-
-  void makeCurrentTurnVisible() {
-    makeVisible(currentTurn);
-  }
-
-  private boolean makeNextVisible() {
-    T next = getNext();
-    if (next != null) {
-      if (DEBUG_NEXT) logger.info("makeNextVisible " + next.getExID() + " : " + next.getText());
-      makeVisible((T) next);
-      return true;
-    } else {
-      if (DEBUG_NEXT) logger.info("makeNextVisible - no next?");
-      return false;
-    }
-  }
-
-  private boolean makePrevVisible() {
-    T next = getPrev();
-    if (next != null) {
-      makeVisible((T) next);
-      return true;
-    } else return false;
   }
 
 
@@ -992,67 +834,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     return widgets;
   }
 
-  /**
-   * @see DialogEditor#gotTurnClick(EditorTurn)
-   * @see #gotTurnClick(ITurnPanel)
-   * @see #clearHighlightAndRemoveMark()
-   * @see #setNextTurnForSide()
-   * @see #playStopped()
-   * @see #currentTurnPlayEnded()
-   */
-  void removeMarkCurrent() {
-    if (DEBUG) logger.info("removeMarkCurrent on " + blurb());
-
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
-//    logger.info("logException stack:\n" + exceptionAsString);
-
-    currentTurn.removeMarkCurrent();
-  }
-
-  void markCurrent() {
-    if (DEBUG) logger.info("markCurrent on " + blurb());
-
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("markCurrent on " + currentTurn.getExID()));
-//    logger.info("logException stack:\n" + exceptionAsString);
-
-    currentTurn.markCurrent();
-  }
-
-  /**
-   * @return null if on last turn
-   */
-  T getNext() {
-    return getNext(this.currentTurn);
-  }
-
-  //  T getNextTurn() {
-//    int i = getAllTurns().indexOf(currentTurn) + 1;
-//    return i == getAllTurns().size() ? null : getAllTurns().get(i);
-//  }
-
-
-//  private T getPrev() {
-//    List<T> seq = getAllTurns();
-//    int i = seq.indexOf(currentTurn);
-//    int i1 = i - 1;
-//
-//    if (i1 > -1) {
-//      return seq.get(i1);
-//    } else {
-//      return null;
-//    }
-//  }
-//
-
-  /**
-   * @return null if there is no previous turn
-   * @see
-   */
-  protected T getPrev() {
-    return getPrev(this.currentTurn);
-  }
-
-//  protected T getPrev(T currentTurn) {
+  //  protected T getPrev(T currentTurn) {
 //    getAllTurns().stream().filter()
 //  }
 }

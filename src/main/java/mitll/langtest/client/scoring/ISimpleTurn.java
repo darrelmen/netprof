@@ -32,7 +32,7 @@ package mitll.langtest.client.scoring;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.ui.IsWidget;
 
-public interface ISimpleTurn extends IsWidget {
+public interface ISimpleTurn extends IsWidget, ISimpleTurnMarking {
   /**
    * JUST FOR DEBUGGING
    *
@@ -43,6 +43,10 @@ public interface ISimpleTurn extends IsWidget {
   void makeVisible();
 
   void grabFocus();
+
+  boolean isDeleting();
+
+  void setDeleting(boolean deleting);
 
   DivWidget addWidgets(boolean showFL,
                        boolean showALTFL,

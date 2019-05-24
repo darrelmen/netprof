@@ -95,7 +95,7 @@ public class EditorTurn extends PlayAudioExercisePanel
   private EditableTurnHelper editableTurnHelper;
   private TurnAddDelete turnAddDelete;
   private static final boolean DEBUG = false;
-  IEditableTurnContainer<EditorTurn> editableTurnContainer;
+  private IEditableTurnContainer<EditorTurn> editableTurnContainer;
   /**
    * @param clientExercise
    * @param columns

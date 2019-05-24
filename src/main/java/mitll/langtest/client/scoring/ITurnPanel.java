@@ -43,8 +43,4 @@ public interface ITurnPanel extends ISimpleTurn, ITurnMarking, RefAudioGetter, I
   void grabFocus();
 
   String getText();
-
-  boolean isDeleting();
-
-  void setDeleting(boolean deleting);
 }

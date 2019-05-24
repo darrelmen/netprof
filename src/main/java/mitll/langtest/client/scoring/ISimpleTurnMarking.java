@@ -29,23 +29,12 @@
 
 package mitll.langtest.client.scoring;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Widget;
+public interface ISimpleTurnMarking {
 
-public interface ITurnMarking extends ISimpleTurnMarking {
-  /**
-   * @return
-   */
- // void makeVisible();
+  boolean hasCurrentMark();
 
+  void markCurrent();
 
-  void addFloatLeft(Widget w);
+  void removeMarkCurrent();
 
-  boolean shouldAddFloatLeft();
-
-  boolean isLeft();
-  boolean isMiddle();
-  boolean isRight();
-
-  void addClickHandler(ClickHandler clickHandler);
 }
