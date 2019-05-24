@@ -249,7 +249,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @see PerformViewHelper#getTurnPanel
    * Or should we use exact match?
    */
-  public void maybeSetObscure(List<ClientExercise> coreVocabs) {
+/*  public void maybeSetObscure(List<ClientExercise> coreVocabs) {
     Set<String> coreVocab = new HashSet<>();
 
     coreVocabs.forEach(ex -> coreVocab.add(ex.getForeignLanguage().trim()));
@@ -259,15 +259,16 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     if (DEBUG_OVERLAP) logger.info("maybeSetObscure got " + coreVocab + " found " + obscureCandidates);
 
     obscureCandidates.forEach(IHighlightSegment::setObscurable);
-  }
+  }*/
 
   /**
    * Get all segments that need to be blacked out.
    *
    * @param coreVocab
    * @return
+   * @see #maybeSetObscure(List)
    */
-  private Collection<IHighlightSegment> getObscureCandidates(Collection<String> coreVocab) {
+ /* private Collection<IHighlightSegment> getObscureCandidates(Collection<String> coreVocab) {
     if (DEBUG_OVERLAP) logger.info("getCandidates for " + exercise.getID() + " " + exercise.getForeignLanguage());
 
     Set<IHighlightSegment> candidates = new HashSet<>();
@@ -298,8 +299,14 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
     return candidates;
   }
-
-  private List<IHighlightSegment> getClickableWordsHighlight(List<IHighlightSegment> candidates, String highlight) {
+*/
+  /**
+   * @see #getObscureCandidates(Collection)
+   * @param candidates
+   * @param highlight
+   * @return
+   */
+/*  private List<IHighlightSegment> getClickableWordsHighlight(List<IHighlightSegment> candidates, String highlight) {
     boolean isChineseCharacter = false; // TODO : check language
 
     SearchTokenizer searchTokenizer = new SearchTokenizer();
@@ -370,7 +377,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     }
 
     return (overlaps.size() == highlightTokens.size()) ? overlaps : Collections.emptyList();
-  }
+  }*/
 
   /**
    * @param result

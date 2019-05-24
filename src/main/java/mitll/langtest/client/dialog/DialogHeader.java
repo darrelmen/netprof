@@ -127,8 +127,9 @@ public class DialogHeader {
       int midWidth = 50;
       int sides = (100 - midWidth) / 2;
       // add prev view
+      boolean mine = dialog.getUserid() == controller.getUser();
       if (getPrevView() != null) {
-        Widget leftArrow = getLeftArrow();
+        Widget leftArrow = getLeftArrow(mine);
         leftArrow.setWidth(sides + "%");
         row.add(leftArrow);
       }
@@ -137,7 +138,6 @@ public class DialogHeader {
       row.add(middle);
       middle.setWidth(75 + "%");
 
-//      DivWidget headingContainer = getTitleBlurb();
       middle.add(getTitleBlurb());
       // add image
       {
@@ -151,7 +151,6 @@ public class DialogHeader {
 
       //add next view arrow
       if (getNextView() != null) {
-        boolean mine = dialog.getUserid() == controller.getUser();
         Widget rightArrow = getRightArrow(mine);
         rightArrow.setWidth(sides + "%");
         row.add(rightArrow);
@@ -347,7 +346,7 @@ public class DialogHeader {
   }
 
   @NotNull
-  private Widget getLeftArrow() {
+  private Widget getLeftArrow(boolean mine) {
     DivWidget buttonDiv = new DivWidget();
     Button widgets = new Button(getCapitalized(getPrevView().toString().toLowerCase()), IconType.ARROW_LEFT, event -> gotGoBack());
     new TooltipHelper().addTooltip(widgets, getPrevTooltip());
@@ -356,6 +355,10 @@ public class DialogHeader {
     buttonDiv.add(widgets);
 
     setMinWidth(buttonDiv, ARROW_WIDTH);
+
+    if (shouldShowDialogEditor(mine) && thisView == CORE_EDITOR) {
+      buttonDiv.add(getEditorButton(CORE_REHEARSE, false));
+    }
 
     return buttonDiv;
   }
@@ -392,10 +395,10 @@ public class DialogHeader {
       buttonDiv.add(getTurnEditor());
     }
     if (b && thisView == TURN_EDITOR) {
-      buttonDiv.add(getEditorButton(CORE_EDITOR));
+      buttonDiv.add(getEditorButton(CORE_EDITOR, true));
     }
     if (b && thisView == CORE_REHEARSE) {
-      buttonDiv.add(getEditorButton(CORE_EDITOR));
+      buttonDiv.add(getEditorButton(CORE_EDITOR, true));
     }
 
     if (thisView == LISTEN || thisView == TURN_EDITOR) {
@@ -418,17 +421,21 @@ public class DialogHeader {
 
   @NotNull
   private Button getTurnEditor() {
-    return getEditorButton(TURN_EDITOR);
+    return getEditorButton(TURN_EDITOR, true);
   }
 
   @NotNull
-  private Button getEditorButton(INavigation.VIEWS turnEditor) {
-    Button editButton = new Button(getCapitalized(turnEditor.toString()), IconType.ARROW_RIGHT, event -> controller.getNavigation().show(turnEditor));
-    new TooltipHelper().createAddTooltip(editButton, "Go to " + turnEditor.toString(), Placement.LEFT);
+  private Button getEditorButton(INavigation.VIEWS turnEditor, boolean addFloatRight) {
+    Button editButton = new Button(getCapitalized(turnEditor.toString()), addFloatRight ? IconType.ARROW_RIGHT : IconType.ARROW_LEFT, event -> controller.getNavigation().show(turnEditor));
+    new TooltipHelper().createAddTooltip(editButton, "Go to " + turnEditor.toString(), addFloatRight ? Placement.LEFT : Placement.RIGHT);
     styleButton(editButton);
-    editButton.addStyleName("floatRight");
+    if (addFloatRight) {
+      editButton.addStyleName("floatRight");
+    }
     editButton.addStyleName("topFiftyMargin");
-    editButton.setType(ButtonType.WARNING);
+    if (turnEditor == TURN_EDITOR || turnEditor == CORE_EDITOR) {
+      editButton.setType(ButtonType.WARNING);
+    }
     return editButton;
   }
 

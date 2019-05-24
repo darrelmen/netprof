@@ -73,7 +73,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     logger.info("core " + vocab.getID() + " " + vocab.getForeignLanguage());
 
     prev = vocab.getForeignLanguage();
-    this.turnAddDelete = new TurnAddDelete(this);
+    this.turnAddDelete = new TurnAddDelete(this, 21);
 
     this.editableTurnHelper = new EditableTurnHelper(language, this, vocab, this) {
       @Override
@@ -167,14 +167,14 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       ne.preventDefault();
       ne.stopPropagation();
 
-      logger.info("gotKey : got enter on " + this.getExID());// + " : " + columns);
+      if (DEBUG) logger.info("gotKey : got enter on " + this.getExID());// + " : " + columns);
 
       if (s.equals(prev)) {
-       // logger.warning("deal with making a new ex");
+        // logger.warning("deal with making a new ex");
         coreVocabEditor.gotForward(this);
       } else {
         prev = s;
-        logger.info("gotBlur " + getExID() + " = " + prev);
+        if (DEBUG) logger.info("gotBlur " + getExID() + " = " + prev);
         maybeCreateFirst(s, this, true);
       }
     }
@@ -195,7 +195,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
             logger.warning("huh? didn't add");
           } else {
             exercise = result.getChanged().get(0);
-            logger.info("ex now " + exercise + " move turn to next " + moveToNextTurn);
+            if (DEBUG) logger.info("ex now " + exercise + " move turn to next " + moveToNextTurn);
             updateText(s, outer, moveToNextTurn);
           }
         }
@@ -211,7 +211,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     if (projectID != -1) {
       final int exID = getExID();
 
-      logger.info("updateText : Checking " + s + " on " + projectID + " for " + exID);
+      if (DEBUG) logger.info("updateText : Checking " + s + " on " + projectID + " for " + exID);
 
       // talk to the audio service first to determine the oov
       controller.getAudioService().isValid(projectID, exID, s, new AsyncCallback<OOVWordsAndUpdate>() {
@@ -225,7 +225,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
 
         @Override
         public void onSuccess(OOVWordsAndUpdate result) {
-          logger.info("updateText : onSuccess " + result);
+          if (DEBUG) logger.info("updateText : onSuccess " + result);
 
           showOOVResult(result);
 

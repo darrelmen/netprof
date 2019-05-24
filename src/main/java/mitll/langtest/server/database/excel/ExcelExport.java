@@ -120,6 +120,7 @@ public class ExcelExport {
 
     boolean addProps = options.isAddProperties();
     boolean english = addHeaderRow(language, typeOrder, headerRow, isDefectList, addProps);
+    boolean normalMode = !addProps;
 
 
     /**
@@ -133,16 +134,18 @@ public class ExcelExport {
       int j = 0;
 
       row.createCell(j++).setCellValue(exercise.getID());
-      row.createCell(j++).setCellValue(exercise.getOldID());
-
+      if (normalMode) {
+        row.createCell(j++).setCellValue(exercise.getOldID());
+      }
       // logger.warn("English " + exercise.getEnglish() + " getMeaning " + exercise.getMeaning() + " getForeignLanguage " + exercise.getForeignLanguage() + " ref " + exercise.getRefSentence());
 
       // TODO : some horrible hacks to deal with UserExercise vs Exercise confusion about fields.
       // WORD_EXPRESSION
       String english1 = english ? exercise.getForeignLanguage() : exercise.getEnglish();
-      row.createCell(j++).setCellValue(english1);
-
-      if (!english) {
+      if (normalMode) {
+        row.createCell(j++).setCellValue(english1);
+      }
+      if (!english && normalMode) {
         row.createCell(j++).setCellValue(exercise.getForeignLanguage());
       }
 
@@ -152,26 +155,31 @@ public class ExcelExport {
 
       // english ? MEANING : TRANSLITERATION
       // evil thing where the meaning is empty for UserExercise overrides, but on the spreadsheet
-      row.createCell(j++).setCellValue(meaning);
-
-      row.createCell(j++).setCellValue(exercise.getAltFL());
+      if (normalMode) {
+        row.createCell(j++).setCellValue(meaning);
+        row.createCell(j++).setCellValue(exercise.getAltFL());
+      }
 
       for (String type : typeOrder) {
         String value = exercise.getUnitToValue().get(type);
         if (value == null || value.equalsIgnoreCase(BLANK)) value = "";
         row.createCell(j++).setCellValue(value);
       }
-      Collection<ClientExercise> directlyRelated = exercise.getDirectlyRelated();
-      if (directlyRelated.isEmpty()) {
-        row.createCell(j++).setCellValue("");
-        row.createCell(j++).setCellValue("");
-        row.createCell(j++).setCellValue("");
-      } else {
-        ClientExercise next = directlyRelated.iterator().next();
-        row.createCell(j++).setCellValue(next.getForeignLanguage());
-        row.createCell(j++).setCellValue(next.getAltFL());
-        row.createCell(j++).setCellValue(next.getEnglish());
+
+      if (normalMode) {
+        Collection<ClientExercise> directlyRelated = exercise.getDirectlyRelated();
+        if (directlyRelated.isEmpty()) {
+          row.createCell(j++).setCellValue("");
+          row.createCell(j++).setCellValue("");
+          row.createCell(j++).setCellValue("");
+        } else {
+          ClientExercise next = directlyRelated.iterator().next();
+          row.createCell(j++).setCellValue(next.getForeignLanguage());
+          row.createCell(j++).setCellValue(next.getAltFL());
+          row.createCell(j++).setCellValue(next.getEnglish());
+        }
       }
+
       if (isDefectList) {
         addDefects(english, preferredVoices, exercise, row, j);
       }
@@ -303,19 +311,26 @@ public class ExcelExport {
   private boolean addHeaderRow(String language, Collection<String> typeOrder, Row headerRow, boolean isDefectList, boolean addProps) {
     List<String> columns = new ArrayList<>();
     columns.add(ID);
-    columns.add("NP_ID");
-    columns.add(WORD_EXPRESSION);
+
+    if (!addProps) {
+      columns.add("NP_ID");
+      columns.add(WORD_EXPRESSION);
+    }
+
     boolean english = isEnglish(language);
     if (!english) {
       columns.add(language);
     }
-    columns.add(english ? MEANING : TRANSLITERATION);
-    columns.add("alt" + language);
+    if (!addProps) {
+      columns.add(english ? MEANING : TRANSLITERATION);
+      columns.add("alt" + language);
+    }
     columns.addAll(typeOrder);
     columns.add(CONTEXT_SENTENCE);
-    columns.add("alt" + CONTEXT_SENTENCE);
-    columns.add(CONTEXT_TRANSLATION);
-
+    if (!addProps) {
+      columns.add("alt" + CONTEXT_SENTENCE);
+      columns.add(CONTEXT_TRANSLATION);
+    }
     if (isDefectList) {
       //  logger.debug("adding defect columns");
       columns.add(WORD_EXPRESSION + "_comment");

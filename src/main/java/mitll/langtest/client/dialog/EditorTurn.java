@@ -132,7 +132,7 @@ public class EditorTurn extends PlayAudioExercisePanel
 
     this.isFirstTurn = isFirstTurn;
 
-    this.turnAddDelete = new TurnAddDelete(this);
+    this.turnAddDelete = new TurnAddDelete(this,26);
     this.editableTurnHelper = new EditableTurnHelper(controller.getLanguageInfo(), this, clientExercise, this);
     editableTurnHelper.setPlaceholder(turnContainer.isInterpreter(), columns);
 

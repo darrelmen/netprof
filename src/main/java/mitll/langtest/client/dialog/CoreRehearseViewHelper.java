@@ -46,7 +46,6 @@ import java.util.logging.Logger;
 
 public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscurable> extends RehearseViewHelper<T> {
  private final Logger logger = Logger.getLogger("CoreRehearseViewHelper");
-  //private Map<String, ClientExercise> exidToShell = new HashMap<>();
 
   /**
    * @param controller
@@ -68,8 +67,6 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscu
   @NotNull
   @Override
   public DivWidget getTurns(IDialog dialog) {
-  //  dialog.getCoreVocabulary().forEach(clientExercise -> exidToShell.put(clientExercise.getOldID(), clientExercise));
-
     //logger.info("getTurns got " + dialog.getCoreVocabulary().size() + " : " + exidToShell.values());
     DivWidget turns = super.getTurns(dialog);
     Scheduler.get().scheduleDeferred(this::obscureRespTurns);

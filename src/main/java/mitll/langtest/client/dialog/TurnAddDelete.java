@@ -40,8 +40,11 @@ import org.jetbrains.annotations.NotNull;
 class TurnAddDelete {
   private AddDeleteListener listener;
 
-  TurnAddDelete(AddDeleteListener listener) {
+  private int width;
+
+  TurnAddDelete(AddDeleteListener listener, int width) {
     this.listener = listener;
+    this.width = width;
   }
 
   Button addAddTurnButton() {
@@ -110,7 +113,7 @@ class TurnAddDelete {
     Style style = postAudioRecordButton.getElement().getStyle();
     style.setProperty("borderRadius", 21 + "px");
     style.setPadding(9, Style.Unit.PX);
-    style.setWidth(26, Style.Unit.PX);
+    style.setWidth(width, Style.Unit.PX);
     style.setMarginRight(5, Style.Unit.PX);
     style.setHeight(20, Style.Unit.PX);
   }

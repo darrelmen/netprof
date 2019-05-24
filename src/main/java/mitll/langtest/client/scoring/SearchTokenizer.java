@@ -193,6 +193,7 @@ public class SearchTokenizer {
    * @param tokens
    * @param highlightTokens
    * @return index of first matching token
+   * @see RecordDialogExercisePanel#getClickableWordsHighlight
    */
   @NotNull
   protected int getMatchingHighlightAll(List<String> tokens, List<String> highlightTokens) {

@@ -29,8 +29,9 @@
 
 package mitll.langtest.client.scoring;
 
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.shared.exercise.ClientExercise;
+
+import java.util.List;
 
 public interface IObscurable {
 
@@ -39,4 +40,6 @@ public interface IObscurable {
   void obscureText();
 
   void restoreText();
+
+  void maybeSetObscure(List<ClientExercise> coreVocabs);
 }
