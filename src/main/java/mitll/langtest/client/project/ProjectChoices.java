@@ -276,9 +276,7 @@ public class ProjectChoices extends ThumbnailChoices {
   }
 
   private boolean isCanRecord(Collection<Permission> permissions) {
-    return permissions.contains(RECORD_AUDIO) ||
-        permissions.contains(QUALITY_CONTROL) ||
-        permissions.contains(DEVELOP_CONTENT);
+    return permissions.contains(RECORD_AUDIO) || permissions.contains(QUALITY_CONTROL) || permissions.contains(DEVELOP_CONTENT);
   }
 
   /**
@@ -864,7 +862,7 @@ public class ProjectChoices extends ThumbnailChoices {
 //      }
 
       if (admin && !didSpew) {
-       if (DEBUG) logger.info("isOwnerOrAdmin : " + controller.getUserManager().getUserID() + " is an admin");
+        if (DEBUG) logger.info("isOwnerOrAdmin : " + controller.getUserManager().getUserID() + " is an admin");
         didSpew = true;
       }
     }
@@ -1151,7 +1149,8 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {
     List<SlimProject> children = projectForLang.getChildren();
-    if (DEBUG_CLICK) logger.info("gotClickOnFlag project " + projid + " has " + children.size() + " children, name " + name);
+    if (DEBUG_CLICK)
+      logger.info("gotClickOnFlag project " + projid + " has " + children.size() + " children, name " + name);
 
 /*    if (children.size() == 2) {
       Set<ProjectMode> names = new HashSet<>();

@@ -132,7 +132,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
    */
   private Panel getUnitLessonForExercise(T exercise) {
     // Panel flow = new HorizontalPanel();
- //   logger.info("getUnitLessonForExercise for " + exercise);
+    //   logger.info("getUnitLessonForExercise for " + exercise);
     Panel flow = new DivWidget();
     flow.addStyleName("inlineFlex");
     //flow.getElement().setId("getUnitLessonForExercise_unitLesson");
@@ -246,7 +246,7 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
       String subtext = unitToValue.get(type);
       // logger.info("type " + type + " = " + subtext);
       if (subtext != null && !subtext.isEmpty()) {
-        String subtext1 = truncate(subtext,25);
+        String subtext1 = truncate(subtext, 25);
         builder.append(getTypeAndValue(type, subtext1));
       }
     }
@@ -279,6 +279,17 @@ public class UnitChapterItemHelper<T extends HasID & Details> {
     return "<span>" +
         "<h5>" + "<small>" + type + "</small>" +
         "<span style='margin-left:5px;float:right'>" + subtext + "</span>" +
+        "</h5>" +
+        "</span>";
+  }
+
+  @NotNull
+  public String getTypeAndValue2(String type, String subtext) {
+    return "<span style='width:100%;white-space:nowrap;" +
+        // "display:inline-flex" +
+        "'>" +
+        "<h5>" + "<span style='float:left;width:50%'>" + type + "</span>" +
+        "<span style='margin-left:5px;margin-top:-19px;float:right;color:blue;width:50%'>" + subtext + "</span>" +
         "</h5>" +
         "</span>";
   }

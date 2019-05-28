@@ -32,27 +32,28 @@ package mitll.langtest.client.dialog;
 import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
+import com.github.gwtbootstrap.client.ui.Popover;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.github.gwtbootstrap.client.ui.constants.Trigger;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.ui.Anchor;
-import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.scoring.UnitChapterItemHelper;
+import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.dialog.IDialog;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.user.Permission;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
@@ -63,7 +64,7 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * @see ListenViewHelper#addDialogHeader(IDialog, Panel)
  */
 public class DialogHeader {
- // private final Logger logger = Logger.getLogger("DialogHeader");
+  // private final Logger logger = Logger.getLogger("DialogHeader");
   private static final String HEIGHT = 100 + "px";
 
   /**
@@ -151,7 +152,7 @@ public class DialogHeader {
 
       //add next view arrow
       if (getNextView() != null) {
-        Widget rightArrow = getRightArrow(mine);
+        Widget rightArrow = getRightArrow(dialog, mine);
         rightArrow.setWidth(sides + "%");
         row.add(rightArrow);
       }
@@ -374,7 +375,7 @@ public class DialogHeader {
    * @return
    */
   @NotNull
-  private Widget getRightArrow(boolean mine) {
+  private Widget getRightArrow(IDialog dialog, boolean mine) {
     DivWidget buttonDiv = new DivWidget();
     setMinWidth(buttonDiv, ARROW_WIDTH);
 
@@ -412,11 +413,79 @@ public class DialogHeader {
       widgets.addStyleName("floatRight");
       widgets.getElement().getStyle().setMarginTop(25, PX);
       widgets.getElement().getStyle().setMarginRight(12, PX);
-
+      widgets.getElement().getStyle().setClear(Style.Clear.BOTH);
       buttonDiv.add(widgets);
     }
 
+    // HTML core_vocab = new HTML("Core Vocab");
+    if (!dialog.getCoreVocabulary().isEmpty()) {
+      Widget core_vocab = getCoreVocab(dialog);
+      buttonDiv.add(core_vocab);
+    }
+
     return buttonDiv;
+  }
+
+  @NotNull
+  private Widget getCoreVocab(IDialog dialog) {
+    HTML core_vocab = new HTML("<b>Vocab (Mouseover)</b>");
+    Map<String, String> objectObjectHashMap = new TreeMap<>();
+
+    for (ClientExercise exercise : dialog.getCoreVocabulary()) {
+      objectObjectHashMap.put(exercise.getForeignLanguage(), exercise.getEnglish());
+    }
+
+    StringBuilder builder = new StringBuilder();
+    objectObjectHashMap.forEach((k, v) -> builder.append(getTypeAndValue2(k, v)));
+    builder.append(getTypeAndValue2(" ", " "));
+
+    String message = "<div style='width:300px;margin-bottom:5px;padding-bottom:5px'>" + builder.toString() + "<br/></div>";
+
+    DivWidget wrapper = new DivWidget();
+    wrapper.add(core_vocab);
+
+    wrapper.getElement().getStyle().setClear(Style.Clear.BOTH);
+    wrapper.getElement().getStyle().setPaddingLeft(10, PX);
+    wrapper.getElement().getStyle().setMarginLeft(10, PX);
+    wrapper.addStyleName("floatRight");
+    wrapper.getElement().getStyle().setZIndex(0);
+
+    Popover popover = new Popover();
+    popover.setContainer("body");
+
+    simplePopover(popover,
+        wrapper,
+        null,
+        message,
+        Placement.LEFT, true);
+
+    wrapper.getElement().getStyle().setMarginTop(27, PX);
+    wrapper.addStyleName("rightFiveMargin");
+    return wrapper;
+  }
+
+  private void simplePopover(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
+    popover.setWidget(w);
+    popover.setHtml(isHTML);
+    popover.setText(message);
+    popover.setPlacement(placement);
+
+    popover.setTrigger(Trigger.HOVER);
+    popover.setAnimation(false);
+    popover.reconfigure();
+    if (heading == null) {
+      popover.getWidget().getElement().removeAttribute("data-original-title");
+    }
+  }
+
+  @NotNull
+  public String getTypeAndValue2(String type, String subtext) {
+    return "<span style='width:100%;white-space:nowrap;" +
+        "'>" +
+        "<h5>" + "<span style='float:left;width:50%'>" + type + "</span>" +
+        "<span style='margin-left:5px;margin-top:-19px;float:right;color:blue;width:50%'>" + subtext + "</span>" +
+        "</h5>" +
+        "</span>";
   }
 
   @NotNull

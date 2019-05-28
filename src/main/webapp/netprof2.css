@@ -38,6 +38,8 @@ body {
         flex: 1;*/
 }
 
+.tooltip { pointer-events: none; }
+
 .headerBackground {
     background-color: #404141;
     color: #ffffff;
