@@ -508,6 +508,11 @@ public class FilterResponseHelper implements IResponseFilter {
         exercises = getParentChildPairs(exercises, projid);
       }
     } else if (request.isOnlyUninspected()) {
+      if (onlyExamples) {
+        logger.info("filterExercises OK doing examples");
+        exercises = getContextExercises(exercises);
+      }
+
       exercises = filterByUninspected(exercises);
       exercises = maybeDoInterpreterFilter(request, exercises);
     } else if (onlyExamples) {
