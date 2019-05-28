@@ -315,10 +315,6 @@ public class EditorTurn extends PlayAudioExercisePanel
     return playButton;
   }
 
-//  private void removeFromTabSequence(Focusable postAudioRecordButton) {
-//    postAudioRecordButton.setTabIndex(-1);
-//  }
-
   @NotNull
   private DivWidget getTextBox() {
     DivWidget textBoxContainer = editableTurnHelper.getTextBox(true);
@@ -370,52 +366,6 @@ public class EditorTurn extends PlayAudioExercisePanel
     recordAudioPanel.cancelRecording();
   }
 
-/*  private void addAddTurnButton() {
-    Button w = getTripleButton();
-
-    w.addClickHandler(event -> gotPlus());
-    w.setIcon(IconType.PLUS);
-    w.setType(ButtonType.SUCCESS);
-
-    tripleButtonStyle(w);
-
-    add(w);
-  }*/
-
-/*
-  private void addDeleteButton() {
-    Button w = getTripleButton();
-
-    w.addClickHandler(event -> gotMinus());
-    w.setType(ButtonType.WARNING);
-    w.setIcon(IconType.MINUS);
-
-    // can't blow away the first turn!
-    w.setEnabled(!isFirstTurn);
-
-    tripleFirstStyle(w);
-
-    w.addFocusHandler(event -> deleteGotFocus());
-    w.addBlurHandler(event -> deleteGotBlur());
-    add(w);
-  }
-*/
-
-/*  @NotNull
-  private Button getTripleButton() {
-    return new Button() {
-      @Override
-      protected void onAttach() {
-        int tabIndex = getTabIndex();
-        super.onAttach();
-
-        if (-1 == tabIndex) {
-          setTabIndex(-1);
-        }
-      }
-    };
-  }*/
-
   /**
    * So, if you get the focus and you're not last, move on to next
    * How can we distinguish between delete getting focus, just before buttton press
@@ -428,18 +378,6 @@ public class EditorTurn extends PlayAudioExercisePanel
       turnContainer.moveFocusToNext();
     }
   }
-
-/*
-  private void deleteGotBlur() {
-    if (turnContainer.isLast(this)) {  // since you may be about to click it
-      if (DEBUG) logger.info("deleteGotBlur - ");
-      // grabFocus();
-    } else {
-      if (DEBUG) logger.info("deleteGotBlur - not last ");
-      //  turnContainer.moveFocusToNext();
-    }
-  }
-*/
 
 
   private void addOtherTurn() {
@@ -458,21 +396,6 @@ public class EditorTurn extends PlayAudioExercisePanel
     add(w);
   }
 
- /* private void tripleButtonStyle(Button w) {
-    tripleFirstStyle(w);
-    //   w.addFocusHandler(event -> turnContainer.moveFocusToNext());
-    removeFromTabSequence(w);
-//    logger.info("aftr " + getExID() + " " + w.getTabIndex());
-  }*/
-
-/*
-  private void tripleFirstStyle(Button w) {
-    addPressAndHoldStyle(w);
-
-    w.addStyleName("topFiveMargin");
-    w.addStyleName("leftFiveMargin");
-  }
-*/
 
   @Override
   public void gotPlus() {
@@ -488,16 +411,6 @@ public class EditorTurn extends PlayAudioExercisePanel
     editableTurnContainer.addTurnForOtherSpeaker(this);
   }
 
-/*
-  private void addPressAndHoldStyle(UIObject postAudioRecordButton) {
-    Style style = postAudioRecordButton.getElement().getStyle();
-    style.setProperty("borderRadius", 21 + "px");
-    style.setPadding(9, Style.Unit.PX);
-    style.setWidth(26, Style.Unit.PX);
-    style.setMarginRight(5, Style.Unit.PX);
-    style.setHeight(20, Style.Unit.PX);
-  }
-*/
 
   private void addPressAndHoldStyleForRecordButton(UIObject postAudioRecordButton) {
     Style style = postAudioRecordButton.getElement().getStyle();
@@ -561,7 +474,7 @@ public class EditorTurn extends PlayAudioExercisePanel
   public void gotKey(KeyUpEvent event) {
     NativeEvent ne = event.getNativeEvent();
 
-    String s = editableTurnHelper.getContent();//SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
+    String s = editableTurnHelper.getContent();
     if (ne.getKeyCode() == KeyCodes.KEY_ENTER) {
       ne.preventDefault();
       ne.stopPropagation();

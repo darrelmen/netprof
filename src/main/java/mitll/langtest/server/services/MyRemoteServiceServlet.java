@@ -582,13 +582,13 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
         dialog.getExercises().forEach(clientExercise -> {
               AudioAttribute latestAudio = getLatestAudio(clientExercise);
               String info = latestAudio == null ? "" : latestAudio.getUniqueID() + " : " + latestAudio.getTranscript() + " : " + latestAudio.getAudioRef();
-              logger.info("ex " + clientExercise.getID() + " " + clientExercise.getForeignLanguage() + " : " + clientExercise.getAudioAttributes().size() + " : " + info);
+              logger.info("getDialog ex " + clientExercise.getID() + " " + clientExercise.getForeignLanguage() + " : " + clientExercise.getAudioAttributes().size() + " : " + info);
             }
         );
 
-    /*    iDialog.getExercises().forEach(exercise ->
-            logger.info("lang for " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " " + language)
-        );*/
+        dialog.getCoreVocabulary().forEach(exercise ->
+            logger.info("getDialog (" + id +
+                ") vocab for " + exercise.getID() + " eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() + "' " + language));
       }
 
       new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(project, dialog.getExercises());
@@ -665,7 +665,6 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
 ////    }
 //    return getDialogsForProject(projid);
 //  }
-
   protected Collection<IDialog> getDialogs(int projectIDFromUser) {
     Collection<IDialog> dialogList = new ArrayList<>();
     {

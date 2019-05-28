@@ -953,12 +953,9 @@ public class ProjectChoices extends ThumbnailChoices {
 
     addTooltip(w, "Upload excel into domino.");
 
-    if (w != null) {
-      w.addClickHandler(event -> {
-        UploadViewBase widgets = new UploadViewBase(projid, controller.getUser());
-        widgets.showModal();
-      });
-    }
+//    if (w != null) {
+    w.addClickHandler(event -> new UploadViewBase(projid, controller.getUser()).showModal());
+    //}
 
     return w;
   }

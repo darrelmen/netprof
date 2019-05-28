@@ -51,7 +51,9 @@ import static mitll.langtest.server.audio.HTTPClient.UTF_8;
 
 public class ExcelUpload {
   private static final Logger logger = LogManager.getLogger(ExcelUpload.class);
-  public void doExcelUpload(HttpServletRequest request, HttpServletResponse response,
+
+  public void doExcelUpload(HttpServletRequest request,
+                            HttpServletResponse response,
                             MyRemoteServiceServlet serviceServlet,
                             IProjectManagement projectManagement) {
     logger.info("doExcelUpload : " +
@@ -122,7 +124,7 @@ public class ExcelUpload {
           jsonObject.addProperty("Error", "no domino id set for project.");
           sendResponse(response, jsonObject.toString());
         } else {
-          ImportResult b =projectManagement.doDominoImport(dominoid, docImportAttachment, project.getTypeOrder(), userID);
+          ImportResult b = projectManagement.doDominoImport(dominoid, docImportAttachment, project.getTypeOrder(), userID);
           JsonObject jsonObject = new JsonObject();
           jsonObject.addProperty("Success", b.isSuccess());
           jsonObject.addProperty("Error", "None");

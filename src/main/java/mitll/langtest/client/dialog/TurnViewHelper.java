@@ -69,6 +69,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 public abstract class TurnViewHelper<T extends ISimpleTurn>
     extends DialogView
     implements ContentView {
+  public static final int DELETE_DELAY = 500;
   private final Logger logger = Logger.getLogger("TurnViewHelper");
 
   private static final String ENGLISH_SPEAKER = "English Speaker";
@@ -149,7 +150,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
 
-
   public IDialog getDialog() {
     return dialog;
   }
@@ -169,7 +169,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   protected void startDelete(ISimpleTurn currentTurn) {
     currentTurn.setDeleting(true);
     if (currentTurn instanceof UIObject) {
-      ((UIObject)currentTurn).getElement().getStyle().setOpacity(0.5);
+      ((UIObject) currentTurn).getElement().getStyle().setOpacity(0.5);
     }
   }
 
@@ -191,30 +191,8 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
       showDialog(dialogID, dialog, child);
     } else {
       controller.getNavigation().showView(INavigation.VIEWS.DIALOG);
- /*     logger.info("showDialogGetRef no dialog for " + dialogID);
-      Label child1 = new Label(LabelType.INFO, "Please choose a dialog first under Dialogs.");
-      child1.getElement().getStyle().setFontSize(16, PX);
-      child1.addStyleName("topFiveMargin");
-      child1.addStyleName("floatLeft");
-      child1.getElement().getStyle().setClear(Style.Clear.BOTH);
-      child.add(child1);
-
-      {
-        Button widgets = new Button("Click here to choose a dialog", IconType.EYE_OPEN);
-        widgets.setType(ButtonType.INFO);
-        widgets.addClickHandler(event -> gotJumpToDialog());
-        widgets.addStyleName("leftFiveMargin");
-        widgets.addStyleName("topFiveMargin");
-        widgets.addStyleName("floatLeft");
-        widgets.getElement().getStyle().setClear(Style.Clear.BOTH);
-        child.add(widgets);
-      }*/
     }
   }
-
-//  private void gotJumpToDialog() {
-//    controller.getNavigation().showView(INavigation.VIEWS.DIALOG);
-//  }
 
   /**
    * @param exid
@@ -265,7 +243,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   /**
    * @see #ifOnLastJumpBackToFirst
    */
-  protected void markFirstTurn() {
+   void markFirstTurn() {
     if (!allTurns.isEmpty()) {
       setCurrentTurn(allTurns.get(0));
       logger.info("markFirstTurn : markCurrent ");
@@ -279,7 +257,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
     Scheduler.get().scheduleDeferred(() -> {
       if (DEBUG) {
-        logger.info("addTurns : focus will be on " + (fnext == null ? "NULL" : fnext.getExID()));
+        logger.info("makeNextTheCurrentTurn : focus will be on " + (fnext == null ? "NULL" : fnext.getExID()));
       }
 
       markCurrent();
@@ -708,12 +686,11 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   protected abstract T reallyGetTurnPanel(ClientExercise clientExercise,
                                           ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index);
 
-
   /**
    * @param exid
    * @see DialogEditor#deleteCurrentTurnOrPair
    */
-  T deleteTurn(int exid, Set<T> toRemoves) {
+  private T deleteTurn(int exid, Set<T> toRemoves) {
     T toRemove = getTurnByID(exid);
     T newCurrentTurn = null;
     if (toRemove == null) {
@@ -776,10 +753,11 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
         }
       }
     };
-    currentTimer.schedule(500);
+    currentTimer.schedule(DELETE_DELAY);
   }
 
-  protected void removeFromAllPanels(T toRemove) {}
+  protected void removeFromAllPanels(T toRemove) {
+  }
 
   List<T> getAllTurns() {
     return allTurns;
@@ -804,7 +782,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return seq.indexOf(currentTurn) == seq.size() - 1;
   }
 
-  T getNext(T currentTurn) {
+  private T getNext(T currentTurn) {
     List<T> seq = getAllTurns();
     int i = seq.indexOf(currentTurn);
     int i1 = i + 1;
@@ -828,7 +806,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return i1 < 0 ? null : seq.get(i1);
   }
 
-  protected void reloadDialog() {
+   void reloadDialog() {
     int projectID = controller.getProjectID();
     if (projectID != -1) {
       int dialogID = getDialogID();
@@ -860,7 +838,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   @Nullable
-  protected ClientExercise getPrev(int exid, List<ClientExercise> updatedExercises) {
+   ClientExercise getPrev(int exid, List<ClientExercise> updatedExercises) {
     ClientExercise prev = null;
     for (ClientExercise turn : updatedExercises) {
       if (turn.getID() == exid) break;
@@ -895,7 +873,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     }
   }
 
- protected int beforeChangeTurns() {
+  protected int beforeChangeTurns() {
     int i = getIndexOfCurrentTurn();
 
     if (!makeNextVisible()) {
@@ -923,7 +901,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     }
   }
 
-  protected int getIndexOfCurrentTurn() {
+  int getIndexOfCurrentTurn() {
     return getAllTurns().indexOf(currentTurn);
   }
 
@@ -976,7 +954,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     }
   }
 
-  protected boolean makePrevVisible() {
+  boolean makePrevVisible() {
     T next = getPrev();
     if (next != null) {
       makeVisible((T) next);
@@ -993,7 +971,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    * @see #currentTurnPlayEnded()
    */
   void removeMarkCurrent() {
-  //  if (DEBUG) logger.info("removeMarkCurrent on " + blurb());
+    //  if (DEBUG) logger.info("removeMarkCurrent on " + blurb());
 
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
 //    logger.info("logException stack:\n" + exceptionAsString);
@@ -1002,7 +980,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   void markCurrent() {
-  //  if (ListenViewHelper.DEBUG) logger.info("markCurrent on " + blurb());
+    //  if (ListenViewHelper.DEBUG) logger.info("markCurrent on " + blurb());
 
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("markCurrent on " + currentTurn.getExID()));
 //    logger.info("logException stack:\n" + exceptionAsString);

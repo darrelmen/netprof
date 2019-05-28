@@ -417,10 +417,8 @@ public class DialogHeader {
       buttonDiv.add(widgets);
     }
 
-    // HTML core_vocab = new HTML("Core Vocab");
-    if (!dialog.getCoreVocabulary().isEmpty()) {
-      Widget core_vocab = getCoreVocab(dialog);
-      buttonDiv.add(core_vocab);
+    if (!dialog.getCoreVocabulary().isEmpty() & thisView != CORE_EDITOR && thisView != SCORES) {
+      buttonDiv.add(getCoreVocab(dialog));
     }
 
     return buttonDiv;
@@ -501,7 +499,10 @@ public class DialogHeader {
     if (addFloatRight) {
       editButton.addStyleName("floatRight");
     }
-    editButton.addStyleName("topFiftyMargin");
+    if (!addFloatRight) {
+      editButton.addStyleName("topFiftyMargin");
+    } else editButton.getElement().getStyle().setMarginTop(30, PX);
+
     if (turnEditor == TURN_EDITOR || turnEditor == CORE_EDITOR) {
       editButton.setType(ButtonType.WARNING);
     }

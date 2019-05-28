@@ -33,5 +33,4 @@ public interface AddDeleteListener {
   void gotPlus();
   void gotMinus();
   void deleteGotFocus();
- // void deete
 }

@@ -1421,11 +1421,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     Project project = getProject(projid);
     return project.getExerciseDAO().updateEnglishText(project, dialogID, exid, content);
   }
-/*
-  private String getTrim(String part) {
-    return part.replaceAll(REGEX, " ").replaceAll(TIC_REGEX, "'").trim();
-  }
-*/
 
   /**
    * Make sure that if the audio service on score1 or hydra has marked an exercise safe or unsafe it's reflected here.

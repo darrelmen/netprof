@@ -312,11 +312,25 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     IDialog dialog = getProject(projectForDialog).getDialog(dialogID);
     int before = dialog.getCoreVocabulary().size();
 
+    dialog.getCoreVocabulary().forEach(exercise ->
+        logger.info("addEmptyCoreExercise before  (" + dialogID +
+            ") vocab for " + exercise.getID() + " eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() +"'"));
+
     ClientExercise added = db.getDialogDAO().addCoreVocab(dialog, userIDFromSessionOrDB, afterExid, System.currentTimeMillis());
 
+    logger.info("addEmptyCoreExercise Added exercise #" + added.getID());
+
+    dialog = getProject(projectForDialog).getDialog(dialogID);
     int after = dialog.getCoreVocabulary().size();
 
-    if (after - before != 1) logger.error("before there were " + before + " but after add only " + after);
+    if (after - before != 1) {
+      logger.error("addEmptyCoreExercise before there were " + before + " but after add only " + after);
+    }
+
+    dialog.getCoreVocabulary().forEach(exercise ->
+        logger.info("addEmptyCoreExercise (" + dialogID +
+            ") vocab for " + exercise.getID() + " eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() +"'"));
+
 
     List<ClientExercise> objects = new ArrayList<>();
     objects.add(added);

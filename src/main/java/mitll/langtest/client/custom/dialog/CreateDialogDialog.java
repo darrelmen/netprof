@@ -31,13 +31,18 @@ package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.ListBox;
-import com.github.gwtbootstrap.client.ui.base.TextBox;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.LabelType;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
+import mitll.langtest.client.domino.common.UploadViewBase;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.dialog.Dialog;
@@ -91,6 +96,62 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     return formField;
   }
 
+
+  @NotNull
+  private com.github.gwtbootstrap.client.ui.Button getUploadButton(int projid) {
+    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
+
+    w.setIcon(IconType.UPLOAD);
+    w.setType(ButtonType.WARNING);
+
+    addTooltip(w, "Upload image for dialog.");
+
+//    if (w != null) {
+    w.addClickHandler(event -> new UploadViewBase(projid, controller.getUser()) {
+      @NotNull
+      @Override
+      protected String getDialogTitle() {
+        return "Upload image";
+      }
+
+      @NotNull
+      @Override
+      protected String getHint() {
+        return "Choose an image";
+      }
+
+      @NotNull
+      @Override
+      protected String getAcceptValue() {
+        return "image/*";
+      }
+
+      @NotNull
+      @Override
+      protected String getService() {
+        return "audio-manager";
+      }
+
+      @Override
+      protected void addInfoLabels() {
+        com.github.gwtbootstrap.client.ui.Label w = getLabel("Choose an image.");
+        add(w);
+      }
+
+
+      @NotNull
+      private Label getLabel(String text) {
+        Label w = new Label(LabelType.WARNING, text);
+        w.getElement().getStyle().setFontSize(16, Style.Unit.PX);
+        w.getElement().getStyle().setWhiteSpace(Style.WhiteSpace.NORMAL);
+        return w;
+      }
+    }.showModal());
+    //}
+
+    return w;
+  }
+
   @Override
   protected int getMaxTitleLength() {
     return 35;
@@ -124,6 +185,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
 
     addDialogType(child);
 
+    child.add(getUploadButton(controller.getProjectID()));
    /* {
       ListBox listBox = getListBox(200);
       listBox.addStyleName("leftFiveMargin");

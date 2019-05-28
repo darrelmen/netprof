@@ -52,9 +52,9 @@ import static com.github.gwtbootstrap.client.ui.constants.LabelType.IMPORTANT;
 public class UploadViewBase extends DivWidget {
   private final Logger logger = Logger.getLogger("UploadViewBase");
 
-  public static final String PROJECT_ID = "project-id";
-  public static final int WIDTH = 475;
-  public static final String HORRIBLE_PREV = "<pre style=\"word-wrap: break-word; white-space: pre-wrap;\">";
+  private static final String PROJECT_ID = "project-id";
+  private static final int WIDTH = 475;
+  private static final String HORRIBLE_PREV = "<pre style=\"word-wrap: break-word; white-space: pre-wrap;\">";
 
   private Form mainForm;
   private Fieldset fields;
@@ -65,11 +65,30 @@ public class UploadViewBase extends DivWidget {
 
   public UploadViewBase(int projectID, int user) {
     this.user = user;
-
     init(projectID);
   }
 
-  protected void handleFormSubmitSuccess(UploadResult result) {
+  @NotNull
+  protected String getDialogTitle() {
+    return "Upload excel file to Domino";
+  }
+
+  @NotNull
+  protected String getHint() {
+    return "Choose an excel file.";
+  }
+
+  @NotNull
+  protected String getAcceptValue() {
+    return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+  }
+
+  @NotNull
+  protected String getService() {
+    return "exercise-manager";
+  }
+
+  private void handleFormSubmitSuccess(UploadResult result) {
     result.inform();
   }
 
@@ -77,7 +96,8 @@ public class UploadViewBase extends DivWidget {
     //   this.projectID = projectID;
     mainForm = new Form();
     //String sUrl = DownloadHelper.toDominoUrl("langtest/exercise-manager");
-    mainForm.setAction(DownloadHelper.toDominoUrl("langtest/exercise-manager"));
+    mainForm.setAction(DownloadHelper.toDominoUrl("langtest/" +
+        getService()));
     mainForm.setEncoding(FormPanel.ENCODING_MULTIPART);
     mainForm.setMethod(FormPanel.METHOD_POST);
     mainForm.setType(FormType.HORIZONTAL);
@@ -92,6 +112,15 @@ public class UploadViewBase extends DivWidget {
     addMainFormSubmitHandler();
     addMainFormSubmitCompleteHandler();
 
+    addInfoLabels();
+
+    mainForm.addStyleName("topFiveMargin");
+    add(mainForm);
+    //	initWidget(mainForm);
+  }
+
+
+  protected void addInfoLabels() {
     Label w = getLabel("Only do this if you're sure the NP_ID column is correct.");
     add(w);
     add(getLabel("Otherwise you may end up with lots of duplicate items that will need to be removed one-by-one."));
@@ -105,9 +134,6 @@ public class UploadViewBase extends DivWidget {
     label = getLabel("So please be patient.");
     label.setType(IMPORTANT);
     add(label);
-    mainForm.addStyleName("topFiveMargin");
-    add(mainForm);
-    //	initWidget(mainForm);
   }
 
   @NotNull
@@ -118,7 +144,7 @@ public class UploadViewBase extends DivWidget {
     return w;
   }
 
-  private void addHidden(int projectID) {
+  protected void addHidden(int projectID) {
     String pidVal = Integer.toString(projectID);
     fields.add(new Hidden(PROJECT_ID, pidVal));
     fields.add(new Hidden("user-id", "" + user));
@@ -126,7 +152,7 @@ public class UploadViewBase extends DivWidget {
 
   private void addFormFields(Fieldset fields) {
     initUploadBox();
-    new BasicDialog().addControlGroupEntry(fields, "Upload File", uploadBox, "Choose an excel file.");
+    new BasicDialog().addControlGroupEntry(fields, "Upload File", uploadBox, getHint());
   }
 
   private void initUploadBox() {
@@ -141,8 +167,9 @@ public class UploadViewBase extends DivWidget {
    * @param element
    */
   private void setAcceptOnInput(Element element) {
-    element.setAttribute("accept", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    element.setAttribute("accept", getAcceptValue());
   }
+
 
   private DialogHelper dialogHelper;
 
@@ -152,7 +179,7 @@ public class UploadViewBase extends DivWidget {
       protected void afterGotYes(Button closeButton) {
       }
     };
-    dialogHelper.show("Upload excel file to Domino", this, new DialogHelper.CloseListener() {
+    dialogHelper.show(getDialogTitle(), this, new DialogHelper.CloseListener() {
       @Override
       public boolean gotYes() {
 
@@ -172,6 +199,7 @@ public class UploadViewBase extends DivWidget {
     }, 400, WIDTH);
   }
 
+
   private boolean validateAndWarn() {
     boolean uploadSuccess = true;//validateFileUpload();
 //		if (uploadSuccess) {
@@ -179,9 +207,6 @@ public class UploadViewBase extends DivWidget {
 //		}
     return uploadSuccess;
   }
-
-  private static final String[] EXCEL_TYPES =
-      {"xlsx", "xls"};
 
   private void addMainFormSubmitHandler() {
     mainForm.addSubmitHandler(event -> {
@@ -201,7 +226,7 @@ public class UploadViewBase extends DivWidget {
     // we can get the result text here (see the FormPanel documentation for
     // further explanation).
     String results = event.getResults();
-    logger.info("handleSubmitComplete got " + results);
+    // logger.info("handleSubmitComplete got " + results);
 
     if (results != null) {
       if (results.startsWith("<pre>")) results = results.substring("<pre>".length());
@@ -260,7 +285,7 @@ public class UploadViewBase extends DivWidget {
    * @see #showModal
    */
   private void submitForm() {
-    logger.info("submitForm -- ");
+    //   logger.info("submitForm -- ");
     // String pidVal = Integer.toString(getState().getCurrentProject().getId());
     // fields.add(new Hidden(PROJECT_ID, "" + projectID));
     //fields.add(new Hidden(AttachmentUpload.ATT_TYPE_PNM, getRequiredAttachmentType().name()));
@@ -276,7 +301,7 @@ public class UploadViewBase extends DivWidget {
     public int num; // Returned for document attachments.
     //
 //		public final int attId; // Returned for project/exam attachments
-    public String errMsg;
+    String errMsg;
 
     UploadResult(boolean success) {
       this.success = success;
@@ -321,7 +346,7 @@ public class UploadViewBase extends DivWidget {
 
     }
 
-    public void inform() {
+    void inform() {
       new DialogHelper(false).showErrorMessage("Import Complete!", success ? "Imported " + num + " items" : "Failed to import : " + errMsg);
     }
   }

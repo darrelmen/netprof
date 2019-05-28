@@ -33,12 +33,6 @@ import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
 
 public interface ITurnMarking extends ISimpleTurnMarking {
-  /**
-   * @return
-   */
- // void makeVisible();
-
-
   void addFloatLeft(Widget w);
 
   boolean shouldAddFloatLeft();

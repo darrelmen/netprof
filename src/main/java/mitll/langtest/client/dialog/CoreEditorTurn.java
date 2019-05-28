@@ -209,7 +209,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
         String eng = englishEditableTurnHelper.getContent();
         if (!eng.equals(engprev)) {
           engprev = eng;
-          maybeCreateFirst(s, false, true);
+          maybeCreateFirst(s, true, true);
         } else {
           // logger.warning("deal with making a new ex");
           coreVocabEditor.gotForward(this);
@@ -233,10 +233,10 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
         @Override
         public void onSuccess(DialogExChangeResponse result) {
           if (result.getChanged().isEmpty()) {
-            logger.warning("huh? didn't add");
+            logger.warning("maybeCreateFirst huh? didn't add");
           } else {
-//            exercise = result.getChanged().get(0);
-//            if (DEBUG) logger.info("ex now " + exercise + " move turn to next " + moveToNextTurn);
+            exercise = result.getChanged().get(0);
+            if (DEBUG) logger.info("maybeCreateFirst ex now " + exercise + " move turn to next " + moveToNextTurn);
 
             if (isEnglish) {
               updateEnglish(moveToNextTurn);
@@ -331,7 +331,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       @Override
       public void onSuccess(Boolean result) {
         // showOOVResult(result);
-        logger.info("updateEnglishText OK, update was " + result);
+        logger.info("updateEnglishText OK, update was " + result + " move to next " +moveToNextTurn);
         //coreVocabEditor.setHighlights();
         if (moveToNextTurn) {
           coreVocabEditor.gotForward(outer);

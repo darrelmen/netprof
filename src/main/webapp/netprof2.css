@@ -2354,17 +2354,17 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
 
 .opacity-target {
     animation-name: opacity;
-    animation-duration: 1s;
+    animation-duration: 0.5s;
 }
 
 @keyframes opacity {
-    0%   {opacity: 0;}
+    0%   {opacity: 0.1;}
     100% {opacity: 1;}
 }
 
 .opacity-out-target {
      animation-name: opacity-out;
-     animation-duration: 1s;
+     animation-duration: 0.5s;
  }
 
 @keyframes opacity-out {

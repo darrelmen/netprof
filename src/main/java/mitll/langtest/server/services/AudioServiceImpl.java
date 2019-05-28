@@ -55,6 +55,7 @@ import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectHelper;
 import mitll.langtest.server.domino.AudioCopy;
+import mitll.langtest.server.domino.ExcelUpload;
 import mitll.langtest.server.scoring.JsonScoring;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
@@ -197,7 +198,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   @Override
   protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     ServletRequestContext ctx = new ServletRequestContext(request);
-    //  String contentType = ctx.getContentType();
+    String contentType = ctx.getContentType();
     //  String requestType = getRequestType(request);
 //    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
     if (ctx.getContentType() != null && ctx.getContentType().equalsIgnoreCase(APPLICATION_WAV)) {
@@ -219,7 +220,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 //        db.getProjectManagement().getFileUploadHelper().doUploadInfoResponse(response, uploadInfo);
 //      }
     } else {
-      super.service(request, response);
+      //  String requestType = getRequestType(request);
+//    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
+      if (contentType != null && contentType.contains("multipart/form-data")) {
+        //reportOnHeaders(request);
+        new ExcelUpload().doExcelUpload(request, response, this, db.getProjectManagement());
+      } else {
+        super.service(request, response);
+      }
     }
   }
 
@@ -1278,12 +1286,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
-   * @see mitll.langtest.client.dialog.EditorTurn#updateText(String, EditorTurn, int, boolean)
    * @param projid
    * @param exid
    * @param text
    * @return
    * @throws DominoSessionException
+   * @see mitll.langtest.client.dialog.EditorTurn#updateText(String, EditorTurn, int, boolean)
    */
   @Override
   public OOVWordsAndUpdate isValid(int projid, int exid, String text) throws DominoSessionException {
@@ -1302,7 +1310,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
       OOVWordsAndUpdate oovWordsAndUpdate = new OOVWordsAndUpdate(false, valid, project.getModelType() == ModelType.HYDRA);
 
-      logger.info("isValid : Sending " +oovWordsAndUpdate);
+      logger.info("isValid : Sending " + oovWordsAndUpdate);
       return oovWordsAndUpdate;
     }
   }

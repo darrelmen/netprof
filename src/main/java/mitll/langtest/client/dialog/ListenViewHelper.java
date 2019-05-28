@@ -262,7 +262,6 @@ public class ListenViewHelper<T extends ITurnPanel>
   protected void addTurnForEachExercise(DivWidget rowOne, String left, String right, List<ClientExercise> exercises) {
     super.addTurnForEachExercise(rowOne, left, right, exercises);
     populateColumnTurnLists();
-
   }
 
   private void populateColumnTurnLists() {

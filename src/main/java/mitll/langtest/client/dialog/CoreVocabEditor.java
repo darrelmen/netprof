@@ -55,9 +55,13 @@ import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.UNK;
 public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
     implements IFocusable, IEditableTurnContainer<CoreEditorTurn>, ITurnContainer<CoreEditorTurn> {
   private final Logger logger = Logger.getLogger("CoreVocabEditor");
-  private static final boolean DEBUG_BLUR = false;
+
+  private static final int LEFT_WIDTH = 55;
 
   private final boolean isInModal;
+
+  private static final boolean DEBUG_BLUR = false;
+
 
   public CoreVocabEditor(ExerciseController controller, INavigation.VIEWS thisView, IDialog theDialog) {
     super(controller, thisView);
@@ -112,12 +116,12 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
       leftHelper.setDialog(dialog);
       this.leftHelper = leftHelper;
       DivWidget turns = leftHelper.getTurns(dialog);
-      turns.setWidth("60%");
+      turns.setWidth(LEFT_WIDTH + "%");
       leftRight.add(turns);
     }
 
     DivWidget coreVocabTurns = super.getTurns(dialog);
-    coreVocabTurns.setWidth("40%");
+    coreVocabTurns.setWidth((100 - LEFT_WIDTH) + "%");
     styleTurnContainer(coreVocabTurns);
     leftRight.add(coreVocabTurns);
 
@@ -127,7 +131,6 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   void setHighlights() {
     Set<String> allText = new HashSet<>();
     getAllTurns().forEach(turn -> allText.add(turn.getContent()));
-//    leftHelper.getAllTurns().forEach(SimpleTurn::restoreText);
 
     //  logger.info("core " +allText);
     leftHelper.getAllTurns().forEach(turn -> {
@@ -143,8 +146,21 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
       protected void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
         rowOne.clear();
         List<ClientExercise> exercises = dialog.getExercises();
+
+        exercises.forEach(ex -> logger.info("ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
+
+        if (dialog.getKind() == DialogType.INTERPRETER) {
+          exercises = exercises.stream().filter(exercise -> exercise.getSpeaker().equalsIgnoreCase("Interpreter")).collect(Collectors.toList());
+          exercises.forEach(ex -> logger.info("after ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
+        } else {
+          exercises = exercises.stream().filter(exercise -> exercise.getSpeaker().equalsIgnoreCase("B")).collect(Collectors.toList());
+        }
+
+
         exercises = exercises.stream().filter(exercise ->
-            !exercise.hasEnglishAttr() && !exercise.getForeignLanguage().isEmpty()).collect(Collectors.toList());
+            !exercise.hasEnglishAttr() &&
+                !exercise.getForeignLanguage().isEmpty()).collect(Collectors.toList());
+
         addTurnForEachExercise(rowOne, left, right, exercises);
       }
 
@@ -172,6 +188,10 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
     };
   }
 
+  /**
+   * @param editorTurn
+   * @see CoreEditorTurn#gotPlus()
+   */
   @Override
   public void addTurnForSameSpeaker(CoreEditorTurn editorTurn) {
     int exID = editorTurn.getExID();
@@ -227,10 +247,10 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   private void addTurns(IDialog updated, List<ClientExercise> changed, int index, DivWidget turnContainer, int exid) {
     this.setDialog(updated);
 
-    for (ClientExercise clientExercise : changed) {
-      CoreEditorTurn turn = addTurn(turnContainer, clientExercise, UNK, UNK, index);
-      turn.addStyleName("opacity-target");
-    }
+    changed.forEach(clientExercise -> addTurn(turnContainer, clientExercise, UNK, UNK, index).addStyleName("opacity-target"));
+//    for (ClientExercise clientExercise : changed) {
+//      addTurn(turnContainer, clientExercise, UNK, UNK, index).addStyleName("opacity-target");
+//    }
     makeNextTheCurrentTurn(getNextTurn(exid));
   }
 
@@ -240,7 +260,6 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   @Override
   public void grabFocus() {
     //if (!getAllTurns().isEmpty()) getAllTurns().iterator().next().grabFocus();
-
     if (getCurrentTurn() != null) {
       // logger.info("give focus to turn for ex #" + getCurrentTurn().getExID());
       getCurrentTurn().grabFocus();

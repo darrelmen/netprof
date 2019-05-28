@@ -617,7 +617,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   /**
    * Having any of the required permissions allows you access to the dialog editor.
    *
-   *
    * @param visible
    * @see #reflectPermissions
    */
@@ -626,12 +625,23 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     boolean hasProjectChoice = hasProject && controller.getProjectID() != -1;
     dialognav.setVisible(visible && hasProjectChoice && controller.getMode() == ProjectMode.DIALOG);
 
-  //  logger.info("setDialogNavVisible dialog nav " + dialognav.isVisible());
+    //  logger.info("setDialogNavVisible dialog nav " + dialognav.isVisible());
+
+    boolean showDialogEditor = shouldShowDialogEditor();
 
     NavLink widgets = viewToLink.get(DIALOG_EDITOR);
     if (widgets != null) {
-      widgets.setVisible(shouldShowDialogEditor());
+      widgets.setVisible(showDialogEditor);
     }
+    widgets = viewToLink.get(TURN_EDITOR);
+    if (widgets != null) {
+      widgets.setVisible(showDialogEditor);
+    }
+    widgets = viewToLink.get(CORE_EDITOR);
+    if (widgets != null) {
+      widgets.setVisible(showDialogEditor);
+    }
+
 //    logger.info("setDialogNavVisible dialog nav " + dialognav.isVisible());
   }
 
