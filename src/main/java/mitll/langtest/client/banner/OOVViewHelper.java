@@ -137,6 +137,7 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     addOOVList(outer);
   }
 
+
   private void updateOOV() {
     List<OOV> dirtyItems = getDirtyItems();
     if (!dirtyItems.isEmpty()) {
@@ -647,7 +648,10 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     OOVMemoryItemContainer() {
       super(OOVViewHelper.this.controller, "oov", OOV, 10, 10);
     }
-
+    @Override
+    protected int getNumTableRowsGivenScreenHeight() {
+      return 10;
+    }
     @Override
     public void gotClickOnItem(OOV user) {
       super.gotClickOnItem(user);
@@ -801,6 +805,11 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
   private class UnsafeItems extends MemoryItemContainer<Wrapper> {
     UnsafeItems() {
       super(OOVViewHelper.this.controller, "unsafe", ITEMS_WITH_MISSING_WORDS, 10, 10);
+    }
+
+    @Override
+    protected int getNumTableRowsGivenScreenHeight() {
+      return 10;
     }
 
     @Override

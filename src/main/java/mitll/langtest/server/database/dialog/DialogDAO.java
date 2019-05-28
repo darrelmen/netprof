@@ -344,7 +344,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
           exercise = databaseImpl.getExercise(projid, exid);
 
           if (exercise != null) {
-            logger.info("addExercises ex #" + exercise.getID() + " " + exercise.getForeignLanguage() + " -> tokens : " + exercise.getTokens());
+//            logger.info("addExercises ex #" + exercise.getID() + " " + exercise.getForeignLanguage() + " -> tokens : " + exercise.getTokens());
             idToEx.put(exid, exercise = new Exercise(exercise));
           }
         }

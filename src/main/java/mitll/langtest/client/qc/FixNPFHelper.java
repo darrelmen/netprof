@@ -79,6 +79,15 @@ public class FixNPFHelper<T extends CommonShell & ScoredExercise> extends Simple
         bottomRow.addStyleName("centerPractice");
       }
 
+      /**
+       *
+       * @param topRow
+       * @param currentExercisePanel
+       * @param instanceName
+       * @param listHeader
+       * @param footer
+       * @return
+       */
       @Override
       protected PagingExerciseList<T, ClientExercise> makeExerciseList(Panel topRow,
                                                                        Panel currentExercisePanel,

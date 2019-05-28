@@ -136,12 +136,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
 
   public void removeHistoryListener() {
     if (handlerRegistration != null) {
-  //    logger.info("removeHistoryListener " + getInstance());
+      //    logger.info("removeHistoryListener " + getInstance());
       handlerRegistration.removeHandler();
       handlerRegistration = null;
-    }
-    else {
-     // logger.info("didn't remove listener???");
+    } else {
+      // logger.info("didn't remove listener???");
     }
   }
 
@@ -313,7 +312,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
       String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception(historyToken));
       logger.info("setHistoryItem logException stack " + exceptionAsString);
     }
-   // logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' ");
+    // logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' ");
 
     History.newItem(historyToken);
   }
@@ -329,7 +328,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   }
 
   public void loadExercise(int itemID) {
-   // logger.info("loadExercise " + itemID);
+    // logger.info("loadExercise " + itemID);
     pushNewItem(getTypeAheadText(), itemID, new SelectionState().getList());
   }
 
@@ -471,10 +470,12 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    * @param selectionState
    * @param newState
    */
-  private void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
-    if (DEBUG) logger.info("loadFromSelectionState" +
-        "\n\told state " + selectionState.getInfo() +
-        "\n\tnew state " + newState.getInfo());
+  protected void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
+    if (DEBUG) {
+      logger.info("loadFromSelectionState" +
+          "\n\told state " + selectionState.getInfo() +
+          "\n\tnew state " + newState.getInfo());
+    }
 
     loadExercisesUsingPrefix(
         newState.getTypeToSection(),

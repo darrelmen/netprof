@@ -84,7 +84,10 @@ public abstract class PhoneContainerBase extends SimplePagingContainer<PhoneAndS
     this.analysisServiceAsync = analysisServiceAsync;
     this.reqInfo = reqInfo;
   }
-
+  @Override
+  protected int getNumTableRowsGivenScreenHeight() {
+    return 8;
+  }
   @Override
   protected void addSelectionModel() {
     selectionModel = new SingleSelectionModel<>();

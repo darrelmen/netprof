@@ -70,7 +70,10 @@ class PhoneContainer extends PhoneContainerBase implements AnalysisPlot.TimeChan
   protected String getLabel() {
     return SOUND;
   }
-
+//  @Override
+//  protected int getNumTableRowsGivenScreenHeight() {
+//    return 8;
+//  }
   /**
    * @param phoneReport
    * @return

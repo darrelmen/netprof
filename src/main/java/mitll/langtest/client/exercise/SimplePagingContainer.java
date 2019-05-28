@@ -224,6 +224,14 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
     addColumnsToTable();
 
+    {
+      int numRows = getNumTableRowsGivenScreenHeight();
+      logger.info("configureTable size is " + numRows + " " +this.getClass());
+      if (table.getPageSize() != numRows) {
+        table.setPageSize(numRows);
+      }
+    }
+
     table.addRangeChangeHandler(event -> gotRangeChanged(event.getNewRange()));
   }
 
@@ -410,7 +418,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
         table.setVisibleRange(newStart, pageSize);
         return true;
       } else {
-        if (DEBUG_SCROLL) logger.info("nope -");
+        if (DEBUG_SCROLL) logger.info("scrollToVisible nope -");
         table.setVisibleRange(table.getPageStart(), table.getPageSize());
 
         return false;
@@ -419,8 +427,8 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   }
 
   /**
-   * @see ClickablePagingContainer#getVisibleIDs()
    * @return
+   * @see ClickablePagingContainer#getVisibleIDs()
    */
   Range getVisibleRange() {
     return table.getVisibleRange();

@@ -442,9 +442,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     } else {
       logger.info("setInstanceHistory NOT clearing history for instance " + views);
 
-
-      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("views " + views));
-      logger.info("logException stack " + exceptionAsString);
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("views " + views));
+//      logger.info("logException stack " + exceptionAsString);
     }
   }
 

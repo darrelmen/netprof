@@ -36,6 +36,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListFacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ScoredExercise;
@@ -57,6 +58,8 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
   private final Logger logger = Logger.getLogger("PracticeFacetExerciseList");
   private final PracticeHelper<T> practiceHelper;
   private ControlState controlState;
+
+  private static final boolean DEBUG = false;
 
   public PracticeFacetExerciseList(Panel topRow,
                                    Panel currentExercisePanel,
@@ -152,9 +155,9 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
     return practiceHelper == null ? null : practiceHelper.getStatsFlashcardFactory();
   }
 
-  @Override
-  protected void gotRangeChanged() {
-  }
+//  @Override
+//  protected void gotRangeChanged() {
+//  }
 
   @Override
   protected void getVisibleExercises(final Collection<Integer> visibleIDs, final int currentReq) {
@@ -163,6 +166,11 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
 
   @Override
   protected Collection<Integer> getVisibleForDrill(int itemID, Collection<Integer> visibleIDs) {
+    if (DEBUG) {
+      logger.info("getVisibleForDrill " + visibleIDs.size() +
+          " visible ids : " + visibleIDs + " itemID " + itemID);
+    }
+
     if (itemID > 0) {
       visibleIDs = new ArrayList<>();
       visibleIDs.add(itemID);
@@ -172,6 +180,10 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
 
   @Override
   protected void reallyGetExercises(Collection<Integer> visibleIDs, final int currentReq) {
+    if (DEBUG) {
+      logger.info("reallyGetExercises " + visibleIDs.size() + " visible ids : " + visibleIDs + " currentReq " + currentReq);
+    }
+
     if (visibleIDs.isEmpty()) {
       CommonShell currentExercise = getCurrentExercise();
       if (currentExercise != null) {
@@ -188,6 +200,10 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
 
   @Override
   protected void showExercises(final Collection<ClientExercise> result, final int reqID) {
+    if (DEBUG) {
+      logger.info("showExercises " + result.size() + " currentReq " + reqID);
+    }
+
     showOnlySortBox();
     showOnlyOne(result);
   }
@@ -203,8 +219,29 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
    * @see #showExercises
    */
   private void showOnlyOneExercise(Collection<ClientExercise> result) {
+    if (DEBUG) {
+      logger.info("showOnlyOneExercise " + result.size());
+    }
+
     ClientExercise next = result.iterator().next();
-    markCurrentExercise(next.getID());
+    int id = next.getID();
+    if (DEBUG) {
+      logger.info("showOnlyOneExercise id " + id);
+    }
+    markCurrentExercise(id);
     addExerciseWidget(next);
   }
+
+  @Override
+  protected void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
+    loadExercisesUsingPrefix(
+        newState.getTypeToSection(),
+        selectionState.getSearch(),
+        selectionState.getItem(),
+
+        newState.isOnlyWithAudioDefects(),
+        newState.isOnlyDefault(),
+        newState.isOnlyUninspected());
+  }
+
 }

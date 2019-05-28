@@ -83,7 +83,8 @@ import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
 public abstract class FacetExerciseList<T extends CommonShell & Scored, U extends HasID & CommonShell>
     extends HistoryExerciseList<T, U>
     implements ShowEventListener, ChoicesContainer {
-  private final Logger logger = Logger.getLogger("FacetExerciseList");
+  private Logger logger = Logger.getLogger("FacetExerciseList");
+
   /**
    * Try to avoid wrap on the pager text
    */
@@ -161,7 +162,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   /**
    * @see #setPagerRowVisible
    */
-  private final DivWidget pagerAndSortRow;
+  private DivWidget pagerAndSortRow;
   private DivWidget showAndDownload;
 
   private List<String> typeOrder;
@@ -194,6 +195,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   private final INavigation.VIEWS views;
   private final String pageSizeSelected;
   private final String visibleItemStorage;
+  private Panel secondRow;
+
+  private boolean finished;
+  private ListBox sortBoxReally;
+  private ListSorting<T, U> listSorting;
 
   /**
    * @param secondRow             add the section panel to this row
@@ -217,11 +223,27 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     sectionPanel = new DivWidget();
     sectionPanel.getElement().setId("sectionPanel_" + getInstance());
     sectionPanel.addStyleName("rightFiveMargin");
+    this.secondRow = secondRow;
+    this.listHeader = listHeader;
 
+    //  addComponents(secondRow, controller, listHeader);
+
+    // TODO : don't do it - will keep around reference to dead components.
+    // so for instance if in TwoColumnExercisePanel there's an addList, removeList, newList
+    downloadHelper = new DownloadHelper();
+    LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> downloadHelper.showDialog(controller.getHost(), this));
+  }
+
+  @Override
+  public void addComponents() {
+    super.addComponents();
+    addComponents(secondRow, controller, listHeader);
+    //   logger.info("addComponents!");
+  }
+
+  protected void addComponents(Panel secondRow, ExerciseController controller, DivWidget listHeader) {
     secondRow.add(sectionPanel);
     setUnaccountedForVertical(0);
-
-    downloadHelper = new DownloadHelper();
 
     DivWidget breadRow = getBreadcrumbRow();
     // Todo : add this?
@@ -231,14 +253,10 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       listHeader.add(breadRow);
       listHeader.add(pagerAndSortRow = getPagerAndSort(controller));
       listHeader.setWidth("100%");
-      this.listHeader = listHeader;
+      //this.listHeader = listHeader;
     }
     // addPrevNextPage(footer);
     finished = true;
-
-    // TODO : don't do it - will keep around reference to dead components.
-    // so for instance if in TwoColumnExercisePanel there's an addList, removeList, newList
-    LangTest.EVENT_BUS.addHandler(DownloadEvent.TYPE, authenticationEvent -> downloadHelper.showDialog(controller.getHost(), this));
   }
 
   public String getListName(int userListID) {
@@ -390,6 +408,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   private int getChosenPageIndex() {
     int pageIndex = getPageIndex();
+//    if (logger == null) {
+//      logger = Logger.getLogger("FacetExerciseList");
+//    }
 //    logger.info("getChosenPageIndex pageIndex " + pageIndex);
     return pageIndex == -1 ? getPageSizeChoiceValues().indexOf(getFirstPageSize()) : pageIndex;
   }
@@ -406,11 +427,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return controller.getStorage().getInt(pageSizeSelected);
   }
 
-  protected int getVisibleItem() {
+  private int getVisibleItem() {
     return controller.getStorage().getInt(visibleItemStorage);
   }
 
-  protected void setVisibleItem(int item) {
+  private void setVisibleItem(int item) {
     controller.getStorage().setInt(visibleItemStorage, item);
   }
 
@@ -427,9 +448,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     Window.scrollTo(0, 0);
   }
 
-  private final boolean finished;
-  private ListBox sortBoxReally;
-  private ListSorting<T, U> listSorting;
 
   /**
    * @return
@@ -492,7 +510,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
           @Override
           protected int getNumTableRowsGivenScreenHeight() {
             int pageSize = getChosenPageSize();
-            //     logger.info("getNumTableRowsGivenScreenHeight " + pageSize + " vs " + numToShow);
+//            if (logger == null) {
+//              logger = Logger.getLogger("FacetExerciseList");
+//
+//            }
+//            logger.info("getNumTableRowsGivenScreenHeight " + pageSize);
             return pageSize;
           }
         };
@@ -502,7 +524,12 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return pagingContainer;
   }
 
-  protected void gotRangeChanged() {
+  private void gotRangeChanged() {
+    logger.info("gotRangeChanged");
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("gotRangeChanged"));
+//    logger.info("logException stack " + exceptionAsString);
+
     askServerForExercise(-1);
   }
 
@@ -1468,6 +1495,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   protected void pushFirstSelection(int exerciseID, String searchIfAny) {
     updateDownloadLinks();
+    logger.info("pushFirstSelection " + exerciseID + " : " + searchIfAny);
     askServerForExercise(exerciseID);
   }
 
@@ -1477,11 +1505,89 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   @Override
   public void flushWith(Comparator<T> comparator) {
-    //  logger.info("flushWith ");
+    logger.info("flushWith ");
     super.flushWith(comparator);
     askServerForExercise(-1);
   }
 
+ /* @Override
+  public void onResize() {
+    if (!pagingContainer.onResize(getCurrentExercise())) {
+    }
+    didntResize();
+  }*/
+
+
+//  protected Set<Integer> justRequested = new HashSet<>();
+
+  @Override
+  protected void didntResize() {
+    int remembered = getVisibleItem();
+
+    if (!pagingContainer.getIdToExercise().containsKey(remembered)) {
+      setVisibleItem(-1);
+      remembered = -1;
+    }
+    if (DEBUG) logger.info("didntResize remembered " + remembered);
+    askServerForExercise(remembered);
+  }
+
+  protected void goToFirst(String searchIfAny, int exerciseID) {
+/*    if (listOptions.isShowFirstNotCompleted()) {
+      logger.info("goToFirst IGNORING " + exerciseID + " searchIfAny '" + searchIfAny + "'");
+      // loadFirstExercise(searchIfAny);
+    } else {
+      int remembered = getVisibleItem();
+
+      if (exerciseID == -1 && searchIfAny.isEmpty()) {
+        if (remembered > 0) {
+          logger.info("goToFirst skip go to first " + remembered + " vs " + exerciseID);
+//          super.goToFirst(searchIfAny, remembered);
+        }
+      } else {
+
+        logger.info("goToFirst skip 2 go to first " + remembered + " vs " + exerciseID + " did " + didChange);
+        //    didntResize();
+        //super.goToFirst(searchIfAny, exerciseID);
+
+        Collection<Integer> visibleIDs = pagingContainer.getVisibleIDs();
+        if (visibleIDs.contains(remembered)) {
+          logger.info("goToFirst remembered " + remembered + " in " + visibleIDs);
+
+        }
+      }
+    }*/
+  }
+
+  private boolean didChange = false;
+
+  @Override
+  public boolean markCurrentExercise(int itemID) {
+    boolean b = pagingContainer.markCurrentExercise(itemID);
+    didChange = b;
+    //if (!b) askServerForExercise(itemID);
+    return b;
+  }
+
+  @Override
+  protected void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
+    int item = newState.getItem();
+    int remembered = getVisibleItem();
+    if (DEBUG) logger.info("loadFromSelectionState item " + item + " vs remembered '" + remembered + "'");
+    if (remembered != item) {
+      boolean found = pagingContainer.getIdToExercise().containsKey(remembered);
+      if (DEBUG) {
+        logger.info("loadFromSelectionState 2 item " + item +
+            " vs remembered '" + remembered + "' : " + found + " in " + pagingContainer.getIdToExercise().size());
+      }
+      if (found || pagingContainer.getIdToExercise().isEmpty()) {
+        newState.setItem(remembered);
+      }
+      super.loadFromSelectionState(selectionState, newState);
+    } else {
+      super.loadFromSelectionState(selectionState, newState);
+    }
+  }
 
   /**
    * Remembers the first visible item and then if the initial item is not that, will
@@ -1496,39 +1602,65 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see ExerciseList#checkAndAskServer
    */
   protected void askServerForExercise(int itemID) {
-    if (itemID > 0) {
+    //boolean askForExercises = true;
+
+//    if (DEBUG) {
+//      logger.warning("askServerForExercise got " + getExceptionAsString(new Exception("ask for " + itemID)));
+//    }
+
+/*    if (itemID > 0) {
       int remembered = getVisibleItem();
-//      logger.info("askServerForExercise " + itemID + " vs " + remembered);
 
       if (remembered > 0) {
+        logger.info("askServerForExercise 1 " + itemID + " vs " + remembered);
         boolean didIt = pagingContainer.markCurrentExercise(remembered);
         if (!didIt) {
           setVisibleItem(-1);
+          logger.info("askServerForExercise 2 " + itemID + " vs " + remembered);
           pagingContainer.markCurrentExercise(itemID);
+        } else {
+          //   marked = true;
         }
       } else {
+        logger.info("askServerForExercise 3 " + itemID + " vs " + remembered);
         pagingContainer.markCurrentExercise(itemID);
       }
-    }
+    }*/
 
     Collection<Integer> visibleIDs = pagingContainer.getVisibleIDs();
 
     if (itemID <= 0) {
       if (!visibleIDs.isEmpty()) {
         Integer firstVisible = visibleIDs.iterator().next();
-//        int remembered = getVisibleItem();
-//        logger.info("askServerForExercise firstVisible " + firstVisible + " vs " + remembered);
+        int remembered = getVisibleItem();
+        if (DEBUG) logger.info("askServerForExercise 4 firstVisible " + firstVisible + " vs " + remembered);
         setVisibleItem(firstVisible);
       }
+      // askForExercises = true;
     }
 
     if (visibleIDs.isEmpty()) {
       if (DEBUG) logger.info("askServerForExercise skipping empty visible range?");
     } else {
-      if (DEBUG) logger.info("askServerForExercise visible ids = " + visibleIDs);
+      if (DEBUG) logger.info("askServerForExercise visible ids = " + visibleIDs + " item " + itemID);
 
+ /*     Widget widget = innerContainer.getWidget();
+      if (widget == null) {
+        logger.info("askServerForExercise NO inner ");
+        //     askForExercises = true;
+      } else {
+        logger.info("askServerForExercise inner " + widget.getClass());
+      }*/
+//      if (justRequested.containsAll(visibleIDs)) {
+//        logger.info("askServerForExercise don't ask again for same visible ids");
+//        askForExercises = false;
+//      }
+      //if (askForExercises) {
 //      logger.warning("askServerForExercise got " + getExceptionAsString(new Exception()));
       askServerForVisibleExercises(itemID, visibleIDs, incrReq());
+      // } else {
+      //   logger.info("askServerForExercise skip " + visibleIDs + " since marked...");
+      //}
     }
   }
 
@@ -1647,7 +1779,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   protected void checkAndGetExercises(Collection<Integer> visibleIDs, int currentReq) {
     if (isCurrentReq(currentReq)) {
-      if (DEBUG) logger.info("getVisibleExercises  req " + currentReq + " vs current " + getCurrentExerciseReq());
+      if (DEBUG) {
+        logger.info("getVisibleExercises  req " + currentReq + " vs current " + getCurrentExerciseReq());
+      }
       reallyGetExercises(visibleIDs, currentReq);
     } else {
       logger.warning("getVisibleExercises skip stale req " + currentReq + " vs current " + getCurrentExerciseReq());
@@ -1673,9 +1807,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       if (DEBUG) logger.info("reallyGetExercises no req for " + alreadyFetched.size());
       gotFullExercises(currentReq, alreadyFetched);
     } else {
-/*      logger.info("reallyGetExercises make" +
+      logger.info("reallyGetExercises make" +
           "\n\treq for " + requested +
-          "\n\tvisible " + visibleIDs);*/
+          "\n\tvisible " + visibleIDs);
 
       if (isThereALoggedInUser()) {
         getFullExercises(visibleIDs, currentReq, requested, alreadyFetched);
@@ -2015,7 +2149,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
             final int reqid = next.getReq();
             if (isCurrentReq(reqid)) {
               Scheduler.get().scheduleDeferred(() -> {
-            //    logger.info("schedule later...");
+                //    logger.info("schedule later...");
                 if (isCurrentReq(reqid)) {
                   getRefAudio(iterator);
                 } else {
@@ -2221,7 +2355,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
 
   /**
    * @param toRemember
-   * @see PagingExerciseList#rememberExercises
+   * @see ExerciseList#rememberExercises
    */
   protected List<T> resort(List<T> toRemember) {
     List<T> commonShells = new ArrayList<>(toRemember);
@@ -2231,6 +2365,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
 
   @Override
   public void gotShow() {
+    logger.info("gotShow ");
     askServerForExercise(-1);
   }
 

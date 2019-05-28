@@ -117,7 +117,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends HasID> imp
         listHeader, footer);
     npfExerciseList = widgets;
 
-  //  addThirdColumn(bottomRow);
+    //  addThirdColumn(bottomRow);
 
     if (npfExerciseList == null) {
       logger.warning("huh? exercise list is null for " + instanceName + " and " + userListID);
@@ -234,7 +234,9 @@ public abstract class FlexListLayout<T extends CommonShell, U extends HasID> imp
         listHeader, footer);
     exerciseList.setUserListID(userListID);
     exerciseList.setFactory(getFactory(exerciseList));
-    Scheduler.get().scheduleDeferred(exerciseList::onResize);
+    exerciseList.addComponents();
+    //Scheduler.get().scheduleDeferred(exerciseList::onResize);
+   // exerciseList.onResize();
     return exerciseList;
   }
 

@@ -123,7 +123,7 @@ public interface ListInterface<T extends HasID, U extends HasID> extends Require
 
   int getIndex(int currentID);
 
-  void markCurrentExercise(int id);
+  boolean markCurrentExercise(int id);
 
   void gotClickOnItem(T newExercise);
 

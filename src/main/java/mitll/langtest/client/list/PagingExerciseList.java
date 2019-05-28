@@ -81,7 +81,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
                      ListOptions listOptions) {
     super(currentExerciseVPanel, factory, controller, listOptions);
     this.waitCursorHelper = new WaitCursorHelper();
-    addComponents();
+//    addComponents();
     // getElement().setId("PagingExerciseList_" + getInstance());
   }
 
@@ -91,20 +91,6 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
     return pagingContainer.getIdToExercise();
   }
 
-  /**
-   * @param comp
-   * @see ListSorting#sortBy
-   */
- /* void sortBy(Comparator<T> comp) {
-    if (DEBUG) logger.info("start - sortBy ");
-    scheduleWaitTimer();
-
-    pagingContainer.sortBy(comp);
-    loadFirst();
-
-    showFinishedGettingExercises();
-    if (DEBUG) logger.info("end  - sortBy ");
-  }*/
   public void loadFirst() {
     pushFirstSelection(getFirstID(), getTypeAheadText());
   }
@@ -118,7 +104,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    *
    * @see #PagingExerciseList
    */
-  private void addComponents() {
+  public void addComponents() {
     ClickablePagingContainer<T> pagingContainer = makePagingContainer();
     pagingContainer.setContainerList(this);
     addTableWithPager(pagingContainer);
@@ -186,7 +172,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    */
   public void setUnaccountedForVertical(int v) {
     unaccountedForVertical = v;
-    pagingContainer.setUnaccountedForVertical(v);
+    // pagingContainer.setUnaccountedForVertical(v);
     //logger.info("setUnaccountedForVertical : vert " + v + " for " +getElement().getExID());
   }
 
@@ -322,12 +308,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
   }
 
   public void clear() {
-   // logger.info(getInstance() + " : clear");
+    // logger.info(getInstance() + " : clear");
     pagingContainer.clear();
   }
 
   private void flush() {
-   // logger.info(getInstance() + " : flush");
+    // logger.info(getInstance() + " : flush");
     pagingContainer.flush();
     onResize();
   }
@@ -351,11 +337,12 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
    * A little complicated -- if {@link #doShuffle} is true, shuffles the exercises
    *
    * @param toRemember
+   * @param currentID
    * @see ExerciseList#rememberAndLoadFirst
    * @see #simpleSetShuffle
    */
   @Override
-  public List<T> rememberExercises(List<T> toRemember) {
+  public List<T> rememberExercises(List<T> toRemember, int currentID) {
     inOrderResult = toRemember;
 
 //    logger.info(getInstance() + " : rememberExercises " + toRemember.size() + " items");
@@ -372,7 +359,18 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
     clear();
     toRemember.forEach(this::addExercise);
 
-    flush();
+    if (currentID != -1) {
+      if (DEBUG) logger.info("rememberExercises mark " + currentID);
+      pagingContainer.flush();
+      if (!markCurrentExercise(currentID)) {
+        if (DEBUG) logger.info("rememberExercises YES flush for  " + currentID);
+        flush();
+      } else {
+        if (DEBUG) logger.info("rememberExercises no flush for  " + currentID);
+      }
+    } else {
+      flush();
+    }
     return toRemember;
   }
 
@@ -423,7 +421,7 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
 
   /**
    * @param es
-   * @see ExerciseList#rememberExercises(List)
+   * @see ExerciseList#rememberExercises(List, int)
    */
   @Override
   public void addExercise(T es) {
@@ -456,17 +454,24 @@ public abstract class PagingExerciseList<T extends CommonShell, U extends HasID>
 
   @Override
   public void onResize() {
-    pagingContainer.onResize(getCurrentExercise());
+    //  logger.info("onResize = ");
+    if (!pagingContainer.onResize(getCurrentExercise())) {
+      didntResize();
+    }
+  }
+
+  protected void didntResize() {
   }
 
   /**
    * Scrolls container to visible range, if needed.
    *
    * @param itemID
+   * @return
    * @see #showExercise
    */
-  public void markCurrentExercise(int itemID) {
-    pagingContainer.markCurrentExercise(itemID);
+  public boolean markCurrentExercise(int itemID) {
+    return pagingContainer.markCurrentExercise(itemID);
   }
 
   public void setUserListID(int userListID) {
