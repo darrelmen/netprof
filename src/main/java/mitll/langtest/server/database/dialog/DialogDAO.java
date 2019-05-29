@@ -278,7 +278,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     addCoreVocabNoSort(dialogIDToCoreRelated.get(dialogID), project, dialog);
 
     // add images
-    addImage(projid, dialog);
+    addImage(dialog);
   }
 
   private Collection<SlickDialog> getByProjID(int projid) {
@@ -405,17 +405,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
   /**
    * TODO: For now, don't do a check for existences for images
    *
-   * @param projid
    * @param dialog
    */
-  private void addImage(int projid, Dialog dialog) {
-    //List<SlickImage> all = databaseImpl.getImageDAO().getByID(projid);
-//    logger.warn("addImage got " + all.size());
-
-    //  Map<Integer, String> idToImageRef = new HashMap<>();
-    //  all.forEach(slickImage -> idToImageRef.put(slickImage.id(), slickImage.filepath()));
-    //  logger.warn("idToImageRef got " + idToImageRef.size());
-    int imageid = dialog.getImageid();//dialog.getSlickDialog().imageid();
+  private void addImage(Dialog dialog) {
+    int imageid = dialog.getImageid();
     if (imageid < 1) {
       // logger.warn("addImage no image for dialog " + dialog.getID() + " : " + dialog.getForeignLanguage());
     } else {
@@ -429,11 +422,22 @@ public class DialogDAO extends DAO implements IDialogDAO {
         String audioBaseDir = databaseImpl.getServerProps().getAudioBaseDir();
 
         boolean b = s.startsWith(audioBaseDir);
-        if (!b) logger.error("addImage Expecting " + s + " to start with " + audioBaseDir);
+        if (!b) {
+          logger.warn("addImage Expecting " + s + " to start with " + audioBaseDir);
+          audioBaseDir = "/opt/dialog";
+          b = s.startsWith(audioBaseDir);
+        }
+
+        if (!b) {
+          logger.error("addImage Expecting " + s + " to start with " + audioBaseDir);
+        }
 
         if (b) { // may not be true for legacy images...
-          s = s.substring(audioBaseDir.length() - 1);
+          s = s.substring(audioBaseDir.length());
           logger.info("addImage image ref now " + s);
+        } else {
+          logger.info("addImage no truncation : image ref now " + s);
+
         }
 
         dialog.getMutable().setImageRef(s);
