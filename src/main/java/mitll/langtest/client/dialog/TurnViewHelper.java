@@ -74,7 +74,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
   private static final String ENGLISH_SPEAKER = "English Speaker";
 
-  private static final String INTERPRETER = "Interpreter";
+  static final String INTERPRETER = "Interpreter";
   static final String SPEAKER_A = "A";
   static final String SPEAKER_B = "B";
   private static final int INTERPRETER_WIDTH = 165;//235;
@@ -619,7 +619,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   protected void addTurnForEachExercise(DivWidget rowOne, String left, String right, List<ClientExercise> exercises) {
     ClientExercise prev = null;
     int index = 0;
-    logger.info("addTurnForEachExercise got " + exercises.size());
+ //   logger.info("addTurnForEachExercise got " + exercises.size());
     for (ClientExercise clientExercise : exercises) {
       ITurnContainer.COLUMNS prevCol = prev == null ? ITurnContainer.COLUMNS.UNK : getColumnForEx(left, right, prev);
       addTurn(rowOne, clientExercise, getColumnForEx(left, right, clientExercise), prevCol, index);
@@ -890,15 +890,19 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return i;
   }
 
+  /**
+   * @see EditorTurn#deleteGotFocus
+   */
   public void moveFocusToNext() {
     T next = getNext();
     if (next != null) {
       logger.info("moveFocusToNext - have " + next.getExID() + " grab focus.");
       next.grabFocus();
-    } else if (!getAllTurns().isEmpty()) {
-      logger.info("moveFocusToNext - to first - let's not!");
-      //getAllTurns().get(0).grabFocus();
     }
+    //else if (!getAllTurns().isEmpty()) {
+     // logger.info("moveFocusToNext - to first - let's not!");
+      //getAllTurns().get(0).grabFocus();
+   // }
   }
 
   int getIndexOfCurrentTurn() {

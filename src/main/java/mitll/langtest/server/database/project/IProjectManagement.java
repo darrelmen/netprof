@@ -170,7 +170,7 @@ public interface IProjectManagement {
 
   ImportResult doDominoImport(int dominoID, File excelFile, Collection<String> typeOrder, int userID);
 
-  ImageResult doImageImport(int projid, String language, int dialogID, FileItem item);
+  ImageResult doImageImport(int projid, String language, int dialogID, FileItem item, String webappName);
 
   OOVInfo checkOOV(int id, int num, int offset);
 

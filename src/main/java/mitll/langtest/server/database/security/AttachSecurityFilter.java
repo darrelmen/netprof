@@ -65,6 +65,7 @@ public class AttachSecurityFilter implements Filter {
   private static final String WAV = ".wav";
   private static final int WAV_LEN = WAV.length();
   public static final String DIALOG = "dialog";
+  public static final String WWW = "www";
 
   private DatabaseServices db;
 
@@ -78,24 +79,28 @@ public class AttachSecurityFilter implements Filter {
 
   public void init(FilterConfig filterConfig) {
     this.servletContext = filterConfig.getServletContext();
+    webappName = getWebappName(servletContext);
 
-    //String contextPath = servletContext.getContextPath();
+    // log.info("webappName " + webappName);
 
-   // log.info("context        '" + contextPath + "'");
-    String realContextPath = servletContext == null ? "" : servletContext.getRealPath(servletContext.getContextPath());
-   // log.info("realContextPath " + realContextPath);
-
-    List<String> pathElements = Arrays.asList(realContextPath.split(realContextPath.contains("\\") ? "\\\\" : "/"));
-   // log.info("pathElements    " + pathElements);
-
-    webappName = pathElements.get(pathElements.size() - 1);
-   // log.info("webappName " + webappName);
-
-    if (!webappName.equalsIgnoreCase(DIALOG) || !webappName.equalsIgnoreCase(NETPROF) || !webappName.equalsIgnoreCase("www")) {
+    if (!webappName.equalsIgnoreCase(DIALOG) || !webappName.equalsIgnoreCase(NETPROF) || !webappName.equalsIgnoreCase(WWW)) {
       log.warn("huh? unexpected : app name is " + webappName);
     }
 
 //    if (DEBUG) log.info("found servlet context " + servletContext);
+  }
+
+  private String getWebappName(ServletContext servletContext) {
+    //String contextPath = servletContext.getContextPath();
+
+    // log.info("context        '" + contextPath + "'");
+    String realContextPath = servletContext == null ? "" : servletContext.getRealPath(servletContext.getContextPath());
+    // log.info("realContextPath " + realContextPath);
+
+    List<String> pathElements = Arrays.asList(realContextPath.split(realContextPath.contains("\\") ? "\\\\" : "/"));
+    // log.info("pathElements    " + pathElements);
+
+    return pathElements.get(pathElements.size() - 1);
   }
 
   @Override
@@ -278,7 +283,7 @@ public class AttachSecurityFilter implements Filter {
     String fileToFind = requestURI.startsWith(ANSWERS) ? requestURI.substring(ANSWERS.length()) : requestURI;
     fileToFind = removeNetprof(fileToFind);
     if (DEBUG) log.info("getUserForFile user for " + fileToFind);
-   // return getUserForWavFile(removeAnswers(fileToFind));
+    // return getUserForWavFile(removeAnswers(fileToFind));
     log.info("getUserForFile checking owner of " + requestURI + " actually " + fileToFind);
     return getUserForWavFile(fileToFind);
   }

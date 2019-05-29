@@ -36,7 +36,7 @@ import java.io.File;
 import java.util.List;
 
 public interface IImageDAO extends IDAO {
-  ImageResult insertAndGetImageID(int projid, String language, File filePath);
+  ImageResult insertAndGetImageID(int projid, String language, String webappName, File filePath);
 
   int insert(int projid, String ref);
   int insert(SlickImage image);

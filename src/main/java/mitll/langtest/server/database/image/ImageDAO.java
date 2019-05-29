@@ -34,6 +34,7 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.dialog.IDialogDAO;
+import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.dialog.DialogStatus;
 import mitll.langtest.shared.dialog.DialogType;
@@ -95,18 +96,35 @@ public class ImageDAO extends DAO implements IImageDAO {
   }
 
   /**
-   * @see mitll.langtest.server.database.project.ProjectManagement#doImageImport(int, String, int, FileItem)
    * @param projid
    * @param language
+   * @param webappName
    * @param filePath
    * @return
+   * @see IProjectManagement#doImageImport(int, String, int, FileItem, String)
    */
-  public ImageResult insertAndGetImageID(int projid, String language, File filePath) {
+  public ImageResult insertAndGetImageID(int projid, String language, String webappName, File filePath) {
     int imageID = -1;
     if (filePath != null) {
       try {
-        String relPath = "images/" + language + "/" + filePath.getName();
-        File path = getAbsoluteAudioFile(relPath);
+        String prefix = "images/" + language;
+
+        if (webappName.equalsIgnoreCase("www")) {
+          webappName = "netprof";
+        }
+
+        String rootDir = "/opt/" + webappName;
+        File absoluteAudioFile = getAbsolute(rootDir, prefix);
+        if (!absoluteAudioFile.exists()) {
+          if (absoluteAudioFile.mkdirs()) logger.info("insertAndGetImageID made image directory " + absoluteAudioFile);
+          else {
+            logger.error("insertAndGetImageID DID NOT make image directory " + absoluteAudioFile);
+          }
+        }
+        String relPath = prefix + "/" + filePath.getName();
+
+        File path = getAbsolute(rootDir, relPath);
+        logger.info("insertAndGetImageID path is " + path.getAbsolutePath());
         FileUtils.copyFile(filePath, path);
         String absolutePath = path.getAbsolutePath();
         imageID = insert(projid, absolutePath);
@@ -121,9 +139,9 @@ public class ImageDAO extends DAO implements IImageDAO {
     return new ImageResult(null, -1);
   }
 
-  public File getAbsoluteAudioFile(String filePath) {
-    return getAbsolute(serverProps.getAudioBaseDir(), filePath);
-  }
+//  public File getAbsoluteAudioFile(String filePath) {
+//    return getAbsolute(serverProps.getAudioBaseDir(), filePath);
+//  }
 
   private File getAbsolute(String realContextPath, String filePath) {
     return new File(realContextPath, filePath);

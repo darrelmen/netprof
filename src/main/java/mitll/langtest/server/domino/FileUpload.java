@@ -59,13 +59,14 @@ public class FileUpload {
    * @param serviceServlet
    * @param projectManagement
    * @param isImage
+   * @param webappName
    * @see mitll.langtest.server.services.AudioServiceImpl#service(HttpServletRequest, HttpServletResponse)
    */
   public void doFileUpload(HttpServletRequest request,
                            HttpServletResponse response,
                            MyRemoteServiceServlet serviceServlet,
                            IProjectManagement projectManagement,
-                           boolean isImage) {
+                           boolean isImage, String webappName) {
     logger.info("doFileUpload : " +
         "\n\tRequest " + request.getQueryString() +
         "\n\tpath    " + request.getPathInfo());
@@ -136,7 +137,7 @@ public class FileUpload {
         Project project = serviceServlet.getProject(projId);
 
         if (isImage) {
-          importImage(response, projectManagement, projId, docImportAttachment, project, dialogID);
+          importImage(response, projectManagement, projId, docImportAttachment, project, dialogID, webappName);
         } else {
           int dominoid = project.getProject().dominoid();
 
@@ -178,8 +179,8 @@ public class FileUpload {
                            IProjectManagement projectManagement,
                            int projId,
                            FileItem docImportAttachment,
-                           Project project, int dialogID) {
-    ImageResult result = projectManagement.doImageImport(projId, project.getLanguage(), dialogID, docImportAttachment);
+                           Project project, int dialogID, String webappName) {
+    ImageResult result = projectManagement.doImageImport(projId, project.getLanguage(), dialogID, docImportAttachment, webappName);
     JsonObject jsonObject = new JsonObject();
     jsonObject.addProperty("Success", true);
     jsonObject.addProperty("Error", "None");

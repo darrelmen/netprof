@@ -59,6 +59,7 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -83,8 +84,8 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private static final int MIN_WARN_DURATION = 1000;
   private static final String LISTS = "Lists";
 
-  private static final String REGEX = " ";  // no break space!
-  private static final String TIC_REGEX = "&#39;";
+//  private static final String REGEX = " ";  // no break space!
+//  private static final String TIC_REGEX = "&#39;";
 
   private static final boolean DEBUG_SEARCH = false;
   private static final boolean DEBUG = false;
@@ -109,12 +110,24 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 //    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
     if (contentType != null && contentType.contains("multipart/form-data")) {
       //reportOnHeaders(request);
-      new FileUpload().doFileUpload(request, response, this, db.getProjectManagement(), false);
+      new FileUpload().doFileUpload(request, response, this, db.getProjectManagement(), false, getWebappName(getServletContext()));
     } else {
       super.service(request, response);
     }
   }
 
+  private String getWebappName(ServletContext servletContext) {
+    //String contextPath = servletContext.getContextPath();
+
+    // log.info("context        '" + contextPath + "'");
+    String realContextPath = servletContext == null ? "" : servletContext.getRealPath(servletContext.getContextPath());
+    // log.info("realContextPath " + realContextPath);
+
+    List<String> pathElements = Arrays.asList(realContextPath.split(realContextPath.contains("\\") ? "\\\\" : "/"));
+    // log.info("pathElements    " + pathElements);
+
+    return pathElements.get(pathElements.size() - 1);
+  }
 
   /**
    * Complicated.

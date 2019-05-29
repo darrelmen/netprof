@@ -1135,14 +1135,15 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     int imageID = dialog.getImageID();
     logger.info("update image id " + imageID);
+    Timestamp modified1 = new Timestamp(modified);
     boolean b = dao.update(new SlickDialog(
         dialog.getID(),
         dialog.getUserid(),
         projid,
         -1,
         imageID,
-        new Timestamp(modified),
-        new Timestamp(modified),
+        modified1,
+        modified1,
         dialog.getUnit(), dialog.getChapter(),
         dialog.getKind().toString(),
         DialogStatus.DEFAULT.toString(),

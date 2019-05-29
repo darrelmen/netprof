@@ -29,6 +29,7 @@
 
 package mitll.langtest.client.dialog;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -59,14 +60,25 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
   private static final int WIDTH_TO_USE = 210;
 
   private static final boolean DEBUG = false;
+  private boolean onlyOneTurn;
 
+  /**
+   * @param controller
+   * @param coreVocabEditor
+   * @param vocab
+   * @param language
+   * @param isInterpreter
+   * @param dialogID
+   * @param onlyOneTurn
+   */
   CoreEditorTurn(ExerciseController<?> controller,
                  CoreVocabEditor coreVocabEditor,
                  ClientExercise vocab,
                  Language language,
                  boolean isInterpreter,
-                 int dialogID) {
+                 int dialogID, boolean onlyOneTurn) {
     super(vocab, ITurnContainer.COLUMNS.RIGHT, false, controller.getLanguageInfo());
+    this.onlyOneTurn = onlyOneTurn;
     this.controller = controller;
     this.coreVocabEditor = coreVocabEditor;
     this.dialogID = dialogID;
@@ -97,6 +109,8 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     englishEditableTurnHelper.setPlaceholder("English Translation...");
   }
 
+  private Button deleteButton;
+
   @Override
   public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
     //logger.info("addWidgets : got '" + exercise.getForeignLanguage() + "' for " + exercise.getID());
@@ -114,7 +128,8 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     add(buttons);
     buttons.addStyleName("inlineFlex");
     buttons.add(turnAddDelete.addAddTurnButton());
-    buttons.add(turnAddDelete.addDeleteButton(false));
+
+    buttons.add(deleteButton = turnAddDelete.addDeleteButton(onlyOneTurn));
     return widgets;
   }
 
@@ -133,6 +148,11 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     coreVocabEditor.deleteCurrentTurnOrPair(this);
   }
 
+  void enableDelete(boolean enable) {
+    //logger.info("enabledDelete " + enable + " on " + getExID());
+    deleteButton.setEnabled(enable);
+  }
+
   /**
    * TODO Move focus to next...
    */
@@ -148,15 +168,11 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
   }
 
   /**
-   * TODO add english
-   *
    * @return
    */
   @NotNull
   private DivWidget getTextBox() {
-    DivWidget textBoxContainer = editableTurnHelper.getTextBox(false);
-    // textBoxContainer.add(getTurnFeedback());
-    return textBoxContainer;
+    return editableTurnHelper.getTextBox(false);
   }
 
   private String prev = "";
@@ -237,6 +253,12 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
           } else {
             exercise = result.getChanged().get(0);
             if (DEBUG) logger.info("maybeCreateFirst ex now " + exercise + " move turn to next " + moveToNextTurn);
+
+            int size = coreVocabEditor.getAllTurns().size();
+          //  logger.info("maybeCreateFirst Got " + size);
+            if (size == 1) {
+              coreVocabEditor.getAllTurns().get(0).enableDelete(true);
+            }
 
             if (isEnglish) {
               updateEnglish(moveToNextTurn);
@@ -331,7 +353,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       @Override
       public void onSuccess(Boolean result) {
         // showOOVResult(result);
-        logger.info("updateEnglishText OK, update was " + result + " move to next " +moveToNextTurn);
+        logger.info("updateEnglishText OK, update was " + result + " move to next " + moveToNextTurn);
         //coreVocabEditor.setHighlights();
         if (moveToNextTurn) {
           coreVocabEditor.gotForward(outer);
@@ -351,7 +373,8 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       builder.append(result.isPossible() ? "No pronunciation for " : "You can't use these words ");
       result.getOov().forEach(oov -> builder.append(oov).append(" "));
       //turnFeedback.setText(builder.toString());
-    } else {
+    }
+    else {
       //turnFeedback.setText("");
     }
   }

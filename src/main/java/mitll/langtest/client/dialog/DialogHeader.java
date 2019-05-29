@@ -74,6 +74,7 @@ public class DialogHeader {
   private static final String SPEAK_HINT = "<b>Speak</b> when you see the record icon.";
   private static final String PRESS_AND_HOLD_HINT = "<b>Press and hold</b> when recording.";
   private static final int ARROW_WIDTH = 190;
+  public static final String DOWNLOAD = "Download";
 
   private final INavigation.VIEWS thisView;
   private final INavigation.VIEWS prev;
@@ -357,9 +358,9 @@ public class DialogHeader {
 
     setMinWidth(buttonDiv, ARROW_WIDTH);
 
-    if (shouldShowDialogEditor(mine) && thisView == CORE_EDITOR) {
-      buttonDiv.add(getEditorButton(CORE_REHEARSE, false));
-    }
+//    if (shouldShowDialogEditor(mine) && thisView == CORE_EDITOR) {
+//      buttonDiv.add(getEditorButton(CORE_REHEARSE, false));
+//    }
 
     return buttonDiv;
   }
@@ -402,9 +403,9 @@ public class DialogHeader {
       buttonDiv.add(getEditorButton(CORE_EDITOR, true));
     }
 
-    if (thisView == LISTEN || thisView == TURN_EDITOR) {
+    if (thisView == LISTEN || thisView == TURN_EDITOR || thisView == CORE_EDITOR) {
       DivWidget widgets = new DivWidget();
-      Anchor download = new Anchor("Download");
+      Anchor download = new Anchor(DOWNLOAD);
       download.addClickHandler(event -> gotDownload());
       download.addStyleName("leftFiveMargin");
       widgets.add(new Image(LANGTEST_IMAGES + "icon-excel.png"));

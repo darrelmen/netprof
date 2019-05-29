@@ -47,6 +47,10 @@ import java.util.stream.Collectors;
 public class Dialog implements IDialog, MutableShell, IMutableDialog {
   private final transient Logger logger = Logger.getLogger("Dialog");
 
+  // TODO : needed?
+  private static final String DIALOG_PNG = "dialog.png";
+  private static final String INTERPRETER_PNG = "interpreter.png";
+
   private static final String SPEAKER = "Speaker".toLowerCase();
   public static final String UNIT = "unit";
   private static final String CHAPTER = "chapter";
@@ -249,7 +253,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     String refToUse = imageRef;
 
     if (refToUse == null || refToUse.isEmpty()) {
-      refToUse = "langtest/cc/" + "dialog.png";
+      refToUse = "langtest/cc/" + (getKind() == DialogType.INTERPRETER ? INTERPRETER_PNG : DIALOG_PNG);
     }
 
     return refToUse;

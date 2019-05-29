@@ -49,11 +49,13 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.CORE_EDITOR;
-import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
+import static mitll.langtest.client.custom.INavigation.VIEWS.CORE_REHEARSE;
 import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.UNK;
 
 public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
     implements IFocusable, IEditableTurnContainer<CoreEditorTurn>, ITurnContainer<CoreEditorTurn> {
+  // public static final String INTERPRETER = "Interpreter";
+  // public static final String B = "B";
   private final Logger logger = Logger.getLogger("CoreVocabEditor");
 
   private static final int LEFT_WIDTH = 55;
@@ -76,7 +78,7 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
 
   @NotNull
   protected INavigation.VIEWS getNextView() {
-    return LISTEN;
+    return CORE_REHEARSE;
   }
 
   @Override
@@ -150,12 +152,18 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
         exercises.forEach(ex -> logger.info("ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
 
         if (dialog.getKind() == DialogType.INTERPRETER) {
-          exercises = exercises.stream().filter(exercise -> exercise.getSpeaker().equalsIgnoreCase("Interpreter")).collect(Collectors.toList());
-          exercises.forEach(ex -> logger.info("after ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
+          exercises = exercises
+              .stream()
+              .filter(exercise ->
+                  exercise.getSpeaker().equalsIgnoreCase(INTERPRETER) || exercise.getSpeaker().equalsIgnoreCase(SPEAKER_B))
+              .collect(Collectors.toList());
+          // exercises.forEach(ex -> logger.info("after ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
         } else {
-          exercises = exercises.stream().filter(exercise -> exercise.getSpeaker().equalsIgnoreCase("B")).collect(Collectors.toList());
+          exercises = exercises
+              .stream()
+              .filter(exercise -> exercise.getSpeaker().equalsIgnoreCase(SPEAKER_B))
+              .collect(Collectors.toList());
         }
-
 
         exercises = exercises.stream().filter(exercise ->
             !exercise.hasEnglishAttr() &&
@@ -204,6 +212,12 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
 
       @Override
       public void onSuccess(DialogExChangeResponse result) {
+        int size = result.getChanged().size();
+        int size1 = allTurns.size();
+        logger.info("addTurnForSameSpeaker changed " + size + " all " + size1);
+        if (size == 1 && size1 == 1) {
+          editorTurn.enableDelete(true);
+        }
         addTurns(result.getUpdated(), result.getChanged(), index + 1, turnContainer, exID);
       }
     });
@@ -234,7 +248,13 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
             if (resp) {
               gotDeleteResponse(Collections.singletonList(exID));
               setHighlights();
-            } else logger.warning("huh?");
+
+              if (getAllTurns().size() == 1) {
+                getAllTurns().get(0).enableDelete(false);
+              }
+            } else {
+              logger.warning("huh?");
+            }
           }
         });
   }
@@ -283,7 +303,8 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
     if (coreVocabulary == null) {
       logger.warning("huh? core vocab is null???");
     } else {
-      coreVocabulary.forEach(clientExercise -> logger.info("Got " + clientExercise.getID() + " " + clientExercise.getForeignLanguage()));
+//      coreVocabulary.forEach(clientExercise -> logger.info("Got " + clientExercise.getID() + " " + clientExercise.getForeignLanguage()));
+
       List<ClientExercise> toUse = coreVocabulary.isEmpty() ? new ArrayList<>() : coreVocabulary;
       if (toUse.isEmpty()) toUse.add(new Exercise());
 
@@ -294,13 +315,14 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   @NotNull
   @Override
   protected CoreEditorTurn reallyGetTurnPanel(ClientExercise clientExercise, ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
+    dialog.getExercises().size();
     return new CoreEditorTurn(
         controller,
         this,
         clientExercise,
         controller.getLanguageInfo(),
         false,
-        getDialogID());
+        getDialogID(), dialog.getExercises().size() == 1);
   }
 
   @Override

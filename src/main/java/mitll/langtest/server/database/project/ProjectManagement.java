@@ -119,13 +119,13 @@ public class ProjectManagement implements IProjectManagement {
   private static final String VOCAB = "vocab";
   private static final String DIALOG1 = "dialog";
   private static final String NO_PROJECT_FOR_ID = "NO_PROJECT_FOR_ID";
-  private static final String INTERPRETER = "Interpreter";
+ // private static final String INTERPRETER = "Interpreter";
   // private static final String INTERPRETER1 = "interpreter";
   //public static final String ANSWERS1 = "^.*answers\\/(.+)\\/.+";
   private static final String ANSWERS1 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
   private static final Pattern pattern = Pattern.compile(ANSWERS1);
   private static final boolean DEBUG_USER_FOR_FILE = false;
-  private static final boolean CHECK_FOR_OOV_ON_STARTUP = false;
+ // private static final boolean CHECK_FOR_OOV_ON_STARTUP = false;
   public static final boolean DEBUG = false;
 
   /**
@@ -1524,13 +1524,13 @@ public class ProjectManagement implements IProjectManagement {
   }
 
   @Override
-  public ImageResult doImageImport(int projid, String language, int dialogID, FileItem item) {
+  public ImageResult doImageImport(int projid, String language, int dialogID, FileItem item, String webappName) {
     logger.info("doImageImport : file " + item);
     File filename = getFile(item);
     logger.info("doImageImport : file is " + filename);
 
     if (filename != null) {
-      ImageResult imageResult = db.getImageDAO().insertAndGetImageID(projid, language.toLowerCase(), filename);
+      ImageResult imageResult = db.getImageDAO().insertAndGetImageID(projid, language.toLowerCase(), webappName, filename);
       if (imageResult.getImageID() > 0) {
         boolean b = db.getDialogDAO().updateImage(dialogID, imageResult.getImageID());
         if (b) {

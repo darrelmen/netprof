@@ -62,11 +62,15 @@ import java.util.stream.Collectors;
  * A facet list display of dialogs.
  */
 public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
-  public static final String TYPE = "Type";
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
-  public static final String INTERP_COLOR = "#f0fff7";
-  public static final String ENGLISH = "english";
+  private static final String TYPE = "Type";
+  private static final String DIALOG_PNG = "dialog.png";
+  private static final String INTERPRETER_PNG = "interpreter.png";
+  private static final String DIALOG_COLOR = "#f0fff7";
+  public static final String INTERP_COLOR = "aliceblue";
+
+  private static final String ENGLISH = "english";
 
   /**
    * Gah - doesn't really work very well as me make the window narrower or wider
@@ -268,7 +272,8 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     // logger.info("show image " + imageRef);
     String imageRef = dialog.getImageRef();
     if (imageRef == null || imageRef.isEmpty()) {
-      imageRef = "langtest/cc/" + "dialog.png";
+      String s = dialog.getKind() == DialogType.INTERPRETER ? INTERPRETER_PNG : DIALOG_PNG;
+      imageRef = "langtest/cc/" + s;
     }
     PushButton button = new PushButton(getFlag(imageRef));
     button.addClickHandler(clickEvent -> gotClickOnDialog(dialog));
@@ -346,12 +351,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     container.add(overallSmiley);
     container.setWidth("100%");
     container.addStyleName("floatLeft");
-    if (dialog.getKind() == DialogType.DIALOG) {
-      container.getElement().getStyle().setBackgroundColor("aliceblue");
-    } else {
-      container.getElement().getStyle().setBackgroundColor(INTERP_COLOR);
-
-    }
+    container.getElement().getStyle().setBackgroundColor(dialog.getKind() == DialogType.DIALOG ? DIALOG_COLOR : INTERP_COLOR);
     return container;
   }
 
