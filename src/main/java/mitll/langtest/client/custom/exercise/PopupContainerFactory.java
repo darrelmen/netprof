@@ -41,12 +41,14 @@ import mitll.langtest.client.initial.PopupHelper;
 import mitll.langtest.shared.exercise.ExerciseAnnotation;
 import org.jetbrains.annotations.NotNull;
 
-
+/**
+ * @see mitll.langtest.client.scoring.UserListSupport
+ */
 public class PopupContainerFactory {
-  private static final int VISIBLE_LENGTH = 70;
   //private final Logger logger = Logger.getLogger("PopupContainerFactory");
-  private final PopupHelper popupHelper = new PopupHelper();
 
+  private static final int VISIBLE_LENGTH = 70;
+  private final PopupHelper popupHelper = new PopupHelper();
 
   /**
    * @param commentEntryText
@@ -104,7 +106,13 @@ public class PopupContainerFactory {
     popupButton.addClickHandler(event -> showOrHideRelative(popup, popupButton, textEntry, tooltip));
   }
 
-  void showOrHideRelative(PopupPanel popup, UIObject popupButton, TextBox textEntry, Tooltip tooltip) {
+  void configurePopupButton(final Button popupButton,
+                            final PopupPanel popup,
+                            final Tooltip tooltip) {
+    popupButton.addClickHandler(event -> showOrHideRelative(popup, popupButton, tooltip));
+  }
+
+  void showOrHideRelative(PopupPanel popup, UIObject popupButton, FocusWidget textEntry, Tooltip tooltip) {
     if (popup.isShowing()) {// fix for bug that Wade found -- if we click off of popup, it dismisses it,
       // but if that click is on the button, it would immediately shows it again
       //System.out.println("popup visible " + visible);
@@ -120,6 +128,23 @@ public class PopupContainerFactory {
     }
   }
 
+  void showOrHideRelative(PopupPanel popup, UIObject popupButton, Tooltip tooltip) {
+    if (popup.isShowing()) {// fix for bug that Wade found -- if we click off of popup, it dismisses it,
+      // but if that click is on the button, it would immediately shows it again
+      //System.out.println("popup visible " + visible);
+      popup.hide();
+    } else {
+      popup.getElement().getStyle().setZIndex(1100);
+      popup.showRelativeTo(popupButton);
+      if (tooltip != null) tooltip.hide();
+    }
+  }
+
+  /**
+   * @param html
+   * @param target
+   * @see NewListButton#makeANewList
+   */
   public void showPopup(String html, Widget target) {
     popupHelper.showPopup(html, target);
   }

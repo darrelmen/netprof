@@ -684,6 +684,11 @@ public class AudioExercise extends ExerciseShell {
     this.fieldToAnnotation = fieldToAnnotation;
   }
 
+  /**
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getFLEntry
+   * @param field
+   * @return
+   */
   public ExerciseAnnotation getAnnotation(String field) {
     if (!fieldToAnnotation.containsKey(field)) {
       if (field.endsWith(WAV)) {

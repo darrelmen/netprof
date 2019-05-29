@@ -31,14 +31,17 @@ package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
+import com.github.gwtbootstrap.client.ui.Image;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.FormField;
@@ -55,7 +58,10 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
+  public static final String PLEASE_CHOOSE = "Please choose.";
+  public static final String CHOOSE_TYPE_OF_DIALOG = "-- Choose type of dialog --";
   private final Logger logger = Logger.getLogger("CreateDialogDialog");
+  private static final String HEIGHT = 100 + "px";
 
   private FormField entitleBox;
   private ListBox dialogType;
@@ -143,11 +149,15 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
 
     addDialogType(child);
 
-//    DivWidget imageContainer = new DivWidget();
-//    imageContainer.addStyleName("floatRight");
-//    imageContainer.addStyleName("rightFiveMargin");
-//    imageContainer.add(getUploadButton(controller.getProjectID()));
-//    child.add(imageContainer);
+    if (isEdit) {
+      DivWidget imageContainer = new DivWidget();
+      imageContainer.addStyleName("floatRight");
+      imageContainer.addStyleName("rightFiveMargin");
+      String imageRef = getCurrent().getImageRef();
+    //  logger.info("Show " + imageRef);
+      imageContainer.add(getImage(imageRef));
+      child.add(imageContainer);
+    }
    /* {
       ListBox listBox = getListBox(200);
       listBox.addStyleName("leftFiveMargin");
@@ -158,17 +168,30 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     }*/
     //listBox.addChangeHandler(event -> gotChangeOn);
 
-    child.add(getPrivacyChoices());
+    Widget privacyChoices = getPrivacyChoices();
+    privacyChoices.getElement().getStyle().setClear(Style.Clear.LEFT);
+    child.add(privacyChoices);
     moveFocusToTitleLater();
+  }
+
+  @NotNull
+  private com.google.gwt.user.client.ui.Image getImage(String cc) {
+    com.google.gwt.user.client.ui.Image image = new com.google.gwt.user.client.ui.Image(cc);
+    image.setHeight(HEIGHT);
+    image.setWidth(HEIGHT);
+    return image;
   }
 
   private void addDialogType(Panel child) {
     ListBox listBox = getListBox(200);
     listBox.addStyleName("leftFiveMargin");
-    listBox.addItem("-- Choose type of dialog --");
+    listBox.addItem(CHOOSE_TYPE_OF_DIALOG);
     listBox.addItem(DialogType.DIALOG.toString());
     listBox.addItem(DialogType.INTERPRETER.toString());
     dialogTypeContainer = new ControlGroup();
+
+    dialogTypeContainer.setWidth("50%");
+    dialogTypeContainer.addStyleName("floatLeft");
     dialogTypeContainer.add(listBox);
     dialogType = listBox;
     child.add(dialogTypeContainer);
@@ -217,7 +240,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
       for (int i = 0; i < allUnitChapter.size(); i++) {
         ListBox listBox = allUnitChapter.get(i);
         if (listBox.getSelectedValue().startsWith("--")) {
-          markError(allUnitChapterGroup.get(i), listBox, listBox, "Please choose.", "Please choose a " + typeOrder.get(i));
+          markError(allUnitChapterGroup.get(i), listBox, listBox, PLEASE_CHOOSE, "Please choose a " + typeOrder.get(i));
           validUnit = false;
           break;
         }
@@ -233,7 +256,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
         }
 
         if (!valid) {
-          markError(dialogTypeContainer, dialogType, dialogType, "Please choose.", "Please choose a dialog type");
+          markError(dialogTypeContainer, dialogType, dialogType, PLEASE_CHOOSE, "Please choose a dialog type");
         }
 
         logger.info("isValid " + valid);
@@ -333,7 +356,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     mutable.setOrientation(theDescription.getText());
     mutable.setDialogType(DialogType.valueOf(dialogType.getSelectedValue()));
 //    logger.info("doEdit : using image " + imageID);
-  //  mutable.setImageID(imageID);
+    //  mutable.setImageID(imageID);
 
     controller.getDialogService().update(currentSelection, new AsyncCallback<Void>() {
       @Override

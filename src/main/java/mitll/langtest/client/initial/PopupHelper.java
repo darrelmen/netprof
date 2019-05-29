@@ -34,6 +34,7 @@ import com.google.gwt.user.client.ui.DecoratedPopupPanel;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
@@ -64,10 +65,8 @@ public class PopupHelper {
   }
 
   public PopupPanel showPopup(String html, Widget button, int hideDelay) {
-    final PopupPanel pleaseWait = new DecoratedPopupPanel();
-    pleaseWait.setAutoHideEnabled(true);
-    pleaseWait.add(new HTML(html));
-    pleaseWait.showRelativeTo(button);
+    Widget w = new HTML(html);
+    final PopupPanel pleaseWait = getPopupPanel(button, w);
 
     Timer t = new Timer() {
       @Override
@@ -76,6 +75,15 @@ public class PopupHelper {
       }
     };
     t.schedule(hideDelay);
+    return pleaseWait;
+  }
+
+  @NotNull
+  public PopupPanel getPopupPanel(Widget button, Widget w) {
+    final PopupPanel pleaseWait = new DecoratedPopupPanel();
+    pleaseWait.setAutoHideEnabled(true);
+    pleaseWait.add(w);
+    pleaseWait.showRelativeTo(button);
     return pleaseWait;
   }
 

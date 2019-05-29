@@ -46,5 +46,9 @@ public interface AnnotationExercise extends HasID {
    */
   ExerciseAnnotation getAnnotation(String field);
 
+  /**
+   * SERVER SIDE ONLY
+   * @return
+   */
   Collection<String> getFields();
 }

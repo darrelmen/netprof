@@ -45,16 +45,16 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
-import mitll.langtest.client.scoring.UnitChapterItemHelper;
-import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.user.Permission;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
 import static mitll.langtest.client.LangTest.LANGTEST_IMAGES;
@@ -404,18 +404,7 @@ public class DialogHeader {
     }
 
     if (thisView == LISTEN || thisView == TURN_EDITOR || thisView == CORE_EDITOR) {
-      DivWidget widgets = new DivWidget();
-      Anchor download = new Anchor(DOWNLOAD);
-      download.addClickHandler(event -> gotDownload());
-      download.addStyleName("leftFiveMargin");
-      widgets.add(new Image(LANGTEST_IMAGES + "icon-excel.png"));
-      widgets.add(download);
-
-      widgets.addStyleName("floatRight");
-      widgets.getElement().getStyle().setMarginTop(25, PX);
-      widgets.getElement().getStyle().setMarginRight(12, PX);
-      widgets.getElement().getStyle().setClear(Style.Clear.BOTH);
-      buttonDiv.add(widgets);
+      buttonDiv.add(getDownloadLink());
     }
 
     if (!dialog.getCoreVocabulary().isEmpty() & thisView != CORE_EDITOR && thisView != SCORES) {
@@ -426,8 +415,25 @@ public class DialogHeader {
   }
 
   @NotNull
+  private DivWidget getDownloadLink() {
+    DivWidget widgets = new DivWidget();
+    Anchor download = new Anchor(DOWNLOAD);
+    download.addClickHandler(event -> gotDownload());
+    download.addStyleName("leftFiveMargin");
+    widgets.add(new Image(LANGTEST_IMAGES + "icon-excel.png"));
+    widgets.add(download);
+
+    widgets.addStyleName("floatRight");
+    widgets.getElement().getStyle().setMarginTop(25, PX);
+    widgets.getElement().getStyle().setMarginRight(12, PX);
+    widgets.getElement().getStyle().setClear(Style.Clear.BOTH);
+    return widgets;
+  }
+
+  @NotNull
   private Widget getCoreVocab(IDialog dialog) {
     HTML core_vocab = new HTML("<b>Vocab (Mouseover)</b>");
+
     Map<String, String> objectObjectHashMap = new TreeMap<>();
 
     for (ClientExercise exercise : dialog.getCoreVocabulary()) {
@@ -438,7 +444,7 @@ public class DialogHeader {
     objectObjectHashMap.forEach((k, v) -> builder.append(getTypeAndValue2(k, v)));
     builder.append(getTypeAndValue2(" ", " "));
 
-    String message = "<div style='width:300px;margin-bottom:5px;padding-bottom:5px'>" + builder.toString() + "<br/></div>";
+    String message = "<div style='width:400px;margin-bottom:5px;padding-bottom:5px'>" + builder.toString() + "<br/></div>";
 
     DivWidget wrapper = new DivWidget();
     wrapper.add(core_vocab);
@@ -452,11 +458,20 @@ public class DialogHeader {
     Popover popover = new Popover();
     popover.setContainer("body");
 
-    simplePopover(popover,
-        wrapper,
-        null,
-        message,
-        Placement.LEFT, true);
+//    simplePopover(popover,
+//        wrapper,
+//        null,
+//        message,
+//        Placement.LEFT, true);
+
+//    PopupPanel popupPanel = new PopupHelper().getPopupPanel(core_vocab, new HTML(message));
+
+    final PopupPanel popupPanel = new DecoratedPopupPanel();
+    popupPanel.setAutoHideEnabled(true);
+    popupPanel.add(new HTML(message));
+
+    core_vocab.addMouseOverHandler(event -> popupPanel.showRelativeTo(core_vocab));
+    core_vocab.addMouseOutHandler(event -> popupPanel.hide());
 
     wrapper.getElement().getStyle().setMarginTop(27, PX);
     wrapper.addStyleName("rightFiveMargin");
