@@ -31,17 +31,17 @@ package mitll.langtest.client.scoring;
 
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.dialog.IRehearseView;
-import mitll.langtest.client.dialog.ListenViewHelper;
-import mitll.langtest.client.dialog.PerformViewHelper;
+import mitll.langtest.client.dialog.ITurnContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class ObscureRecordDialogExercisePanel extends RecordDialogExercisePanel implements IObscurable {
   private final Logger logger = Logger.getLogger("ObscureRecordDialogExercisePanel");
@@ -50,8 +50,10 @@ public class ObscureRecordDialogExercisePanel extends RecordDialogExercisePanel 
                                           ExerciseController controller,
                                           ListInterface<?, ?> listContainer,
                                           Map<Integer, AlignmentOutput> alignments,
-                                          IRehearseView listenView, SessionManager sessionManager, ListenViewHelper.COLUMNS columns) {
-    super(commonExercise, controller, listContainer, alignments, listenView, sessionManager, columns);
+                                          IRehearseView listenView, SessionManager sessionManager,
+                                          ITurnContainer.COLUMNS columns,
+                                          ITurnContainer.COLUMNS prevColumn) {
+    super(commonExercise, controller, listContainer, alignments, listenView, sessionManager, columns, prevColumn);
   }
 
   @Override
@@ -87,7 +89,7 @@ public class ObscureRecordDialogExercisePanel extends RecordDialogExercisePanel 
    * 3) if you have a choice, don't obscure first token? ?
    *
    * @param coreVocab
-   * @see PerformViewHelper#getTurnPanel
+   * @see mitll.langtest.client.dialog.PerformViewHelper#getTurnPanel
    * Or should we use exact match?
    */
   public void maybeSetObscure(List<ClientExercise> coreVocabs) {

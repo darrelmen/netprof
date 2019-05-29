@@ -250,7 +250,6 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
       // phonesImage.setHeight(TRANSCRIPT_IMAGE_HEIGHT + "px");
       phonesImage.getElement().setId("Transcript_Phones");
     }
-    // hp.setWidth("100%");
 
     add(hp);
     hp.addStyleName("bottomFiveMargin");

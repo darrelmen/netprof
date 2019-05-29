@@ -436,6 +436,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     jsonObject.addProperty(STREAMTIMESTAMP.toString(), timestamp);
     jsonObject.addProperty(STREAMSPACKET.toString(), packet);
     jsonObject.addProperty(STREAMSTOP.toString(), isFinished);
+    jsonObject.addProperty(STREAMPACKETDUR.toString(), validityAndDur.getDurationInMillis());
 
     return jsonObject;
   }

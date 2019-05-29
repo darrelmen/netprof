@@ -64,7 +64,10 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.net.UnknownHostException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 
 import static mitll.langtest.server.database.project.Project.MANDARIN;
 
@@ -578,17 +581,20 @@ public class MyRemoteServiceServlet extends XsrfProtectedServiceServlet implemen
                     project.getAudioFileHelper().getSmallVocabDecoder(), false, false)
         );
 
-        // sanity check...
-        dialog.getExercises().forEach(clientExercise -> {
-              AudioAttribute latestAudio = getLatestAudio(clientExercise);
-              String info = latestAudio == null ? "" : latestAudio.getUniqueID() + " : " + latestAudio.getTranscript() + " : " + latestAudio.getAudioRef();
-              logger.info("getDialog ex " + clientExercise.getID() + " " + clientExercise.getForeignLanguage() + " : " + clientExercise.getAudioAttributes().size() + " : " + info);
-            }
-        );
+        if (DEBUG) {
+          // sanity check...
+          dialog.getExercises().forEach(clientExercise -> {
+                AudioAttribute latestAudio = getLatestAudio(clientExercise);
+                String info = latestAudio == null ? "" : latestAudio.getUniqueID() + " : " + latestAudio.getTranscript() + " : " + latestAudio.getAudioRef();
+                logger.info("getDialog ex " + clientExercise.getID() + " " + clientExercise.getForeignLanguage() + " : " + clientExercise.getAudioAttributes().size() + " : " + info);
+              }
+          );
 
-        dialog.getCoreVocabulary().forEach(exercise ->
-            logger.info("getDialog (" + id +
-                ") vocab for " + exercise.getID() + " eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() + "' " + language));
+          dialog.getCoreVocabulary().forEach(exercise ->
+              logger.info("getDialog (" + id +
+                  ") vocab for " + exercise.getID() + " eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() + "' " + language));
+
+        }
       }
 
       new AlignmentHelper(serverProps, db.getRefResultDAO()).addAlignmentOutput(project, dialog.getExercises());

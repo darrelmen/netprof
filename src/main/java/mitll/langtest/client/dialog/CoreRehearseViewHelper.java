@@ -40,8 +40,6 @@ import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.logging.Logger;
 
 public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscurable> extends RehearseViewHelper<T> {
@@ -74,9 +72,9 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscu
   }
 
   @Override
-  protected T makeRecordingTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
+  protected T makeRecordingTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn) {
     return (T) new ObscureRecordDialogExercisePanel(clientExercise, controller,
-        null, alignments, this, this, columns);
+        null, alignments, this, this, columns, prevColumn);
   }
 
   /**

@@ -82,9 +82,9 @@ public class PerformViewHelper<T extends ObscureRecordDialogExercisePanel> exten
     return turnPanel;
   }
 
-  protected T makeRecordingTurnPanel(ClientExercise clientExercise, COLUMNS columns) {
+  protected T makeRecordingTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn) {
     return (T) new ObscureRecordDialogExercisePanel(clientExercise, controller,
-        null, alignments, this, this, columns);
+        null, alignments, this, this, columns, prevColumn);
   }
 
   /**

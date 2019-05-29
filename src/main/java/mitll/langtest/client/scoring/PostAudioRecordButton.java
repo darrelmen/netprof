@@ -207,7 +207,9 @@ public abstract class PostAudioRecordButton extends RecordButton
       AudioAnswer audioAnswer = jsonAnswerParser.getAudioAnswer(digestJsonResponse);
       if (DEBUG_PACKET || audioAnswer.getValidity() != OK) {
         logger.info("gotPacketResponse audioAnswer " + audioAnswer);
-        logger.info("gotPacketResponse json        " + json);
+        if (DEBUG) {
+          logger.info("gotPacketResponse json        " + json);
+        }
         controller.logEvent(this, "gotPacketResponse", "" + exerciseID, "invalid recording " + audioAnswer.getValidity());
       }
       onPostSuccess(audioAnswer, stopRecordingReqTimestamp);
@@ -286,7 +288,7 @@ public abstract class PostAudioRecordButton extends RecordButton
   void gotShortDurationRecording() {
     logger.info("gotShortDurationRecording");
 
-    showPopup("Recording too short");
+    showPopupLater("Recording too short");
   }
 
   protected String getDevice() {
@@ -384,7 +386,7 @@ public abstract class PostAudioRecordButton extends RecordButton
         !pretestScore.getStatus().isEmpty()) {
       String toShow = "Status " + pretestScore.getStatus();
       String suffix = pretestScore.getMessage().isEmpty() ? "" : " : " + pretestScore.getMessage();
-      showPopup(toShow + suffix);
+      showPopupLater(toShow + suffix);
     }
   }
 
@@ -400,7 +402,7 @@ public abstract class PostAudioRecordButton extends RecordButton
     controller.logEvent(this, "recordButton", "" + exerciseID, "invalid recording " + validity);
     // logger.info("useInvalidResult platform is " + getPlatform() + " validity " + validity);
     if (!checkAndShowTooLoud(validity)) {
-      showPopup(validity.getPrompt());
+      showPopupLater(validity.getPrompt());
     }
 //    gotInvalidResult(validity);
   }
@@ -475,12 +477,13 @@ public abstract class PostAudioRecordButton extends RecordButton
    *
    * @param toShow
    */
-  public void showPopup(String toShow) {
-    Scheduler.get().scheduleDeferred((Command) () -> showPopupLater(toShow));
+  public void showPopupLater(String toShow) {
+  //  logger.info("showPopupLater " + toShow + " on " + getExerciseID());
+    Scheduler.get().scheduleDeferred((Command) () -> showPopupDismissLater(toShow));
   }
 
-  private void showPopupLater(String toShow) {
-      logger.info("showPopup " + toShow + " on " + getExerciseID());
+  void showPopupDismissLater(String toShow) {
+  //  logger.info("showPopup " + toShow + " on " + getExerciseID());
     new PopupHelper().showPopup(toShow, getPopupTargetWidget(), 5000);
   }
 
@@ -488,7 +491,7 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @return
    */
   Widget getPopupTargetWidget() {
-    //logger.info("getPopupTargetWidget target is " + this.getElement().getId());
+    logger.info("getPopupTargetWidget target is " + this.getElement().getId());
     return this;
   }
 }

@@ -158,7 +158,6 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn, IObscurable {
     //  logger.info("addWidgets : got '" + exercise.getForeignLanguage() + "' for " + exercise.getID());
     DivWidget widgets = new DivWidget();
     segments.clear();
-//    widgets.addStyleName("topFiveMargin");
     widgets.getElement().getStyle().setPaddingTop(10, Style.Unit.PX);
     widgets.getElement().getStyle().setPaddingLeft(10, Style.Unit.PX);
     widgets.addStyleName("flfont");

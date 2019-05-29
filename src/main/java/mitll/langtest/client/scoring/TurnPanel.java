@@ -46,16 +46,13 @@ import mitll.langtest.client.sound.AllHighlight;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 /**
  * Does left, right, or middle justify
@@ -83,17 +80,23 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
                    final ListInterface<?, ?> listContainer,
                    Map<Integer, AlignmentOutput> alignments,
                    IListenView listenView,
-                   ListenViewHelper.COLUMNS columns,
+                   ITurnContainer.COLUMNS columns,
                    boolean rightJustify) {
     super(clientExercise, controller, listContainer, alignments, listenView);
 
     if (columns == ITurnContainer.COLUMNS.MIDDLE) {
-      addStyleName("inlineFlex");
-      setWidth("100%");
-      // TODO : why?
-      getElement().getStyle().setMarginRight(29, Style.Unit.PX);
+      // addStyleName("inlineFlex");
+      styleInterpreterTurn();
     }
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify);
+  }
+
+  protected void styleInterpreterTurn() {
+    logger.info("styleInterpreter " + getExID() + " " + getText());
+    addStyleName("inlineFlex");
+    setWidth("100%");
+    // TODO : why?
+    getElement().getStyle().setMarginRight(29, Style.Unit.PX);
   }
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
@@ -144,23 +147,13 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
 
   @Override
   boolean shouldShowPhones() {
-    List<ExerciseAttribute> speaker = exercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equals("SPEAKER")).collect(Collectors.toList());
+//    List<ExerciseAttribute> speaker = exercise.getAttributes().stream().filter(exerciseAttribute -> exerciseAttribute.getProperty().equals("SPEAKER")).collect(Collectors.toList());
     boolean hasEnglishAttr = exercise.hasEnglishAttr();
     boolean b = !hasEnglishAttr && false;//isInterpreterTurn(speaker);
 //    if (b)
 //      logger.info("ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " Got show phones " + b);
     return b;
   }
-
- /* private boolean isInterpreterTurn(List<ExerciseAttribute> speaker) {
-    boolean isInterpreterTurn = false;
-
-    if (!speaker.isEmpty()) {
-      isInterpreterTurn = speaker.get(0).getValue().equals("I");
-    }
-
-    return isInterpreterTurn;
-  }*/
 
   /**
    * @param wrapper
@@ -241,7 +234,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
 
   @Override
   public void setDeleting(boolean deleting) {
-      logger.warning("don't call me");
+    logger.warning("don't call me");
   }
 
   @Override

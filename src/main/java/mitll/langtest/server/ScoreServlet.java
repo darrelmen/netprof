@@ -198,6 +198,7 @@ public class ScoreServlet extends DatabaseServlet {
     STREAMSESSION,
     STREAMSTATE,
     STREAMSPACKET,
+    STREAMPACKETDUR,
     STREAMSTOP,
     STREAMTIMESTAMP;  // when it's sent
 

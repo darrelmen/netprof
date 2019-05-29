@@ -510,7 +510,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
   protected void stylePhoneRow(UIObject phoneRow) {
     if (isRTL) {
       phoneRow.addStyleName("floatRight");
-      //  phoneRow.addStyleName("topFiveMargin");
       phoneRow.getElement().getStyle().setMarginTop(7, PX);
     }
   }

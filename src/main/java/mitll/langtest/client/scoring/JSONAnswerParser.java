@@ -61,6 +61,10 @@ class JSONAnswerParser {
   private static final String END = "end";
   private static final String SCORE = "score";
   private static final String STREAMTIMESTAMP = "STREAMTIMESTAMP";
+  /**
+   * @see #getResponse(JSONObject)
+   */
+  private static final String STREAMPACKETDUR = "STREAMPACKETDUR";
   private static final String STREAMSTOP = "STREAMSTOP";
 
   private static final String PHONE_TRANSCRIPT = "PHONE_TRANSCRIPT";
@@ -149,7 +153,7 @@ class JSONAnswerParser {
    * @see PostAudioRecordButton#gotPacketResponse
    */
   StreamResponse getResponse(JSONObject jsonObject) {
-    return new StreamResponse(getValidity(jsonObject), getStreamTimestamp(jsonObject), getStreamStop(jsonObject));
+    return new StreamResponse(getValidity(jsonObject), getStreamTimestamp(jsonObject), getStreamStop(jsonObject), getIntField(jsonObject, STREAMPACKETDUR.toLowerCase()));
   }
 
   private long getStreamTimestamp(JSONObject jsonObject) {

@@ -232,7 +232,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }
 
   /**
-   * @see #configureDialogs(int, Map, Map, Map, Map)
    * @param projid
    * @param dialog
    * @param idToPair
@@ -241,6 +240,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @param project
    * @param dialogID
    * @param slickDialogAttributeJoins
+   * @see #configureDialogs(int, Map, Map, Map, Map)
    */
   private void configureDialog(int projid,
                                Dialog dialog,
@@ -412,8 +412,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
     //List<SlickImage> all = databaseImpl.getImageDAO().getByID(projid);
 //    logger.warn("addImage got " + all.size());
 
-  //  Map<Integer, String> idToImageRef = new HashMap<>();
-  //  all.forEach(slickImage -> idToImageRef.put(slickImage.id(), slickImage.filepath()));
+    //  Map<Integer, String> idToImageRef = new HashMap<>();
+    //  all.forEach(slickImage -> idToImageRef.put(slickImage.id(), slickImage.filepath()));
     //  logger.warn("idToImageRef got " + idToImageRef.size());
     int imageid = dialog.getImageid();//dialog.getSlickDialog().imageid();
     if (imageid < 1) {
@@ -428,11 +428,14 @@ public class DialogDAO extends DAO implements IDialogDAO {
         logger.info("addImage image ref " + s);
         String audioBaseDir = databaseImpl.getServerProps().getAudioBaseDir();
 
-        if (!s.startsWith(audioBaseDir)) logger.error("addImage Expecting " + s + " to start with " + audioBaseDir);
+        boolean b = s.startsWith(audioBaseDir);
+        if (!b) logger.error("addImage Expecting " + s + " to start with " + audioBaseDir);
 
-        s = s.substring(audioBaseDir.length() - 1);
+        if (b) { // may not be true for legacy images...
+          s = s.substring(audioBaseDir.length() - 1);
+          logger.info("addImage image ref now " + s);
+        }
 
-        logger.info("addImage image ref now " + s);
         dialog.getMutable().setImageRef(s);
       }
     }

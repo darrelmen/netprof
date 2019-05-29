@@ -73,10 +73,8 @@ public class EditorTurn extends PlayAudioExercisePanel
   private final TurnPanelDelegate turnPanelDelegate;
   private final ClientExercise clientExercise;
 
-  //private final Language language;
   private final ExerciseController<?> controller;
   private final ITurnContainer<EditorTurn> turnContainer;
-  //private final IEditableTurnContainer<EditorTurn> editableTurnContainer;
   private final int dialogID;
   private String prev = "";
   private final ITurnContainer.COLUMNS columns;
@@ -85,7 +83,6 @@ public class EditorTurn extends PlayAudioExercisePanel
   /**
    * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
-  //private TextBox contentTextBox;
   private HTML turnFeedback;
   private NoFeedbackRecordAudioPanel<ClientExercise> recordAudioPanel;
 
@@ -94,8 +91,9 @@ public class EditorTurn extends PlayAudioExercisePanel
 
   private EditableTurnHelper editableTurnHelper;
   private TurnAddDelete turnAddDelete;
-  private static final boolean DEBUG = false;
   private IEditableTurnContainer<EditorTurn> editableTurnContainer;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param clientExercise
@@ -143,7 +141,6 @@ public class EditorTurn extends PlayAudioExercisePanel
         style2.setMarginLeft(15, Style.Unit.PX);
         boolean useBigRightMargin = columns == ITurnContainer.COLUMNS.RIGHT && turnContainer.isInterpreter();
         style2.setMarginRight(useBigRightMargin ? RIGHT_TURN_RIGHT_MARGIN : 10, Style.Unit.PX);
-        // style2.setMarginTop(7, Style.Unit.PX);
         style2.setMarginBottom(0, Style.Unit.PX);
       }
     };
@@ -272,7 +269,7 @@ public class EditorTurn extends PlayAudioExercisePanel
       } else {
         AudioAttribute next = getLatestAudio();
 
-        if (DEBUG || true) {
+        if (DEBUG) {
           logger.info("addWidgets :binding " + next + " to play for turn for " + getExID());
         }
         playAudioPanel.rememberAudio(next);

@@ -113,13 +113,13 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
 //    return waitCursorHelper;
 //  }
 
-  void showWaitCursor() {
-    waitCursorHelper.showAnimated();
-  }
+//  void showWaitCursor() {
+//    waitCursorHelper.showAnimated();
+//  }
 
-  void hideWaitCursor() {
-    waitCursorHelper.showFinished();
-  }
+//  void hideWaitCursor() {
+//    waitCursorHelper.showFinished();
+//  }
 
   /**
    * So here we're trying to make the record and play buttons know about each other
@@ -156,11 +156,14 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
 
       @Override
       protected Widget getPopupTargetWidget() {
-        return postAudioRecordButton;
+//        logger.info("getPopupTargetWidget target is " + outer.getElement().getId());
+        return scoreFeedback;
       }
 
-      public void showPopup(String toShow) {
-        super.showPopup(toShow);
+      public void showPopupLater(String toShow) {
+      //  logger.info("showPopupLater target is " + outer.getElement().getId());
+
+        super.showPopupDismissLater(toShow);
         showInvalidResultPopup(toShow);
       }
 

@@ -37,6 +37,7 @@ import mitll.langtest.shared.answer.Validity;
 public class StreamResponse {
   private final Validity validity;
   private final long streamTimestamp;
+  private final long duration;
   private final boolean streamStop;
 
   /**
@@ -45,15 +46,16 @@ public class StreamResponse {
    * @param streamStop
    * @see JSONAnswerParser#getResponse
    */
-  StreamResponse(Validity validity, long streamTimestamp, boolean streamStop) {
+  StreamResponse(Validity validity, long streamTimestamp, boolean streamStop, long duration) {
     this.validity = validity;
     this.streamTimestamp = streamTimestamp;
     this.streamStop = streamStop;
+    this.duration = duration;
   }
 
   /**
-   * @see RecordDialogExercisePanel#addWidgets
    * @return
+   * @see RecordDialogExercisePanel#addWidgets
    */
   public Validity getValidity() {
     return validity;
@@ -65,6 +67,10 @@ public class StreamResponse {
 
   boolean isStreamStop() {
     return streamStop;
+  }
+
+  public long getDuration() {
+    return duration;
   }
 
   public String toString() {

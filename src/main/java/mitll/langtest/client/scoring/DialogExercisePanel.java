@@ -149,6 +149,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
     return exercise.getID();
   }
 
+  /**
+   *
+   * @param showFL
+   * @param showALTFL
+   * @param phonesChoices
+   * @param englishDisplayChoices
+   * @return
+   */
   @Override
   public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
@@ -160,6 +168,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
       {
         wrapper.add(getFLEntry(exercise));
         wrapper.add(flClickableRowPhones = clickableWords.getClickableDiv(isRTL));
+        flClickableRowPhones.setId("flClickableRowPhones_" + getExID());
         stylePhoneRow(flClickableRowPhones);
 
         styleMe(wrapper);
@@ -260,7 +269,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
     }
   }
 
-  private  AudioAttribute getRegularSpeedIfAvailable(T e) {
+  private AudioAttribute getRegularSpeedIfAvailable(T e) {
     AudioAttribute candidate = e.getRegularSpeed();
     return candidate == null ? e.getFirst() : candidate;
   }

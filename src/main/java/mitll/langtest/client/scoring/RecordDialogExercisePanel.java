@@ -37,7 +37,6 @@ import mitll.langtest.client.banner.Emoticon;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.dialog.IRehearseView;
 import mitll.langtest.client.dialog.ITurnContainer;
-import mitll.langtest.client.dialog.PerformViewHelper;
 import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.gauge.SimpleColumnChart;
@@ -53,10 +52,13 @@ import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.NetPronImageType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
+import static com.google.gwt.dom.client.Style.Unit.PX;
 import static mitll.langtest.client.LangTest.RED_X_URL;
 import static mitll.langtest.client.scoring.RecorderPlayAudioPanel.BLUE_INACTIVE_COLOR;
 
@@ -65,7 +67,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
   private static final boolean DEBUG_PARTIAL = false;
   private static final boolean DEBUG = false;
-//  private static final boolean DEBUG_OVERLAP = false;
 
   private static final long MOVE_ON_DUR = 3000L;
   private static final long END_SILENCE = 300L;
@@ -77,14 +78,17 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * @see #startRecording
    */
   private long start = 0L;
+  /**
+   *
+   */
   private long firstVAD = -1L;
 
   private NoFeedbackRecordAudioPanel<ClientExercise> recordAudioPanel;
-  private static final float DELAY_SCALAR = 1.0F;
   /**
    *
    */
   private long minDur;
+  private long actualMinDur;
   /**
    * @see #addWidgets
    */
@@ -103,13 +107,14 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   private final boolean doPushToTalk;
 
   /**
+   * @param isRight
    * @param commonExercise
    * @param controller
    * @param listContainer
    * @param alignments
    * @param listenView
    * @param sessionManager
-   * @param isRight
+   * @param prevColumn
    * @see RehearseViewHelper#getRecordingTurnPanel
    * @see RehearseViewHelper#makeRecordingTurnPanel
    */
@@ -119,18 +124,39 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
                                    Map<Integer, AlignmentOutput> alignments,
                                    IRehearseView listenView,
                                    SessionManager sessionManager,
-                                   ITurnContainer.COLUMNS columns) {
+                                   ITurnContainer.COLUMNS columns,
+                                   ITurnContainer.COLUMNS prevColumn) {
     super(commonExercise, controller, listContainer, alignments, listenView, columns, false);
     this.rehearseView = listenView;
     setMinExpectedDur(commonExercise);
     this.sessionManager = sessionManager;
     doPushToTalk = listenView.isPressAndHold();
+    if (columns == ITurnContainer.COLUMNS.MIDDLE) {
+      if (prevColumn == ITurnContainer.COLUMNS.RIGHT) {
+        addStyleName("floatRight");
+      } else {
+        addStyleName("floatLeft");
+      }
+    }
+  }
+
+//
+//  @Override
+//  public void styleMe(DivWidget wrapper) {
+//    super.styleMe(wrapper);
+//    wrapper.getElement().getStyle().setMarginBottom(0, PX);
+//  }
+
+  @Override
+  protected void styleInterpreterTurn() {
   }
 
   private void setMinExpectedDur(ClientExercise commonExercise) {
     if (commonExercise.hasRefAudio()) {
       minDur = commonExercise.getFirst().getDurationInMillis();
-      minDur = (long) (((float) minDur) * DELAY_SCALAR);
+      actualMinDur = minDur;
+
+      minDur = (long) ((float) minDur);
       minDur -= END_DUR_SKEW;
     }
   }
@@ -179,7 +205,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       iHighlightSegment.clearHighlight();
     });
 
-    // rememberAudio(getRegularSpeedIfAvailable(exercise));
     rememberAudio();
   }
 
@@ -237,155 +262,14 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   }
 
   /**
-   * Rules:
-   * <p>
-   * 1) don't obscure everything
-   * 2) obscure something
-   * 3) Don't obscure more than one or two or three? words?
-   * 4) if choosing only two out of all of them, choose the longest ones?
-   * 3) if you have a choice, don't obscure first token? ?
-   *
-   * @param coreVocab
-   * @see PerformViewHelper#getTurnPanel
-   * Or should we use exact match?
-   */
-/*  public void maybeSetObscure(List<ClientExercise> coreVocabs) {
-    Set<String> coreVocab = new HashSet<>();
-
-    coreVocabs.forEach(ex -> coreVocab.add(ex.getForeignLanguage().trim()));
-
-    Collection<IHighlightSegment> obscureCandidates = getObscureCandidates(coreVocab);
-
-    if (DEBUG_OVERLAP) logger.info("maybeSetObscure got " + coreVocab + " found " + obscureCandidates);
-
-    obscureCandidates.forEach(IHighlightSegment::setObscurable);
-  }*/
-
-  /**
-   * Get all segments that need to be blacked out.
-   *
-   * @param coreVocab
-   * @return
-   * @see #maybeSetObscure(List)
-   */
- /* private Collection<IHighlightSegment> getObscureCandidates(Collection<String> coreVocab) {
-    if (DEBUG_OVERLAP) logger.info("getCandidates for " + exercise.getID() + " " + exercise.getForeignLanguage());
-
-    Set<IHighlightSegment> candidates = new HashSet<>();
-
-    String foreignLanguage = exercise.getForeignLanguage();
-    List<String> overlaps = coreVocab.stream().filter(foreignLanguage::contains).collect(Collectors.toList());
-
-    Set<IHighlightSegment> toObscure = new HashSet<>();
-
-    if (DEBUG_OVERLAP)
-      logger.info("getObscureCandidates : from " + coreVocab.size() + " found " + overlaps.size() + " overlaps");
-
-    overlaps.forEach(overlap -> {
-      List<IHighlightSegment> clickableWordsHighlight = getClickableWordsHighlight(flclickables, overlap);
-      if (!clickableWordsHighlight.isEmpty()) {
-        if (DEBUG_OVERLAP) logger.info("\tgetObscureCandidates : match " + overlap + " =  " + clickableWordsHighlight);
-      }
-      toObscure.addAll(clickableWordsHighlight);
-    });
-
-    for (IHighlightSegment segment : flclickables) {
-      if (toObscure.contains(segment)) {
-        candidates.add(segment);
-      }
-    }
-
-    if (DEBUG_OVERLAP) logger.info("getObscureCandidates : return " + candidates);
-
-    return candidates;
-  }
-*/
-  /**
-   * @see #getObscureCandidates(Collection)
-   * @param candidates
-   * @param highlight
-   * @return
-   */
-/*  private List<IHighlightSegment> getClickableWordsHighlight(List<IHighlightSegment> candidates, String highlight) {
-    boolean isChineseCharacter = false; // TODO : check language
-
-    SearchTokenizer searchTokenizer = new SearchTokenizer();
-
-    List<String> tokens = new ArrayList<>();
-    for (IHighlightSegment candidate : candidates) {
-      tokens.add(candidate.getContent());
-    }
-    if (DEBUG_OVERLAP) {
-      logger.info("getClickableWordsHighlight " +
-          //    "\n\tcontextSentence     '" + contextSentence + "'" +
-          "\n\thighlight '" + highlight + "'" +
-          "\n\ttokens    " + tokens +
-          "\n\t# tokens  " + candidates.size());
-    }
-
-    // if the highlight token is not in the display, skip over it -
-
-    List<String> highlightTokens = searchTokenizer.getTokens(highlight, isChineseCharacter, new ArrayList<>());
-
-    if (DEBUG_OVERLAP) {
-      logger.info("getClickableWordsHighlight " +
-          //    "\n\tcontextSentence     '" + contextSentence + "'" +
-          "\n\thighlight '" + highlightTokens + "'");
-    }
-    int highlightStartIndex = searchTokenizer.getMatchingHighlightAll(tokens, highlightTokens);
-
-    Iterator<String> highlightIterator = highlightTokens.iterator();
-    String highlightToFind = highlightIterator.hasNext() ? highlightIterator.next() : null;
-
-    if (DEBUG_OVERLAP) {
-      logger.info("getClickableWordsHighlight highlight start " + highlightStartIndex + " find " + highlightToFind);
-    }
-
-    List<IHighlightSegment> overlaps = new ArrayList<>();
-
-    if (highlightStartIndex == -1 || highlightToFind == null) {
-
-    } else {
-      boolean isHighlightMatch = true;
-      boolean maybeFoundAllTokens = false;
-      while (isHighlightMatch && !maybeFoundAllTokens) {
-        String token = tokens.get(highlightStartIndex);
-
-        isHighlightMatch = searchTokenizer.isMatch(token, highlightToFind);
-
-        if (isHighlightMatch) {
-          if (DEBUG_OVERLAP)
-            logger.info("getClickableWordsHighlight *highlight* '" + highlightToFind + "' = '" + token + "'");
-
-          overlaps.add(candidates.get(highlightStartIndex));
-
-          if (highlightIterator.hasNext()) {
-            highlightToFind = highlightIterator.next();
-            highlightStartIndex++;
-          } else {
-            maybeFoundAllTokens = true;
-            // OK match
-          }
-        } else {
-          maybeFoundAllTokens = true;
-        }
-      }
-    }
-
-    if (DEBUG_OVERLAP) {
-      logger.info("getClickableWordsHighlight maybeFoundAllTokens " + overlaps.size() + " vs " + highlightTokens.size());
-    }
-
-    return (overlaps.size() == highlightTokens.size()) ? overlaps : Collections.emptyList();
-  }*/
-
-  /**
    * @param result
    * @see RehearseViewHelper#useResult
    */
   @Override
   public void useResult(AudioAnswer result) {
     logger.info("useResult got " + result.getScore() + " for " + result.getPath());
+
+    hideAudioFeedback();
 
     this.studentSpeechDur = getSpeechDur(result.getExid(), result.getPretestScore());
 
@@ -419,9 +303,13 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     emoticon.setUrl(RED_X_URL);
   }
 
-
   private DivWidget placeForRecordButton;
+  private DivWidget audioFeedback;
 
+  /**
+   * @return
+   * @see DialogExercisePanel#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
+   */
   @Override
   @NotNull
   protected DivWidget getBubble() {
@@ -431,7 +319,30 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     placeForRecordButton.addStyleName("bottomFiveMargin");
     placeForRecordButton.addStyleName("topFiveMargin");
     placeForRecordButton.addStyleName("leftFiveMargin");
+
     return widgets;
+  }
+
+  @NotNull
+  private DivWidget getAudioFeedback() {
+    DivWidget w = new DivWidget();
+    w.setId("audioFeedback_" + getExID());
+    w.setHeight("10px");
+    w.setWidth("95%");
+
+    w.addStyleName("leftFiveMargin");
+    w.addStyleName("rightFiveMargin");
+
+    w.getElement().getStyle().setClear(Style.Clear.LEFT);
+    w.getElement().getStyle().setBackgroundColor("white");
+    w.getElement().getStyle().setBorderColor("black");
+    w.getElement().getStyle().setBorderStyle(Style.BorderStyle.SOLID);
+    w.getElement().getStyle().setBorderWidth(1, PX);
+    audioFeedback = w;
+    audioFeedback.addStyleName("inlineFlex");
+    audioFeedback.setVisible(false);
+
+    return w;
   }
 
   /**
@@ -495,7 +406,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
           flClickableRow.getWidget(i).addStyleName("eightMarginTop");
         }
       } else {
-        flClickableRow.getElement().getStyle().setMarginTop(14, Style.Unit.PX);
+        flClickableRow.getElement().getStyle().setMarginTop(14, PX);
       }
 
       placeForRecordButton.getParent().addStyleName("inlineFlex");
@@ -507,6 +418,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       } else {
         placeForRecordButton.add(recordPanel.getScoreFeedback());
       }
+
+      add(getAudioFeedback());
+     // audioFeedback.setVisible(true);
     }
     return flContainer;
   }
@@ -531,15 +445,17 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   private void addPressAndHoldStyle(UIObject postAudioRecordButton) {
     Style style = postAudioRecordButton.getElement().getStyle();
     style.setProperty("borderRadius", "18px");
-    style.setPadding(8, Style.Unit.PX);
-    style.setWidth(19, Style.Unit.PX);
-    style.setMarginRight(5, Style.Unit.PX);
-    style.setHeight(19, Style.Unit.PX);
+    style.setPadding(8, PX);
+    style.setWidth(19, PX);
+    style.setMarginRight(5, PX);
+    style.setHeight(19, PX);
   }
 
   private PostAudioRecordButton getPostAudioRecordButton(NoFeedbackRecordAudioPanel<ClientExercise> recordPanel) {
     return recordPanel.getPostAudioRecordButton();
   }
+
+  long totalDur = 0;
 
   /**
    * @param response
@@ -551,20 +467,37 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       rehearseView.addPacketValidity(validity);
 
       if (validity == Validity.OK && firstVAD == -1) {
-        firstVAD = response.getStreamTimestamp();//System.currentTimeMillis();
+        firstVAD = response.getStreamTimestamp();
+
         if (DEBUG_PARTIAL) {
           logger.info("usePartial : (" + rehearseView.getNumValidities() +
               ") got first vad : " + firstVAD +
               " (" + (start - firstVAD) + ")" +
-              " for " + report() + " diff " + (System.currentTimeMillis() - start));
+              " for " + report() + " diff " + (System.currentTimeMillis() - start) + " dur " + response.getDuration());
         }
+        DivWidget w = getPacketDiv(response);
+        w.getElement().getStyle().setBackgroundColor("green");
+
+        totalDur += response.getDuration();
+        audioFeedback.add(w);
       } else {
         if (DEBUG_PARTIAL) {
           logger.info("usePartial : (" + rehearseView.getNumValidities() +
               " packets) skip validity " + validity +
               " vad " + firstVAD +
-              " for " + report() + " diff " + (System.currentTimeMillis() - start));
+              " for " + report() + " diff " + (System.currentTimeMillis() - start) + " dur " + response.getDuration());
         }
+
+        DivWidget w = getPacketDiv(response);
+        if (firstVAD != -1) {
+          totalDur += response.getDuration();
+        }
+        String value = validity == Validity.OK ? "green" : "black";
+        if (validity != Validity.OK && firstVAD != -1) {
+          if (totalDur < actualMinDur) value = "grey";
+        }
+        w.getElement().getStyle().setBackgroundColor(value);
+        audioFeedback.add(w);
       }
 
       if (response.isStreamStop()) {
@@ -574,6 +507,16 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     } else {
       logger.info("usePartial hmm " + report() + " getting response " + response + " but not recording...?");
     }
+  }
+
+  @NotNull
+  private DivWidget getPacketDiv(StreamResponse response) {
+    DivWidget w = new DivWidget();
+    w.setHeight("10px");
+    long l = (100 * response.getDuration()) / actualMinDur;
+  //  logger.info("1 percent " + l);
+    w.setWidth(l + "%");
+    return w;
   }
 
   private String report() {
@@ -611,6 +554,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   @Override
   public void removeMarkCurrent() {
     super.removeMarkCurrent();
+   // logger.info("removeMarkCurrent");
 
     if (doPushToTalk) {
       //  logger.info("removeMarkCurrent");
@@ -621,14 +565,11 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
       disableRecordButton();
     }
+    hideAudioFeedback();
   }
 
   @Override
   public void disableRecordButton() {
-//    logger.info("disableRecordButton");
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("disableRecordButton " +getExID()));
-//    logger.info("logException stack " + exceptionAsString);
-
     PostAudioRecordButton recordButton = getRecordButton();
     recordButton.setEnabled(false);
     recordButton.getElement().getStyle().setBackgroundColor(BLUE_INACTIVE_COLOR);
@@ -652,8 +593,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     w.getElement().setId("emoticon");
     w.setVisible(false);
     w.setHeight(DIM + "px");
-    //  w.setWidth(DIM + "px");
-    w.getElement().getStyle().setMarginTop(-5, Style.Unit.PX);
+    w.getElement().getStyle().setMarginTop(-5, PX);
     return w;
   }
 
@@ -666,14 +606,11 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     DivWidget flContainer = new DivWidget();
     flContainer.addStyleName("inlineFlex");
     Style style = flContainer.getElement().getStyle();
-    style.setMarginTop(15, Style.Unit.PX);
+    style.setMarginTop(15, PX);
 
     if (isMiddle() && exercise.hasEnglishAttr()) {
       style.setProperty("marginLeft", "auto");
     }
-//    else {
-//      logger.info("setmargin NOT left  auto on " + getExID());
-//    }
 
     flContainer.getElement().setId("RecordDialogExercisePanel_horiz");
     return flContainer;
@@ -693,7 +630,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     );
 
     firstVAD = -1;
-
+    totalDur = 0;
+    audioFeedback.clear();
+    audioFeedback.setVisible(true);
     if (pushToTalk) {
       enableRecordButton();
     } else {
@@ -702,14 +641,27 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   }
 
   public boolean reallyStartOrStopRecording() {
-    logger.info("reallyStartOrStopRecording " + "\n\tfor  " + getExID());
-    return getRecordButton().startOrStopRecording();
+    if (DEBUG) logger.info("reallyStartOrStopRecording " + "\n\tfor  " + getExID());
+    boolean b = getRecordButton().startOrStopRecording();
+//    if (!b) {
+//      hideAudioFeedback();
+//    }
+    return b;
+  }
+
+  private void hideAudioFeedback() {
+   // logger.info("hideAudioFeedback");
+    if (audioFeedback != null) {
+      audioFeedback.clear();
+      audioFeedback.setVisible(false);
+    }
   }
 
   /**
    * @see RehearseViewHelper#stopRecordingSafe()
    */
   public void stopRecordingSafe() {
+    hideAudioFeedback();
     getRecordButton().stopRecordingSafe();
   }
 
@@ -726,10 +678,11 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    * Check against expected duration to see when to end.
    *
    * @see #startRecording
-   * @see RehearseViewHelper#stopRecordingTurn()
+   * @see RehearseViewHelper#gotEndSilenceMaybeStopRecordingTurn()
    */
   public boolean gotEndSilenceMaybeStopRecordingTurn() {
     if (doPushToTalk) {
+ //     logger.info("gotEndSilenceMaybeStopRecordingTurn ");
       return false;
     } else {
 
@@ -744,7 +697,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
 
       boolean shouldStop = vadCheck || diff > minDurPlusMoveOn;// || doPushToTalk;
       if (shouldStop) {
-       // recordAudioPanel.showWaitCursor();
+        // recordAudioPanel.showWaitCursor();
 
         logger.info("gotEndSilenceMaybeStopRecordingTurn " + this +
             "\n\tvadCheck  " + vadCheck +
@@ -767,8 +720,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       }
     }
   }
-
-  public void hideWaitCursor() { recordAudioPanel.hideWaitCursor(); }
 
   /**
    * @return
