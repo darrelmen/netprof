@@ -58,6 +58,7 @@ import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.npdata.dao.SlickProject;
+import org.apache.commons.fileupload.FileItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -888,9 +889,7 @@ public class Project implements IPronunciationLookup, IProject {
       }
     });
 
-
     dialogs.forEach(dialog -> idToDialog.put(dialog.getID(), dialog));
-
 
     createDialogSectionHelper(idToDialog.values());
   }
@@ -970,4 +969,6 @@ public class Project implements IPronunciationLookup, IProject {
     }
     return b;
   }
+
+
 }

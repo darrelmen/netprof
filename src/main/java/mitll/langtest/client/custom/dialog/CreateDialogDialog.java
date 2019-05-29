@@ -31,18 +31,15 @@ package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
-import com.github.gwtbootstrap.client.ui.Label;
 import com.github.gwtbootstrap.client.ui.ListBox;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.TextBoxBase;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.github.gwtbootstrap.client.ui.constants.LabelType;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
-import mitll.langtest.client.domino.common.UploadViewBase;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.dialog.Dialog;
@@ -96,61 +93,22 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     return formField;
   }
 
-
-  @NotNull
-  private com.github.gwtbootstrap.client.ui.Button getUploadButton(int projid) {
-    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button();
-
-    w.setIcon(IconType.UPLOAD);
-    w.setType(ButtonType.WARNING);
-
-    addTooltip(w, "Upload image for dialog.");
-
-//    if (w != null) {
-    w.addClickHandler(event -> new UploadViewBase(projid, controller.getUser()) {
-      @NotNull
-      @Override
-      protected String getDialogTitle() {
-        return "Upload image";
-      }
-
-      @NotNull
-      @Override
-      protected String getHint() {
-        return "Choose an image";
-      }
-
-      @NotNull
-      @Override
-      protected String getAcceptValue() {
-        return "image/*";
-      }
-
-      @NotNull
-      @Override
-      protected String getService() {
-        return "audio-manager";
-      }
-
-      @Override
-      protected void addInfoLabels() {
-        com.github.gwtbootstrap.client.ui.Label w = getLabel("Choose an image.");
-        add(w);
-      }
-
-
-      @NotNull
-      private Label getLabel(String text) {
-        Label w = new Label(LabelType.WARNING, text);
-        w.getElement().getStyle().setFontSize(16, Style.Unit.PX);
-        w.getElement().getStyle().setWhiteSpace(Style.WhiteSpace.NORMAL);
-        return w;
-      }
-    }.showModal());
-    //}
-
-    return w;
-  }
+//  private String filePath = "";
+//  private int imageID;
+//
+//  @NotNull
+//  private com.github.gwtbootstrap.client.ui.Button getUploadButton(int projid) {
+//    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button("Upload image");
+//
+//    w.setIcon(IconType.UPLOAD);
+//    w.setType(ButtonType.INFO);
+//
+//    addTooltip(w, "Upload image for dialog.");
+//
+//    w.addClickHandler(event -> new ImageUpload(projid).showModal());
+//
+//    return w;
+//  }
 
   @Override
   protected int getMaxTitleLength() {
@@ -185,7 +143,11 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
 
     addDialogType(child);
 
-    child.add(getUploadButton(controller.getProjectID()));
+//    DivWidget imageContainer = new DivWidget();
+//    imageContainer.addStyleName("floatRight");
+//    imageContainer.addStyleName("rightFiveMargin");
+//    imageContainer.add(getUploadButton(controller.getProjectID()));
+//    child.add(imageContainer);
    /* {
       ListBox listBox = getListBox(200);
       listBox.addStyleName("leftFiveMargin");
@@ -300,8 +262,6 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     String unit = typeOrder.size() > 0 ? unitAndChapterSelections.get(typeOrder.get(0)) : "";
     String chapter = typeOrder.size() > 1 ? unitAndChapterSelections.get(typeOrder.get(1)) : "";
 
-    int imageID = -1;
-
     String imageRef = "";
 
     boolean isPrivate = !publicChoice.getValue();
@@ -309,7 +269,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     IDialog newDialog = new Dialog(-1,
         controller.getUser(),
         controller.getProjectID(),
-        imageID,
+        -1,
         System.currentTimeMillis(),
 
         unit,
@@ -325,8 +285,9 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
         "",
         isPrivate
     );
+    //  newDialog.setFilePath(filePath);
 
-    logger.info("doCreate new " + newDialog.getID() + " " + newDialog.isPrivate());
+    logger.info("doCreate new " + newDialog.getID() + " " + newDialog.isPrivate());// + " image: " + filePath);
 
     controller.getDialogService().addDialog(newDialog,
         new AsyncCallback<IDialog>() {
@@ -371,6 +332,8 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     mutable.setEnglish(entitleBox.getSafeText());
     mutable.setOrientation(theDescription.getText());
     mutable.setDialogType(DialogType.valueOf(dialogType.getSelectedValue()));
+//    logger.info("doEdit : using image " + imageID);
+  //  mutable.setImageID(imageID);
 
     controller.getDialogService().update(currentSelection, new AsyncCallback<Void>() {
       @Override
@@ -384,4 +347,5 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
       }
     });
   }
+
 }

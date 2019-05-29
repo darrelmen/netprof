@@ -33,6 +33,7 @@ import mitll.hlt.domino.server.extern.importers.ImportResult;
 import mitll.langtest.server.LangTestDatabaseImpl;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
+import mitll.langtest.server.database.image.ImageResult;
 import mitll.langtest.server.domino.ImportInfo;
 import mitll.langtest.server.domino.ImportProjectInfo;
 import mitll.langtest.server.services.OpenUserServiceImpl;
@@ -157,9 +158,19 @@ public interface IProjectManagement {
 
   Map<String, Integer> getNpToDomino(int dominoProjectID);
 
+  /**
+   *
+   * @param dominoID
+   * @param item
+   * @param typeOrder
+   * @param userID
+   * @return
+   */
   ImportResult doDominoImport(int dominoID, FileItem item, Collection<String> typeOrder, int userID);
 
   ImportResult doDominoImport(int dominoID, File excelFile, Collection<String> typeOrder, int userID);
+
+  ImageResult doImageImport(int projid, String language, int dialogID, FileItem item);
 
   OOVInfo checkOOV(int id, int num, int offset);
 

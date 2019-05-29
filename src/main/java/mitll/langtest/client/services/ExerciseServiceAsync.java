@@ -80,4 +80,6 @@ public interface ExerciseServiceAsync<T extends CommonShell & HasUnitChapter> {
   void refreshAllAudio(int projid, AsyncCallback<Void> async);
 
   void reloadDialog(int projectID, int dialogID, AsyncCallback<Void> async);
+
+  void setImagePath(int dialogID, String path, AsyncCallback<Boolean> async);
 }

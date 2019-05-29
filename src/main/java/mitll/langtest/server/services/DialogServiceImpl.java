@@ -278,13 +278,19 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   @Override
   public IDialog addDialog(IDialog dialog) throws DominoSessionException {
     getUserIDFromSessionOrDB();
-    return db.getDialogDAO().add(dialog);
+    return db.getDialogDAO().add(dialog, getProject(dialog.getProjid()).getLanguage());
   }
 
   public void update(IDialog dialog) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     db.getDialogDAO().update(dialog);
   }
+
+//  @Override
+//  public boolean updateImage(int dialogID, int imageID) throws DominoSessionException {
+//    getUserIDFromSessionOrDB();
+//    return db.getDialogDAO().updateImage(dialogID,imageID);
+//  }
 
   public DialogExChangeResponse addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
@@ -314,7 +320,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
 
     dialog.getCoreVocabulary().forEach(exercise ->
         logger.info("addEmptyCoreExercise before  (" + dialogID +
-            ") vocab for " + exercise.getID() + " eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() +"'"));
+            ") vocab for " + exercise.getID() + " eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() + "'"));
 
     ClientExercise added = db.getDialogDAO().addCoreVocab(dialog, userIDFromSessionOrDB, afterExid, System.currentTimeMillis());
 
@@ -329,7 +335,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
 
     dialog.getCoreVocabulary().forEach(exercise ->
         logger.info("addEmptyCoreExercise (" + dialogID +
-            ") vocab for " + exercise.getID() + " eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() +"'"));
+            ") vocab for " + exercise.getID() + " eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() + "'"));
 
 
     List<ClientExercise> objects = new ArrayList<>();

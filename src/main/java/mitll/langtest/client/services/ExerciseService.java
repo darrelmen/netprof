@@ -90,4 +90,5 @@ public interface ExerciseService<T extends CommonShell & ScoredExercise> extends
 
   void reloadDialog(int projectID, int dialogID) throws DominoSessionException;
 
+  boolean setImagePath(int dialogID, String path) throws DominoSessionException;
 }

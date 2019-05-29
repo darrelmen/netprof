@@ -38,12 +38,14 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
+import mitll.hlt.domino.server.extern.importers.ImportResult;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.CoreVocabEditor;
 import mitll.langtest.client.dialog.DialogEditor;
 import mitll.langtest.client.dialog.DialogHelper;
+import mitll.langtest.client.domino.common.UploadViewBase;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.scoring.IFocusable;
@@ -65,7 +67,7 @@ import static mitll.langtest.client.custom.INavigation.QC_PERMISSIONS;
 /**
  * Created by go22670 on 7/3/17.
  */
-public class DialogEditorView<T extends IDialog> extends ContentEditorView<T>  {
+public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   private final Logger logger = Logger.getLogger("DialogEditorView");
 
   private static final String LIST = "dialog";
@@ -102,6 +104,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T>  {
   protected DivWidget getButtons(ButtonMemoryItemContainer<T> container) {
     DivWidget buttons = super.getButtons(container);
     buttons.add(getCoreVocabButton(container));
+    buttons.add(getUploadImageButton(container));
     buttons.add(getListenButton(container));
     return buttons;
   }
@@ -129,6 +132,91 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T>  {
     return learn;
   }
 
+  @NotNull
+  private Button getUploadImageButton(ButtonMemoryItemContainer<T> container) {
+    Button learn = getSuccessButton("Upload Image");
+    learn.setIcon(IconType.PENCIL);
+    learn.setType(ButtonType.INFO);
+
+    learn.addClickHandler(event -> {
+      int itemID = getItemID(container);
+      logger.info("dialog item ID " + itemID);
+      ImageUpload widgets1 = new ImageUpload(controller.getUser(), itemID) {
+        @Override
+        protected void handleFormSubmitSuccess(UploadResult result) {
+          super.handleFormSubmitSuccess(result);
+          if (result.isSuccess()) {
+            getCurrentSelection(container).getMutable().setImageRef(result.getFilePath());
+            controller.getExerciseService().setImagePath(itemID, result.getFilePath(), new AsyncCallback<Boolean>() {
+              @Override
+              public void onFailure(Throwable caught) {
+
+
+              }
+
+              @Override
+              public void onSuccess(Boolean result) {
+              //  logger.info("Set image path " + result);
+                if (!result) {
+                  logger.warning("Set image path " + result);
+
+                }
+              }
+            });
+          }
+
+        }
+      };
+      widgets1.init(controller.getProjectID());
+      widgets1.showModal(new DialogHelper.CloseListener() {
+        @Override
+        public boolean gotYes() {
+          UploadViewBase.UploadResult result = widgets1.getResult();
+          if (result != null && result.getImageID() > 0) {
+            logger.info("got back " + result.getImageID() + " " + result.getFilePath());
+//            controller.getDialogService().updateImage(getItemID(container), result.getImageID(), new AsyncCallback<Boolean>() {
+//              @Override
+//              public void onFailure(Throwable caught) {
+//
+//              }
+//
+//              @Override
+//              public void onSuccess(Boolean result) {
+//                logger.info("got back " + result);
+//              }
+//            });
+            //    getCurrentSelection(container).getMutable().setImageRef(result.getFilePath());
+          } else {
+            logger.info("2 got back " + result);
+          }
+          return false;
+        }
+
+        @Override
+        public void gotNo() {
+          logger.info("gotNo ");
+
+        }
+
+        @Override
+        public void gotHidden() {
+          logger.info("gotHidden ");
+
+          logger.info("2 got back " + widgets1.getResult());
+
+        }
+      });
+    });
+    addTooltip(learn, "Upload a dialog image.");
+    //learn.setEnabled(!container.isEmpty());
+    container.addButton(learn);
+    return learn;
+  }
+
+  public interface ResultListener {
+    void got(UploadViewBase.UploadResult result);
+  }
+
   private void showLearnList(ButtonMemoryItemContainer<T> container) {
     controller.getNavigation().showDialogIn(getItemID(container), INavigation.VIEWS.LISTEN);
   }
@@ -142,7 +230,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T>  {
     showYours(Collections.emptyList(), left);
 
     int user = controller.getUser();
-    logger.info("addYours project " +controller.getProjectID());
+    logger.info("addYours project " + controller.getProjectID());
     ExerciseListRequest request =
         new ExerciseListRequest(0, user, controller.getProjectID()).setSortByDate(true);
 
@@ -239,8 +327,9 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T>  {
         null,
         new MyShownCloseListener(editorTurnDialogEditor, selectedItem.getID()), 720, -1, true);
   }
-//  @Override
-  protected void editCoreVocabList(T selectedItem) {
+
+  //  @Override
+  private void editCoreVocabList(T selectedItem) {
     DivWidget listContent = new DivWidget();
 
     CoreVocabEditor editorTurnDialogEditor = new CoreVocabEditor(controller, INavigation.VIEWS.CORE_EDITOR, selectedItem);

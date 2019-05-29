@@ -34,6 +34,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectType;
 import mitll.npdata.dao.SlickProject;
+import org.apache.commons.fileupload.FileItem;
 
 import java.util.List;
 
@@ -49,7 +50,7 @@ public interface IProject {
 
   String getLanguage();
 
-  abstract Language getLanguageEnum();
+  Language getLanguageEnum();
 
   SlickProject getProject();
 
@@ -64,4 +65,6 @@ public interface IProject {
   CommonExercise getExerciseByID(int id);
 
   CommonExercise forgetExercise(int prev);
+
+ // String doImageImport(FileItem item);
 }

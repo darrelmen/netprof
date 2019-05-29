@@ -54,6 +54,7 @@ import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.image.ImageResult;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.user.IUserDAO;
@@ -1514,7 +1515,40 @@ public class ProjectManagement implements IProjectManagement {
     logger.info("doDominoImport : file " + item);
     File filename = getFile(item);
     logger.info("doDominoImport : file is " + filename);
-    return doDominoImport(dominoID, filename, typeOrder, userID);
+
+    if (item.getName().endsWith("xlsx") || item.getName().endsWith("xls")) {
+      return doDominoImport(dominoID, filename, typeOrder, userID);
+    } else {
+      return new ImportResult();
+    }
+  }
+
+  @Override
+  public ImageResult doImageImport(int projid, String language, int dialogID, FileItem item) {
+    logger.info("doImageImport : file " + item);
+    File filename = getFile(item);
+    logger.info("doImageImport : file is " + filename);
+
+    if (filename != null) {
+      ImageResult imageResult = db.getImageDAO().insertAndGetImageID(projid, language.toLowerCase(), filename);
+      if (imageResult.getImageID() > 0) {
+        boolean b = db.getDialogDAO().updateImage(dialogID, imageResult.getImageID());
+        if (b) {
+          logger.info("doImageImport Set path " + imageResult.getPath());
+//          getProject(projid, true).getDialog(dialogID).getMutable().setImageRef(imageResult.getPath());
+        } else {
+          logger.warn("doImageImport huh? didn't update dialog image id for dialog #" + dialogID);
+
+        }
+      }
+      else {
+        logger.warn("doImageImport imageResult for dialog #" + dialogID + " " + imageResult);
+
+      }
+      return imageResult;
+    } else {
+      return new ImageResult();
+    }
   }
 
   @Override
@@ -1548,8 +1582,9 @@ public class ProjectManagement implements IProjectManagement {
 
   private File getFile(FileItem item) {
     try {
-      File tempDir = Files.createTempDirectory("fileUpload_" + item.getName()).toFile();
-      File tempFile = new File(tempDir, "upload_" + System.currentTimeMillis());
+      String name = item.getName();
+      File tempDir = Files.createTempDirectory("fileUpload_" + name).toFile();
+      File tempFile = new File(tempDir, System.currentTimeMillis() + "_" + name);
 
       logger.info("write " +
           "\n\tfile item " + item +

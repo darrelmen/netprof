@@ -36,4 +36,10 @@ public interface IMutableDialog extends MutableShell {
   void setOrientation(String orientation);
   void setDialogType(DialogType type);
   void setIsPrivate(boolean val);
+
+
+  void setFilePath(String filePath);
+void setImageRef(String imageRef);
+  void setImageID(int imageID);
+
 }

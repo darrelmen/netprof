@@ -57,15 +57,19 @@ public class UploadViewBase extends DivWidget {
   private static final String HORRIBLE_PREV = "<pre style=\"word-wrap: break-word; white-space: pre-wrap;\">";
 
   private Form mainForm;
-  private Fieldset fields;
+  protected Fieldset fields;
 
   private FileUpload uploadBox;
 
   private int user;
+  private static final boolean DEBUG = false;
 
-  public UploadViewBase(int projectID, int user) {
+  public interface ResultListener {
+    void got(UploadViewBase.UploadResult result);
+  }
+
+  public UploadViewBase(int user) {
     this.user = user;
-    init(projectID);
   }
 
   @NotNull
@@ -88,12 +92,15 @@ public class UploadViewBase extends DivWidget {
     return "exercise-manager";
   }
 
-  private void handleFormSubmitSuccess(UploadResult result) {
+  protected void handleFormSubmitSuccess(UploadResult result) {
     result.inform();
   }
 
-  private void init(int projectID) {
-    //   this.projectID = projectID;
+  /**
+   * @param projectID
+   */
+  public UploadViewBase init(int projectID) {
+    // logger.info("init " + projectID);
     mainForm = new Form();
     //String sUrl = DownloadHelper.toDominoUrl("langtest/exercise-manager");
     mainForm.setAction(DownloadHelper.toDominoUrl("langtest/" +
@@ -116,6 +123,7 @@ public class UploadViewBase extends DivWidget {
 
     mainForm.addStyleName("topFiveMargin");
     add(mainForm);
+    return this;
     //	initWidget(mainForm);
   }
 
@@ -173,7 +181,8 @@ public class UploadViewBase extends DivWidget {
 
   private DialogHelper dialogHelper;
 
-  public void showModal() {
+  public void showModal(DialogHelper.CloseListener closeListener) {
+    logger.info("showModal got " + closeListener);
     dialogHelper = new DialogHelper(false) {
       @Override
       protected void afterGotYes(Button closeButton) {
@@ -184,17 +193,24 @@ public class UploadViewBase extends DivWidget {
       public boolean gotYes() {
 
         submitForm();
+        if (closeListener != null) {
+          closeListener.gotYes();
+        }
         return false;
       }
 
       @Override
       public void gotNo() {
-
+        if (closeListener != null) {
+          closeListener.gotNo();
+        }
       }
 
       @Override
       public void gotHidden() {
-
+        if (closeListener != null) {
+          closeListener.gotHidden();
+        }
       }
     }, 400, WIDTH);
   }
@@ -226,7 +242,7 @@ public class UploadViewBase extends DivWidget {
     // we can get the result text here (see the FormPanel documentation for
     // further explanation).
     String results = event.getResults();
-    // logger.info("handleSubmitComplete got " + results);
+    logger.info("handleSubmitComplete got " + results);
 
     if (results != null) {
       if (results.startsWith("<pre>")) results = results.substring("<pre>".length());
@@ -264,7 +280,7 @@ public class UploadViewBase extends DivWidget {
    * Digest a json response from a servlet checking for a session expiration code
    */
   private JSONObject digestJsonResponse(String json) {
-    logger.info("handleSubmitComplete Digesting response " + json);
+    logger.info("handleSubmitComplete Digesting response '" + json + "'");
     try {
       JSONValue val = JSONParser.parseStrict(json);
       JSONObject obj = (val != null) ? val.isObject() : null;
@@ -295,59 +311,70 @@ public class UploadViewBase extends DivWidget {
   /**
    * TODO:for audio, get metadata info, save the document
    */
-  class UploadResult {
-    public boolean success;
+  public class UploadResult {
+    private boolean success;
 
-    public int num; // Returned for document attachments.
-    //
-//		public final int attId; // Returned for project/exam attachments
-    String errMsg;
+    private int num; // Returned for document attachments.
+    private String errMsg;
+    private String filePath;
+    private int imageID;
 
     UploadResult(boolean success) {
       this.success = success;
     }
 
-    //		public final String attFilename;
-//		public final String attContentType;
-//		private final JSONObject audioMetadata;
-//		public final double attSize;
-//
     UploadResult(JSONObject jsonObj) {
       if (jsonObj != null) {
+        logger.info("got back " + jsonObj);
+
         JSONValue jVal = jsonObj.get("Success");
+        //   logger.info("Success " + jVal);
         success = (jVal != null && jVal.isBoolean() != null) && jVal.isBoolean().booleanValue();
+        //  logger.info("Success " + jVal + " " + success);
+
         jVal = jsonObj.get("Error");
         errMsg = (jVal != null && jVal.isString() != null) ? jVal.isString().stringValue() : "";
 
         jVal = jsonObj.get("Num");
         num = (jVal != null && jVal.isNumber() != null) ? (int) jVal.isNumber().doubleValue() : -1;
-//				jVal = jsonObj.get(AttachmentUpload.ATT_ID_RVAL);
-//				attId = (jVal != null && jVal.isNumber() != null) ? (int)jVal.isNumber().doubleValue() : -1;
-//				jVal = jsonObj.get(AttachmentUpload.ATT_FILENAME_RVAL);
-//				attFilename = (jVal != null && jVal.isString() != null) ? jVal.isString().stringValue() : "";
-//				jVal = jsonObj.get(AttachmentUpload.ATT_CONTENT_TYPE_RVAL);
-//				attContentType = (jVal != null && jVal.isString() != null) ? jVal.isString().stringValue() : "";
-//				jVal = jsonObj.get(AttachmentUpload.ATT_CONTENT_SIZE_RVAL);
-//				attSize = (jVal != null && jVal.isNumber() != null) ? jVal.isNumber().doubleValue() : -1.0;
-//
-//				audioMetadata = jsonObj.get(AttachmentUpload.AUDIO_METADATA).isObject();
+
+        jVal = jsonObj.get("FilePath");
+        filePath = (jVal != null && jVal.isString() != null) ? jVal.isString().stringValue() : "";
+
+
+        jVal = jsonObj.get("ImageID");
+        imageID = (jVal != null && jVal.isNumber() != null) ? (int) jVal.isNumber().doubleValue() : -1;
+
+        //  logger.info("Parsed result: (1) success=" + success + ", num=" + num + ", errMsg=" + errMsg);
+
       } else {
         success = false;
-//				docId = -1;
-//				attId = -1;
-//				errMsg = "Unknown Error";
-//				attContentType = "";
-//				attFilename = "";
-//				attSize = -1.0;
-//				audioMetadata = new JSONObject();
-
       }
       logger.info("Parsed result: success=" + success + ", num=" + num + ", errMsg=" + errMsg);
-
     }
 
     void inform() {
       new DialogHelper(false).showErrorMessage("Import Complete!", success ? "Imported " + num + " items" : "Failed to import : " + errMsg);
+    }
+
+    public String getFilePath() {
+      return filePath;
+    }
+
+    public boolean isSuccess() {
+      return success;
+    }
+
+    public int getNum() {
+      return num;
+    }
+
+    public String getErrMsg() {
+      return errMsg;
+    }
+
+    public int getImageID() {
+      return imageID;
     }
   }
 

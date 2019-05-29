@@ -39,7 +39,7 @@ import mitll.langtest.server.database.exercise.Search;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.exercise.TripleExercises;
 import mitll.langtest.server.database.project.Project;
-import mitll.langtest.server.domino.ExcelUpload;
+import mitll.langtest.server.domino.FileUpload;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
 import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.server.trie.ExerciseTrie;
@@ -109,7 +109,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 //    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
     if (contentType != null && contentType.contains("multipart/form-data")) {
       //reportOnHeaders(request);
-      new ExcelUpload().doExcelUpload(request, response, this, db.getProjectManagement());
+      new FileUpload().doFileUpload(request, response, this, db.getProjectManagement(), false);
     } else {
       super.service(request, response);
     }
@@ -1440,5 +1440,17 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     db.getProject(projectID)
         .getDialog(dialogID)
         .getExercises().forEach(exercise -> exerciseDAO.refresh(exercise.getID()));
+  }
+
+  @Override
+  public boolean setImagePath(int dialogID, String path) throws DominoSessionException {
+    getUserIDFromSessionOrDB();
+
+    int projectForDialog = db.getDialogDAO().getProjectForDialog(dialogID);
+    Project project = db.getProject(projectForDialog);
+    if (project == null) return false;
+    else if (project.getDialog(dialogID) == null) return false;
+    project.getDialog(dialogID).getMutable().setImageRef(path);
+    return true;
   }
 }

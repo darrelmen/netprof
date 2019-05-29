@@ -45,26 +45,26 @@ import java.util.Map;
 @RemoteServiceRelativePath("dialog-manager")
 public interface DialogService extends RemoteService {
   /**
-   * @see mitll.langtest.client.dialog.DialogExerciseList#getTypeToValues(Map, int)
    * @param request
    * @return
    * @throws DominoSessionException
+   * @see mitll.langtest.client.dialog.DialogExerciseList#getTypeToValues(Map, int)
    */
   FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException;
 
   /**
-   * @see mitll.langtest.client.dialog.DialogExerciseList#getExerciseIDs(Map, String, int, ExerciseListRequest)
    * @param request
    * @return
    * @throws DominoSessionException
+   * @see mitll.langtest.client.dialog.DialogExerciseList#getExerciseIDs(Map, String, int, ExerciseListRequest)
    */
   ExerciseListWrapper<IDialog> getDialogs(ExerciseListRequest request) throws DominoSessionException;
 
   /**
-   * @see mitll.langtest.client.dialog.ListenViewHelper#showContent
    * @param id
    * @return
    * @throws DominoSessionException
+   * @see mitll.langtest.client.dialog.ListenViewHelper#showContent
    */
   IDialog getDialog(int id) throws DominoSessionException;
 
@@ -72,9 +72,9 @@ public interface DialogService extends RemoteService {
 
   void update(IDialog dialog) throws DominoSessionException;
 
+//  boolean updateImage(int dialogID, int imageID) throws DominoSessionException;
+
   /**
-   *
-   *
    * @param projid
    * @param id
    * @throws DominoSessionException
@@ -82,25 +82,27 @@ public interface DialogService extends RemoteService {
   boolean delete(int projid, int id) throws DominoSessionException;
 
   DialogExChangeResponse addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException;
+
   DialogExChangeResponse addEmptyCoreExercise(int dialogID, int afterExid) throws DominoSessionException;
 
   /**
-   * @see RehearseViewHelper#setSession
    * @param dialogSession
    * @return
    * @throws DominoSessionException
+   * @see RehearseViewHelper#setSession
    */
   int addSession(DialogSession dialogSession) throws DominoSessionException;
 
   /**
-   * @see mitll.langtest.client.analysis.SessionAnalysis#SessionAnalysis
    * @param userid
    * @param dialogid
    * @return
    * @throws DominoSessionException
+   * @see mitll.langtest.client.analysis.SessionAnalysis#SessionAnalysis
    */
   List<IDialogSession> getDialogSessions(int userid, int dialogid) throws DominoSessionException;
 
   List<Integer> deleteATurnOrPair(int projid, int dialogID, int exid) throws DominoSessionException;
+
   boolean deleteCoreExercise(int dialogID, int exid) throws DominoSessionException;
 }

@@ -42,13 +42,15 @@ import java.util.List;
 public interface IDialogDAO extends IDAO {
   /**
    * @param toAdd
+   * @param language
    * @return
    * @see CreateDialogDialog#doCreate
    * @see mitll.langtest.server.services.DialogServiceImpl#addDialog
    */
-  IDialog add(IDialog toAdd);
+  IDialog add(IDialog toAdd, String language);
 
   boolean update(IDialog toAdd);
+  boolean updateImage(int dialogID,int imageID);
 
   List<ClientExercise> addEmptyExercises(IDialog toAdd, int userid, int afterExid, boolean isLeft, long now);
 

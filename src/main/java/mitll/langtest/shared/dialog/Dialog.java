@@ -57,6 +57,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
   private int userid;
   private int projid;
   private int imageid;
+  private String filePath;
 
   private long modified;
 
@@ -513,6 +514,21 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     this.kind = dialogType;
   }
 
+  @Override
+  public String getFilePath() {
+    return filePath;
+  }
+
+  @Override
+  public void setFilePath(String filePath) {
+    this.filePath = filePath;
+  }
+
+  @Override
+  public void setImageID(int imageID) {
+    this.imageid = imageID;
+  }
+
   public String toString() {
     return "Dialog #" + id +
         "\n\tkind        " + kind +
@@ -520,6 +536,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
         "\n\tchapter     " + chapter +
         "\n\ttitle       " + entitle +
         "\n\tfltitle     " + fltitle +
+        "\n\timageid     " + imageid +
         "\n\torientation " + orientation +
         "\n\timage       " + imageRef +
         "\n\tprivate     " + isPrivate +

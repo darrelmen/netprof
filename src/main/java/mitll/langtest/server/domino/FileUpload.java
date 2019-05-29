@@ -32,6 +32,7 @@ package mitll.langtest.server.domino;
 import com.google.gson.JsonObject;
 import mitll.hlt.domino.server.extern.importers.ImportResult;
 import mitll.hlt.domino.shared.Constants;
+import mitll.langtest.server.database.image.ImageResult;
 import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.services.MyRemoteServiceServlet;
@@ -49,19 +50,29 @@ import java.util.List;
 
 import static mitll.langtest.server.audio.HTTPClient.UTF_8;
 
-public class ExcelUpload {
-  private static final Logger logger = LogManager.getLogger(ExcelUpload.class);
+public class FileUpload {
+  private static final Logger logger = LogManager.getLogger(FileUpload.class);
 
-  public void doExcelUpload(HttpServletRequest request,
-                            HttpServletResponse response,
-                            MyRemoteServiceServlet serviceServlet,
-                            IProjectManagement projectManagement) {
-    logger.info("doExcelUpload : " +
+  /**
+   * @param request
+   * @param response
+   * @param serviceServlet
+   * @param projectManagement
+   * @param isImage
+   * @see mitll.langtest.server.services.AudioServiceImpl#service(HttpServletRequest, HttpServletResponse)
+   */
+  public void doFileUpload(HttpServletRequest request,
+                           HttpServletResponse response,
+                           MyRemoteServiceServlet serviceServlet,
+                           IProjectManagement projectManagement,
+                           boolean isImage) {
+    logger.info("doFileUpload : " +
         "\n\tRequest " + request.getQueryString() +
         "\n\tpath    " + request.getPathInfo());
 
     int projId = -1;
     int userID = -1;
+    int dialogID = -99;
     FileItem docImportAttachment = null;
 
     DiskFileItemFactory fileItemFactory = new DiskFileItemFactory();
@@ -84,7 +95,7 @@ public class ExcelUpload {
         String fieldValue = item.getString();
         String name = item.getName();
 
-        logger.info("doExcelUpload field '" + fieldName + "' = " + fieldValue.length() + " bytes : '" + name + "'");
+        logger.info("doFileUpload field '" + fieldName + "' = " + fieldValue.length() + " bytes : '" + name + "'");
 
         if (Constants.PROJ_ID_PNM.equals(fieldName)) {
           projId = Integer.parseInt(fieldValue);
@@ -94,13 +105,19 @@ public class ExcelUpload {
           }
         } else if ("user-id".equalsIgnoreCase(fieldName)) {
           userID = Integer.parseInt(fieldValue);
+        } else if ("dialog-id".equalsIgnoreCase(fieldName)) {
+          logger.warn("doFileUpload found field " + fieldName + " = '" + fieldValue + "'");
+          dialogID = Integer.parseInt(fieldValue);
+        } else {
+          logger.warn("doFileUpload ignored field " + fieldName);
         }
       }
 
       int sessionUserID = serviceServlet.getSessionUserID();
 
-      logger.info("doExcelUpload service : " +
+      logger.info("doFileUpload service : " +
           "\n\tprojId              " + projId +
+          "\n\tdialogID            " + dialogID +
           "\n\tsessionUserID       " + sessionUserID +
           "\n\tuserID              " + userID +
           "\n\tdocImportAttachment " + docImportAttachment);
@@ -113,33 +130,41 @@ public class ExcelUpload {
       } else if (docImportAttachment == null) {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("Success", false);
-        jsonObject.addProperty("Error", "no import excel file specified?");
+        jsonObject.addProperty("Error", "no import file specified?");
         sendResponse(response, jsonObject.toString());
       } else {
         Project project = serviceServlet.getProject(projId);
-        int dominoid = project.getProject().dominoid();
-        if (dominoid == -1) {
-          JsonObject jsonObject = new JsonObject();
-          jsonObject.addProperty("Success", false);
-          jsonObject.addProperty("Error", "no domino id set for project.");
-          sendResponse(response, jsonObject.toString());
+
+        if (isImage) {
+          importImage(response, projectManagement, projId, docImportAttachment, project, dialogID);
         } else {
-          ImportResult b = projectManagement.doDominoImport(dominoid, docImportAttachment, project.getTypeOrder(), userID);
+          int dominoid = project.getProject().dominoid();
+
           JsonObject jsonObject = new JsonObject();
-          jsonObject.addProperty("Success", b.isSuccess());
-          jsonObject.addProperty("Error", "None");
-          jsonObject.addProperty("Num", b.getImportedDocs().size());
-          sendResponse(response, jsonObject.toString());
+          if (dominoid == -1) {
+            jsonObject.addProperty("Success", false);
+            jsonObject.addProperty("Error", "no domino id set for project.");
+            sendResponse(response, jsonObject.toString());
+          } else {
+            ImportResult b = projectManagement.doDominoImport(dominoid, docImportAttachment, project.getTypeOrder(), userID);
+            jsonObject.addProperty("Success", b.isSuccess());
+            jsonObject.addProperty("Error", "None");
+            jsonObject.addProperty("Num", b.getImportedDocs().size());
+            sendResponse(response, jsonObject.toString());
+          }
         }
       }
-    } catch (FileUploadException e) {
+
+    } catch (
+        FileUploadException e) {
       logger.error("got error uploading " + e, e);
 
       JsonObject jsonObject = new JsonObject();
       jsonObject.addProperty("Success", false);
       jsonObject.addProperty("Error", "FileUploadException");
       sendResponse(response, jsonObject.toString());
-    } catch (DominoSessionException dse) {
+    } catch (
+        DominoSessionException dse) {
       logger.info("session exception " + dse, dse);
 
       JsonObject jsonObject = new JsonObject();
@@ -147,6 +172,21 @@ public class ExcelUpload {
       jsonObject.addProperty("Error", "DominoSessionException");
       sendResponse(response, jsonObject.toString());
     }
+  }
+
+  private void importImage(HttpServletResponse response,
+                           IProjectManagement projectManagement,
+                           int projId,
+                           FileItem docImportAttachment,
+                           Project project, int dialogID) {
+    ImageResult result = projectManagement.doImageImport(projId, project.getLanguage(), dialogID, docImportAttachment);
+    JsonObject jsonObject = new JsonObject();
+    jsonObject.addProperty("Success", true);
+    jsonObject.addProperty("Error", "None");
+    jsonObject.addProperty("Num", 1);
+    jsonObject.addProperty("FilePath", result.getPath());
+    jsonObject.addProperty("ImageID", result.getImageID());
+    sendResponse(response, jsonObject.toString());
   }
 
   private void sendResponse(HttpServletResponse response, String outJSON) {

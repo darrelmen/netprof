@@ -27,70 +27,25 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.shared.dialog;
+package mitll.langtest.server.database.image;
 
-import mitll.langtest.shared.custom.INameable;
-import mitll.langtest.shared.custom.IPublicPrivate;
-import mitll.langtest.shared.exercise.*;
+public class ImageResult {
+  private String path = "";
+  private int imageID = -1;
 
-import java.util.List;
-import java.util.Map;
+  public ImageResult() {
+  }
 
-/**
- * @see mitll.langtest.server.services.DialogServiceImpl#getScoreHistoryForDialogs
- */
-public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable, IPublicPrivate {
-  int getUserid();
+  ImageResult(String path, int imageID) {
+    this.path = path;
+    this.imageID = imageID;
+  }
 
-  int getProjid();
+  public String getPath() {
+    return path;
+  }
 
-  long getModified();
-
-  DialogType getKind();
-
-  int getImageID();
-  String getCountryCode();
-  String getImageRef();
-
-  String getOrientation();
-
-
-  String getUnit();
-  String getChapter();
-
-  String getAttributeValue(DialogMetadata metadata);
-  ExerciseAttribute getAttribute(DialogMetadata metadata);
-
-  /**
-   * Attributes/meta-data of a dialog
-   * @return
-   */
-  List<ExerciseAttribute> getAttributes();
-
-  /**
-   * All the exercises in a dialog.
-   * @return
-   */
-  List<ClientExercise> getExercises();
-  ClientExercise getExByID(int exid);
-
-  int getLastID();
-  ClientExercise getLast();
-
-  List<ClientExercise> getCoreVocabulary();
-
-  List<ClientExercise> getBothExercisesAndCore();
-
-  /**
-   * The names of the speakers in a dialog - could be more than 2!
-   * @return
-   */
-  List<String> getSpeakers();
-
-  Map<String, List<ClientExercise>> groupBySpeaker();
-
-  IMutableDialog getMutable();
-
-  String getFilePath();
-
+  public int getImageID() {
+    return imageID;
+  }
 }

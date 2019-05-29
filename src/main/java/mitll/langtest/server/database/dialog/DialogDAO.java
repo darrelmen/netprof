@@ -412,6 +412,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
       if (s == null) {
         logger.warn("addImage no image by " + imageid + "for dialog " + dialog);
       } else {
+        logger.info("addImage image ref " + s);
+        String audioBaseDir = databaseImpl.getServerProps().getAudioBaseDir();
+        s = s.substring(audioBaseDir.length());
+        logger.info("addImage image ref now " + s);
         dialog.setImageRef(s);
       }
     }
@@ -594,20 +598,25 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * TODO : store creation time?
    *
    * @param toAdd
+   * @param language
    * @return
    * @see CreateDialogDialog#doCreate
    * @see mitll.langtest.server.services.DialogServiceImpl#addDialog
    */
   @Override
-  public IDialog add(IDialog toAdd) {
+  public IDialog add(IDialog toAdd, String language) {
     int projid = toAdd.getProjid();
     int userid = toAdd.getUserid();
 
+    int imageID = toAdd.getImageID();
+
+//    String filePath = toAdd.getFilePath();
+//    int imageID = insertAndGetImageID(language, projid, filePath);
     int add = add(
         userid,
         projid,
         -1,
-        toAdd.getImageID(),
+        imageID,
         toAdd.getModified(),
         toAdd.getModified(),
         toAdd.getUnit(),
@@ -639,6 +648,12 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return toAdd;
   }
 
+/*
+  public boolean setImageID(int dialogID, int imageID) {
+    return dao.setImageID(dialogID, imageID) > 0;
+  }
+*/
+
   /**
    * @param toAdd
    * @param projid
@@ -647,7 +662,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
    * @param isLeft
    * @param now
    * @return
-   * @see #add(IDialog)
+   * @see IDialogDAO#add(IDialog, String)
    */
   public List<ClientExercise> addEmptyExercises(IDialog toAdd, int userid, int afterExid, boolean isLeft, long now) {
     int projid = toAdd.getProjid();
@@ -1094,6 +1109,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
   }
 
   @Override
+  public boolean updateImage(int dialogID, int imageID) {
+    return dao.setImageID(dialogID, imageID) > 0;
+  }
+
+  @Override
   public boolean update(IDialog dialog) {
     long modified = System.currentTimeMillis();
 
@@ -1113,12 +1133,14 @@ public class DialogDAO extends DAO implements IDialogDAO {
       }
     }
 
+    int imageID = dialog.getImageID();
+    logger.info("update image id " + imageID);
     boolean b = dao.update(new SlickDialog(
         dialog.getID(),
         dialog.getUserid(),
         projid,
         -1,
-        dialog.getImageID(),
+        imageID,
         new Timestamp(modified),
         new Timestamp(modified),
         dialog.getUnit(), dialog.getChapter(),

@@ -55,7 +55,7 @@ import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectHelper;
 import mitll.langtest.server.domino.AudioCopy;
-import mitll.langtest.server.domino.ExcelUpload;
+import mitll.langtest.server.domino.FileUpload;
 import mitll.langtest.server.scoring.JsonScoring;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
@@ -224,7 +224,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 //    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
       if (contentType != null && contentType.contains("multipart/form-data")) {
         //reportOnHeaders(request);
-        new ExcelUpload().doExcelUpload(request, response, this, db.getProjectManagement());
+
+        logger.info("service got image request! " + contentType);
+        new FileUpload().doFileUpload(request, response, this, db.getProjectManagement(), true);
       } else {
         super.service(request, response);
       }
@@ -1096,17 +1098,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
    * @see RecordButton.RecordingListener#stopRecording
    * @see RecordButton.RecordingListener#stopRecording
    */
-/*  @Override
-  public AudioAnswer writeAudioFile(String base64EncodedString,
-                                    AudioContext audioContext,
-
-                                    String deviceType,
-                                    String device,
-                                    DecoderOptions decoderOptions
-  ) throws DominoSessionException {
-    return getAudioAnswer(base64EncodedString, audioContext,
-        deviceType, device, decoderOptions, null, getProjectIDFromUser());
-  }*/
 
   /**
    * Does alignment!

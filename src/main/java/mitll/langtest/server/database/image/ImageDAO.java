@@ -33,17 +33,26 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.dialog.IDialogDAO;
+import mitll.langtest.server.database.project.Project;
+import mitll.langtest.shared.dialog.DialogStatus;
+import mitll.langtest.shared.dialog.DialogType;
 import mitll.npdata.dao.DBConnection;
 import mitll.npdata.dao.SlickImage;
 import mitll.npdata.dao.image.ImageDAOWrapper;
+import org.apache.commons.fileupload.FileItem;
+import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public class ImageDAO extends DAO implements IImageDAO {
   private static final Logger logger = LogManager.getLogger(ImageDAO.class);
@@ -85,6 +94,87 @@ public class ImageDAO extends DAO implements IImageDAO {
     return false;
   }
 
+  /**
+   * @see mitll.langtest.server.database.project.ProjectManagement#doImageImport(int, String, int, FileItem)
+   * @param projid
+   * @param language
+   * @param filePath
+   * @return
+   */
+  public ImageResult insertAndGetImageID(int projid, String language, File filePath) {
+    int imageID = -1;
+    if (filePath != null) {
+      try {
+        String relPath = "images/" + language + "/" + filePath.getName();
+        File path = getAbsoluteAudioFile(relPath);
+        FileUtils.copyFile(filePath, path);
+        String absolutePath = path.getAbsolutePath();
+        imageID = insert(projid, absolutePath);
+        logger.info("insertAndGetImageID for " + absolutePath + " id " + imageID);
+        return new ImageResult(relPath, imageID);
+      } catch (IOException e) {
+        logger.error("got " + e, e);
+        e.printStackTrace();
+      }
+    }
+
+    return new ImageResult(null, -1);
+  }
+
+  public File getAbsoluteAudioFile(String filePath) {
+    return getAbsolute(serverProps.getAudioBaseDir(), filePath);
+  }
+
+  private File getAbsolute(String realContextPath, String filePath) {
+    return new File(realContextPath, filePath);
+  }
+
+
+  /**
+   * @param projid
+   * @param ref
+   * @return
+   * @see
+   * @see mitll.langtest.server.database.dialog.DialogDAO#add(int, int, int, int, long, long, String, String, DialogType, DialogStatus, String, String, boolean)
+   */
+  public int insert(int projid, String ref) {
+    long time = System.currentTimeMillis();
+    new Timestamp(time);
+    return insert(getSlickImage(projid, time, ref, new Timestamp(time)));
+  }
+
+  static final long FIVE_YEARS = (5L * 365L * 24L * 60L * 60L * 1000L);
+
+  @NotNull
+  private SlickImage getSlickImage(int projid, long now, String imageRef, Timestamp modified) {
+    Timestamp ago = new Timestamp(now - FIVE_YEARS);
+
+    //  logger.info("getSlickImage image ref " + imageRef);
+    return new SlickImage(
+        -1,
+        projid,
+        -1,
+
+        modified,
+        modified,
+
+        "",
+        imageRef,
+
+        0,
+        0,
+
+        false,
+        false,
+        ago
+    );
+  }
+
+  /**
+   * @param image
+   * @return
+   * @see mitll.langtest.server.database.project.DialogPopulate#addDialogs(Project, Project, IDialogDAO, Map, int, DialogType, Map, boolean)
+   */
   @Override
   public int insert(SlickImage image) {
     return dao.insert(image);

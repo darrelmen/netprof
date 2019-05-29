@@ -227,7 +227,7 @@ public class DialogPopulate {
       // add the image
 
       // logger.info("addDialogs add dialog image " + projid + " dialog " + dialog.getID() + " modified " + modified);
-      int imageID = db.getImageDAO().insert(getSlickImage(projid, now, dialog, modified));
+      int imageID = db.getImageDAO().insert(getSlickImage(projid, now, dialog.getImageRef(), modified));
       //  logger.info("addDialogs add dialog image " + projid + " dialog " + dialog.getID() + " id " + imageID);
 
       dialogToSlick.get(dialog).imageid_$eq(imageID);
@@ -636,10 +636,10 @@ public class DialogPopulate {
   }
 
   @NotNull
-  private SlickImage getSlickImage(int projid, long now, Dialog dialog, Timestamp modified) {
+  private SlickImage getSlickImage(int projid, long now, String imageRef, Timestamp modified) {
     Timestamp ago = new Timestamp(now - FIVE_YEARS);
 
-    String imageRef = dialog.getImageRef();
+   // String imageRef = dialog.getImageRef();
 
     //  logger.info("getSlickImage image ref " + imageRef);
     return new SlickImage(
