@@ -209,6 +209,12 @@ public class ImageDAO extends DAO implements IImageDAO {
   }
 
   @Override
+  public SlickImage getByID(int imageID) {
+    Collection<SlickImage> byID = dao.getByID(imageID);
+    return byID.isEmpty() ? null : byID.iterator().next();
+  }
+
+  @Override
   public int getDefault() {
     return defImageID;
   }

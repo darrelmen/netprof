@@ -65,8 +65,10 @@ import java.util.*;
 import java.util.logging.Logger;
 
 public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends BasicDialog {
-  public static final int TYPE_AND_VALUE_WIDTH = 200;
   private final Logger logger = Logger.getLogger("CreateDialog");
+
+  private static final int TYPE_AND_VALUE_WIDTH = 200;
+  private static final boolean DEBUG = false;
 
   static final String CREATE_NEW_LIST = "Create New List";
   static final String TEXT_BOX = "TextBox";
@@ -373,7 +375,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
   }
 
   protected FormField addTitle(FluidRow row) {
-    FormField titleBox = addControlFormField(row, "", "", getMaxTitleLength(),getTitleWidth());
+    FormField titleBox = addControlFormField(row, "", "", getMaxTitleLength(), getTitleWidth());
     titleBox.getWidget().getElement().getStyle().setMarginTop(10, Style.Unit.PX);
 
     final TextBoxBase box = titleBox.box;
@@ -562,19 +564,19 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
    * @param listBox
    */
   private void setChapter(String chapter, ListBox listBox) {
-    logger.info("setChapter chapter has " + listBox.getVisibleItemCount() + " choices...");
+    if (DEBUG) logger.info("setChapter chapter has " + listBox.getVisibleItemCount() + " choices...");
     listBox.setSelectedValue(chapter);
     String selectedValue = listBox.getSelectedValue();
 
     if (selectedValue == null) {
       int itemCount = listBox.getItemCount();
-      logger.info("invoke no " + chapter + " in " + selectedValue + " : " + itemCount);
+      if (DEBUG) logger.info("invoke no " + chapter + " in " + selectedValue + " : " + itemCount);
       for (int i = 0; i < itemCount; i++) {
         String value = listBox.getValue(i);
-        logger.info("invoke (" + i + ") no " + chapter + " in " + value);
+        if (DEBUG) logger.info("invoke (" + i + ") no " + chapter + " in " + value);
       }
     } else {
-      logger.info("invoke no " + chapter + " selected is " + selectedValue);
+      if (DEBUG) logger.info("invoke no " + chapter + " selected is " + selectedValue);
     }
   }
 }

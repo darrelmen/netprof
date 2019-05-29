@@ -105,13 +105,13 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
 
   private WaitCursorHelper waitCursorHelper;
 
-  private WaitCursorHelper makeWaitCursor() {
-    if (waitCursorHelper == null) {
-      waitCursorHelper = new WaitCursorHelper();
-      waitCursorHelper.showFinished();
-    }
-    return waitCursorHelper;
-  }
+//  private WaitCursorHelper makeWaitCursor() {
+//    if (waitCursorHelper == null) {
+//      waitCursorHelper = new WaitCursorHelper();
+//      waitCursorHelper.showFinished();
+//    }
+//    return waitCursorHelper;
+//  }
 
   void showWaitCursor() {
     waitCursorHelper.showAnimated();

@@ -33,13 +33,19 @@ import mitll.langtest.shared.exercise.MutableShell;
 
 public interface IMutableDialog extends MutableShell {
   void setID(int id);
+
   void setOrientation(String orientation);
+
   void setDialogType(DialogType type);
+
   void setIsPrivate(boolean val);
 
+//
+//  @Deprecated
+//  void setFilePath(String filePath);
 
-  void setFilePath(String filePath);
-void setImageRef(String imageRef);
+  void setImageRef(String imageRef);
+
   void setImageID(int imageID);
 
 }

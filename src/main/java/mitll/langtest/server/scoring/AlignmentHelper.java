@@ -182,18 +182,19 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
    * @see #rememberAlignments
    */
   private Map<Integer, AlignmentAndScore> getAlignmentsFromDB(int projid, Set<Integer> audioIDs, Language language) {
-    if (DEBUG) logger.info("getAlignmentsFromDB asking for " + audioIDs.size());
-
     if (audioIDs.isEmpty()) {
-      logger.warn("getAlignmentsFromDB not asking for any audio ids?");
-    }
-    Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(refResultDAO.getAllSlimForProjectIn(projid, audioIDs));
+      logger.info("getAlignmentsFromDB not asking for any audio ids for " + projid);
+      return new HashMap<>();
+    } else {
+      if (DEBUG) logger.info("getAlignmentsFromDB asking for " + audioIDs.size());
+      Map<Integer, ISlimResult> audioIDMap = getAudioIDMap(refResultDAO.getAllSlimForProjectIn(projid, audioIDs));
 
-    if (audioIDMap.size() != audioIDs.size() || DEBUG) {
-      logger.info("getAlignmentsFromDB found " + audioIDs.size() + "/" + audioIDMap.size() + " ref result alignments...");
-    }
+      if (audioIDMap.size() != audioIDs.size() || DEBUG) {
+        logger.info("getAlignmentsFromDB found " + audioIDs.size() + "/" + audioIDMap.size() + " ref result alignments...");
+      }
 
-    return parseJsonToGetAlignments(audioIDs, audioIDMap, language);
+      return parseJsonToGetAlignments(audioIDs, audioIDMap, language);
+    }
   }
 
   @NotNull

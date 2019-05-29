@@ -388,7 +388,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           logger.warning("showView huh? unknown view " + view);
       }
     } else {
-      if (DEBUG || true) logger.warning("showView skip current view " + view);
+      if (DEBUG) logger.info("showView skip current view " + view);
     }
   }
 

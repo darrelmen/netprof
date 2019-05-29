@@ -45,6 +45,7 @@ public interface IImageDAO extends IDAO {
 
   List<SlickImage> getAllNoExistsCheck(int projid);
 
+  SlickImage getByID(int imageID);
   int ensureDefault(int defProjectID);
 
   void makeSureImagesAreThere(int projectID, String language, boolean validateAll);

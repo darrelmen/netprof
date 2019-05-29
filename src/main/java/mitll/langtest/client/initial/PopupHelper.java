@@ -36,29 +36,9 @@ import com.google.gwt.user.client.ui.PopupPanel;
 import com.google.gwt.user.client.ui.Widget;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.logging.Logger;
-
 public class PopupHelper {
-  private final Logger logger = Logger.getLogger("PopupHelper");
-
+ // private final Logger logger = Logger.getLogger("PopupHelper");
   private static final int HIDE_DELAY = 2500;
-
-/*
-  public void showPopup(String html) {
-    final PopupPanel pleaseWait = new DecoratedPopupPanel();
-    pleaseWait.setAutoHideEnabled(true);
-    pleaseWait.add(new HTML(html));
-    pleaseWait.center();
-
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        pleaseWait.hide();
-      }
-    };
-    t.schedule(HIDE_DELAY);
-  }
-*/
 
   public void showPopup(String html, Widget target) {
     showPopup(html, target, 2000);
@@ -79,30 +59,11 @@ public class PopupHelper {
   }
 
   @NotNull
-  public PopupPanel getPopupPanel(Widget button, Widget w) {
+  private PopupPanel getPopupPanel(Widget button, Widget w) {
     final PopupPanel pleaseWait = new DecoratedPopupPanel();
     pleaseWait.setAutoHideEnabled(true);
     pleaseWait.add(w);
     pleaseWait.showRelativeTo(button);
     return pleaseWait;
   }
-
-/*  public void showPopup(String toShow, String toShow2, Widget over) {
-    final PopupPanel popupImage = new PopupPanel(true);
-    Panel vp = new VerticalPanel();
-    vp.add(new HTML(toShow));
-    vp.add(new HTML(toShow2));
-    popupImage.add(vp);
-    if (over.getParent() == null) {
-      logger.warning("no parent for " + over);
-    }
-    popupImage.showRelativeTo(over);
-    Timer t = new Timer() {
-      @Override
-      public void run() {
-        popupImage.hide();
-      }
-    };
-    t.schedule(3000);
-  }*/
 }

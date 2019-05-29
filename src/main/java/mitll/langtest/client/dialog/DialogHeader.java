@@ -169,9 +169,8 @@ public class DialogHeader {
     vert.getElement().setId("vert");
     vert.addStyleName("leftTenMargin");
     vert.addStyleName("rightTenMargin");
-
-//    DivWidget headingContainer = getTitleBlurb();
-//    vert.add(headingContainer);
+    vert.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+    vert.setHeight("100%");
 
     {
       DivWidget titleDiv = new DivWidget();
@@ -432,7 +431,7 @@ public class DialogHeader {
 
   @NotNull
   private Widget getCoreVocab(IDialog dialog) {
-    HTML core_vocab = new HTML("<b>Vocab (Mouseover)</b>");
+    HTML core_vocab = new HTML("<b>See Vocab</b>");
 
     Map<String, String> objectObjectHashMap = new TreeMap<>();
 
@@ -493,7 +492,7 @@ public class DialogHeader {
   }
 
   @NotNull
-  public String getTypeAndValue2(String type, String subtext) {
+  private String getTypeAndValue2(String type, String subtext) {
     return "<span style='width:100%;white-space:nowrap;" +
         "'>" +
         "<h5>" + "<span style='float:left;width:50%'>" + type + "</span>" +
