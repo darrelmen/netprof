@@ -203,11 +203,10 @@ public class SelectionState {
     return item;
   }
 
-  private void setItem(int item) {
+  public void setItem(int item) {
     if (DEBUG) logger.info("item = " + item);
     this.item = item;
   }
-
 
   /**
    * @param typeOrder
@@ -259,7 +258,7 @@ public class SelectionState {
     return search;
   }
 
-  boolean isOnlyWithAudioDefects() {
+  public boolean isOnlyWithAudioDefects() {
     return onlyWithAudioDefects;
   }
 
@@ -267,11 +266,11 @@ public class SelectionState {
     return onlyUnrecorded;
   }
 
-  boolean isOnlyDefault() {
+  public boolean isOnlyDefault() {
     return onlyDefault;
   }
 
-  boolean isOnlyUninspected() {
+  public boolean isOnlyUninspected() {
     return onlyUninspected;
   }
 

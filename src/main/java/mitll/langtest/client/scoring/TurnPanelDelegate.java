@@ -73,7 +73,8 @@ public class TurnPanelDelegate implements ITurnMarking {
    */
   protected TurnPanelDelegate(final ClientExercise clientExercise,
                               DivWidget widget,
-                              ListenViewHelper.COLUMNS columns, boolean rightJustify) {
+                              ListenViewHelper.COLUMNS columns,
+                              boolean rightJustify) {
     this.exercise = clientExercise;
     this.columns = columns;
     this.rightJustify = rightJustify;
@@ -115,7 +116,6 @@ public class TurnPanelDelegate implements ITurnMarking {
       }
     }
 
-    // flClickableRow.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
     addMarginStyle(widget.getElement().getStyle());
   }
 
@@ -126,7 +126,6 @@ public class TurnPanelDelegate implements ITurnMarking {
     style2.setMarginBottom(0, Style.Unit.PX);
   }
 
-  //@Override
   @Override
   public void addFloatLeft(Widget w) {
     if (shouldAddFloatLeft()) {

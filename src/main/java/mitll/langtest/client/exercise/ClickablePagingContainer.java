@@ -249,12 +249,13 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
     if (found == null) {
       return false;
     } else {
-      markCurrent(getIndex(found), found);
-      return true;
+      boolean b = markCurrent(getIndex(found), found);
+      if (DEBUG)  logger.info("markCurrentExercise : change visible range " + b);
+      return b;
     }
   }
 
-  private void markCurrent(int i, T itemToSelect) {
+  private boolean markCurrent(int i, T itemToSelect) {
 //    if (DEBUG) logger.info(new Date() + " markCurrentExercise : Comparing selected " + itemToSelect.getID() + " at " +i);
     getSelectionModel().setSelected(itemToSelect, true);
     if (DEBUG || DEBUG_MARK_CURRENT) {
@@ -267,8 +268,9 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
           "\n\titem       " + itemToSelect);
     }
 
-    scrollToVisible(i);
+    boolean b = scrollToVisible(i);
     table.redraw();
+    return b;
   }
 
   private SelectionModel<? super T> getSelectionModel() {
@@ -277,16 +279,20 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
   /**
    * @param currentExercise
+   * @return true if did the resize
    * @see mitll.langtest.client.list.PagingExerciseList#onResize()
    */
-  public void onResize(T currentExercise) {
+  public boolean onResize(T currentExercise) {
     int numRows = getNumTableRowsGivenScreenHeight();
     //   logger.info("onResize size is " + numRows);
-    if (/*table.getParent() != null &&*/ table.getPageSize() != numRows) {
-      //  logger.info("2 onResize size is " + numRows + " parent " +table.getParent());
+    if (table.getPageSize() != numRows) {
+      if (DEBUG) logger.info("onResize size is " + numRows);// + " parent " + table.getParent());
       table.setPageSize(numRows);
       // table.redraw();
       markCurrent(currentExercise);
+      return true;
+    } else {
+      return false;
     }
   }
 

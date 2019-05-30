@@ -72,6 +72,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
    * @param alignments
    * @param listenView
    * @param columns
+   * @param prevColumn
    * @param rightJustify
    * @see ListenViewHelper#reallyGetTurnPanel
    */
@@ -81,22 +82,18 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
                    Map<Integer, AlignmentOutput> alignments,
                    IListenView listenView,
                    ITurnContainer.COLUMNS columns,
+                   ITurnContainer.COLUMNS prevColumn,
                    boolean rightJustify) {
     super(clientExercise, controller, listContainer, alignments, listenView);
 
     if (columns == ITurnContainer.COLUMNS.MIDDLE) {
-      // addStyleName("inlineFlex");
-      styleInterpreterTurn();
+      if (prevColumn == ITurnContainer.COLUMNS.RIGHT) {
+        addStyleName("floatRight");
+      } else {
+        addStyleName("floatLeft");
+      }
     }
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify);
-  }
-
-  protected void styleInterpreterTurn() {
-    logger.info("styleInterpreter " + getExID() + " " + getText());
-    addStyleName("inlineFlex");
-    setWidth("100%");
-    // TODO : why?
-    getElement().getStyle().setMarginRight(29, Style.Unit.PX);
   }
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
@@ -157,7 +154,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
 
   /**
    * @param wrapper
-   * @see RefAudioGetter#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
+   * @see mitll.langtest.shared.dialog.Dialog#addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
   public void styleMe(DivWidget wrapper) {
     super.styleMe(wrapper);

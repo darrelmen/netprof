@@ -160,11 +160,16 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   /**
    * Consistent with number of rows
    *
-   * @see #ROWS_TO_SHOW
    * @return
+   * @see #ROWS_TO_SHOW
    */
   int getTableHeight() {
     return 155;//180;
+  }
+
+  @Override
+  protected int getNumTableRowsGivenScreenHeight() {
+    return 5;
   }
 
   protected void setMaxWidth() {
@@ -286,9 +291,9 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
   /**
    * Only sort with descending score.
    *
+   * @param useCompactPager
    * @return
    * @see AnalysisTab#getWordContainer
-   * @param useCompactPager
    */
   public Panel getTableWithPager(boolean useCompactPager) {
     // logger.info("getTableWithPager " +listOptions);
@@ -401,7 +406,7 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     itemCol.setSortable(true);
     int itemColWidth = getItemColWidth();
 
-  //  logger.info("addReview itemColWidth " + itemColWidth);
+    //  logger.info("addReview itemColWidth " + itemColWidth);
 
     table.setColumnWidth(itemCol, itemColWidth + "px");
 

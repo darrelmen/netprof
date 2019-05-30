@@ -98,6 +98,11 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
         , 12);
     setUserListID(list.getID());
     this.list = list;
+  }
+
+  @Override
+  public void addComponents() {
+    super.addComponents();
 
     if (list.isEmpty()) delete.setEnabled(false);
     pagingContainer.setPageSize(8);

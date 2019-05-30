@@ -352,7 +352,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
       if (options.getInstance() == INavigation.VIEWS.QC_SENTENCES) {
         context = true;
         if (this.exercise.getDirectlyRelated().isEmpty()) {
-          logger.warning("no context sentences for " + e.getID() + " " + e.getEnglish());
+          logger.info("no context sentences for " + e.getID() + " " + e.getEnglish());
         } else {
           toShow = this.exercise.getDirectlyRelated().iterator().next();
         }

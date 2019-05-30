@@ -101,6 +101,7 @@ public class EditItem {
     userListID = originalList.getID();
     userListName = originalList.getName();
     this.exerciseList = new EditableExerciseList(controller, right, INavigation.VIEWS.LISTS, originalList);
+    exerciseList.addComponents();
     setFactory(this.exerciseList);
     this.exerciseList.setUnaccountedForVertical(280);   // TODO do something better here
     // logger.info("setting vertical on " +exerciseList.getElement().getExID());

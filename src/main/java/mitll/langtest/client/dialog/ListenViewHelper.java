@@ -40,7 +40,6 @@ import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.IBanner;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
@@ -253,7 +252,7 @@ public class ListenViewHelper<T extends ITurnPanel>
         alignments,
         this,
         columns,
-        rightJustify);
+        prevColumn, rightJustify);
 
     return t;
   }

@@ -68,7 +68,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
 
   private static final boolean DEBUG_STALE = true;
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_EXCEPTION = true;
 
   private static final String SERVER_ERROR = "Server error";
   private static final String GETTING_EXERCISE = "getting exercise";
@@ -254,11 +253,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
 
   /**
    * @param result
+   * @param currentID
    * @return
    * @see #rememberAndLoadFirst(List, String, String, int)
    * @see ExerciseList.SetExercisesCallbackWithID#useExercises
    */
-  protected abstract List<T> rememberExercises(List<T> result);
+  protected abstract List<T> rememberExercises(List<T> result, int currentID);
 
   Panel getCreatedPanel() {
     return createdPanel;
@@ -345,8 +345,6 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
                                     List<T> exercises) {
     checkForEmptyExerciseList(exercises.isEmpty());
     //   int idToUse = exerciseID == -1 ? firstExercise == null ? -1 : firstExercise.getID() : exerciseID;
-
-
     // TODO : check the current list of exercise ids - if it's not different than the result set, don't blink the UI.
 
     rememberAndLoadFirst(exercises, selectionID, searchIfAny, exerciseID);
@@ -403,7 +401,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       lastSuccessfulRequest = request;
       List<T> exercises = result.getExercises();
       checkForEmptyExerciseList(exercises.isEmpty());
-      exercises = rememberExercises(exercises);
+      exercises = rememberExercises(exercises, -1);
       for (ListChangeListener<T> listener : listeners) {
         listener.listChanged(exercises, "");
       }
@@ -452,7 +450,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   /**
    * @see #reloadWith
    */
-  protected void checkForEmptyExerciseList(boolean isEmpty) {
+  private void checkForEmptyExerciseList(boolean isEmpty) {
     // if (DEBUG) logger.info("ExerciseList.gotExercises result = " + result);
     if (isEmpty) {
       gotEmptyExerciseList();
@@ -526,7 +524,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
       );
     }
 
-    exercises = rememberExercises(exercises);
+    exercises = rememberExercises(exercises, exerciseID);
     for (ListChangeListener<T> listener : listeners) {  // can't do a lambda, since we change exercises...?
       listener.listChanged(exercises, selectionID);
     }
@@ -856,7 +854,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
     super.clear();
   }
 
-  public abstract void markCurrentExercise(int itemID);
+  public abstract boolean markCurrentExercise(int itemID);
 
   @Override
   public boolean loadNext() {

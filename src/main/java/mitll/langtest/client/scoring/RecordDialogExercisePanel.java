@@ -126,29 +126,11 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
                                    SessionManager sessionManager,
                                    ITurnContainer.COLUMNS columns,
                                    ITurnContainer.COLUMNS prevColumn) {
-    super(commonExercise, controller, listContainer, alignments, listenView, columns, false);
+    super(commonExercise, controller, listContainer, alignments, listenView, columns, prevColumn, false);
     this.rehearseView = listenView;
     setMinExpectedDur(commonExercise);
     this.sessionManager = sessionManager;
     doPushToTalk = listenView.isPressAndHold();
-    if (columns == ITurnContainer.COLUMNS.MIDDLE) {
-      if (prevColumn == ITurnContainer.COLUMNS.RIGHT) {
-        addStyleName("floatRight");
-      } else {
-        addStyleName("floatLeft");
-      }
-    }
-  }
-
-//
-//  @Override
-//  public void styleMe(DivWidget wrapper) {
-//    super.styleMe(wrapper);
-//    wrapper.getElement().getStyle().setMarginBottom(0, PX);
-//  }
-
-  @Override
-  protected void styleInterpreterTurn() {
   }
 
   private void setMinExpectedDur(ClientExercise commonExercise) {

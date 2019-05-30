@@ -429,7 +429,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
         }
 
         if (!b) {
-          logger.error("addImage Expecting " + s + " to start with " + audioBaseDir);
+          logger.warn("addImage (legacy image?) expecting " + s + " to start with " + audioBaseDir);
         }
 
         if (b) { // may not be true for legacy images...
@@ -437,7 +437,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
           logger.info("addImage image ref now " + s);
         } else {
           logger.info("addImage no truncation : image ref now " + s);
-
         }
 
         dialog.getMutable().setImageRef(s);

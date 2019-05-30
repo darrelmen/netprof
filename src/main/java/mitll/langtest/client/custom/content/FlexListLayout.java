@@ -227,7 +227,9 @@ public abstract class FlexListLayout<T extends CommonShell, U extends HasID> imp
         listHeader, footer);
     exerciseList.setUserListID(userListID);
     exerciseList.setFactory(getFactory(exerciseList));
-    Scheduler.get().scheduleDeferred(exerciseList::onResize);
+    exerciseList.addComponents();
+    //Scheduler.get().scheduleDeferred(exerciseList::onResize);
+   // exerciseList.onResize();
     return exerciseList;
   }
 

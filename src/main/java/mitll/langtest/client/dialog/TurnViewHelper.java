@@ -101,9 +101,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_NEXT = false;
-//  private static final boolean DEBUG_BLUR = false;
-//  private static final boolean DEBUG_DETAIL = false;
-//  private static final boolean DEBUG_PLAY = false;
 
   TurnViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     this.controller = controller;

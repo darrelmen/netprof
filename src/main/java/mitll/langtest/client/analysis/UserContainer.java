@@ -212,6 +212,10 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     ((Panel) tableWithPager.getParent()).add(getButtons());
   }
 
+  @Override
+  protected int getNumTableRowsGivenScreenHeight() {
+    return 10;
+  }
 
   @NotNull
   private Button getDownloadButton() {

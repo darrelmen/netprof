@@ -87,6 +87,7 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
 
     if (DEBUG) {
       logger.info("getFullExercises" +
+          "\n\treq       " + currentReq +
           "\n\trequest   " + visibleIDs.size() + " visible ids : " + visibleIDs +
           "\n\trequested " + requested +
           "\n\talready   " + getIDs(alreadyFetched));

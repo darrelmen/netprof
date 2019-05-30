@@ -555,6 +555,13 @@ public class ScoreServlet extends DatabaseServlet {
    */
   private int getProjectID(String languageName, boolean isKaldi) {
     Language language;
+
+    // fix for john steinberg runs
+    if (languageName.equalsIgnoreCase("mandarin_simplified")) {
+      logger.info("getProjectID clamp " + languageName + " to " + Language.MANDARIN.toString());
+      languageName = Language.MANDARIN.toString();
+    }
+
     try {
       language = Language.valueOf(languageName.toUpperCase());
       IProjectManagement projectManagement = db.getProjectManagement();
@@ -1262,7 +1269,7 @@ public class ScoreServlet extends DatabaseServlet {
    * First see if it's on the request session,
    * then see if it's on the request header,
    * then if there's a language on the request header, use the project for the language
-   *
+   * <p>
    * the last helps if we're running from a dev laptop to a server...
    *
    * @param request
@@ -1366,6 +1373,7 @@ public class ScoreServlet extends DatabaseServlet {
    **/
   private int getProjidFromLanguage(HttpServletRequest request, int projid) {
     String language = getLanguage(request);
+
     //logger.debug("getJsonForAudio got langauge from request " + language);
 
     if (language != null) {
