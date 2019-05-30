@@ -1144,8 +1144,12 @@ public class DialogEditorTest extends BaseTest {
         "us", true
     );
 
-    andPopulate.getDialogDAO().add(toAdd);
+    andPopulate.getDialogDAO().add(toAdd, getLanguage(andPopulate, projectid));
     return toAdd;
+  }
+
+  private String getLanguage(DatabaseImpl andPopulate, int projectid) {
+    return andPopulate.getProject(projectid).getLanguage();
   }
 
   @Test
@@ -1170,7 +1174,7 @@ public class DialogEditorTest extends BaseTest {
     );
 
 
-    andPopulate.getDialogDAO().add(toAdd);
+    andPopulate.getDialogDAO().add(toAdd, getLanguage(andPopulate, PROJECTID));
 
     for (ClientExercise exercise : toAdd.getExercises()) {
       logger.info("new " + exercise);

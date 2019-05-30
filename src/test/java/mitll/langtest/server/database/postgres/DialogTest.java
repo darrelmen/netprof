@@ -668,7 +668,7 @@ public class DialogTest extends BaseTest {
         "us", true
     );
 
-    andPopulate.getDialogDAO().add(toAdd);
+    andPopulate.getDialogDAO().add(toAdd, andPopulate.getProject(projectid).getLanguage());
     return toAdd;
   }
 
@@ -691,7 +691,7 @@ public class DialogTest extends BaseTest {
 
     andPopulate.waitForDefaultUser();
 
-    andPopulate.getDialogDAO().add(toAdd);
+    andPopulate.getDialogDAO().add(toAdd, andPopulate.getProject(21).getLanguage());
 
     for (ClientExercise exercise : toAdd.getExercises()) {
       logger.info("new " + exercise);
