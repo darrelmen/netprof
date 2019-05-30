@@ -149,7 +149,7 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
         rowOne.clear();
         List<ClientExercise> exercises = dialog.getExercises();
 
-        exercises.forEach(ex -> logger.info("ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
+        exercises.forEach(ex -> logger.info("getLeftHelper : ex speaker : '" + ex.getSpeaker() + "' " + ex.getForeignLanguage()));
 
         if (dialog.getKind() == DialogType.INTERPRETER) {
           exercises = exercises
@@ -157,7 +157,7 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
               .filter(exercise ->
                   exercise.getSpeaker().equalsIgnoreCase(INTERPRETER) || exercise.getSpeaker().equalsIgnoreCase(SPEAKER_B))
               .collect(Collectors.toList());
-          // exercises.forEach(ex -> logger.info("after ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
+          exercises.forEach(ex -> logger.info("getLeftHelper : after ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
         } else {
           exercises = exercises
               .stream()
@@ -168,6 +168,8 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
         exercises = exercises.stream().filter(exercise ->
             !exercise.hasEnglishAttr() &&
                 !exercise.getForeignLanguage().isEmpty()).collect(Collectors.toList());
+        
+        exercises.forEach(ex -> logger.info("getLeftHelper : finally ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
 
         addTurnForEachExercise(rowOne, left, right, exercises);
       }
