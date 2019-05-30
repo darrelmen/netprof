@@ -423,8 +423,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
         boolean b = s.startsWith(audioBaseDir);
         if (!b) {
-          logger.warn("addImage Expecting " + s + " to start with " + audioBaseDir);
-          audioBaseDir = "/opt/dialog";
+          logger.info("addImage Expecting " + s + " to start with " + audioBaseDir);
+          audioBaseDir = "/opt/dialog/";
           b = s.startsWith(audioBaseDir);
         }
 
