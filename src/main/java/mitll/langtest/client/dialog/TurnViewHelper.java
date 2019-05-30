@@ -240,7 +240,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   /**
    * @see #ifOnLastJumpBackToFirst
    */
-   void markFirstTurn() {
+  void markFirstTurn() {
     if (!allTurns.isEmpty()) {
       setCurrentTurn(allTurns.get(0));
       logger.info("markFirstTurn : markCurrent ");
@@ -395,50 +395,8 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    * @param dialog
    * @return
    */
-  @Nullable
-  String getSecondSpeakerLabel(IDialog dialog) {
-    String secondSpeaker = dialog.getSpeakers().size() > 2 ? dialog.getSpeakers().get(2) : null;
-
-    // OK guess from the language of the first turn
-    if (!dialog.getExercises().isEmpty()) {
-      ClientExercise next = dialog.getExercises().iterator().next();
-      boolean hasEnglishAttr = next.hasEnglishAttr();
-
-      if (hasEnglishAttr && !getExerciseSpeaker(next).equalsIgnoreCase(secondSpeaker)) {
-        secondSpeaker = getProjectLangSpeaker();
-      }
-    } else if (dialog.getKind() == DialogType.INTERPRETER) {
-      secondSpeaker = getProjectLangSpeaker();
-    }
-
-    if (secondSpeaker == null) secondSpeaker = ListenViewHelper.SPEAKER_B;
-    return secondSpeaker;
-  }
-
-  @NotNull
-  private String getProjectLangSpeaker() {
-    return controller.getLanguageInfo().toDisplay() + " Speaker";
-  }
-
-  /**
-   * TODO : allow english speaker to go second
-   *
-   * @param dialog
-   * @return
-   */
   @NotNull
   String getFirstSpeakerLabel(IDialog dialog) {
-    //  logger.info("getFirstSpeakerLabel for dialog " + dialog.getID());
-//    dialog.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute.toString()));
-//
-//    List<ExerciseAttribute> properties = dialog.getAttributes()
-//        .stream()
-//        .filter(exerciseAttribute -> (exerciseAttribute.getProperty() != null))
-//        .sorted(Comparator.comparing(Pair::getProperty))
-//        .collect(Collectors.toList());
-//
-//    properties.forEach(p -> logger.info(p.toString()));
-
     String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
 
     if (DEBUG) logger.info("getFirstSpeakerLabel first speaker " + firstSpeaker);
@@ -461,6 +419,37 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
           "first speaker " + firstSpeaker);
     }
     return firstSpeaker;
+  }
+
+  /**
+   * TODO : allow english speaker to go second
+   *
+   * @param dialog
+   * @return
+   */
+  @Nullable
+  String getSecondSpeakerLabel(IDialog dialog) {
+    String secondSpeaker = dialog.getSpeakers().size() > 1 ? dialog.getSpeakers().get(1) : null;
+
+    // OK guess from the language of the first turn
+    if (!dialog.getExercises().isEmpty()) {
+      ClientExercise next = dialog.getExercises().iterator().next();
+      boolean hasEnglishAttr = next.hasEnglishAttr();
+
+      if (hasEnglishAttr && !getExerciseSpeaker(next).equalsIgnoreCase(secondSpeaker)) {
+        secondSpeaker = getProjectLangSpeaker();
+      }
+    } else if (dialog.getKind() == DialogType.INTERPRETER) {
+      secondSpeaker = getProjectLangSpeaker();
+    }
+
+    if (secondSpeaker == null) secondSpeaker = ListenViewHelper.SPEAKER_B;
+    return secondSpeaker;
+  }
+
+  @NotNull
+  private String getProjectLangSpeaker() {
+    return controller.getLanguageInfo().toDisplay() + " Speaker";
   }
 
   @NotNull
@@ -616,7 +605,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   protected void addTurnForEachExercise(DivWidget rowOne, String left, String right, List<ClientExercise> exercises) {
     ClientExercise prev = null;
     int index = 0;
- //   logger.info("addTurnForEachExercise got " + exercises.size());
+    //   logger.info("addTurnForEachExercise got " + exercises.size());
     for (ClientExercise clientExercise : exercises) {
       ITurnContainer.COLUMNS prevCol = prev == null ? ITurnContainer.COLUMNS.UNK : getColumnForEx(left, right, prev);
       addTurn(rowOne, clientExercise, getColumnForEx(left, right, clientExercise), prevCol, index);
@@ -647,7 +636,9 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
       columns = ITurnContainer.COLUMNS.MIDDLE;
     }
 
-    //  logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs " + speaker + " => " + columns);
+    if (DEBUG) {
+      logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs " + speaker + " => " + columns);
+    }
     return columns;
   }
 
@@ -803,7 +794,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return i1 < 0 ? null : seq.get(i1);
   }
 
-   void reloadDialog() {
+  void reloadDialog() {
     int projectID = controller.getProjectID();
     if (projectID != -1) {
       int dialogID = getDialogID();
@@ -835,7 +826,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   @Nullable
-   ClientExercise getPrev(int exid, List<ClientExercise> updatedExercises) {
+  ClientExercise getPrev(int exid, List<ClientExercise> updatedExercises) {
     ClientExercise prev = null;
     for (ClientExercise turn : updatedExercises) {
       if (turn.getID() == exid) break;
@@ -897,9 +888,9 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
       next.grabFocus();
     }
     //else if (!getAllTurns().isEmpty()) {
-     // logger.info("moveFocusToNext - to first - let's not!");
-      //getAllTurns().get(0).grabFocus();
-   // }
+    // logger.info("moveFocusToNext - to first - let's not!");
+    //getAllTurns().get(0).grabFocus();
+    // }
   }
 
   int getIndexOfCurrentTurn() {

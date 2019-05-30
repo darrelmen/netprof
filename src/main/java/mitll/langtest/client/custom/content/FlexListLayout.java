@@ -31,7 +31,6 @@ package mitll.langtest.client.custom.content;
 
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -128,7 +127,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends HasID> imp
     return twoRows;
   }
 
-
   @Override
   public void setVisible(boolean vis) {
     if (section != null) {
@@ -161,10 +159,7 @@ public abstract class FlexListLayout<T extends CommonShell, U extends HasID> imp
     twoRows.add(section);
     twoRows.setWidth("100%");
     section.add(topRow);
-
-    //  makeSureFacetsAlwaysVisible(section);
   }
-
 
   /**
    * mainBlock sometimes helpful, sometimes not...
@@ -228,8 +223,6 @@ public abstract class FlexListLayout<T extends CommonShell, U extends HasID> imp
     exerciseList.setUserListID(userListID);
     exerciseList.setFactory(getFactory(exerciseList));
     exerciseList.addComponents();
-    //Scheduler.get().scheduleDeferred(exerciseList::onResize);
-   // exerciseList.onResize();
     return exerciseList;
   }
 

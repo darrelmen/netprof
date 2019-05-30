@@ -408,7 +408,6 @@ public class EditorTurn extends PlayAudioExercisePanel
     editableTurnContainer.addTurnForOtherSpeaker(this);
   }
 
-
   private void addPressAndHoldStyleForRecordButton(UIObject postAudioRecordButton) {
     Style style = postAudioRecordButton.getElement().getStyle();
     style.setProperty("borderRadius", "18px");
@@ -419,42 +418,6 @@ public class EditorTurn extends PlayAudioExercisePanel
     style.setHeight(19, Style.Unit.PX);
   }
 
-  /**
-   * @param wrapper
-   * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
-   */
-/*
-  private TextBox addTextBox() {
-    // TODO : instead, make this a div contenteditable!
-    TextBox w = new TextBox();
-    w.getElement().getStyle().setFontSize(16, Style.Unit.PX);
-//    w.setId("TextBox_" + getExID());
-    w.setWidth(350 + "px");
-
-    String foreignLanguage = clientExercise.getForeignLanguage();
-    if (foreignLanguage.isEmpty()) {
-      String placeholder = clientExercise.hasEnglishAttr() ? "English... (" + getExID() +
-          ")" : language.toDisplay() + " translation (" + getExID() +
-          ")";
-      if (!turnContainer.isInterpreter()) {
-        placeholder = (columns == ITurnContainer.COLUMNS.LEFT ? SPEAKER_A : SPEAKER_B) + " says...";
-      }
-      w.setPlaceholder(placeholder);
-    } else {
-      w.setText(foreignLanguage);
-      prev = foreignLanguage;
-    }
-    w.addBlurHandler(event -> gotBlur());
-    w.addFocusHandler(event -> gotFocus());
-    w.addKeyUpHandler(this::gotKey);
-
-    w.addStyleName("leftTenMargin");
-    w.addStyleName("rightTenMargin");
-    w.addStyleName("topFiveMargin");
-
-    return w;
-  }
-*/
   public void gotFocus() {
     if (DEBUG) {
       logger.info("gotFocus " + getExID());
@@ -585,8 +548,7 @@ public class EditorTurn extends PlayAudioExercisePanel
   private int getAudioID() {
     // logger.info("has " + clientExercise.getAudioAttributes().size() + " audio attributes...");
     Collection<AudioAttribute> audioAttributes = clientExercise.getAudioAttributes();
-    logger.info("getAudioID : audio attr " + audioAttributes);
-
+   // logger.info("getAudioID : audio attr " + audioAttributes);
     return audioAttributes.isEmpty() ? -1 : audioAttributes.iterator().next().getUniqueID();
   }
 
@@ -596,12 +558,6 @@ public class EditorTurn extends PlayAudioExercisePanel
   @Override
   public void grabFocus() {
     editableTurnHelper.grabFocus();
-//    if (contentTextBox == null) {
-//      logger.info("grabFocus no contentTextBox yet for " + getText());
-//    } else {
-//      logger.info("grabFocus on " + getText());
-//      contentTextBox.setFocus(true);
-//    }
   }
 
   @Override
