@@ -31,6 +31,7 @@ package mitll.langtest.client.user;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
@@ -67,6 +68,7 @@ public class UserManager {
    * @see #gotNewUser
    */
   private User current;
+  KeyStorage storage;
 
   /**
    * @param lt
@@ -77,11 +79,13 @@ public class UserManager {
   public UserManager(UserNotification lt,
                      UserFeedback userFeedback,
                      UserServiceAsync userServiceAsync,
-                     PropertyHandler props) {
+                     PropertyHandler props,
+                     KeyStorage storage) {
     this.userNotification = lt;
     this.userServiceAsync = userServiceAsync;
     this.appTitle = props.getAppTitle();
     this.userFeedback = userFeedback;
+    this.storage = storage;
   }
 
   /**
@@ -170,7 +174,7 @@ public class UserManager {
    */
   public String getUserID() {
     if (Storage.isLocalStorageSupported()) {
-      return Storage.getLocalStorageIfSupported().getItem(getUserChosenID());
+      return storage.getValue(getUserChosenID());
     } else {
       return userChosenID;
     }
@@ -178,7 +182,7 @@ public class UserManager {
 
   String getPendingUserID() {
     if (Storage.isLocalStorageSupported()) {
-      return Storage.getLocalStorageIfSupported().getItem(getUserPendingID());
+      return storage.getValue(getUserPendingID());
     } else {
       return userChosenID;
     }
@@ -202,14 +206,11 @@ public class UserManager {
   }
 
   private String getUserFromStorage() {
-    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-    return localStorageIfSupported != null ? localStorageIfSupported.getItem(getUserIDCookie()) : NO_USER_SET_STRING;
+    return Storage.getLocalStorageIfSupported() != null ? storage.getValue(getUserIDCookie()) : NO_USER_SET_STRING;
   }
 
   void setPendingUserStorage(String pendingID) {
-    if (Storage.isLocalStorageSupported()) {
-      Storage.getLocalStorageIfSupported().setItem(getUserPendingID(), pendingID);
-    }
+    storage.storeValue(getUserPendingID(), pendingID);
   }
 
   /**
@@ -257,10 +258,9 @@ public class UserManager {
    * @see #storeUser
    */
   void rememberUser(SimpleUser user) {
-    Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
     userChosenID = user.getUserID();
-    localStorageIfSupported.setItem(getUserIDCookie(), "" + user.getID());
-    localStorageIfSupported.setItem(getUserChosenID(), "" + userChosenID);
+    storage.storeValue(getUserIDCookie(), "" + user.getID());
+    storage.storeValue(getUserChosenID(), "" + userChosenID);
 
     if (DEBUG) logger.info("storeUser : user now " + user.getID() + " / " + getUser());
   }
@@ -270,10 +270,9 @@ public class UserManager {
    */
   public void clearUser() {
     if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      localStorageIfSupported.removeItem(getUserIDCookie());
-      localStorageIfSupported.removeItem(getUserChosenID());
-      localStorageIfSupported.removeItem(getUserPendingID());
+      storage.removeValue(getUserIDCookie());
+      storage.removeValue(getUserChosenID());
+      storage.removeValue(getUserPendingID());
       current = null;
       if (DEBUG) logger.info("clearUser : removed user id = " + getUserID() + " user now " + getUser());
     } else {

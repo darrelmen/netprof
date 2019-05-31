@@ -39,7 +39,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
@@ -368,20 +367,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    */
   private int getSelectedUser(String selectedUserKey) {
     if (selectedUserKey == null) return -1;
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      String item = localStorageIfSupported.getItem(selectedUserKey);
-      if (item != null) {
-     //   logger.info("getSelectedUser " + selectedUserKey + " = " + item);
-        try {
-          return Integer.parseInt(item);
-        } catch (NumberFormatException e) {
-          logger.warning("got " + e);
-          return -1;
-        }
-      }
-    }
-    return -1;
+    return controller.getStorage().getInt(selectedUserKey);
   }
 
   @Override
@@ -396,12 +382,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #gotClickOnItem
    */
   private void storeSelectedUser(int selectedUser) {
-  //  logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
+    //  logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
 
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      localStorageIfSupported.setItem(selectedUserKey, "" + selectedUser);
-    }
+    controller.getStorage().storeValue(selectedUserKey, "" + selectedUser);
 
     if (selectedUser != getSelectedUser(selectedUserKey)) {
       logger.warning("storeSelectedUser : huh? stored " + selectedUserKey + " but got " + getSelectedUser(selectedUserKey));

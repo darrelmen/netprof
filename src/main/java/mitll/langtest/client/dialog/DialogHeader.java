@@ -508,11 +508,14 @@ public class DialogHeader {
 
   @NotNull
   private Button getEditorButton(INavigation.VIEWS turnEditor, boolean addFloatRight) {
-    Button editButton = new Button(getCapitalized(turnEditor.toString()), addFloatRight ? IconType.ARROW_RIGHT : IconType.ARROW_LEFT, event -> controller.getNavigation().show(turnEditor));
+    Button editButton = new Button(getCapitalized(turnEditor.toString()),
+        addFloatRight ? IconType.ARROW_RIGHT : IconType.ARROW_LEFT,
+        event -> controller.getNavigation().show(turnEditor));
     new TooltipHelper().createAddTooltip(editButton, "Go to " + turnEditor.toString(), addFloatRight ? Placement.LEFT : Placement.RIGHT);
     styleButton(editButton);
     if (addFloatRight) {
       editButton.addStyleName("floatRight");
+      editButton.getElement().getStyle().setClear(Style.Clear.BOTH);
     }
     if (!addFloatRight) {
       editButton.addStyleName("topFiftyMargin");

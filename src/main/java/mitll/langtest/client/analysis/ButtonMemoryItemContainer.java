@@ -30,36 +30,20 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.cell.client.Cell;
-import com.google.gwt.core.client.Scheduler;
-import com.google.gwt.dom.client.BrowserEvents;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.NativeEvent;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.safehtml.shared.SafeHtml;
-import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.Window;
-import com.google.gwt.user.client.ui.IsWidget;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.view.client.SingleSelectionModel;
-import mitll.langtest.client.custom.TooltipHelper;
-import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.shared.custom.IPublicPrivate;
-import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.HasID;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public abstract class ButtonMemoryItemContainer<T extends HasID & IPublicPrivate> extends MemoryItemContainer<T> {
   // private final Logger logger = Logger.getLogger("ButtonMemoryItemContainer");

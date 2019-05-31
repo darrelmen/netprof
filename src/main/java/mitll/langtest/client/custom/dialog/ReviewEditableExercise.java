@@ -35,7 +35,6 @@ import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
@@ -781,20 +780,16 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
   }
 
   private boolean getKeepAudioSelection(String selectedUserKey) {
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      String item = localStorageIfSupported.getItem(selectedUserKey);
-      // logger.info("value for " + selectedUserKey + "='" + item+ "'");
-      if (item != null) {
-        return item.toLowerCase().equals("true");
-      } else {
-        storeKeepAudio(true);
-        return true;
-      }
+    String item = controller.getStorage().getValue(selectedUserKey);
+
+    // logger.info("value for " + selectedUserKey + "='" + item+ "'");
+    if (item != null) {
+      return item.toLowerCase().equals("true");
+    } else {
+      storeKeepAudio(true);
+      return true;
     }
-    // else {
-    return false;
-    // }
+
   }
 
   private String getSelectedUserKey(ExerciseController controller, String appTitle) {
@@ -806,10 +801,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
   }
 
   private void storeKeepAudio(boolean shouldKeepAudio) {
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      localStorageIfSupported.setItem(getSelectedUserKey(controller, ""), "" + shouldKeepAudio);
-    }
+    controller.getStorage().storeValue(getSelectedUserKey(controller, ""), "" + shouldKeepAudio);
   }
 
   /**

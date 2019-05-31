@@ -144,32 +144,40 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
 
   private TurnViewHelper<SimpleTurn> getLeftHelper() {
     return new TurnViewHelper<SimpleTurn>(controller, CORE_EDITOR) {
+      /**
+       * @see TurnViewHelper#addAllTurns
+       * @param dialog
+       * @param rowOne
+       * @param left
+       * @param right
+       */
       @Override
       protected void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
         rowOne.clear();
+
         List<ClientExercise> exercises = dialog.getExercises();
 
-        exercises.forEach(ex -> logger.info("getLeftHelper : ex speaker : '" + ex.getSpeaker() + "' " + ex.getForeignLanguage()));
+   //     exercises.forEach(ex -> logger.info("getLeftHelper : ex speaker : '" + ex.getSpeaker() + "' " + ex.getForeignLanguage()));
 
-        if (dialog.getKind() == DialogType.INTERPRETER) {
-          exercises = exercises
-              .stream()
-              .filter(exercise ->
-                  exercise.getSpeaker().equalsIgnoreCase(INTERPRETER) || exercise.getSpeaker().equalsIgnoreCase(SPEAKER_B))
-              .collect(Collectors.toList());
-          exercises.forEach(ex -> logger.info("getLeftHelper : after ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
-        } else {
-          exercises = exercises
-              .stream()
-              .filter(exercise -> exercise.getSpeaker().equalsIgnoreCase(SPEAKER_B))
-              .collect(Collectors.toList());
-        }
+//        if (dialog.getKind() == DialogType.INTERPRETER) {
+//          exercises = exercises
+//              .stream()
+//              .filter(exercise ->
+//                  exercise.getSpeaker().equalsIgnoreCase(INTERPRETER) || exercise.getSpeaker().equalsIgnoreCase(SPEAKER_B))
+//              .collect(Collectors.toList());
+//          exercises.forEach(ex -> logger.info("getLeftHelper : after ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
+//        } else {
+//          exercises = exercises
+//              .stream()
+//              .filter(exercise -> exercise.getSpeaker().equalsIgnoreCase(SPEAKER_B))
+//              .collect(Collectors.toList());
+//        }
 
         exercises = exercises.stream().filter(exercise ->
             !exercise.hasEnglishAttr() &&
                 !exercise.getForeignLanguage().isEmpty()).collect(Collectors.toList());
         
-        exercises.forEach(ex -> logger.info("getLeftHelper : finally ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
+      //  exercises.forEach(ex -> logger.info("getLeftHelper : finally ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
 
         addTurnForEachExercise(rowOne, left, right, exercises);
       }

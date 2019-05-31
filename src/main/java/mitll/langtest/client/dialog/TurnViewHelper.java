@@ -477,13 +477,11 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     Heading w = new Heading(4, secondSpeaker);
 
     DivWidget right = new DivWidget();
-    // right.setWidth(SPEAKER_WIDTH +            "px");
     right.add(w);
     right.addStyleName("bubble");
     right.addStyleName("rightbubble");
     right.addStyleName("floatRight");
     setPadding(right);
-    //left.addStyleName("leftFiveMargin");
     right.getElement().getStyle().setBackgroundColor(RIGHT_BKG_COLOR);
     styleRightSpeaker(w);
     return right;
@@ -495,7 +493,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
     DivWidget left = new DivWidget();
     left.add(w);
-    // left.setWidth(SPEAKER_WIDTH +            "px");
 
     styleLeftSpeaker(w);
 
@@ -504,7 +501,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     left.addStyleName("leftbubble");
     setPadding(left);
 
-    //left.addStyleName("leftFiveMargin");
     left.getElement().getStyle().setBackgroundColor(LEFT_COLOR);
 
     return left;
@@ -576,16 +572,11 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   void onUnload() {
-
   }
 
   void addAllTurns(IDialog dialog, DivWidget rowOne) {
-    String left = getFirstSpeakerLabel(dialog); //speakers.get(0);
-    String right = getSecondSpeakerLabel(dialog);//speakers.get(2);
-/*    logger.info("for speaker " + left + " got " + speakerToEx.get(left).size());
-    logger.info("for speaker " + middle + " got " + middleTurns.size());
-    logger.info("for speaker " + right + " got " + speakerToEx.get(right).size());*/
-
+    String left = getFirstSpeakerLabel(dialog);
+    String right = getSecondSpeakerLabel(dialog);
     addTurnPerExercise(dialog, rowOne, left, right);
   }
 
