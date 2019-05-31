@@ -92,7 +92,7 @@ public class StatsFlashcardFactory<L extends CommonShell, T extends ClientExerci
       }
     }
 
-    storage = new KeyStorage(controller) {
+    storage = new KeyStorage() {
       @Override
       protected String getKey(String name) {
         return getKeyPrefix() + super.getKey(name); // in the context of this selection

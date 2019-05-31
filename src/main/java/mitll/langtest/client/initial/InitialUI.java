@@ -140,6 +140,9 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    * @see #makeFirstTwoRows
    */
   private DivWidget contentRow;
+  /**
+   * @see #makeNavigation()
+   */
   private INavigation navigation;
   private DivWidget verticalContainer;
   private final ProjectChoices choices;
@@ -167,6 +170,9 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     userMenu.setBanner(banner);
   }
 
+  /**
+   * @return
+   */
   public INavigation getNavigation() {
     return navigation;
   }
@@ -175,14 +181,16 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   /**
    * So, if we're currently showing the login, let's switch to the tab panel...
    *
-   * @see UILifecycle#gotUser
+   * @see InitialUI#gotUser
    * @see #configureUIGivenUser(long) (long)
    */
   private void populateRootPanelIfLogin() {
     int childCount = contentRow.getElement().getChildCount();
 
-    if (DEBUG)
-      logger.info("populateRootPanelIfLogin root " + contentRow.getElement().getNodeName() + " childCount " + childCount);
+    if (DEBUG) {
+      logger.info("populateRootPanelIfLogin root (" + contentRow.getId() +
+          ") " + contentRow.getElement().getNodeName() + " childCount " + childCount);
+    }
 
     if (childCount > 0) {
       Node child = contentRow.getElement().getChild(0);
@@ -204,13 +212,15 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    */
   @Override
   public void populateRootPanel() {
-    //  logger.info("----> populateRootPanel BEGIN ------>");
+    if (DEBUG) logger.info("----> populateRootPanel BEGIN ------>");
     DivWidget verticalContainer = getRootContainer();
     this.verticalContainer = verticalContainer;
     // header/title line
     // first row ---------------
     choices.setContentRow(makeFirstTwoRows(verticalContainer));
-    if (!showLogin()) {
+
+    if (!showLogin()) { // we have a user!
+      if (DEBUG) logger.info("----> populateRootPanel WE HAVE A USER ------>");
       verticalContainer.getElement().removeAttribute("height");
 
       populateBelowHeader(verticalContainer);
@@ -223,7 +233,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
         logger.warning("got " + e);
       }
     }
-    //  logger.info("----> populateRootPanel END   ------>");
+    if (DEBUG) logger.info("----> populateRootPanel END   ------>");
   }
 
   private void showIOSAd() {
@@ -249,14 +259,12 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    * @see #populateRootPanel
    */
   private DivWidget makeFirstTwoRows(DivWidget verticalContainer) {
-    // add header row
     RootPanel rootPanel = RootPanel.get();
     rootPanel.add(headerRow = makeHeaderRow());
 
-//    DivWidget contentRow = new DivWidget();
-//    contentRow.getElement().setId("InitialUI_contentRow");
-//    verticalContainer.add(contentRow);
     this.contentRow = verticalContainer;
+
+    if (DEBUG) logger.info("makeFirstTwoRows content row " + contentRow.getId());
 
     rootPanel.add(getDownloadDiv());
 
@@ -285,7 +293,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    * @see #makeHeaderRow()
    */
   private String getGreeting() {
-    return userManager.getUserID() == null ? "" : ("" + userManager.getAbbreviation());
+    return userManager.hasUser() ? ("" + userManager.getAbbreviation()) : "";
   }
 
   /**
@@ -320,8 +328,9 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     pushClearHistory(); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
-    lifecycleSupport.recordingModeSelect();
     clearContent();
+
+    lifecycleSupport.recordingModeSelect(true);
   }
 
   private void pushClearHistory() {
@@ -333,7 +342,12 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    * @see BreadcrumbHelper#getBreadcrumbs
    */
   public void clearContent() {
-    //logger.info("clearContent -");
+    if (DEBUG) logger.info("clearContent - " + contentRow.getId());
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("clearContent"));
+//    logger.info("logException stack " + exceptionAsString);
+
+
     clearStartupInfo();
     contentRow.clear();
 //    contentRow.getElement().getStyle().setPosition(Style.Position.FIXED);
@@ -359,6 +373,8 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 //    DivWidget verticalContainer = new DivWidget();
     addMouseOverHandler(verticalContainer, event -> confirmCurrentProject());
     verticalContainer.getElement().setId(ROOT_VERTICAL_CONTAINER);
+
+    if (DEBUG) logger.info("getRootContainer ");
 
     Style style = verticalContainer.getElement().getStyle();
     style.setTop(TOP_OF_ROOT, Style.Unit.PX);
@@ -534,10 +550,11 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
       child.getElement().getStyle().setMarginLeft(550, Style.Unit.PX);
 
+      if (DEBUG) logger.info("adding please allow recording... add notice to " + contentRow.getId());
       contentRow.add(child);
     }
 
-    lifecycleSupport.recordingModeSelect();
+    lifecycleSupport.recordingModeSelect(false);
     makeNavigation();
     addResizeHandler();
   }
@@ -553,13 +570,16 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private void showNavigation() {
     int childCount = contentRow.getElement().getChildCount();
     if (childCount <= 2) {
-      if (DEBUG) logger.info("showNavigation : - add to content root = " + childCount);
+      if (DEBUG) {
+        logger.info("showNavigation : - add to content (" + contentRow.getId() +
+            ") root = " + childCount);
+      }
 
       contentRow.remove(child);
       if (navigation == null) makeNavigation(); // TODO : cheesy
       contentRow.add(navigation.getNavigation());
     } else {
-      logger.warning("showNavigation : first row has " + childCount + " child(ren) - not adding tab panel???");
+      logger.warning("\n\n\nshowNavigation : first row has " + childCount + " child(ren) - not adding tab panel???");
     }
   }
 
@@ -656,9 +676,11 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       return true;
     }
     // are we here to show the login screen?
-    boolean show = userManager.getUserID() == null;
-    if (show) {
-      // logger.info("showLogin user is not valid : user expired " + userManager.getUserID());
+    // boolean show = userManager.getUserID().isEmpty();
+    boolean b = userManager.hasUser();
+    if (DEBUG) logger.info("showLogin has user " + b);
+    if (!b) {
+      if (DEBUG) logger.info("showLogin user is not valid : user expired " + userManager.getUserID());
       verticalContainer.setHeight("100%");
       showLogin(eventRegistration);
       return true;
@@ -670,8 +692,10 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   }
 
   private void showLogin(EventRegistration eventRegistration) {
+    if (DEBUG) logger.info("showLogin (" + contentRow.getId() + ") " + contentRow.getWidgetCount());
     contentRow.add(new UserPassLogin(props, userManager, eventRegistration, lifecycleSupport.getStartupInfo()).getContent());
     contentRow.getElement().getStyle().setPosition(Style.Position.RELATIVE);
+    if (DEBUG) logger.info("showLogin after " + contentRow.getWidgetCount());
 
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
@@ -739,6 +763,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   @Override
   public void gotUser(HasID user) {
     populateRootPanelIfLogin();
+
     long userID = -1;
     if (user != null) {
       userID = user.getID();
@@ -747,12 +772,15 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     if (DEBUG) logger.info("gotUser : userID " + userID);
 
     banner.setUserName(getGreeting());
+
     if (userID != lastUser) {
       if (DEBUG) logger.info("\tgotUser : userID " + userID + " vs last " + lastUser);
       configureUIGivenUser(userID);
       lifecycleSupport.logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
     } else {
-      if (DEBUG)  logger.info("gotUser ignoring got user for current user " + userID + " perms " + userManager.getPermissions());
+      if (DEBUG) {
+        logger.info("gotUser ignoring got user for current user " + userID + " perms " + userManager.getPermissions());
+      }
       if (navigation != null) {
         showNavigation();
         navigation.showPreviousState();

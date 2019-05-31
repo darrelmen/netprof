@@ -31,26 +31,33 @@ package mitll.langtest.client.custom;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Window;
-import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.initial.InitialUI;
 import mitll.langtest.client.initial.PropertyHandler;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Logger;
 
 public class KeyStorage {
+  public static final String TRUE = "true";
   private final Logger logger = Logger.getLogger("KeyStorage");
 
-  private ExerciseController controller = null;
   private int user;
   private boolean showedAlert = false;
+
+  //private static final int NO_USER_SET = -1;
+//  private static final String NO_USER_SET_STRING = "" + NO_USER_SET;
+
+  private static final String USER_ID = "userID";
+  private static final String USER_CHOSEN_ID = "userChosenID";
+  private static final String USER_PENDING_ID = "userPendingID";
 
   private final boolean DEBUG = false;
 
   /**
-   * @param controller
+   *
    */
-  public KeyStorage(ExerciseController controller) {
-    this(controller.getUserState().getUser());
-    this.controller = controller;
+  public KeyStorage() {
+    this.user = getUserID();
   }
 
   /**
@@ -58,10 +65,9 @@ public class KeyStorage {
    * @paramx language
    * @see mitll.langtest.client.user.UserPassLogin#UserPassLogin
    */
-  private KeyStorage(int user) {
-    this.user = user;
-  }
-
+//  private KeyStorage(int user) {
+//    this.user = user;
+//  }
   public void setBoolean(String name, boolean val) {
     storeValue(name, "" + val);
   }
@@ -71,12 +77,12 @@ public class KeyStorage {
   }
 
   public boolean isTrue(String name) {
-    String value = getValue(name);
-    return value.equals("true");
+    return getValue(name).equals(TRUE);
   }
 
   public int getInt(String name) {
     String value = getValue(name);
+
     if (value == null) return -1;
     else {
       try {
@@ -87,25 +93,16 @@ public class KeyStorage {
     }
   }
 
-  public void storeValue(String name, String toStore) {
-    if (Storage.isLocalStorageSupported()) {
-      Storage localStorageIfSupported = Storage.getLocalStorageIfSupported();
-      String localStorageKey = getLocalStorageKey(name);
+  public int getSimpleInt(String name) {
+    String value = getSimpleValue(name);
 
-      if (DEBUG) logger.info("storeValue : (" + localStorageKey + ")" + " '" + name + "' = '" + toStore + "'");
-
+    if (value == null) return -1;
+    else {
       try {
-        localStorageIfSupported.setItem(localStorageKey, toStore);
-      } catch (Exception e) {
-        if (!showedAlert) {
-          showedAlert = true;
-          Window.alert("Your web browser does not support storing settings locally. " +
-              "In Safari, the most common cause of this is using Private Browsing Mode. " +
-              "Some settings may not save or some features may not work properly for you.");
-        }
+        return Integer.parseInt(value);
+      } catch (NumberFormatException e) {
+        return -1;
       }
-      if (DEBUG) logger.info("KeyStorage : (" + localStorageKey +
-          ") storeValue " + name + "=" + toStore + " : " + getValue(name));
     }
   }
 
@@ -120,7 +117,7 @@ public class KeyStorage {
    */
   public String getValue(String name) {
     if (Storage.isLocalStorageSupported()) {
-      String localStorageKey = getLocalStorageKey(name);
+      String localStorageKey = getKey(name);
       String item = Storage.getLocalStorageIfSupported().getItem(localStorageKey);
       if (DEBUG) logger.info("getValue : (" + localStorageKey + ")" + " '" + name + "' = '" + item + "'");
       if (item == null) item = "";
@@ -130,19 +127,147 @@ public class KeyStorage {
     }
   }
 
+  private String getSimpleValue(String name) {
+    if (Storage.isLocalStorageSupported()) {
+      String localStorageKey = getSimpleKey(name);
+      String item = Storage.getLocalStorageIfSupported().getItem(localStorageKey);
+      if (DEBUG) logger.info("getValue : (" + localStorageKey + ")" + " '" + name + "' = '" + item + "'");
+      if (item == null) item = "";
+      return item;
+    } else {
+      return "";
+    }
+  }
+
+  public void storeValue(String name, String toStore) {
+    if (Storage.isLocalStorageSupported()) {
+      store(name, toStore, getKey(name));
+    }
+  }
+
+  private void store(String name, String toStore, String localStorageKey) {
+    if (DEBUG) logger.info("storeValue : (" + localStorageKey + ")" + " '" + name + "' = '" + toStore + "'");
+
+    try {
+      Storage.getLocalStorageIfSupported().setItem(localStorageKey, toStore);
+    } catch (Exception e) {
+      showAlert();
+    }
+    if (DEBUG) {
+      logger.info("KeyStorage : (" + localStorageKey +
+          ") storeValue " + name + "=" + toStore + " : " + getValue(name));
+    }
+  }
+
+  private void showAlert() {
+    if (!showedAlert) {
+      showedAlert = true;
+      Window.alert("Your web browser does not support storing settings locally. " +
+          "In Safari, the most common cause of this is using Private Browsing Mode. " +
+          "Some settings may not save or some features may not work properly for you.");
+    }
+  }
+
+
+  private void storeSimpleValue(String name, String toStore) {
+    if (Storage.isLocalStorageSupported()) {
+      store(name, toStore, getSimpleKey(name));
+    }
+  }
+
   public void removeValue(String name) {
     if (Storage.isLocalStorageSupported()) {
-      Storage.getLocalStorageIfSupported().removeItem(getLocalStorageKey(name));
+      Storage.getLocalStorageIfSupported().removeItem(getKey(name));
       //if (debug) System.out.println("KeyStorage : removeValue " + name);
     }
   }
 
-  private String getLocalStorageKey(String name) {
-    if (controller != null) {
-      user = controller.getUser();
+  private void removeSimpleValue(String name) {
+    if (Storage.isLocalStorageSupported()) {
+      Storage.getLocalStorageIfSupported().removeItem(getSimpleKey(name));
+      //if (debug) System.out.println("KeyStorage : removeValue " + name);
     }
+  }
 
-    return getKey(name);
+//  private String getLocalStorageKey(String name) {
+//    //   user = getUserID();
+//    return getKey(name);
+//  }
+
+  public int getUserID() {
+    //String userIDCookie = getUserIDCookie();
+    //   logger.info("getUserID " + userIDCookie);
+    int anInt = getSimpleInt(USER_ID);
+   // logger.info("getUserID value " + anInt);
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getUserID"));
+//    logger.info("logException stack " + exceptionAsString);
+
+    return anInt;
+  }
+
+//  private String getUserFromStorage() {
+//    return Storage.getLocalStorageIfSupported() != null ? getValue(getUserIDCookie()) : NO_USER_SET_STRING;
+//  }
+
+  public String toString() {
+    return getKey("");
+  }
+
+  /**
+   * Need these to be prefixed by app title so if we switch webapps, we don't get weird user ids
+   *
+   * @return
+   * @see #getUserFromStorage
+   * @see #clearUser
+   * @see #rememberUser
+   */
+//  private String getUserIDCookie() {
+//    return USER_ID;
+//  }
+
+//  private String getUserChosenIDCookie() {
+//    return USER_CHOSEN_ID;
+//  }
+
+//  private String getUserPendingIDCookie() {
+//    return USER_PENDING_ID;
+//  }
+  public String getUserChosenID() {
+    if (Storage.isLocalStorageSupported()) {
+      return getSimpleValue(USER_CHOSEN_ID);
+    } else {
+      return "";
+    }
+  }
+
+  public String getUserPendingID() {
+    if (Storage.isLocalStorageSupported()) {
+      return getSimpleValue(USER_PENDING_ID);
+    } else {
+      return "";
+    }
+  }
+
+  public void setPendingUserStorage(String pendingID) {
+    storeSimpleValue(USER_PENDING_ID, pendingID);
+  }
+
+  public void rememberUser(String userChosenID, int userID) {
+    storeSimpleValue(USER_ID, "" + userID);
+    storeSimpleValue(USER_CHOSEN_ID, "" + userChosenID);
+    // if (DEBUG) logger.info("storeUser : user now " + user.getID() + " / " + getUser());
+  }
+
+  /**
+   * @see InitialUI#resetState()
+   */
+  public void clearUser() {
+    if (Storage.isLocalStorageSupported()) {
+      removeSimpleValue(USER_ID);
+      removeSimpleValue(USER_CHOSEN_ID);
+      removeSimpleValue(USER_PENDING_ID);
+    }
   }
 
   /**
@@ -153,10 +278,27 @@ public class KeyStorage {
    * @return
    */
   protected String getKey(String name) {
-    return PropertyHandler.getAppName() + "_" + user + "_" + name;
+    return getAppName() + "_" + user + "_" + name;
   }
 
-  public String toString() {
-    return getKey("");
+  private String getSimpleKey(String name) {
+    return getAppName() + "_" + name;
+  }
+
+  @NotNull
+  private String getAppName() {
+    String appName = PropertyHandler.getAppName();
+    String path = Window.Location.getPath();
+    String app = path.substring(0, path.lastIndexOf("/"));
+    appName = app.isEmpty() ? appName : app;
+
+    if (!appName.equalsIgnoreCase("Netscape")) {
+      logger.info("appName " + appName);
+    }
+    return appName;
+  }
+
+  public void setUser(int user) {
+    this.user = user;
   }
 }

@@ -182,7 +182,7 @@ public class UserDialog extends BasicDialog {
    * @see SignUpForm#gotSignUp
    */
   void storeUser(User result, UserManager userManager) {
-    //logger.info("UserPassLogin.storeUser - " + result);
+    logger.info("UserPassLogin.storeUser - " + result);
     enterKeyButtonHelper.removeKeyHandler();
     userManager.storeUser(result);
   }

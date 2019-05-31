@@ -97,7 +97,7 @@ public class QuizChoiceHelper implements ContentView {
             QuizIntro widgets = new QuizIntro(
                 getIdToUserListMap(result),
                 QuizChoiceHelper.this::gotQuizChoice,
-                controller.getUserManager().getUserID());
+                controller.getUserManager().getAbbreviation());
             toAddTo.add(widgets);
           }
         });

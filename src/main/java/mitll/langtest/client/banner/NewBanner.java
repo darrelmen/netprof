@@ -272,13 +272,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     rememberViewAndLink(nav, RECORD_ENTRIES);
 
     boolean dialogNavVisible = isDialogNavVisible();
-    logger.info("Dialog nav visible : " + dialogNavVisible);
+    if (DEBUG) logger.info("Dialog nav visible : " + dialogNavVisible);
     if (!dialogNavVisible) {
       rememberViewAndLink(nav, RECORD_SENTENCES);
     }
 
     rememberViewAndLink(nav, OOV_EDITOR);
-    //dialogEditor = rememberViewAndLink(nav, DIALOG_EDITOR);
 
     recnav.add(nav);
     return recnav;

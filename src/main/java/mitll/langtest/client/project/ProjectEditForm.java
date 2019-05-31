@@ -178,9 +178,8 @@ public class ProjectEditForm extends UserDialog {
     messageHelper = controller.getMessageHelper();
 
     this.controller = controller;
-    {
-      String userID = controller.getUserManager().getUserID();
-      if (userID != null) isSuperUser = userID.equalsIgnoreCase(GVIDAVER);
+    if (controller.getUserManager().hasUser()) {
+      isSuperUser = controller.getUserManager().getUserID().equalsIgnoreCase(GVIDAVER);
     }
   }
 

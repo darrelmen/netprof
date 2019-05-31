@@ -169,7 +169,7 @@ public class FlashcardPanel<L extends CommonShell, T extends ClientExercise>
     this.soundFeedback = soundFeedback;
     isUrdu = controller.getLanguageInfo() == Language.URDU;
 
-    controlState.setStorage(new KeyStorage(controller));
+    controlState.setStorage(new KeyStorage());
   }
 
   /**

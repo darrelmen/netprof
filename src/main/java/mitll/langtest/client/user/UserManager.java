@@ -48,13 +48,12 @@ public class UserManager {
 
   private static final boolean DEBUG = false;
 
-
   private static final int NO_USER_SET = -1;
-  private static final String NO_USER_SET_STRING = "" + NO_USER_SET;
+//  private static final String NO_USER_SET_STRING = "" + NO_USER_SET;
 
-  private static final String USER_ID = "userID";
-  private static final String USER_CHOSEN_ID = "userChosenID";
-  private static final String USER_PENDING_ID = "userPendingID";
+//  public static final String USER_ID = "userID";
+//  private static final String USER_CHOSEN_ID = "userChosenID";
+//  private static final String USER_PENDING_ID = "userPendingID";
 
   private final UserServiceAsync userServiceAsync;
 
@@ -68,7 +67,7 @@ public class UserManager {
    * @see #gotNewUser
    */
   private User current;
-  KeyStorage storage;
+  private KeyStorage storage;
 
   /**
    * @param lt
@@ -101,13 +100,16 @@ public class UserManager {
    */
   public void checkLogin() {
     final int user = getUser();
+
+    if (DEBUG) logger.info("UserManager.checkLogin : current user : " + user);
+
     if (user != NO_USER_SET) {
-      if (DEBUG) logger.info("UserManager.login : current user : " + user);
+      if (DEBUG) logger.info("\n\nUserManager.checkLogin : we have a current user : " + user);
       if (current == null) {
         getPermissionsAndSetUser();
       } else {
         if (DEBUG)
-          logger.info("checkLogin : user " + user + " and full info " + current.getUserID() + " " + current.getUserKind());
+          logger.info("UserManager.checkLogin : user " + user + " and full info " + current.getUserID() + " " + current.getUserKind());
       }
     } else {
       userNotification.showLogin();
@@ -118,6 +120,7 @@ public class UserManager {
    * instead have call to get permissions for a user.
    *
    * @see #checkLogin
+   * @see InitialUI#getUserPermissions()
    */
   public void getPermissionsAndSetUser() {
     if (DEBUG) {
@@ -174,7 +177,7 @@ public class UserManager {
    */
   public String getUserID() {
     if (Storage.isLocalStorageSupported()) {
-      return storage.getValue(getUserChosenID());
+      return storage.getUserChosenID();
     } else {
       return userChosenID;
     }
@@ -182,10 +185,18 @@ public class UserManager {
 
   String getPendingUserID() {
     if (Storage.isLocalStorageSupported()) {
-      return storage.getValue(getUserPendingID());
+      return storage.getUserPendingID();
     } else {
       return userChosenID;
     }
+  }
+
+  /**
+   * So we only have a valid user id here if we've logged in.
+   * @return
+   */
+  public boolean hasUser() {
+    return getUser() != -1;//!getUserID().isEmpty();
   }
 
   /**
@@ -194,23 +205,21 @@ public class UserManager {
    */
   public int getUser() {
     if (Storage.isLocalStorageSupported()) {
-      String sid = getUserFromStorage();
-      return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
+      return storage.getUserID();
+//      String sid = getUserFromStorage();
+//      return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
     } else {
       return userID;
     }
   }
 
-  public boolean hasUser() {
-    return getUserID() != null;
-  }
-
-  private String getUserFromStorage() {
-    return Storage.getLocalStorageIfSupported() != null ? storage.getValue(getUserIDCookie()) : NO_USER_SET_STRING;
-  }
+//
+//  private String getUserFromStorage() {
+//    return Storage.getLocalStorageIfSupported() != null ? storage.getValue(getUserIDCookie()) : NO_USER_SET_STRING;
+//  }
 
   void setPendingUserStorage(String pendingID) {
-    storage.storeValue(getUserPendingID(), pendingID);
+    storage.setPendingUserStorage(pendingID);
   }
 
   /**
@@ -221,20 +230,20 @@ public class UserManager {
    * @see #clearUser
    * @see #rememberUser
    */
-  private String getUserIDCookie() {
-    return appTitle + ":" + USER_ID;
-  }
+//  private String getUserIDCookie() {
+//    return appTitle + ":" + USER_ID;
+//  }
 
   /**
    * @return
    */
-  private String getUserChosenID() {
-    return appTitle + ":" + USER_CHOSEN_ID;
-  }
+//  private String getUserChosenID() {
+//    return appTitle + ":" + USER_CHOSEN_ID;
+//  }
 
-  private String getUserPendingID() {
-    return appTitle + ":" + USER_PENDING_ID;
-  }
+//  private String getUserPendingID() {
+//    return appTitle + ":" + USER_PENDING_ID;
+//  }
 
   /**
    * don't store the password hash in local storage :)
@@ -248,6 +257,7 @@ public class UserManager {
       rememberUser(user);
       gotNewUser(user);
     } else {  // not sure what we could possibly do here...
+      if (DEBUG) logger.info("storeUser : ??? user now " + user);
       userID = user.getID();
       userNotification.gotUser(user);
     }
@@ -258,11 +268,14 @@ public class UserManager {
    * @see #storeUser
    */
   void rememberUser(SimpleUser user) {
-    userChosenID = user.getUserID();
-    storage.storeValue(getUserIDCookie(), "" + user.getID());
-    storage.storeValue(getUserChosenID(), "" + userChosenID);
+    storage.rememberUser(userChosenID = user.getUserID(), user.getID());
+//    storage.storeValue(getUserIDCookie(), "" + user.getID());
+//    storage.storeValue(getUserChosenID(), "" + userChosenID);
 
-    if (DEBUG) logger.info("storeUser : user now " + user.getID() + " / " + getUser());
+    if (DEBUG) {
+      logger.info("storeUser : user now " + user.getID() + " / " + getUser() +
+          "\n\tstorage " + storage.getUserChosenID() + " " + storage.getUserID());
+    }
   }
 
   /**
@@ -270,9 +283,8 @@ public class UserManager {
    */
   public void clearUser() {
     if (Storage.isLocalStorageSupported()) {
-      storage.removeValue(getUserIDCookie());
-      storage.removeValue(getUserChosenID());
-      storage.removeValue(getUserPendingID());
+      storage.clearUser();
+//      storage.removeValue(getUserPendingID());
       current = null;
       if (DEBUG) logger.info("clearUser : removed user id = " + getUserID() + " user now " + getUser());
     } else {
@@ -297,6 +309,8 @@ public class UserManager {
 //      logger.info("gotNewUser ab " + abbreviation +
 //          " current user " + current);
       userNotification.gotUser(result);
+    } else {
+      logger.warning("gotNewUser failed?");
     }
   }
 

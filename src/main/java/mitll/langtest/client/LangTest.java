@@ -86,7 +86,6 @@ import mitll.langtest.shared.user.User;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static mitll.langtest.client.banner.NewContentChooser.MODE;
 
@@ -123,6 +122,7 @@ public class LangTest implements
   private static final int MAX_EXCEPTION_STRING = 600;
   private static final int MAX_CACHE_SIZE = 100;
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_MODE = true;
 
   private UserManager userManager;
 
@@ -424,7 +424,7 @@ public class LangTest implements
   }
 
   private boolean lastWasStackOverflow = false;
-  private boolean lastWasIncompat = false;
+  // private boolean lastWasIncompat = false;
 
   public String logException(Throwable throwable) {
 //    if (throwable instanceof IncompatibleRemoteServiceException && !lastWasIncompat) {
@@ -436,18 +436,18 @@ public class LangTest implements
 //      Window.Location.reload();
 //      return "";
 //    } else {
-      logger.info("logException got exception " + throwable.getMessage());
+    logger.info("logException got exception " + throwable.getMessage());
 
-      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(throwable);
-      logger.info("logException stack " + exceptionAsString);
-      boolean isStackOverflow = exceptionAsString.contains("Maximum call stack size exceeded");
-      if (isStackOverflow && lastWasStackOverflow) { // we get overwhelmed by repeated exceptions
-        return ""; // skip repeat exceptions
-      } else {
-        lastWasStackOverflow = isStackOverflow;
-      }
-      logMessageOnServer(exceptionAsString, GOT_BROWSER_EXCEPTION, true);
-      return exceptionAsString;
+    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(throwable);
+    logger.info("logException stack " + exceptionAsString);
+    boolean isStackOverflow = exceptionAsString.contains("Maximum call stack size exceeded");
+    if (isStackOverflow && lastWasStackOverflow) { // we get overwhelmed by repeated exceptions
+      return ""; // skip repeat exceptions
+    } else {
+      lastWasStackOverflow = isStackOverflow;
+    }
+    logMessageOnServer(exceptionAsString, GOT_BROWSER_EXCEPTION, true);
+    return exceptionAsString;
 //    }
   }
 
@@ -609,6 +609,7 @@ public class LangTest implements
 
   /**
    * @see mitll.langtest.client.user.UserManager#getPermissionsAndSetUser
+   * @see InitialUI#populateRootPanel
    */
   @Override
   public void showLogin() {
@@ -648,12 +649,50 @@ public class LangTest implements
    * <p>
    * If in goodwave (pronunciation scoring) mode or auto crt mode, skip the user login.
    *
+   * @param checkLogin
    * @see InitialUI#resetState
    * @see #onModuleLoad2()
    */
   @Override
-  public void recordingModeSelect() {
-    Scheduler.get().scheduleDeferred(this::checkInitFlash);
+  public void recordingModeSelect(boolean checkLogin) {
+    //   Scheduler.get().scheduleDeferred(this::checkInitFlash);
+
+//    checkInitFlash();
+//    Scheduler.get().scheduleDeferred(this::checkInitFlash);
+//  }
+//
+//    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
+//      @Override
+//      public void execute() {
+//
+//      }
+//    });
+
+    if (BrowserRecording.gotPermission()) {
+      if (DEBUG_MODE) logger.info("checkInitFlash : initFlash - has permission " +checkLogin);
+      if (checkLogin) userManager.checkLogin();
+    } else {
+      if (DEBUG_MODE) logger.info("checkInitFlash : initFlash - no permission yet " + checkLogin);
+      BrowserRecording.getWebAudio().initWebaudio();
+      if (!WebAudioRecorder.isWebRTCAvailable()) {
+        if (checkLogin) {
+          if (DEBUG_MODE) logger.info("checkInitFlash : initFlash - checkLogin " + checkLogin);
+          userManager.checkLogin();
+        }
+      }
+    }
+  }
+
+  /**
+   * Called after the user clicks "Yes" in flash mic permission dialog.
+   *
+   * @see #checkInitFlash()
+   * @see #initBrowserRecording()
+   */
+  private void checkLogin() {
+    //console("checkLogin");
+    //logger.info("checkLogin -- ");
+    userManager.checkLogin();
   }
 
 //  private boolean showingPlugInNotice = false;
@@ -812,25 +851,10 @@ public class LangTest implements
    * @see UserManager#storeUser
    */
   public void gotUser(User user) {
+    storage.setUser(user.getID());
     setProjectStartupInfo(user);
     if (DEBUG) logger.info("\ngotUser Got startup info " + projectStartupInfo);
     initialUI.gotUser(user);
-  }
-
-  /**
-   * @see #recordingModeSelect()
-   */
-  private void checkInitFlash() {
-    if (BrowserRecording.gotPermission()) {
-      if (DEBUG) logger.info("checkInitFlash : initFlash - has permission");
-      checkLogin();
-    } else {
-      if (DEBUG) logger.info("checkInitFlash : initFlash - no permission yet");
-      BrowserRecording.getWebAudio().initWebaudio();
-      if (!WebAudioRecorder.isWebRTCAvailable()) {
-        checkLogin();
-      }
-    }
   }
 
   @Override
@@ -904,17 +928,6 @@ public class LangTest implements
     buttonFactory.logEvent(widgetID, widgetType, new EventContext(exid, context, getUser()));
   }
 
-  /**
-   * Called after the user clicks "Yes" in flash mic permission dialog.
-   *
-   * @see #checkInitFlash()
-   * @see #initBrowserRecording()
-   */
-  private void checkLogin() {
-    //console("checkLogin");
-    //logger.info("checkLogin -- ");
-    userManager.checkLogin();
-  }
 
   /**
    * @return
@@ -935,7 +948,7 @@ public class LangTest implements
    * @see mitll.langtest.client.exercise.PostAnswerProvider#postAnswers
    */
   public int getUser() {
-    return userManager.getUser();
+    return userManager == null ? -1 : userManager.getUser();
   }
 
   public User getCurrent() {
@@ -1208,7 +1221,7 @@ public class LangTest implements
 
   public KeyStorage getStorage() {
     if (storage == null) {
-      storage = new KeyStorage(this);
+      storage = new KeyStorage();
     }
     return storage;
   }

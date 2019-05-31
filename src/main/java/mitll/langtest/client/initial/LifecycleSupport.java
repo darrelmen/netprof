@@ -40,7 +40,7 @@ import java.util.Collection;
  * MUST BE PUBLIC -
  */
 public interface LifecycleSupport extends EventRegistration {
-  void recordingModeSelect();
+  void recordingModeSelect(boolean checkLogin);
 
   void clearStartupInfo();
 

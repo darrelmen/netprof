@@ -182,9 +182,8 @@ public class ProjectChoices extends ThumbnailChoices {
     this.lifecycleSupport = langTest;
     this.sessionUser = langTest.getUser();
 
-    {
-      String userID = langTest.getUserManager().getUserID();
-      if (userID != null) isSuperUser = userID.equalsIgnoreCase(GVIDAVER);
+    if (langTest.getUserManager().hasUser()) {
+      isSuperUser = langTest.getUserManager().getUserID().equalsIgnoreCase(GVIDAVER);
     }
 
     this.controller = langTest;

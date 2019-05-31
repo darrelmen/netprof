@@ -384,7 +384,7 @@ public class PropertyHandler {
 
   /**
    * @return
-   * @see mitll.langtest.client.LangTest#recordingModeSelect()
+   * @see LifecycleSupport#recordingModeSelect(boolean)
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    */
   public boolean isBkgColorForRef() {
@@ -444,9 +444,9 @@ public class PropertyHandler {
     return quietAudioOK;
   }
 
-  private static boolean knownChoice(String choice) {
-    return TEXT.equals(choice) || AUDIO.equals(choice) || SPEECH.equals(choice);
-  }
+//  private static boolean knownChoice(String choice) {
+//    return TEXT.equals(choice) || AUDIO.equals(choice) || SPEECH.equals(choice);
+//  }
 
   @Deprecated
   public boolean isOdaMode() {

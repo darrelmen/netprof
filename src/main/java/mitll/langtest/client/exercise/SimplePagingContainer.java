@@ -226,7 +226,9 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
     {
       int numRows = getNumTableRowsGivenScreenHeight();
-      logger.info("configureTable size is " + numRows + " " +this.getClass());
+
+      if (DEBUG) logger.info("configureTable size is " + numRows + " " + this.getClass());
+
       if (table.getPageSize() != numRows) {
         table.setPageSize(numRows);
       }

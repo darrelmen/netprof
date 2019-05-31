@@ -66,6 +66,11 @@ public class BasicUserContainer<T extends SimpleUser> extends MemoryItemContaine
     return tableWithPager;
   }
 
+  @Override
+  protected int getNumTableRowsGivenScreenHeight() {
+    return 10;
+  }
+
   /**
    * @see SimplePagingContainer#configureTable
    */
