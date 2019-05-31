@@ -72,8 +72,8 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    */
   private static final String EDIT_THE_LIST = "Edit the ";// + LIST + ", make it public.";
 
-  private static final String SHARE = "Share";
-  private static final String SHARE_THE_LIST = "Share the ";// + LIST + " with someone.";
+  static final String SHARE = "Share";
+  static final String SHARE_THE_LIST = "Share the ";// + LIST + " with someone.";
   private static final String SAVE = "Save";
 
   private static final String EDIT_THE_ITEMS_ON_LIST = "Edit the items on ";
@@ -97,7 +97,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   protected final ExerciseController<?> controller;
   protected DivWidget leftRight, left;
   protected Button share;
-  private static final int MIN_WIDTH = 659;//599;
+  private static final int MIN_WIDTH = 659;
   protected DialogHelper dialogHelper;
   private ButtonMemoryItemContainer<T> myLists;
 
@@ -138,6 +138,16 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    */
   @NotNull
   protected DivWidget getButtons(ButtonMemoryItemContainer<T> container) {
+    DivWidget buttons = getCommonButtonContainer();
+
+    addImportButton(buttons);
+    buttons.add(share = getShare());
+
+    return buttons;
+  }
+
+  @NotNull
+  DivWidget getCommonButtonContainer() {
     DivWidget buttons = new DivWidget();
     buttons.addStyleName("inlineFlex");
     buttons.addStyleName("topFiveMargin");
@@ -149,12 +159,9 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     }
 
     buttons.add(removeButton = getRemoveButton());
-
+    removeButton.addStyleName("rightTenMargin");
     buttons.add(editButton = getEdit());
     buttons.add(getAddItems());
-    addImportButton(buttons);
-    buttons.add(share = getShare());
-
     return buttons;
   }
 
@@ -282,9 +289,9 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
           "\n\tnext is       " + at.getID());
 
 //      listContainer.markCurrentExercise(id);
-    //  Scheduler.get().scheduleDeferred(() -> {
-        listContainer.markCurrentExercise(id);
-        listContainer.redraw();
+      //  Scheduler.get().scheduleDeferred(() -> {
+      listContainer.markCurrentExercise(id);
+      listContainer.redraw();
       //});
 
     }
@@ -373,11 +380,15 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   }
 
   @NotNull
-  private String getSuffix() {
+  protected String getSuffix() {
     return " " + getName();
   }
 
-  private Button getShare() {
+  /**
+   * @return
+   * @see #getButtons
+   */
+  protected Button getShare() {
     Button successButton = getSuccessButton(SHARE);
     successButton.setIcon(IconType.SHARE);
     addTooltip(successButton, SHARE_THE_LIST + getSuffix());
@@ -507,7 +518,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   protected void setShareHREF(T user) {
     if (user != null) {
       setShareButtonHREF();
-      // share.setEnabled(!user.isFavorite());
     }
   }
 
@@ -541,8 +551,8 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   }
 
   /**
-   * @see DialogEditorView#showYours(Collection, DivWidget)
    * @param myLists
+   * @see DialogEditorView#showYours(Collection, DivWidget)
    */
   public void setMyLists(ButtonMemoryItemContainer<T> myLists) {
     this.myLists = myLists;

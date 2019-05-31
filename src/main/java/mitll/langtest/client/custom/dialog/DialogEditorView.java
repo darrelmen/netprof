@@ -101,11 +101,29 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   @NotNull
   @Override
   protected DivWidget getButtons(ButtonMemoryItemContainer<T> container) {
-    DivWidget buttons = super.getButtons(container);
-    buttons.add(getCoreVocabButton(container));
-    buttons.add(getUploadImageButton(container));
+    DivWidget buttons = getCommonButtonContainer();
+
+    Button coreVocabButton = getCoreVocabButton(container);
+
+    buttons.add(coreVocabButton);
+    Button uploadImageButton = getUploadImageButton(container);
+    buttons.add(uploadImageButton);
+    uploadImageButton.addStyleName("rightTenMargin");
+
+    buttons.add(share = getShare());
+
     buttons.add(getListenButton(container));
     return buttons;
+  }
+
+  protected Button getShare() {
+    Button successButton = new Button(SHARE);
+    successButton.setType(ButtonType.INFO);
+    successButton.addStyleName("leftFiveMargin");
+
+    successButton.setIcon(IconType.SHARE);
+    addTooltip(successButton, SHARE_THE_LIST + getSuffix());
+    return successButton;
   }
 
   @NotNull
@@ -123,10 +141,8 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   private Button getCoreVocabButton(ButtonMemoryItemContainer<T> container) {
     Button learn = getSuccessButton("Core Vocab");
     learn.setIcon(IconType.PENCIL);
-    learn.setType(ButtonType.INFO);
     learn.addClickHandler(event -> editCoreVocabList(getCurrentSelection()));
     addTooltip(learn, "Edit the core vocab to the dialog.");
-    //learn.setEnabled(!container.isEmpty());
     container.addButton(learn);
     return learn;
   }
@@ -134,13 +150,13 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   @NotNull
   private Button getUploadImageButton(ButtonMemoryItemContainer<T> container) {
     Button learn = getSuccessButton("Upload Image");
-    learn.setIcon(IconType.PENCIL);
-    learn.setType(ButtonType.INFO);
+    learn.setIcon(IconType.PICTURE);
+//    learn.setType(ButtonType.INFO);
 
     learn.addClickHandler(event -> {
       int itemID = getItemID(container);
       logger.info("dialog item ID " + itemID);
-      ImageUpload widgets1 = new ImageUpload(controller.getUser(), itemID) {
+      ImageUpload widgets1 = new ImageUpload(controller.getUser(), itemID, getCurrentSelection().getImageRef()) {
         @Override
         protected void handleFormSubmitSuccess(UploadResult result) {
           super.handleFormSubmitSuccess(result);
@@ -155,7 +171,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
               @Override
               public void onSuccess(Boolean result) {
-              //  logger.info("Set image path " + result);
+                //  logger.info("Set image path " + result);
                 if (!result) {
                   logger.warning("Set image path " + result);
 
@@ -315,8 +331,6 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
     DialogEditor editorTurnDialogEditor = new DialogEditor(controller, INavigation.VIEWS.DIALOG_EDITOR, selectedItem);
     editorTurnDialogEditor.showContent(listContent, INavigation.VIEWS.DIALOG_EDITOR);
-
-    //  logger.info("list content " + listContent);
 
     new DialogHelper(true).show(
         "Add/Edit Turns" + " : " + getListName(),

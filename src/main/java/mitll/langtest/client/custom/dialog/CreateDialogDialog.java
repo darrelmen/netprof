@@ -55,10 +55,11 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
+  private final Logger logger = Logger.getLogger("CreateDialogDialog");
+
   public static final String PLEASE_CHOOSE = "Please choose.";
   public static final String CHOOSE_TYPE_OF_DIALOG = "-- Choose type of dialog --";
-  private final Logger logger = Logger.getLogger("CreateDialogDialog");
-  private static final String HEIGHT = 100 + "px";
+  public static final String HEIGHT = 100 + "px";
 
   private FormField entitleBox;
   private ListBox dialogType;
@@ -87,31 +88,6 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
   CreateDialogDialog(Set<String> names, ExerciseController controller, CreateComplete<T> listView) {
     super(null, names, false, controller, listView);
   }
-
-  @Override
-  protected FormField addTitle(FluidRow row) {
-    FormField formField = super.addTitle(row);
-    // formField.getWidget().setWidth("300px");
-    // ((TextBox)formField.box).setVisibleLength(40);
-    return formField;
-  }
-
-//  private String filePath = "";
-//  private int imageID;
-//
-//  @NotNull
-//  private com.github.gwtbootstrap.client.ui.Button getUploadButton(int projid) {
-//    com.github.gwtbootstrap.client.ui.Button w = new com.github.gwtbootstrap.client.ui.Button("Upload image");
-//
-//    w.setIcon(IconType.UPLOAD);
-//    w.setType(ButtonType.INFO);
-//
-//    addTooltip(w, "Upload image for dialog.");
-//
-//    w.addClickHandler(event -> new ImageUpload(projid).showModal());
-//
-//    return w;
-//  }
 
   @Override
   protected int getMaxTitleLength() {

@@ -30,8 +30,10 @@
 package mitll.langtest.client.custom.dialog;
 
 import com.github.gwtbootstrap.client.ui.Label;
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.LabelType;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Hidden;
 import mitll.langtest.client.domino.common.UploadViewBase;
 import org.jetbrains.annotations.NotNull;
@@ -43,9 +45,12 @@ class ImageUpload extends UploadViewBase {
 
   private int dialogID;
 
-  ImageUpload(int userID, int dialogID) {
+  private String imageRef;
+
+  ImageUpload(int userID, int dialogID, String imageRef) {
     super(userID);
     this.dialogID = dialogID;
+    this.imageRef = imageRef;
     logger.info("dialogID " + dialogID);
   }
 
@@ -100,8 +105,29 @@ class ImageUpload extends UploadViewBase {
 
   @Override
   protected void addInfoLabels() {
-    Label w = getLabel("Choose an image (square ideally).");
+    Label w = getLabel("Choose an image (ideally square).");
     add(w);
+    if (imageRef != null) {
+      add(getCurrentImage(imageRef));
+    }
+  }
+
+  private DivWidget getCurrentImage(String imageRef) {
+    DivWidget imageContainer = new DivWidget();
+    imageContainer.addStyleName("floatRight");
+    imageContainer.addStyleName("rightFiveMargin");
+    imageContainer.add(new HTML("Current Image"));
+    imageContainer.addStyleName("cardBorderShadow");
+    imageContainer.add(getImage(imageRef));
+    return imageContainer;
+  }
+
+  @NotNull
+  private com.google.gwt.user.client.ui.Image getImage(String cc) {
+    com.google.gwt.user.client.ui.Image image = new com.google.gwt.user.client.ui.Image(cc);
+    image.setHeight(CreateDialogDialog.HEIGHT);
+    image.setWidth(CreateDialogDialog.HEIGHT);
+    return image;
   }
 
   @NotNull
