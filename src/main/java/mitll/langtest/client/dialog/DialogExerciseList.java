@@ -34,9 +34,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.PushButton;
-import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.banner.Emoticon;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -157,12 +155,12 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     }
   }
 
-  private Map<Integer, CorrectAndScore> scoreHistoryPerExercise;
+  private Map<Integer, CorrectAndScore> scoreHistoryPerDialog;
 
   @Override
   protected void setScores(ExerciseListWrapper<IDialog> result) {
     super.setScores(result);
-    scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
+    scoreHistoryPerDialog = result.getScoreHistoryPerExercise();
   }
 
   @Override
@@ -174,32 +172,12 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 //    logger.info("getFullExercises " + requested);
 //    logger.info("getFullExercises " + alreadyFetched.size());
 //    logger.info("getFullExercises " + getInOrder().size());
-
     showDialogs(visibleIDs, getInOrder());
-
-   /* controller.getDialogService().getDialogs(new ExerciseListRequest(1, controller.getUser(), controller.getProjectID()),
-        new AsyncCallback<ExerciseListWrapper<IDialog>>() {
-          @Override
-          public void onFailure(Throwable caught) {
-
-          }
-
-          @Override
-          public void onSuccess(ExerciseListWrapper<IDialog> result) {
-            showDialogs(result, visibleIDs);
-          }
-        });*/
   }
-/*
-  private void showDialogs(ExerciseListWrapper<IDialog> result, Collection<Integer> visibleIDs) {
-    List<IDialog> exercises = result.getExercises();
-    showDialogs(visibleIDs, exercises);
-  }*/
+
 
   private void showDialogs(Collection<Integer> visibleIDs, List<IDialog> exercises) {
     List<IDialog> toShow = exercises.stream().filter(iDialog -> visibleIDs.contains(iDialog.getID())).collect(Collectors.toList());
-    //scoreHistoryPerExercise = result.getScoreHistoryPerExercise();
-
     sortDialogs(toShow, visibleIDs);
     showExercisesForCurrentReq(toShow, incrReq());
   }
@@ -347,12 +325,35 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
       container.add(label1);
     }
-    Emoticon overallSmiley = getEmoticon(dialog);
-    container.add(overallSmiley);
+
+    container.add(getEmoticonRow(dialog));
+
     container.setWidth("100%");
     container.addStyleName("floatLeft");
     container.getElement().getStyle().setBackgroundColor(dialog.getKind() == DialogType.DIALOG ? DIALOG_COLOR : INTERP_COLOR);
     return container;
+  }
+
+  /**
+   * Show score and mode
+   * @param dialog
+   * @return
+   */
+  @NotNull
+  private DivWidget getEmoticonRow(IDialog dialog) {
+    Emoticon overallSmiley = getEmoticon(dialog);
+    DivWidget smiley = new DivWidget();
+    smiley.addStyleName("inlineFlex");
+
+    smiley.add(overallSmiley);
+    CorrectAndScore correctAndScore = scoreHistoryPerDialog.get(dialog.getID());
+    if (correctAndScore != null) {
+      HTML w = new HTML(INavigation.VIEWS.valueOf(correctAndScore.getPath()).toString());
+      w.addStyleName("leftFiveMargin");
+      w.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
+      smiley.add(w);
+    }
+    return smiley;
   }
 
   @NotNull
@@ -360,13 +361,16 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     Emoticon overallSmiley = new Emoticon();
 
     {
-      int percentScore = scoreHistoryPerExercise.getOrDefault(dialog.getID(), new CorrectAndScore(0F, null)).getPercentScore();
+      CorrectAndScore orDefault = scoreHistoryPerDialog.getOrDefault(dialog.getID(), new CorrectAndScore(0F, null));
+      int percentScore = orDefault.getPercentScore();
       if (percentScore > 0) {
         // logger.info("For " + dialog.getID() + " score " +percentScore);
         double score = Integer.valueOf(percentScore).doubleValue() / 100D;
         // logger.info("overallSmiley For " + dialog.getID() + " score " +score);
         overallSmiley.setEmoticon(score, controller.getLanguageInfo());
-      } else overallSmiley.setVisible(false);
+      } else {
+        overallSmiley.setVisible(false);
+      }
       //  else overallSmiley.setEmoticon(0.5,controller.getLanguageInfo());
 
       styleAnimatedSmiley(overallSmiley);

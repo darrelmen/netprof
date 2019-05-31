@@ -38,34 +38,15 @@ import java.util.List;
 import java.util.Map;
 
 public interface IDialogSessionDAO extends IDAO {
-/*
-  List<Integer> getUsersForDialog(int dialogID);
-*/
-
-/*
-  int add(int userid,
-          int projid,
-          int dialogid,
-
-          long modified,
-          long end,
-          INavigation.VIEWS view,
-          DialogStatus status,
-          int numrecordings,
-          float score,
-          float speakingrate
-  );
-*/
-
   // seems like we want a summary of the latest scores
 
   /**
-   * @see mitll.langtest.server.services.DialogServiceImpl#getScoreHistoryForDialogs(int, List)
    * @param projid
    * @param userid
    * @return
+   * @see mitll.langtest.server.services.DialogServiceImpl#getScoreHistoryForDialogs(int, List)
    */
-  Map<Integer, Float> getLatestDialogSessionScores(int projid, int userid);
+  Map<Integer, Map<String, Float>> getLatestDialogSessionScoresPerMode(int projid, int userid);
 
   /**
    * @param userid
@@ -76,25 +57,17 @@ public interface IDialogSessionDAO extends IDAO {
   List<IDialogSession> getDialogSessions(int userid, int dialog);
 
   /**
-   * For when we want to drop the current dialog data and reload
-   *
-   * @param id
-   * @see mitll.langtest.server.database.project.DialogPopulate#cleanDialog
-   */
- // void removeForProject(int id);
-
-  /**
-   * @see mitll.langtest.server.services.DialogServiceImpl#addSession
    * @param dialogSession
    * @return
+   * @see mitll.langtest.server.services.DialogServiceImpl#addSession
    */
   int add(DialogSession dialogSession);
 
   SlickDialogSession byID(int dialogSessionID);
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#updateDialogSessionWithAnswer(int, long)
    * @param slickDialogSession
+   * @see mitll.langtest.server.audio.AudioFileHelper#updateDialogSessionWithAnswer(int, long)
    */
   void update(SlickDialogSession slickDialogSession);
 }

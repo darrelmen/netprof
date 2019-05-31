@@ -45,6 +45,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Comparator.comparingLong;
+
 /**
  * Probably going to need to parameterize by exercises?
  *
@@ -121,7 +123,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
 
     dialogList = getFilteredBySearchTerm(request, dialogList);
     if (request.isSortByDate()) {
-      dialogList.sort((o1, o2) -> Long.compare(o1.getModified(), o2.getModified()));
+      dialogList.sort(comparingLong(IDialog::getModified));
     } else {
       dialogList.sort(this::getDialogComparator);
     }
@@ -149,15 +151,15 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    */
   @NotNull
   private Map<Integer, CorrectAndScore> getScoreHistoryForDialogs(int userIDFromSessionOrDB, List<IDialog> dialogList) {
-    Map<Integer, CorrectAndScore> scoreHistoryPerExercise = new HashMap<>();
+    Map<Integer, CorrectAndScore> scoreHistoryPerDialog = new HashMap<>();
 
     if (!dialogList.isEmpty()) {
       IDialog iDialog = dialogList.get(0);
-      Map<Integer, Float> latestDialogSessionScores =
-          db.getDialogSessionDAO().getLatestDialogSessionScores(iDialog.getProjid(), userIDFromSessionOrDB);
-      latestDialogSessionScores.forEach((k, v) -> scoreHistoryPerExercise.put(k, new CorrectAndScore(v, null)));
+      Map<Integer, Map<String, Float>> latestDialogSessionScoresPerMode =
+          db.getDialogSessionDAO().getLatestDialogSessionScoresPerMode(iDialog.getProjid(), userIDFromSessionOrDB);
+      latestDialogSessionScoresPerMode.forEach((k, v) -> scoreHistoryPerDialog.put(k, new CorrectAndScore(v.values().iterator().next(), v.keySet().iterator().next())));
     }
-    return scoreHistoryPerExercise;
+    return scoreHistoryPerDialog;
   }
 
   private List<IDialog> getFilteredBySearchTerm(ExerciseListRequest request, List<IDialog> dialogList) {

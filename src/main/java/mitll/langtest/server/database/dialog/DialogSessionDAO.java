@@ -33,7 +33,6 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
-import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.dialog.DialogSession;
 import mitll.langtest.shared.dialog.DialogStatus;
 import mitll.langtest.shared.dialog.IDialogSession;
@@ -45,11 +44,10 @@ import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static mitll.langtest.client.custom.INavigation.VIEWS.NONE;
 
 public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
   private static final Logger logger = LogManager.getLogger(DialogSessionDAO.class);
@@ -67,14 +65,6 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
     dao = new DialogSessionDAOWrapper(dbConnection);
   }
 
-  // TODO : may need this later
-/*
-  public SlickDialog getByID(int projid) {
-    Collection<SlickDialog> SlickDialogs = dao.byID(projid);
-    return SlickDialogs.isEmpty() ? null : SlickDialogs.iterator().next();
-  }
-*/
-
   /**
    * join with attributes = meta data from domino
    *
@@ -91,11 +81,6 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
   public List<IDialogSession> getDialogSessions(int userid, int dialogid) {
     return getiDialogSessions(getByUserAndDialog(userid, dialogid));
   }
-
-/*  @Override
-  public List<IDialogSession> getCurrentDialogSessions(int userid) {
-    return getiDialogSessions(dao.byUser(userid));
-  }*/
 
   @NotNull
   private List<IDialogSession> getiDialogSessions(Collection<SlickDialogSession> byProjID) {
@@ -127,13 +112,19 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
     return views;
   }
 
+  /**
+   * @param projid
+   * @param userid
+   * @return
+   * @see mitll.langtest.server.services.DialogServiceImpl#getScoreHistoryForDialogs
+   */
   @Override
-  public Map<Integer, Float> getLatestDialogSessionScores(int projid, int userid) {
-    Map<Integer, Float> dialogIDToScore = new HashMap<>();
+  public Map<Integer, Map<String, Float>> getLatestDialogSessionScoresPerMode(int projid, int userid) {
+    Map<Integer, Map<String, Float>> dialogIDToScore = new HashMap<>();
 
     dao.byProjAndUser(projid, userid).forEach((k, v) ->
         {
-          SlickDialogSession candidate = getCandidate(v);
+          SlickDialogSession candidate = getCandidates(v);
 
           if (DEBUG) {
             if (candidate != null) {
@@ -145,19 +136,17 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
             }
           }
 
-          dialogIDToScore.put(k, candidate == null ? 0F : candidate.score());
+          Map<String, Float> pair = new HashMap<>();
+          if (candidate != null) {
+            pair.put(candidate.view(), candidate.score());
+          }
+          dialogIDToScore.put(k, candidate == null ? new HashMap<>() : pair);
         }
     );
 
     return dialogIDToScore;
   }
 
-/*
-  @Override
-  public List<Integer> getUsersForDialog(int dialogID) {
-    return dao.uniqueUsersForDialog(dialogID);
-  }
-*/
 
   /**
    * Take the most recent one, but not if it's a study and we already have a rehearse or a perform
@@ -171,27 +160,35 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
       if (candidate == null) {
         candidate = dialogSession;
       } else if (candidate.modified().getTime() < dialogSession.modified().getTime()) {
-
-/*
-        INavigation.VIEWS candidateView = INavigation.VIEWS.NONE;
-        try {
-          candidateView = INavigation.VIEWS.valueOf(candidate.view().toUpperCase());
-        } catch (IllegalArgumentException e) {
-        }
-
-        INavigation.VIEWS currentView = INavigation.VIEWS.NONE;
-        try {
-          currentView = INavigation.VIEWS.valueOf(dialogSession.view().toUpperCase());
-        } catch (IllegalArgumentException e) {
-        }*/
-
-//        logger.info("getCandidate " + candidate);
-//        if (currentView != INavigation.VIEWS.STUDY && candidateView == INavigation.VIEWS.STUDY) {  // rehearse or perform trumps STUDY
-//          candidate = dialogSession;
-//        }
+        candidate = dialogSession;
       }
     }
     return candidate;
+  }
+
+  private SlickDialogSession getCandidates(List<SlickDialogSession> rawSessions) {
+//    Map<String, List<SlickDialogSession>> collect = rawSessions.stream().collect(Collectors.groupingBy(SlickDialogSession::view));
+//    Map<INavigation.VIEWS, Optional<SlickDialogSession>> viewToSessions = new HashMap<>();
+//    collect
+//        .forEach((k, v) -> viewToSessions.put(getView(k), v.stream()
+//            .max((Comparator<SlickDialogSession>) (o1, o2) -> -1 * o1.modified().compareTo(o2.modified()))));
+
+
+    Optional<SlickDialogSession> max = rawSessions.stream().max((o1, o2) -> -1 * o1.modified().compareTo(o2.modified()));
+
+//    Map<INavigation.VIEWS, SlickDialogSession> viewToSession = new HashMap<>();
+//    viewToSessions.forEach((k, v) -> v.ifPresent(slickDialogSession -> viewToSession.put(k, slickDialogSession)));
+
+    return max.orElse(null);
+  }
+
+  private INavigation.VIEWS getView(String k) {
+    try {
+      return INavigation.VIEWS.valueOf(k);
+    } catch (IllegalArgumentException e) {
+      logger.warn("getView can't parse view " + k);
+      return NONE;
+    }
   }
 
   private Collection<SlickDialogSession> getByUserAndDialog(int userid, int dialogid) {
@@ -208,51 +205,16 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
   }
 
   /**
-   * @param modified
-   * @param status
-   * @return
-   * @see mitll.langtest.server.database.project.DialogPopulate#populateDatabase(Project)
-   */
-/*  @Override
-  public int add(int userid,
-                 int projid,
-                 int dialogid,
-
-
-                 long modified,
-                 long end,
-                 INavigation.VIEWS views,
-                 DialogStatus status,
-                 int numRecordings,
-                 float score,
-                 float speakingRate
-  ) {
-    return dao.insert(new SlickDialogSession(
-        -1,
-        userid,
-        projid,
-        dialogid,
-        new Timestamp(modified),
-        new Timestamp(end),
-        views.toString(),
-        status.toString(),
-        numRecordings,
-        score,
-        speakingRate
-    ));
-  }*/
-
-  /**
    * @param ds
-   * @return  session id;
+   * @return session id;
    * @see mitll.langtest.server.services.DialogServiceImpl#addSession
    */
   @Override
   public int add(DialogSession ds) {
-   // logger.info("add : add session " + ds);
+    // logger.info("add : add session " + ds);
     int dialogid = ds.getDialogid();
     if (dialogid < 1) {
-      logger.warn("\n\n\ninvalid dialog id " + dialogid + " for " +ds);
+      logger.warn("\n\n\ninvalid dialog id " + dialogid + " for " + ds);
       return -1;
     } else {
       long modified = ds.getModified();
@@ -263,7 +225,7 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
 
       int userid = ds.getUserid();
       int projid = ds.getProjid();
-      logger.info("add for user " +userid + " in " + projid + " for dialog "+dialogid);
+      logger.info("add for user " + userid + " in " + projid + " for dialog " + dialogid);
 
       int insert = dao.insert(new SlickDialogSession(
           -1,
@@ -300,14 +262,4 @@ public class DialogSessionDAO extends DAO implements IDialogSessionDAO {
       logger.warn("\n\n\ndidn't update session " + slickDialogSession.id());
     }
   }
-
-  /**
-   * FOR REAL
-   *
-   * @param projid
-   */
-//  @Override
-//  public void removeForProject(int projid) {
-//    dao.removeForProject(projid);
-//  }
 }

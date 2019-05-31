@@ -40,21 +40,18 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
 import mitll.langtest.client.list.PagingExerciseList;
 import mitll.langtest.shared.dialog.IDialog;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
 
 /**
  * Created by go22670 on 4/5/17.
  */
 public class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
   //  private final Logger logger = Logger.getLogger("LearnHelper");
-  private static final String WELCOME_TO_DIALOG_PRACTICE = "Welcome to Interpreter Practice!";
+/*  private static final String WELCOME_TO_DIALOG_PRACTICE = "Welcome to Interpreter Practice!";
   private static final String CHOOSE_A_DIALOG_AND_THEN = "Choose a dialog and then:";
   private static final String STUDY = "Study";
   private static final String LISTEN = "Listen";
   private static final String REHEARSE = "Rehearse";
-  private static final String PERFORM = "Perform";
+  private static final String PERFORM = "Perform";*/
 
   /**
    * @param controller
@@ -63,14 +60,14 @@ public class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
   public DialogViewHelper(ExerciseController controller) {
     super(controller);
   }
-
+/*
   @Override
   public void showContent(Panel listContent, INavigation.VIEWS views) {
     super.showContent(listContent, views);
     doIntroMaybe();
-  }
+  }*/
 
-  private void doIntroMaybe() {
+ /* private void doIntroMaybe() {
     boolean dialogIntroShown = controller.getStorage().isTrue("dialogIntroShown");
     if (!dialogIntroShown) {
       controller.getStorage().setBoolean("dialogIntroShown", true);
@@ -84,8 +81,8 @@ public class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
       ), 240, false);
     }
   }
-
-  @NotNull
+*/
+/*  @NotNull
   private String getLarger(String s) {
     return "<span style='font-size:larger'>" + s + "</span>";
   }
@@ -93,7 +90,7 @@ public class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
   @NotNull
   private String getLarge(String study) {
     return "<span style='font-size: large;'>" + study + "</span>";
-  }
+  }*/
 
   @Override
   protected FlexListLayout<IDialog, IDialog> getMyListLayout(SimpleChapterNPFHelper<IDialog, IDialog> outer) {
