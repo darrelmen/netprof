@@ -42,6 +42,7 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.logging.Logger;
 
 /**
  * Does left, right, or middle justify
@@ -50,7 +51,8 @@ import java.util.Collection;
  * @see ListenViewHelper#reallyGetTurnPanel
  */
 public class TurnPanelDelegate implements ITurnMarking {
-  //private final Logger logger = Logger.getLogger("TurnPanel");
+  private final Logger logger = Logger.getLogger("TurnPanel");
+
   private static final String FLOAT_LEFT = "floatLeft";
 
   private final ListenViewHelper.COLUMNS columns;
@@ -177,7 +179,12 @@ public class TurnPanelDelegate implements ITurnMarking {
   }
 
   private void setBorderColor(String white) {
-    bubble.getElement().getStyle().setBorderColor(white);
+    if (bubble == null) {
+      logger.warning("huh? no bubble for " + exercise.getID());
+    }
+    else {
+      bubble.getElement().getStyle().setBorderColor(white);
+    }
   }
 
   public void makeVisible() {

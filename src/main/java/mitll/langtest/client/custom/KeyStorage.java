@@ -44,9 +44,6 @@ public class KeyStorage {
   private int user;
   private boolean showedAlert = false;
 
-  //private static final int NO_USER_SET = -1;
-//  private static final String NO_USER_SET_STRING = "" + NO_USER_SET;
-
   private static final String USER_ID = "userID";
   private static final String USER_CHOSEN_ID = "userChosenID";
   private static final String USER_PENDING_ID = "userPendingID";
@@ -60,14 +57,6 @@ public class KeyStorage {
     this.user = getUserID();
   }
 
-  /**
-   * @param user
-   * @paramx language
-   * @see mitll.langtest.client.user.UserPassLogin#UserPassLogin
-   */
-//  private KeyStorage(int user) {
-//    this.user = user;
-//  }
   public void setBoolean(String name, boolean val) {
     storeValue(name, "" + val);
   }
@@ -189,11 +178,6 @@ public class KeyStorage {
     }
   }
 
-//  private String getLocalStorageKey(String name) {
-//    //   user = getUserID();
-//    return getKey(name);
-//  }
-
   public int getUserID() {
     //String userIDCookie = getUserIDCookie();
     //   logger.info("getUserID " + userIDCookie);
@@ -206,33 +190,12 @@ public class KeyStorage {
     return anInt;
   }
 
-//  private String getUserFromStorage() {
-//    return Storage.getLocalStorageIfSupported() != null ? getValue(getUserIDCookie()) : NO_USER_SET_STRING;
-//  }
 
   public String toString() {
     return getKey("");
   }
 
-  /**
-   * Need these to be prefixed by app title so if we switch webapps, we don't get weird user ids
-   *
-   * @return
-   * @see #getUserFromStorage
-   * @see #clearUser
-   * @see #rememberUser
-   */
-//  private String getUserIDCookie() {
-//    return USER_ID;
-//  }
 
-//  private String getUserChosenIDCookie() {
-//    return USER_CHOSEN_ID;
-//  }
-
-//  private String getUserPendingIDCookie() {
-//    return USER_PENDING_ID;
-//  }
   public String getUserChosenID() {
     if (Storage.isLocalStorageSupported()) {
       return getSimpleValue(USER_CHOSEN_ID);

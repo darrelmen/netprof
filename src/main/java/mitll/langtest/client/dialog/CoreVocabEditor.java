@@ -54,8 +54,6 @@ import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.UNK;
 
 public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
     implements IFocusable, IEditableTurnContainer<CoreEditorTurn>, ITurnContainer<CoreEditorTurn> {
-  // public static final String INTERPRETER = "Interpreter";
-  // public static final String B = "B";
   private final Logger logger = Logger.getLogger("CoreVocabEditor");
 
   private static final int LEFT_WIDTH = 55;
@@ -81,6 +79,10 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
     return CORE_REHEARSE;
   }
 
+  /**
+   * @see #getTurns(IDialog)
+   * @param rowOne
+   */
   @Override
   protected void styleTurnContainer(DivWidget rowOne) {
     super.styleTurnContainer(rowOne);
@@ -91,14 +93,16 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   }
 
   private void setFixedHeight(DivWidget rowOne) {
-    rowOne.setHeight(390 + "px");
+    rowOne.setHeight(DialogEditor.FIXED_HEIGHT + "px");
   }
 
   @Override
   protected void addDialogHeader(IDialog dialog, Panel child) {
-    child.add(dialogHeader =
-        new DialogHeader(controller,
-            INavigation.VIEWS.CORE_EDITOR, isInModal ? null : getPrevView(), isInModal ? null : getNextView()).getHeader(dialog));
+    if (!isInModal) {
+      child.add(dialogHeader =
+          new DialogHeader(controller,
+              INavigation.VIEWS.CORE_EDITOR, isInModal ? null : getPrevView(), isInModal ? null : getNextView()).getHeader(dialog));
+    }
   }
 
   private TurnViewHelper<SimpleTurn> leftHelper;
@@ -109,25 +113,34 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
       logger.info("getTurns set dialog " + dialog);
       setDialog(dialog);
     }
+
     DivWidget leftRight = new DivWidget();
     leftRight.setWidth("100%");
     leftRight.addStyleName("inlineFlex");
 
-    {
-      TurnViewHelper<SimpleTurn> leftHelper = getLeftHelper();
-      leftHelper.setDialog(dialog);
-      this.leftHelper = leftHelper;
-      DivWidget turns = leftHelper.getTurns(dialog);
-      turns.setWidth(LEFT_WIDTH + "%");
-      leftRight.add(turns);
-    }
+    leftRight.add(getTurnLeftSide(dialog));
+    leftRight.add(getVocabRightSide(dialog));
 
+    return leftRight;
+  }
+
+  @NotNull
+  private DivWidget getVocabRightSide(IDialog dialog) {
     DivWidget coreVocabTurns = super.getTurns(dialog);
     coreVocabTurns.setWidth((100 - LEFT_WIDTH) + "%");
     styleTurnContainer(coreVocabTurns);
-    leftRight.add(coreVocabTurns);
+    return coreVocabTurns;
+  }
 
-    return leftRight;
+  @NotNull
+  private DivWidget getTurnLeftSide(IDialog dialog) {
+    TurnViewHelper<SimpleTurn> leftHelper = getLeftHelper();
+    leftHelper.setDialog(dialog);
+    this.leftHelper = leftHelper;
+    DivWidget turns = leftHelper.getTurns(dialog);
+    styleTurnContainer(turns);
+    turns.setWidth(LEFT_WIDTH + "%");
+    return turns;
   }
 
   void setHighlights() {
@@ -156,28 +169,9 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
         rowOne.clear();
 
         List<ClientExercise> exercises = dialog.getExercises();
-
-   //     exercises.forEach(ex -> logger.info("getLeftHelper : ex speaker : '" + ex.getSpeaker() + "' " + ex.getForeignLanguage()));
-
-//        if (dialog.getKind() == DialogType.INTERPRETER) {
-//          exercises = exercises
-//              .stream()
-//              .filter(exercise ->
-//                  exercise.getSpeaker().equalsIgnoreCase(INTERPRETER) || exercise.getSpeaker().equalsIgnoreCase(SPEAKER_B))
-//              .collect(Collectors.toList());
-//          exercises.forEach(ex -> logger.info("getLeftHelper : after ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
-//        } else {
-//          exercises = exercises
-//              .stream()
-//              .filter(exercise -> exercise.getSpeaker().equalsIgnoreCase(SPEAKER_B))
-//              .collect(Collectors.toList());
-//        }
-
         exercises = exercises.stream().filter(exercise ->
             !exercise.hasEnglishAttr() &&
                 !exercise.getForeignLanguage().isEmpty()).collect(Collectors.toList());
-        
-      //  exercises.forEach(ex -> logger.info("getLeftHelper : finally ex " + ex.getSpeaker() + " " + ex.getForeignLanguage()));
 
         addTurnForEachExercise(rowOne, left, right, exercises);
       }
@@ -274,13 +268,11 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
    * @param afterThisTurn
    * @see #getAsyncForNewTurns
    */
-  private void addTurns(IDialog updated, List<ClientExercise> changed, int index, DivWidget turnContainer, int exid) {
+  private void addTurns(IDialog updated, List<ClientExercise> changed, int index, DivWidget turnContainer,
+                        int exid) {
     this.setDialog(updated);
 
     changed.forEach(clientExercise -> addTurn(turnContainer, clientExercise, UNK, UNK, index).addStyleName("opacity-target"));
-//    for (ClientExercise clientExercise : changed) {
-//      addTurn(turnContainer, clientExercise, UNK, UNK, index).addStyleName("opacity-target");
-//    }
     makeNextTheCurrentTurn(getNextTurn(exid));
   }
 
@@ -324,7 +316,8 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
 
   @NotNull
   @Override
-  protected CoreEditorTurn reallyGetTurnPanel(ClientExercise clientExercise, ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
+  protected CoreEditorTurn reallyGetTurnPanel(ClientExercise clientExercise, ITurnContainer.COLUMNS
+      columns, ITurnContainer.COLUMNS prevColumn, int index) {
     dialog.getExercises().size();
     return new CoreEditorTurn(
         controller,

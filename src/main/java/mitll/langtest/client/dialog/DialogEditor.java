@@ -56,12 +56,11 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.SCORES;
 public class DialogEditor extends ListenViewHelper<EditorTurn> implements SessionManager, IFocusable, IEditableTurnContainer<EditorTurn> {
   private final Logger logger = Logger.getLogger("DialogEditor");
 
-  private static final int FIXED_HEIGHT = 390;
+  public static final int FIXED_HEIGHT = 390;
 
   private final SessionStorage sessionStorage;
   private final boolean isInModal;
 
- // private static final boolean DEBUG = false;
   private static final boolean DEBUG_ADD_TURN = false;
 
   /**

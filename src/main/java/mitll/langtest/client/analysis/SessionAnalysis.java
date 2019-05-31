@@ -48,7 +48,7 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
   private static final String SESSION = "Session";
   private static final String NO_SESSIONS_YET = "No Sessions yet...";
   private final int user;
-  final DivWidget userContainerBottom;
+  private final DivWidget userContainerBottom;
 
   /**
    * @param controller
@@ -79,37 +79,6 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
         });
   }
 
-/*
-  @Override
-  protected void addBottom(DivWidget bottom) {
-//    rightSide.add(bottom);
-    //super.addBottom(bottom);
-  }
-*/
-
-  /*
-    protected DivWidget addTop(Collection<IDialogSession> users,
-                               ExerciseController controller, DivWidget bottom) {
-      DivWidget rightSide = getRightSide();
-      DivWidget table = getTable(users, controller, bottom, rightSide);
-      add(getTop(table, bottom));
-      return rightSide;
-    }
-  */
-
-/*
-  protected DivWidget addTop(Collection<IDialogSession> users, ExerciseController controller, DivWidget bottom) {
-   DivWidget rightSide = getRightSide();
-    DivWidget leftSide = getTable(users, controller, bottom, rightSide, getNoDataYetMessage());
-    leftSide.addStyleName("cardBorderShadow");
-    leftSide.addStyleName("bottomFiveMargin");
-    add(leftSide);
-  //  add(getTop(leftSide, rightSide));
-    return rightSide;
-  }
-*/
-
-
   @Override
   protected DivWidget getContainerDiv(DivWidget table) {
     DivWidget containerDiv = super.getContainerDiv(table);
@@ -137,6 +106,11 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
                                                                  DivWidget bottom,
                                                                  DivWidget rightSide) {
     return new SessionContainer<IDialogSession>(controller, userContainerBottom == null ? bottom : userContainerBottom, rightSide, user) {
+      @Override
+      protected int getNumTableRowsGivenScreenHeight() {
+        return 10;
+      }
+
       @Override
       public Panel getTableWithPager(Collection<IDialogSession> users) {
         Panel tableWithPager = super.getTableWithPager(users);

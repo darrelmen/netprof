@@ -372,14 +372,9 @@ public class PropertyHandler {
       usePhoneToDisplay = !Window.Location.getParameter(USE_PHONE_TO_DISPLAY).equals("false");
       if (usePhoneToDisplay) logger.info("usePhoneToDisplay is " + usePhoneToDisplay);
     }
-//    if (Window.Location.getParameter(RESPONSE_TYPE) != null) {
-//      responseType = Window.Location.getParameter(RESPONSE_TYPE);
-//    }
     if (Window.Location.getParameter(SHOW_ADVERTISED_IOS) != null) {
       showAdvertiseIOS = Window.Location.getParameter(SHOW_ADVERTISED_IOS) != null;
     }
-
-    //setResponseType();
   }
 
   /**
@@ -392,11 +387,24 @@ public class PropertyHandler {
   }
 
   public String getAppTitle() {
-//    String path = Window.Location.getPath();
-//    String substring = path.substring(0, path.lastIndexOf("/"));
-//    logger.info("candidate " +substring);
-//    logger.info("path      " +path);
-    return appTitle;
+    return getAppNameSmarter();
+  }
+
+  /**
+   * Just like in KeyStorage... TODO : move to using it for all storage
+   * @return
+   */
+  @NotNull
+  private String getAppNameSmarter() {
+    String appName = getAppName();
+    String path = Window.Location.getPath();
+    String app = path.substring(0, path.lastIndexOf("/"));
+    appName = app.isEmpty() ? appName : app;
+
+    if (!appName.equalsIgnoreCase("Netscape")) {
+      logger.info("appName " + appName);
+    }
+    return appName;
   }
 
   public static native String getAppName() /*-{
@@ -442,15 +450,6 @@ public class PropertyHandler {
 
   public boolean isQuietAudioOK() {
     return quietAudioOK;
-  }
-
-//  private static boolean knownChoice(String choice) {
-//    return TEXT.equals(choice) || AUDIO.equals(choice) || SPEECH.equals(choice);
-//  }
-
-  @Deprecated
-  public boolean isOdaMode() {
-    return false;
   }
 
   public String getDominoURL() {

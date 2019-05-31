@@ -88,29 +88,4 @@ public class StudentAnalysis extends TwoColumnAnalysis<UserInfo> {
   protected String getHeaderLabel() {
     return null;
   }
-
-  /**
-   * @see TwoColumnAnalysis#addTop
-   * @param users
-   * @param controller
-   * @param bottom
-   * @param rightSide
-   * @param noDataMessage
-   * @return
-   */
-/*  protected DivWidget getTable(Collection<UserInfo> users, ExerciseController controller, DivWidget bottom, DivWidget rightSide, String noDataMessage) {
-    UserContainer userContainer = new UserContainer(controller, bottom, rightSide, getRememberedSelectedUser(controller));
-    return userContainer.getTable(getUserInfos(users));
-  }*/
-/*
-  private List<UserInfo> getUserInfos(Collection<UserInfo> users) {
-    List<UserInfo> filtered = new ArrayList<>();
-    for (UserInfo userInfo : users) {
-      String userID = userInfo.getUserID();
-      if (userID != null && !userID.equals("defectDetector")) {
-        filtered.add(userInfo);
-      }
-    }
-    return filtered;
-  }*/
 }

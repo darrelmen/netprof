@@ -91,8 +91,9 @@ import static mitll.langtest.client.banner.NewContentChooser.MODE;
 
 public class LangTest implements
     EntryPoint, UserFeedback, ExerciseController<ClientExercise>, UserNotification, LifecycleSupport, UserState {
-  public static final String UNKNOWN1 = "Unknown";
   private final Logger logger = Logger.getLogger("LangTest");
+
+  private static final String UNKNOWN1 = "Unknown";
 
   private static final String LOCALHOST = "127.0.0.1";
 
@@ -409,8 +410,6 @@ public class LangTest implements
   }
 
   private boolean isDefault(String host) {
-//    boolean isDefault = false;
-//    if (host.equals(LOCALHOST)) isDefault = true;
     return host.equals(LOCALHOST);
   }
 
@@ -496,12 +495,6 @@ public class LangTest implements
    * @param client
    * @see mitll.langtest.client.scoring.AudioPanel#getImageURLForAudio(String, String, int, mitll.langtest.client.scoring.AudioPanel.ImageAndCheck)
    */
-/*  @Override
-  public void getImage(int reqid, final String path, final String type, int toUse, int height, int exerciseID,
-                       AsyncCallback<ImageResponse> client) {
-    String key = path + DIVIDER + type + DIVIDER + toUse + DIVIDER + height + DIVIDER + exerciseID;
-    getImage(reqid, key, client);
-  }*/
   private void getImage(int reqid, String key, AsyncCallback<ImageResponse> client) {
     String[] split = key.split("\\|");
     String path = split[0];
@@ -655,19 +648,6 @@ public class LangTest implements
    */
   @Override
   public void recordingModeSelect(boolean checkLogin) {
-    //   Scheduler.get().scheduleDeferred(this::checkInitFlash);
-
-//    checkInitFlash();
-//    Scheduler.get().scheduleDeferred(this::checkInitFlash);
-//  }
-//
-//    Scheduler.get().scheduleDeferred(new Scheduler.ScheduledCommand() {
-//      @Override
-//      public void execute() {
-//
-//      }
-//    });
-
     if (BrowserRecording.gotPermission()) {
       if (DEBUG_MODE) logger.info("checkInitFlash : initFlash - has permission " +checkLogin);
       if (checkLogin) userManager.checkLogin();
@@ -694,8 +674,6 @@ public class LangTest implements
     //logger.info("checkLogin -- ");
     userManager.checkLogin();
   }
-
-//  private boolean showingPlugInNotice = false;
 
   /**
    * Hookup feedback for events from Flash generated from the user's response to the Mic Access dialog
@@ -927,7 +905,6 @@ public class LangTest implements
   public void logEvent(String widgetID, String widgetType, String exid, String context) {
     buttonFactory.logEvent(widgetID, widgetType, new EventContext(exid, context, getUser()));
   }
-
 
   /**
    * @return
