@@ -45,11 +45,9 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 
-public class SessionContainer<T extends IDialogSession>
-    extends MemoryItemContainer<T> implements ReqCounter {
-  private final Logger logger = Logger.getLogger("SessionContainer");
+public class SessionContainer<T extends IDialogSession> extends MemoryItemContainer<T> implements ReqCounter {
+  // private final Logger logger = Logger.getLogger("SessionContainer");
 
   private static final String SCORE = "Score";
   private static final int ITEM_COLUMN_WIDTH = 450;
@@ -89,6 +87,11 @@ public class SessionContainer<T extends IDialogSession>
     return super.getListOptions().setCompact(true);
   }
 
+  /**
+   * @param users
+   * @param userToSelect
+   * @see #populateTable
+   */
   @Override
   protected void makeInitialSelectionFromSet(Collection<T> users, T userToSelect) {
     if (!users.isEmpty()) {
@@ -111,6 +114,7 @@ public class SessionContainer<T extends IDialogSession>
 
   /**
    * Change the session the right side changes.
+   *
    * @param selectedItem
    */
   private void changeSelectedUser(T selectedItem) {
@@ -125,7 +129,7 @@ public class SessionContainer<T extends IDialogSession>
 
   @NotNull
   private AnalysisTab getAnalysisTab(T selectedUser, int user) {
-   // logger.info("getAnalysisTab " + selectedUser + " " + user);
+    // logger.info("getAnalysisTab " + selectedUser + " " + user);
     return new DialogSessionAnalysisTab<T>(this.controller,
         selectedUser,
         overallBottom,
