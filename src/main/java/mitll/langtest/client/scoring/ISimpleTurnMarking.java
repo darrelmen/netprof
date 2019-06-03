@@ -30,11 +30,9 @@
 package mitll.langtest.client.scoring;
 
 public interface ISimpleTurnMarking {
-
   boolean hasCurrentMark();
 
   void markCurrent();
 
   void removeMarkCurrent();
-
 }

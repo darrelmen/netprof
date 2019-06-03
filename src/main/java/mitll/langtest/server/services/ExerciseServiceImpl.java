@@ -84,9 +84,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   private static final int MIN_WARN_DURATION = 1000;
   private static final String LISTS = "Lists";
 
-//  private static final String REGEX = " ";  // no break space!
-//  private static final String TIC_REGEX = "&#39;";
-
   private static final boolean DEBUG_SEARCH = false;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_ID_LOOKUP = false;

@@ -43,7 +43,6 @@ import java.util.List;
 
 public class DialogHelper {
   //private final Logger logger = Logger.getLogger("DialogHelper");
-
   private static final String OK = "OK";
   private static final String CANCEL = "Cancel";
   private final boolean doYesAndNo;

@@ -45,14 +45,6 @@ import mitll.langtest.shared.dialog.IDialog;
  * Created by go22670 on 4/5/17.
  */
 public class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
-  //  private final Logger logger = Logger.getLogger("LearnHelper");
-/*  private static final String WELCOME_TO_DIALOG_PRACTICE = "Welcome to Interpreter Practice!";
-  private static final String CHOOSE_A_DIALOG_AND_THEN = "Choose a dialog and then:";
-  private static final String STUDY = "Study";
-  private static final String LISTEN = "Listen";
-  private static final String REHEARSE = "Rehearse";
-  private static final String PERFORM = "Perform";*/
-
   /**
    * @param controller
    * @see NewContentChooser#NewContentChooser(ExerciseController, IBanner)
@@ -60,37 +52,6 @@ public class DialogViewHelper extends SimpleChapterNPFHelper<IDialog, IDialog> {
   public DialogViewHelper(ExerciseController controller) {
     super(controller);
   }
-/*
-  @Override
-  public void showContent(Panel listContent, INavigation.VIEWS views) {
-    super.showContent(listContent, views);
-    doIntroMaybe();
-  }*/
-
- /* private void doIntroMaybe() {
-    boolean dialogIntroShown = controller.getStorage().isTrue("dialogIntroShown");
-    if (!dialogIntroShown) {
-      controller.getStorage().setBoolean("dialogIntroShown", true);
-
-      new ModalInfoDialog(WELCOME_TO_DIALOG_PRACTICE, Arrays.asList(
-          getLarger(CHOOSE_A_DIALOG_AND_THEN),
-          getLarger("* " + getLarge(STUDY) + " the sentences in each dialog."),
-          getLarger("* " + getLarge(LISTEN) + " to the whole dialog."),
-          getLarger("* " + getLarge(REHEARSE) + " speaking in your role as interpreter."),
-          getLarger("* " + getLarge(PERFORM) + " as an interpreter by listening and responding with the scripted phrases.")
-      ), 240, false);
-    }
-  }
-*/
-/*  @NotNull
-  private String getLarger(String s) {
-    return "<span style='font-size:larger'>" + s + "</span>";
-  }
-
-  @NotNull
-  private String getLarge(String study) {
-    return "<span style='font-size: large;'>" + study + "</span>";
-  }*/
 
   @Override
   protected FlexListLayout<IDialog, IDialog> getMyListLayout(SimpleChapterNPFHelper<IDialog, IDialog> outer) {

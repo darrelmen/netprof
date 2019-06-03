@@ -142,7 +142,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     Button learn = getSuccessButton("Core Vocab");
     learn.setIcon(IconType.PENCIL);
     learn.addClickHandler(event -> editCoreVocabList(getCurrentSelection()));
-    addTooltip(learn, "Edit the core vocab to the dialog.");
+    addTooltip(learn, "Edit the core vocabulary for the dialog.");
     container.addButton(learn);
     return learn;
   }
@@ -522,5 +522,15 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   @Override
   protected String getName() {
     return "Dialog";
+  }
+
+  @NotNull
+  protected String getEditItemTooltipPrefix() {
+    return "Edit the turns in the ";
+  }
+
+  @NotNull
+  protected String getEditItemButtonTitle() {
+    return "Turns";
   }
 }

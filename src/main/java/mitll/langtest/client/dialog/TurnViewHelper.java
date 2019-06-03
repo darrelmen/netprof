@@ -234,6 +234,8 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    * @see #markFirstTurn()
    */
   void setCurrentTurn(T toMakeCurrent) {
+    String s = toMakeCurrent == null ? " NO CURRENT " : toMakeCurrent.getExID() + " " + toMakeCurrent.getContent();
+    logger.info("setCurrentTurn : toMakeCurrent " + s);
     this.currentTurn = toMakeCurrent;
   }
 

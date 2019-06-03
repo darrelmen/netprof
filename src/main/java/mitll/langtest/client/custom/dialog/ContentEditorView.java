@@ -372,11 +372,21 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    * @see #getButtons
    */
   private IsWidget getAddItems() {
-    Button successButton = getSuccessButton(ITEMS);
+    Button successButton = getSuccessButton(getEditItemButtonTitle());
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> editList(getCurrentSelection()));
-    addTooltip(successButton, EDIT_THE_ITEMS_ON_LIST + getSuffix());
+    addTooltip(successButton, getEditItemTooltipPrefix() + getSuffix());
     return successButton;
+  }
+
+  @NotNull
+  protected String getEditItemTooltipPrefix() {
+    return EDIT_THE_ITEMS_ON_LIST;
+  }
+
+  @NotNull
+  protected String getEditItemButtonTitle() {
+    return ITEMS;
   }
 
   @NotNull

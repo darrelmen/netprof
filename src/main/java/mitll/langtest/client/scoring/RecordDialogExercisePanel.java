@@ -402,7 +402,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       }
 
       add(getAudioFeedback());
-     // audioFeedback.setVisible(true);
+      // audioFeedback.setVisible(true);
     }
     return flContainer;
   }
@@ -496,7 +496,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     DivWidget w = new DivWidget();
     w.setHeight("10px");
     long l = (100 * response.getDuration()) / actualMinDur;
-  //  logger.info("1 percent " + l);
+    //  logger.info("1 percent " + l);
     w.setWidth(l + "%");
     return w;
   }
@@ -536,7 +536,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   @Override
   public void removeMarkCurrent() {
     super.removeMarkCurrent();
-   // logger.info("removeMarkCurrent");
+    // logger.info("removeMarkCurrent");
 
     if (doPushToTalk) {
       //  logger.info("removeMarkCurrent");
@@ -632,7 +632,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   }
 
   private void hideAudioFeedback() {
-   // logger.info("hideAudioFeedback");
+    // logger.info("hideAudioFeedback");
     if (audioFeedback != null) {
       audioFeedback.clear();
       audioFeedback.setVisible(false);
@@ -664,7 +664,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    */
   public boolean gotEndSilenceMaybeStopRecordingTurn() {
     if (doPushToTalk) {
- //     logger.info("gotEndSilenceMaybeStopRecordingTurn ");
+      //     logger.info("gotEndSilenceMaybeStopRecordingTurn ");
       return false;
     } else {
 
@@ -681,16 +681,18 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
       if (shouldStop) {
         // recordAudioPanel.showWaitCursor();
 
-        logger.info("gotEndSilenceMaybeStopRecordingTurn " + this +
-            "\n\tvadCheck  " + vadCheck +
-            "\n\tgotStreamStop " + gotStreamStop +
-            "\n\tfirstVAD  " + firstVAD +
-            "\n\tVAD delay " + (diffVAD - diff) +
-            "\n\tdiffVAD   " + diffVAD +
-            "\n\tminDur    " + minDur +
-            "\n\tminDur+move on " + minDurPlusMoveOn +
-            "\n\tdiff      " + diff
-        );
+        if (DEBUG) {
+          logger.info("gotEndSilenceMaybeStopRecordingTurn " + this +
+              "\n\tvadCheck  " + vadCheck +
+              "\n\tgotStreamStop " + gotStreamStop +
+              "\n\tfirstVAD  " + firstVAD +
+              "\n\tVAD delay " + (diffVAD - diff) +
+              "\n\tdiffVAD   " + diffVAD +
+              "\n\tminDur    " + minDur +
+              "\n\tminDur+move on " + minDurPlusMoveOn +
+              "\n\tdiff      " + diff
+          );
+        }
         reallyStartOrStopRecording();
         return true;
       } else {

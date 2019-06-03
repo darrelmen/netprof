@@ -40,11 +40,12 @@ public class FilterRequest implements IsSerializable, IRequest {
   private String prefix = "";
   private int limit = -1;
   private int userListID = -1;
+  private int userID = -1;
+  private int projID = -1;
   private boolean recordRequest = false;
   private boolean exampleRequest = false;
   private boolean onlyUninspected = false;
   private boolean onlyWithAnno = false;
-  //private ProjectType projectType = ProjectType.DEFAULT;
   private ProjectMode mode = ProjectMode.VOCABULARY;
 
   public FilterRequest() {
@@ -149,16 +150,6 @@ public class FilterRequest implements IsSerializable, IRequest {
 
   public boolean isExampleRequest() {
     boolean exampleRequest = this.exampleRequest;
-  /*  if (!exampleRequest) {
-      for (Pair pair : typeToSelection) {
-        if (pair.getProperty().equalsIgnoreCase("CONTENT")) {
-          exampleRequest = pair.getValue().startsWith("Sentences");
-
-          break;
-        }
-      }
-      ;
-    }*/
     return exampleRequest;
   }
 
@@ -198,15 +189,6 @@ public class FilterRequest implements IsSerializable, IRequest {
     pv.forEach((k, v) -> typeToSelection.add(new Pair(k, v)));
   }
 
-//  public ProjectType getProjectType() {
-//    return projectType;
-//  }
-//
-//  public FilterRequest setProjectType(ProjectType projectType) {
-//    this.projectType = projectType;
-//    return this;
-//  }
-
   @Override
   public ProjectMode getMode() {
     return mode;
@@ -215,6 +197,14 @@ public class FilterRequest implements IsSerializable, IRequest {
   public FilterRequest setMode(ProjectMode mode) {
     this.mode = mode;
     return this;
+  }
+
+  public int getUserID() {
+    return userID;
+  }
+
+  public void setUserID(int userID) {
+    this.userID = userID;
   }
 
   /**
@@ -227,10 +217,19 @@ public class FilterRequest implements IsSerializable, IRequest {
             (prefix.isEmpty() ? "" : "prefix '" + prefix + "' ") +
             (recordRequest ? "recordRequest " : "") +
             (onlyUninspected ? "onlyUninspected " : "") +
+            (userID == -1 ? "" : "userID = " + userID) +
             (onlyWithAnno ? "onlyWithAnno " : "") +
             (mode != ProjectMode.VOCABULARY ?
-                  "\n\tmode      " + mode : "") +
+                "\n\tmode      " + mode : "") +
             (getTypeToSelection().isEmpty() ? "" :
-                  "\n\tselection " + getTypeToSelection());
+                "\n\tselection " + getTypeToSelection());
+  }
+
+  public int getProjID() {
+    return projID;
+  }
+
+  public void setProjID(int projID) {
+    this.projID = projID;
   }
 }

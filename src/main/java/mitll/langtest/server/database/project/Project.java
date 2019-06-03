@@ -868,7 +868,7 @@ public class Project implements IPronunciationLookup, IProject {
   public Collection<Integer> getDialogExerciseIDs(int dialogID) {
     Set<Integer> dialogExercises = new HashSet<>();
     if (dialogID != -1) {
-      IDialog first = getDialog(dialogID);//.stream().filter(iDialog -> iDialog.getID() == dialogID).findFirst();
+      IDialog first = getDialog(dialogID);
       if (first != null) {
         first.getExercises().forEach(clientExercise -> dialogExercises.add(clientExercise.getID()));
         first.getCoreVocabulary().forEach(clientExercise -> dialogExercises.add(clientExercise.getID()));
@@ -895,7 +895,12 @@ public class Project implements IPronunciationLookup, IProject {
   }
 
   private synchronized void createDialogSectionHelper(Collection<IDialog> dialogs) {
-    dialogSectionHelper.clear();
+    populateDialogSectionHelper(dialogs, dialogSectionHelper);
+  }
+
+  public void populateDialogSectionHelper(Collection<IDialog> dialogs,
+                                          ISection<IDialog> dialogSectionHelper1) {
+    dialogSectionHelper1.clear();
 
     List<String> typeOrder = getTypeOrder();
 
@@ -928,17 +933,17 @@ public class Project implements IPronunciationLookup, IProject {
       // logger.info("adding " + value + " " + dialog.getID());
       pairs.add(new Pair(TYPE, value));
 
-      this.dialogSectionHelper.addPairs(dialog, pairs);
+      dialogSectionHelper1.addPairs(dialog, pairs);
 
       seen.add(pairs);
     });
 
     typeOrder.add(TYPE);
-    dialogSectionHelper.rememberTypesInOrder(typeOrder, seen);
+    dialogSectionHelper1.rememberTypesInOrder(typeOrder, seen);
 
     if (REPORT_ON_DIALOG_TYPES) {
       logger.info("createDialogSectionHelper report on dialog types");
-      dialogSectionHelper.report();
+      dialogSectionHelper1.report();
     }
   }
 

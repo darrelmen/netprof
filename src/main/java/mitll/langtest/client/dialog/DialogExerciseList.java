@@ -81,7 +81,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private static final int NORMAL_MIN_HEIGHT = 101;// 67;
   private static final int LANGUAGE_SIZE = 6;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    *
@@ -128,6 +128,8 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
       if (DEBUG) logger.info("getTypeToValues req " + typeToSelection);
 
       FilterRequest filterRequest = getFilterRequest(userListID, getPairs(typeToSelection));
+      filterRequest.setUserID(controller.getUser());
+      filterRequest.setProjID(controller.getProjectID());
       if (DEBUG) logger.info("getTypeToValues filterRequest " + filterRequest);
       controller.getDialogService().getTypeToValues(filterRequest, getTypeToValuesCallback(typeToSelection, then));
     }

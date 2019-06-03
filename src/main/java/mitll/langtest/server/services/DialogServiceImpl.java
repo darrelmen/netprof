@@ -34,10 +34,14 @@ import mitll.langtest.client.dialog.EditorTurn;
 import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.services.DialogService;
 import mitll.langtest.server.database.exercise.ISection;
+import mitll.langtest.server.database.exercise.SectionHelper;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.*;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
+import mitll.langtest.shared.user.Permission;
+import mitll.langtest.shared.user.User;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -46,6 +50,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparingLong;
+import static mitll.langtest.client.custom.INavigation.QC_PERMISSIONS;
 
 /**
  * Probably going to need to parameterize by exercises?
@@ -62,7 +67,11 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    * @see mitll.langtest.client.dialog.DialogExerciseList#getTypeToValues
    */
   public FilterResponse getTypeToValues(FilterRequest request) throws DominoSessionException {
-    ISection<IDialog> sectionHelper = getDialogSectionHelper();
+
+    getUserIDFromSessionOrDB();
+
+    ISection<IDialog> sectionHelper = getDialogSectionHelper(request);
+
     if (sectionHelper == null) {
       logger.info("getTypeToValues no reponse...");// + "\n\ttype->selection" + typeToSelection);
       return new FilterResponse();
@@ -71,6 +80,51 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       logger.info("getTypeToValues for " + request + " got " + typeToValues);
       return typeToValues;
     }
+  }
+
+  /**
+   * Worry about visibility.
+   * @see #getTypeToValues(FilterRequest)
+   * @param request
+   * @return
+   */
+  private ISection<IDialog> getDialogSectionHelper(FilterRequest request) {
+    Project project = getProject(request.getProjID());
+
+    ISection<IDialog> sectionHelper;
+
+    User byID = db.getUserDAO().getByID(request.getUserID());
+    if (isCanSeeAll(byID.isAdmin(), byID.getPermissions())) {
+      sectionHelper = project.getDialogSectionHelper();
+    } else {
+      List<IDialog> collect = getDialogVisibleToMe(request.getUserID(), project.getDialogs());
+      sectionHelper = new SectionHelper<>();
+      project.populateDialogSectionHelper(collect, sectionHelper);
+    }
+    return sectionHelper;
+  }
+
+  @NotNull
+  private List<IDialog> getDialogVisibleToMe(int userID, Collection<IDialog> dialogs) {
+    return dialogs
+        .stream()
+        .filter(d ->
+            !d.isPrivate() ||
+                d.getUserid() == userID).collect(Collectors.toList());
+  }
+
+  private boolean isCanSeeAll(boolean isAdmin, Collection<Permission> permissions) {
+    boolean canSeeAll = isAdmin;
+
+    if (!canSeeAll) {
+      for (Permission perm : permissions) {
+        if (QC_PERMISSIONS.contains(perm)) {
+          canSeeAll = true;
+          break;
+        }
+      }
+    }
+    return canSeeAll;
   }
 
   /**
@@ -112,6 +166,8 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   }
 
   /**
+   * Worry about dialog visibility.
+   *
    * @param request
    * @param sectionHelper
    * @return
@@ -119,9 +175,24 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    */
   @NotNull
   private List<IDialog> getDialogsForRequest(ExerciseListRequest request, ISection<IDialog> sectionHelper) {
-    List<IDialog> dialogList = new ArrayList<>(getDialogs(request, sectionHelper));
+    List<IDialog> dialogVisibleToMe;
+
+    User byID = db.getUserDAO().getByID(request.getUserID());
+    if (isCanSeeAll(byID.isAdmin(), byID.getPermissions())) {
+      dialogVisibleToMe = new ArrayList<>(getDialogs(request.getProjID()));
+    } else {
+      dialogVisibleToMe = getDialogVisibleToMe(request.getUserID(), getDialogs(request.getProjID()));
+      sectionHelper = new SectionHelper<>();
+      getProject(request.getProjID()).populateDialogSectionHelper(dialogVisibleToMe, sectionHelper);
+    }
+
+    List<IDialog> dialogList =  (request.getTypeToSelection().isEmpty()) ?
+        dialogVisibleToMe :
+        new ArrayList<>(sectionHelper.getExercisesForSelectionState(request.getTypeToSelection()));
 
     dialogList = getFilteredBySearchTerm(request, dialogList);
+
+    // sort... by date or unit, chapter, title
     if (request.isSortByDate()) {
       dialogList.sort(comparingLong(IDialog::getModified));
     } else {
@@ -157,7 +228,13 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       IDialog iDialog = dialogList.get(0);
       Map<Integer, Map<String, Float>> latestDialogSessionScoresPerMode =
           db.getDialogSessionDAO().getLatestDialogSessionScoresPerMode(iDialog.getProjid(), userIDFromSessionOrDB);
-      latestDialogSessionScoresPerMode.forEach((k, v) -> scoreHistoryPerDialog.put(k, new CorrectAndScore(v.values().iterator().next(), v.keySet().iterator().next())));
+      latestDialogSessionScoresPerMode.forEach((k, v) -> {
+        if (v.isEmpty()) {
+          logger.info("getScoreHistoryForDialogs : no scores for dialog #" + k);
+        } else {
+          scoreHistoryPerDialog.put(k, new CorrectAndScore(v.values().iterator().next(), v.keySet().iterator().next()));
+        }
+      });
     }
     return scoreHistoryPerDialog;
   }
@@ -227,11 +304,11 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     return db.getDialogSessionDAO().add(dialogSession);
   }
 
-  private Collection<IDialog> getDialogs(ExerciseListRequest request, ISection<IDialog> sectionHelper) {
-    return (request.getTypeToSelection().isEmpty()) ?
-        getDialogs(request.getProjID()) :
-        new ArrayList<>(sectionHelper.getExercisesForSelectionState(request.getTypeToSelection()));
-  }
+//  private Collection<IDialog> getDialogs(ExerciseListRequest request, ISection<IDialog> sectionHelper) {
+//    return (request.getTypeToSelection().isEmpty()) ?
+//        getDialogVisibleToMe(request.getUserID(),getDialogs(request.getProjID())) :
+//        new ArrayList<>(sectionHelper.getExercisesForSelectionState(request.getTypeToSelection()));
+//  }
 
   /**
    * Delete a dialog!

@@ -512,7 +512,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 //    return i;
   }
 
-  protected void afterChangeTurns(boolean isPlaying) {
+  private void afterChangeTurns(boolean isPlaying) {
     if (DEBUG) logger.info("afterChangeTurns isPlaying " + isPlaying);
     markCurrent();
     if (isPlaying) playCurrentTurn();
@@ -621,10 +621,16 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   void ifOnLastJumpBackToFirst() {
     T currentTurn = getCurrentTurn();
+
+
     boolean last = isLast(currentTurn);
     if (last) logger.info("ifOnLastJumpBackToFirst : OK, on last - let's consider going back to start");
 
-    if (last && currentTurn != null && !currentTurn.hasCurrentMark()) {
+    if (last && currentTurn != null
+    //    && !currentTurn.hasCurrentMark()
+    ) {
+      logger.info("ifOnLastJumpBackToFirst mark first turn\n\n\n");
+      removeMarkCurrent();
       markFirstTurn();
     }
   }
@@ -680,14 +686,18 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   Boolean isLeftSpeakerSet() {
-    return true;//isLeftSpeakerSelected();
+    return true;
   }
 
   Boolean isRightSpeakerSet() {
-    return false;//sRightSpeakerSelected();
+    return false;
   }
 
   /**
+   * If there is a current turn and there is audio,
+   * if the audio is playing, pause it,
+   * if the audio is paused, play it, and mark it as current(?)
+   *
    * @see #gotTurnClick
    * @see #gotClickOnPlay()
    */
@@ -800,6 +810,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
   }
 
+  private boolean sessionGoingNow;
 
   /**
    * @seex #setPlayButtonIcon
@@ -818,8 +829,6 @@ public class ListenViewHelper<T extends ITurnPanel>
     sessionGoingNow = false;
   }
 
-  private boolean sessionGoingNow;
-
   boolean isSessionGoingNow() {
     return sessionGoingNow;
   }
@@ -831,8 +840,4 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
     return widgets;
   }
-
-  //  protected T getPrev(T currentTurn) {
-//    getAllTurns().stream().filter()
-//  }
 }

@@ -80,11 +80,12 @@ public class AttachSecurityFilter implements Filter {
   public void init(FilterConfig filterConfig) {
     this.servletContext = filterConfig.getServletContext();
     webappName = getWebappName(servletContext);
-
     // log.info("webappName " + webappName);
 
-    if (!webappName.equalsIgnoreCase(DIALOG) || !webappName.equalsIgnoreCase(NETPROF) || !webappName.equalsIgnoreCase(WWW)) {
-      log.warn("huh? unexpected : app name is " + webappName);
+    if (!webappName.equalsIgnoreCase(DIALOG) &&
+        !webappName.equalsIgnoreCase(NETPROF) &&
+        !webappName.equalsIgnoreCase(WWW)) {
+      log.warn("init : huh? unexpected : app name is '" + webappName + "'");
     }
 
 //    if (DEBUG) log.info("found servlet context " + servletContext);

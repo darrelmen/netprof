@@ -810,11 +810,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   @Override
   public ISection<IDialog> getDialogSectionHelper(int projectid) {
-    if (projectid == -1) {
-      return null;
-    } else {
-      return getDialogSectionHelperForProject(projectid);
-    }
+    return (projectid == -1) ? null : getDialogSectionHelperForProject(projectid);
   }
 
   @Nullable
@@ -1799,7 +1795,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
       for (CommonExercise ex : copyAsExercises) {
         userListManager.addAnnotations(ex);
         if (smallVocabDecoder != null) {
-          int i = getAudioDAO().attachAudioToExercise(ex, language, idToMini, smallVocabDecoder,false, true);
+          int i = getAudioDAO().attachAudioToExercise(ex, language, idToMini, smallVocabDecoder, false, true);
 
           if (DEBUG_AUDIO_EXPORT) {
             logger.info("doAudioExport attached " + i + " cuts to " + ex.getID());
