@@ -570,7 +570,7 @@ public class LangTest implements
 
     buttonFactory = new ButtonFactory(service, props, this);
 
-    userManager = new UserManager(this, this, userService, props, getStorage());
+    userManager = new UserManager(this, this, userService, getStorage());
 
     RootPanel.get().getElement().getStyle().setPaddingTop(2, Style.Unit.PX);
 

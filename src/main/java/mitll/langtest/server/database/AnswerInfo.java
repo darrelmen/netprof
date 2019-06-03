@@ -62,6 +62,10 @@ public class AnswerInfo {
     return projid;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#recordInResults(AudioContext, RecordingInfo, AudioCheck.ValidityAndDur, AudioAnswer)
+   * @param recoSentence
+   */
   public void setNormTranscript(String recoSentence) {
     this.normtranscript = recoSentence;
   }
@@ -337,7 +341,7 @@ public class AnswerInfo {
     return transcript;
   }
 
-  public String getNormtTranscript() {
+  public String getNormTranscript() {
     return normtranscript;
   }
 

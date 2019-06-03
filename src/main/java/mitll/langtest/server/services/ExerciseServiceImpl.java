@@ -52,6 +52,7 @@ import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVWordsAndUpdate;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
+import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -973,7 +974,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @param projID
    * @param exid
    * @throws DominoSessionException
-   * @see NewUserExercise#refreshEx
+   * @see mitll.langtest.client.custom.dialog.NewUserExercise#refreshEx
    */
   @Override
   public void refreshExercise(int projID, int exid) throws DominoSessionException {
@@ -1199,14 +1200,21 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   }
 
   /**
+   * @param projID
    * @param exid
+   * @param previousAudioID
    * @throws DominoSessionException
    * @see mitll.langtest.client.custom.dialog.ReviewEditableExercise#getDeleteButton(Panel, AudioAttribute, HasID, String)
    */
   @Override
-  public void refreshAudio(int exid) throws DominoSessionException {
+  public void refreshAudio(int projID, int exid, int previousAudioID) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     db.getAudioDAO().clearAudioCacheForEx(exid);
+
+    if (previousAudioID != -1) {
+      AlignmentOutput remove = db.getProject(projID).getAudioToAlignment().remove(previousAudioID);
+      logger.info("refreshAudio Forgot about " + remove);
+    }
   }
 
   @Override
@@ -1413,16 +1421,18 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @param exid
    * @param audioID
    * @param content
+   * @param normalized
    * @return
    * @throws DominoSessionException
    * @see mitll.langtest.client.dialog.EditorTurn#gotKey
    * @see EditorTurn#gotBlur()
    */
   @Override
-  public OOVWordsAndUpdate updateText(int projid, int dialogID, int exid, int audioID, String content) throws DominoSessionException {
+  public OOVWordsAndUpdate updateText(int projid, int dialogID, int exid, int audioID, String content, String normalized) throws DominoSessionException {
     getUserIDFromSessionOrDB();
     Project project = getProject(projid);
-    return project.getExerciseDAO().updateText(project, dialogID, exid, audioID, content);
+
+    return project.getExerciseDAO().updateText(project, dialogID, exid, audioID, content, normalized, db.getRefResultDAO());
   }
 
   @Override

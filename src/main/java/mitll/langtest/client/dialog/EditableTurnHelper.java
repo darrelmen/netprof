@@ -35,7 +35,6 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import mitll.langtest.client.scoring.EnglishDisplayChoices;
-import mitll.langtest.client.scoring.ISimpleTurn;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
@@ -45,30 +44,18 @@ import static mitll.langtest.client.dialog.TurnViewHelper.SPEAKER_B;
 
 public class EditableTurnHelper {
   private TextBox contentTextBox;
-  //private HTML turnFeedback;
   private final Language language;
-  // private ISimpleTurn simpleTurn;
-  //  boolean isInterpreter;
+
   private String placeholder;
-  // private ClientExercise clientExercise;
   private boolean hasEnglishAttr;
   private String initialContent;
   private IFocusListener focusListener;
-  //private String prev = "";
-
 
   EditableTurnHelper(Language language,
-                     ISimpleTurn simpleTurn,
-
-                     // ClientExercise clientExercise,
                      boolean hasEnglishAttr,
                      String initialContent,
-                     IFocusListener focusListener
-  ) {
+                     IFocusListener focusListener) {
     this.language = language;
-    //  this.simpleTurn = simpleTurn;
-
-    //   this.clientExercise = clientExercise;
     this.focusListener = focusListener;
     this.hasEnglishAttr = hasEnglishAttr;
     this.initialContent = initialContent;
@@ -175,8 +162,18 @@ public class EditableTurnHelper {
     return isInterpreter ? (columns == ITurnContainer.COLUMNS.LEFT ? SPEAKER_A : SPEAKER_B) + " says..." : placeholder;
   }
 
-  public String getContent() {
-    return SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
+  public String getSanitizedContent() {
+    String content = getContent();
+    return getSanitized(content);
+  }
+
+  String getSanitized(String content) {
+    return SimpleHtmlSanitizer.sanitizeHtml(content).asString();
+  }
+
+
+  String getContent() {
+    return contentTextBox.getText();
   }
 
   private void gotBlur() {

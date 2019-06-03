@@ -259,16 +259,6 @@ public class AudioAnswer extends SimpleAudioAnswer {
   public long getRoundTripMillis() {
     return 0;//roundTripMillis;
   }
-/*
-  public void setRoundTripMillis(long roundTripMillis) {
-    this.roundTripMillis = roundTripMillis;
-  }*/
-
-/*
-  public String getNormTranscript() {
-    return normTranscript;
-  }
-*/
 
   public void setNormTranscript(String normTranscript) {
     this.normTranscript = normTranscript;

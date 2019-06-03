@@ -210,7 +210,7 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
    */
   @NotNull
   String getRememberedSelectedUser(ExerciseController controller) {
-    return getSelectedUserKey(controller, controller.getProps().getAppTitle());
+    return getSelectedUserKey(controller, controller.getProps().getAppNameSmarter());
   }
 
   private String getSelectedUserKey(ExerciseController controller, String appTitle) {

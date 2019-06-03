@@ -33,7 +33,6 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import mitll.langtest.client.custom.KeyStorage;
 import mitll.langtest.client.initial.InitialUI;
-import mitll.langtest.client.initial.PropertyHandler;
 import mitll.langtest.client.services.UserServiceAsync;
 import mitll.langtest.shared.user.MiniUser;
 import mitll.langtest.shared.user.Permission;
@@ -49,12 +48,6 @@ public class UserManager {
   private static final boolean DEBUG = false;
 
   private static final int NO_USER_SET = -1;
-//  private static final String NO_USER_SET_STRING = "" + NO_USER_SET;
-
-//  public static final String USER_ID = "userID";
-//  private static final String USER_CHOSEN_ID = "userChosenID";
-//  private static final String USER_PENDING_ID = "userPendingID";
-
   private final UserServiceAsync userServiceAsync;
 
   private final UserNotification userNotification;
@@ -62,7 +55,6 @@ public class UserManager {
   private int userID = NO_USER_SET;
   private String userChosenID = "";
 
-  private final String appTitle;
   /**
    * @see #gotNewUser
    */
@@ -72,17 +64,14 @@ public class UserManager {
   /**
    * @param lt
    * @param userServiceAsync
-   * @param props
    * @see mitll.langtest.client.LangTest#onModuleLoad2()
    */
   public UserManager(UserNotification lt,
                      UserFeedback userFeedback,
                      UserServiceAsync userServiceAsync,
-                     PropertyHandler props,
                      KeyStorage storage) {
     this.userNotification = lt;
     this.userServiceAsync = userServiceAsync;
-    this.appTitle = props.getAppTitle();
     this.userFeedback = userFeedback;
     this.storage = storage;
   }
@@ -193,6 +182,7 @@ public class UserManager {
 
   /**
    * So we only have a valid user id here if we've logged in.
+   *
    * @return
    */
   public boolean hasUser() {
@@ -213,37 +203,10 @@ public class UserManager {
     }
   }
 
-//
-//  private String getUserFromStorage() {
-//    return Storage.getLocalStorageIfSupported() != null ? storage.getValue(getUserIDCookie()) : NO_USER_SET_STRING;
-//  }
-
   void setPendingUserStorage(String pendingID) {
     storage.setPendingUserStorage(pendingID);
   }
 
-  /**
-   * Need these to be prefixed by app title so if we switch webapps, we don't get weird user ids
-   *
-   * @return
-   * @see #getUserFromStorage
-   * @see #clearUser
-   * @see #rememberUser
-   */
-//  private String getUserIDCookie() {
-//    return appTitle + ":" + USER_ID;
-//  }
-
-  /**
-   * @return
-   */
-//  private String getUserChosenID() {
-//    return appTitle + ":" + USER_CHOSEN_ID;
-//  }
-
-//  private String getUserPendingID() {
-//    return appTitle + ":" + USER_PENDING_ID;
-//  }
 
   /**
    * don't store the password hash in local storage :)

@@ -91,6 +91,7 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable,
 
   IMutableDialog getMutable();
 
- // String getFilePath();
+  ClientExercise getTurnByID(int id);
+  ClientExercise getCoreByID(int id);
 
 }

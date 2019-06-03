@@ -387,7 +387,7 @@ public class PropertyHandler {
   }
 
   public String getAppTitle() {
-    return getAppNameSmarter();
+    return appTitle;
   }
 
   /**
@@ -395,7 +395,7 @@ public class PropertyHandler {
    * @return
    */
   @NotNull
-  private String getAppNameSmarter() {
+  public String getAppNameSmarter() {
     String appName = getAppName();
     String path = Window.Location.getPath();
     String app = path.substring(0, path.lastIndexOf("/"));

@@ -34,6 +34,7 @@ import mitll.langtest.shared.UserAndTime;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.user.MiniUser;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -342,23 +343,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return resultid;
   }
 
-  /**
-   * @return
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#makeFirstRow
-   */
-/*
-  public AlignmentOutput getAlignmentOutput() {
-    return alignmentOutput;
-  }
-*/
-
-  /**
-   * @param alignmentOutput
-   * @seex mitll.langtest.server.services.ExerciseServiceImpl#setAlignmentInfo
-   */
-/*  public void setAlignmentOutput(AlignmentOutput alignmentOutput) {
-    this.alignmentOutput = alignmentOutput;
-  }*/
   public MiniUser.Gender getRealGender() {
     return realGender;
   }
@@ -368,6 +352,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     return "Audio" +
         "\n\tid         " + uniqueID +
         "\n\texid       " + exid +
+        "\n\tmodified   " + new Date(timestamp) +
         (getOldexid() == null ? "" : " (old ex " + getOldexid() + ") :") +
         "\n\tpath       " + audioRef +
         "\n\tattrs      " + attributes +

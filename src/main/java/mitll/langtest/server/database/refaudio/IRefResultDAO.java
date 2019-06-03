@@ -87,7 +87,6 @@ public interface IRefResultDAO extends IDAO {
    */
   List<Result> getResults();
 
-//  Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid);
   int getNumPhonesForEx(int exid);
 
   Map<Integer, ISlimResult> getAudioIDMap(int projid, Set<Integer> audioIDs);
@@ -100,6 +99,13 @@ public interface IRefResultDAO extends IDAO {
    * @return
    */
   Collection<ISlimResult> getAllSlimForProject(int projid);
+
+  /**
+   * @see mitll.langtest.server.scoring.AlignmentHelper#getAlignmentsFromDB
+   * @param projid
+   * @param audioIDs
+   * @return
+   */
   Collection<ISlimResult> getAllSlimForProjectIn(int projid, Set<Integer> audioIDs);
   ISlimResult getResult(int audioid);
 

@@ -134,7 +134,6 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     if (hasSound()) {
       if (isPlaying()) {
         if (DEBUG_PLAY) logger.info("doPlayPauseToggle pause, is playing = " + playing + " " + currentPath);
-        //markNotPlaying();
         pause();  // somehow get exception here?
         return true;
       } else {

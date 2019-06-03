@@ -69,7 +69,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
 
   private static final String DIALOGS = "Dialogs";
-  private static final String DIALOG_PRACTICE = "Practice";
+  private static final String DIALOG_PRACTICE = "Rehearsal";//"Practice";
 
   private static final String RECORD = "Record";
   private static final String QC = "QC";

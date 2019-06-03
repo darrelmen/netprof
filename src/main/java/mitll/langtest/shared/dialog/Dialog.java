@@ -61,7 +61,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
   private int userid;
   private int projid;
   private int imageid;
- // private String filePath;
+  // private String filePath;
 
   private long modified;
 
@@ -518,19 +518,22 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     this.kind = dialogType;
   }
 
-//  @Override
-//  public String getFilePath() {
-//    return filePath;
-//  }
-
-//  @Override
-//  public void setFilePath(String filePath) {
-//    this.filePath = filePath;
-//  }
 
   @Override
   public void setImageID(int imageID) {
     this.imageid = imageID;
+  }
+
+  @Override
+  public ClientExercise getTurnByID(int id) {
+    List<ClientExercise> collect1 = getExercises().stream().filter(exercise -> exercise.getID() == id).collect(Collectors.toList());
+    return collect1.isEmpty() ? null : collect1.get(0);
+  }
+
+  @Override
+  public ClientExercise getCoreByID(int id) {
+    List<ClientExercise> collect1 = getCoreVocabulary().stream().filter(exercise -> exercise.getID() == id).collect(Collectors.toList());
+    return collect1.isEmpty() ? null : collect1.get(0);
   }
 
   public String toString() {

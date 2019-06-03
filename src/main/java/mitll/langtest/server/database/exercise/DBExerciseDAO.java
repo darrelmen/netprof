@@ -59,6 +59,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private final SlickProject project;
   private final Project fullProject;
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_REFRESH = true;
   private static final boolean DEBUG_ROOT_TYPE = false;
   private static final boolean DEBUG_USER_CREATED = false;
   private final Map<Integer, CommonExercise> idToContextExercise = new ConcurrentHashMap<>();
@@ -651,14 +652,17 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * @see mitll.langtest.server.services.ExerciseServiceImpl#refreshExercise
    */
   public boolean refresh(int exid) {
-    if (DEBUG) {
+    if (DEBUG_REFRESH) {
       CommonExercise commonExercise = idToUserExercise.get(exid);
       if (commonExercise == null) {
         logger.info("refresh no ex with " + exid);
+        logger.info("refresh check context " + idToContextExercise.get(exid));
       } else {
         logger.info("refresh found " + commonExercise.getID() + " " + commonExercise.getEnglish() + " " + commonExercise.getForeignLanguage());
-        ClientExercise next = commonExercise.getDirectlyRelated().iterator().next();
-        logger.info("refresh found context " + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage());
+        if (commonExercise.hasContext()) {
+          ClientExercise next = commonExercise.getDirectlyRelated().iterator().next();
+          logger.info("refresh found context " + next.getID() + " " + next.getEnglish() + " " + next.getForeignLanguage());
+        }
       }
     }
 
@@ -675,7 +679,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 //      logger.info("refresh attributes got " + attributesFor);
       byExID.setAttributes(attributesFor);
 
-      if (DEBUG) logger.info("refresh attributes after " + byExID.getAttributes());
+      if (DEBUG_REFRESH) logger.info("refresh attributes after " + byExID.getAttributes());
 
       CommonExercise exercise = getExercise(exid);
       if (exercise.getAttributes().size() != attributesFor.size()) {
@@ -693,7 +697,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           next.asCommon().setAttributes(userExerciseDAO.getExerciseAttributeDAO().getAttributesFor(id));
         }
 
-        if (DEBUG) {
+        if (DEBUG_REFRESH) {
           String s1 = "refresh after " + byExID.getEnglish() + " " + byExID.getForeignLanguage();
           String s = next == null ? "" : "\n\trefresh after context " + next.getEnglish() + " " + next.getForeignLanguage();
           logger.info(s1 + s);

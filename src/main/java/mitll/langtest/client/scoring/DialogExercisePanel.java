@@ -150,7 +150,6 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
   }
 
   /**
-   *
    * @param showFL
    * @param showALTFL
    * @param phonesChoices
@@ -263,9 +262,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
     if (next != null) {
       AlignmentOutput alignmentOutput = alignmentFetcher.getAlignment(next.getUniqueID());
       if (alignmentOutput != null) {
-        //   logger.info("maybeShowAlignment audio for " + this + "  " + next);
+        logger.info("maybeShowAlignment audio for " + getExID() + " : " + next);
         showAlignment(next.getUniqueID(), next.getDurationInMillis(), alignmentOutput);
+      } else {
+        logger.info("maybeShowAlignment no alignment for " + getExID() + " : " + next.getUniqueID() + " " + next.getTranscript() + " in " + alignmentFetcher.getNumAlignments());
       }
+    } else {
+      logger.info("maybeShowAlignment no audio for " + getExID());
+
     }
   }
 

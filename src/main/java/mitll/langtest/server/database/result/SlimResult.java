@@ -40,7 +40,6 @@ public class SlimResult implements ISlimResult {
   private final int audioID;
 
   /**
-   *
    * @param exID
    * @param audioID
    * @param valid
@@ -71,8 +70,8 @@ public class SlimResult implements ISlimResult {
   }
 
   /**
-   * @see mitll.langtest.server.database.refaudio.SlickRefResultDAO#fromSlick
    * @param jsonScore
+   * @see mitll.langtest.server.database.refaudio.SlickRefResultDAO#fromSlick
    */
   public void setJsonScore(String jsonScore) {
     this.jsonScore = jsonScore;
@@ -86,5 +85,13 @@ public class SlimResult implements ISlimResult {
   @Override
   public int getExID() {
     return exID;
+  }
+
+  public String toString() {
+    return
+        "ex " + exID +
+            "\n\taudio     " + audioID +
+            "\n\tscore     " + pronScore +
+            "\n\tjsonScore " + jsonScore;
   }
 }

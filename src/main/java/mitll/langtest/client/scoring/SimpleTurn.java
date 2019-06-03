@@ -120,7 +120,6 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn, IObscurable {
   public void restoreText() {
 //    segments.forEach(IHighlightSegment::restoreText);
 
-
     segments.forEach(iHighlightSegment -> {
       // if (iHighlightSegment.isObscurable()) {
       iHighlightSegment.clearObscurable();

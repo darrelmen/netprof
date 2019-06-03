@@ -93,7 +93,7 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
         answerInfo.getTranscript(),
         -1,
         answerInfo.getProjid(),
-        answerInfo.getNormtTranscript());
+        answerInfo.getNormTranscript());
 
     int id = dao.insert(res).id();
 
@@ -119,17 +119,10 @@ public class SlickAnswerDAO extends BaseAnswerDAO implements IAnswerDAO {
 
     if (i == 0) {
       logger.warn("addRoundTrip huh? tried to set round trip for " + resultID + " to " + roundTrip + " but failed?");
-    } else {
+    } else if (roundTrip > 500) {
       logger.info("addRoundTrip (" + i + "): " + resultID + " = " + roundTrip);
     }
   }
-/*
-
-  @Override
-  public void addUserScore(int id, float score) {
-    dao.addUserScore(id, score);
-  }
-*/
 
   /**
    * TODO : set the isCorrect field

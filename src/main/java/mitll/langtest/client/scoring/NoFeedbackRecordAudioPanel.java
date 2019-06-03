@@ -179,7 +179,9 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
 
       @Override
       protected AudioType getAudioType() {
-        return outer.getAudioType();
+        AudioType audioType = outer.getAudioType();
+        logger.info("\n\n\n\ngetAudioType " + audioType);
+        return audioType;
       }
     };
     postAudioRecordButton.addStyleName("leftFiveMargin");

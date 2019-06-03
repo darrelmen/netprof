@@ -33,6 +33,7 @@ import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.project.Project;
+import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
@@ -100,7 +101,7 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
 
   CommonExercise forget(int id);
 
-  OOVWordsAndUpdate updateText(Project project, int dialogID, int exid, int audioID, String content);
+  OOVWordsAndUpdate updateText(Project project, int dialogID, int exid, int audioID, String content, String normalized, IRefResultDAO refResultDAO);
 
   boolean updateEnglishText(Project project, int dialogID, int exid, String content);
 }

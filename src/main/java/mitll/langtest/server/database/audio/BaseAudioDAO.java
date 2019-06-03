@@ -447,7 +447,7 @@ public abstract class BaseAudioDAO extends DAO {
     boolean doDebug = debug || DEBUG_ATTACH;
 
     if (doDebug) {
-      logger.info("attachAudio for ex " + firstExercise.getID() + " '" + firstExercise.getEnglish() + "' '" + firstExercise.getForeignLanguage() +
+      logger.info("attachAudio for ex " + firstExercise.getID() + " '" + firstExercise.getEnglish() + "' = '" + firstExercise.getForeignLanguage() +
           "' found " + currentPaths.size() + " vs " + audioAttributes.size());
     }
 

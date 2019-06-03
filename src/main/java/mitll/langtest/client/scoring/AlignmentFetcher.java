@@ -48,7 +48,7 @@ import java.util.logging.Logger;
 public class AlignmentFetcher {
   private final Logger logger = Logger.getLogger("AlignmentFetcher");
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   /**
    *
@@ -510,4 +510,6 @@ public class AlignmentFetcher {
   void setContextPlay(PlayAudioPanel contextPlay) {
     this.contextPlay = contextPlay;
   }
+
+  int getNumAlignments() { return alignments.size(); }
 }

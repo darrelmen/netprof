@@ -182,7 +182,7 @@ public class KeyStorage {
     //String userIDCookie = getUserIDCookie();
     //   logger.info("getUserID " + userIDCookie);
     int anInt = getSimpleInt(USER_ID);
-   // logger.info("getUserID value " + anInt);
+    // logger.info("getUserID value " + anInt);
 
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getUserID"));
 //    logger.info("logException stack " + exceptionAsString);
@@ -255,8 +255,8 @@ public class KeyStorage {
     String app = path.substring(0, path.lastIndexOf("/"));
     appName = app.isEmpty() ? appName : app;
 
-    if (!appName.equalsIgnoreCase("Netscape")) {
-      logger.info("appName " + appName);
+    if (DEBUG && !appName.equalsIgnoreCase("Netscape")) {
+      logger.info("getAppName : appName = '" + appName + "'");
     }
     return appName;
   }

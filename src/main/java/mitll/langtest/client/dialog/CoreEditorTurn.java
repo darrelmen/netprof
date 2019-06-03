@@ -45,9 +45,12 @@ import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVWordsAndUpdate;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteListener {
+  public static final boolean DEBUG_UPDATE_TEXT = true;
   private final Logger logger = Logger.getLogger("CoreEditorTurn");
 
   private CoreVocabEditor coreVocabEditor;
@@ -61,6 +64,10 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
 
   private static final boolean DEBUG = false;
   private boolean onlyOneTurn;
+
+  private String prev = "";
+  private String engprev = "";
+
 
   /**
    * @param controller
@@ -87,9 +94,11 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     if (coreVocabEditor == null) logger.warning("huh? how can that be??\n\n\n");
 
     prev = vocab.getForeignLanguage();
+    engprev = vocab.getEnglish();
+
     this.turnAddDelete = new TurnAddDelete(this, 21);
 
-    this.editableTurnHelper = new EditableTurnHelper(language, this, vocab.hasEnglishAttr(), vocab.getForeignLanguage(),
+    this.editableTurnHelper = new EditableTurnHelper(language, vocab.hasEnglishAttr(), vocab.getForeignLanguage(),
         this) {
       @Override
       protected int getTextBoxWidth() {
@@ -99,7 +108,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     editableTurnHelper.setPlaceholder(isInterpreter, ITurnContainer.COLUMNS.RIGHT);
     editableTurnHelper.setPlaceholder("Core Vocabulary");
 
-    this.englishEditableTurnHelper = new EditableTurnHelper(language, this, true, vocab.getEnglish(),
+    this.englishEditableTurnHelper = new EditableTurnHelper(language, true, vocab.getEnglish(),
         this) {
       @Override
       protected int getTextBoxWidth() {
@@ -174,9 +183,6 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
   private DivWidget getTextBox() {
     return editableTurnHelper.getTextBox(false);
   }
-
-  private String prev = "";
-  private String engprev = "";
 
   @Override
   public void gotBlur() {
@@ -255,7 +261,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
             if (DEBUG) logger.info("maybeCreateFirst ex now " + exercise + " move turn to next " + moveToNextTurn);
 
             int size = coreVocabEditor.getAllTurns().size();
-          //  logger.info("maybeCreateFirst Got " + size);
+            //  logger.info("maybeCreateFirst Got " + size);
             if (size == 1) {
               coreVocabEditor.getAllTurns().get(0).enableDelete(true);
             }
@@ -285,7 +291,8 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       if (DEBUG) logger.info("updateText : Checking " + s + " on " + projectID + " for " + exID);
 
       // talk to the audio service first to determine the oov
-      controller.getAudioService().isValid(projectID, exID, s, new AsyncCallback<OOVWordsAndUpdate>() {
+
+      controller.getAudioService().isValid(projectID, exID, getSanitized(s), new AsyncCallback<OOVWordsAndUpdate>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("isValid on text...", caught);
@@ -296,14 +303,18 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
 
         @Override
         public void onSuccess(OOVWordsAndUpdate result) {
-          if (DEBUG) logger.info("updateText : onSuccess " + result);
+          if (DEBUG_UPDATE_TEXT) logger.info("updateText : onSuccess " + result);
 
           showOOVResult(result);
 
-          updateTextViaExerciseService(projectID, exID, s, moveToNextTurn);
+          updateTextViaExerciseService(projectID, exID, s, result.getNormalizedText(), moveToNextTurn);
         }
       });
     }
+  }
+
+  private String getSanitized(String s) {
+    return englishEditableTurnHelper.getSanitized(s);
   }
 
   /**
@@ -315,9 +326,9 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
    * @param moveToNextTurn
    * @param outer
    */
-  private void updateTextViaExerciseService(int projectID, int exID, String s, boolean moveToNextTurn) {
+  private void updateTextViaExerciseService(int projectID, int exID, String s, String normalized, boolean moveToNextTurn) {
     CoreEditorTurn outer = this;
-    controller.getExerciseService().updateText(projectID, dialogID, exID, -1, s, new AsyncCallback<OOVWordsAndUpdate>() {
+    controller.getExerciseService().updateText(projectID, dialogID, exID, -1, getSanitized(s), normalized, new AsyncCallback<OOVWordsAndUpdate>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("updating text...", caught);
@@ -335,13 +346,15 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
         if (moveToNextTurn) {
           coreVocabEditor.gotForward(outer);
         }
+
+        syncAudioService(result.isDidUpdate(), projectID, exID);
       }
     });
   }
 
   private void updateEnglishText(int projectID, int exID, String s, boolean moveToNextTurn) {
     CoreEditorTurn outer = this;
-    controller.getExerciseService().updateEnglishText(projectID, dialogID, exID, s, new AsyncCallback<Boolean>() {
+    controller.getExerciseService().updateEnglishText(projectID, dialogID, exID, getSanitized(s), new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("updating english text...", caught);
@@ -358,8 +371,27 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
         if (moveToNextTurn) {
           coreVocabEditor.gotForward(outer);
         }
+        syncAudioService(result, projectID, exID);
       }
     });
+  }
+
+  private void syncAudioService(boolean success, int projectID, int exID) {
+    if (success) {
+      Set<Integer> singleton = new HashSet<>();
+      singleton.add(exID);
+      controller.getAudioService().refreshExercises(projectID, singleton, new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("refreshing exercise on hydra", caught);
+        }
+
+        @Override
+        public void onSuccess(Void result) {
+          logger.info("OK, updated " + exID + " on hydra/hydra2");
+        }
+      });
+    }
   }
 
   /**
@@ -373,8 +405,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       builder.append(result.isPossible() ? "No pronunciation for " : "You can't use these words ");
       result.getOov().forEach(oov -> builder.append(oov).append(" "));
       //turnFeedback.setText(builder.toString());
-    }
-    else {
+    } else {
       //turnFeedback.setText("");
     }
   }

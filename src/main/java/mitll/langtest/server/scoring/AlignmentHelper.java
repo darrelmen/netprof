@@ -55,6 +55,7 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
 
   private static final boolean USE_PHONE_TO_DISPLAY = true;
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_OUTPUT = true;
   private static final boolean WARN_MISSING_REF_RESULT = false || DEBUG;
 
   private final IRefResultDAO refResultDAO;
@@ -67,13 +68,14 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
   /**
    * @param toAddAudioTo
    * @see mitll.langtest.server.services.ExerciseServiceImpl#getFullExercises
+   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getDialog(int)
    */
   public void addAlignmentOutput(Project project, Collection<ClientExercise> toAddAudioTo) {
     if (project != null && !toAddAudioTo.isEmpty()) {
       int projectID = project.getID();
       Map<Integer, AlignmentOutput> audioToAlignment = project.getAudioToAlignment();
 
-      if (DEBUG) logger.info("addAlignmentOutput : For project " + projectID + " found " + audioToAlignment.size() +
+      if (DEBUG_OUTPUT) logger.info("addAlignmentOutput : For project " + projectID + " found " + audioToAlignment.size() +
           " audio->alignment entries, trying to marry to " + toAddAudioTo.size() + " exercises");
 
       Map<Boolean, List<ClientExercise>> collect = toAddAudioTo.stream().collect(Collectors.partitioningBy(ClientExercise::hasEnglishAttr));
@@ -81,11 +83,14 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
       List<ClientExercise> englishEx = collect.get(true);
       List<ClientExercise> flEx = collect.get(false);
 
-      if (DEBUG) logger.info("addAlignmentOutput found " + englishEx.size() + " eng, " + flEx.size() + " fl exercises");
+      if (DEBUG_OUTPUT) logger.info("addAlignmentOutput found " + englishEx.size() + " eng, " + flEx.size() + " fl exercises");
 
       audioToAlignment.putAll(getIDToAlignment(englishEx, projectID, audioToAlignment, Language.ENGLISH));
       audioToAlignment.putAll(getIDToAlignment(flEx, projectID, audioToAlignment, project.getLanguageEnum()));
 
+    }
+    else {
+      logger.warn("addAlignmentOutput no exercises for " + project);
     }
   }
 
@@ -96,81 +101,23 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
     Set<Integer> ids = new HashSet<>();
 
     for (ClientExercise exercise : toAddAudioTo) {
+      logger.info("getIDToAlignment ex " + exercise.getID() + " " + exercise.getForeignLanguage() + " has " + exercise.getAudioAttributes() + " audio...");
       addAudioIDs(exercise, ids);
       exercise.getDirectlyRelated().forEach(context -> addAudioIDs(context, ids));
     }
 
+    logger.info("getIDToAlignment candidates " + ids);
     ids.removeAll(audioToAlignment.keySet());
+    logger.info("getIDToAlignment after      " + ids);
 
     return getAlignmentsFromDB(projectID, ids, languageEnum);
   }
 
-  /**
-   * TODO : why not concurrent hash map...
-   *
-   * Look in the map of
-   *
-   * @param audioToAlignment
-   * @param idToAudio        for all that are missing alignment
-   * @param exercise
-   */
-/*
-  private void setAlignmentInfo(Map<Integer, AlignmentOutput> audioToAlignment,
-                                Map<Integer, AudioAttribute> idToAudio,
-                                ClientExercise exercise) {
-    for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
-      AlignmentOutput currentAlignment = audioAttribute.getAlignmentOutput();
-      if (currentAlignment == null) {
-        synchronized (audioToAlignment) {
-          AlignmentOutput alignmentOutput = audioToAlignment.get(audioAttribute.getUniqueID());
-
-          if (alignmentOutput == null) {
-            idToAudio.put(audioAttribute.getUniqueID(), audioAttribute);
-          } else {  // not sure how this can happen
-            audioAttribute.setAlignmentOutput(alignmentOutput);
-          }
-        }
-      }
-    }
-  }
-*/
   private void addAudioIDs(ClientExercise exercise, Set<Integer> ids) {
     for (AudioAttribute audioAttribute : exercise.getAudioAttributes()) {
       ids.add(audioAttribute.getUniqueID());
     }
   }
-
-
-  /**
-   * @param projectID
-   * @param idToAudio
-   * @param language
-   * @return
-   * @see #addAlignmentOutput
-   */
-/*  private Map<Integer, AlignmentAndScore> rememberAlignments(int projectID,
-                                                           Map<Integer, AudioAttribute> idToAudio, Language language) {
-    if (!idToAudio.isEmpty() && idToAudio.size() > 50 || DEBUG)
-      logger.info("rememberAlignments : asking for " + idToAudio.size() + " alignment outputs from database");
-
-    Map<Integer, AlignmentAndScore> alignments = getAlignmentsFromDB(projectID, idToAudio.keySet(), language);
-    addAlignmentToAudioAttribute(idToAudio, alignments);
-    return alignments;
-  }*/
-
-
-/*  private void addAlignmentToAudioAttribute(Map<Integer, AudioAttribute> idToAudio,
-                                            Map<Integer, AlignmentAndScore> alignments) {
-    idToAudio.forEach((k, v) -> {
-      AlignmentOutput alignmentOutput = alignments.get(k);
-      if (alignmentOutput == null) {
-        // logger.warn("addAlignmentToAudioAttribute : couldn't get alignment for audio #" + v.getUniqueID());
-      } else {
-//        logger.info("addAlignmentToAudioAttribute set alignment output " + alignmentOutput + " on " + v.getUniqueID() + " : " + v.getTranscript());
-        v.setAlignmentOutput(alignmentOutput);
-      }
-    });
-  }*/
 
   /**
    * get alignment from db

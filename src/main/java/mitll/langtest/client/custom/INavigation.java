@@ -78,11 +78,11 @@ public interface INavigation extends IViewContaner {
     /**
      *
      */
-    REHEARSE("Rehearse", ProjectMode.DIALOG, true),
-    CORE_REHEARSE("Rehearse (auto)", ProjectMode.DIALOG, false),
+    REHEARSE("Rehearse self-paced", ProjectMode.DIALOG, true),
+    CORE_REHEARSE("Rehearse", ProjectMode.DIALOG, false),
 
-    PERFORM_PRESS_AND_HOLD("Perform", ProjectMode.DIALOG, true),
-    PERFORM("Perform (auto)", ProjectMode.DIALOG, false),
+    PERFORM_PRESS_AND_HOLD("Perform self-paced", ProjectMode.DIALOG, true),
+    PERFORM("Perform", ProjectMode.DIALOG, false),
 
     /**
      * @see mitll.langtest.client.banner.NewContentChooser#showScores
@@ -91,6 +91,7 @@ public interface INavigation extends IViewContaner {
 
     /**
      * @see NewBanner#getRecNav
+     * @see mitll.langtest.client.banner.NewContentChooser#showView(VIEWS, boolean, boolean)
      */
     RECORD_ENTRIES("Record Entries", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
     RECORD_SENTENCES("Record Sentences", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),

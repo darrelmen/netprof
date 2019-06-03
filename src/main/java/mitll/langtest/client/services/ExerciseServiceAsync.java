@@ -71,11 +71,11 @@ public interface ExerciseServiceAsync<T extends CommonShell & HasUnitChapter> {
 
   void reload(int projid, AsyncCallback<Void> async);
 
-  void updateText(int projid, int dialogID, int exid, int audioID, String content, AsyncCallback<OOVWordsAndUpdate> async);
+  void updateText(int projid, int dialogID, int exid, int audioID, String content, String normalized, AsyncCallback<OOVWordsAndUpdate> async);
 
   void updateEnglishText(int projid, int dialogID, int exid, String content, AsyncCallback<Boolean> async);
 
-  void refreshAudio(int exid, AsyncCallback<Void> async);
+  void refreshAudio(int projID, int exid, int previousAudioID, AsyncCallback<Void> async);
 
   void refreshAllAudio(int projid, AsyncCallback<Void> async);
 

@@ -35,13 +35,10 @@ import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.image.TranscriptEvent;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseServices;
-import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.result.ISlimResult;
 import mitll.langtest.server.database.result.Result;
 import mitll.langtest.server.database.result.SlimResult;
-import mitll.langtest.server.database.userexercise.ExercisePhoneInfo;
-import mitll.langtest.server.database.userexercise.ExerciseToPhone;
 import mitll.langtest.server.decoder.RefResultDecoder;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.server.scoring.PrecalcScores;
@@ -148,7 +145,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
         exid,
         audioid,
         new Timestamp(System.currentTimeMillis()),
-        //audioFile,
+
         durationInMillis,
         correct,
         decodeOutput.getScore(), decodeOutput.getJson(), decodeOutput.getNumPhones(), decodeOutput.getProcessDurInMillis(),
@@ -158,6 +155,13 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     );
   }
 
+  /**
+   * @param projid
+   * @param result
+   * @param audioID
+   * @return
+   * @see mitll.langtest.server.database.copy.CopyToPostgres#copyRefResult
+   */
   public SlickRefResult toSlick(int projid, Result result, int audioID) {
     DecodeAlignOutput alignOutput = result.getAlignOutput();
     DecodeAlignOutput decodeOutput = result.getDecodeOutput();
@@ -179,9 +183,16 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     );
   }
 
+  /**
+   * @param audioID
+   * @return
+   * @see mitll.langtest.server.services.ScoringServiceImpl#recalcOneOrGetCached
+   */
   @Override
   public boolean removeByAudioID(int audioID) {
-    return dao.deleteByAudioID(audioID) > 0;
+    int audioID1 = dao.deleteByAudioID(audioID);
+    logger.info("removeByAudioID for audio id " + audioID + " result " + audioID1);
+    return audioID1 > 0;
   }
 
   /**
@@ -212,13 +223,6 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     return getAudioIDMap(getAllSlimForProject(id));
   }
 
-//  @NotNull
-//  private Map<Integer, ISlimResult> getAudioIDMap(Collection<ISlimResult> jsonResultsForProject) {
-//    Map<Integer, ISlimResult> audioToResult = new HashMap<>(jsonResultsForProject.size());
-//    jsonResultsForProject.forEach(iSlimResult -> audioToResult.put(iSlimResult.getAudioID(), iSlimResult));
-//    return audioToResult;
-//  }
-
   /**
    * @param projid
    * @return
@@ -230,15 +234,6 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
   public Collection<ISlimResult> getAllSlimForProjectIn(int projid, Set<Integer> audioIDs) {
     return dao.getAllSlimIn(projid, audioIDs).stream().map(this::fromSlickToSlim).collect(Collectors.toList());
   }
-
-  /**
-   * @param projid
-   * @return
-   * @see DBExerciseDAO#readExercises
-   */
-//  public Map<Integer, ExercisePhoneInfo> getExerciseToPhoneForProject(int projid) {
-//    return new ExerciseToPhone().getExerciseToPhoneForProject(getJsonResultsForProject(projid));
-//  }
 
   public int getNumPhonesForEx(int exid) {
     return dao.numPhonesForEx(exid);
@@ -263,6 +258,11 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     }
   }
 
+  /**
+   * @param slickRef
+   * @return
+   * @see #getResults()
+   */
   private Result fromSlick(SlickRefResult slickRef) {
     float pronScore = slickRef.pronscore();
     String scoreJson = slickRef.scorejson();
@@ -329,6 +329,12 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
     dao.deleteForProject(projid);
   }
 
+  /**
+   * @param projid
+   * @param audioIDs
+   * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#getCachedAlignments
+   */
   @Override
   public Map<Integer, AlignmentAndScore> getCachedAlignments(int projid, Set<Integer> audioIDs) {
 //    logger.info("getAlignments project " + projid + " asking for " + audioIDs);

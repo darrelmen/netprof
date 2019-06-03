@@ -88,7 +88,7 @@ public class FilterResponseHelper implements IResponseFilter {
         return getFilterResponseForRecording(request, projid, userID);
       } else if (request.isOnlyUninspected()) {
         FilterResponse filterResponse = getFilterResponse(request, projid, getRequestForUninspected(request, userID));
-        addInterpreterMetaData(request, hasDialogs(projid) && request.getMode() == ProjectMode.DIALOG, filterResponse);
+        addInterpreterMetaData(request, hasDialogs(projid) && isDialog(request), filterResponse);
         return filterResponse;
       } else if (request.isOnlyWithAnno()) {
         return getFilterResponse(request, projid, getExerciseListRequest(request, userID).setOnlyWithAnno(true));
@@ -487,10 +487,10 @@ public class FilterResponseHelper implements IResponseFilter {
 
       if (DEBUG) {
         if (!filterOnBothSpeeds) {
-          logger.info("only filter on reg speed");
+          logger.info("filterExercises only filter on reg speed");
         }
-        if (request.getMode() == ProjectMode.DIALOG) {
-          logger.info("request mode is dialog.");
+        if (isDialog(request)) {
+          logger.info("filterExercises request mode is dialog.");
         }
       }
       exercises = getRecordFilterExercisesMatchingGender(request.getUserID(), exercises, projid, onlyExamples, filterOnBothSpeeds);
@@ -845,7 +845,7 @@ public class FilterResponseHelper implements IResponseFilter {
   }
 
   private List<CommonExercise> maybeFilterDownToJustDialog(IRequest request, int projid, List<CommonExercise> copy) {
-    if (request.getMode() == ProjectMode.DIALOG) {
+    if (isDialog(request)) {
       int before = copy.size();
       copy = getDialogExercisesFiltered(projid, copy);
       int after = copy.size();

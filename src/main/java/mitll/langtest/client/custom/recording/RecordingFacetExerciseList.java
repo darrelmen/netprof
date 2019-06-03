@@ -93,10 +93,7 @@ public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> 
         listHeader,
         instanceName);
     this.isContext = isContext;
- //   ProjectMode mode = controller.getMode();
-   // logger.info("mode = " + mode);
     isDialog = isDialog() && controller.getMode() == ProjectMode.DIALOG;
-  //  logger.info("isDialog = " + isDialog);
   }
 
   @NotNull

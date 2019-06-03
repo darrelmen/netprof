@@ -299,6 +299,7 @@ public class AudioFileHelper implements AlignDecode {
           logger.warn("checkOOV can't find ex " + p.id());
         } else {
           String foreignlanguagenorm = p.foreignlanguagenorm();
+          logger.info("checkOOV : " + p.id() + " " + exerciseByID.getForeignLanguage() + " = " + foreignlanguagenorm);
           if (!exerciseByID.getNormalizedFL().equals(foreignlanguagenorm)) {
             changed.add(exerciseByID);
             exerciseByID.getMutable().setNormalizedFL(foreignlanguagenorm);
@@ -399,11 +400,13 @@ public class AudioFileHelper implements AlignDecode {
         }
       }
 
+      String opt = unsafeToNorm.size() < 10 ? unsafeToNorm.toString() : " LOTS";
       logger.info("checkAllExercises (" + project.getName() + ") " +
           "\n\tchecked vocab        " + checkedVocab +
           "\n\tchecked direct       " + checkedDirect +
           "\n\tcontext safe changed " + safeChanged +
           "\n\tunsafeHighlighted    " + unsafeHighlighted.size() +
+          "\n\tunsafeToNorm         " + unsafeToNorm.size() + " : " + opt +
           "\n\tfrom                 " + exercises.size() +
           "\n\tfor whether they can be decoded in " + (System.currentTimeMillis() - then) + " millis");
 
@@ -564,14 +567,15 @@ public class AudioFileHelper implements AlignDecode {
 
   /**
    * @param exercise
-   * @return
+   * @param idToNorm
+   * @return oov tokens, if any
    * @see mitll.langtest.server.services.AudioServiceImpl#isValid(int, int, String)
    */
-  public Set<String> isValid(ClientExercise exercise) {
+  public Set<String> isValid(ClientExercise exercise, Map<Integer, String> idToNorm) {
     Map<String, List<OOV>> oovToEquivalents = db.getOOVDAO().getOOVToEquivalents(language);
 
     Set<String> oovCumulative = new HashSet<>();
-    isValidForeignPhraseEither(exercise, oovToEquivalents, true, new HashMap<>(), oovCumulative, new HashSet<>());
+    isValidForeignPhraseEither(exercise, oovToEquivalents, true, idToNorm, oovCumulative, new HashSet<>());
     return oovCumulative;
   }
 
@@ -1267,7 +1271,9 @@ public class AudioFileHelper implements AlignDecode {
 
     //logger.debug("attr dur " + attribute.getDurationInMillis());
 
-    getRefAudioAnswerDecoding(exercise,
+    rememberRefResult(
+        exercise.getProjectID(),
+        exercise.getID(),
         attribute.getUserid(),
         attribute.getUniqueID(),
         durationInMillis,
@@ -1421,24 +1427,26 @@ public class AudioFileHelper implements AlignDecode {
    * @seex #decodeOneAttribute(CommonExercise, AudioAttribute, int)
    * @see #decodeAndRemember(CommonExercise, AudioAttribute, boolean, int, File, Language)
    */
-  private void getRefAudioAnswerDecoding(CommonExercise exercise1,
-                                         int user,
-                                         int audioid,
-                                         long duration,
-                                         DecodeAlignOutput alignOutput,
-                                         DecodeAlignOutput decodeOutput,
+  private void rememberRefResult(
+      int projID,
+      int exID,
+      int user,
+      int audioid,
+      long duration,
+      DecodeAlignOutput alignOutput,
+      DecodeAlignOutput decodeOutput,
 
-                                         DecodeAlignOutput alignOutputOld,
-                                         DecodeAlignOutput decodeOutputOld,
+      DecodeAlignOutput alignOutputOld,
+      DecodeAlignOutput decodeOutputOld,
 
-                                         boolean isMale,
-                                         String speed,
-                                         String model) {
+      boolean isMale,
+      String speed,
+      String model) {
     AudioCheck.ValidityAndDur validity = new AudioCheck.ValidityAndDur(duration);
     // logger.debug("validity dur " + validity.durationInMillis);
 
     if (alignOutput.isValid()) {
-      db.getRefResultDAO().addAnswer(user, exercise1.getProjectID(), exercise1.getID(),
+      db.getRefResultDAO().addAnswer(user, projID, exID, //.getProjectID(), exercise1.getID(),
           audioid,
           validity.getDurationInMillis(),
 
@@ -1455,7 +1463,7 @@ public class AudioFileHelper implements AlignDecode {
           model);
       // TODO : add word and phone table for refs
       //	recordWordAndPhoneInfo(decodeAnswer, answerID);
-      //   logger.debug("getRefAudioAnswerDecoding decodeAnswer " + decodeAnswer);
+      //   logger.debug("rememberRefResult decodeAnswer " + decodeAnswer);
     } else {
       logger.warn("not writing to db since alignment output is not valid for audio " + audioid);
     }

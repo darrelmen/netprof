@@ -203,7 +203,7 @@ public class DialogEditorTest extends BaseTest {
     int id1 = exercise.getID();
     Assert.assertTrue("Expecting non zero dialogID", id1 > 0);
 
-    OOVWordsAndUpdate first = andPopulate.getExerciseDAO(PROJECTID).updateText(project, dialogID, id1, -1, FIRST);
+    OOVWordsAndUpdate first = andPopulate.getExerciseDAO(PROJECTID).updateText(project, dialogID, id1, -1, FIRST, FIRST, andPopulate.getRefResultDAO());
     logger.info("got 1 " + first);
     Assert.assertTrue("Expecting it to update", first.isDidUpdate());
 
@@ -221,7 +221,7 @@ public class DialogEditorTest extends BaseTest {
 
     ClientExercise exercise2 = dialogDAO.addCoreVocab(toAdd, USERID, id1, System.currentTimeMillis());
 
-    OOVWordsAndUpdate second = andPopulate.getExerciseDAO(PROJECTID).updateText(project, dialogID, exercise2.getID(), -1, SECOND);
+    OOVWordsAndUpdate second = andPopulate.getExerciseDAO(PROJECTID).updateText(project, dialogID, exercise2.getID(), -1, SECOND, SECOND, andPopulate.getRefResultDAO());
     logger.info("got 2 " + second);
     Assert.assertTrue("Expecting it to update", second.isDidUpdate());
 
@@ -244,7 +244,7 @@ public class DialogEditorTest extends BaseTest {
     logger.info("Add new ex after " + id1);
     ClientExercise exercise3 = dialogDAO.addCoreVocab(toAdd, USERID, id1, System.currentTimeMillis());
 
-    OOVWordsAndUpdate third = andPopulate.getExerciseDAO(PROJECTID).updateText(project, dialogID, exercise3.getID(), -1, "third");
+    OOVWordsAndUpdate third = andPopulate.getExerciseDAO(PROJECTID).updateText(project, dialogID, exercise3.getID(), -1, "third", "third", andPopulate.getRefResultDAO());
     logger.info("got 3 " + third);
     Assert.assertTrue("Expecting it to update", third.isDidUpdate());
 

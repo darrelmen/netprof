@@ -226,7 +226,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       if (contentType != null && contentType.contains("multipart/form-data")) {
         //reportOnHeaders(request);
         String webappName = getWebappName(getServletContext());
-        logger.info("service got image request! " + contentType + " from " +webappName );
+        logger.info("service got image request! " + contentType + " from " + webappName);
         new FileUpload().doFileUpload(request, response, this, db.getProjectManagement(), true, webappName);
       } else {
         super.service(request, response);
@@ -400,7 +400,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         synchronized (audioChunks) {
           completeSet = isCompleteSet(audioChunks, session);
           if (completeSet) {
-            logger.info("getJSONForStream session " + session + " is complete with " + audioChunks.size() + " chunks.");
+            if (DEBUG) {
+              logger.info("getJSONForStream session " + session + " is complete with " + audioChunks.size() + " chunks.");
+            }
+
             sessionToComplete.get(session).add(Boolean.TRUE);
             combined = getCombined(isRef, audioChunks, session);
           }
@@ -597,7 +600,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           audioType)
           .setDialogSessionID(dialogSessionID);
 
-      logger.info("getJsonObject audio context " + audioContext);
+      if (DEBUG) logger.info("getJsonObject audio context " + audioContext);
 
       DecoderOptions decoderOptions = new DecoderOptions()
           .setDoDecode(true)
@@ -1200,7 +1203,6 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
 //    logger.info("writeAudioFile recording audioAnswer transcript '" + audioAnswer.getTranscript() + "'");
     int user = audioContext.getUserid();
-
 //    logger.info("getAudioAnswer " + decoderOptions + " valid " + audioAnswer.isValid());
 
     if (decoderOptions.isRefRecording() && audioAnswer.isValid()) {
@@ -1307,14 +1309,22 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     CommonExercise exerciseByID = project.getExerciseByID(exid);
 
     if (exerciseByID == null) {
-      logger.warn("updateText " + "can't find " + exid);
+      logger.warn("isValid can't find " + exid);
       return new OOVWordsAndUpdate(false);
     } else {
       Exercise exercise = new Exercise(exerciseByID);
-      exercise.getMutable().setForeignLanguage(getTrim(text));
-      Set<String> valid = project.getAudioFileHelper().isValid(exercise);
+      String trim = getTrim(text);
 
-      OOVWordsAndUpdate oovWordsAndUpdate = new OOVWordsAndUpdate(false, valid, project.getModelType() == ModelType.HYDRA);
+      logger.info("isValid " + text + " = " + trim);
+
+      exercise.getMutable().setForeignLanguage(trim);
+      Map<Integer, String> idToNorm = new HashMap<>();
+      Set<String> oovTokens = project.getAudioFileHelper().isValid(exercise, idToNorm);
+      Collection<String> values = idToNorm.values();
+
+      String normText = values.isEmpty() ? trim : values.iterator().next();
+
+      OOVWordsAndUpdate oovWordsAndUpdate = new OOVWordsAndUpdate(false, oovTokens, project.getModelType() == ModelType.HYDRA, normText);
 
       logger.info("isValid : Sending " + oovWordsAndUpdate);
       return oovWordsAndUpdate;
@@ -1423,6 +1433,10 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
           realGender, hasProjectSpecificAudio);
 
       audioAttribute = db.getAudioDAO().addOrUpdate(info);
+
+      int uniqueID = audioAttribute.getUniqueID();
+      boolean b = db.getRefResultDAO().removeByAudioID(uniqueID);
+      logger.info("\n\n\naddToAudioTable : removed ref alignment for " + uniqueID + " = " + b);
 
       audioAnswer.setPath(audioAttribute.getAudioRef());
       if (DEBUG) {
@@ -1693,8 +1707,31 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   @Override
   public void refreshExercises(int projID, Set<Integer> exids) throws DominoSessionException {
     getUserIDFromSessionOrDB();
-    ExerciseDAO<CommonExercise> exerciseDAO = getDatabase().getProject(projID).getExerciseDAO();
-    exids.forEach(exerciseDAO::refresh);
+    Project project = getDatabase().getProject(projID);
+
+    ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
+    Set<Integer> updated = new HashSet<>();
+    logger.info("refreshExercises update " + exids);
+    exids.forEach(exid -> {
+      if (exerciseDAO.refresh(exid)) {
+        updated.add(exid);
+      } else logger.warn("didn't update " + exid);
+    });
+
+    // post condition
+    if (updated.size() != exids.size()) {
+      logger.warn("refreshExercises : tried to update " + exids + " but only did " + updated);
+    }
+
+    if (true) {
+      exids.forEach(exid -> {
+        CommonExercise exerciseByID = project.getExerciseByID(exid);
+        if (exerciseByID == null) logger.warn("could not find " + exid);
+        else {
+          logger.info("refreshExercises : " + exid + " = " + exerciseByID.getForeignLanguage() + " norm " + exerciseByID.getNormalizedFL());
+        }
+      });
+    }
   }
 
   /**

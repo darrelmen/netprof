@@ -942,58 +942,65 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
         // logger.info("currentTurnPlayEnded NOT DOING showScoreInfo on " + currentTurn);
       }
 
-      if (nextOtherSide < allTurns.size()) {
-        T nextTurn = allTurns.get(nextOtherSide);
-
-        if (DEBUG) logger.info("currentTurnPlayEnded next is " + nextTurn + "  at " + nextOtherSide);
-        showNextTurn(nextTurn);
-
-        if (isTurnAPrompt(nextTurn)) {
-          if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded - play next " + nextTurn);
-
-          playCurrentTurn();
-        } else {
-          if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded - startRecording " + nextTurn);
-          startRecordingTurn(nextTurn); // advance automatically
-        }
+      if (nextOtherSide < allTurns.size()) {  // not on the last turn
+        notOnTheLastTurn(nextOtherSide);
       } else {  // on the last turn!
-        if (isCurrentPrompt) {
-          logger.info("currentTurnPlayEnded - isCurrentPrompt " + isCurrentPrompt);
+        onTheLastTurn(currentTurn, isCurrentPrompt);
+      }
+    }
+  }
 
-          // TODO :
-          //  a race - does the play end before the score is available, or is the score available before the play ends?
-          if (doWeHaveTheLastResponseScore()) {
-            if (DEBUG_PLAY_ENDED) {
-              logger.info("currentTurnPlayEnded - on last " + currentTurn);
-            }
-            if (isDoRehearse()) {
-              showScores();
-            } else {
-              if (DEBUG_PLAY_ENDED) {
-                logger.info("currentTurnPlayEnded - maybe show first turn ??? " + allTurns.get(0));
-              }
-              showFirstTurn();
-            }
-            setPlayButtonToPlay();
-          } else if (!getRespSeq().isEmpty()) { // could be we don't have any response turns yet.
-            if (DEBUG_PLAY_ENDED)
-              logger.info("currentTurnPlayEnded - no score for " + currentTurn.getExID() + " know about " + exToScore.keySet() + " exercises so waiting...");
+  private void notOnTheLastTurn(int nextOtherSide) {
+    T nextTurn = allTurns.get(nextOtherSide);
 
-            if (haveRecordedAllTurns()) {
-              showWaitSpiner();  // wait for it
-            }
-          } else {  // no resp turns
-            showFirstTurn();
-            setPlayButtonToPlay();
-          }
-        } else {
-          if (isDoRehearse()) {
-            if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded skip last (why?) " + currentTurn);
-          } else {  // ok, we're doing hear yourself, so make sure we set the first turn to be current and reset the play button state
-            showFirstTurn();
-            setPlayButtonToPlay();
-          }
+    if (DEBUG) logger.info("currentTurnPlayEnded next is " + nextTurn + "  at " + nextOtherSide);
+    showNextTurn(nextTurn);
+
+    if (isTurnAPrompt(nextTurn)) {
+      if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded - play next " + nextTurn);
+      playCurrentTurn();
+    } else {
+      if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded - startRecording " + nextTurn);
+      startRecordingTurn(nextTurn); // advance automatically
+    }
+  }
+
+  private void onTheLastTurn(T currentTurn, boolean isCurrentPrompt) {
+    if (isCurrentPrompt) {
+      logger.info("currentTurnPlayEnded - isCurrentPrompt " + isCurrentPrompt);
+
+      // TODO :
+      //  a race - does the play end before the score is available, or is the score available before the play ends?
+      if (doWeHaveTheLastResponseScore()) {
+        if (DEBUG_PLAY_ENDED) {
+          logger.info("currentTurnPlayEnded - on last " + currentTurn);
         }
+        if (isDoRehearse()) {
+          showScores();
+        } else {
+          if (DEBUG_PLAY_ENDED) {
+            logger.info("currentTurnPlayEnded - maybe show first turn ??? " + allTurns.get(0));
+          }
+          showFirstTurn();
+        }
+        setPlayButtonToPlay();
+      } else if (!getRespSeq().isEmpty()) { // could be we don't have any response turns yet.
+        if (DEBUG_PLAY_ENDED)
+          logger.info("currentTurnPlayEnded - no score for " + currentTurn.getExID() + " know about " + exToScore.keySet() + " exercises so waiting...");
+
+        if (haveRecordedAllTurns()) {
+          showWaitSpiner();  // wait for it
+        }
+      } else {  // no resp turns
+        showFirstTurn();
+        setPlayButtonToPlay();
+      }
+    } else {
+      if (isDoRehearse()) {
+        if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded skip last (why?) " + currentTurn);
+      } else {  // ok, we're doing hear yourself, so make sure we set the first turn to be current and reset the play button state
+        showFirstTurn();
+        setPlayButtonToPlay();
       }
     }
   }

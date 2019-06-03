@@ -55,7 +55,9 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.OOVWordsAndUpdate;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.MIDDLE;
@@ -67,6 +69,9 @@ public class EditorTurn extends PlayAudioExercisePanel
     implements ITurnPanel, IRehearseView, IRecordingTurnPanel, IFocusListener, AddDeleteListener {
   private final Logger logger = Logger.getLogger("EditorTurn");
 
+  public static final String REALLY_AVOID_LONG_PHRASES = "Really avoid long phrases.";
+  public static final String AVOID_LONG_PHRASES = "Avoid long phrases.";
+
   private static final int TURN_WIDTH = 97;
   private static final int RIGHT_TURN_RIGHT_MARGIN = 153;
 
@@ -76,6 +81,10 @@ public class EditorTurn extends PlayAudioExercisePanel
   private final ExerciseController<?> controller;
   private final ITurnContainer<EditorTurn> turnContainer;
   private final int dialogID;
+
+  /**
+   * @see
+   */
   private String prev = "";
   private final ITurnContainer.COLUMNS columns;
   private final ITurnContainer.COLUMNS prevColumn;
@@ -123,6 +132,14 @@ public class EditorTurn extends PlayAudioExercisePanel
           "\n\taudio  " + clientExercise.getAudioAttributes()
       );
     }
+    this.prev = clientExercise.getForeignLanguage();
+
+    logger.info("EditorTurn : turn " +
+        "\n\tex     " + clientExercise.getID() + " prev '" +
+        prev +
+        "'"
+    );
+
     this.sessionManager = sessionManager;
 
     this.columns = columns;
@@ -132,7 +149,7 @@ public class EditorTurn extends PlayAudioExercisePanel
     this.isFirstTurn = isFirstTurn;
 
     this.turnAddDelete = new TurnAddDelete(this, 26);
-    this.editableTurnHelper = new EditableTurnHelper(controller.getLanguageInfo(), this, clientExercise.hasEnglishAttr(), clientExercise.getForeignLanguage(), this);
+    this.editableTurnHelper = new EditableTurnHelper(controller.getLanguageInfo(), clientExercise.hasEnglishAttr(), clientExercise.getForeignLanguage(), this);
     editableTurnHelper.setPlaceholder(turnContainer.isInterpreter(), columns);
 
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify) {
@@ -323,6 +340,7 @@ public class EditorTurn extends PlayAudioExercisePanel
     AudioAttribute latest = null;
     for (AudioAttribute audio : clientExercise.getAudioAttributes()) {
       if (latest == null || audio.getTimestamp() > latest.getTimestamp()) {
+        logger.info("getLatestAudio : latest now " + new Date(audio.getTimestamp()) + " " + audio.getUniqueID() + " " + audio.getAudioRef());
         latest = audio;
       }
     }
@@ -434,35 +452,32 @@ public class EditorTurn extends PlayAudioExercisePanel
   public void gotKey(KeyUpEvent event) {
     NativeEvent ne = event.getNativeEvent();
 
-    String s = editableTurnHelper.getContent();
+    String content = editableTurnHelper.getContent();
     if (ne.getKeyCode() == KeyCodes.KEY_ENTER) {
       ne.preventDefault();
       ne.stopPropagation();
 
-      logger.info("gotKey : got enter on " + this.getExID() + " : " + columns);
+      if (DEBUG) logger.info("gotKey : got enter on " + this.getExID() + " : " + columns);
 
-      if (s.equals(prev)) {
+      if (content.equals(prev)) {
         turnContainer.gotForward(this);
       } else {
-        prev = s;
+        prev = content;
         int audioID = getAudioID();
         logger.info("gotBlur " + getExID() + " = " + prev + " audio id " + audioID);
-        updateText(s, this, audioID, true);
+        updateText(content, this, audioID, true);
       }
     } else {
-      int length = s.split(" ").length;
+      int length = content.split(" ").length;
       //  logger.info("num tokens " + length);
 
       if (length > 10) {
-        //contentTextBox.getElement().getStyle().setBackgroundColor("red");
         editableTurnHelper.setBackgroundColor("red");
-        turnFeedback.setText("Really avoid long phrases.");
+        turnFeedback.setText(REALLY_AVOID_LONG_PHRASES);
       } else if (length > 7) {
-        // contentTextBox.getElement().getStyle().setBackgroundColor("yellow");
         editableTurnHelper.setBackgroundColor("yellow");
-        turnFeedback.setText("Avoid long phrases.");
+        turnFeedback.setText(AVOID_LONG_PHRASES);
       } else {
-        //  contentTextBox.getElement().getStyle().setBackgroundColor("white");
         editableTurnHelper.setBackgroundColor("white");
         turnFeedback.setText("");
       }
@@ -475,14 +490,23 @@ public class EditorTurn extends PlayAudioExercisePanel
    */
   public void gotBlur() {
     turnContainer.gotBlur(this);
-    String s = editableTurnHelper.getContent();//SimpleHtmlSanitizer.sanitizeHtml(contentTextBox.getText()).asString();
-    if (s.equals(prev)) {
+    String content = editableTurnHelper.getContent();
+    if (content.equals(prev)) {
       if (DEBUG) logger.info("gotBlur " + getExID() + " skip unchanged " + prev);
     } else {
-      prev = s;
+
       int audioID = getAudioID();
-      if (DEBUG) logger.info("gotBlur " + getExID() + " = " + prev + " audio " + audioID);
-      updateText(s, this, audioID, false);
+
+      if (DEBUG || true) logger.info("gotBlur " + getExID() +
+          "\n\tprev " + prev +
+          "\n\traw  " + editableTurnHelper.getContent() +
+          "\n\tsan  " + content +
+          " audio " + audioID);
+
+      prev = content;
+
+
+      updateText(content, this, audioID, false);
     }
   }
 
@@ -490,11 +514,10 @@ public class EditorTurn extends PlayAudioExercisePanel
     int projectID = controller.getProjectID();
     if (projectID != -1) {
       final int exID = getExID();
-
-      logger.info("updateText : Checking " + s + " on " + projectID + " for " + exID);
+      logger.info("updateText : Checking '" + s + "' on " + projectID + " for " + exID);
 
       // talk to the audio service first to determine the oov
-      controller.getAudioService().isValid(projectID, exID, s, new AsyncCallback<OOVWordsAndUpdate>() {
+      controller.getAudioService().isValid(projectID, exID, getSanitized(s), new AsyncCallback<OOVWordsAndUpdate>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("isValid on text...", caught);
@@ -509,14 +532,20 @@ public class EditorTurn extends PlayAudioExercisePanel
 
           showOOVResult(result);
 
-          updateTextViaExerciseService(projectID, exID, audioID, s, moveToNextTurn, outer);
+          updateTextViaExerciseService(projectID, exID, audioID, s, result.getNormalizedText(), moveToNextTurn, outer);
         }
       });
     }
   }
 
-  private void updateTextViaExerciseService(int projectID, int exID, int audioID, String s, boolean moveToNextTurn, EditorTurn outer) {
-    controller.getExerciseService().updateText(projectID, dialogID, exID, audioID, s, new AsyncCallback<OOVWordsAndUpdate>() {
+  private String getSanitized(String s) {
+    return editableTurnHelper.getSanitized(s);
+  }
+
+  private void updateTextViaExerciseService(int projectID, int exID, int audioID, String s, String norm, boolean moveToNextTurn, EditorTurn outer) {
+    String sanitized = getSanitized(s);
+    logger.info("update : " + s + ", sanitized " + sanitized + " norm " + norm + " audio id " + audioID);
+    controller.getExerciseService().updateText(projectID, dialogID, exID, audioID, sanitized, norm, new AsyncCallback<OOVWordsAndUpdate>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("updating text...", caught);
@@ -528,7 +557,22 @@ public class EditorTurn extends PlayAudioExercisePanel
       @Override
       public void onSuccess(OOVWordsAndUpdate result) {
         // showOOVResult(result);
-        logger.info("OK, update was " + result);
+        logger.info("updateTextViaExerciseService : OK, update was " + result);
+        if (result.isDidUpdate()) {
+          Set<Integer> singleton = new HashSet<>();
+          singleton.add(exID);
+          controller.getAudioService().refreshExercises(projectID, singleton, new AsyncCallback<Void>() {
+            @Override
+            public void onFailure(Throwable caught) {
+              controller.handleNonFatalError("refreshing exercise on hydra", caught);
+            }
+
+            @Override
+            public void onSuccess(Void result) {
+              logger.info("updateTextViaExerciseService : OK, updated " + exID + " on hydra/hydra2 for " + s);
+            }
+          });
+        }
         if (moveToNextTurn) {
           turnContainer.gotForward(outer);
         }
@@ -546,10 +590,8 @@ public class EditorTurn extends PlayAudioExercisePanel
   }
 
   private int getAudioID() {
-    // logger.info("has " + clientExercise.getAudioAttributes().size() + " audio attributes...");
-    Collection<AudioAttribute> audioAttributes = clientExercise.getAudioAttributes();
-   // logger.info("getAudioID : audio attr " + audioAttributes);
-    return audioAttributes.isEmpty() ? -1 : audioAttributes.iterator().next().getUniqueID();
+    AudioAttribute latestAudio = getLatestAudio();
+    return latestAudio == null ? -1 : latestAudio.getUniqueID();
   }
 
   /**
@@ -649,10 +691,13 @@ public class EditorTurn extends PlayAudioExercisePanel
    */
   @Override
   public void useResult(AudioAnswer audioAnswer) {
-    //  logger.info("useResult got " + audioAnswer);
+    logger.info("useResult got " + audioAnswer);
 
     if (audioAnswer.isValid()) {
       turnFeedback.setHTML("");
+
+      // so if we had any audio previously recorded, tell netprof z instance to forget about it
+      int previousAudioID = getAudioID();
 
       AudioAttribute audioAttribute = audioAnswer.getAudioAttribute();
 
@@ -667,15 +712,14 @@ public class EditorTurn extends PlayAudioExercisePanel
 
       ((Button) getPlayButton()).setType(ButtonType.SUCCESS);
 
-      tellNetprofAudioHasChanged(audioAttribute.getUniqueID());
-
+      tellNetprofAudioHasChanged(audioAttribute.getUniqueID(), previousAudioID);
     } else {
       turnFeedback.setHTML(audioAnswer.getValidity().getPrompt());
     }
   }
 
-  private void tellNetprofAudioHasChanged(int id) {
-    controller.getExerciseService().refreshAudio(getExID(), new AsyncCallback<Void>() {
+  private void tellNetprofAudioHasChanged(int id, int previousAudioID) {
+    controller.getExerciseService().refreshAudio(controller.getProjectID(), getExID(), previousAudioID, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("refresh audio for " + getExID(), caught);
@@ -683,7 +727,7 @@ public class EditorTurn extends PlayAudioExercisePanel
 
       @Override
       public void onSuccess(Void result) {
-        logger.info("tellNetprofAudioHasChanged : refreshed audio for " + getExID() + " and audio id " + id);
+        logger.info("tellNetprofAudioHasChanged : refreshed audio for ex #" + getExID() + " and audio id " + id);
       }
     });
   }

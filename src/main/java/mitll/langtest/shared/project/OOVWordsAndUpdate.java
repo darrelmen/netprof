@@ -30,7 +30,6 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import mitll.langtest.shared.exercise.OOV;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -43,6 +42,7 @@ public class OOVWordsAndUpdate implements IsSerializable {
   private boolean didUpdate = false;
   private boolean isPossible = true;
   private boolean foundExercise = true;
+  private String normalizedText;
 
   public OOVWordsAndUpdate() {
   }
@@ -56,12 +56,14 @@ public class OOVWordsAndUpdate implements IsSerializable {
    * @param name
    * @param first
    * @param secondType
+   * @param normText
    * @see mitll.langtest.server.audio.AudioFileHelper#checkAllExercises
    */
-  public OOVWordsAndUpdate(boolean didUpdate, Set<String> oov, boolean isPossible) {
+  public OOVWordsAndUpdate(boolean didUpdate, Set<String> oov, boolean isPossible, String normText) {
     this.didUpdate = didUpdate;
     this.oov = oov;
     this.isPossible = isPossible;
+    this.normalizedText = normText;
   }
 
   public Set<String> getOov() {
@@ -85,9 +87,14 @@ public class OOVWordsAndUpdate implements IsSerializable {
     return foundExercise;
   }
 
+  public String getNormalizedText() {
+    return normalizedText;
+  }
+
   public String toString() {
     return "OOVWordsAndUpdate : " +
         "\n\toov        " + getOov() +
+        "\n\tnorm       " + getNormalizedText() +
         "\n\tdidUpdate  " + isDidUpdate() +
         "\n\tisPossible " + isPossible() +
         "\n\tisFound    " + isFoundExercise()

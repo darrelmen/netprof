@@ -37,9 +37,9 @@ import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.project.Project;
+import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
-import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -649,9 +649,12 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @param exid
    * @param audioID
    * @param content
+   * @param normalized
+   * @param refResultDAO
    * @return
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#updateText(int, int, int, int, String, String)
    */
-  public OOVWordsAndUpdate updateText(Project project, int dialogID, int exid, int audioID, String content) {
+  public OOVWordsAndUpdate updateText(Project project, int dialogID, int exid, int audioID, String content, String normalized, IRefResultDAO refResultDAO) {
     CommonExercise exerciseByID = project.getExerciseByID(exid);
     if (exerciseByID == null) {
       logger.error("updateText " + "can't find " + exid);
@@ -661,6 +664,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       content = getTrim(content);
 
       exerciseByID.getMutable().setForeignLanguage(content);
+      exerciseByID.getMutable().setNormalizedFL(normalized);
 
       boolean update = project.getExerciseDAO().update(exerciseByID);
 
@@ -674,36 +678,43 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
         if (dialog == null) {
           logger.warn("updateText can't find dialog ID " + dialogID);
         } else {
-          List<ClientExercise> collect1 = dialog.getExercises().stream().filter(exercise -> exercise.getID() == exid).collect(Collectors.toList());
-          if (collect1.isEmpty()) {
-            collect1 = dialog.getCoreVocabulary().stream().filter(exercise -> exercise.getID() == exid).collect(Collectors.toList());
+          ClientExercise exByID = dialog.getExByID(exid);
+          boolean isTurn = true;
+          if (exByID == null) {
+            isTurn = false;
+            exByID = dialog.getCoreByID(exid);
           }
 
-          if (collect1.isEmpty()) {
+          if (exByID == null) {
             logger.warn("updateText can't find ex id  " + exid);
           } else {
             // not really sure this is needed
-            CommonExercise commonExercise = collect1.get(0).asCommon();
-            commonExercise.getMutable().setForeignLanguage(content);
-            logger.info("updateText text on " + getExInfo(commonExercise));
 
-            project.getDialog(dialogID).getCoreVocabulary().forEach(ex->logger.info(getExInfo(ex)));
+            exByID.asCommon().getMutable().setForeignLanguage(content);
+            logger.info("updateText text on " + getExInfo(exByID));
+            logger.info("updateText after update : " + project.getExerciseByID(exid));
+
+            if (DEBUG) {
+              project.getDialog(dialogID).getCoreVocabulary().forEach(ex -> logger.info(getExInfo(ex)));
+            }
           }
 
-          if (audioID != -1) {  // maybe we have text before the audio...
+          if (audioID != -1 && isTurn) {  // maybe we have text before the audio...
             if (!audioDAO.updateTranscript(audioID, content)) {
               logger.warn("updateText didn't update audio id# " + audioID + " with " + content);
+            } else {
+              boolean b = refResultDAO.removeByAudioID(audioID);
+              if (!b) logger.warn("updateText : didn't delete the ref result for audio #" + audioID);
             }
           } else {
-            logger.info("updateText no audio id...");
+            logger.info("updateText no audio id : " + audioID);
           }
         }
-      }
-      else {
-        logger.warn("updateText didn't update " +exid + " with " + content);
+      } else {
+        logger.warn("updateText didn't update " + exid + " with " + content);
       }
 
-      return new OOVWordsAndUpdate(update, new HashSet<>(), project.getModelType() == ModelType.HYDRA);
+      return new OOVWordsAndUpdate(update, new HashSet<>(), project.getModelType() == ModelType.HYDRA, normalized);
     }
   }
 
@@ -736,12 +747,12 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
           commonExercise.getMutable().setEnglish(content);
           logger.info("updateEnglishText text on " + getExInfo(commonExercise));
 
-          project.getDialog(dialogID).getCoreVocabulary().forEach(ex->logger.info(getExInfo(ex)));
+          project.getDialog(dialogID).getCoreVocabulary().forEach(ex -> logger.info(getExInfo(ex)));
 
           return true;
         }
       } else {
-        logger.warn("updateEnglishText didn't update " +exid + " with " + content);
+        logger.warn("updateEnglishText didn't update " + exid + " with " + content);
         return false;
       }
     }

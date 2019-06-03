@@ -77,7 +77,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    */
   private static final String DELETE_AUDIO = "Delete Audio";
   private static final String DELETE_THIS_AUDIO_CUT = "Delete this audio cut.";
-  private static final String TRANSLITERATION = "Transliteration";
+ // private static final String TRANSLITERATION = "Transliteration";
 
   private static final String MARK_FIXED_TOOLTIP = "Mark item as fixed, removed defective audio, and remove item from the review list.";
 
@@ -517,7 +517,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
         @Override
         public void onSuccess(Void result) {
           widgets.getParent().setVisible(false);
-          controller.getExerciseService().refreshAudio(exercise.getID(), new AsyncCallback<Void>() {
+          controller.getExerciseService().refreshAudio(controller.getProjectID(), exercise.getID(), audio.getUniqueID(), new AsyncCallback<Void>() {
             @Override
             public void onFailure(Throwable caught) {
               controller.handleNonFatalError("refresh audio for " + exercise.getID(), caught);
@@ -903,11 +903,13 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
      */
     @Override
     protected Widget getAfterPlayWidget() {
+      int projectID = controller.getProjectID();
+      final AudioAttribute audioAttribute = getAudioAttribute();
       ClickHandler handler = event -> {
         deleteButton.setEnabled(false);
         int id = exercise.getID();
-        logger.info("marking audio defect for " + getAudioAttribute() + " on " + id);
-        controller.getQCService().markAudioDefect(getAudioAttribute(), exercise, new AsyncCallback<Void>() {    // delete comment too?
+        logger.info("marking audio defect for " + audioAttribute + " on " + id);
+        controller.getQCService().markAudioDefect(audioAttribute, exercise, new AsyncCallback<Void>() {    // delete comment too?
           @Override
           public void onFailure(Throwable caught) {
             controller.getMessageHelper().handleNonFatalError(MARKING_AUDIO_DEFECT, caught);
@@ -917,7 +919,8 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
           public void onSuccess(Void result) {
             getWaveform().setVisible(false);
             setEnabled(false);
-            controller.getExerciseService().refreshAudio(id, new AsyncCallback<Void>() {
+            int previousAudioID = audioAttribute == null ? -1 : audioAttribute.getUniqueID();
+            controller.getExerciseService().refreshAudio(projectID, id, previousAudioID, new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable caught) {
 
@@ -925,7 +928,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
 
               @Override
               public void onSuccess(Void result) {
-                logger.info("refresh audio defect for " + getAudioAttribute() + " on " + id);
+                logger.info("refresh audio defect for " + audioAttribute + " on " + id);
               }
             });
             if (comment != null) {
@@ -936,7 +939,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
       };
 
       deleteButton = getDeleteButton(DELETE_THIS_AUDIO_CUT, handler);
-      if (getAudioAttribute() == null) deleteButton.setEnabled(false);
+      if (audioAttribute == null) deleteButton.setEnabled(false);
       return deleteButton;
     }
 

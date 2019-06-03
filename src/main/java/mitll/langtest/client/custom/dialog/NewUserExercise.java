@@ -621,7 +621,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
         newUserExercise.getID(), new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
-
+            controller.handleNonFatalError("refreshing exercise", caught);
           }
 
           @Override

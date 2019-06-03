@@ -152,7 +152,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     super.showDialog(dialogID, dialog, child);
     if (dialog != null) {
       List<RefAudioGetter> refAudioGetters = new ArrayList<>(allTurns);
-      if (DEBUG) logger.info("showDialogGetRef : Get ref audio for " + refAudioGetters.size());
+      if (DEBUG || true) logger.info("showDialogGetRef : Get ref audio for " + refAudioGetters.size());
       getRefAudio(refAudioGetters.iterator());
     }
   }
@@ -709,7 +709,6 @@ public class ListenViewHelper<T extends ITurnPanel>
         boolean didPause = currentTurn.doPlayPauseToggle();
         if (didPause) {
           if (DEBUG_PLAY) logger.info("playCurrentTurn did pause " + blurb());
-          //setPlayButtonToPlay();
         } else {
           if (DEBUG_PLAY) {
             logger.info("playCurrentTurn maybe did play " + blurb());
@@ -740,7 +739,6 @@ public class ListenViewHelper<T extends ITurnPanel>
       if (DEBUG) {
         logger.info("playStarted - turn " + blurb());
       }
-      //setPlayButtonToPause();
       markCurrent();
     }
   }
@@ -759,18 +757,13 @@ public class ListenViewHelper<T extends ITurnPanel>
       if (DEBUG) {
         logger.info("playStopped for turn " + blurb());
       }
-
-      //setPlayButtonToPlay();
-
-//      if (isGotTurnClick()) {
-//        logger.info("playStopped ignore since click?");
-//      } else
       if (isSessionGoingNow()) {
         removeMarkCurrent();
         currentTurnPlayEnded();
       } else {
-        if (!isDoRehearse())
+        if (!isDoRehearse()) {
           logger.info("playStopped ignore since session has ended (via play button click)");
+        }
       }
     } else {
       logger.info("playStopped - no current turn.");

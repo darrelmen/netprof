@@ -137,7 +137,7 @@ public class WaveformPostAudioRecordButton extends PostAudioRecordButton {
     getWaveform().setUrl(WAIT_URL);
 
 
-    controller.getExerciseService().refreshAudio(getExerciseID(), new AsyncCallback<Void>() {
+    controller.getExerciseService().refreshAudio(controller.getProjectID(), getExerciseID(), -1, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
 

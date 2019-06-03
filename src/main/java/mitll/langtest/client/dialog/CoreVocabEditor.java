@@ -80,8 +80,8 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   }
 
   /**
-   * @see #getTurns(IDialog)
    * @param rowOne
+   * @see #getTurns(IDialog)
    */
   @Override
   protected void styleTurnContainer(DivWidget rowOne) {
@@ -100,8 +100,7 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   protected void addDialogHeader(IDialog dialog, Panel child) {
     if (!isInModal) {
       child.add(dialogHeader =
-          new DialogHeader(controller,
-              INavigation.VIEWS.CORE_EDITOR, isInModal ? null : getPrevView(), isInModal ? null : getNextView()).getHeader(dialog));
+          new DialogHeader(controller, INavigation.VIEWS.CORE_EDITOR, getPrevView(), getNextView()).getHeader(dialog));
     }
   }
 
@@ -281,11 +280,9 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
 
   @Override
   public void grabFocus() {
-    //if (!getAllTurns().isEmpty()) getAllTurns().iterator().next().grabFocus();
     if (getCurrentTurn() != null) {
       // logger.info("give focus to turn for ex #" + getCurrentTurn().getExID());
       getCurrentTurn().grabFocus();
-      // markCurrent();
     }
   }
 
