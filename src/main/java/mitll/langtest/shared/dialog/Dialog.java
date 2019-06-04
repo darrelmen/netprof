@@ -465,6 +465,15 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     return both;
   }
 
+  @Override
+  public List<ClientExercise> getBothExercisesAndCoreNoEmpty() {
+    List<ClientExercise> both = new ArrayList<>(coreVocabulary.size() + exercises.size());
+    both.addAll(exercises);
+    both.addAll(coreVocabulary);
+    both = both.stream().filter(clientExercise -> !clientExercise.getForeignLanguage().isEmpty()).collect(Collectors.toList());
+    return both;
+  }
+
   /**
    * TODO :remove?
    *

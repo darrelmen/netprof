@@ -544,8 +544,16 @@ public class EditorTurn extends PlayAudioExercisePanel
 
   private void updateTextViaExerciseService(int projectID, int exID, int audioID, String s, String norm, boolean moveToNextTurn, EditorTurn outer) {
     String sanitized = getSanitized(s);
-    logger.info("update : " + s + ", sanitized " + sanitized + " norm " + norm + " audio id " + audioID);
-    controller.getExerciseService().updateText(projectID, dialogID, exID, audioID, sanitized, norm, new AsyncCallback<OOVWordsAndUpdate>() {
+    String sanitized2 = getSanitized(norm);
+
+    logger.info("update : " +
+        "\n\tcontent   " + s +
+        "\n\tsanitized " + sanitized +
+        "\n\tnorm      " + norm +
+        "\n\tsanitized " + sanitized2 +
+        "\n\taudio id  " + audioID);
+
+    controller.getExerciseService().updateText(projectID, dialogID, exID, audioID, sanitized, sanitized2, new AsyncCallback<OOVWordsAndUpdate>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("updating text...", caught);

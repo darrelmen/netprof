@@ -217,8 +217,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    */
   protected TreeMap<TranscriptSegment, IHighlightSegment> showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
     if (alignmentOutput != null) {
-      if (currentAudioDisplayed != id) {
-        currentAudioDisplayed = id;
+      if (shouldDoMatch(id, alignmentOutput)) {
+        rememberMatch(id, alignmentOutput);
 
         if (DEBUG_SHOW_ALIGNMENT) {
           logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);

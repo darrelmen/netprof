@@ -88,7 +88,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
   private static final boolean DEBUG = false;
   static final boolean DEBUG_SHOW_ALIGNMENT = true;
   private static final boolean DEBUG_DETAIL = false;
-  private static final boolean DEBUG_MATCH = false;
+  private static final boolean DEBUG_MATCH = true;
 
   final boolean isRTL;
 
@@ -348,7 +348,8 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
     showAlignment(id, duration, alignmentFetcher.getAlignment(id));
   }
 
-  int currentAudioDisplayed = -1;
+  private int currentAudioDisplayed = -1;
+  private long alignmentTimestamp = -1;
 
   /**
    * TODO : don't do this twice!
@@ -363,8 +364,10 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
    */
   TreeMap<TranscriptSegment, IHighlightSegment> showAlignment(int id, long duration, AlignmentOutput alignmentOutput) {
     if (alignmentOutput != null) {
-      if (currentAudioDisplayed != id) {
-        currentAudioDisplayed = id;
+
+      if (shouldDoMatch(id, alignmentOutput)) {
+        rememberMatch(id, alignmentOutput);
+
         if (DEBUG_SHOW_ALIGNMENT) {
           logger.info("showAlignment for ex " + exercise.getID() + " audio id " + id + " : " + alignmentOutput);
         }
@@ -381,6 +384,15 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
         logger.warning("showAlignment no alignment info for " + this + " id " + id + " dur " + duration);
       return null;
     }
+  }
+
+  protected boolean shouldDoMatch(int id, AlignmentOutput alignmentOutput) {
+    return currentAudioDisplayed != id || alignmentTimestamp != alignmentOutput.getModified();
+  }
+
+  protected void rememberMatch(int id, AlignmentOutput alignmentOutput) {
+    currentAudioDisplayed = id;
+    alignmentTimestamp = alignmentOutput.getModified();
   }
 
   /**

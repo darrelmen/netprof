@@ -651,11 +651,11 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> extends Sear
     return s1.split(GoodwaveExercisePanel.SPACE_REGEX)[0].toLowerCase();
   }
 
-  public boolean isAreSegmentsClickable() {
+  private boolean isAreSegmentsClickable() {
     return areSegmentsClickable;
   }
 
-  public void setAreSegmentsClickable(boolean areSegmentsClickable) {
+  void setAreSegmentsClickable(boolean areSegmentsClickable) {
     this.areSegmentsClickable = areSegmentsClickable;
   }
 }

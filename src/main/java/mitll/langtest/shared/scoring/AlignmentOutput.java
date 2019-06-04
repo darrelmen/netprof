@@ -41,7 +41,7 @@ import java.util.Map;
  * Created by go22670 on 4/13/17.
  */
 public class AlignmentOutput implements IsSerializable {
-  protected long modified;
+  private long modified;
   private Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
 
   private boolean showPhoneScores;
@@ -85,5 +85,9 @@ public class AlignmentOutput implements IsSerializable {
   public String toString() {
     List<TranscriptSegment> transcriptSegments = sTypeToEndTimes.get(NetPronImageType.WORD_TRANSCRIPT);
     return transcriptSegments == null ? "NO_SEGMENTS?" : transcriptSegments.isEmpty() ? " EMPTY " : transcriptSegments.toString();
+  }
+
+  public long getModified() {
+    return modified;
   }
 }

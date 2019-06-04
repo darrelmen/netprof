@@ -328,7 +328,17 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
    */
   private void updateTextViaExerciseService(int projectID, int exID, String s, String normalized, boolean moveToNextTurn) {
     CoreEditorTurn outer = this;
-    controller.getExerciseService().updateText(projectID, dialogID, exID, -1, getSanitized(s), normalized, new AsyncCallback<OOVWordsAndUpdate>() {
+    String sanitized = getSanitized(s);
+    String sanitized2 = getSanitized(normalized);
+
+    logger.info("updateTextViaExerciseService " + exID +
+        "\n\tcontent    " + s +
+        "\n\tsanitized  " + sanitized +
+        "\n\tnormalized " + normalized +
+        "\n\tsanitized  " + sanitized2
+    );
+
+    controller.getExerciseService().updateText(projectID, dialogID, exID, -1, sanitized, sanitized2, new AsyncCallback<OOVWordsAndUpdate>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("updating text...", caught);
