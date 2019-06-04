@@ -59,6 +59,7 @@ public class PretestScore extends AlignmentAndScore {
   private String status = "";
   private String message = "";
   private float rawOverallScore;
+  private long modified;
 
   public PretestScore() {
   } // required for serialization
@@ -70,6 +71,7 @@ public class PretestScore extends AlignmentAndScore {
   public PretestScore(float score) {
     this.overallScore = score;
     ranNormally = false;
+    modified = System.currentTimeMillis();
   }
 
   /**
@@ -81,6 +83,7 @@ public class PretestScore extends AlignmentAndScore {
    * @param recoSentence
    * @param processDur
    * @param isFullMatch
+   * @param modified
    * @see mitll.langtest.server.scoring.ASRWebserviceScoring#getPretestScore
    */
   public PretestScore(float overallScore,
@@ -91,8 +94,8 @@ public class PretestScore extends AlignmentAndScore {
                       String recoSentence,
                       float wavFileLengthSeconds,
                       int processDur,
-                      boolean isFullMatch) {
-    super(sTypeToEndTimes, overallScore, isFullMatch);
+                      boolean isFullMatch, long modified) {
+    super(sTypeToEndTimes, overallScore, isFullMatch, modified);
     this.sTypeToImage = sTypeToImage;
     this.phoneScores = phoneScores;
     this.wordScores = wordScores;
@@ -100,10 +103,11 @@ public class PretestScore extends AlignmentAndScore {
     this.wavFileLengthSeconds = wavFileLengthSeconds;
     this.processDur = processDur;
     this.ranNormally = true;
+    this.modified = System.currentTimeMillis();
   }
 
   public AlignmentAndScore getSkinny() {
-    return new AlignmentAndScore(getTypeToSegments(), getOverallScore(), isFullMatch());
+    return new AlignmentAndScore(getTypeToSegments(), getOverallScore(), isFullMatch(), modified);
   }
 
   /**

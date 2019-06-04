@@ -85,7 +85,8 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
 
     // add record feedback
     {
-      recordFeedback = makePlayAudioPanel().getRecordFeedback(null);;//makeWaitCursor().getWaitCursor());
+      recordFeedback = makePlayAudioPanel().getRecordFeedback(null);
+      ;//makeWaitCursor().getWaitCursor());
       Style style = recordFeedback.getElement().getStyle();
       style.setMarginTop(7, Style.Unit.PX);
       style.setProperty("minWidth", CONTEXT_INDENT + "px");
@@ -161,7 +162,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
       }
 
       public void showPopupLater(String toShow) {
-      //  logger.info("showPopupLater target is " + outer.getElement().getId());
+        //  logger.info("showPopupLater target is " + outer.getElement().getId());
 
         super.showPopupDismissLater(toShow);
         showInvalidResultPopup(toShow);
@@ -180,7 +181,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
       @Override
       protected AudioType getAudioType() {
         AudioType audioType = outer.getAudioType();
-        logger.info("\n\n\n\ngetAudioType " + audioType);
+        logger.info("getAudioType ex " + exercise.getID() + " = " + audioType);
         return audioType;
       }
     };

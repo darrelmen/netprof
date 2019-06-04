@@ -324,8 +324,13 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
 
   public AlignmentAndScore getStudentAlignment(int projid, int resultID) {
     CorrectAndScore correctAndScoreForResult = db.getResultDAO().getCorrectAndScoreForResult(resultID, getProject(projid).getLanguageEnum());
+
+    if (correctAndScoreForResult != null) {
+      logger.info("getStudentAlignment " + resultID + " = " + new Date(correctAndScoreForResult.getTimestamp()));
+    }
+
     return correctAndScoreForResult == null ? null :
-        new AlignmentAndScore(correctAndScoreForResult.getScores(), correctAndScoreForResult.getScore(), true);
+        new AlignmentAndScore(correctAndScoreForResult.getScores(), correctAndScoreForResult.getScore(), true, correctAndScoreForResult.getTimestamp());
   }
 
   /**
@@ -425,7 +430,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
           getTypeToTranscriptEvents(jsonObject, USE_PHONE_TO_DISPLAY, language);
       Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = transcriptSegmentGenerator.getTypeToSegments(typeToTranscriptEvents, language);
 //    logger.info("getCachedAudioRef : cache HIT for " + audioID + " returning " + typeToSegments);
-      idToAlignment.put(audioID, new AlignmentAndScore(typeToSegments, cachedResult.getPronScore(), true));
+      idToAlignment.put(audioID, new AlignmentAndScore(typeToSegments, cachedResult.getPronScore(), true, precalcScores.getModified()));
     }
   }
 

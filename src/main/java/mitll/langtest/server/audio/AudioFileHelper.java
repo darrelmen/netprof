@@ -1155,7 +1155,7 @@ public class AudioFileHelper implements AlignDecode {
           OOVInfo oovInfo = audioFileHelper.checkOOV(Collections.singleton(customOrPredefExercise), true);
           logger.info("Got back " + oovInfo);
 
-          if (oovInfo.getUnsafe().contains(customOrPredefExercise)) {
+          if (oovInfo.getUnsafe().contains(customOrPredefExercise) || customOrPredefExercise.getForeignLanguage().isEmpty()) {
             logger.info("recalcRefAudioWithHelper : STILL ex " + byID.getExid() + " is not safe to decode.");
             return new PretestScore();
           } else {
@@ -1986,8 +1986,8 @@ public class AudioFileHelper implements AlignDecode {
             (kaldi ? "\n\tKALDI : " : "") +
             "" + testAudioFile +
             "\n\twith sentence '" + sentence + "'" +
-//        "\n\treq# " + reqid +
             (prefix.isEmpty() ? "" : " prefix " + prefix)
+       // , new Exception("Got request")
     );
 
 

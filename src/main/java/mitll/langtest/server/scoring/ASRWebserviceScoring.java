@@ -582,7 +582,7 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           getRecoSentence(eventAndFileInfo),
           (float) duration,
           processDur,
-          isMatch(result, typeToSegments));
+          isMatch(result, typeToSegments), System.currentTimeMillis());
 
       if (useKaldi) {
         hackOverallScoreForKaldi(overallScore, pretestScore);

@@ -44,8 +44,14 @@ public class AlignmentAndScore extends AlignmentOutput {
   public AlignmentAndScore() {
   }
 
-  public AlignmentAndScore(Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes, float hydecScore, boolean isFullMatch) {
-    super(sTypeToEndTimes);
+  /**
+   * @param sTypeToEndTimes
+   * @param hydecScore
+   * @param isFullMatch
+   * @param modified
+   */
+  public AlignmentAndScore(Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes, float hydecScore, boolean isFullMatch, long modified) {
+    super(sTypeToEndTimes, modified);
     this.overallScore = hydecScore;
     this.fullMatch = isFullMatch;
   }
@@ -60,5 +66,9 @@ public class AlignmentAndScore extends AlignmentOutput {
 
   public boolean isFullMatch() {
     return fullMatch;
+  }
+
+  public String toString() {
+    return "score " + overallScore + " match " + fullMatch + " : " + super.toString();
   }
 }

@@ -29,6 +29,8 @@
 
 package mitll.langtest.server.database.result;
 
+import java.util.Date;
+
 /**
  * Created by go22670 on 4/13/17.
  */
@@ -38,6 +40,7 @@ public class SlimResult implements ISlimResult {
   private transient String jsonScore;
   private final int exID;
   private final int audioID;
+  private final long modified;
 
   /**
    * @param exID
@@ -45,14 +48,16 @@ public class SlimResult implements ISlimResult {
    * @param valid
    * @param jsonScore
    * @param pronScore
+   * @param modified
    * @see mitll.langtest.server.database.refaudio.SlickRefResultDAO#fromSlickToSlim
    */
-  public SlimResult(int exID, int audioID, boolean valid, String jsonScore, float pronScore) {
+  public SlimResult(int exID, int audioID, boolean valid, String jsonScore, float pronScore, long modified) {
     this.exID = exID;
     this.audioID = audioID;
     this.valid = valid;
     this.jsonScore = jsonScore;
     this.pronScore = pronScore;
+    this.modified = modified;
   }
 
   public boolean isValid() {
@@ -87,11 +92,17 @@ public class SlimResult implements ISlimResult {
     return exID;
   }
 
+  @Override
+  public long getModified() {
+    return modified;
+  }
+
   public String toString() {
     return
         "ex " + exID +
             "\n\taudio     " + audioID +
             "\n\tscore     " + pronScore +
+            "\n\tmodified  " + new Date(modified) +
             "\n\tjsonScore " + jsonScore;
   }
 }

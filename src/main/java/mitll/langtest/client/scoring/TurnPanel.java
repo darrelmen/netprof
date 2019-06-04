@@ -84,7 +84,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
                    ITurnContainer.COLUMNS columns,
                    ITurnContainer.COLUMNS prevColumn,
                    boolean rightJustify) {
-    super(clientExercise, controller, listContainer, alignments, listenView);
+    super(clientExercise, controller, listContainer, alignments, listenView, false);
 
     if (columns == ITurnContainer.COLUMNS.MIDDLE) {
       if (prevColumn == ITurnContainer.COLUMNS.RIGHT) {

@@ -98,7 +98,7 @@ public class CorrectAndScore extends ExerciseIDAndScore implements Comparable<Co
   }
 
   public long getTimestamp() {
-    return timestamp;
+    return super.getTimestamp();
   }
 
   public String getPath() {

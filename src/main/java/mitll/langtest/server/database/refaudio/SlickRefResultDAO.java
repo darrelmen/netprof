@@ -312,7 +312,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
 //      logger.info("fromSlickToSlim : slickRef " + slickRef + " not valid " + alignScore + " score " + scoreJson);
     }
 
-    return new SlimResult(slickRef.exid(), slickRef.audioid(), validAlignJSON, scoreJson, alignScore);
+    return new SlimResult(slickRef.exid(), slickRef.audioid(), validAlignJSON, scoreJson, alignScore, slickRef.modified().getTime());
   }
 
   @Override
@@ -397,7 +397,7 @@ public class SlickRefResultDAO extends BaseRefResultDAO implements IRefResultDAO
           getTypeToTranscriptEvents(jsonObject, USE_PHONE_TO_DISPLAY, language);
       Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = transcriptSegmentGenerator.getTypeToSegments(typeToTranscriptEvents, language);
 //    logger.info("getCachedAudioRef : cache HIT for " + audioID + " returning " + typeToSegments);
-      idToAlignment.put(audioID, new AlignmentAndScore(typeToSegments, cachedResult.getPronScore(), true));
+      idToAlignment.put(audioID, new AlignmentAndScore(typeToSegments, cachedResult.getPronScore(), true, cachedResult.getModified()));
     }
   }
 

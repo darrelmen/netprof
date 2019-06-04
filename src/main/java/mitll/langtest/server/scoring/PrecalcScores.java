@@ -202,7 +202,7 @@ public class PrecalcScores {
     }
   }
 
-  public static boolean shouldSkip(String event) {
+  static boolean shouldSkip(String event) {
     return event.equals("sil") || event.equals("<s>") || event.equals("</s>");
   }
 
@@ -233,7 +233,7 @@ public class PrecalcScores {
     return didRunNormally;
   }
 
-//  public void setDidRunNormally(boolean didRunNormally) {
-//    this.didRunNormally = didRunNormally;
-//  }
+  public long getModified() {
+    return precalcResult == null ? 0 : precalcResult.getModified();
+  }
 }

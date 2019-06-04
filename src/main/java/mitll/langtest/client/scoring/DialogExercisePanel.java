@@ -86,7 +86,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
   List<IHighlightSegment> flclickables = null;
 
   private static final boolean DEBUG = false;
-  static final boolean DEBUG_SHOW_ALIGNMENT = false;
+  static final boolean DEBUG_SHOW_ALIGNMENT = true;
   private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_MATCH = false;
 
@@ -109,6 +109,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
    * @param commonExercise for this exercise
    * @param controller
    * @param alignments
+   * @param useCache
    * @see mitll.langtest.client.exercise.ExercisePanelFactory#getExercisePanel
    * @see mitll.langtest.client.custom.content.NPFHelper#getFactory
    * @see mitll.langtest.client.custom.dialog.EditItem#setFactory
@@ -118,7 +119,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
                       final ExerciseController<T> controller,
                       final ListInterface<?, ?> listContainer,
                       Map<Integer, AlignmentOutput> alignments,
-                      IListenView listenView) {
+                      IListenView listenView, boolean useCache) {
     this.exercise = commonExercise;
     this.controller = controller;
     this.listenView = listenView;
@@ -139,7 +140,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
       @Override
       public void audioChangedWithAlignment(int id, long duration) {
       }
-    });
+    }, useCache);
     Style style = getElement().getStyle();
     style.setCursor(Style.Cursor.POINTER);
     getElement().setId("DialogExercisePanel_" + getExID());
@@ -300,7 +301,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
     alignmentFetcher.getRefAudio(listener);
   }
 
-  Set<Integer> getReqAudio() {
+  Map<Integer, Long> getReqAudio() {
     return alignmentFetcher.getAllReqAudioIDs();
   }
 

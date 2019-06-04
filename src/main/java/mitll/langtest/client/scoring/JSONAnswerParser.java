@@ -105,16 +105,20 @@ class JSONAnswerParser {
       JSONValue jsonValue = jsonObject.get(ISFULLMATCH);
       boolean isFullMatch = jsonValue == null || jsonValue.isBoolean().booleanValue();
 
+      // for now the datestamp not absolutely necessary?
       PretestScore pretestScore = new PretestScore(score, new HashMap<>(),
           new HashMap<>(),
           new HashMap<>(),
           sTypeToEndTimes, "", wavFileLengthSeconds,
-          0, isFullMatch);
+          0, isFullMatch,
+
+          System.currentTimeMillis() // for now the datestamp not absolutely necessary?
+      );
 
       converted.setPretestScore(pretestScore);
 
       AudioAttribute audioAttribute = new AudioAttribute(getIntField(jsonObject, "audioID"), converted.getPath());
-  //    logger.info("getAudioAnswer got back " + audioAttribute);
+      //    logger.info("getAudioAnswer got back " + audioAttribute);
       converted.setAudioAttribute(audioAttribute);
     } else {
       logger.info("getAudioAnswer invalid : " + jsonObject);

@@ -40,9 +40,7 @@ import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Logger;
 
 public class AlignmentFetcher {
@@ -63,6 +61,7 @@ public class AlignmentFetcher {
   private int req;
   private final AudioChangeListener audioChangeListener;
   private final AudioChangeListener contextChangeListener;
+  private boolean useCache = true;
 
   /**
    * @param exerciseID
@@ -71,6 +70,7 @@ public class AlignmentFetcher {
    * @param alignments
    * @param audioChangeListener
    * @param contextChangeListener
+   * @param useCache
    * @see DialogExercisePanel#DialogExercisePanel
    */
   AlignmentFetcher(final int exerciseID,
@@ -78,13 +78,14 @@ public class AlignmentFetcher {
                    final ListInterface<?, ?> listContainer,
                    Map<Integer, AlignmentOutput> alignments,
                    AudioChangeListener audioChangeListener,
-                   AudioChangeListener contextChangeListener) {
+                   AudioChangeListener contextChangeListener, boolean useCache) {
     this.exerciseID = exerciseID;
     this.controller = controller;
     this.listContainer = listContainer;
     this.alignments = alignments;
     this.audioChangeListener = audioChangeListener;
     this.contextChangeListener = contextChangeListener;
+    // this.useCache = useCache;
   }
 
   /**
@@ -98,15 +99,16 @@ public class AlignmentFetcher {
 //    AudioAttribute contextAudioAttr = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
 //    int contextRefID = contextAudioAttr != null ? contextAudioAttr.getUniqueID() : -1;
 
-    Set<Integer> req = getReqAudioIDs();
+    Map<Integer, Long> audioIDToModified = getReqAudioIDs();
+    Set<Integer> req = new HashSet<>(audioIDToModified.keySet());
     int before = req.size();
-    Set<Integer> knownIDs = getKnownIDs(req);
+    Set<Integer> knownIDs = getKnownIDs(audioIDToModified);
 
     if (DEBUG) {
       logger.info("getRefAudio asking for" +
               "\n\texercise  " + exerciseID + //" : " +
               "\n\tbefore    " + before +
-              "\n\tafter     " + req.size()
+              "\n\tafter     " + audioIDToModified.size()
           // +
           //           "\n\taudio     " + contextAudioAttr// +
 //            "\n\talignment " + contextAudioAttr
@@ -122,8 +124,8 @@ public class AlignmentFetcher {
 
     if (req.isEmpty()) {
       if (DEBUG) {
-        logger.info("getRefAudio for " + exerciseID + " already has alignments for audio #" + refID + " = " + alignments.containsKey(refID));
-        logger.info("getRefAudio already has alignments for context " + contextRefID + " " + alignments.containsKey(contextRefID));
+        logger.info("getRefAudio for " + exerciseID + " already has alignments for audio #" + refID + " = " + isCached(refID));
+        logger.info("getRefAudio already has alignments for context " + contextRefID + " " + isCached(contextRefID));
       }
 
       //registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
@@ -149,7 +151,7 @@ public class AlignmentFetcher {
         if (needToShowContextRef) { // means it was already shown just now
           req.remove(contextRefID);
         }
-        if (DEBUG) logger.info("getRefAudio for " + exerciseID + " now " + req.size());
+        if (DEBUG) logger.info("getRefAudio for " + exerciseID + " now " + req.size() + " requests");
       }
       req.removeAll(knownIDs);
       if (DEBUG) logger.info("getRefAudio for " + exerciseID + " after removing known. now " + req.size());
@@ -176,7 +178,10 @@ public class AlignmentFetcher {
     return currentAudioAttr == null ? -1 : currentAudioAttr.getUniqueID();
   }
 
-  Set<Integer> getReqAudioIDs() {
+  /**
+   * @return
+   */
+  private Map<Integer, Long> getReqAudioIDs() {
     AudioAttribute currentAudioAttr = playAudio == null ? null : playAudio.getCurrentAudioAttr();
     int refID = currentAudioAttr == null ? -1 : currentAudioAttr.getUniqueID();
 
@@ -193,8 +198,10 @@ public class AlignmentFetcher {
   }
 
   @NotNull
-  private Set<Integer> getReqAudioIDs(AudioAttribute currentAudioAttr, int refID, AudioAttribute contextAudioAttr, int contextRefID) {
-    Set<Integer> req = new HashSet<>();
+  private Map<Integer, Long> getReqAudioIDs(AudioAttribute currentAudioAttr, int refID, AudioAttribute contextAudioAttr, int contextRefID) {
+    Map<Integer, Long> audioIDToModified = new HashMap<>();
+
+    //Set<Integer> req = new HashSet<>();
     if (refID != -1) {
       if (DEBUG) {
         logger.info("getReqAudioIDs asking for" +
@@ -205,11 +212,13 @@ public class AlignmentFetcher {
             //    "\n\tisMale " + currentAudioAttr.getUser().isMale()
         );
       }
-      if (addToRequest(currentAudioAttr)) req.add(currentAudioAttr.getUniqueID());
+      //if (addToRequest(currentAudioAttr))
+      audioIDToModified.put(currentAudioAttr.getUniqueID(), currentAudioAttr.getTimestamp());
 
       Set<AudioAttribute> allPossible = playAudio.getAllPossible();
       allPossible.forEach(audioAttribute -> {
-        if (addToRequest(audioAttribute)) req.add(audioAttribute.getUniqueID());
+        //if (addToRequest(audioAttribute))
+        audioIDToModified.put(audioAttribute.getUniqueID(), audioAttribute.getTimestamp());
       });
     }
     //else {
@@ -226,15 +235,15 @@ public class AlignmentFetcher {
             "\n\tisMale " + contextAudioAttr.isMale()
         );
       }
-      if (addToRequest(contextAudioAttr)) {
-        req.add(contextRefID);
+      // if (addToRequest(contextAudioAttr)) {
+      audioIDToModified.put(contextRefID, contextAudioAttr.getTimestamp());
 
-        if (DEBUG) {
-          logger.info("getReqAudioIDs added context" +
-              "\n\taudio #" + contextRefID
-          );
-        }
+      if (DEBUG) {
+        logger.info("getReqAudioIDs added context" +
+            "\n\taudio #" + contextRefID
+        );
       }
+      //  }
 
       Set<AudioAttribute> allPossible = contextPlay.getAllPossible();
 
@@ -244,20 +253,20 @@ public class AlignmentFetcher {
         );
       }
       allPossible.forEach(audioAttribute -> {
-        if (addToRequest(audioAttribute)) {
-          req.add(audioAttribute.getUniqueID());
-        } else {
-          if (DEBUG) {
-            logger.info("getReqAudioIDs  context" +
-                "\n\taudio " + audioAttribute.getUniqueID() + " " + audioAttribute.getAudioType() + " not added to request."
-            );
-          }
-        }
+        // if (addToRequest(audioAttribute)) {
+        audioIDToModified.put(audioAttribute.getUniqueID(), audioAttribute.getTimestamp());
+//        } else {
+//          if (DEBUG) {
+//            logger.info("getReqAudioIDs  context" +
+//                "\n\taudio " + audioAttribute.getUniqueID() + " " + audioAttribute.getAudioType() + " not added to request."
+//            );
+//          }
+//        }
       });
     } else {
       // logger.warning("getRefAudio no context audio for " + exerciseID + " : has context widget " + (contextPlay != null));
     }
-    return req;
+    return audioIDToModified;
   }
 
   /**
@@ -273,58 +282,19 @@ public class AlignmentFetcher {
   }
 
   /**
-   * Is the alignment already known and attached?
-   *
-   * @param currentAudioAttr
-   * @return
-   * @see #getRefAudio(RefAudioListener)
-   */
-  private boolean addToRequest(AudioAttribute currentAudioAttr) {
-/*    int refID = currentAudioAttr.getUniqueID();
-    if (alignments.containsKey(refID)) {
-      if (DEBUG)
-        logger.info("addToRequest found " + refID + " " + currentAudioAttr.getAudioType() + " : " + alignments.get(refID));
-
-
-      return false;
-    } else {
-      AlignmentOutput alignmentOutput = currentAudioAttr.getAlignmentOutput();
-      if (alignmentOutput == null) {
-        if (DEBUG)
-          logger.info("addToRequest nope - no alignment for audio " + refID + " " + currentAudioAttr.getAudioType());
-        return true;
-      } else {
-        if (DEBUG)
-          logger.info("addToRequest remember audio " + refID + " " + alignmentOutput + " " + currentAudioAttr.getAudioType());
-        rememberAlignment(refID, alignmentOutput);
-        return false;
-      }
-    }*/
-    return true;
-  }
-
-  /**
    * @param refID
    * @param alignmentOutput
    * @see #addToRequest
    */
   void rememberAlignment(int refID, AlignmentOutput alignmentOutput) {
     if (DEBUG) {
-      if (alignments.containsKey(refID)) {
+      if (isCached(refID)) {
         logger.info("rememberAlignment : already has alignment for " + refID);
       }
     }
     alignments.put(refID, alignmentOutput);
   }
 
-  /**
-   * @param refID
-   * @return
-   * @see DialogExercisePanel#audioChanged(int, long)
-   */
-  public AlignmentOutput getAlignment(int refID) {
-    return alignments.get(refID);
-  }
 
   /**
    * TODO : how can we not know what to show? -- how can needToShowContextRef = false???
@@ -349,7 +319,8 @@ public class AlignmentFetcher {
     final boolean needToShowContextRef = req.contains(contextRefID);
 
     if (DEBUG) {
-      logger.info("getAlignments asking scoring service for exid " + exerciseID +
+      logger.info("getAlignments asking scoring service for " +
+          "\n\texid " + exerciseID +
           "\n\tfor " + req.size() + " : " + req +
           "\n\talignments for " + refID + " and context " + contextRefID +
           "\n\tneedToShowRef        " + needToShowRef +
@@ -371,7 +342,7 @@ public class AlignmentFetcher {
             @Override
             public void onSuccess(Map<Integer, AlignmentAndScore> result) {
               if (result == null) {
-                logger.warning("no alignments for " + req);
+                logger.warning("getAlignments no alignments for " + req);
               } else {
                 if (DEBUG) {
                   result.forEach((k, v) -> logger.info("getAlignments from server got " + k + " = " + v));
@@ -385,6 +356,8 @@ public class AlignmentFetcher {
               cacheOthers(listener);
             }
           });
+    } else {
+      logger.warning("getAlignments no startup info?");
     }
   }
 
@@ -406,9 +379,11 @@ public class AlignmentFetcher {
    * @see #getRefAudio(RefAudioListener)
    */
   private void cacheOthers(RefAudioListener listener) {
-    Set<Integer> req = getAllReqAudioIDs();
+    Map<Integer, Long> idToModified = getAllReqAudioIDs();
 
-    Set<Integer> knownIDs = getKnownIDs(req);
+    Set<Integer> req = new HashSet<>(idToModified.keySet());
+
+    Set<Integer> knownIDs = getKnownIDs(idToModified);
     if (DEBUG) logger.info("cacheOthers : From " + req.size() + " : known " + knownIDs.size());
 
     req.removeAll(knownIDs);
@@ -427,8 +402,7 @@ public class AlignmentFetcher {
   private void getAndRememberAlignents(RefAudioListener listener, Set<Integer> req) {
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
     if (projectStartupInfo != null) {
-      controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(),
-          req, getOnComplete(listener));
+      controller.getScoringService().getAlignments(projectStartupInfo.getProjectid(), req, getOnComplete(listener));
     }
   }
 
@@ -450,21 +424,6 @@ public class AlignmentFetcher {
     };
   }
 
-/*  void getAndRememberCachedAlignents(RefAudioListener listener, Set<Integer> req) {
-    Set<Integer> knownIDs = getKnownIDs(req);
-    if (DEBUG) logger.info("getAndRememberCachedAlignents : From " + req.size() + " : known " + knownIDs.size());
-
-    req.removeAll(knownIDs);
-
-    if (!req.isEmpty()) {
-      ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
-      if (projectStartupInfo != null) {
-        controller.getScoringService().getCachedAlignments(projectStartupInfo.getProjectid(),
-            req, getOnComplete(listener));
-      }
-    }
-  }*/
-
   private ProjectStartupInfo getProjectStartupInfo() {
     return controller.getProjectStartupInfo();
   }
@@ -473,29 +432,49 @@ public class AlignmentFetcher {
    * @return only return audio ids that haven't been asked for yet.
    * @see #cacheOthers
    */
-  Set<Integer> getAllReqAudioIDs() {
-    Set<Integer> req = playAudio == null ? new HashSet<>() : new HashSet<>(playAudio.getAllAudioIDs());
+  Map<Integer, Long>  getAllReqAudioIDs() {
+    //Set<Integer> req = playAudio == null ? new HashSet<>() : new HashSet<>(playAudio.get());
+
+    Map<Integer, Long> allAudioIDToModified = playAudio == null ? new HashMap<>() :
+        playAudio.getAllAudioIDToModified();
 
 //    logger.info("getAllReqAudioIDs " + req.size() + " audio attrs : " +req);
     if (contextPlay != null) {
-      req.addAll(contextPlay.getAllAudioIDs());
+      allAudioIDToModified.putAll(contextPlay.getAllAudioIDToModified());
       //    logger.info("getAllReqAudioIDs with context  " + req.size() + " audio attrs");
     }
     //removeKnownAudioIDs(req);
 
-    return req;
+    return allAudioIDToModified;
   }
 
-  private Set<Integer> getKnownIDs(Set<Integer> req) {
+  /**
+   * @param req
+   * @return
+   * @see #getRefAudio(RefAudioListener)
+   */
+  private Set<Integer> getKnownIDs(Map<Integer, Long> audioIDToModified) {
     //int before = req.size();
-
     Set<Integer> known = new HashSet<>();
 
-    req.forEach(r -> {
-      if (alignments.containsKey(r)) {
-        known.add(r);
+    audioIDToModified.forEach((k, v) -> {
+      AlignmentOutput alignmentOutput = alignments.get(k);
+      if (alignmentOutput == null) {
+        logger.info("getKnownIDs no alignment for " + k + " at " + new Date(v));
+      } else {
+        if (alignmentOutput.isStale(v)) {
+          logger.info("getKnownIDs alignment " + alignmentOutput + " is stale for " + k + " at " + new Date(v));
+        } else {
+          logger.info("getKnownIDs alignment " + alignmentOutput + " is not stale for " + k + " at " + new Date(v));
+          known.add(k);
+        }
       }
     });
+//    req.forEach(r -> {
+//      if (isCached(r)) {
+//        known.add(r);
+//      }
+//    });
 
 //    if (!req.isEmpty()) {
 //      logger.info("getAllReqAudioIDs before " + before + ", after removing known " + req.size() + " audio attrs");
@@ -511,5 +490,20 @@ public class AlignmentFetcher {
     this.contextPlay = contextPlay;
   }
 
-  int getNumAlignments() { return alignments.size(); }
+  /**
+   * @param refID
+   * @return
+   * @see DialogExercisePanel#audioChanged(int, long)
+   */
+  public AlignmentOutput getAlignment(int refID) {
+    return useCache ? alignments.get(refID) : null;
+  }
+
+  private boolean isCached(int refID) {
+    return useCache && alignments.containsKey(refID);
+  }
+
+  int getNumAlignments() {
+    return alignments.size();
+  }
 }

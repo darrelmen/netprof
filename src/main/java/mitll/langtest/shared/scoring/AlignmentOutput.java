@@ -41,6 +41,7 @@ import java.util.Map;
  * Created by go22670 on 4/13/17.
  */
 public class AlignmentOutput implements IsSerializable {
+  protected long modified;
   private Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes = new HashMap<NetPronImageType, List<TranscriptSegment>>();
 
   private boolean showPhoneScores;
@@ -56,8 +57,9 @@ public class AlignmentOutput implements IsSerializable {
    * @see mitll.langtest.server.scoring.AlignmentHelper#getCachedAudioRef
    * @see mitll.langtest.server.services.ScoringServiceImpl#getCachedAudioRef
    */
-  public AlignmentOutput(Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes) {
+  public AlignmentOutput(Map<NetPronImageType, List<TranscriptSegment>> sTypeToEndTimes, long modified) {
     this.sTypeToEndTimes = sTypeToEndTimes;
+    this.modified = modified;
   }
 
   /**
@@ -74,6 +76,10 @@ public class AlignmentOutput implements IsSerializable {
 
   public void setShowPhoneScores(boolean showPhoneScores) {
     this.showPhoneScores = showPhoneScores;
+  }
+
+  public boolean isStale(long modified) {
+    return modified > this.modified;
   }
 
   public String toString() {

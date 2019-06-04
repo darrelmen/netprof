@@ -54,7 +54,7 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
   private static final Logger logger = LogManager.getLogger(AlignmentHelper.class);
 
   private static final boolean USE_PHONE_TO_DISPLAY = true;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_OUTPUT = true;
   private static final boolean WARN_MISSING_REF_RESULT = false || DEBUG;
 
@@ -75,21 +75,22 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
       int projectID = project.getID();
       Map<Integer, AlignmentOutput> audioToAlignment = project.getAudioToAlignment();
 
-      if (DEBUG_OUTPUT) logger.info("addAlignmentOutput : For project " + projectID + " found " + audioToAlignment.size() +
-          " audio->alignment entries, trying to marry to " + toAddAudioTo.size() + " exercises");
+      if (DEBUG_OUTPUT)
+        logger.info("addAlignmentOutput : For project " + projectID + " found " + audioToAlignment.size() +
+            " audio->alignment entries, trying to marry to " + toAddAudioTo.size() + " exercises");
 
       Map<Boolean, List<ClientExercise>> collect = toAddAudioTo.stream().collect(Collectors.partitioningBy(ClientExercise::hasEnglishAttr));
 
       List<ClientExercise> englishEx = collect.get(true);
       List<ClientExercise> flEx = collect.get(false);
 
-      if (DEBUG_OUTPUT) logger.info("addAlignmentOutput found " + englishEx.size() + " eng, " + flEx.size() + " fl exercises");
+      if (DEBUG_OUTPUT)
+        logger.info("addAlignmentOutput found " + englishEx.size() + " eng, " + flEx.size() + " fl exercises");
 
       audioToAlignment.putAll(getIDToAlignment(englishEx, projectID, audioToAlignment, Language.ENGLISH));
       audioToAlignment.putAll(getIDToAlignment(flEx, projectID, audioToAlignment, project.getLanguageEnum()));
 
-    }
-    else {
+    } else {
       logger.warn("addAlignmentOutput no exercises for " + project);
     }
   }
@@ -180,15 +181,21 @@ public class AlignmentHelper extends TranscriptSegmentGenerator {
    * @param cachedResult
    * @param language
    */
-  private void getCachedAudioRef(Map<Integer, AlignmentAndScore> idToAlignment, Integer audioID,
-                                 ISlimResult cachedResult, Language language) {
+  private void getCachedAudioRef(Map<Integer, AlignmentAndScore> idToAlignment,
+                                 Integer audioID,
+                                 ISlimResult cachedResult,
+                                 Language language) {
     PrecalcScores precalcScores = getPrecalcScores(USE_PHONE_TO_DISPLAY, cachedResult, language);
     Map<ImageType, Map<Float, TranscriptEvent>> typeToTranscriptEvents =
         getTypeToTranscriptEvents(precalcScores.getJsonObject(), USE_PHONE_TO_DISPLAY, language);
+
     Map<NetPronImageType, List<TranscriptSegment>> typeToSegments = getTypeToSegments(typeToTranscriptEvents, language);
-    if (DEBUG)
-      logger.info("getCachedAudioRef : cache HIT (" + language + ") for audio id=" + audioID + " returning " + typeToSegments);
-    idToAlignment.put(audioID, new AlignmentAndScore(typeToSegments, cachedResult.getPronScore(), true));
+
+    if (DEBUG) {
+      logger.info("getCachedAudioRef : cache HIT (" + language + ") for audio id=" + audioID + " returning " + typeToSegments + "\n\tmodified " + new Date(cachedResult.getModified()));
+    }
+
+    idToAlignment.put(audioID, new AlignmentAndScore(typeToSegments, cachedResult.getPronScore(), true, cachedResult.getModified()));
   }
 
   @NotNull

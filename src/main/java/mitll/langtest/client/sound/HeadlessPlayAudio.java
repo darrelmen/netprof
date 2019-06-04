@@ -329,9 +329,18 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     return currentAudioAttr;
   }
 
-  public Collection<Integer> getAllAudioIDs() {
+/*  public Collection<Integer> getAllAudioIDs() {
     return currentAudioAttr == null ?
         Collections.emptySet() : Collections.singleton(currentAudioAttr.getUniqueID());
+  }*/
+
+  /**
+   *
+   * @return
+   */
+  public Map<Integer, Long> getAllAudioIDToModified() {
+    return currentAudioAttr == null ?
+        Collections.emptyMap() : Collections.singletonMap(currentAudioAttr.getUniqueID(), currentAudioAttr.getTimestamp());
   }
 
   public Set<AudioAttribute> getAllPossible() {

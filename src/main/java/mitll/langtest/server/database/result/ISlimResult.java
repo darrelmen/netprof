@@ -34,8 +34,14 @@ package mitll.langtest.server.database.result;
  */
 public interface ISlimResult {
   float getPronScore();
+
   String getJsonScore();
+
   boolean isValid();
+
   int getAudioID();
+
   int getExID();
+
+  long getModified();
 }

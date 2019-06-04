@@ -39,7 +39,7 @@ import com.google.gwt.user.client.rpc.IsSerializable;
 public class ExerciseIDAndScore implements IsSerializable {
   protected int exid;
   private float score;
-  protected long timestamp;
+  private long timestamp;
 
   public ExerciseIDAndScore() {
   }
@@ -65,5 +65,9 @@ public class ExerciseIDAndScore implements IsSerializable {
 
   public int getExid() {
     return exid;
+  }
+
+  public long getTimestamp() {
+    return timestamp;
   }
 }

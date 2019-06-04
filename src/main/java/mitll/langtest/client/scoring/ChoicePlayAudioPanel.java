@@ -73,7 +73,6 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
   private final boolean includeContext;
 
   /**
-   *
    * @see #playAndRemember
    * @see #addChoices(SplitDropdownButton, boolean, Button, boolean)
    * @see AlignmentFetcher#getRefAudio
@@ -279,7 +278,7 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
       }
       rememberAudio(toUse.getAudioRef());
     } else {
-   //  logger.info("addChoices has no audio for " + exercise.getID() + " context " + includeContext);
+      //  logger.info("addChoices has no audio for " + exercise.getID() + " context " + includeContext);
     }
   }
 
@@ -413,11 +412,20 @@ class ChoicePlayAudioPanel<T extends HasID & AudioRefExercise> extends PlayAudio
    * @return
    * @see TwoColumnExercisePanel#getReqAudio
    */
-  @Override
+ /* @Override
   public Collection<Integer> getAllAudioIDs() {
     Set<Integer> allIDs = new HashSet<>();
     allPossible.forEach(audioAttribute -> allIDs.add(audioAttribute.getUniqueID()));
     return allIDs;
+  }*/
+
+  @Override
+  public Map<Integer, Long> getAllAudioIDToModified() {
+    Map<Integer, Long> idToModified = new HashMap<>();
+
+    allPossible.forEach(audioAttribute -> idToModified.put(audioAttribute.getUniqueID(), audioAttribute.getTimestamp()));
+
+    return idToModified;
   }
 
   /**

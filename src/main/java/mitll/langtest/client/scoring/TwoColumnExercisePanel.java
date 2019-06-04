@@ -165,7 +165,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
                                 boolean addPlayer,
                                 IListenView listenView,
                                 SessionManager sessionManager) {
-    super(commonExercise, controller, listContainer, alignments, listenView);
+    super(commonExercise, controller, listContainer, alignments, listenView, true);
 
     this.sessionManager = sessionManager;
     this.listContainer = listContainer;
