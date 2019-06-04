@@ -417,7 +417,7 @@ public class DialogHeader {
   private DivWidget getDownloadLink() {
     DivWidget widgets = new DivWidget();
     Anchor download = new Anchor(DOWNLOAD);
-    new TooltipHelper().createAddTooltip(download, "Download dialog as excel spreadsheet with audio", Placement.RIGHT);
+    new TooltipHelper().createAddTooltip(download, "Download dialog as excel spreadsheet with audio", Placement.BOTTOM);
 
     download.addClickHandler(event -> gotDownload());
     download.addStyleName("leftFiveMargin");

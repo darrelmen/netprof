@@ -1987,7 +1987,7 @@ public class AudioFileHelper implements AlignDecode {
             "" + testAudioFile +
             "\n\twith sentence '" + sentence + "'" +
             (prefix.isEmpty() ? "" : " prefix " + prefix)
-       // , new Exception("Got request")
+        // , new Exception("Got request")
     );
 
 
@@ -2058,7 +2058,10 @@ public class AudioFileHelper implements AlignDecode {
 
         pathHelper.getImageOutDir(language.getLanguage()), imageOptions,
         shouldDoDecoding,
-        options.isCanUseCache(), prefix,
+
+        false,// options.isCanUseCache(),
+
+        prefix,
         precalcScores,
         options.isUsePhoneToDisplay(),
         kaldi);

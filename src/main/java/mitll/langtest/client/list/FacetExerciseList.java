@@ -525,7 +525,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   private void gotRangeChanged() {
-    logger.info("gotRangeChanged");
+//    logger.info("gotRangeChanged");
 
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("gotRangeChanged"));
 //    logger.info("logException stack " + exceptionAsString);
@@ -1725,7 +1725,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @see #gotFullExercises
    */
   protected void hidePrevNextWidgets() {
- //   logger.info("hidePrevNextWidgets");
+    //   logger.info("hidePrevNextWidgets");
 
     pageSizeContainer.setVisible(false);
     setSortBoxVisible(false);
@@ -1742,7 +1742,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   protected void showPrevNext() {
-   // logger.info("showPrevNext");
+    // logger.info("showPrevNext");
 
     pageSizeContainer.setVisible(true);
     setSortBoxVisible(true);
@@ -1759,15 +1759,15 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
   }
 
   /**
-   * @see mitll.langtest.client.flashcard.StatsPracticePanel#setListHeaderVisible(boolean)
    * @param b
+   * @see mitll.langtest.client.flashcard.StatsPracticePanel#setListHeaderVisible(boolean)
    */
   public void setListHeaderVisible(boolean b) {
     listHeader.setVisible(b);
   }
 
   protected void setDownloadVisible(boolean b) {
-   // logger.info("setDownloadVisible ");
+    // logger.info("setDownloadVisible ");
     showAndDownload.setVisible(b);
   }
 
@@ -1822,9 +1822,11 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       if (DEBUG) logger.info("reallyGetExercises no req for " + alreadyFetched.size());
       gotFullExercises(currentReq, alreadyFetched);
     } else {
-      logger.info("reallyGetExercises make" +
-          "\n\treq for " + requested +
-          "\n\tvisible " + visibleIDs);
+      if (DEBUG) {
+        logger.info("reallyGetExercises make" +
+            "\n\treq for " + requested +
+            "\n\tvisible " + visibleIDs);
+      }
 
       if (isThereALoggedInUser()) {
         getFullExercises(visibleIDs, currentReq, requested, alreadyFetched);
