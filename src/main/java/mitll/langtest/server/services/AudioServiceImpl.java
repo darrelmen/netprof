@@ -1713,7 +1713,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     Set<Integer> updated = new HashSet<>();
     logger.info("refreshExercises update " + exids);
     exids.forEach(exid -> {
-      if (exerciseDAO.refresh(exid)) {
+      if (exerciseDAO.simpleRefresh(exid)) {
         updated.add(exid);
       } else logger.warn("didn't update " + exid);
     });

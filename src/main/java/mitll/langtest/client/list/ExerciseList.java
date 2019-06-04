@@ -67,7 +67,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   protected static final String COMPLETE = "Complete";
 
   private static final boolean DEBUG_STALE = true;
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   private static final String SERVER_ERROR = "Server error";
   private static final String GETTING_EXERCISE = "getting exercise";
@@ -870,11 +870,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   public boolean loadNextExercise(HasID current) {
     if (DEBUG) logger.info("ExerciseList.loadNextExercise current is : " + current);// + " instance " + getInstance());
     boolean onLast = isOnLast(current);
-/*
-    logger.info("ExerciseList.loadNextExercise current is : " + id + " index " + index +
+
+    logger.info("ExerciseList.loadNextExercise current is : " + current.getID() +
+        //" index " + index +
         " of " + getSize() + " last is " + (getSize() - 1) +
         "\n\ton last " + onLast);
-        */
+
     if (isOnLast(current)) {
       onLastItem();
     } else {

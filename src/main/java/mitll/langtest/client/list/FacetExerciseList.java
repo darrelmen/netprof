@@ -427,7 +427,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return controller.getStorage().getInt(pageSizeSelected);
   }
 
-  private int getVisibleItem() {
+  protected int getVisibleItem() {
     return controller.getStorage().getInt(visibleItemStorage);
   }
 

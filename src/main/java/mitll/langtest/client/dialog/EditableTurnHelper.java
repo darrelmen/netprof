@@ -163,14 +163,12 @@ public class EditableTurnHelper {
   }
 
   public String getSanitizedContent() {
-    String content = getContent();
-    return getSanitized(content);
+    return getSanitized(getContent());
   }
 
   String getSanitized(String content) {
-    return SimpleHtmlSanitizer.sanitizeHtml(content).asString();
+    return content == null ? "" : SimpleHtmlSanitizer.sanitizeHtml(content).asString();
   }
-
 
   String getContent() {
     return contentTextBox.getText();

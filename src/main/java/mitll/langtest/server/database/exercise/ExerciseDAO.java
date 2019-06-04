@@ -50,7 +50,7 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   /**
    * @param userExerciseDAO
    * @param projid
-   * @param isMyProject is the data on this host? e.g. hydra2 may only have some projects and audio
+   * @param isMyProject     is the data on this host? e.g. hydra2 may only have some projects and audio
    * @see mitll.langtest.server.database.project.ProjectManagement#setDependencies
    */
   void setDependencies(IUserExerciseDAO userExerciseDAO,
@@ -62,26 +62,27 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
   List<CommonExercise> getUserDefinedByProjectExactMatch(String fl, int userIDFromSession);
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkForOOV
    * @param safe
    * @param unsafe
    * @param dictTimestamp
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkForOOV
    */
   void markSafeUnsafe(Set<Integer> safe, Set<Integer> unsafe, long dictTimestamp);
 
 
   /**
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict
    * @param id
    * @param count
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercisePhoneInfoFromDict
    */
   void updatePhones(int id, int count);
 
   /**
-   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises
    * @param pairs
+   * @see mitll.langtest.server.database.userexercise.SlickUserExerciseDAO#getExercises
    */
   void updatePhonesBulk(List<SlickExercisePhone> pairs);
+
   void updateNormBulk(List<SlickExerciseNorm> pairs);
 
   int updateDominoBulk(List<SlickUpdateDominoPair> pairs);
@@ -92,8 +93,9 @@ public interface ExerciseDAO<T extends CommonShell & HasUnitChapter> extends Sim
 
   boolean refresh(int exid);
 
+  boolean simpleRefresh(int exid);
+
   /**
-   *
    * @param toChange
    * @return
    */

@@ -338,6 +338,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
   /**
    * Show score and mode
+   *
    * @param dialog
    * @return
    */
@@ -350,12 +351,26 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     smiley.add(overallSmiley);
     CorrectAndScore correctAndScore = scoreHistoryPerDialog.get(dialog.getID());
     if (correctAndScore != null) {
-      HTML w = new HTML(INavigation.VIEWS.valueOf(correctAndScore.getPath()).toString());
-      w.addStyleName("leftFiveMargin");
-      w.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
-      smiley.add(w);
+      INavigation.VIEWS viewForScore = getViewForScore(correctAndScore);
+      if (viewForScore != INavigation.VIEWS.NONE) {
+        HTML w = new HTML(viewForScore.toString());
+        w.addStyleName("leftFiveMargin");
+        w.getElement().getStyle().setMarginTop(2, Style.Unit.PX);
+        smiley.add(w);
+      }
     }
     return smiley;
+  }
+
+  @NotNull
+  private INavigation.VIEWS getViewForScore(CorrectAndScore correctAndScore) {
+    String name = correctAndScore.getPath().toUpperCase();
+    try {
+      return INavigation.VIEWS.valueOf(name);
+    } catch (IllegalArgumentException e) {
+      logger.warning("couldn't parse " + name);
+      return INavigation.VIEWS.NONE;
+    }
   }
 
   @NotNull

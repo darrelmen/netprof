@@ -399,7 +399,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
    */
   @Override
   public void postAnswers(ExerciseController controller, HasID completedExercise) {
-    // logger.info("postAnswers " + completedExercise.getID());
+    logger.info("postAnswers " + completedExercise.getID());
     showRecordedState();
     exerciseList.loadNextExercise(completedExercise);
   }

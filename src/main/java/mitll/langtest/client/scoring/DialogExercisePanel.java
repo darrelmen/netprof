@@ -86,9 +86,9 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
   List<IHighlightSegment> flclickables = null;
 
   private static final boolean DEBUG = false;
-  static final boolean DEBUG_SHOW_ALIGNMENT = true;
+  static final boolean DEBUG_SHOW_ALIGNMENT = false;
   private static final boolean DEBUG_DETAIL = false;
-  private static final boolean DEBUG_MATCH = true;
+  private static final boolean DEBUG_MATCH = false;
 
   final boolean isRTL;
 
@@ -386,11 +386,11 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
     }
   }
 
-  protected boolean shouldDoMatch(int id, AlignmentOutput alignmentOutput) {
+  boolean shouldDoMatch(int id, AlignmentOutput alignmentOutput) {
     return currentAudioDisplayed != id || alignmentTimestamp != alignmentOutput.getModified();
   }
 
-  protected void rememberMatch(int id, AlignmentOutput alignmentOutput) {
+  void rememberMatch(int id, AlignmentOutput alignmentOutput) {
     currentAudioDisplayed = id;
     alignmentTimestamp = alignmentOutput.getModified();
   }

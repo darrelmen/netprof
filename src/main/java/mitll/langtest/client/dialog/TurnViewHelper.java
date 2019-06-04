@@ -196,12 +196,12 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    * @return
    * @see DialogEditor#getNextTurn(int)
    */
-  T getTurnByID(int exid) {
+  private T getTurnByID(int exid) {
     List<T> collect = allTurns.stream().filter(turn -> turn.getExID() == exid).collect(Collectors.toList());
     return collect.isEmpty() ? null : collect.get(0);
   }
 
-  void removeFromContainer(T toRemove) {
+  private void removeFromContainer(T toRemove) {
     boolean remove = turnContainer.remove(toRemove);
     if (!remove) {
       logger.warning("deleteTurn : didn't remove turn " + toRemove);
@@ -923,11 +923,20 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return isLast(currentTurn);
   }
 
+  /**
+   *
+   */
   void makeCurrentTurnVisible() {
-    makeVisible(currentTurn);
+    if (!makeNextVisible()) {
+      makeVisible(currentTurn);
+    }
   }
 
-  protected boolean makeNextVisible() {
+  /**
+   *
+   * @return true if did it
+   */
+  boolean makeNextVisible() {
     T next = getNext();
     if (next != null) {
       if (DEBUG_NEXT) logger.info("makeNextVisible " + next.getExID());// + " : " + next.getText());

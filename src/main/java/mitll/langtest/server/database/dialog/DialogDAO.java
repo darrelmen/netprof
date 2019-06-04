@@ -478,8 +478,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
         CommonExercise exercise = idToEx.get(exid);
 
         if (exercise == null) {
-          if (!databaseImpl.getExerciseDAO(projid).refresh(exid)) {  // so we need to keep both netprof instances in sync
-            logger.warn("addExercises : didn't refresh " + exid);
+          if (!databaseImpl.getExerciseDAO(projid).simpleRefresh(exid)) {  // so we need to keep both netprof instances in sync
+            logger.warn("\n\n\naddExercises : didn't refresh " + exid);
           }
 
           exercise = databaseImpl.getExercise(projid, exid);
@@ -829,7 +829,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     exercises.forEach(exercise -> {
       int id = exercise.getID();
 
-      boolean refresh = exerciseDAO.refresh(id);
+      boolean refresh = exerciseDAO.simpleRefresh(id);
 
       if (refresh) {
         logger.info("refreshExercises ex " + id + " " + exercise.getAttributes());

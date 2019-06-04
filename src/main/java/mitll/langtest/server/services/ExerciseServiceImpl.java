@@ -1459,7 +1459,7 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     db.getProject(projectID)
         .getDialog(dialogID)
-        .getExercises().forEach(exercise -> exerciseDAO.refresh(exercise.getID()));
+        .getExercises().forEach(exercise -> exerciseDAO.simpleRefresh(exercise.getID()));
   }
 
   @Override

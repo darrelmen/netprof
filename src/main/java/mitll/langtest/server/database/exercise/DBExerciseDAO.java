@@ -96,7 +96,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     CommonExercise commonExercise = getCommonExercise(id);
 
     if (commonExercise == null) {
-      //logger.info("getExercise can't find exercise " + id);
+      logger.info("getExercise can't find exercise " + id);
       if (id != userExerciseDAO.getUnknownExerciseID()) {
         commonExercise = idToContextExercise.get(id);
         if (commonExercise == null) {
@@ -104,7 +104,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
           if (commonExercise == null) {
             spew++;
-            if (spew < 10 || spew % 100 == 0) {
+            if (spew < 10 || spew % 100 == 0 || true) {
               logger.warn(this + " getExercise : couldn't find " +
                   "\n\texercise #" + id +
                   "\n\tin        " + idToExercise.size() + " exercises" +
@@ -113,10 +113,10 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
               );
             }
           } else {
-//              logger.info("getExercise user ex for " + id + " = " + commonExercise.getEnglish() + " = " + commonExercise.getForeignLanguage());
+            logger.info("getExercise user ex for " + id + " = " + commonExercise.getEnglish() + " = " + commonExercise.getForeignLanguage());
           }
         } else {
-          //  logger.info("getExercise found context " + commonExercise.getID());
+          logger.info("getExercise found context " + commonExercise.getID());
         }
       }
     } else {
@@ -641,7 +641,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   public boolean update(CommonExercise toChange) {
     boolean update = userExerciseDAO.update(toChange, false, getTypeOrder());
     if (update) {
-      refresh(toChange.getID());
+      simpleRefresh(toChange.getID());
     }
     return update;
   }
@@ -673,19 +673,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     } else {
       idToUserExercise.put(exid, byExID);
 
-      List<ExerciseAttribute> attributesFor = userExerciseDAO.getExerciseAttributeDAO().getAttributesFor(exid);
-
-//      logger.info("refresh attributes for " + exid);
-//      logger.info("refresh attributes got " + attributesFor);
-      byExID.setAttributes(attributesFor);
-
-      if (DEBUG_REFRESH) logger.info("refresh attributes after " + byExID.getAttributes());
-
-      CommonExercise exercise = getExercise(exid);
-      if (exercise.getAttributes().size() != attributesFor.size()) {
-        logger.error("refresh attributes after " + exercise.getAttributes());
-        logger.error("refresh attributes after " + attributesFor);
-      }
+      setAttributes(exid, byExID);
 
       added = true;
 
@@ -699,13 +687,67 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
         if (DEBUG_REFRESH) {
           String s1 = "refresh after " + byExID.getEnglish() + " " + byExID.getForeignLanguage();
-          String s = next == null ? "" : "\n\trefresh after context " + next.getEnglish() + " " + next.getForeignLanguage();
+          String s = next == null ? "" : "\n\trefresh after" +
+              "\n\t context english " + next.getEnglish() + " = '" + next.getForeignLanguage() + "'";
           logger.info(s1 + s);
         }
       }
     }
 
     return added;
+  }
+
+  public boolean simpleRefresh(int exid) {
+    forget(exid);
+
+    boolean added = false;
+    CommonExercise replacement = userExerciseDAO.getByExID(exid, false);
+    if (replacement == null) {
+      logger.error("refresh huh? no known exid " + exid);
+    } else {
+      CommonExercise previous = idToUserExercise.put(exid, replacement);
+
+      if (previous != null) {
+        logger.info("simpleRefresh : " +
+            "\n\treplace " + previous.getEnglish() + " = " + previous.getForeignLanguage() +
+            "\n\twith    " + replacement.getEnglish() + " = " + replacement.getForeignLanguage());
+      }
+
+      CommonExercise exercise = setAttributes(exid, replacement);
+
+      if (exercise.getEnglish().equals(replacement.getEnglish())) {
+        if (exercise.getForeignLanguage().equals(replacement.getForeignLanguage())) {
+
+        } else {
+          logger.warn("simpleRefresh huh? after refresh, new " + exercise.getForeignLanguage() + " vs " + replacement.getForeignLanguage());
+
+        }
+      } else {
+        logger.warn("simpleRefresh huh? after refresh, new " + exercise.getEnglish() + " vs " + replacement.getEnglish());
+      }
+
+      if (DEBUG_REFRESH) {
+        logger.info("simpleRefresh after " + replacement.getEnglish() + " = " + replacement.getForeignLanguage());
+      }
+
+      added = true;
+    }
+    return added;
+  }
+
+  @NotNull
+  private CommonExercise setAttributes(int exid, CommonExercise replacement) {
+    List<ExerciseAttribute> attributesFor = userExerciseDAO.getExerciseAttributeDAO().getAttributesFor(exid);
+    replacement.setAttributes(attributesFor);
+
+    if (DEBUG_REFRESH) logger.info("refresh attributes after " + replacement.getAttributes());
+
+    CommonExercise exercise = getExercise(exid);
+    if (exercise.getAttributes().size() != attributesFor.size()) {
+      logger.error("refresh attributes after " + exercise.getAttributes());
+      logger.error("refresh attributes after " + attributesFor);
+    }
+    return exercise;
   }
 
   private ExerciseDAOWrapper getDao() {

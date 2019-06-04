@@ -96,6 +96,15 @@ public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> 
     isDialog = isDialog() && controller.getMode() == ProjectMode.DIALOG;
   }
 
+  @Override
+  protected int getVisibleItem() {
+    return -1;
+  }
+
+  protected int getFirstPageSize() {
+    return 1;
+  }
+
   @NotNull
   @Override
   protected String getNoneDoneMessage() {
@@ -143,7 +152,7 @@ public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> 
 
   private boolean isDialog() {
     ProjectType projectType = controller.getProjectStartupInfo().getProjectType();
-   // logger.info("isDialog project type " + controller.getProjectStartupInfo());
+    // logger.info("isDialog project type " + controller.getProjectStartupInfo());
     return projectType == ProjectType.DIALOG;
   }
 
@@ -151,11 +160,11 @@ public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> 
   protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                        String prefix,
                                                        boolean onlyUninspected) {
-  //  logger.info("getExerciseListRequest type->sel " +typeToSection);
+    //  logger.info("getExerciseListRequest type->sel " +typeToSection);
     ExerciseListRequest exerciseListRequest = super.getExerciseListRequest(typeToSection, prefix, onlyUninspected);
     exerciseListRequest.setOnlyUnrecordedByMe(true).setMode(controller.getMode());
-  //  logger.info("getExerciseListRequest exerciseListRequest " +exerciseListRequest);
-   // logger.info("getExerciseListRequest type->sel " +exerciseListRequest.getTypeToSelection());
+    //  logger.info("getExerciseListRequest exerciseListRequest " +exerciseListRequest);
+    // logger.info("getExerciseListRequest type->sel " +exerciseListRequest.getTypeToSelection());
     return exerciseListRequest;
   }
 
@@ -184,7 +193,7 @@ public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> 
     ExerciseListRequest request = super.getExerciseListRequest(prefix);
     ProjectMode mode = controller.getMode();
     request.setOnlyExamples(isContext).setMode(mode);
-   // logger.info("getExerciseListRequest isContext = " + isContext);
+    // logger.info("getExerciseListRequest isContext = " + isContext);
     if (DEBUG) logger.info("getExerciseListRequest req " + request);
     return request;
   }

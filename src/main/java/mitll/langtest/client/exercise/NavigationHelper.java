@@ -50,6 +50,8 @@ public class NavigationHelper extends HorizontalPanel {
   private final PostAnswerProvider provider;
   private final ListInterface<?, ?> listContainer;
 
+  private boolean DEBUG = true;
+
   /**
    * @param exercise
    * @param controller
@@ -141,7 +143,7 @@ public class NavigationHelper extends HorizontalPanel {
       next.setEnabled(false);
     } else {
       boolean b = listContainer.onLast(exercise);
-   //   logger.info("enableNextOnlyWhenAllCompleted false on last = " +  b);
+      //   logger.info("enableNextOnlyWhenAllCompleted false on last = " +  b);
       next.setEnabled(!b);
     }
   }
@@ -167,7 +169,7 @@ public class NavigationHelper extends HorizontalPanel {
         // logger.info("clickNext  post answers " + exercise.getID());
         provider.postAnswers(controller, exercise);
       } else {
-       // logger.info("clickNext NO PROVIDER " + exercise.getID());
+        // logger.info("clickNext NO PROVIDER " + exercise.getID());
       }
     }
   }

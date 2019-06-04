@@ -152,7 +152,11 @@ public class ListenViewHelper<T extends ITurnPanel>
     super.showDialog(dialogID, dialog, child);
     if (dialog != null) {
       List<RefAudioGetter> refAudioGetters = new ArrayList<>(allTurns);
-      if (DEBUG || true) logger.info("showDialogGetRef : Get ref audio for " + refAudioGetters.size());
+
+      if (DEBUG) {
+        logger.info("showDialogGetRef : Get ref audio for " + refAudioGetters.size());
+      }
+
       getRefAudio(refAudioGetters.iterator());
     }
   }
@@ -627,7 +631,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     if (last) logger.info("ifOnLastJumpBackToFirst : OK, on last - let's consider going back to start");
 
     if (last && currentTurn != null
-    //    && !currentTurn.hasCurrentMark()
+      //    && !currentTurn.hasCurrentMark()
     ) {
       logger.info("ifOnLastJumpBackToFirst mark first turn\n\n\n");
       removeMarkCurrent();

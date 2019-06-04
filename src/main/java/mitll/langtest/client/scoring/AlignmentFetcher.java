@@ -46,7 +46,7 @@ import java.util.logging.Logger;
 public class AlignmentFetcher {
   private final Logger logger = Logger.getLogger("AlignmentFetcher");
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   /**
    *
@@ -93,12 +93,6 @@ public class AlignmentFetcher {
    * @see mitll.langtest.client.list.FacetExerciseList#getRefAudio
    */
   public void getRefAudio(RefAudioListener listener) {
-//    AudioAttribute currentAudioAttr = playAudio == null ? null : playAudio.getCurrentAudioAttr();
-//    int refID = currentAudioAttr == null ? -1 : currentAudioAttr.getUniqueID();
-//
-//    AudioAttribute contextAudioAttr = contextPlay != null ? contextPlay.getCurrentAudioAttr() : null;
-//    int contextRefID = contextAudioAttr != null ? contextAudioAttr.getUniqueID() : -1;
-
     Map<Integer, Long> audioIDToModified = getReqAudioIDs();
     Set<Integer> req = new HashSet<>(audioIDToModified.keySet());
     int before = req.size();
@@ -127,8 +121,6 @@ public class AlignmentFetcher {
         logger.info("getRefAudio for " + exerciseID + " already has alignments for audio #" + refID + " = " + isCached(refID));
         logger.info("getRefAudio already has alignments for context " + contextRefID + " " + isCached(contextRefID));
       }
-
-      //registerSegments(refID, currentAudioAttr, contextRefID, contextAudioAttr);
 
       listener.refAudioComplete();
       if (listContainer == null || listContainer.isCurrentReq(getReq())) {
@@ -432,7 +424,7 @@ public class AlignmentFetcher {
    * @return only return audio ids that haven't been asked for yet.
    * @see #cacheOthers
    */
-  Map<Integer, Long>  getAllReqAudioIDs() {
+  Map<Integer, Long> getAllReqAudioIDs() {
     //Set<Integer> req = playAudio == null ? new HashSet<>() : new HashSet<>(playAudio.get());
 
     Map<Integer, Long> allAudioIDToModified = playAudio == null ? new HashMap<>() :
@@ -460,21 +452,18 @@ public class AlignmentFetcher {
     audioIDToModified.forEach((k, v) -> {
       AlignmentOutput alignmentOutput = alignments.get(k);
       if (alignmentOutput == null) {
-        logger.info("getKnownIDs no alignment for " + k + " at " + new Date(v));
+        if (DEBUG) logger.info("getKnownIDs no alignment for " + k + " at " + new Date(v));
       } else {
         if (alignmentOutput.isStale(v)) {
-          logger.info("getKnownIDs alignment " + alignmentOutput + " is stale for " + k + " at " + new Date(v));
+          if (DEBUG)
+            logger.info("getKnownIDs alignment " + alignmentOutput + " is stale for " + k + " at " + new Date(v));
         } else {
-          logger.info("getKnownIDs alignment " + alignmentOutput + " is not stale for " + k + " at " + new Date(v));
+          if (DEBUG)
+            logger.info("getKnownIDs alignment " + alignmentOutput + " is *not* stale for " + k + " at " + new Date(v));
           known.add(k);
         }
       }
     });
-//    req.forEach(r -> {
-//      if (isCached(r)) {
-//        known.add(r);
-//      }
-//    });
 
 //    if (!req.isEmpty()) {
 //      logger.info("getAllReqAudioIDs before " + before + ", after removing known " + req.size() + " audio attrs");
