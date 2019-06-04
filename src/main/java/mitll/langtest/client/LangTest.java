@@ -832,6 +832,7 @@ public class LangTest implements
     storage.setUser(user.getID());
 
     projectStartupInfo = user.getStartupInfo();
+  //  setProjectStartupInfo(user);
 
     if (DEBUG) logger.info("\ngotUser Got startup info " + projectStartupInfo);
     initialUI.gotUser(user);
@@ -1209,7 +1210,7 @@ public class LangTest implements
     String mode = getStorage().getValue(MODE);
 
     if (mode == null || mode.isEmpty()) {
-      return ProjectMode.VOCABULARY;
+      return ProjectMode.UNSET;
     } else {
       try {
         return ProjectMode.valueOf(mode);

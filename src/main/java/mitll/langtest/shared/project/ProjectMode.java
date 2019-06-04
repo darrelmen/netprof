@@ -38,6 +38,7 @@ import mitll.langtest.server.database.project.IProjectDAO;
 public enum ProjectMode implements IsSerializable {
   VOCABULARY(true),
   DIALOG(true),
+  UNSET(false),
   EITHER(false);
 
   private boolean show;

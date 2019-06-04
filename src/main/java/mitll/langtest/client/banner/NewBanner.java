@@ -60,8 +60,7 @@ import java.util.logging.Logger;
 import static mitll.langtest.client.banner.NewContentChooser.MODE;
 import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
-import static mitll.langtest.shared.project.ProjectMode.EITHER;
-import static mitll.langtest.shared.project.ProjectMode.VOCABULARY;
+import static mitll.langtest.shared.project.ProjectMode.*;
 import static mitll.langtest.shared.project.ProjectType.DIALOG;
 
 /**
@@ -607,7 +606,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     if (DEBUG) {
       logger.info("reflectPermissions : " + permissions +
-          "\n\tdialog visible " + isDialog + " : " + widgets
+          "\n\tdialog visible " + isDialog + " : " + widgets +
+          "\n\tmode " + getMode()
       );
     }
   }
@@ -619,8 +619,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private boolean isDialogMode() {
     return
         controller.getProjectStartupInfo() != null &&
-            controller.getProjectStartupInfo().getProjectType() == DIALOG
-            && getMode() == ProjectMode.DIALOG;
+            controller.getProjectStartupInfo().getProjectType() == DIALOG &&
+            getMode() == ProjectMode.DIALOG;
   }
 
   /**
@@ -632,7 +632,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private void setDialogNavVisible(boolean visible) {
     boolean hasProject = controller.getProjectStartupInfo() != null;
     boolean hasProjectChoice = hasProject && controller.getProjectID() != -1;
-    dialognav.setVisible(visible && hasProjectChoice && controller.getMode() == ProjectMode.DIALOG);
+    ProjectMode mode = controller.getMode();
+    dialognav.setVisible(visible && hasProjectChoice && (mode == ProjectMode.DIALOG || mode == UNSET));
 
     //  logger.info("setDialogNavVisible dialog nav " + dialognav.isVisible());
 
@@ -696,15 +697,23 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private ProjectMode getMode() {
-    ProjectMode storedMode = VOCABULARY;
+    return controller.getMode();
+/*
+    ProjectMode storedMode = UNSET;
 
     String value = controller.getStorage().getValue(MODE);
     if (value != null && !value.isEmpty()) {
       storedMode = ProjectMode.valueOf(value);
-      //ProjectMode viewMode = currentStoredView.getMode();
-      //  logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
+      // ProjectMode viewMode = currentStoredView.getMode();
+      logger.info("getMode : storedMode " + storedMode
+          //    + " mode " + viewMode
+      );
+    } else {
+      logger.info("getMode : storedMode value = " + value);
     }
+
     return storedMode;
+*/
   }
 
   private void setChoicesVisibility(boolean admin, boolean teacher) {
