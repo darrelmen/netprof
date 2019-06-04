@@ -347,7 +347,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     DivWidget flContainer = getHorizDiv();
     if (isRight()) {
       addStyleName("floatRight");
-    } else if (isLeft()) {
+    } else if (isLeft() || isMiddle()) {
       flContainer.addStyleName("floatLeft");
     }
 
@@ -575,7 +575,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     w.getElement().setId("emoticon");
     w.setVisible(false);
     w.setHeight(DIM + "px");
-    w.getElement().getStyle().setMarginTop(-5, PX);
+    w.getElement().getStyle().setMarginTop(10, PX);
     return w;
   }
 
@@ -586,9 +586,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   @NotNull
   private DivWidget getHorizDiv() {
     DivWidget flContainer = new DivWidget();
-    flContainer.addStyleName("inlineFlex");
     Style style = flContainer.getElement().getStyle();
-    style.setMarginTop(15, PX);
 
     if (isMiddle() && exercise.hasEnglishAttr()) {
       style.setProperty("marginLeft", "auto");

@@ -190,7 +190,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
             "\n\trequired perms " + currentStoredView.getPerms() + " from " + currentStoredView +
             " falling back to default view for (" + storedMode + ")");
         currentStoredView = hasStartup && storedMode == ProjectMode.DIALOG ? DIALOG : LEARN;
-      } else /*if (!userPerms.isEmpty())*/ {
+      } else  {
         if (hasStartup) {
           //String value = getStorage().getValue(MODE);
           // logger.info("selected mode is " + value);
@@ -199,24 +199,28 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
             //ProjectMode storedMode = ProjectMode.valueOf(value);
 
             ProjectMode viewMode = currentStoredView.getMode();
-            // logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
 
-            if (viewMode == ProjectMode.DIALOG && storedMode == ProjectMode.VOCABULARY) {
-              // currentStoredView = LEARN;
-              logger.info("consider force learn view?");
-            } else if (viewMode == VOCABULARY && storedMode == ProjectMode.DIALOG) {
-              //currentStoredView = DIALOG;
-              logger.warning("force dialog view?");
-            } else {
-              //   logger.info("OK - no inconsistency...");
+            if (DEBUG) {
+              logger.info("getCurrentView : " +
+                  "\n\tstored mode " + storedMode +
+                  "\n\tview mode   " + viewMode +
+                  "\n\tview        " + currentStoredView
+              );
             }
+
+//            if (viewMode == ProjectMode.DIALOG && storedMode == ProjectMode.VOCABULARY) {
+//              // currentStoredView = LEARN;
+//             // logger.info("consider force learn view?");
+//            } else if (viewMode == VOCABULARY && storedMode == ProjectMode.DIALOG) {
+//              //currentStoredView = DIALOG;
+//             // logger.info("force dialog view?");
+//            } else {
+//              //   logger.info("OK - no inconsistency...");
+//            }
 
           } catch (IllegalArgumentException e) {
             e.printStackTrace();
           }
-
-          //ProjectType projectType = controller.getProjectStartupInfo().getProjectType();
-
         }
       }
     }

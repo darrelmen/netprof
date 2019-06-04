@@ -57,8 +57,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.banner.NewContentChooser.MODE;
 import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
+import static mitll.langtest.shared.project.ProjectMode.EITHER;
+import static mitll.langtest.shared.project.ProjectMode.VOCABULARY;
 import static mitll.langtest.shared.project.ProjectType.DIALOG;
 
 /**
@@ -271,7 +274,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Dropdown nav = new Dropdown(RECORD);
     rememberViewAndLink(nav, RECORD_ENTRIES);
 
-    boolean dialogNavVisible = isDialogNavVisible();
+    boolean dialogNavVisible = isDialogMode();
     if (DEBUG) logger.info("Dialog nav visible : " + dialogNavVisible);
     if (!dialogNavVisible) {
       rememberViewAndLink(nav, RECORD_SENTENCES);
@@ -593,7 +596,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     recordMenuVisible();
     defectMenuVisible();
 
-    boolean isDialog = isDialogNavVisible();
+    boolean isDialog = isDialogMode();
     setDialogNavVisible(hasProjectChoice() && isDialog);
 
     NavLink widgets = viewToLink.get(RECORD_SENTENCES);
@@ -611,6 +614,13 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private boolean isDialogNavVisible() {
     return controller.getProjectStartupInfo() != null && controller.getProjectStartupInfo().getProjectType() == DIALOG;
+  }
+
+  private boolean isDialogMode() {
+    return
+        controller.getProjectStartupInfo() != null &&
+            controller.getProjectStartupInfo().getProjectType() == DIALOG
+            && getMode() == ProjectMode.DIALOG;
   }
 
   /**
@@ -665,8 +675,17 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     if (val && navigation != null) {
       // VIEWS currentView = navigation.getCurrentView();
-      //logger.info("setCogVisible current view " + currentView);
-      setVisibleChoicesByMode(navigation.getCurrentView().getMode());
+      VIEWS currentView = navigation.getCurrentView();
+      if (DEBUG) logger.info("setCogVisible current view " + currentView);
+
+      ProjectMode viewMode = currentView.getMode();
+
+      boolean isDialogMode = getMode() == ProjectMode.DIALOG;
+      if (currentView.getMode() == EITHER && isDialogMode) {
+        viewMode = ProjectMode.DIALOG;
+      }
+
+      setVisibleChoicesByMode(viewMode);
     }
 
     boolean admin = isAdmin();
@@ -674,6 +693,18 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     cog.setVisible(admin || teacher);
 
     setChoicesVisibility(admin, teacher);
+  }
+
+  private ProjectMode getMode() {
+    ProjectMode storedMode = VOCABULARY;
+
+    String value = controller.getStorage().getValue(MODE);
+    if (value != null && !value.isEmpty()) {
+      storedMode = ProjectMode.valueOf(value);
+      //ProjectMode viewMode = currentStoredView.getMode();
+      //  logger.info("getCurrentView : storedMode " + storedMode + " mode " + viewMode);
+    }
+    return storedMode;
   }
 
   private void setChoicesVisibility(boolean admin, boolean teacher) {
@@ -809,6 +840,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   @Override
   public void setVisibleChoicesByMode(ProjectMode mode) {
     if (DEBUG) logger.info("setVisibleChoicesByMode set visible choices " + mode);
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("mode " + mode));
+//    logger.info("logException stack " + exceptionAsString);
+
     boolean isDialogMode = mode == ProjectMode.DIALOG;
     hideOrShowByMode(isDialogMode ? DIALOG_VIEWS : STANDARD_VIEWS);
 

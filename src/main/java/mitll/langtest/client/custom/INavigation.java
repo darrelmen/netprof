@@ -102,7 +102,7 @@ public interface INavigation extends IViewContaner {
     QC_SENTENCES("QC Sentences", QC_PERMISSIONS, true, false, true),
     FIX_SENTENCES("Fix Sentences", QC_PERMISSIONS, false, true, true),
 
-    OOV_EDITOR("Missing In Dictionary", VOCABULARY, QC_PERMISSIONS),
+    OOV_EDITOR("Missing In Dictionary", EITHER, QC_PERMISSIONS),
 
     /**
      * @see NewBanner#getDialogNav

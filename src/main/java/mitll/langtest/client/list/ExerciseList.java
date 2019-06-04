@@ -67,7 +67,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   protected static final String COMPLETE = "Complete";
 
   private static final boolean DEBUG_STALE = true;
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
 
   private static final String SERVER_ERROR = "Server error";
   private static final String GETTING_EXERCISE = "getting exercise";

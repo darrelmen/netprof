@@ -263,14 +263,14 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
     if (next != null) {
       AlignmentOutput alignmentOutput = alignmentFetcher.getAlignment(next.getUniqueID());
       if (alignmentOutput != null) {
-        logger.info("maybeShowAlignment audio for " + getExID() + " : " + next);
+        if (DEBUG_SHOW_ALIGNMENT) logger.info("maybeShowAlignment audio for " + getExID() + " : " + next);
         showAlignment(next.getUniqueID(), next.getDurationInMillis(), alignmentOutput);
       } else {
-        logger.info("maybeShowAlignment no alignment for " + getExID() + " : " + next.getUniqueID() + " " + next.getTranscript() + " in " + alignmentFetcher.getNumAlignments());
+        if (DEBUG_SHOW_ALIGNMENT)
+          logger.info("maybeShowAlignment no alignment for " + getExID() + " : " + next.getUniqueID() + " " + next.getTranscript() + " in " + alignmentFetcher.getNumAlignments());
       }
     } else {
-      logger.info("maybeShowAlignment no audio for " + getExID());
-
+      if (DEBUG_SHOW_ALIGNMENT) logger.info("maybeShowAlignment no audio for " + getExID());
     }
   }
 

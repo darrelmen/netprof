@@ -140,7 +140,8 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
       @Override
       public void onSuccess(IDialog dialog) {
-        logger.info("showContent Got back dialog " + dialog);
+        if (DEBUG) logger.info("showContent Got back dialog " + dialog);
+
         showDialogGetRef(dialogFromURL, dialog, listContent);
       }
     });
@@ -245,7 +246,9 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   void markFirstTurn() {
     if (!allTurns.isEmpty()) {
       setCurrentTurn(allTurns.get(0));
-      logger.info("markFirstTurn : markCurrent ");
+
+      if (DEBUG) logger.info("markFirstTurn : markCurrent ");
+
       markCurrent();
       makeVisible(currentTurn);
     }
@@ -686,10 +689,10 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
       T prev = getPrev(toRemove);
       if (prev == null) {
         T next = getNext(toRemove);
-        logger.info("deleteTurn now next " + (next == null ? " NULL " : next.getExID()));
+        if (DEBUG) logger.info("deleteTurn now next " + (next == null ? " NULL " : next.getExID()));
         newCurrentTurn = next;
       } else {
-        logger.info("deleteTurn now prev " + prev.getExID());
+        if (DEBUG) logger.info("deleteTurn now prev " + prev.getExID());
         newCurrentTurn = prev;
       }
 
@@ -933,7 +936,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   /**
-   *
    * @return true if did it
    */
   boolean makeNextVisible() {

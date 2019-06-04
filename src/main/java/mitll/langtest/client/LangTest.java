@@ -830,7 +830,9 @@ public class LangTest implements
    */
   public void gotUser(User user) {
     storage.setUser(user.getID());
-    setProjectStartupInfo(user);
+
+    projectStartupInfo = user.getStartupInfo();
+
     if (DEBUG) logger.info("\ngotUser Got startup info " + projectStartupInfo);
     initialUI.gotUser(user);
   }
