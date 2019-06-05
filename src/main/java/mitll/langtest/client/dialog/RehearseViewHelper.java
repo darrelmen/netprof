@@ -74,8 +74,9 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     extends ListenViewHelper<T>
     implements SessionManager, IRehearseView, KeyPressDelegate {
-  public static final double HUNDRED = 100.0D;
   private final Logger logger = Logger.getLogger("RehearseViewHelper");
+
+  private static final double HUNDRED = 100.0D;
 
   private static final String DIALOG_INTRO_SHOWN_REHEARSAL = "dialogIntroShownRehearsal";
   private static final String HOLD_THE_RED_RECORD_BUTTON = "When it's your turn, press and hold the red record button or space bar.";
