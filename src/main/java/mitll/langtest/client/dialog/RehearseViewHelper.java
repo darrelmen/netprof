@@ -156,6 +156,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     return getView().isPressAndHold();
   }
 
+  /**
+   * @see RecordDialogExercisePanel#shouldShowRecordButton
+   * @return
+   */
   @Override
   public boolean isSimpleDialog() {
     return getDialog().getKind() == DialogType.DIALOG;

@@ -32,12 +32,13 @@ package mitll.langtest.client.scoring;
 import mitll.langtest.client.dialog.PerformViewHelper;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.exercise.CommonShell;
 
 import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class ObscureHelper {
+class ObscureHelper {
   private final Logger logger = Logger.getLogger("ObscureHelper");
 
   private static final boolean DEBUG_OVERLAP = false;
@@ -46,7 +47,13 @@ public class ObscureHelper {
   private final String foreignLanguage;
   private final List<IHighlightSegment> flclickables;
 
-  public ObscureHelper(int exid, String foreignLanguage, List<IHighlightSegment> flclickables) {
+  /**
+   * @see SimpleTurn#maybeObscure(Set)
+   * @param exid
+   * @param foreignLanguage
+   * @param flclickables
+   */
+  ObscureHelper(int exid, String foreignLanguage, List<IHighlightSegment> flclickables) {
     this.exid = exid;
     this.foreignLanguage = foreignLanguage;
     this.flclickables = flclickables;
@@ -65,7 +72,7 @@ public class ObscureHelper {
    * @see PerformViewHelper#getTurnPanel
    * Or should we use exact match?
    */
-  public void maybeSetObscure(List<ClientExercise> coreVocabs) {
+  void maybeSetObscure(List<? extends CommonShell> coreVocabs) {
     Set<String> coreVocab = new HashSet<>();
 
     coreVocabs.forEach(ex -> coreVocab.add(ex.getForeignLanguage().trim()));
@@ -73,7 +80,7 @@ public class ObscureHelper {
     maybeObscure(coreVocab);
   }
 
-  public void maybeObscure(Set<String> coreVocab) {
+  void maybeObscure(Set<String> coreVocab) {
     Collection<IHighlightSegment> obscureCandidates = getObscureCandidates(coreVocab);
 
     if (DEBUG_OVERLAP) logger.info("maybeSetObscure got " + coreVocab + " found " + obscureCandidates);
@@ -83,6 +90,8 @@ public class ObscureHelper {
 
   /**
    * Get all segments that need to be blacked out.
+   *
+   * Should be case insensitive.
    *
    * @param coreVocab
    * @return
@@ -94,7 +103,13 @@ public class ObscureHelper {
     Set<IHighlightSegment> candidates = new HashSet<>();
 
     // String foreignLanguage = exercise.getForeignLanguage();
-    List<String> overlaps = coreVocab.stream().filter(foreignLanguage::contains).collect(Collectors.toList());
+    String foreignLanguage = this.foreignLanguage.toLowerCase();
+
+    List<String> overlaps = coreVocab
+        .stream()
+        .map(String::toLowerCase)
+        .filter(foreignLanguage::contains)
+        .collect(Collectors.toList());
 
     Set<IHighlightSegment> toObscure = new HashSet<>();
 

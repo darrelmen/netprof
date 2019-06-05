@@ -580,16 +580,19 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
    * @param userDAO
    * @param minRecordings
    * @param listid
+   * @param justLastTwoYears
    * @return
    * @see AnalysisServiceImpl#getUsersWithRecordings
    * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis
    */
   @Override
-  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings, int listid) {
+  public List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings, int listid, boolean justLastTwoYears) {
     long then = System.currentTimeMillis();
     float minAnalysisScore = database.getServerProps().getMinAnalysisScore();
     Collection<SlickPerfResult> perfForUser = listid == -1 ?
-        resultDAO.getPerf(projid) :
+        (justLastTwoYears ?
+            resultDAO.getPerf(projid) :
+            resultDAO.getPerfAll(projid)) :
         resultDAO.getPerfOnList(listid, minAnalysisScore);
 
     long now = System.currentTimeMillis();
@@ -690,8 +693,8 @@ public class SlickAnalysis extends Analysis implements IAnalysis {
 
       List<BestScore> results = userToBest.computeIfAbsent(userid, k -> new ArrayList<>());
 
-      if (pronScore < 0) {
-        logger.warn("getUserToResults huh? got " + pronScore + " for " + exid + " and " + id);
+      if (pronScore < 0 && (count < 10 || count % 1000 == 0)) {
+        logger.warn("getUserToResults huh? got score " + pronScore + " for " + exid + " and " + id + " at " + perf.modified());
       }
 
       String json = perf.scorejson();

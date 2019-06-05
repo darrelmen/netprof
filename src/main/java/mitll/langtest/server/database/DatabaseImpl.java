@@ -83,6 +83,7 @@ import mitll.langtest.server.domino.ProjectSync;
 import mitll.langtest.server.json.JsonExport;
 import mitll.langtest.server.mail.MailSupport;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
+import mitll.langtest.server.scoring.TextNormalizer;
 import mitll.langtest.server.services.UserServiceImpl;
 import mitll.langtest.server.sorter.SimpleSorter;
 import mitll.langtest.shared.analysis.PhoneReportRequest;
@@ -1580,12 +1581,11 @@ public class DatabaseImpl implements Database, DatabaseServices {
       }
 
       boolean swap = projectDAO.getDefPropValue(project.getID(), ProjectProperty.SWAP_PRIMARY_AND_ALT).equalsIgnoreCase("TRUE");
-      exercise = getUserExerciseByExID(exid, swap);
+      exercise = getUserExerciseByExID(exid, swap, project.getSmallVocabDecoder());
     }
 
     String nativeAudio = audioDAO.getNativeAudio(userToGender, userid, exercise, project.getLanguageEnum(), idToMini, project.getAudioFileHelper().getSmallVocabDecoder());
     return new NativeAudioResult(nativeAudio, exercise != null && exercise.isContext());
-    // return nativeAudio;
   }
 
   /**
@@ -1593,12 +1593,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
    *
    * @param id
    * @param shouldSwap
+   * @param textNormalizer
    * @return
    * @see #editItem
    * @see #getCustomOrPredefExercise(int, int)
    */
-  private CommonExercise getUserExerciseByExID(int id, boolean shouldSwap) {
-    return userExerciseDAO.getByExID(id, shouldSwap);
+  private CommonExercise getUserExerciseByExID(int id, boolean shouldSwap, TextNormalizer textNormalizer) {
+    return userExerciseDAO.getByExID(id, shouldSwap, textNormalizer);
   }
 
   @Override
@@ -1606,57 +1607,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return serverProps;
   }
 
-  /**
-   * @param out
-   * @param typeToSection
-   * @param projectid
-   * @param ensureAudioHelper
-   * @throws Exception
-   * @see mitll.langtest.server.DownloadServlet#doGet(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)
-   */
-/*  public void writeZip(OutputStream out,
-                       Map<String, Collection<String>> typeToSection,
-                       int projectid,
-                       AudioExportOptions options,
-                       IEnsureAudioHelper ensureAudioHelper) throws Exception {
-    Collection<CommonExercise> exercisesForSelectionState = typeToSection.isEmpty() ?
-        getExercises(projectid, false) :
-        getSectionHelper(projectid).getExercisesForSelectionState(typeToSection);
 
-    if (!options.getSearch().isEmpty()) {
-      TripleExercises<CommonExercise> exercisesForSearch = new Search<>(this)
-          .getExercisesForSearch(
-              options.getSearch(),
-              exercisesForSelectionState, !options.isUserList() && typeToSection.isEmpty(), projectid, true);
-      exercisesForSelectionState = exercisesForSearch.getByExercise();
-    }
-
-    Project project = getProject(projectid);
-
-    String language = getLanguage(project);
-
-//    if (!typeToSection.isEmpty()) {
-    logger.info("writeZip for project " + projectid +
-        " ensure audio for " + exercisesForSelectionState.size() +
-        " exercises for " + language +
-        " selection " + typeToSection);
-
-    if (options.getIncludeAudio()) {
-      Language languageEnum = project.getLanguageEnum();
-      audioDAO.attachAudioToExercises(exercisesForSelectionState, languageEnum, projectid);
-      ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, languageEnum);
-    }
-
-    new AudioExport(getServerProps(), pathHelper.getContext())
-        .writeZip(out,
-            typeToSection,
-            getSectionHelper(projectid),
-            exercisesForSelectionState,
-            language,
-            false,
-            options,
-            project.isEnglish());
-  }*/
   @Override
   public String getLanguage(CommonExercise ex) {
     return getLanguage(ex.getProjectID());

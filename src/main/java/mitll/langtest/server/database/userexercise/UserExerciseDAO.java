@@ -36,6 +36,7 @@ import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.userlist.UserListDAO;
 import mitll.langtest.server.database.userlist.UserListExerciseJoinDAO;
+import mitll.langtest.server.scoring.TextNormalizer;
 import mitll.langtest.shared.exercise.*;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickExerciseAttributeJoin;
@@ -403,11 +404,12 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    *
    * @param listID
    * @param shouldSwap
+   * @param textNormalizer
    * @return
    * @see UserListDAO#populateList
    */
   @Override
-  public List<CommonShell> getOnList(int listID, boolean shouldSwap) {
+  public List<CommonShell> getOnList(int listID, boolean shouldSwap, TextNormalizer textNormalizer) {
     String sql = getJoin(listID);
     List<CommonShell> userExercises2 = new ArrayList<>();
 
@@ -492,14 +494,14 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   @Override
-  public List<CommonExercise> getCommonExercises(int listID, boolean shouldSwap) {
+  public List<CommonExercise> getCommonExercises(int listID, boolean shouldSwap, TextNormalizer textNormalizer) {
     return null;
   }
 
   /**
    * @param listID
    * @return
-   * @see IUserExerciseDAO#getOnList(int, boolean)
+   * @see IUserExerciseDAO#getOnList(int, boolean, TextNormalizer)
    */
   private String getJoin(long listID) {
     return "SELECT " +
@@ -533,11 +535,12 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    *
    * @param exid
    * @param shouldSwap
+   * @param textNormalizer
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseByExID
    */
   @Override
-  public CommonExercise getByExID(int exid, boolean shouldSwap) {
+  public CommonExercise getByExID(int exid, boolean shouldSwap, TextNormalizer textNormalizer) {
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + "='" + exid + "'";
     Collection<CommonExercise> commonExercises = getCommonExercises(sql);
     return commonExercises.isEmpty() ? null : commonExercises.iterator().next();
@@ -549,7 +552,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   @Override
-  public CommonExercise getByExOldID(String oldid, int projID) {
+  public CommonExercise getByExOldID(String oldid, int projID, TextNormalizer textNormalizer) {
     String sql = "SELECT * from " + USEREXERCISE + " where " + EXERCISEID + "='" + oldid + "'";
     Collection<CommonExercise> commonExercises = getCommonExercises(sql);
     return commonExercises.isEmpty() ? null : commonExercises.iterator().next();
@@ -561,7 +564,7 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
   }
 
   @Override
-  public CommonExercise getTemplateExercise(int projID) {
+  public CommonExercise getTemplateExercise(int projID, TextNormalizer textNormalizer) {
     return null;
   }
 
@@ -573,12 +576,13 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
 
   /**
    * @param shouldSwap
+   * @param textNormalizer
    * @return
    * @seex #setAudioDAO(AudioDAO)
    * @see mitll.langtest.server.database.exercise.ExcelImport#getRawExercises()
    */
   @Override
-  public Collection<CommonExercise> getOverrides(boolean shouldSwap) {
+  public Collection<CommonExercise> getOverrides(boolean shouldSwap, TextNormalizer textNormalizer) {
     return getCommonExercises("SELECT * from " + USEREXERCISE + " where " + OVERRIDE + "=true");
   }
 
@@ -647,9 +651,9 @@ public class UserExerciseDAO extends BaseUserExerciseDAO implements IUserExercis
    * @param sql
    * @return user exercises without annotations
    * @throws SQLException
-   * @see IUserExerciseDAO#getOnList(int, boolean)
-   * @see IUserExerciseDAO#getOverrides(boolean)
-   * @see IUserExerciseDAO#getByExID(int, boolean)
+   * @see IUserExerciseDAO#getOnList(int, boolean, TextNormalizer)
+   * @see IUserExerciseDAO#getOverrides(boolean, TextNormalizer)
+   * @see IUserExerciseDAO#getByExID(int, boolean, TextNormalizer)
    */
   private Collection<CommonExercise> getUserExercises(String sql) throws SQLException {
     Connection connection = database.getConnection(this.getClass().toString());

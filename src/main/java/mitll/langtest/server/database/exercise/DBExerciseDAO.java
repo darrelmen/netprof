@@ -33,6 +33,7 @@ import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.server.scoring.TextNormalizer;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -73,9 +74,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       IUserListManager userListManager,
       boolean addDefects,
       IUserExerciseDAO userExerciseDAO,
-      Project fullProject
-  ) {
-    super(serverProps, userListManager, addDefects, fullProject.getProject().language());
+      Project fullProject) {
+    super(serverProps, userListManager, addDefects, fullProject.getProject().language(), fullProject.getSmallVocabDecoder());
     this.userExerciseDAO = userExerciseDAO;
     this.project = fullProject.getProject();
     this.fullProject = fullProject;
@@ -113,7 +113,12 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
               );
             }
           } else {
-            logger.info("getExercise user ex for " + id + " = " + commonExercise.getEnglish() + " = " + commonExercise.getForeignLanguage());
+            logger.info("getExercise user ex " +
+                "\n\tfor  #" + id +
+                "\n\teng  '" + commonExercise.getEnglish() + "'" +
+                "\n\tfl   '" + commonExercise.getForeignLanguage() + "'" +
+                "\n\tnorm '" + commonExercise.getNormalizedFL() + "'" +
+                "");
           }
         } else {
           logger.info("getExercise found context " + commonExercise.getID());
@@ -206,8 +211,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * I don't think we're doing user exercise mask-out overrides anymore...
    *
    * @param removes
+   * @param textNormalizer
    */
-  protected void addOverlays(Collection<Integer> removes) {
+  protected void addOverlays(Collection<Integer> removes, TextNormalizer textNormalizer) {
   }
 
   /**
@@ -667,7 +673,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
 
     boolean added = false;
-    CommonExercise byExID = userExerciseDAO.getByExID(exid, false);
+    CommonExercise byExID = userExerciseDAO.getByExID(exid, false, fullProject.getSmallVocabDecoder());
     if (byExID == null) {
       logger.error("refresh huh? no known exid " + exid);
     } else {
@@ -701,9 +707,9 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     forget(exid);
 
     boolean added = false;
-    CommonExercise replacement = userExerciseDAO.getByExID(exid, false);
+    CommonExercise replacement = userExerciseDAO.getByExID(exid, false, fullProject.getSmallVocabDecoder());
     if (replacement == null) {
-      logger.error("refresh huh? no known exid " + exid);
+      logger.error("simpleRefresh huh? no known exid " + exid);
     } else {
       CommonExercise previous = idToUserExercise.put(exid, replacement);
 
@@ -727,7 +733,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       }
 
       if (DEBUG_REFRESH) {
-        logger.info("simpleRefresh after " + replacement.getEnglish() + " = " + replacement.getForeignLanguage());
+        logger.info("simpleRefresh after eng '" + replacement.getEnglish() + "' = '" + replacement.getForeignLanguage() + "'");
       }
 
       added = true;
@@ -735,12 +741,22 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     return added;
   }
 
+  /**
+   * @param exid
+   * @param replacement
+   * @return
+   * @see #simpleRefresh(int)
+   */
   @NotNull
   private CommonExercise setAttributes(int exid, CommonExercise replacement) {
     List<ExerciseAttribute> attributesFor = userExerciseDAO.getExerciseAttributeDAO().getAttributesFor(exid);
-    replacement.setAttributes(attributesFor);
 
-    if (DEBUG_REFRESH) logger.info("refresh attributes after " + replacement.getAttributes());
+    if (replacement == null) {
+      logger.warn("setAttributes no replacement exercise for #" + exid);
+    } else {
+      replacement.setAttributes(attributesFor);
+      if (DEBUG_REFRESH) logger.info("refresh attributes after " + replacement.getAttributes());
+    }
 
     CommonExercise exercise = getExercise(exid);
     if (exercise.getAttributes().size() != attributesFor.size()) {

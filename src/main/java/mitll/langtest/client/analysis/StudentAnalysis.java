@@ -47,11 +47,13 @@ public class StudentAnalysis extends TwoColumnAnalysis<UserInfo> {
 
   /**
    * @param controller
+   * @param justLastTwoYears
    * @see NewContentChooser#showProgress
    */
-  public StudentAnalysis(final ExerciseController controller) {
+  public StudentAnalysis(final ExerciseController controller, boolean justLastTwoYears) {
     Timer pleaseWaitTimer = getPleaseWaitTimer(controller);
-    analysisServiceAsync.getUsersWithRecordings(controller.getProjectID(), new AsyncCallback<Collection<UserInfo>>() {
+
+    analysisServiceAsync.getUsersWithRecordings(controller.getProjectID(), justLastTwoYears, new AsyncCallback<Collection<UserInfo>>() {
       @Override
       public void onFailure(Throwable throwable) {
         finishPleaseWait(pleaseWaitTimer, controller.getMessageHelper());

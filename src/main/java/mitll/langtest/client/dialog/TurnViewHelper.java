@@ -620,6 +620,15 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     }
   }
 
+  /**
+   * TODO : make the column decision based on the dialog vs interpreter mode in the UI, not on speakers in the dialog
+   *
+   * @see #getColumnForEx(String, String, ClientExercise)
+   * @param left
+   * @param right
+   * @param speaker
+   * @return
+   */
   @NotNull
   private ITurnContainer.COLUMNS getColumnForSpeaker(String left, String right, String speaker) {
     ITurnContainer.COLUMNS columns;
@@ -659,6 +668,15 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return turn;
   }
 
+  /**
+   *
+   * @param clientExercise
+   * @param columns
+   * @param prevColumn
+   * @param index
+   * @return
+   * @see #addTurn
+   */
   @NotNull
   T getTurnPanel(ClientExercise clientExercise, ITurnContainer.COLUMNS columns, ITurnContainer.COLUMNS prevColumn, int index) {
     T turn = reallyGetTurnPanel(clientExercise, columns, prevColumn, index);

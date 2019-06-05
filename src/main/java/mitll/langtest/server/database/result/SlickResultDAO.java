@@ -32,6 +32,7 @@ package mitll.langtest.server.database.result;
 import mitll.langtest.server.PathHelper;
 import mitll.langtest.server.ServerProperties;
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.analysis.IAnalysis;
 import mitll.langtest.server.database.user.IUserDAO;
 import mitll.langtest.server.scoring.ParseResultJson;
 import mitll.langtest.shared.UserAndTime;
@@ -283,7 +284,7 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
 
   @Override
   public List<MonitorResult> getResultsInTimeRange(int userid, int projectid, Timestamp from, Timestamp to) {
-    return getMonitorResults(getDao().resultsInTimeRange(userid, projectid,  from, to));
+    return getMonitorResults(getDao().resultsInTimeRange(userid, projectid, from, to));
   }
 
   public List<MonitorResult> getMonitorResultsKnownExercises(int projid) {
@@ -629,10 +630,14 @@ public class SlickResultDAO extends BaseResultDAO implements IResultDAO {
   /**
    * @param projid
    * @return
-   * @see mitll.langtest.server.database.analysis.SlickAnalysis#getUserInfo(IUserDAO, int, int)
+   * @see IAnalysis#getUserInfo(IUserDAO, int, int, boolean)
    */
   public Collection<SlickPerfResult> getPerf(int projid) {
     return dao.perf(projid);
+  }
+
+  public Collection<SlickPerfResult> getPerfAll(int projid) {
+    return dao.perfAll(projid);
   }
 
   public Collection<SlickPerfResult> getPerfOnList(int listid, float minScore) {

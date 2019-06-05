@@ -30,7 +30,6 @@
 package mitll.langtest.server.database.exercise;
 
 import mitll.hlt.domino.shared.model.document.*;
-import mitll.langtest.server.database.project.IProjectManagement;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.ImportDoc;
@@ -392,6 +391,8 @@ public class DominoExerciseDAO {
   }
 
   /**
+   * TODO : do proper TextNormalizer text normalization.
+   *
    * @param projid
    * @param exID
    * @param npID
@@ -420,12 +421,14 @@ public class DominoExerciseDAO {
                                                  boolean shouldSwap) {
     String trim = termVal.trim();
 
+    String normalizedFL = StringUtils.stripAccents(trim);
+
     Exercise exercise = new Exercise(exID,
         npID,
         creatorID,
         meaning.trim(),
         trim,
-        StringUtils.stripAccents(trim),
+        normalizedFL,
         alternateFormVal.trim(),
         "",
         transliterationVal.trim(),

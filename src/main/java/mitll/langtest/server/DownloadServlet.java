@@ -733,7 +733,7 @@ public class DownloadServlet extends DatabaseServlet {
       setFilenameHeader(response, filename);
       List<UserInfo> userInfo = db
           .getAnalysis(projectid)
-          .getUserInfo(db.getUserDAO(), 1, listID);
+          .getUserInfo(db.getUserDAO(), 1, listID, true);
 
       userInfo = filterByUser(invoke, userInfo);
 

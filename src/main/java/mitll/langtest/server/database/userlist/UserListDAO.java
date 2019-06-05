@@ -416,7 +416,7 @@ public class UserListDAO extends DAO implements IUserListDAO {
    * @see IUserListDAO#getAllByUser(int, int)
    */
   private void populateList(UserList<CommonShell> where) {
-    where.setExercises(userExerciseDAO.getOnList(where.getID(), false));
+    where.setExercises(userExerciseDAO.getOnList(where.getID(), false, database.getProject(where.getProjid()).getSmallVocabDecoder()));
   }
 
   @Override

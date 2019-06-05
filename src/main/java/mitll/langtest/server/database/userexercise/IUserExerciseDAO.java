@@ -36,6 +36,7 @@ import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectManagement;
+import mitll.langtest.server.scoring.TextNormalizer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.Exercise;
@@ -122,33 +123,36 @@ public interface IUserExerciseDAO extends IDAO {
 
   int insert(SlickExercise UserExercise);
 
-  List<CommonShell> getOnList(int listID, boolean shouldSwap);
+  List<CommonShell> getOnList(int listID, boolean shouldSwap, TextNormalizer textNormalizer);
 
   /**
    *
    * @param listID
    * @param shouldSwap
+   * @param textNormalizer
    * @return
    */
-  List<CommonExercise> getCommonExercises(int listID, boolean shouldSwap);
+  List<CommonExercise> getCommonExercises(int listID, boolean shouldSwap, TextNormalizer textNormalizer);
 
   /**
    * @param exid
    * @param shouldSwap
+   * @param textNormalizer
    * @return
    * @see mitll.langtest.server.database.DatabaseImpl#getUserExerciseByExID
    */
-  CommonExercise getByExID(int exid, boolean shouldSwap);
+  CommonExercise getByExID(int exid, boolean shouldSwap, TextNormalizer textNormalizer);
 
   SlickExercise getByID(int exid);
 
   /**
    * @param oldid
    * @param projID
+   * @param textNormalizer
    * @return
-   * @see SlickUserExerciseDAO#getTemplateExercise
+   * @see IUserExerciseDAO#getTemplateExercise
    */
-  CommonExercise getByExOldID(String oldid, int projID);
+  CommonExercise getByExOldID(String oldid, int projID, TextNormalizer textNormalizer);
 
   /**
    * @see ProjectManagement#getExercise
@@ -160,9 +164,10 @@ public interface IUserExerciseDAO extends IDAO {
   /**
    * @see mitll.langtest.server.services.AudioServiceImpl#writeAudioFile(String, AudioContext, boolean, String, String, DecoderOptions)
    * @param projID
+   * @param textNormalizer
    * @return
    */
-  CommonExercise getTemplateExercise(int projID);
+  CommonExercise getTemplateExercise(int projID, TextNormalizer textNormalizer);
 
   /**
    * @see DatabaseImpl#afterDAOSetup
@@ -198,7 +203,7 @@ public interface IUserExerciseDAO extends IDAO {
       Map<Integer, Collection<SlickExerciseAttributeJoin>> exToAttrs,
       boolean isPredef);
 
-  Collection<CommonExercise> getOverrides(boolean shouldSwap);
+  Collection<CommonExercise> getOverrides(boolean shouldSwap, TextNormalizer textNormalizer);
 
   List<SlickExercise> getExercisesByIDs(Collection<Integer> exids);
 

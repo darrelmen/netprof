@@ -342,6 +342,8 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
   /**
    * TODO : consider how to make this work for IE - inlineFlex doesn't
    *
+   * TODO: add something to allow you to show all data, not just last two years.
+   *
    * @return
    * @see MemoryItemContainer#getTable
    */
@@ -354,11 +356,6 @@ public class UserContainer extends BasicUserContainer<UserInfo> implements Typea
     filterContainer.add(userTypeahead.getSearch());
 
     filterContainer.add(getDownloadButton());
-
-
-//    Button excel = new Button("Excel", IconType.DOWNLOAD);
-//    excel.addStyleName("leftFiveMargin");
-//    filterContainer.add(excel);
 
     addListChoiceBox(filterContainer);
     return filterContainer;

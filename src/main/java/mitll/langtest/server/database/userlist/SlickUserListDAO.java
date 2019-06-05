@@ -281,24 +281,8 @@ public class SlickUserListDAO extends DAO implements IUserListDAO {
    * @see #getWithExercises(int)
    */
   private void populateList(UserList<CommonShell> where, boolean shouldSwap) {
-    //   List<CommonShell> onList = userExerciseDAO.getOnList(where.getID());
-    where.setExercises(userExerciseDAO.getOnList(where.getID(), shouldSwap));
-    // for (CommonShell shell : onList) logger.info("for " + where.getOldID() + " found " + shell);
-/*
-    Set<String> userExIDs = new HashSet<>();
-    for (CommonShell shell : onList) userExIDs.add(shell.getOldID());
-
-    Collection<String> exidsFor = userListExerciseJoinDAO.getExidsFor(where.getRealID());
-
-    for (String exid : exidsFor) {
-      if (!userExIDs.contains(exid)) {
-        CommonExercise predefExercise = userExerciseDAO.getPredefExercise(exid);
-        if (exid == null) logger.warn("can't find " + exid + " for list " + where);
-        else onList.add(predefExercise);
-      }
-    }*/
+    where.setExercises(userExerciseDAO.getOnList(where.getID(), shouldSwap, database.getProject(where.getProjid()).getSmallVocabDecoder()));
   }
-
 
   @Override
   public List<UserList<CommonShell>> getByName(long userid, String name, int projid) {

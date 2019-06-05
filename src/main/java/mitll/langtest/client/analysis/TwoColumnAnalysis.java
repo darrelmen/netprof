@@ -171,8 +171,7 @@ public abstract class TwoColumnAnalysis<T extends HasID> extends DivWidget {
                                  DivWidget bottom,
                                  DivWidget rightSide,
                                  String userContainer1) {
-    MemoryItemContainer<T> userContainer = getItemContainer(controller, bottom, rightSide);
-    DivWidget sessions = getContainerDiv(userContainer.getTable(users));
+    DivWidget sessions = getContainerDiv(getItemContainer(controller, bottom, rightSide).getTable(users));
     sessions.getElement().setId(userContainer1);
     sessions.addStyleName("cardBorderShadow");
     return sessions;

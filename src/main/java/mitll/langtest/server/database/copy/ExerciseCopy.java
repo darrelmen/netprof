@@ -32,6 +32,7 @@ package mitll.langtest.server.database.copy;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
+import mitll.langtest.server.scoring.TextNormalizer;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
@@ -107,7 +108,7 @@ public class ExerciseCopy {
         DEFAULT_DIALOG_ID));
 
     Map<String, Integer> exToInt = getOldToNewExIDs(db, projectid);
-    reallyAddingUserExercises(projectid, typeOrder, slickUEDAO, exToInt, customExercises);
+    reallyAddingUserExercises(projectid, typeOrder, slickUEDAO, exToInt, customExercises, db.getProject(projectid).getSmallVocabDecoder());
 
     logger.info("copyUserAndPredefExercises : finished copying customExercises - found " + exToInt.size());
     return exToInt;
@@ -124,21 +125,23 @@ public class ExerciseCopy {
    * @param slickUEDAO
    * @param exToInt
    * @param exercises
+   * @param textNormalizer
    * @see #copyUserAndPredefExercises
    */
   private void reallyAddingUserExercises(int projectid,
                                          Collection<String> typeOrder,
                                          IUserExerciseDAO slickUEDAO,
                                          Map<String, Integer> exToInt,
-                                         List<Exercise> exercises) {
+                                         List<Exercise> exercises, TextNormalizer textNormalizer) {
     List<SlickExercise> bulk = new ArrayList<>();
+
 
     for (Exercise userCandidate : exercises) {
       String oldID = userCandidate.getOldID();
       Integer existingPredefID = exToInt.get(oldID);
 
       if (existingPredefID != null) {
-        CommonExercise byExID = slickUEDAO.getByExID(existingPredefID, false);
+        CommonExercise byExID = slickUEDAO.getByExID(existingPredefID, false, textNormalizer);
         if (byExID.getEnglish().equals(userCandidate.getEnglish()) &&
             byExID.getForeignLanguage().equals(userCandidate.getForeignLanguage())) {
           logger.debug("reallyAddingUserExercises - user exercise with same old id " + oldID + " as predef " + byExID);

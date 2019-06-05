@@ -53,13 +53,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-public interface DatabaseServices extends DAOContainer, ProjectServices, //AmasServices,
+public interface DatabaseServices extends DAOContainer, ProjectServices,
     UserListServices, ExerciseServices, ReportingServices {
   Database getDatabase();
 
   IAnalysis getAnalysis(int projectid);
-
-
 
   mitll.langtest.server.database.user.UserManagement getUserManagement();
 

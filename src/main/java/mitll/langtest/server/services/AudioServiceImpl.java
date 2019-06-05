@@ -1152,7 +1152,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     CommonExercise commonExercise = isExistingExercise ?
         db.getCustomOrPredefExercise(projectID, exerciseID) :
-        db.getUserExerciseDAO().getTemplateExercise(db.getProjectDAO().getDefault());
+        db.getUserExerciseDAO().getTemplateExercise(db.getProjectDAO().getDefault(), project.getSmallVocabDecoder());
 
     if (commonExercise == null && isExistingExercise) {
       if (!db.getExerciseDAO(projectID).refresh(exerciseID)) {

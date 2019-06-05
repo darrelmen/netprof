@@ -36,6 +36,7 @@ import mitll.langtest.server.database.custom.AddRemoveDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
+import mitll.langtest.server.scoring.TextNormalizer;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -142,7 +143,7 @@ public class ExcelImport extends BaseExerciseDAO implements ExerciseDAO<CommonEx
                      ServerProperties serverProps,
                      IUserListManager userListManager,
                      boolean addDefects) {
-    super(serverProps, userListManager, addDefects, serverProps.getLanguage());
+    super(serverProps, userListManager, addDefects, serverProps.getLanguage(), new TextNormalizer(serverProps.getLanguage()));
     this.file = file;
 
     logger.info("ExcelImport Reading from " + file);

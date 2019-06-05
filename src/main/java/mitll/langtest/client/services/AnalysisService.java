@@ -50,7 +50,7 @@ public interface AnalysisService extends RemoteService {
    * @throws DominoSessionException
    * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis
    */
-  Collection<UserInfo> getUsersWithRecordings(int projid) throws DominoSessionException;
+  Collection<UserInfo> getUsersWithRecordings(int projid, boolean justLastTwoYears) throws DominoSessionException;
 
   Collection<UserInfo> getUsersWithRecordingsForDialog(int dialogID) throws DominoSessionException;
 

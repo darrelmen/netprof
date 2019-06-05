@@ -34,14 +34,18 @@ import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Widget;
+import mitll.langtest.client.dialog.IListenView;
 import mitll.langtest.client.dialog.ITurnContainer;
 import mitll.langtest.client.dialog.ListenViewHelper;
+import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.AllHighlight;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**
@@ -72,6 +76,7 @@ public class TurnPanelDelegate implements ITurnMarking {
    * @param columns
    * @param rightJustify
    * @see ListenViewHelper#reallyGetTurnPanel
+   * @see TurnPanel#TurnPanel
    */
   protected TurnPanelDelegate(final ClientExercise clientExercise,
                               DivWidget widget,

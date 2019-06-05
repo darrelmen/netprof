@@ -136,6 +136,7 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
     TurnViewHelper<SimpleTurn> leftHelper = getLeftHelper();
     leftHelper.setDialog(dialog);
     this.leftHelper = leftHelper;
+
     DivWidget turns = leftHelper.getTurns(dialog);
     styleTurnContainer(turns);
     turns.setWidth(LEFT_WIDTH + "%");
@@ -281,7 +282,6 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   @Override
   public void grabFocus() {
     if (getCurrentTurn() != null) {
-      // logger.info("give focus to turn for ex #" + getCurrentTurn().getExID());
       getCurrentTurn().grabFocus();
     }
   }
@@ -303,7 +303,6 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
       logger.warning("huh? core vocab is null???");
     } else {
 //      coreVocabulary.forEach(clientExercise -> logger.info("Got " + clientExercise.getID() + " " + clientExercise.getForeignLanguage()));
-
       List<ClientExercise> toUse = coreVocabulary.isEmpty() ? new ArrayList<>() : coreVocabulary;
       if (toUse.isEmpty()) toUse.add(new Exercise());
 

@@ -207,7 +207,7 @@ public class Project implements IPronunciationLookup, IProject {
     return getLanguageEnum() == Language.ENGLISH;
   }
 
-  private SmallVocabDecoder getSmallVocabDecoder() {
+  public SmallVocabDecoder getSmallVocabDecoder() {
     return getAudioFileHelper() == null ? null : getAudioFileHelper().getSmallVocabDecoder();
   }
 

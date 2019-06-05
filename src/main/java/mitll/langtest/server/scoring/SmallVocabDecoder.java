@@ -91,7 +91,6 @@ public class SmallVocabDecoder extends TextNormalizer {
     super(language.name());
     removeAllAccents =
         language != Language.FRENCH &&
-
             language != Language.TURKISH &&
             language != Language.CROATIAN &&
             language != Language.SERBIAN;

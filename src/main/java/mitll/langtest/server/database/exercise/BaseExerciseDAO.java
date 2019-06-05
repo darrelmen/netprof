@@ -40,6 +40,7 @@ import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.refaudio.IRefResultDAO;
 import mitll.langtest.server.database.userexercise.BaseUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
+import mitll.langtest.server.scoring.TextNormalizer;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
@@ -86,22 +87,26 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    */
   IUserExerciseDAO userExerciseDAO;
   private IAudioDAO audioDAO;
+  private TextNormalizer textNormalizer;
 
   /**
    * @param serverProps
    * @param userListManager
    * @param addDefects
    * @param language
+   * @param textNormalizer
    * @see DBExerciseDAO#DBExerciseDAO
    */
   BaseExerciseDAO(ServerProperties serverProps,
                   IUserListManager userListManager,
                   boolean addDefects,
-                  String language) {
+                  String language,
+                  TextNormalizer textNormalizer) {
     this.serverProps = serverProps;
     this.userListManager = userListManager;
     this.language = language;
     this.addDefects = addDefects;
+    this.textNormalizer = textNormalizer;
     // logger.debug("language is " + language + " add defects " + addDefects);
   }
 
@@ -128,7 +133,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     synchronized (idToExercise) {
       if (exercises == null) {
         exercises = readExercises();
-        afterReadingExercises();
+        afterReadingExercises(textNormalizer);
       }
     }
     return exercises;
@@ -157,9 +162,10 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   /**
    * Do steps after reading the exercises.
    *
+   * @param textNormalizer
    * @see #getRawExercises
    */
-  private void afterReadingExercises() {
+  private void afterReadingExercises(TextNormalizer textNormalizer) {
     addAlternatives(exercises);
 
     populateIdToExercise();
@@ -172,11 +178,11 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       Collection<Integer> removes = removeExercises();
       if (!removes.isEmpty())
         logger.info("remove these (" + removes.size() + ") " + removes);
-      addOverlays(removes);
+      addOverlays(removes, textNormalizer);
     }
 
     // add new items
-    addNewExercises();
+    addNewExercises(textNormalizer);
   }
 
   @Override
@@ -187,7 +193,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   /**
    * @return
    * @see DatabaseImpl#getSectionHelper(int)
-   * @see #addNewExercises()
+   * @see #addNewExercises(TextNormalizer)
    */
   public ISection<CommonExercise> getSectionHelper() {
     return sectionHelper;
@@ -256,11 +262,12 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * Don't add overlays for exercises that have been removed.
    *
    * @param removes
+   * @param textNormalizer
    * @see #setDependencies
    * @deprecated only for old h2 world with immutable exercises from spreadsheet
    */
-  protected void addOverlays(Collection<Integer> removes) {
-    Collection<CommonExercise> overrides = userExerciseDAO.getOverrides(false);
+  protected void addOverlays(Collection<Integer> removes, TextNormalizer textNormalizer) {
+    Collection<CommonExercise> overrides = userExerciseDAO.getOverrides(false, textNormalizer);
 
     if (overrides.size() > 0) {
       logger.debug("addOverlays found " + overrides.size() + " overrides : ");
@@ -381,7 +388,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   /**
    * @param ue
    * @seex DatabaseImpl#duplicateExercise
-   * @see #addNewExercises()
+   * @see #addNewExercises(TextNormalizer)
    */
   public void add(CommonExercise ue) {
     synchronized (idToExercise) {
@@ -469,7 +476,7 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
 
   /**
    * @param exTofieldToDefect
-   * @see #afterReadingExercises()
+   * @see #afterReadingExercises(TextNormalizer)
    */
   private void addDefects(Map<CommonExercise, Map<String, String>> exTofieldToDefect) {
     if (addDefects) {
@@ -517,14 +524,15 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
   /**
    * Only on import...
    *
+   * @param textNormalizer
    * @see #getRawExercises
    * @see #afterReadingExercises
    */
-  private void addNewExercises() {
+  private void addNewExercises(TextNormalizer textNormalizer) {
     if (addRemoveDAO != null) {
       for (AddRemoveDAO.IdAndTime id : addRemoveDAO.getAdds()) {
         String oldid = id.getOldid();
-        CommonExercise where = userExerciseDAO.getByExOldID(oldid, -1);
+        CommonExercise where = userExerciseDAO.getByExOldID(oldid, -1, textNormalizer);
         if (where == null) {
           logger.error("getRawExercises huh? couldn't find user exercise from add exercise table in user exercise table : " + id);
         } else {
@@ -655,6 +663,12 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @see mitll.langtest.server.services.ExerciseServiceImpl#updateText(int, int, int, int, String, String)
    */
   public OOVWordsAndUpdate updateText(Project project, int dialogID, int exid, int audioID, String content, String normalized, IRefResultDAO refResultDAO) {
+    logger.info("updateText " +
+        "\n\texid       " + exid +
+        "\n\taudioID    " + audioID +
+        "\n\tcontent    '" + content + "'" +
+        "\n\tnormalized '" + normalized + "'");
+
     CommonExercise exerciseByID = project.getExerciseByID(exid);
     if (exerciseByID == null) {
       logger.error("updateText " + "can't find " + exid);
@@ -673,6 +687,11 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
         logger.info("updateText " +
             "\n\tnow        '" + exerciseByID1.getForeignLanguage() + "'" +
             "\n\tnormalized '" + exerciseByID1.getNormalizedFL() + "'");*/
+
+        logger.info("updateText " +
+            "\n\tnow        '" + exerciseByID.getForeignLanguage() + "'" +
+            "\n\tnormalized '" + exerciseByID.getNormalizedFL() + "'");
+
 
         IDialog dialog = project.getDialog(dialogID);
         if (dialog == null) {

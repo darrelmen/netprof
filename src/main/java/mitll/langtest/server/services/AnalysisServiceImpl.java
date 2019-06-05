@@ -80,11 +80,12 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
 
   /**
    * @param projid - maybe they log out of another window while they do this request
+   * @param justLastTwoYears true by default - only show last two years of data so we don't overwhelm user
    * @return
    * @see mitll.langtest.client.analysis.StudentAnalysis#StudentAnalysis
    */
   @Override
-  public Collection<UserInfo> getUsersWithRecordings(int projid) throws DominoSessionException, RestrictedOperationException {
+  public Collection<UserInfo> getUsersWithRecordings(int projid, boolean justLastTwoYears) throws DominoSessionException, RestrictedOperationException {
     long then = System.currentTimeMillis();
     boolean hasTeacherPerm = hasTeacherPerm();
     if (!hasTeacherPerm) {
@@ -98,11 +99,10 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
     }
 
     if (hasTeacherPerm) {
-      //  int projid = getProjectIDFromUser();
       logger.info("getUsersWithRecordings for project # " + projid);
       List<UserInfo> userInfo = db
           .getAnalysis(projid)
-          .getUserInfo(db.getUserDAO(), MIN_RECORDINGS, -1);
+          .getUserInfo(db.getUserDAO(), MIN_RECORDINGS, -1, justLastTwoYears);
       long now = System.currentTimeMillis();
       if (now - then > 100) {
         logger.info("getUsersWithRecordings took " + (now - then) + " millis to get " + userInfo.size() + " user infos.");

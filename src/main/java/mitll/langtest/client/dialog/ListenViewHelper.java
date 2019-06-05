@@ -246,6 +246,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @param rightJustify
    * @param index
    * @return
+   * @see #reallyGetTurnPanel
    */
   @NotNull
   protected T makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, boolean rightJustify, int index) {
@@ -269,7 +270,10 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   private void populateColumnTurnLists() {
     allTurns.forEach(turn -> addToColumnPanelLists(
-        (turn.isLeft() ? COLUMNS.LEFT : turn.isRight() ? COLUMNS.RIGHT : COLUMNS.MIDDLE), turn));
+        (turn.isLeft() ? COLUMNS.LEFT :
+            turn.isRight() ? COLUMNS.RIGHT :
+                COLUMNS.MIDDLE),
+        turn));
   }
 
   private void addToColumnPanelLists(COLUMNS columns, T turn) {

@@ -69,8 +69,8 @@ public class EditorTurn extends PlayAudioExercisePanel
     implements ITurnPanel, IRehearseView, IRecordingTurnPanel, IFocusListener, AddDeleteListener {
   private final Logger logger = Logger.getLogger("EditorTurn");
 
-  public static final String REALLY_AVOID_LONG_PHRASES = "Really avoid long phrases.";
-  public static final String AVOID_LONG_PHRASES = "Avoid long phrases.";
+  private static final String REALLY_AVOID_LONG_PHRASES = "Really avoid long phrases.";
+  private static final String AVOID_LONG_PHRASES = "Avoid long phrases.";
 
   private static final int TURN_WIDTH = 97;
   private static final int RIGHT_TURN_RIGHT_MARGIN = 153;
@@ -542,50 +542,56 @@ public class EditorTurn extends PlayAudioExercisePanel
     return editableTurnHelper.getSanitized(s);
   }
 
-  private void updateTextViaExerciseService(int projectID, int exID, int audioID, String s, String norm, boolean moveToNextTurn, EditorTurn outer) {
+  private void updateTextViaExerciseService(int projectID, int exID, int audioID, String s,
+                                            String norm,
+                                            boolean moveToNextTurn, EditorTurn outer) {
     String sanitized = getSanitized(s);
     String sanitized2 = getSanitized(norm);
 
-    logger.info("update : " +
-        "\n\tcontent   " + s +
-        "\n\tsanitized " + sanitized +
-        "\n\tnorm      " + norm +
-        "\n\tsanitized " + sanitized2 +
-        "\n\taudio id  " + audioID);
+    if (DEBUG) {
+      logger.info("update : " +
+          "\n\tcontent   " + s +
+          "\n\tsanitized " + sanitized +
+          "\n\tnorm      " + norm +
+          "\n\tsanitized " + sanitized2 +
+          "\n\taudio id  " + audioID);
+    }
 
-    controller.getExerciseService().updateText(projectID, dialogID, exID, audioID, sanitized, sanitized2, new AsyncCallback<OOVWordsAndUpdate>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("updating text...", caught);
+    controller.getExerciseService().updateText(projectID, dialogID, exID, audioID, sanitized,
+        sanitized2,
+        new AsyncCallback<OOVWordsAndUpdate>() {
+          @Override
+          public void onFailure(Throwable caught) {
+            controller.handleNonFatalError("updating text...", caught);
 
-        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(caught);
-        logger.info("logException stack " + exceptionAsString);
-      }
+            String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(caught);
+            logger.info("logException stack " + exceptionAsString);
+          }
 
-      @Override
-      public void onSuccess(OOVWordsAndUpdate result) {
-        // showOOVResult(result);
-        logger.info("updateTextViaExerciseService : OK, update was " + result);
-        if (result.isDidUpdate()) {
-          Set<Integer> singleton = new HashSet<>();
-          singleton.add(exID);
-          controller.getAudioService().refreshExercises(projectID, singleton, new AsyncCallback<Void>() {
-            @Override
-            public void onFailure(Throwable caught) {
-              controller.handleNonFatalError("refreshing exercise on hydra", caught);
+          @Override
+          public void onSuccess(OOVWordsAndUpdate result) {
+            // showOOVResult(result);
+            logger.info("updateTextViaExerciseService : OK, update was " + result);
+            if (result.isDidUpdate()) {
+              Set<Integer> singleton = new HashSet<>();
+              singleton.add(exID);
+              controller.getAudioService().refreshExercises(projectID, singleton, new AsyncCallback<Void>() {
+                @Override
+                public void onFailure(Throwable caught) {
+                  controller.handleNonFatalError("refreshing exercise on hydra", caught);
+                }
+
+                @Override
+                public void onSuccess(Void result) {
+                  logger.info("updateTextViaExerciseService : OK, updated " + exID + " on hydra/hydra2 for " + s);
+                }
+              });
             }
-
-            @Override
-            public void onSuccess(Void result) {
-              logger.info("updateTextViaExerciseService : OK, updated " + exID + " on hydra/hydra2 for " + s);
+            if (moveToNextTurn) {
+              turnContainer.gotForward(outer);
             }
-          });
-        }
-        if (moveToNextTurn) {
-          turnContainer.gotForward(outer);
-        }
-      }
-    });
+          }
+        });
   }
 
   private void showOOVResult(OOVWordsAndUpdate result) {
