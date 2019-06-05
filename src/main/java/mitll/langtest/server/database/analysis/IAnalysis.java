@@ -41,7 +41,7 @@ public interface IAnalysis {
   WordsAndTotal getWordScoresForUser(AnalysisRequest analysisRequest, int rangeStart, int rangeEnd, String sort);
 
   List<WordAndScore> getWordAndScoreForPhoneAndBigram(AnalysisRequest analysisRequest);
-  List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings, int listid);
+  List<UserInfo> getUserInfo(IUserDAO userDAO, int minRecordings, int listid, boolean justLastTwoYears);
 
   /**
    * @see mitll.langtest.server.services.AnalysisServiceImpl#getUsersWithRecordingsForDialog

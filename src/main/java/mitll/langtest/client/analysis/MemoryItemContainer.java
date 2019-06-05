@@ -112,7 +112,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   /**
    * @param users
    * @return
-   * @see StudentAnalysis#StudentAnalysis(ExerciseController)
+   * @see StudentAnalysis#StudentAnalysis(ExerciseController, boolean)
    */
   DivWidget getTable(Collection<T> users) {
     DivWidget leftSide = new DivWidget();

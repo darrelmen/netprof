@@ -674,7 +674,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   private void showProgress() {
     boolean polyglotProject = isPolyglotProject();
     divWidget.add(isTeacher() ?
-        new StudentAnalysis(controller) :
+        new StudentAnalysis(controller, true) :
         new AnalysisTab(controller, polyglotProject, 0, () -> 1, LEARN, -1));
 
     currentSection = PROGRESS;

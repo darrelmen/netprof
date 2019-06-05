@@ -38,7 +38,7 @@ import java.util.Collection;
 import java.util.List;
 
 public interface AnalysisServiceAsync {
-  void getUsersWithRecordings(int projid, AsyncCallback<Collection<UserInfo>> async);
+  void getUsersWithRecordings(int projid, boolean justLastTwoYears, AsyncCallback<Collection<UserInfo>> async);
 
   /**
    * TODO : not sure why this is ever needed
