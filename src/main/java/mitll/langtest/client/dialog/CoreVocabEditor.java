@@ -337,7 +337,7 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
 
   @Override
   public boolean isInterpreter() {
-    return dialog.getKind() == DialogType.INTERPRETER;
+    return true;//dialog.getKind() == DialogType.INTERPRETER;
   }
 
   @Override

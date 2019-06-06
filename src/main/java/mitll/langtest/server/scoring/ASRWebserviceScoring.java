@@ -340,11 +340,10 @@ public class ASRWebserviceScoring extends Scoring implements ASR {
           return new PretestScore(0).setStatus("couldn't write the file");
         }
 
-
         int end = (int) (cachedDuration * 100.0);
         long now = System.currentTimeMillis();
 
-        if (now - then > 10) {
+        if (now - then > 20) {
           logger.info("scoreRepeatExercise : prep for " + filePath + " took " + (now - then));
         }
 

@@ -58,7 +58,6 @@ import mitll.langtest.shared.project.*;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import mitll.langtest.shared.scoring.RecalcRefResponse;
 import mitll.npdata.dao.SlickProject;
-import org.apache.commons.fileupload.FileItem;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -79,7 +78,6 @@ import static mitll.langtest.shared.project.ProjectProperty.*;
 public class Project implements IPronunciationLookup, IProject {
   private static final Logger logger = LogManager.getLogger(Project.class);
 
-
   private static final boolean BUILD_TRIE = true;
 
   private static final String HYDRA_2 = "hydra2";
@@ -92,12 +90,13 @@ public class Project implements IPronunciationLookup, IProject {
    * @see ProjectDAO#update
    * @see ProjectManagement#getProjectInfo
    */
-  public static final String TRUE = Boolean.TRUE.toString();
+  private static final String TRUE = Boolean.TRUE.toString();
   public static final String MANDARIN = "Mandarin";
 
   private static final boolean REPORT_ON_DIALOG_TYPES = false;
   private static final boolean DEBUG_FILE_LOOKUP = false;
-  public static final String TYPE = "Type";
+
+//  public static final String TYPE = "Type";
 
   /**
    * @see #getWebservicePort
@@ -122,12 +121,12 @@ public class Project implements IPronunciationLookup, IProject {
   private final ConcurrentMap<Integer, AlignmentOutput> audioToAlignment = new ConcurrentHashMap<>();
 
   private Map<String, Integer> fileToRecorder = new ConcurrentHashMap<>();
-  private Map<String, Boolean> unknownFiles = new ConcurrentHashMap<>();
+  private final Map<String, Boolean> unknownFiles = new ConcurrentHashMap<>();
 
   /**
    * @see #setDialogs
    */
-  private Map<Integer, IDialog> idToDialog = new ConcurrentHashMap<>();
+  private final Map<Integer, IDialog> idToDialog = new ConcurrentHashMap<>();
 
   /**
    *
@@ -304,9 +303,6 @@ public class Project implements IPronunciationLookup, IProject {
     return exerciseDAO == null ? null : exerciseDAO.getSectionHelper();
   }
 
-  public synchronized ISection<IDialog> getDialogSectionHelper() {
-    return dialogSectionHelper;
-  }
 
   void setJsonSupport(JsonSupport jsonSupport) {
     this.jsonSupport = jsonSupport;
@@ -463,8 +459,7 @@ public class Project implements IPronunciationLookup, IProject {
       return ModelType.HYDRA;
     } else {
       try {
-        ModelType modelType = ModelType.valueOf(prop);
-        return modelType;
+        return ModelType.valueOf(prop);
       } catch (IllegalArgumentException e) {
         logger.error("couldn't parse '" + prop + "' as model type enum?");
         return ModelType.HYDRA;
@@ -894,6 +889,10 @@ public class Project implements IPronunciationLookup, IProject {
     createDialogSectionHelper(idToDialog.values());
   }
 
+  public synchronized ISection<IDialog> getDialogSectionHelper() {
+    return dialogSectionHelper;
+  }
+
   private synchronized void createDialogSectionHelper(Collection<IDialog> dialogs) {
     populateDialogSectionHelper(dialogs, dialogSectionHelper);
   }
@@ -928,17 +927,19 @@ public class Project implements IPronunciationLookup, IProject {
 
       pairs.addAll(dialog.getAttributes());
 
+/*
       String value = dialog.getKind().toString();
       value = value.substring(0, 1).toUpperCase() + value.substring(1).toLowerCase();
       // logger.info("adding " + value + " " + dialog.getID());
       pairs.add(new Pair(TYPE, value));
+*/
 
       dialogSectionHelper1.addPairs(dialog, pairs);
 
       seen.add(pairs);
     });
 
-    typeOrder.add(TYPE);
+//    typeOrder.add(TYPE);
     dialogSectionHelper1.rememberTypesInOrder(typeOrder, seen);
 
     if (REPORT_ON_DIALOG_TYPES) {

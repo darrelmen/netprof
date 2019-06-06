@@ -162,7 +162,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    */
   @Override
   public boolean isSimpleDialog() {
-    return getDialog().getKind() == DialogType.DIALOG;
+    return !isInterpreter();
   }
 
   @Override
@@ -254,13 +254,13 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   @NotNull
   @Override
   protected DivWidget getLeftSpeaker(String firstSpeaker) {
-    if (isInterpreter) return super.getLeftSpeaker(firstSpeaker);
+    if (super.isInterpreter()) return super.getLeftSpeaker(firstSpeaker);
     else {
       DivWidget leftSpeaker = super.getLeftSpeaker(firstSpeaker);
       DivWidget container = new DivWidget();
       container.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
       container.add(leftSpeaker);
-      if (!isInterpreter)
+      if (!super.isInterpreter())
         container.add(getLeftHintHTML());
 
       return container;
@@ -270,14 +270,14 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   @NotNull
   @Override
   protected DivWidget getRightSpeaker(String secondSpeaker) {
-    if (isInterpreter) return super.getRightSpeaker(secondSpeaker);
+    if (super.isInterpreter()) return super.getRightSpeaker(secondSpeaker);
     else {
       DivWidget rightSpeaker = super.getRightSpeaker(secondSpeaker);
       DivWidget container = new DivWidget();
       container.addStyleName("floatRight");
 
       container.add(rightSpeaker);
-      if (!isInterpreter) {
+      if (!super.isInterpreter()) {
         container.getElement().getStyle().setMarginTop(VALUE, PX);
         container.add(getRightHintHTML());
       }
@@ -618,7 +618,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   void gotSpeakerChoice() {
     makeFirstTurnCurrent();
 
-    if (!isInterpreter) {
+    if (!super.isInterpreter()) {
       setHints();
     }
   }

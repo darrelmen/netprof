@@ -30,6 +30,7 @@
 package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.DatabaseImpl;
+import mitll.langtest.server.database.audio.SlickAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
 import mitll.langtest.server.database.custom.UserListManager;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
@@ -435,7 +436,10 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     String english = slick.english();
     if (english.length() > MAX_LENGTH) {
       english = english.substring(0, MAX_LENGTH) + "...";
-      logger.warn("toSlick " + slick.id() + " truncate english " + english);
+      logger.warn("toSlick " + slick.id() + " truncate" +
+          "\n\tfrom english " + slick.english() +
+          "\n\tto           " + english
+      );
     }
 
     String altfl = slick.altfl();
@@ -1010,7 +1014,7 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
   /**
    * @param projID
-   * @see DatabaseImpl#initializeDAOs
+   * @see DatabaseImpl#afterDAOSetup
    */
   public int ensureTemplateExercise(int projID) {
     int id = 0;

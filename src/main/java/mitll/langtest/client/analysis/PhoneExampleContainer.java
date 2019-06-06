@@ -92,10 +92,10 @@ public class PhoneExampleContainer extends AudioExampleContainer<WordAndScore> {
   protected void setMaxWidth() {
   }
 
-  @Override
+/*  @Override
   protected int getNumTableRowsGivenScreenHeight() {
     return 4;
-  }
+  }*/
   /**
    * Two rows each
    *

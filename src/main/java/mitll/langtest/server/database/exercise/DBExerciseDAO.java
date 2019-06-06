@@ -61,6 +61,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private final Project fullProject;
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_REFRESH = true;
+  private static final boolean DEBUG_REFRESH_ATTRIBUTES = false;
   private static final boolean DEBUG_ROOT_TYPE = false;
   private static final boolean DEBUG_USER_CREATED = false;
   private final Map<Integer, CommonExercise> idToContextExercise = new ConcurrentHashMap<>();
@@ -96,7 +97,10 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     CommonExercise commonExercise = getCommonExercise(id);
 
     if (commonExercise == null) {
-      logger.info("getExercise can't find exercise " + id);
+      if (DEBUG) {
+        logger.info("getExercise can't find exercise " + id);
+      }
+
       if (id != userExerciseDAO.getUnknownExerciseID()) {
         commonExercise = idToContextExercise.get(id);
         if (commonExercise == null) {
@@ -113,7 +117,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
               );
             }
           } else {
-            logger.info("getExercise user ex " +
+            logger.info("getExercise found user ex " +
                 "\n\tfor  #" + id +
                 "\n\teng  '" + commonExercise.getEnglish() + "'" +
                 "\n\tfl   '" + commonExercise.getForeignLanguage() + "'" +
@@ -129,9 +133,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
         logger.error("getExercise " + id + " != " + commonExercise);
       }
     }
-//      if (commonExercise == null) {
-//        commonExercise = maybeRefresh(id, commonExercise);
-//      }
 
     return commonExercise;
   }
@@ -147,22 +148,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
     return forget;
   }
-
-  //  private CommonExercise maybeRefresh(int id) {
-//    CommonExercise commonExercise = null;
-//    if (userExerciseDAO.getByID(id) != null) {  // is it in the database by this id at all?
-//      boolean refresh = refresh(id);
-//      if (refresh) {
-//        commonExercise = getExercise(id);
-//        logger.info("getExercise : refresh " + id);
-//      } else {
-//        logger.warn("getExercise : really couldn't find... " + id);
-//      }
-//    } else {
-//      logger.warn("getExercise : no known exercise with id " + id);
-//    }
-//    return commonExercise;
-//  }
 
   @Override
   public List<CommonExercise> getUserDefinedByProjectExactMatch(String fl, int userIDFromSession) {
@@ -726,7 +711,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
         } else {
           logger.warn("simpleRefresh huh? after refresh, new " + exercise.getForeignLanguage() + " vs " + replacement.getForeignLanguage());
-
         }
       } else {
         logger.warn("simpleRefresh huh? after refresh, new " + exercise.getEnglish() + " vs " + replacement.getEnglish());
@@ -755,13 +739,15 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       logger.warn("setAttributes no replacement exercise for #" + exid);
     } else {
       replacement.setAttributes(attributesFor);
-      if (DEBUG_REFRESH) logger.info("refresh attributes after " + replacement.getAttributes());
+      if (DEBUG_REFRESH_ATTRIBUTES) {
+        logger.info("refresh attributes after " + replacement.getAttributes());
+      }
     }
 
     CommonExercise exercise = getExercise(exid);
     if (exercise.getAttributes().size() != attributesFor.size()) {
-      logger.error("refresh attributes after " + exercise.getAttributes());
-      logger.error("refresh attributes after " + attributesFor);
+      logger.error("setAttributes refresh attributes after " + exercise.getAttributes());
+      logger.error("setAttributes refresh attributes after " + attributesFor);
     }
     return exercise;
   }

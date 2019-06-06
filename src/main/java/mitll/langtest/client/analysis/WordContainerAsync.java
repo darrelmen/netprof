@@ -167,10 +167,10 @@ public class WordContainerAsync extends AudioExampleContainer<WordScore> impleme
     return 155;//180;
   }
 
-  @Override
+ /* @Override
   protected int getNumTableRowsGivenScreenHeight() {
     return 5;
-  }
+  }*/
 
   protected void setMaxWidth() {
   }

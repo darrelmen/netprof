@@ -106,10 +106,10 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
                                                                  DivWidget bottom,
                                                                  DivWidget rightSide) {
     return new SessionContainer<IDialogSession>(controller, userContainerBottom == null ? bottom : userContainerBottom, rightSide, user) {
-      @Override
+  /*    @Override
       protected int getNumTableRowsGivenScreenHeight() {
         return 10;
-      }
+      }*/
 
       @Override
       public Panel getTableWithPager(Collection<IDialogSession> users) {

@@ -75,7 +75,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
   /**
    *
    */
-  private DialogType kind = DialogType.DIALOG;
+  private DialogType kind;
   private String orientation;
   private String imageRef;
   private List<ExerciseAttribute> attributes = new ArrayList<>();
@@ -253,10 +253,20 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     String refToUse = imageRef;
 
     if (refToUse == null || refToUse.isEmpty()) {
-      refToUse = "langtest/cc/" + (getKind() == DialogType.INTERPRETER ? INTERPRETER_PNG : DIALOG_PNG);
+      refToUse = getDefaultImage();
     }
 
     return refToUse;
+  }
+
+  /**
+   * Not sure if this is needed or redundant with other default image choice
+   * @return
+   */
+  @NotNull
+  private String getDefaultImage() {
+    //return "langtest/cc/" + (getKind() == DialogType.INTERPRETER ? INTERPRETER_PNG : DIALOG_PNG);
+    return "langtest/cc/" + INTERPRETER_PNG;
   }
 
   @Override

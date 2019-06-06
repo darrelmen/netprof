@@ -115,9 +115,9 @@ public class ListenViewHelper<T extends ITurnPanel>
     super(controller, thisView);
   }
 
-  public boolean isInterpreter() {
-    return dialog.getKind() == DialogType.INTERPRETER;
-  }
+//  public boolean isInterpreter() {
+//    return dialog.getKind() == DialogType.INTERPRETER;
+//  }
 
   @Override
   protected void clearTurnLists() {
@@ -654,7 +654,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @return
    */
   List<T> getPromptSeq() {
-    if (isInterpreter) {
+    if (super.isInterpreter()) {
       return promptTurns;
     } else {
       boolean leftSpeaker = isLeftSpeakerSet();
@@ -672,7 +672,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @return
    */
   List<T> getRespSeq() {
-    if (isInterpreter) {
+    if (super.isInterpreter()) {
       return middleTurnPanels;
     } else {
       boolean leftSpeaker = isLeftSpeakerSet();

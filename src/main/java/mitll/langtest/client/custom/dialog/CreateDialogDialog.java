@@ -57,13 +57,13 @@ import java.util.logging.Logger;
 public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
   private final Logger logger = Logger.getLogger("CreateDialogDialog");
 
-  public static final String PLEASE_CHOOSE = "Please choose.";
-  public static final String CHOOSE_TYPE_OF_DIALOG = "-- Choose type of dialog --";
-  public static final String HEIGHT = 100 + "px";
+  private static final String PLEASE_CHOOSE = "Please choose.";
+ // public static final String CHOOSE_TYPE_OF_DIALOG = "-- Choose type of dialog --";
+  static final String HEIGHT = 100 + "px";
 
   private FormField entitleBox;
-  private ListBox dialogType;
-  private ControlGroup dialogTypeContainer;
+//  private ListBox dialogType;
+//  private ControlGroup dialogTypeContainer;
 
   /**
    * @param current
@@ -120,16 +120,10 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
 
     child.add(grid);
 
-    addDialogType(child);
+  //  addDialogType(child);
 
     if (isEdit) {
-      DivWidget imageContainer = new DivWidget();
-      imageContainer.addStyleName("floatRight");
-      imageContainer.addStyleName("rightFiveMargin");
-      String imageRef = getCurrent().getImageRef();
-    //  logger.info("Show " + imageRef);
-      imageContainer.add(getImage(imageRef));
-      child.add(imageContainer);
+      child.add(getImageContainer());
     }
    /* {
       ListBox listBox = getListBox(200);
@@ -148,6 +142,18 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
   }
 
   @NotNull
+  private DivWidget getImageContainer() {
+    DivWidget imageContainer = new DivWidget();
+    imageContainer.addStyleName("bottomFiveMargin");
+    imageContainer.addStyleName("floatRight");
+    imageContainer.addStyleName("rightFiveMargin");
+    String imageRef = getCurrent().getImageRef();
+    //  logger.info("Show " + imageRef);
+    imageContainer.add(getImage(imageRef));
+    return imageContainer;
+  }
+
+  @NotNull
   private com.google.gwt.user.client.ui.Image getImage(String cc) {
     com.google.gwt.user.client.ui.Image image = new com.google.gwt.user.client.ui.Image(cc);
     image.setHeight(HEIGHT);
@@ -155,6 +161,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     return image;
   }
 
+/*
   private void addDialogType(Panel child) {
     ListBox listBox = getListBox(200);
     listBox.addStyleName("leftFiveMargin");
@@ -178,6 +185,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
       listBox.setEnabled(false);
     }
   }
+*/
 
   @Override
   protected void addDescription(Panel child) {
@@ -219,7 +227,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
         }
       }
 
-      if (validUnit) {
+/*      if (validUnit) {
         boolean valid = false;
         try {
           DialogType.valueOf(this.dialogType.getSelectedValue());
@@ -236,7 +244,9 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
         return valid;
       } else {
         return false;
-      }
+      }*/
+
+      return validUnit;
     } else {
       return false;
     }
@@ -277,7 +287,8 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
         new ArrayList<>(),
         new ArrayList<>(),
         new ArrayList<>(),
-        DialogType.valueOf(this.dialogType.getSelectedValue()),
+//        DialogType.valueOf(this.dialogType.getSelectedValue()),
+        DialogType.INTERPRETER, // always interpreter
         "",
         isPrivate
     );
@@ -327,7 +338,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     mutable.setForeignLanguage(titleBox.getSafeText());
     mutable.setEnglish(entitleBox.getSafeText());
     mutable.setOrientation(theDescription.getText());
-    mutable.setDialogType(DialogType.valueOf(dialogType.getSelectedValue()));
+//    mutable.setDialogType(DialogType.valueOf(dialogType.getSelectedValue()));
 //    logger.info("doEdit : using image " + imageID);
     //  mutable.setImageID(imageID);
 

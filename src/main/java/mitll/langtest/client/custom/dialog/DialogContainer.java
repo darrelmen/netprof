@@ -52,6 +52,7 @@ import static mitll.langtest.client.dialog.DialogExerciseList.INTERP_COLOR;
  * @param <T>
  */
 public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContainer<T> {
+  public static final String ID = "ID";
   //private final Logger logger = Logger.getLogger("DialogContainer");
 
   DialogContainer(ExerciseController<?> controller) {
@@ -87,7 +88,7 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
   private void addID(List<T> list) {
     Column<T, SafeHtml> userCol = getItemIDColumn();
     table.setColumnWidth(userCol, getIdWidth() + "px");
-    addColumn(userCol, new TextHeader("ID"));
+    addColumn(userCol, new TextHeader(ID));
     table.addColumnSortHandler(getUserSorter(userCol, list));
   }
 

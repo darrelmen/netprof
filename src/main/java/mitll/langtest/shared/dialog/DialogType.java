@@ -30,12 +30,14 @@
 package mitll.langtest.shared.dialog;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
-import com.google.gwt.user.client.ui.Panel;
 
 /**
  * @seex mitll.langtest.server.database.project.ProjectDAO#add(int, long, String, String, String, mitll.langtest.server.database.project.ProjectType, ProjectStatus, String, String, String, int, int)
  */
 public enum DialogType implements IsSerializable {
+  /**
+   *
+   */
   DIALOG(true),
   /**
    * @see mitll.langtest.client.custom.dialog.CreateDialogDialog#addDialogType

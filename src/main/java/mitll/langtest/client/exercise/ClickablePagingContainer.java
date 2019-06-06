@@ -47,7 +47,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
   private final Map<Integer, T> idToExercise = new HashMap<>();
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_MARK_CURRENT = false;
   private static final boolean DEBUG_ADDING = false;
 
@@ -219,6 +219,9 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
       );
     }
 
+    refresh();
+    flush();
+
     markCurrent(item);
 
     if (before + 1 != after) logger.warning("addItemAfter didn't add " + item.getID());
@@ -297,7 +300,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   public void setPageSize(int pageSize) {
-    //  logger.info("setPageSize: page size is " + pageSize);
+    logger.info("setPageSize: page size is " + pageSize);
     table.setPageSize(pageSize);
     table.redraw();
   }

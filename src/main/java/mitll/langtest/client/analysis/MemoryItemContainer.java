@@ -248,14 +248,16 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
     int selectedUser = getSelectedUser(selectedUserKey);
 
-    // logger.info("populateTable for " +selectedUserKey+ " selected item is " + selectedUser);
+    logger.info("populateTable for " + selectedUserKey + " selected item is " + selectedUser);
+
     for (T user : users) {
       addItem(user);
 
       if (selectedUser != -1 && user.getID() == selectedUser) {
         index = i;
         userToSelect = user;
-        //   logger.info("populateTable Selected user found  " + selectedUser + " at " + index + " out of " + users.size());
+        logger.info("populateTable Selected user found #" + selectedUser + " (" + user.toString() +
+            ") at " + index + " out of " + users.size());
       }
       i++;
     }
@@ -299,6 +301,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     int pageSize = table.getPageSize();
     int pageNum = i / pageSize;
     int newIndex = pageNum * pageSize;
+
+    logger.info("scrollIntoView " + i + " page size " + pageSize + " page num " + pageNum + " new index " + newIndex);
 
     if (i < table.getPageStart()) {
       int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());

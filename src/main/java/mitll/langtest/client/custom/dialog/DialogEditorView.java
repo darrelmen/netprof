@@ -67,6 +67,7 @@ import static mitll.langtest.client.custom.INavigation.QC_PERMISSIONS;
  * Created by go22670 on 7/3/17.
  */
 public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
+  public static final String UPLOAD_A_DIALOG_IMAGE = "Upload a dialog image.";
   private final Logger logger = Logger.getLogger("DialogEditorView");
 
   private static final String LIST = "dialog";
@@ -186,43 +187,28 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
       widgets1.showModal(new DialogHelper.CloseListener() {
         @Override
         public boolean gotYes() {
-          UploadViewBase.UploadResult result = widgets1.getResult();
-          if (result != null && result.getImageID() > 0) {
+         // UploadViewBase.UploadResult result = widgets1.getResult();
+ /*         if (result != null && result.getImageID() > 0) {
             logger.info("got back " + result.getImageID() + " " + result.getFilePath());
-//            controller.getDialogService().updateImage(getItemID(container), result.getImageID(), new AsyncCallback<Boolean>() {
-//              @Override
-//              public void onFailure(Throwable caught) {
-//
-//              }
-//
-//              @Override
-//              public void onSuccess(Boolean result) {
-//                logger.info("got back " + result);
-//              }
-//            });
-            //    getCurrentSelection(container).getMutable().setImageRef(result.getFilePath());
           } else {
             logger.info("2 got back " + result);
-          }
+          }*/
           return false;
         }
 
         @Override
         public void gotNo() {
-          logger.info("gotNo ");
-
+//          logger.info("gotNo ");
         }
 
         @Override
         public void gotHidden() {
-          logger.info("gotHidden ");
-
-          logger.info("2 got back " + widgets1.getResult());
-
+//          logger.info("gotHidden ");
+//          logger.info("2 got back " + widgets1.getResult());
         }
       });
     });
-    addTooltip(learn, "Upload a dialog image.");
+    addTooltip(learn, UPLOAD_A_DIALOG_IMAGE);
     //learn.setEnabled(!container.isEmpty());
     container.addButton(learn);
     return learn;
@@ -450,13 +436,12 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     controller.getDialogService().delete(controller.getProjectID(), uniqueID, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
-
+        controller.handleNonFatalError("deleting a dialog", caught);
       }
 
       @Override
       public void onSuccess(Boolean result) {
         gotDeleteResponse(result, currentSelection, uniqueID);
-
       }
     });
   }

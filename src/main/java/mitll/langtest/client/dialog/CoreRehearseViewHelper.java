@@ -92,7 +92,7 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscu
   protected T getTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
     T turnPanel = super.getTurnPanel(clientExercise, columns, prevColumn, index);
 
-    if (isInterpreter) {
+    if (super.isInterpreter()) {
       if (columns == ITurnContainer.COLUMNS.MIDDLE) {
         if (!clientExercise.hasEnglishAttr()) {
           turnPanel.maybeSetObscure(dialog.getCoreVocabulary());

@@ -31,7 +31,6 @@ package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
-import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.banner.SessionManager;
@@ -45,9 +44,7 @@ import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
@@ -235,7 +232,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
 
   private boolean isLeftSpeaker(COLUMNS columns, EditorTurn prevTurn) {
     boolean isLeftSpeaker;
-    if (isInterpreter) {
+    if (super.isInterpreter()) {
       if (columns == ITurnContainer.COLUMNS.MIDDLE) {
         isLeftSpeaker = (prevTurn == null || prevTurn.getColumn() == ITurnContainer.COLUMNS.LEFT);
       } else {
@@ -252,7 +249,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     logger.info("deleteCurrentTurnOrPair : " + "\n\tcurrent turn " + currentTurn.getExID());
     startDelete(currentTurn);
 
-    if (isInterpreter) {
+    if (super.isInterpreter()) {
       EditorTurn prev = getPrev(currentTurn);
       if (prev == null) {
         logger.warning("no prev????");

@@ -69,7 +69,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_SORTING = false;
-  private static final boolean DEBUG_SCROLL = false;
+  private static final boolean DEBUG_SCROLL = true;
   private ContainerList<T> containerList;
 
   protected SimplePagingContainer(ExerciseController controller) {
@@ -194,7 +194,11 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   }
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
-    return o == null ? new CellTable<>(getPageSize()) : new CellTable<>(getPageSize(), o);
+    int pageSize = getPageSize();
+
+    logger.info("makeCellTable (" + getClass() + ") " + pageSize);
+
+    return o == null ? new CellTable<>(pageSize) : new CellTable<>(pageSize, o);
   }
 
   protected int getPageSize() {
@@ -227,7 +231,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     {
       int numRows = getNumTableRowsGivenScreenHeight();
 
-      if (DEBUG) logger.info("configureTable size is " + numRows + " " + this.getClass());
+      if (DEBUG || true) logger.info("configureTable size is " + numRows + " " + this.getClass());
 
       if (table.getPageSize() != numRows) {
         table.setPageSize(numRows);
@@ -321,6 +325,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     return dataProvider == null ? null : dataProvider.getList();
   }
 
+  protected void refresh() {
+    dataProvider.refresh();
+  }
+
   /**
    * @see mitll.langtest.client.list.PagingExerciseList#onResize()
    */
@@ -334,26 +342,27 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   }
 
   protected int getNumTableRowsGivenScreenHeight() {
-    int header = getTableHeaderHeight();
+    return getPageSize();
+/*    int header = getTableHeaderHeight();
     int pixelsAbove = header + verticalUnaccountedFor;
     if (table.getElement().getAbsoluteTop() > 0) {
       pixelsAbove = table.getElement().getAbsoluteTop() + VERTICAL_SLOP;
     }
     int leftOver = Window.getClientHeight() - pixelsAbove;
-/*    if (DEBUG) {
+*//*    if (DEBUG) {
       logger.info("getNumTableRowsGivenScreenHeight Got on resize window height " + Window.getClientHeight() +
           " header " + header + " result = " + leftOver + "( vert unaccount " +
           verticalUnaccountedFor + " vs absolute top " + table.getElement().getAbsoluteTop() +
           " pix above " + pixelsAbove +
           ")");
-    }*/
+    }*//*
 
     float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
     float tableRatio = Math.min(MAX_PAGES, rawRatio);
     float ratio = DEFAULT_PAGE_SIZE * tableRatio;
 
-/*    if (DEBUG) logger.debug("getNumTableRowsGivenScreenHeight : left over " + leftOver + " raw " + rawRatio +
-      " table ratio " + tableRatio + " ratio " + ratio);*/
+*//*    if (DEBUG) logger.debug("getNumTableRowsGivenScreenHeight : left over " + leftOver + " raw " + rawRatio +
+      " table ratio " + tableRatio + " ratio " + ratio);*//*
 
     ratio = adjustVerticalRatio(ratio);
     int attempt = (int) Math.floor(ratio);
@@ -362,10 +371,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
     if (DEBUG) logger.info("getNumTableRowsGivenScreenHeight : rows " + rows);
 
-    return rows;
+    return rows;*/
   }
 
-  private float adjustVerticalRatio(float ratio) {
+/*  private float adjustVerticalRatio(float ratio) {
     return ratio;
   }
 
@@ -375,7 +384,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   private int getTableHeaderHeight() {
     return controller.getHeightOfTopRows();
-  }
+  }*/
 
   protected void addItem(T item) {
     getList().add(item);

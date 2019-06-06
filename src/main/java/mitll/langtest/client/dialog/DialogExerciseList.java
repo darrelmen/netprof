@@ -49,7 +49,6 @@ import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.FilterRequest;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.project.ProjectStartupInfo;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -62,8 +61,8 @@ import java.util.stream.Collectors;
 public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
-  private static final String TYPE = "Type";
-  private static final String DIALOG_PNG = "dialog.png";
+  //  private static final String TYPE = "Type";
+//  private static final String DIALOG_PNG = "dialog.png";
   private static final String INTERPRETER_PNG = "interpreter.png";
   private static final String DIALOG_COLOR = "#f0fff7";
   public static final String INTERP_COLOR = "aliceblue";
@@ -80,6 +79,9 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private static final int MAX_LENGTH_ID1 = 2 * MAX_LENGTH_ID + 12;
   private static final int NORMAL_MIN_HEIGHT = 101;// 67;
   private static final int LANGUAGE_SIZE = 6;
+
+  private Map<Integer, CorrectAndScore> scoreHistoryPerDialog;
+
 
   private static final boolean DEBUG = false;
 
@@ -102,19 +104,19 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     setDownloadVisible(false);
   }
 
-  @Override
+/*  @Override
   protected List<String> getTypeOrderSimple() {
     List<String> strings = new ArrayList<>(getStartupInfo().getTypeOrder());
     strings.add(TYPE);
     return strings;
-  }
+  }*/
 
-  @Override
+/*  @Override
   protected Set<String> getRootNodes(ProjectStartupInfo projectStartupInfo) {
     Set<String> strings = new HashSet<>(projectStartupInfo.getRootNodes());
     strings.add(TYPE);
     return strings;
-  }
+  }*/
 
   @Override
   protected int getFirstPageSize() {
@@ -157,7 +159,6 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     }
   }
 
-  private Map<Integer, CorrectAndScore> scoreHistoryPerDialog;
 
   @Override
   protected void setScores(ExerciseListWrapper<IDialog> result) {
@@ -252,8 +253,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     // logger.info("show image " + imageRef);
     String imageRef = dialog.getImageRef();
     if (imageRef == null || imageRef.isEmpty()) {
-      String s = dialog.getKind() == DialogType.INTERPRETER ? INTERPRETER_PNG : DIALOG_PNG;
-      imageRef = "langtest/cc/" + s;
+      imageRef = getDefaultImage(dialog);
     }
     PushButton button = new PushButton(getFlag(imageRef));
     button.addClickHandler(clickEvent -> gotClickOnDialog(dialog));
@@ -282,6 +282,14 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
       thumbnail.add(horiz);
     }
     return thumbnail;
+  }
+
+  @NotNull
+  private String getDefaultImage(IDialog dialog) {
+//    String imageRef;
+//    String s = dialog.getKind() == DialogType.INTERPRETER ? INTERPRETER_PNG : DIALOG_PNG;
+//    imageRef = "langtest/cc/" + s;
+    return "langtest/cc/" + INTERPRETER_PNG;
   }
 
   private void setMinHeight(UIObject horiz1, int normalMinHeight) {

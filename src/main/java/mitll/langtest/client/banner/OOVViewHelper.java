@@ -648,10 +648,10 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
     OOVMemoryItemContainer() {
       super(OOVViewHelper.this.controller, "oov", OOV, 10, 10);
     }
-    @Override
+  /*  @Override
     protected int getNumTableRowsGivenScreenHeight() {
       return 10;
-    }
+    }*/
     @Override
     public void gotClickOnItem(OOV user) {
       super.gotClickOnItem(user);
@@ -807,10 +807,10 @@ public class OOVViewHelper extends TableAndPager implements ContentView {
       super(OOVViewHelper.this.controller, "unsafe", ITEMS_WITH_MISSING_WORDS, 10, 10);
     }
 
-    @Override
+/*    @Override
     protected int getNumTableRowsGivenScreenHeight() {
       return 10;
-    }
+    }*/
 
     @Override
     public void gotClickOnItem(Wrapper user) {

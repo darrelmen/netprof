@@ -93,10 +93,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   final List<T> allTurns = new ArrayList<>();
   DivWidget dialogHeader, speakerRow;
 
-  /**
-   *
-   */
-  boolean isInterpreter = false;
+  private boolean isInterpreter = false;
   DivWidget turnContainer;
 
   private static final boolean DEBUG = false;
@@ -414,7 +411,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
           (firstSpeaker == null || getExerciseSpeaker(next).equalsIgnoreCase(firstSpeaker))) {
         firstSpeaker = ENGLISH_SPEAKER;
       }
-    } else if (dialog.getKind() == DialogType.INTERPRETER) {
+    } else if (isInterpreter()) {
       firstSpeaker = ENGLISH_SPEAKER;
     }
 
@@ -444,7 +441,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
       if (hasEnglishAttr && !getExerciseSpeaker(next).equalsIgnoreCase(secondSpeaker)) {
         secondSpeaker = getProjectLangSpeaker();
       }
-    } else if (dialog.getKind() == DialogType.INTERPRETER) {
+    } else if (isInterpreter()) {
       secondSpeaker = getProjectLangSpeaker();
     }
 
@@ -1015,5 +1012,12 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    */
   protected T getPrev() {
     return getPrev(this.currentTurn);
+  }
+
+  /**
+   *
+   */
+  public boolean isInterpreter() {
+    return isInterpreter;
   }
 }

@@ -66,6 +66,9 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 
   private static final String MAKE_A_NEW_LIST = "Make a new ";// + LIST + ".";
   private static final String CREATE_NEW_LIST = "Create New ";// + DIALOG;
+  /**
+   * @see #getRemoveButton
+   */
   private static final String DELETE_LIST = "Delete";// list.";
   /**
    * @see #getEdit
@@ -97,7 +100,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   protected final ExerciseController<?> controller;
   protected DivWidget leftRight, left;
   protected Button share;
-  private static final int MIN_WIDTH = 659;
+  private static final int MIN_WIDTH = 668;//659;
   protected DialogHelper dialogHelper;
   private ButtonMemoryItemContainer<T> myLists;
 
@@ -123,7 +126,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 
     this.left = left;
     this.leftRight = leftRight;
-//    addYours(left);
   }
 
   protected void setShareHREFLater() {
@@ -195,7 +197,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     successButton.addClickHandler(event -> doImport());
     return successButton;
   }
-
 
   private void doImport() {
     doImport(getCurrentSelection(myLists));
@@ -291,9 +292,8 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 //      listContainer.markCurrentExercise(id);
       //  Scheduler.get().scheduleDeferred(() -> {
       listContainer.markCurrentExercise(id);
-      listContainer.redraw();
+    //  listContainer.redraw();
       //});
-
     }
   }
 
@@ -511,10 +511,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 
           @Override
           public void gotHidden() {
-
           }
-
-
         }, 550);
 
     closeButton.setType(ButtonType.SUCCESS);
@@ -543,7 +540,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    */
   @Override
   public void madeIt(T userList) {
-    // logger.info("madeIt made it " + userList.getName());
+  logger.info("madeIt made it " + userList.getName());
     try {
       dialogHelper.hide();
       myLists.addItemAfter(null, userList);
@@ -553,7 +550,12 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     } catch (Exception e) {
       logger.warning("got " + e);
     }
-    Scheduler.get().scheduleDeferred(() -> myLists.markCurrentExercise(userList.getID()));
+
+/*    Scheduler.get().scheduleDeferred(() -> {
+      logger.info("madeIt markCurrentExercise " + userList.getName());
+
+      myLists.markCurrentExercise(userList.getID());
+    });*/
   }
 
   public ButtonMemoryItemContainer<T> getMyLists() {
@@ -564,7 +566,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    * @param myLists
    * @see DialogEditorView#showYours(Collection, DivWidget)
    */
-  public void setMyLists(ButtonMemoryItemContainer<T> myLists) {
+  protected void setMyLists(ButtonMemoryItemContainer<T> myLists) {
     this.myLists = myLists;
   }
 }

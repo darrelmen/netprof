@@ -266,7 +266,7 @@ public class DownloadServlet extends DatabaseServlet {
         AudioExportOptions audioExportOptions = getAudioExportOptions(splitArgs);
         audioExportOptions.setIncludeAudio(true);
         audioExportOptions.setForgiving(true);
-        writeDialogList(response, db, listid, projid, audioExportOptions);
+        writeDialog(response, db, listid, projid, audioExportOptions);
       }
     } else {
       logger.error("downloadDialogContent can't find dialog id in " + queryString);
@@ -832,11 +832,11 @@ public class DownloadServlet extends DatabaseServlet {
     }
   }
 
-  private void writeDialogList(HttpServletResponse response,
-                               DatabaseImpl db,
-                               String dialogID,
-                               int projectid,
-                               AudioExportOptions options) {
+  private void writeDialog(HttpServletResponse response,
+                           DatabaseImpl db,
+                           String dialogID,
+                           int projectid,
+                           AudioExportOptions options) {
     Integer id = null;
     try {
       id = Integer.parseInt(dialogID);
@@ -860,7 +860,7 @@ public class DownloadServlet extends DatabaseServlet {
       String name = id == null | iDialog == null ? "unknown" : english;
       name = name.replaceAll(",", "_").replaceAll(" ", "_");
       name += ".zip";
-      logger.info("writeDialogList : zip name " + name);
+      logger.info("writeDialog : zip name " + name);
       setHeader(response, name);
 
       options.setUserList(true);

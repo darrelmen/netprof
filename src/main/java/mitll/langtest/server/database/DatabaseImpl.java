@@ -1699,6 +1699,15 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return language + "_" + name;
   }
 
+  /**
+   * @see DownloadServlet#writeDialogList
+   * @param out
+   * @param dialogID
+   * @param projectid
+   * @param options
+   * @return
+   * @throws Exception
+   */
   public String writeDialogItems(OutputStream out,
                                  int dialogID,
                                  int projectid,

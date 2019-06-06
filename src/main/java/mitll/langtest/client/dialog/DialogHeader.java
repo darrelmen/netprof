@@ -136,20 +136,7 @@ public class DialogHeader {
         row.add(leftArrow);
       }
 
-      DivWidget middle = new DivWidget();
-      row.add(middle);
-      middle.setWidth(75 + "%");
-
-      middle.add(getTitleBlurb());
-      // add image
-      {
-        com.google.gwt.user.client.ui.Image image = getImage(dialog.getImageRef());
-        image.addStyleName("floatLeft");
-        image.addStyleName("rightFiveMargin");
-        middle.add(image);
-      }
-
-      middle.add(getDialogLabels(dialog));
+      row.add(getMiddle(dialog));
 
       //add next view arrow
       if (getNextView() != null) {
@@ -161,6 +148,24 @@ public class DialogHeader {
       outer.add(row);
     }
     return outer;
+  }
+
+  @NotNull
+  private DivWidget getMiddle(IDialog dialog) {
+    DivWidget middle = new DivWidget();
+    middle.setWidth(75 + "%");
+
+    middle.add(getTitleBlurb());
+    // add image
+    {
+      com.google.gwt.user.client.ui.Image image = getImage(dialog.getImageRef());
+      image.addStyleName("floatLeft");
+      image.addStyleName("rightFiveMargin");
+      middle.add(image);
+    }
+
+    middle.add(getDialogLabels(dialog));
+    return middle;
   }
 
   @NotNull
