@@ -327,8 +327,6 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
 
   @NotNull
   Widget getPrivacyChoices() {
-    FluidRow row = new FluidRow();
-
     publicChoice = new RadioButton(PUBLIC_PRIVATE_GROUP, PUBLIC);
     publicChoice.addClickHandler(event -> gotClickOnPublic());
 
@@ -338,7 +336,6 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     // students by default have private lists - ?
     {
       boolean isPrivate = getDefaultPrivacy();
-
       publicChoice.setValue(!isPrivate);
       radioButton2.setValue(isPrivate);
     }
@@ -348,9 +345,15 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     radioButton2.addStyleName("leftFiveMargin");
     hp.add(radioButton2);
 
+//    FluidRow row = new FluidRow();
+    Panel row = new FlowPanel();
     row.add(publicPrivateGroup = addControlGroupEntry(row, KEEP_LIST_PUBLIC_PRIVATE, hp, ""));
     return row;
   }
+
+  protected abstract void gotClickOnPublic();
+
+  protected abstract void gotClickOnPrivate();
 
   /**
    * @param projectStartupInfo
@@ -419,9 +422,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
   @NotNull
   protected abstract String getDescriptionOptional();
 
-  protected abstract void gotClickOnPublic();
 
-  protected abstract void gotClickOnPrivate();
 
   private boolean getDefaultPrivacy() {
     boolean isPrivate = true;

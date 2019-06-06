@@ -51,7 +51,6 @@ import mitll.langtest.client.scoring.TurnPanel;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
 import mitll.langtest.client.sound.PlayListener;
-import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.scoring.AlignmentOutput;
@@ -163,34 +162,18 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   private void getRefAudio(final Iterator<RefAudioGetter> iterator) {
     if (iterator.hasNext()) {
-      // RefAudioGetter next = iterator.next();
-      //logger.info("getRefAudio asking next panel...");
-
-//      if (false) {
-//        logger.info("getRefAudio : skip stale req for panel...");
-//      } else {
       iterator.next().getRefAudio(() -> {
         if (iterator.hasNext()) {
-          //     logger.info("\tgetRefAudio panel complete...");
-          //   final int reqid = next.getReq();
-          if (true) {
-            if (Scheduler.get() != null) {
-              Scheduler.get().scheduleDeferred(() -> {
-                // if (true) {
-                getRefAudio(iterator);
-                // }
-                //else {
-//              /
-                // }
-              });
-            }
+          if (Scheduler.get() != null) {
+            Scheduler.get().scheduleDeferred(() -> {
+              getRefAudio(iterator);
+            });
           }
         } else {
           //   logger.info("\tgetRefAudio all panels complete...");
         }
       });
     }
-    // }
   }
 
   /**
@@ -204,8 +187,6 @@ public class ListenViewHelper<T extends ITurnPanel>
   @NotNull
   @Override
   T getTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
-//    T turn = reallyGetTurnPanel(clientExercise, columns, prevColumn, index);
-//    turn.addWidgets(true, false, PhonesChoices.HIDE, EnglishDisplayChoices.SHOW);
     T turn = super.getTurnPanel(clientExercise, columns, prevColumn, index);
     if (!turn.addPlayListener(this)) logger.warning("didn't add the play listener...");
     turn.addClickHandler(event -> {

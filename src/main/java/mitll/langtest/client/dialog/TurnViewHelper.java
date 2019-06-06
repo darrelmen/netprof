@@ -68,13 +68,13 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 
 public abstract class TurnViewHelper<T extends ISimpleTurn>
     extends DialogView
-    implements ContentView {
-  public static final int DELETE_DELAY = 500;
+    implements ContentView, IModeListener {
   private final Logger logger = Logger.getLogger("TurnViewHelper");
 
+  private static final int DELETE_DELAY = 500;
   private static final String ENGLISH_SPEAKER = "English Speaker";
 
-  static final String INTERPRETER = "Interpreter";
+  private static final String INTERPRETER = "Interpreter";
   static final String SPEAKER_A = "A";
   static final String SPEAKER_B = "B";
   private static final int INTERPRETER_WIDTH = 165;//235;
@@ -91,9 +91,12 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   private INavigation.VIEWS thisView;
   protected IDialog dialog;
   final List<T> allTurns = new ArrayList<>();
-  DivWidget dialogHeader, speakerRow;
+  DivWidget dialogHeader;
+  private DivWidget speakerRow;
 
   private boolean isInterpreter = false;
+  private boolean isInterpreterMode = true;
+
   DivWidget turnContainer;
 
   private static final boolean DEBUG = false;
@@ -144,7 +147,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     });
   }
 
-
   public IDialog getDialog() {
     return dialog;
   }
@@ -161,7 +163,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     allTurns.clear();
   }
 
-  protected void startDelete(ISimpleTurn currentTurn) {
+  void startDelete(ISimpleTurn currentTurn) {
     currentTurn.setDeleting(true);
     if (currentTurn instanceof UIObject) {
       ((UIObject) currentTurn).getElement().getStyle().setOpacity(0.5);
@@ -171,6 +173,8 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   protected int getDialogFromURL() {
     return new SelectionState().getDialog();
   }
+
+  private Panel dialogContainer;
 
   /**
    * @param dialogID can be -1 if we just jump into a rehearse view without choosing a dialog first...
@@ -182,6 +186,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     this.dialog = dialog;
     if (DEBUG) logger.info("showDialogGetRef : show dialog " + dialogID);
     if (dialog != null) {
+      this.dialogContainer = child;
       isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
       showDialog(dialogID, dialog, child);
     } else {
@@ -306,18 +311,20 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
       addDialogHeader(dialog, child);
 
-      DivWidget controlAndSpeakers = new DivWidget();
-      styleControlRow(controlAndSpeakers);
+      {
+        DivWidget controlAndSpeakers = new DivWidget();
+        styleControlRow(controlAndSpeakers);
 
-      addControls(controlAndSpeakers);
+        addControls(controlAndSpeakers);
 
-      controlAndSpeakers.add(speakerRow = getSpeakerRow(dialog));
+        controlAndSpeakers.add(speakerRow = getSpeakerRow(dialog));
 
-      child.add(controlAndSpeakers);
+        child.add(controlAndSpeakers);
+      }
 
       child.add(getTurns(dialog));
 
-      child.add(addEditorButton());
+      //child.add(addEditorButton());
     }
   }
 
@@ -337,14 +344,13 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   DivWidget getControls() {
-    DivWidget widgets = new DivWidget();
-    return widgets;
-  }
-
-  @NotNull
-  private DivWidget addEditorButton() {
     return new DivWidget();
   }
+
+//  @NotNull
+//  private DivWidget addEditorButton() {
+//    return new DivWidget();
+//  }
 
   /**
    * @param dialog
@@ -352,7 +358,28 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    * @see #showDialog(int, IDialog, Panel)
    */
   protected void addDialogHeader(IDialog dialog, Panel child) {
-    child.add(dialogHeader = new DialogHeader(controller, thisView, getPrevView(), getNextView()).getHeader(dialog));
+    child.add(dialogHeader =
+        new DialogHeader(controller, thisView, getPrevView(), getNextView(), this)
+            .getHeader(dialog));
+  }
+
+  @Override
+  public void gotDialog() {
+    isInterpreterMode = false;
+
+    showDialog(dialog.getID(), dialog, dialogContainer);
+  }
+
+  @Override
+  public void gotInterpreter() {
+    isInterpreterMode = true;
+    showDialog(dialog.getID(), dialog, dialogContainer);
+  }
+
+  @Override
+  public void setIsDialog(boolean val) {
+    isInterpreterMode = !val;
+    logger.info("isInterpreter " + val);
   }
 
   /**
@@ -381,7 +408,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
     {
       DivWidget middleSpeaker = getMiddleSpeaker();
-      if (!isInterpreter) {
+      if (!isInterpreter || !isInterpreterMode) {
         middleSpeaker.setHeight("5px");
         middleSpeaker.setVisible(false);
       }
@@ -399,7 +426,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    */
   @NotNull
   String getFirstSpeakerLabel(IDialog dialog) {
-    String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
+/*    String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
 
     if (DEBUG) logger.info("getFirstSpeakerLabel first speaker " + firstSpeaker);
 
@@ -420,7 +447,9 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
       logger.info("getFirstSpeakerLabel 2 " +
           "first speaker " + firstSpeaker);
     }
-    return firstSpeaker;
+    */
+
+    return isInterpreterMode ? ENGLISH_SPEAKER : SPEAKER_A;
   }
 
   /**
@@ -431,7 +460,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    */
   @Nullable
   String getSecondSpeakerLabel(IDialog dialog) {
-    String secondSpeaker = dialog.getSpeakers().size() > 1 ? dialog.getSpeakers().get(1) : null;
+ /*   String secondSpeaker = dialog.getSpeakers().size() > 1 ? dialog.getSpeakers().get(1) : null;
 
     // OK guess from the language of the first turn
     if (!dialog.getExercises().isEmpty()) {
@@ -446,7 +475,10 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     }
 
     if (secondSpeaker == null) secondSpeaker = ListenViewHelper.SPEAKER_B;
-    return secondSpeaker;
+    return secondSpeaker;*/
+
+    return isInterpreterMode ? getProjectLangSpeaker() : ListenViewHelper.SPEAKER_B;
+
   }
 
   @NotNull
@@ -599,9 +631,25 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     ClientExercise prev = null;
     int index = 0;
     //   logger.info("addTurnForEachExercise got " + exercises.size());
+
+    if (!isInterpreterMode) {
+      exercises = exercises.stream().filter(ex->!ex.hasEnglishAttr()).collect(Collectors.toList());
+
+      exercises.forEach(clientExercise -> {
+        String speaker = clientExercise.getSpeaker();
+        logger.info("speaker " +speaker);
+        if (speaker.equalsIgnoreCase("Interpreter")) {
+        }
+      });
+    }
+
     for (ClientExercise clientExercise : exercises) {
+
       ITurnContainer.COLUMNS prevCol = prev == null ? ITurnContainer.COLUMNS.UNK : getColumnForEx(left, right, prev);
-      addTurn(rowOne, clientExercise, getColumnForEx(left, right, clientExercise), prevCol, index);
+      ITurnContainer.COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
+
+
+      addTurn(rowOne, clientExercise, columnForEx, prevCol, index);
       prev = clientExercise;
       index++;
     }
@@ -620,11 +668,11 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   /**
    * TODO : make the column decision based on the dialog vs interpreter mode in the UI, not on speakers in the dialog
    *
-   * @see #getColumnForEx(String, String, ClientExercise)
    * @param left
    * @param right
    * @param speaker
    * @return
+   * @see #getColumnForEx(String, String, ClientExercise)
    */
   @NotNull
   private ITurnContainer.COLUMNS getColumnForSpeaker(String left, String right, String speaker) {
@@ -666,7 +714,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   /**
-   *
    * @param clientExercise
    * @param columns
    * @param prevColumn

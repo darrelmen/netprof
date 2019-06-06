@@ -53,6 +53,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by go22670 on 4/5/17.
+ * @deprecated
  */
 public class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHelper<T> {
   private int dialogSessionID = -1;
@@ -111,7 +112,22 @@ public class StudyHelper<T extends CommonShell & ScoredExercise> extends LearnHe
 
   @NotNull
   private DivWidget getHeader(IDialog dialog) {
-    DivWidget header = new DialogHeader(controller, getFirstDialogView(), getPrevView(), getNextView()).getHeader(dialog);
+    DivWidget header = new DialogHeader(controller, getFirstDialogView(), getPrevView(), getNextView(), new IModeListener() {
+      @Override
+      public void gotDialog() {
+
+      }
+
+      @Override
+      public void gotInterpreter() {
+
+      }
+
+      @Override
+      public void setIsDialog(boolean val) {
+
+      }
+    }).getHeader(dialog);
     header.addStyleName("bottomFiveMargin");
     return header;
   }

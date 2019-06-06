@@ -443,7 +443,22 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       showView(DIALOG, false, true);
     } else {
       VIEWS next = shouldShowDialogEditor() ? TURN_EDITOR : null;
-      DialogHeader dialogHeader = new DialogHeader(controller, SCORES, PERFORM, next) {
+      DialogHeader dialogHeader = new DialogHeader(controller, SCORES, PERFORM, next, new IModeListener() {
+        @Override
+        public void gotDialog() {
+
+        }
+
+        @Override
+        public void gotInterpreter() {
+
+        }
+
+        @Override
+        public void setIsDialog(boolean val) {
+
+        }
+      }) {
         @Override
         protected void setRowWidth(DivWidget row) {
         }

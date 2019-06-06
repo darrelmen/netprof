@@ -27,31 +27,12 @@
  * authorized by the U.S. Government may violate any copyrights that exist in this work.
  */
 
-package mitll.langtest.shared.dialog;
+package mitll.langtest.client.dialog;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
+public interface IModeListener {
+  void gotDialog();
 
-/**
- * @seex mitll.langtest.server.database.project.ProjectDAO#add(int, long, String, String, String, mitll.langtest.server.database.project.ProjectType, ProjectStatus, String, String, String, int, int)
- */
-public enum DialogType implements IsSerializable {
-  /**
-   * @deprecated
-   */
-  DIALOG(true),
-  /**
-   * @see mitll.langtest.client.custom.dialog.CreateDialogDialog#addDialogType
-   */
-  INTERPRETER(true),
-  DEFAULT(false);
+  void gotInterpreter();
 
-  private boolean show;
-
-  DialogType(boolean show) {
-    this.show = show;
-  }
-
-  public boolean shouldShow() {
-    return show;
-  }
+  void setIsDialog(boolean val);
 }

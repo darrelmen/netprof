@@ -39,7 +39,6 @@ import com.google.gwt.user.cellview.client.ColumnSortList;
 import com.google.gwt.user.cellview.client.TextHeader;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 
 import java.util.List;
@@ -130,11 +129,17 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
         checkGotClick(object, event);
       }
 
+      /**
+       * No more distinction between dialog and interpreter
+       * @param shell
+       * @return
+       */
       @Override
       public SafeHtml getValue(T shell) {
-        String truncate = truncate(getSafe.getSafe(shell), maxLength);
-        return shell.getKind() == DialogType.DIALOG ?
-            getNoWrapContentBackground(truncate, "aliceblue") : getNoWrapContentBackground(truncate, INTERP_COLOR);
+        //String truncate = truncate(getSafe.getSafe(shell), maxLength);
+//        return shell.getKind() == DialogType.DIALOG ?
+//            getNoWrapContentBackground(truncate, "aliceblue") : getNoWrapContentBackground(truncate, INTERP_COLOR);
+        return getNoWrapContentBackground(truncate(getSafe.getSafe(shell), maxLength), INTERP_COLOR);
       }
     };
     column.setSortable(true);

@@ -38,7 +38,6 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.IFocusable;
 import mitll.langtest.client.scoring.SimpleTurn;
 import mitll.langtest.shared.dialog.DialogExChangeResponse;
-import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.Exercise;
@@ -100,7 +99,22 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   protected void addDialogHeader(IDialog dialog, Panel child) {
     if (!isInModal) {
       child.add(dialogHeader =
-          new DialogHeader(controller, INavigation.VIEWS.CORE_EDITOR, getPrevView(), getNextView()).getHeader(dialog));
+          new DialogHeader(controller, INavigation.VIEWS.CORE_EDITOR, getPrevView(), getNextView(), new IModeListener() {
+            @Override
+            public void gotDialog() {
+
+            }
+
+            @Override
+            public void gotInterpreter() {
+
+            }
+
+            @Override
+            public void setIsDialog(boolean val) {
+
+            }
+          }).getHeader(dialog));
     }
   }
 

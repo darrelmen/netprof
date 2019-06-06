@@ -340,7 +340,10 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
     container.setWidth("100%");
     container.addStyleName("floatLeft");
-    container.getElement().getStyle().setBackgroundColor(dialog.getKind() == DialogType.DIALOG ? DIALOG_COLOR : INTERP_COLOR);
+
+    // no more distinction
+   // container.getElement().getStyle().setBackgroundColor(dialog.getKind() == DialogType.DIALOG ? DIALOG_COLOR : INTERP_COLOR);
+    container.getElement().getStyle().setBackgroundColor(INTERP_COLOR);
     return container;
   }
 

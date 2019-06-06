@@ -82,7 +82,7 @@ public class KeyStorage {
     }
   }
 
-  public int getSimpleInt(String name) {
+  private int getSimpleInt(String name) {
     String value = getSimpleValue(name);
 
     if (value == null) return -1;

@@ -30,9 +30,8 @@
 package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Image;
-import com.github.gwtbootstrap.client.ui.Popover;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
@@ -45,6 +44,7 @@ import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
+import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.ProjectMode;
@@ -55,6 +55,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
 import static mitll.langtest.client.LangTest.LANGTEST_IMAGES;
@@ -64,7 +65,8 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * @see ListenViewHelper#addDialogHeader(IDialog, Panel)
  */
 public class DialogHeader {
-  // private final Logger logger = Logger.getLogger("DialogHeader");
+  public static final String IS_DIALOG_MODE_CHOICE = "isDialogModeChoice";
+  private final Logger logger = Logger.getLogger("DialogHeader");
   private static final String HEIGHT = 100 + "px";
 
   /**
@@ -85,19 +87,23 @@ public class DialogHeader {
 
   private String ARROW_KEY_TIP;
   private String ARROW_KEY_TIP_CORE;
+  private IModeListener modeListener;
 
   /**
    * @param controller
    * @param thisView
    * @param prev
    * @param next
+   * @param modeListener
    * @see mitll.langtest.client.banner.NewContentChooser#showScores(DivWidget, IDialog)
    */
-  protected DialogHeader(ExerciseController controller, INavigation.VIEWS thisView, INavigation.VIEWS prev, INavigation.VIEWS next) {
+  protected DialogHeader(ExerciseController controller, INavigation.VIEWS thisView, INavigation.VIEWS prev,
+                         INavigation.VIEWS next, IModeListener modeListener) {
     this.controller = controller;
     this.thisView = thisView;
     this.prev = prev;
     this.next = next;
+    this.modeListener = modeListener;
 
     String s = thisView.isPressAndHold() ? SPACE_PRESS_AND_HOLD : SPEAK_HINT;
 
@@ -145,9 +151,10 @@ public class DialogHeader {
         row.add(rightArrow);
       }
 
-      outer.add(row);
+      //outer.add(row);
+      return row;
     }
-    return outer;
+    // return outer;
   }
 
   @NotNull
@@ -366,7 +373,62 @@ public class DialogHeader {
 //      buttonDiv.add(getEditorButton(CORE_REHEARSE, false));
 //    }
 
+    Widget modeChoices = getModeChoices();
+    Style style = modeChoices.getElement().getStyle();
+    style.setMarginTop(30, PX);
+    // modeChoices.addStyleName("cardBorderShadow");
+    style.setBackgroundColor("aliceblue");
+    style.setPadding(5, PX);
+    buttonDiv.add(modeChoices);
+
     return buttonDiv;
+  }
+
+  private com.github.gwtbootstrap.client.ui.RadioButton dialogChoice, privateChoice;
+
+  @NotNull
+  Widget getModeChoices() {
+    dialogChoice = new com.github.gwtbootstrap.client.ui.RadioButton("group", "Dialog");
+    dialogChoice.addClickHandler(event -> gotClickOnDialog());
+
+    com.github.gwtbootstrap.client.ui.RadioButton radioButton2 = new com.github.gwtbootstrap.client.ui.RadioButton("group", "Interpreter");
+    privateChoice = radioButton2;
+    privateChoice.addClickHandler(event -> gotClickOnInterpreter());
+    // students by default have private lists - ?
+    {
+      boolean isDialog = controller.getStorage().isTrue(IS_DIALOG_MODE_CHOICE);
+
+      logger.info("isDialog " +isDialog);
+
+      modeListener.setIsDialog(isDialog);
+      dialogChoice.setValue(isDialog);
+      radioButton2.setValue(!isDialog);
+    }
+
+    Panel hp = new FlowPanel();
+    hp.add(dialogChoice);
+
+    hp.add(radioButton2);
+
+    Panel row = new FlowPanel();
+    ControlGroup view_as = new BasicDialog().addControlGroupEntry(row, "View as", hp, "");
+    view_as.addStyleName("floatLeft");
+    view_as.getElement().getStyle().setMarginBottom(0, PX);
+    row.addStyleName("floatLeft");
+    row.add(view_as);
+    return row;
+  }
+
+  private void gotClickOnDialog() {
+    logger.info("got click on dialog choice");
+    controller.getStorage().setBoolean(IS_DIALOG_MODE_CHOICE,true);
+    modeListener.gotDialog();
+  }
+
+  private void gotClickOnInterpreter() {
+    logger.info("got click on dialog choice");
+    controller.getStorage().setBoolean(IS_DIALOG_MODE_CHOICE,false);
+    modeListener.gotInterpreter();
   }
 
   @NotNull
