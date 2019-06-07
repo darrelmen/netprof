@@ -65,8 +65,12 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * @see ListenViewHelper#addDialogHeader(IDialog, Panel)
  */
 public class DialogHeader {
-  public static final String IS_DIALOG_MODE_CHOICE = "isDialogModeChoice";
+  public static final String GROUP = "group";
+  public static final String DIALOG = "Dialog";
+  public static final String INTERPRETER = "Interpreter";
   private final Logger logger = Logger.getLogger("DialogHeader");
+
+  private static final String IS_DIALOG_MODE_CHOICE = "isDialogModeChoice";
   private static final String HEIGHT = 100 + "px";
 
   /**
@@ -369,14 +373,13 @@ public class DialogHeader {
 
     setMinWidth(buttonDiv, ARROW_WIDTH);
 
-//    if (shouldShowDialogEditor(mine) && thisView == CORE_EDITOR) {
-//      buttonDiv.add(getEditorButton(CORE_REHEARSE, false));
-//    }
-
     Widget modeChoices = getModeChoices();
+
+    modeChoices.setVisible(thisView != CORE_EDITOR && thisView != TURN_EDITOR && thisView != SCORES);
+
     Style style = modeChoices.getElement().getStyle();
     style.setMarginTop(30, PX);
-    // modeChoices.addStyleName("cardBorderShadow");
+
     style.setBackgroundColor("aliceblue");
     style.setPadding(5, PX);
     buttonDiv.add(modeChoices);
@@ -384,30 +387,30 @@ public class DialogHeader {
     return buttonDiv;
   }
 
-  private com.github.gwtbootstrap.client.ui.RadioButton dialogChoice, privateChoice;
-
   @NotNull
-  Widget getModeChoices() {
-    dialogChoice = new com.github.gwtbootstrap.client.ui.RadioButton("group", "Dialog");
+  private Widget getModeChoices() {
+    com.github.gwtbootstrap.client.ui.RadioButton dialogChoice =
+        new com.github.gwtbootstrap.client.ui.RadioButton(GROUP, DIALOG);
     dialogChoice.addClickHandler(event -> gotClickOnDialog());
 
-    com.github.gwtbootstrap.client.ui.RadioButton radioButton2 = new com.github.gwtbootstrap.client.ui.RadioButton("group", "Interpreter");
-    privateChoice = radioButton2;
-    privateChoice.addClickHandler(event -> gotClickOnInterpreter());
-    // students by default have private lists - ?
+    com.github.gwtbootstrap.client.ui.RadioButton radioButton2 =
+        new com.github.gwtbootstrap.client.ui.RadioButton(GROUP, INTERPRETER);
+    radioButton2.addClickHandler(event -> gotClickOnInterpreter());
+
     {
       boolean isDialog = controller.getStorage().isTrue(IS_DIALOG_MODE_CHOICE);
 
-      logger.info("isDialog " +isDialog);
+      boolean isEditorView = thisView == TURN_EDITOR || thisView == CORE_EDITOR;
+      logger.info("isDialog " + isDialog + " is editor " + isEditorView);
 
-      modeListener.setIsDialog(isDialog);
+      modeListener.setIsDialog(isDialog && !isEditorView);
+
       dialogChoice.setValue(isDialog);
       radioButton2.setValue(!isDialog);
     }
 
     Panel hp = new FlowPanel();
     hp.add(dialogChoice);
-
     hp.add(radioButton2);
 
     Panel row = new FlowPanel();
@@ -421,13 +424,13 @@ public class DialogHeader {
 
   private void gotClickOnDialog() {
     logger.info("got click on dialog choice");
-    controller.getStorage().setBoolean(IS_DIALOG_MODE_CHOICE,true);
+    controller.getStorage().setBoolean(IS_DIALOG_MODE_CHOICE, true);
     modeListener.gotDialog();
   }
 
   private void gotClickOnInterpreter() {
     logger.info("got click on dialog choice");
-    controller.getStorage().setBoolean(IS_DIALOG_MODE_CHOICE,false);
+    controller.getStorage().setBoolean(IS_DIALOG_MODE_CHOICE, false);
     modeListener.gotInterpreter();
   }
 
@@ -525,14 +528,6 @@ public class DialogHeader {
 
     Popover popover = new Popover();
     popover.setContainer("body");
-
-//    simplePopover(popover,
-//        wrapper,
-//        null,
-//        message,
-//        Placement.LEFT, true);
-
-//    PopupPanel popupPanel = new PopupHelper().getPopupPanel(core_vocab, new HTML(message));
 
     final PopupPanel popupPanel = new DecoratedPopupPanel();
     popupPanel.setAutoHideEnabled(true);

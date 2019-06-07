@@ -100,8 +100,9 @@ public class ListenViewHelper<T extends ITurnPanel>
   private boolean doRehearse = true;
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PLAY_ENDED = false;
   private static final boolean DEBUG_BLUR = false;
-  private static final boolean DEBUG_DETAIL = false;
+//  private static final boolean DEBUG_DETAIL = false;
   private static final boolean DEBUG_PLAY = false;
   private static final boolean DEBUG_NEXT = false;
 
@@ -113,10 +114,6 @@ public class ListenViewHelper<T extends ITurnPanel>
   public ListenViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     super(controller, thisView);
   }
-
-//  public boolean isInterpreter() {
-//    return dialog.getKind() == DialogType.INTERPRETER;
-//  }
 
   @Override
   protected void clearTurnLists() {
@@ -150,7 +147,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   protected void showDialog(int dialogID, IDialog dialog, Panel child) {
     super.showDialog(dialogID, dialog, child);
     if (dialog != null) {
-      List<RefAudioGetter> refAudioGetters = new ArrayList<>(allTurns);
+      List<RefAudioGetter> refAudioGetters = new ArrayList<>(getAllTurns());
 
       if (DEBUG) {
         logger.info("showDialogGetRef : Get ref audio for " + refAudioGetters.size());
@@ -169,9 +166,10 @@ public class ListenViewHelper<T extends ITurnPanel>
               getRefAudio(iterator);
             });
           }
-        } else {
-          //   logger.info("\tgetRefAudio all panels complete...");
         }
+        //else {
+        //   logger.info("\tgetRefAudio all panels complete...");
+        //}
       });
     }
   }
@@ -250,11 +248,12 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   private void populateColumnTurnLists() {
-    allTurns.forEach(turn -> addToColumnPanelLists(
-        (turn.isLeft() ? COLUMNS.LEFT :
-            turn.isRight() ? COLUMNS.RIGHT :
-                COLUMNS.MIDDLE),
-        turn));
+    getAllTurns().forEach(turn ->
+        addToColumnPanelLists(
+            (turn.isLeft() ? COLUMNS.LEFT :
+                turn.isRight() ? COLUMNS.RIGHT :
+                    COLUMNS.MIDDLE),
+            turn));
   }
 
   private void addToColumnPanelLists(COLUMNS columns, T turn) {
@@ -635,15 +634,17 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @return
    */
   List<T> getPromptSeq() {
-    if (super.isInterpreter()) {
+    if (isInterpreter()) {
       return promptTurns;
     } else {
-      boolean leftSpeaker = isLeftSpeakerSet();
-      boolean rightSpeaker = isRightSpeakerSet();
-      List<T> ts = (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : allTurns;
+//      boolean leftSpeaker = isLeftSpeakerSet();
+//      boolean rightSpeaker = isRightSpeakerSet();
+//      List<T> ts = (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : allTurns;
+
       // logger.info("getPromptSeq " + ts.size());
-      if (DEBUG_DETAIL) report("prompts", ts);
-      return ts;
+      //    if (DEBUG_DETAIL) report("prompts", ts);
+      //  return ts;
+      return leftTurnPanels;
     }
   }
 
@@ -653,12 +654,13 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @return
    */
   List<T> getRespSeq() {
-    if (super.isInterpreter()) {
+    if (isInterpreter()) {
       return middleTurnPanels;
     } else {
-      boolean leftSpeaker = isLeftSpeakerSet();
-      boolean rightSpeaker = isRightSpeakerSet();
-      return leftSpeaker ? rightTurnPanels : rightSpeaker ? leftTurnPanels : null;
+      //  boolean leftSpeaker = isLeftSpeakerSet();
+      //  boolean rightSpeaker = isRightSpeakerSet();
+      // return leftSpeaker ? rightTurnPanels : rightSpeaker ? leftTurnPanels : null;
+      return rightTurnPanels;// : rightSpeaker ? leftTurnPanels : null;
     }
   }
 
@@ -672,10 +674,6 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   boolean isFirstPrompt(T turn) {
     return leftTurnPanels.indexOf(turn) == 0;
-  }
-
-  Boolean isLeftSpeakerSet() {
-    return true;
   }
 
   Boolean isRightSpeakerSet() {
@@ -763,33 +761,41 @@ public class ListenViewHelper<T extends ITurnPanel>
    * @see #playStopped
    */
   void currentTurnPlayEnded() {
-    if (DEBUG) {
+    if (DEBUG_PLAY_ENDED) {
       logger.info("currentTurnPlayEnded - turn " + getExID() + " sessionGoingNow " + sessionGoingNow);
-
 //      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("got turn click"));
 //      logger.info("logException stack " + exceptionAsString);
-
     }
 
+    T currentTurn = getCurrentTurn();
+    if (DEBUG_PLAY_ENDED && currentTurn != null) {
+      logger.info("currentTurnPlayEnded current is " + getBlurb(currentTurn));
+    }
     T next = getNext();
-    if (DEBUG && next != null) {
-      logger.info("currentTurnPlayEnded next turn " + next.getExID());
+    if (DEBUG_PLAY_ENDED && next != null) {
+      logger.info("currentTurnPlayEnded next turn " + getBlurb(next));
     }
     if (!makeNextVisible()) {
-      if (DEBUG) logger.info("currentTurnPlayEnded didn't make next visible...");
+      if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded didn't make next visible...");
     }
 
     if (next == null) {
-      if (DEBUG) logger.info("currentTurnPlayEnded OK stop");
-      if (DEBUG) logger.info("currentTurnPlayEnded : markCurrent ");
+      if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded OK stop");
+      if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded : markCurrent ");
       markCurrent();
       makeVisible(getCurrentTurn());
       setPlayButtonToPlay();
     } else {
+      if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded : play next " + getBlurb(next));
       removeMarkCurrent();
       setCurrentTurn(next);
       playCurrentTurn();
     }
+  }
+
+  @NotNull
+  private String getBlurb(T next) {
+    return next.getExID() + " " + next.getText();
   }
 
   private boolean sessionGoingNow;

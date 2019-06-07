@@ -510,9 +510,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
    */
   private DialogHelper doAddQuiz() {
     DivWidget contents = new DivWidget();
-//    ListView<T> lv=this;
-    CreateListDialog<T> createListDialog =
-        new CreateListDialog<>(this, controller, names).setIsQuiz(true);
+    CreateListDialog<T> createListDialog = new CreateListDialog<>(this, controller, names).setIsQuiz(true);
     createListDialog.doCreate(contents);
 
     return getNewListButton(contents, createListDialog, "Create New Quiz");
@@ -568,11 +566,10 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
   /**
    * @seex CreateListDialog#makeCreateButton
    */
-  @Override
-  public void gotEdit() {
-    editDialog.doEdit(getMyLists().getCurrentSelection(), getMyLists());
-  }
-
+//  @Override
+//  public void gotEdit() {
+//    editDialog.doEdit(getMyLists().getCurrentSelection(), getMyLists());
+//  }
   private void enableQuizButton(Button quizButton) {
     UserList<CommonShell> currentSelection = getCurrentSelection(getMyLists());
     if (quizButton != null) {

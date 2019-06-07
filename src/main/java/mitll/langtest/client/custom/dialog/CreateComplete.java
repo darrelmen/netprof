@@ -34,5 +34,5 @@ package mitll.langtest.client.custom.dialog;
  */
 public interface CreateComplete<T> {
   void madeIt(T userList);
-  void gotEdit();
+//  void gotEdit();
 }

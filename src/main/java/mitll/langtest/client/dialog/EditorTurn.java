@@ -134,11 +134,11 @@ public class EditorTurn extends PlayAudioExercisePanel
     }
     this.prev = clientExercise.getForeignLanguage();
 
-    logger.info("EditorTurn : turn " +
-        "\n\tex     " + clientExercise.getID() + " prev '" +
-        prev +
-        "'"
-    );
+    if (DEBUG) {
+      logger.info("EditorTurn : turn " +
+          "\n\tex     " + clientExercise.getID() + " prev '" + prev + "'"
+      );
+    }
 
     this.sessionManager = sessionManager;
 
@@ -340,7 +340,10 @@ public class EditorTurn extends PlayAudioExercisePanel
     AudioAttribute latest = null;
     for (AudioAttribute audio : clientExercise.getAudioAttributes()) {
       if (latest == null || audio.getTimestamp() > latest.getTimestamp()) {
-        logger.info("getLatestAudio : latest now " + new Date(audio.getTimestamp()) + " " + audio.getUniqueID() + " " + audio.getAudioRef());
+        if (DEBUG) {
+          logger.info("getLatestAudio : latest now " + new Date(audio.getTimestamp()) + " " + audio.getUniqueID() + " " + audio.getAudioRef());
+        }
+
         latest = audio;
       }
     }

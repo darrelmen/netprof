@@ -58,14 +58,12 @@ import mitll.langtest.client.scoring.ScoreProgressBar;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.Validity;
 import mitll.langtest.shared.dialog.DialogSession;
-import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import static com.google.gwt.dom.client.Style.Unit.PCT;
 import static com.google.gwt.dom.client.Style.Unit.PX;
@@ -123,7 +121,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    * @see #showOverallDialogScore()
    * @see ListenViewHelper#showDialogGetRef(int, IDialog, Panel)
    */
-  private DivWidget overallFeedback;
+
   private HTML leftSpeakerHint, rightSpeakerHint;
 
   private T currentRecordingTurn = null;
@@ -157,8 +155,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   /**
-   * @see RecordDialogExercisePanel#shouldShowRecordButton
    * @return
+   * @see RecordDialogExercisePanel#shouldShowRecordButton
    */
   @Override
   public boolean isSimpleDialog() {
@@ -190,50 +188,39 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   @Override
   protected void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
     super.showDialogGetRef(dialogID, dialog, child);
-    child.add(overallFeedback = getOverallFeedback());
+    //   child.add(overallFeedback = getOverallFeedback());
     startSession();
   }
 
   @NotNull
-  private DivWidget getOverallFeedback() {
+  @Override
+  protected DivWidget getOverallFeedback() {
     final RecordingKeyPressHelper helper = new RecordingKeyPressHelper(null, this, controller);
+    helper.addKeyListener(controller);
+
     DivWidget breadRow = new DivWidget() {
       @Override
       protected void onDetach() {
         super.onDetach();
-        helper.removeListener();
-
-        safeStopRecording();
+        safeStop(helper);
       }
 
       @Override
       protected void onUnload() {
         super.onUnload();
+        safeStop(helper);
+      }
 
-        //  logger.info("onUnload ---> ");
+      private void safeStop(RecordingKeyPressHelper helper) {
         helper.removeListener();
         safeStopRecording();
       }
-
     };
 
     helper.setWidget(breadRow);
 
-    breadRow.getElement().setId("overallFeedbackRow");
-
-    Style style = breadRow.getElement().getStyle();
-    style.setMarginTop(10, PX);
-    style.setMarginBottom(10, PX);
-    style.setClear(Style.Clear.BOTH);
-
-    breadRow.addStyleName("cardBorderShadow");
-    // breadRow.setWidth(WIDTH);  //??? why 97???
+    styleOverallFeedback(breadRow);
     breadRow.add(showScoreFeedback());
-
-    if (true) {
-      helper.addKeyListener(controller);
-      // logger.info("FlashcardRecordButton : " + instance + " key is  " + listener.getName());
-    }
 
     return breadRow;
   }
@@ -307,15 +294,16 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     return rightSpeakerHint;
   }
 
-
   @NotNull
   private String getLeftHint() {
-    return isLeftSpeakerSet() ? THEY_SPEAK : YOU_SPEAK;
+    //return isLeftSpeakerSet() ? THEY_SPEAK : YOU_SPEAK;
+    return THEY_SPEAK;
   }
 
   @NotNull
   private String getRightHint() {
-    return isRightSpeakerSet() ? THEY_SPEAK : YOU_SPEAK;
+    //return isRightSpeakerSet() ? THEY_SPEAK : YOU_SPEAK;
+    return YOU_SPEAK;
   }
 
   /**
@@ -607,7 +595,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     } else {
       showOverallDialogScore();
       recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
-     // setCurrentTurn(getFirstPrompt());
+      // setCurrentTurn(getFirstPrompt());
     }
   }
 
@@ -618,7 +606,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   void gotSpeakerChoice() {
     makeFirstTurnCurrent();
 
-    if (!super.isInterpreter()) {
+    if (!isInterpreter()) {
       setHints();
     }
   }
@@ -769,57 +757,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     }
   }
 
-/*  private void rehearseTurn() {
-    boolean showingScoresNow = overallSmiley.isVisible();
-
-    if (overallSmiley.isVisible()) {   // start over
-      makeFirstTurnCurrent();
-//      sessionStorage.storeSession();
-//      clearScores();
-    }
-    maybeClearScores();
-
-    T currentTurn = getCurrentTurn();
-
-    if (DEBUG_PLAY) logger.info("\n\n\nrehearseTurn currentTurn - " + currentTurn);
-
-    // TODO : way too confusing
-//    if (currentTurn == null || !currentTurn.isPlaying()) {
-//      setTurnToPromptSide();
-//    }
-
-    if (currentTurn == null) {
-      logger.info("rehearseTurn no current turn");
-      setCurrentTurn(getFirstPrompt());
-    } else {
-      if (DEBUG_PLAY) logger.info("rehearseTurn (rehearse) Current turn = " + currentTurn);
-    }
-
-    if (onFirstPromptTurn()) {  // if got play on the first turn, start a new session -
-      if (currentTurn == null || !currentTurn.isPlaying()) {
-        if (!showingScoresNow) { // we already did this above!
-          if (DEBUG_PLAY) logger.info("rehearseTurn : start new session");
-          sessionStorage.storeSession();
-          clearScores();
-        }
-      } else {
-        // logger.info("gotClickOnPlay ignoring turn " + currentTurn);
-      }
-    }
-
-    if (isTurnAPrompt(currentTurn)) {  // is the current turn a prompt? if so play the prompt
-      if (DEBUG_PLAY) logger.info("rehearseTurn : current turn a prompt");
-      playCurrentTurn();  // could do play/pause!
-    } else { // the current turn is a response, start recording it
-      if (DEBUG_PLAY) logger.info("rehearseTurn : current turn a recording turn.");
-      startRecordingTurn(getCurrentTurn()); // advance automatically
-    }
-  }*/
-
-  private T getFirstPrompt() {
-    return getPromptSeq().get(0);
-  }
-
   private boolean isCurrentTurnARecordingTurn() {
     return !isTurnAPrompt();
   }
@@ -857,7 +794,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     exToStudentDur.clear();
     // exToRefDur.clear();
 
-    allTurns.forEach(IRecordDialogTurn::clearScoreInfo);
+    getAllTurns().forEach(IRecordDialogTurn::clearScoreInfo);
     recordDialogTurns.clear();
   }
 
@@ -929,7 +866,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
       boolean isCurrentPrompt = isTurnAPrompt(currentTurn);
 
-      int i2 = allTurns.indexOf(currentTurn);
+      int i2 = getAllTurns().indexOf(currentTurn);
       int nextOtherSide = i2 + 1;
 
       if (DEBUG_PLAY_ENDED) {
@@ -946,7 +883,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
         // logger.info("currentTurnPlayEnded NOT DOING showScoreInfo on " + currentTurn);
       }
 
-      if (nextOtherSide < allTurns.size()) {  // not on the last turn
+      if (nextOtherSide < getAllTurns().size()) {  // not on the last turn
         notOnTheLastTurn(nextOtherSide);
       } else {  // on the last turn!
         onTheLastTurn(currentTurn, isCurrentPrompt);
@@ -955,7 +892,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   private void notOnTheLastTurn(int nextOtherSide) {
-    T nextTurn = allTurns.get(nextOtherSide);
+    T nextTurn = getAllTurns().get(nextOtherSide);
 
     if (DEBUG) logger.info("currentTurnPlayEnded next is " + nextTurn + "  at " + nextOtherSide);
     showNextTurn(nextTurn);
@@ -983,7 +920,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
           showScores();
         } else {
           if (DEBUG_PLAY_ENDED) {
-            logger.info("currentTurnPlayEnded - maybe show first turn ??? " + allTurns.get(0));
+            logger.info("currentTurnPlayEnded - maybe show first turn ??? " + getAllTurns().get(0));
           }
           showFirstTurn();
         }
@@ -1010,7 +947,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   }
 
   private void showFirstTurn() {
-    showNextTurn(allTurns.get(0));
+    showNextTurn(getAllTurns().get(0));
   }
 
   private void setDirectClick(boolean b) {
@@ -1189,12 +1126,11 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     }
   }
 
-
   @NotNull
-  private Widget cheesySetPercent(ComplexPanel practicedProgress, double percent1) {
+  private void cheesySetPercent(ComplexPanel practicedProgress, double percent1) {
     Widget theBar = practicedProgress.getWidget(0);
     theBar.getElement().getStyle().setWidth(Double.valueOf(percent1).intValue(), Style.Unit.PCT);
-    return theBar;
+    // return theBar;
   }
 
   private double getTotalScore() {
@@ -1214,6 +1150,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
    */
   @Override
   public void stopRecording() {
+    List<T> allTurns = getAllTurns();
     if (getCurrentTurn() == allTurns.get(allTurns.size() - 1) && !exToScore.isEmpty()) {
       waitCursor.setVisible(true);
     }
@@ -1347,6 +1284,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     }
   }
 
+  protected boolean mouseDown = false;
+
   @Override
   public void gotSpaceBar() {
     if (!mouseDown) {
@@ -1372,8 +1311,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     }
   }
 
-  protected boolean mouseDown = false;
-
   /**
    * @param exercises
    * @param afterThisTurn
@@ -1384,19 +1321,16 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
     addAllTurns(getDialog(), turnContainer);
 
-    List<T> collect = allTurns.stream().filter(turn -> turn.getExID() == exid).collect(Collectors.toList());
+    List<T> allTurns = getAllTurns();
+    T turnByID = getTurnByID(exid);
 
     T next = getCurrentTurn();
-    if (collect.isEmpty()) {
+    if (turnByID == null) {
       logger.warning("addTurns : can't find exid " + exid);
     } else {
-      T current = collect.get(0);
-
-      int i = allTurns.indexOf(current) + 1;
-
-      next = allTurns.get(i);
-
-
+      //  T current = collect.get(0);
+      //   int i = allTurns.indexOf(turnByID) + 1;
+      next = allTurns.get(allTurns.indexOf(turnByID) + 1);
     }
 
     final T fnext = next;
@@ -1408,7 +1342,7 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       markCurrent();
       fnext.grabFocus();
     });
-
     //   addTurnForEachExercise(turnContainer, getFirstSpeakerLabel(dialog), getSecondSpeakerLabel(dialog), exercises);
   }
+
 }

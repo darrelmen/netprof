@@ -43,7 +43,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.logging.Logger;
 
 public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscurable> extends RehearseViewHelper<T> {
- private final Logger logger = Logger.getLogger("CoreRehearseViewHelper");
+ // private final Logger logger = Logger.getLogger("CoreRehearseViewHelper");
 
   /**
    * @param controller
@@ -126,6 +126,6 @@ public class CoreRehearseViewHelper<T extends RecordDialogExercisePanel & IObscu
   }
 
   private void obscureRespTurns() {
-    allTurns.forEach(T::obscureText);
+    getAllTurns().forEach(T::obscureText);
   }
 }

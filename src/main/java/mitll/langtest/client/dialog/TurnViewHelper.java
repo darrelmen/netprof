@@ -49,11 +49,9 @@ import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.ISimpleTurn;
 import mitll.langtest.client.scoring.ITurnPanel;
 import mitll.langtest.client.scoring.PhonesChoices;
-import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -90,9 +88,13 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   private T currentTurn;
   private INavigation.VIEWS thisView;
   protected IDialog dialog;
-  final List<T> allTurns = new ArrayList<>();
+  /**
+   *
+   */
+  private final List<T> allTurns = new ArrayList<>();
   DivWidget dialogHeader;
   private DivWidget speakerRow;
+  DivWidget overallFeedback;
 
   private boolean isInterpreter = false;
   private boolean isInterpreterMode = true;
@@ -141,7 +143,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
       @Override
       public void onSuccess(IDialog dialog) {
         if (DEBUG) logger.info("showContent Got back dialog " + dialog);
-
         showDialogGetRef(dialogFromURL, dialog, listContent);
       }
     });
@@ -159,6 +160,9 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return dialog == null ? -1 : dialog.getID();
   }
 
+  /**
+   * @see #showContent(Panel, INavigation.VIEWS)
+   */
   protected void clearTurnLists() {
     allTurns.clear();
   }
@@ -181,6 +185,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    * @param dialog
    * @param child
    * @see #showContent
+   * @see #showContentForDialogInURL(Panel)
    */
   void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
     this.dialog = dialog;
@@ -199,7 +204,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    * @return
    * @see DialogEditor#getNextTurn(int)
    */
-  private T getTurnByID(int exid) {
+  T getTurnByID(int exid) {
     List<T> collect = allTurns.stream().filter(turn -> turn.getExID() == exid).collect(Collectors.toList());
     return collect.isEmpty() ? null : collect.get(0);
   }
@@ -309,23 +314,35 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     } else {
       child.clear();  // dangerous???
 
+      // add header
       addDialogHeader(dialog, child);
 
+      // add controls
       {
         DivWidget controlAndSpeakers = new DivWidget();
         styleControlRow(controlAndSpeakers);
 
         addControls(controlAndSpeakers);
 
-        controlAndSpeakers.add(speakerRow = getSpeakerRow(dialog));
+        controlAndSpeakers.add(speakerRow = getSpeakerRow());
 
         child.add(controlAndSpeakers);
       }
 
+      // add turns
       child.add(getTurns(dialog));
 
-      //child.add(addEditorButton());
+      overallFeedback = getOverallFeedback();
+
+      child.add(overallFeedback = getOverallFeedback());
     }
+  }
+
+  @NotNull
+  protected DivWidget getOverallFeedback() {
+    DivWidget widget = new DivWidget();
+    styleOverallFeedback(widget);
+    return widget;
   }
 
   protected void addControls(DivWidget controlAndSpeakers) {
@@ -347,11 +364,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return new DivWidget();
   }
 
-//  @NotNull
-//  private DivWidget addEditorButton() {
-//    return new DivWidget();
-//  }
-
   /**
    * @param dialog
    * @param child
@@ -366,29 +378,29 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   @Override
   public void gotDialog() {
     isInterpreterMode = false;
-
+    clearTurnLists();
     showDialog(dialog.getID(), dialog, dialogContainer);
   }
 
   @Override
   public void gotInterpreter() {
     isInterpreterMode = true;
+    clearTurnLists();
     showDialog(dialog.getID(), dialog, dialogContainer);
   }
 
   @Override
   public void setIsDialog(boolean val) {
     isInterpreterMode = !val;
-    logger.info("isInterpreter " + val);
+    logger.info("isInterpreter " + val + " : is interpreter : " + isInterpreterMode);
   }
 
   /**
-   * @param dialog
    * @return
    * @see #showDialog
    */
   @NotNull
-  private DivWidget getSpeakerRow(IDialog dialog) {
+  private DivWidget getSpeakerRow() {
     DivWidget rowOne = new DivWidget();
     rowOne.getElement().setId("speakerRow");
 
@@ -397,12 +409,12 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     style.setOverflow(Style.Overflow.HIDDEN);
 
     {
-      String firstSpeakerLabel = isInterpreter ? getFirstSpeakerLabel(dialog) : ListenViewHelper.SPEAKER_A;
+      String firstSpeakerLabel = isInterpreter ? getFirstSpeakerLabel() : ListenViewHelper.SPEAKER_A;
       rowOne.add(getLeftSpeaker(firstSpeakerLabel));
     }
 
     {
-      String secondSpeakerLabel = isInterpreter ? getSecondSpeakerLabel(dialog) : ListenViewHelper.SPEAKER_B;
+      String secondSpeakerLabel = isInterpreter ? getSecondSpeakerLabel() : ListenViewHelper.SPEAKER_B;
       rowOne.add(getRightSpeaker(secondSpeakerLabel));
     }
 
@@ -419,66 +431,21 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   /**
-   * TODO : allow english speaker to go second
-   *
-   * @param dialog
    * @return
    */
   @NotNull
-  String getFirstSpeakerLabel(IDialog dialog) {
-/*    String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
-
-    if (DEBUG) logger.info("getFirstSpeakerLabel first speaker " + firstSpeaker);
-
-    if (!dialog.getExercises().isEmpty()) {
-      ClientExercise next = dialog.getExercises().iterator().next();
-      boolean hasEnglishAttr = next.hasEnglishAttr();
-
-      if (hasEnglishAttr &&
-          (firstSpeaker == null || getExerciseSpeaker(next).equalsIgnoreCase(firstSpeaker))) {
-        firstSpeaker = ENGLISH_SPEAKER;
-      }
-    } else if (isInterpreter()) {
-      firstSpeaker = ENGLISH_SPEAKER;
-    }
-
-    if (firstSpeaker == null) firstSpeaker = SPEAKER_A;
-    if (DEBUG) {
-      logger.info("getFirstSpeakerLabel 2 " +
-          "first speaker " + firstSpeaker);
-    }
-    */
-
+  String getFirstSpeakerLabel() {
     return isInterpreterMode ? ENGLISH_SPEAKER : SPEAKER_A;
   }
 
   /**
    * TODO : allow english speaker to go second
    *
-   * @param dialog
    * @return
    */
   @Nullable
-  String getSecondSpeakerLabel(IDialog dialog) {
- /*   String secondSpeaker = dialog.getSpeakers().size() > 1 ? dialog.getSpeakers().get(1) : null;
-
-    // OK guess from the language of the first turn
-    if (!dialog.getExercises().isEmpty()) {
-      ClientExercise next = dialog.getExercises().iterator().next();
-      boolean hasEnglishAttr = next.hasEnglishAttr();
-
-      if (hasEnglishAttr && !getExerciseSpeaker(next).equalsIgnoreCase(secondSpeaker)) {
-        secondSpeaker = getProjectLangSpeaker();
-      }
-    } else if (isInterpreter()) {
-      secondSpeaker = getProjectLangSpeaker();
-    }
-
-    if (secondSpeaker == null) secondSpeaker = ListenViewHelper.SPEAKER_B;
-    return secondSpeaker;*/
-
+  String getSecondSpeakerLabel() {
     return isInterpreterMode ? getProjectLangSpeaker() : ListenViewHelper.SPEAKER_B;
-
   }
 
   @NotNull
@@ -521,6 +488,17 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return right;
   }
 
+  protected void styleOverallFeedback(DivWidget breadRow) {
+    breadRow.getElement().setId("overallFeedbackRow");
+
+    Style style = breadRow.getElement().getStyle();
+    style.setMarginTop(10, PX);
+    style.setMarginBottom(10, PX);
+    style.setClear(Style.Clear.BOTH);
+
+    breadRow.addStyleName("cardBorderShadow");
+  }
+
   @NotNull
   protected DivWidget getLeftSpeaker(String firstSpeaker) {
     Heading w = new Heading(4, firstSpeaker);
@@ -543,14 +521,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   private void setPadding(DivWidget right) {
     right.getElement().getStyle().setPaddingLeft(PADDING_LOZENGE, PX);
     right.getElement().getStyle().setPaddingRight(PADDING_LOZENGE, PX);
-  }
-
-  private String getExerciseSpeaker(ClientExercise next) {
-    List<ExerciseAttribute> speaker = next
-        .getAttributes()
-        .stream()
-        .filter(attr -> attr.getProperty().equalsIgnoreCase(DialogMetadata.SPEAKER.toString())).collect(Collectors.toList());
-    return speaker.isEmpty() ? "" : speaker.get(0).getValue();
   }
 
   private void styleControlRow(DivWidget rowOne) {
@@ -595,7 +565,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     this.turnContainer = rowOne;
 
     if (DEBUG) logger.info("getTurns : dialog    " + dialog);
-
     if (DEBUG) logger.info("getTurns : exercises " + dialog.getExercises().size());
 
     styleTurnContainer(rowOne);
@@ -609,8 +578,8 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   void addAllTurns(IDialog dialog, DivWidget rowOne) {
-    String left = getFirstSpeakerLabel(dialog);
-    String right = getSecondSpeakerLabel(dialog);
+    String left = getFirstSpeakerLabel();
+    String right = getSecondSpeakerLabel();
     addTurnPerExercise(dialog, rowOne, left, right);
   }
 
@@ -630,25 +599,24 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   protected void addTurnForEachExercise(DivWidget rowOne, String left, String right, List<ClientExercise> exercises) {
     ClientExercise prev = null;
     int index = 0;
-    //   logger.info("addTurnForEachExercise got " + exercises.size());
+    logger.info("addTurnForEachExercise got " + exercises.size() + " : " + isInterpreterMode);
 
     if (!isInterpreterMode) {
-      exercises = exercises.stream().filter(ex->!ex.hasEnglishAttr()).collect(Collectors.toList());
-
-      exercises.forEach(clientExercise -> {
+      exercises = exercises
+          .stream()
+          .filter(ex -> !ex.hasEnglishAttr())
+          .collect(Collectors.toList());
+/*      exercises.forEach(clientExercise -> {
         String speaker = clientExercise.getSpeaker();
-        logger.info("speaker " +speaker);
+        logger.info("speaker " + speaker);
         if (speaker.equalsIgnoreCase("Interpreter")) {
         }
-      });
+      });*/
     }
 
     for (ClientExercise clientExercise : exercises) {
-
       ITurnContainer.COLUMNS prevCol = prev == null ? ITurnContainer.COLUMNS.UNK : getColumnForEx(left, right, prev);
       ITurnContainer.COLUMNS columnForEx = getColumnForEx(left, right, clientExercise);
-
-
       addTurn(rowOne, clientExercise, columnForEx, prevCol, index);
       prev = clientExercise;
       index++;
@@ -678,17 +646,26 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   private ITurnContainer.COLUMNS getColumnForSpeaker(String left, String right, String speaker) {
     ITurnContainer.COLUMNS columns;
 
-    if (speaker.equalsIgnoreCase(left) || speaker.equalsIgnoreCase(SPEAKER_A)) {
-      columns = ITurnContainer.COLUMNS.LEFT;
-    } else if (speaker.equalsIgnoreCase(right) || speaker.equalsIgnoreCase(SPEAKER_B)) {
-      columns = ITurnContainer.COLUMNS.RIGHT;
+    if (isInterpreterMode) {
+      if (speaker.equalsIgnoreCase(left) || speaker.equalsIgnoreCase(SPEAKER_A)) {
+        columns = ITurnContainer.COLUMNS.LEFT;
+      } else if (speaker.equalsIgnoreCase(right) || speaker.equalsIgnoreCase(SPEAKER_B)) {
+        columns = ITurnContainer.COLUMNS.RIGHT;
+      } else {
+        columns = ITurnContainer.COLUMNS.MIDDLE;
+      }
     } else {
-      columns = ITurnContainer.COLUMNS.MIDDLE;
+      if (speaker.equalsIgnoreCase(INTERPRETER)) {
+        columns = ITurnContainer.COLUMNS.LEFT;
+      } else {
+        columns = ITurnContainer.COLUMNS.RIGHT;
+      }
     }
 
     if (DEBUG) {
-      logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs " + speaker + " => " + columns);
+      logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs ex speaker : " + speaker + " => " + columns);
     }
+
     return columns;
   }
 
@@ -806,6 +783,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   List<T> getAllTurns() {
+    logger.info("getAllTurns : " + allTurns.size());
     return allTurns;
   }
 
@@ -1030,7 +1008,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    */
   void removeMarkCurrent() {
     //  if (DEBUG) logger.info("removeMarkCurrent on " + blurb());
-
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("removeMarkCurrent on " + currentTurn.getExID()));
 //    logger.info("logException stack:\n" + exceptionAsString);
 
@@ -1039,10 +1016,8 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
   void markCurrent() {
     //  if (ListenViewHelper.DEBUG) logger.info("markCurrent on " + blurb());
-
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("markCurrent on " + currentTurn.getExID()));
 //    logger.info("logException stack:\n" + exceptionAsString);
-
     currentTurn.markCurrent();
   }
 
@@ -1065,6 +1040,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    *
    */
   public boolean isInterpreter() {
-    return isInterpreter;
+    return isInterpreterMode;
   }
 }

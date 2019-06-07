@@ -61,7 +61,6 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
 
   private static final boolean DEBUG_BLUR = false;
 
-
   public CoreVocabEditor(ExerciseController controller, INavigation.VIEWS thisView, IDialog theDialog) {
     super(controller, thisView);
     setDialog(theDialog);
@@ -72,6 +71,14 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   protected int getDialogFromURL() {
     return getDialogID();
   }
+
+  @NotNull
+  @Override protected DivWidget getOverallFeedback() {
+    DivWidget widget = new DivWidget();
+  //  styleOverallFeedback(widget);
+    return widget;
+  }
+
 
   @NotNull
   protected INavigation.VIEWS getNextView() {
@@ -221,6 +228,7 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   @Override
   public void addTurnForSameSpeaker(CoreEditorTurn editorTurn) {
     int exID = editorTurn.getExID();
+    List<CoreEditorTurn> allTurns = getAllTurns();
     int index = allTurns.indexOf(editorTurn);
     controller.getDialogService().addEmptyCoreExercise(getDialogID(), exID, new AsyncCallback<DialogExChangeResponse>() {
       @Override
@@ -351,7 +359,7 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
 
   @Override
   public boolean isInterpreter() {
-    return true;//dialog.getKind() == DialogType.INTERPRETER;
+    return true;
   }
 
   @Override

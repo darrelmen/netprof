@@ -62,7 +62,6 @@ public class RecordingKeyPressHelper {
     }
   }
 
-
   public void addKeyListener(ExerciseController controller) {
     // if (DEBUG) logger.info("FlashcardRecordButton.addKeyListener : using  for " + instance);
     listener = new mitll.langtest.client.dialog.KeyPressHelper.KeyListener() {

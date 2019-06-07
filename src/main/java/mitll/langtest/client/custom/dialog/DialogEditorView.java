@@ -455,15 +455,6 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   }
 
   /**
-   * TODO: get rid of?
-   *
-   * @seex CreateListDialog#makeCreateButton
-   */
-  @Override
-  public void gotEdit() {
-  }
-
-  /**
    * @see #showYours(Collection, DivWidget)
    */
   private class MyDialogContainer extends DialogContainer<T> {

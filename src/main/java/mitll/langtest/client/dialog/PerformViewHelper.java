@@ -103,6 +103,6 @@ public class PerformViewHelper<T extends ObscureRecordDialogExercisePanel> exten
   }
 
   private void obscureRespTurns() {
-    allTurns.forEach(ObscureRecordDialogExercisePanel::obscureText);
+    getAllTurns().forEach(T::obscureText);
   }
 }

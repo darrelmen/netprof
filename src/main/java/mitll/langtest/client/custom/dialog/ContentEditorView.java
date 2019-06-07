@@ -292,7 +292,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 //      listContainer.markCurrentExercise(id);
       //  Scheduler.get().scheduleDeferred(() -> {
       listContainer.markCurrentExercise(id);
-    //  listContainer.redraw();
+      //  listContainer.redraw();
       //});
     }
   }
@@ -320,8 +320,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 
   @NotNull
   protected abstract CreateDialog<T> getCreateDialog();
-
-  protected CreateDialog<T> editDialog;
 
   @NotNull
   protected abstract CreateDialog<T> getEditDialog();
@@ -357,10 +355,14 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     return dialogHelper;
   }
 
+  /**
+   * @see #getCommonButtonContainer
+   * @return
+   */
   private Button getEdit() {
     Button successButton = getSuccessButton(EDIT_TITLE);
     successButton.setIcon(IconType.PENCIL);
-    successButton.addClickHandler(event -> editDialog = doEdit());
+    successButton.addClickHandler(event -> doEdit());
     addTooltip(successButton, EDIT_THE_LIST + getSuffix());
     return successButton;
   }
@@ -476,47 +478,50 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    * @see #getEdit
    */
   CreateDialog<T> doEdit() {
-    DivWidget contents = new DivWidget();
-    CreateDialog<T> editDialog = getEditDialog();
-    editDialog.doCreate(contents);
-
     T currentSelection = myLists.getCurrentSelection();
+    if (currentSelection == null) {
+      return null;
+    } else {
+      DivWidget contents = new DivWidget();
+      CreateDialog<T> editDialog = getEditDialog();
+      editDialog.doCreate(contents);
 
-    logger.info("doEdit current selection " + currentSelection);
-    DialogHelper dialogHelper = new DialogHelper(true);
-    Button closeButton = dialogHelper.show(
-        EDIT,
-        Collections.emptyList(),
-        contents,
-        SAVE,
-        CANCEL,
-        new DialogHelper.CloseListener() {
-          @Override
-          public boolean gotYes() {
-            boolean okToCreate = editDialog.isValidName();
-            if (okToCreate) {
-              editDialog.doEdit(currentSelection, myLists);
+      logger.info("doEdit current selection " + currentSelection);
+      DialogHelper dialogHelper = new DialogHelper(true);
+      Button closeButton = dialogHelper.show(
+          EDIT,
+          Collections.emptyList(),
+          contents,
+          SAVE,
+          CANCEL,
+          new DialogHelper.CloseListener() {
+            @Override
+            public boolean gotYes() {
+              boolean okToCreate = editDialog.isValidName();
+              if (okToCreate) {
+                editDialog.doEdit(currentSelection, myLists);
 
-              myLists.flush();
-              myLists.redraw();
+                myLists.flush();
+                myLists.redraw();
 
-              afterGotYesOnEdit();
+                afterGotYesOnEdit();
+              }
+              return okToCreate;
             }
-            return okToCreate;
-          }
 
-          @Override
-          public void gotNo() {
-          }
+            @Override
+            public void gotNo() {
+            }
 
-          @Override
-          public void gotHidden() {
-          }
-        }, 550);
+            @Override
+            public void gotHidden() {
+            }
+          }, 550);
 
-    closeButton.setType(ButtonType.SUCCESS);
+      closeButton.setType(ButtonType.SUCCESS);
 
-    return editDialog;
+      return editDialog;
+    }
   }
 
   protected void afterGotYesOnEdit() {
@@ -540,7 +545,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    */
   @Override
   public void madeIt(T userList) {
-  logger.info("madeIt made it " + userList.getName());
+    logger.info("madeIt made it " + userList.getName());
     try {
       dialogHelper.hide();
       myLists.addItemAfter(null, userList);
