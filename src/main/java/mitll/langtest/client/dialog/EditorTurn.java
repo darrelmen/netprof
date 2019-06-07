@@ -238,7 +238,6 @@ public class EditorTurn extends PlayAudioExercisePanel
           public Widget myGetPopupTargetWidget() {
             return recordAudioPanel;
           }
-
         }) {
           @Override
           protected boolean shouldAddToAudioTable() {
@@ -262,7 +261,6 @@ public class EditorTurn extends PlayAudioExercisePanel
             turnFeedback.setHTML(message);
           }
         };
-
 
     this.recordAudioPanel = recordPanel;
 
@@ -350,7 +348,6 @@ public class EditorTurn extends PlayAudioExercisePanel
     return latest;
   }
 
-
   @NotNull
   private HTML getTurnFeedback() {
     HTML turnFeedback = new HTML("");
@@ -400,7 +397,6 @@ public class EditorTurn extends PlayAudioExercisePanel
     }
   }
 
-
   private void addOtherTurn() {
     Button w = turnAddDelete.getTripleButton();
 
@@ -416,7 +412,6 @@ public class EditorTurn extends PlayAudioExercisePanel
 
     add(w);
   }
-
 
   @Override
   public void gotPlus() {
@@ -516,7 +511,7 @@ public class EditorTurn extends PlayAudioExercisePanel
 
       int audioID = getAudioID();
 
-      if (DEBUG || true) logger.info("gotBlur " + getExID() +
+      if (DEBUG) logger.info("gotBlur " + getExID() +
           "\n\tprev " + prev +
           "\n\traw  " + editableTurnHelper.getContent() +
           "\n\tsan  " + content +
@@ -532,7 +527,7 @@ public class EditorTurn extends PlayAudioExercisePanel
     int projectID = controller.getProjectID();
     if (projectID != -1) {
       final int exID = getExID();
-      logger.info("updateText : Checking '" + s + "' on project #" + projectID + " for ex #" + exID);
+      if (DEBUG) logger.info("updateText : Checking '" + s + "' on project #" + projectID + " for ex #" + exID);
 
       // talk to the audio service first to determine the oov
       controller.getAudioService().isValid(projectID, exID, getSanitized(s), new AsyncCallback<OOVWordsAndUpdate>() {
@@ -546,7 +541,7 @@ public class EditorTurn extends PlayAudioExercisePanel
 
         @Override
         public void onSuccess(OOVWordsAndUpdate result) {
-          logger.info("updateText : onSuccess " + result);
+          if (DEBUG) logger.info("updateText : onSuccess " + result);
 
           showOOVResult(result);
 
@@ -563,10 +558,10 @@ public class EditorTurn extends PlayAudioExercisePanel
   private void updateTextViaExerciseService(int projectID, int exID, int audioID, String s,
                                             String norm,
                                             boolean moveToNextTurn, EditorTurn outer) {
-    String sanitized  = getSanitized(s);
+    String sanitized = getSanitized(s);
     String sanitized2 = getSanitized(norm);
 
-    if (DEBUG || true) {
+    if (DEBUG) {
       logger.info("update : " +
           "\n\tcontent   " + s +
           "\n\tsanitized " + sanitized +
@@ -589,8 +584,8 @@ public class EditorTurn extends PlayAudioExercisePanel
           @Override
           public void onSuccess(OOVWordsAndUpdate result) {
             // showOOVResult(result);
+            if (DEBUG) logger.info("updateTextViaExerciseService : OK, update was " + result);
 
-            logger.info("updateTextViaExerciseService : OK, update was " + result);
             if (result.isDidUpdate()) {
               Set<Integer> singleton = new HashSet<>();
               singleton.add(exID);
@@ -618,7 +613,6 @@ public class EditorTurn extends PlayAudioExercisePanel
    * @see #updateText
    */
   private void showOOVResult(OOVWordsAndUpdate result) {
-
     boolean hasEnglishAttr = clientExercise.hasEnglishAttr();
     if (hasEnglishAttr && result.isNoEnglish()) {
       showFeedback("Is there english in this turn?");
@@ -726,7 +720,7 @@ public class EditorTurn extends PlayAudioExercisePanel
   }
 
   public boolean hasCurrentMark() {
-    return turnPanelDelegate.hasCurrentMark();// bubble.getElement().getStyle().getBorderColor().equalsIgnoreCase(HIGHLIGHT_COLOR);
+    return turnPanelDelegate.hasCurrentMark();
   }
 
   public void makeVisible() {
@@ -748,7 +742,7 @@ public class EditorTurn extends PlayAudioExercisePanel
    */
   @Override
   public void useResult(AudioAnswer audioAnswer) {
-    logger.info("useResult got " + audioAnswer);
+    if (DEBUG) logger.info("useResult got " + audioAnswer);
 
     if (audioAnswer.isValid()) {
       turnFeedback.setHTML("");
@@ -806,7 +800,7 @@ public class EditorTurn extends PlayAudioExercisePanel
 
   @Override
   public void addPacketValidity(Validity validity) {
-    logger.info("addPacketValidity " + validity);
+    //  logger.info("addPacketValidity " + validity);
   }
 
   @Override
@@ -841,15 +835,15 @@ public class EditorTurn extends PlayAudioExercisePanel
 
   @Override
   public void showNoAudioToPlay() {
-    doBlinkAnimation(getPlayButton(), "blink-target");
+    doBlinkAnimation(getPlayButton());
   }
 
-  private void doBlinkAnimation(Widget playButton, String style) {
-    playButton.addStyleName(style);
+  private void doBlinkAnimation(Widget playButton) {
+    playButton.addStyleName(BLINK_TARGET);
     Timer timer = new Timer() {
       @Override
       public void run() {
-        playButton.removeStyleName(style);
+        playButton.removeStyleName(BLINK_TARGET);
       }
     };
     timer.schedule(1000);

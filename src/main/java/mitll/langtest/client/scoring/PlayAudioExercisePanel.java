@@ -30,7 +30,6 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.dialog.ListenViewHelper;
@@ -43,6 +42,8 @@ import java.util.logging.Logger;
 
 public class PlayAudioExercisePanel extends DivWidget implements IPlayAudioControl, IPlayAudioExercise {
   private final Logger logger = Logger.getLogger("PlayAudioExercisePanel");
+
+  protected static final String BLINK_TARGET = "blink-target";
 
   private HeadlessPlayAudio playAudio;
 
@@ -61,10 +62,6 @@ public class PlayAudioExercisePanel extends DivWidget implements IPlayAudioContr
   public boolean doPlayPauseToggle() {
     if (playAudio != null) {
       if (DEBUG_PLAY_PAUSE) logger.info("doPlayPauseToggle on ");// + getExID());
-
-//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("doing play for " +getExID()));
-//      logger.info("logException stack " + exceptionAsString);
-
       return playAudio.doPlayPauseToggle();
     } else {
       logger.warning("doPlayPauseToggle no play audio???");
@@ -82,12 +79,11 @@ public class PlayAudioExercisePanel extends DivWidget implements IPlayAudioContr
   @Override
   public void showNoAudioToPlay() {
     Widget widget = getChildren().get(0);
-    widget.addStyleName("blink-target");
-
+    widget.addStyleName(BLINK_TARGET);
     Timer waitTimer = new Timer() {
       @Override
       public void run() {
-        widget.removeStyleName("blink-target");
+        widget.removeStyleName(BLINK_TARGET);
       }
     };
     waitTimer.schedule(1000);
