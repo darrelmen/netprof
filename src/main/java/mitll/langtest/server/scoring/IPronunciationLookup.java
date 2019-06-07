@@ -56,6 +56,7 @@ public interface IPronunciationLookup {
   String getUsedTokens(Collection<String> lmSentences, List<String> background);
 
   SmallVocabDecoder getSmallVocabDecoder();
+
   Set<String> getOOV();
 
   class InDictStat {
@@ -73,6 +74,10 @@ public interface IPronunciationLookup {
 
     public int getNumInDict() {
       return numInDict;
+    }
+
+    public String toString() {
+      return numInDict + "/" + numTokens;
     }
   }
 }

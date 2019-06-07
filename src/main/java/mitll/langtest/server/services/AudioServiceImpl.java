@@ -56,6 +56,7 @@ import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectHelper;
 import mitll.langtest.server.domino.AudioCopy;
 import mitll.langtest.server.domino.FileUpload;
+import mitll.langtest.server.scoring.IPronunciationLookup;
 import mitll.langtest.server.scoring.JsonScoring;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
@@ -103,8 +104,6 @@ import static mitll.langtest.shared.answer.Validity.OK;
 public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioService {
   private static final Logger logger = LogManager.getLogger(AudioServiceImpl.class);
 
-  private static final boolean DEBUG = false;
-
   private static final int WAV_HEADER_LEN = 44;
 
   private static final int WARN_THRESH = 10;
@@ -133,6 +132,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
   private final static boolean DEBUG_REF_TRIM = false;
   private final static boolean DEBUG_DETAIL = false;
+  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_VALID = false;
 
   private final LoadingCache<Long, List<Boolean>> sessionToComplete = CacheBuilder.newBuilder()
       .maximumSize(10000)
@@ -200,11 +201,7 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
     ServletRequestContext ctx = new ServletRequestContext(request);
     String contentType = ctx.getContentType();
-    //  String requestType = getRequestType(request);
-//    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
     if (ctx.getContentType() != null && ctx.getContentType().equalsIgnoreCase(APPLICATION_WAV)) {
-      //reportOnHeaders(request);
-
       try {
         JsonObject jsonForStream = getJSONForStream(request, ScoreServlet.PostRequest.ALIGN, "", "");
         configureResponse(response);
@@ -213,18 +210,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
         logger.warn("got " + e, e);
         throw new ServletException("Got getJSONForStream : " + e, e);
       }
-      // logger.debug("service : Request " + request.getQueryString() + " path " + request.getPathInfo());
-//      FileUploadHelper.UploadInfo uploadInfo = db.getProjectManagement().getFileUploadHelper().gotFile(request);
-//      if (uploadInfo == null) {
-//        super.service(request, response);
-//      } else {
-//        db.getProjectManagement().getFileUploadHelper().doUploadInfoResponse(response, uploadInfo);
-//      }
     } else {
-      //  String requestType = getRequestType(request);
 //    logger.info("service : service content type " + contentType + " " + requestType);/// + " multi " + isMultipart);
       if (contentType != null && contentType.contains("multipart/form-data")) {
-        //reportOnHeaders(request);
         String webappName = getWebappName(getServletContext());
         logger.info("service got image request! " + contentType + " from " + webappName);
         new FileUpload().doFileUpload(request, response, this, db.getProjectManagement(), true, webappName);
@@ -235,15 +223,8 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   private String getWebappName(ServletContext servletContext) {
-    //String contextPath = servletContext.getContextPath();
-
-    // log.info("context        '" + contextPath + "'");
     String realContextPath = servletContext == null ? "" : servletContext.getRealPath(servletContext.getContextPath());
-    // log.info("realContextPath " + realContextPath);
-
     List<String> pathElements = Arrays.asList(realContextPath.split(realContextPath.contains("\\") ? "\\\\" : "/"));
-    // log.info("pathElements    " + pathElements);
-
     return pathElements.get(pathElements.size() - 1);
   }
 
@@ -1294,10 +1275,14 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
   }
 
   /**
+   * So, much more checking of validity.
+   * If expecting english, and no tokens are english, warn about a swap - likely put the fl in the wrong turn.
+   * If expecting the foreign language and all the tokens are english and none are the fl, warn about a swap - likely put the fl in the wrong turn.
+   *
    * @param projid
    * @param exid
    * @param text
-   * @return
+   * @return OOVWordsAndUpdate that has lots of info about the input text
    * @throws DominoSessionException
    * @see mitll.langtest.client.dialog.EditorTurn#updateText(String, EditorTurn, int, boolean)
    */
@@ -1315,9 +1300,37 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       Exercise exercise = new Exercise(exerciseByID);
       String trim = getTrim(text);
 
-      logger.info("isValid " + text + " = " + trim);
+      if (DEBUG_VALID) logger.info("isValid " + text + " = " + trim);
 
       exercise.getMutable().setForeignLanguage(trim);
+
+      boolean hasEnglishAttr = exercise.hasEnglishAttr();
+      boolean allEnglish = hasEnglishAttr;
+      boolean noEnglish = !hasEnglishAttr;
+
+      Project englishProject = db.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
+      IPronunciationLookup.InDictStat tokenStats = null;
+      if (englishProject == null) {
+        logger.warn("isValid : no english project?");
+      } else {
+        tokenStats = englishProject.getAudioFileHelper().getASR().getPronunciationLookup().getTokenStats(trim);
+      }
+
+      if (tokenStats != null) {
+        if (hasEnglishAttr) {      // expecting english, but there is none there, probably got swapped content
+          if (DEBUG_VALID) logger.info("isValid, expecting english, got " + tokenStats);
+          if (tokenStats.getNumInDict() == 0 && tokenStats.getNumTokens() > 0) {
+            noEnglish = true;
+          }
+        } else { // expecting chinese (say) but it's all english? probably a swap
+          if (DEBUG_VALID) logger.info("isValid, expecting " + project.getLanguage() + ", got " + tokenStats);
+          if (tokenStats.getNumTokens() == tokenStats.getNumInDict() && tokenStats.getNumTokens() > 0) {
+            IPronunciationLookup.InDictStat tokenStats2 = getAudioFileHelper().getASR().getPronunciationLookup().getTokenStats(trim);
+            allEnglish = (tokenStats2.getNumInDict() == 0);  // all the tokens are english, and none are fl tokens
+          }
+        }
+      }
+
       Map<Integer, String> idToNorm = new HashMap<>();
       Set<String> oovTokens = project.getAudioFileHelper().isValid(exercise, idToNorm);
       Collection<String> values = idToNorm.values();
@@ -1325,8 +1338,12 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       String normText = values.isEmpty() ? trim : values.iterator().next();
 
       OOVWordsAndUpdate oovWordsAndUpdate = new OOVWordsAndUpdate(false, oovTokens, project.getModelType() == ModelType.HYDRA, normText);
+      oovWordsAndUpdate.setAllEnglish(allEnglish);
+      oovWordsAndUpdate.setNoEnglish(noEnglish);
+      oovWordsAndUpdate.setCheckValid(true);
 
-      logger.info("isValid : Sending " + oovWordsAndUpdate);
+      if (DEBUG_VALID) logger.info("isValid : Sending " + oovWordsAndUpdate);
+
       return oovWordsAndUpdate;
     }
   }
@@ -1711,11 +1728,15 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
 
     ExerciseDAO<CommonExercise> exerciseDAO = project.getExerciseDAO();
     Set<Integer> updated = new HashSet<>();
-    logger.info("refreshExercises update " + exids);
+
+    //logger.info("refreshExercises update " + exids);
+
     exids.forEach(exid -> {
       if (exerciseDAO.simpleRefresh(exid)) {
         updated.add(exid);
-      } else logger.warn("didn't update " + exid);
+      } else {
+        logger.warn("didn't update " + exid);
+      }
     });
 
     // post condition
@@ -1726,8 +1747,9 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     if (true) {
       exids.forEach(exid -> {
         CommonExercise exerciseByID = project.getExerciseByID(exid);
-        if (exerciseByID == null) logger.warn("could not find " + exid);
-        else {
+        if (exerciseByID == null) {
+          logger.warn("could not find " + exid);
+        } else {
           logger.info("refreshExercises : " + exid + " = " + exerciseByID.getForeignLanguage() + " norm " + exerciseByID.getNormalizedFL());
         }
       });

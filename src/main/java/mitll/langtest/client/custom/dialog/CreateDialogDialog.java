@@ -136,6 +136,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     //listBox.addChangeHandler(event -> gotChangeOn);
 
     Widget privacyChoices = getPrivacyChoices();
+    privacyChoices.setHeight("105px");
     privacyChoices.getElement().getStyle().setClear(Style.Clear.LEFT);
     child.add(privacyChoices);
     moveFocusToTitleLater();

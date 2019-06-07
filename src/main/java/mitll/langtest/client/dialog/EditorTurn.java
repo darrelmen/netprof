@@ -357,9 +357,12 @@ public class EditorTurn extends PlayAudioExercisePanel
 
     Style style = turnFeedback.getElement().getStyle();
 
-    style.setMarginTop(-12, Style.Unit.PX);
+    style.setMarginTop(-9, Style.Unit.PX);
     style.setMarginLeft(12, Style.Unit.PX);
+    style.setPaddingLeft(5, Style.Unit.PX);
+    style.setMarginRight(12, Style.Unit.PX);
     style.setTextAlign(Style.TextAlign.LEFT);
+
     this.turnFeedback = turnFeedback;
     return turnFeedback;
   }
@@ -472,19 +475,32 @@ public class EditorTurn extends PlayAudioExercisePanel
       }
     } else {
       int length = content.split(" ").length;
-      //  logger.info("num tokens " + length);
+      logger.info("num tokens " + length);
 
       if (length > 10) {
-        editableTurnHelper.setBackgroundColor("red");
-        turnFeedback.setText(REALLY_AVOID_LONG_PHRASES);
+        markRed();
+        showFeedback(REALLY_AVOID_LONG_PHRASES);
       } else if (length > 7) {
         editableTurnHelper.setBackgroundColor("yellow");
-        turnFeedback.setText(AVOID_LONG_PHRASES);
+        showFeedback(AVOID_LONG_PHRASES);
       } else {
-        editableTurnHelper.setBackgroundColor("white");
-        turnFeedback.setText("");
+        markWhite();
+        String text = turnFeedback.getText();
+        if (text.equalsIgnoreCase(REALLY_AVOID_LONG_PHRASES) || text.equalsIgnoreCase(AVOID_LONG_PHRASES)) {
+          showFeedback("");
+        }
       }
     }
+  }
+
+  private void markRed() {
+    //  logger.info("markRed");
+    editableTurnHelper.setBackgroundColor("red");
+  }
+
+  private void markWhite() {
+    //  logger.info("markWhite");
+    editableTurnHelper.setBackgroundColor("white");
   }
 
   /**
@@ -508,7 +524,6 @@ public class EditorTurn extends PlayAudioExercisePanel
 
       prev = content;
 
-
       updateText(content, this, audioID, false);
     }
   }
@@ -517,7 +532,7 @@ public class EditorTurn extends PlayAudioExercisePanel
     int projectID = controller.getProjectID();
     if (projectID != -1) {
       final int exID = getExID();
-      logger.info("updateText : Checking '" + s + "' on " + projectID + " for " + exID);
+      logger.info("updateText : Checking '" + s + "' on project #" + projectID + " for ex #" + exID);
 
       // talk to the audio service first to determine the oov
       controller.getAudioService().isValid(projectID, exID, getSanitized(s), new AsyncCallback<OOVWordsAndUpdate>() {
@@ -548,10 +563,10 @@ public class EditorTurn extends PlayAudioExercisePanel
   private void updateTextViaExerciseService(int projectID, int exID, int audioID, String s,
                                             String norm,
                                             boolean moveToNextTurn, EditorTurn outer) {
-    String sanitized = getSanitized(s);
+    String sanitized  = getSanitized(s);
     String sanitized2 = getSanitized(norm);
 
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("update : " +
           "\n\tcontent   " + s +
           "\n\tsanitized " + sanitized +
@@ -574,6 +589,7 @@ public class EditorTurn extends PlayAudioExercisePanel
           @Override
           public void onSuccess(OOVWordsAndUpdate result) {
             // showOOVResult(result);
+
             logger.info("updateTextViaExerciseService : OK, update was " + result);
             if (result.isDidUpdate()) {
               Set<Integer> singleton = new HashSet<>();
@@ -597,13 +613,37 @@ public class EditorTurn extends PlayAudioExercisePanel
         });
   }
 
+  /**
+   * @param result
+   * @see #updateText
+   */
   private void showOOVResult(OOVWordsAndUpdate result) {
-    if (!result.getOov().isEmpty()) {
-      StringBuilder builder = new StringBuilder();
-      builder.append(result.isPossible() ? "No pronunciation for " : "You can't use these words ");
-      result.getOov().forEach(oov -> builder.append(oov).append(" "));
-      turnFeedback.setText(builder.toString());
-    } else turnFeedback.setText("");
+
+    boolean hasEnglishAttr = clientExercise.hasEnglishAttr();
+    if (hasEnglishAttr && result.isNoEnglish()) {
+      showFeedback("Is there english in this turn?");
+      turnFeedback.getElement().getStyle().setBackgroundColor("yellow");
+    } else if (!hasEnglishAttr && result.isAllEnglish()) {
+      showFeedback("Is there " + controller.getLanguageInfo().toDisplay() + " in this turn?");
+      turnFeedback.getElement().getStyle().setBackgroundColor("yellow");
+    } else {
+      turnFeedback.getElement().getStyle().setBackgroundColor("white");
+
+      Set<String> oov1 = result.getOov();
+      if (oov1.isEmpty()) {
+        showFeedback("");
+      } else {
+        StringBuilder builder = new StringBuilder();
+        builder.append(result.isPossible() ? "No pronunciation for " : "You can't use these words ");
+        oov1.forEach(oov -> builder.append(oov).append(" "));
+        String text = builder.toString();
+        showFeedback(text);
+      }
+    }
+  }
+
+  private void showFeedback(String text) {
+    turnFeedback.setText(text);
   }
 
   private int getAudioID() {

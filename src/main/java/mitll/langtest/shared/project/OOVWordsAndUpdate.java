@@ -42,6 +42,9 @@ public class OOVWordsAndUpdate implements IsSerializable {
   private boolean didUpdate = false;
   private boolean isPossible = true;
   private boolean foundExercise = true;
+  private boolean allEnglish = false;
+  private boolean noEnglish = false;
+  private boolean checkValid = false;
   private String normalizedText;
 
   public OOVWordsAndUpdate() {
@@ -91,13 +94,40 @@ public class OOVWordsAndUpdate implements IsSerializable {
     return normalizedText;
   }
 
+  public boolean isAllEnglish() {
+    return allEnglish;
+  }
+
+  public void setAllEnglish(boolean allEnglish) {
+    this.allEnglish = allEnglish;
+  }
+
+  public boolean isNoEnglish() {
+    return noEnglish;
+  }
+
+  public void setNoEnglish(boolean noEnglish) {
+    this.noEnglish = noEnglish;
+  }
+
   public String toString() {
     return "OOVWordsAndUpdate : " +
         "\n\toov        " + getOov() +
         "\n\tnorm       " + getNormalizedText() +
         "\n\tdidUpdate  " + isDidUpdate() +
         "\n\tisPossible " + isPossible() +
+        "\n\tall english " + isAllEnglish() +
+        "\n\tno  english " + isNoEnglish() +
+        "\n\tcheck      " + isCheckValid() +
         "\n\tisFound    " + isFoundExercise()
         ;
+  }
+
+  public boolean isCheckValid() {
+    return checkValid;
+  }
+
+  public void setCheckValid(boolean checkValid) {
+    this.checkValid = checkValid;
   }
 }

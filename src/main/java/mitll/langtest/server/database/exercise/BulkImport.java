@@ -57,14 +57,11 @@ public class BulkImport {
   private static final boolean DEBUG = false;
   private static final String REGEX = " ";  // no break space!
   private static final String TIC_REGEX = "&#39;";
-  //private static final boolean DEBUG_IMPORT = false;
 
   private ExerciseServices exerciseServices;
   private ProjectServices projectServices;
 
-  public BulkImport(ExerciseServices exerciseServices,
-                    ProjectServices projectServices) {
-
+  public BulkImport(ExerciseServices exerciseServices, ProjectServices projectServices) {
     this.exerciseServices = exerciseServices;
     this.projectServices = projectServices;
   }
@@ -79,7 +76,7 @@ public class BulkImport {
    * @param englishProject
    * @param userIDFromSession
    * @return
-   * @see #reallyCreateNewItems
+   * @see mitll.langtest.server.services.ListServiceImpl#reallyCreateNewItems
    */
   public List<CommonExercise> convertTextToExercises(String[] lines,
                                                      Set<CommonExercise> knownAlready,
@@ -88,7 +85,6 @@ public class BulkImport {
                                                      Project project,
                                                      Project englishProject,
                                                      int userIDFromSession) {
-    //  boolean onFirst = true;
     boolean firstColIsEnglish = false;
     List<CommonExercise> newItems = new ArrayList<>();
 
@@ -202,6 +198,7 @@ public class BulkImport {
    * @param engLookup
    * @param pairs
    * @return true if first col is english
+   * @see #convertTextToExercises(String[], Set, Set, Set, Project, Project, int)
    */
   private boolean guessLanguageInCol(String[] lines, mitll.langtest.server.scoring.IPronunciationLookup engLookup, List<Pair> pairs) {
     // make a decision as to which side is english in word pairs
@@ -220,18 +217,22 @@ public class BulkImport {
         pairs.add(e);
         logger.info("line " + line + " : " + e);
 
-        String property = e.getProperty();
-        if (!property.isEmpty()) {
-          mitll.langtest.server.scoring.IPronunciationLookup.InDictStat tokenStats = engLookup.getTokenStats(property);
-          engCountFirst += tokenStats.getNumInDict();
-          totalFirst += tokenStats.getNumTokens();
+        {
+          String property = e.getProperty();
+          if (!property.isEmpty()) {
+            mitll.langtest.server.scoring.IPronunciationLookup.InDictStat tokenStats = engLookup.getTokenStats(property);
+            engCountFirst += tokenStats.getNumInDict();
+            totalFirst += tokenStats.getNumTokens();
+          }
         }
 
-        String value = e.getValue();
-        if (!value.isEmpty()) {
-          IPronunciationLookup.InDictStat tokenStats = engLookup.getTokenStats(value);
-          engCountSecond += tokenStats.getNumInDict();
-          totalSecond += tokenStats.getNumTokens();
+        {
+          String value = e.getValue();
+          if (!value.isEmpty()) {
+            IPronunciationLookup.InDictStat tokenStats = engLookup.getTokenStats(value);
+            engCountSecond += tokenStats.getNumInDict();
+            totalSecond += tokenStats.getNumTokens();
+          }
         }
       }
     }

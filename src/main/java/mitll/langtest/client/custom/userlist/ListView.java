@@ -272,9 +272,12 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
 
       @Override
       public void onSuccess(Collection<T> result) {
-        getMyLists().populateTable(result);
+        ButtonMemoryItemContainer<T> myLists = getMyLists();
+        myLists.populateTable(result);
         populateUniqueListNames(result);
         setShareHREFLater();
+
+        if (result.isEmpty()) myLists.disableAll();
       }
     });
   }
@@ -285,7 +288,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
    * @see #addYourLists
    */
   private void showYourLists(Collection<T> result, DivWidget left) {
-    ListContainer myLists = new MyListContainer();
+    ListContainer<T> myLists = new MyListContainer();
     setMyLists(myLists);
     Panel tableWithPager = myLists.getTableWithPager(result);
 
@@ -314,6 +317,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
   /**
    * @param container
    * @return
+   * @see #showYourLists(Collection, DivWidget)
    */
   @NotNull
   @Override
@@ -388,12 +392,10 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
 
   @NotNull
   private Button getLearnButton(ButtonMemoryItemContainer<T> container) {
-    Button learn = getSuccessButton(LEARN);
+    Button learn = getSuccessButton(container, LEARN);
     learn.setType(ButtonType.INFO);
     learn.addClickHandler(event -> showLearnList(container));
     addTooltip(learn, LEARN_THE_LIST);
-    //learn.setEnabled(!container.isEmpty());
-    container.addButton(learn);
     return learn;
   }
 
@@ -411,25 +413,22 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
 
   @NotNull
   private Button getDrillButton(ButtonMemoryItemContainer<T> container) {
-    Button drill = getSuccessButton(DRILL);
+    Button drill = getSuccessButton(container, DRILL);
     drill.setType(ButtonType.INFO);
 
     drill.addClickHandler(event -> controller.showListIn(getItemID(container), INavigation.VIEWS.PRACTICE));
     addTooltip(drill, PRACTICE_THE_LIST);
-    container.addButton(drill);
 
     return drill;
   }
 
   @NotNull
   private Button getQuizButton(ButtonMemoryItemContainer<T> container) {
-    Button drill = getSuccessButton(QUIZ);
+    Button drill = getSuccessButton(container, QUIZ);
     drill.setType(ButtonType.INFO);
 
     drill.addClickHandler(event -> showQuiz(getCurrentSelection(container)));
     addTooltip(drill, DO_QUIZ);
-    container.addButton(drill);
-
     enableQuizButton(drill);
     return drill;
   }

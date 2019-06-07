@@ -49,7 +49,6 @@ import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.custom.INameable;
 import mitll.langtest.shared.custom.IPublicPrivate;
-import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
@@ -140,16 +139,16 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    */
   @NotNull
   protected DivWidget getButtons(ButtonMemoryItemContainer<T> container) {
-    DivWidget buttons = getCommonButtonContainer();
+    DivWidget buttons = getCommonButtonContainer(container);
 
-    addImportButton(buttons);
-    buttons.add(share = getShare());
+    addImportButton(buttons, container);
+    buttons.add(share = getShare(container));
 
     return buttons;
   }
 
   @NotNull
-  DivWidget getCommonButtonContainer() {
+  DivWidget getCommonButtonContainer(ButtonMemoryItemContainer<T> container) {
     DivWidget buttons = new DivWidget();
     buttons.addStyleName("inlineFlex");
     buttons.addStyleName("topFiveMargin");
@@ -162,8 +161,8 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 
     buttons.add(removeButton = getRemoveButton());
     removeButton.addStyleName("rightTenMargin");
-    buttons.add(editButton = getEdit());
-    buttons.add(getAddItems());
+    buttons.add(editButton = getEdit(container));
+    buttons.add(getAddItems(container));
     return buttons;
   }
 
@@ -171,8 +170,8 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     return myLists.getCurrentSelection();
   }
 
-  protected void addImportButton(DivWidget buttons) {
-    buttons.add(getImport());
+  protected void addImportButton(DivWidget buttons, ButtonMemoryItemContainer<T> container) {
+    buttons.add(getImport(container));
   }
 
   protected boolean canMakeQuiz() {
@@ -191,8 +190,8 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     return null;
   }
 
-  private IsWidget getImport() {
-    Button successButton = getSuccessButton(IMPORT);
+  private IsWidget getImport(ButtonMemoryItemContainer<T> container) {
+    Button successButton = getSuccessButton(container, IMPORT);
     successButton.setIcon(IconType.UPLOAD);
     successButton.addClickHandler(event -> doImport());
     return successButton;
@@ -274,7 +273,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     listContainer.forgetItem(currentSelection);
     int numItems = listContainer.getNumItems();
     if (numItems == 0) {
-      //delete.setEnabled(false);
       listContainer.disableAll();
     } else {
       if (index == numItems) {
@@ -356,11 +354,11 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   }
 
   /**
-   * @see #getCommonButtonContainer
    * @return
+   * @see #getCommonButtonContainer
    */
-  private Button getEdit() {
-    Button successButton = getSuccessButton(EDIT_TITLE);
+  private Button getEdit(ButtonMemoryItemContainer<T> container) {
+    Button successButton = getSuccessButton(container, EDIT_TITLE);
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> doEdit());
     addTooltip(successButton, EDIT_THE_LIST + getSuffix());
@@ -373,8 +371,8 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    * @return
    * @see #getButtons
    */
-  private IsWidget getAddItems() {
-    Button successButton = getSuccessButton(getEditItemButtonTitle());
+  private IsWidget getAddItems(ButtonMemoryItemContainer<T> container) {
+    Button successButton = getSuccessButton(container, getEditItemButtonTitle());
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> editList(getCurrentSelection()));
     addTooltip(successButton, getEditItemTooltipPrefix() + getSuffix());
@@ -397,11 +395,12 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   }
 
   /**
+   * @param container
    * @return
    * @see #getButtons
    */
-  protected Button getShare() {
-    Button successButton = getSuccessButton(SHARE);
+  protected Button getShare(ButtonMemoryItemContainer<T> container) {
+    Button successButton = getSuccessButton(container, SHARE);
     successButton.setIcon(IconType.SHARE);
     addTooltip(successButton, SHARE_THE_LIST + getSuffix());
     return successButton;
@@ -409,15 +408,16 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 
   /**
    * @param selectedItem
-   * @see DialogEditorView#editList(IDialog)
+   * @see DialogEditorView#editList
    */
   protected abstract void editList(T selectedItem);
 
   @NotNull
-  protected Button getSuccessButton(String learn1) {
+  protected Button getSuccessButton(ButtonMemoryItemContainer<T> container, String learn1) {
     Button learn = new Button(learn1);
     learn.setType(ButtonType.SUCCESS);
     learn.addStyleName("leftFiveMargin");
+    container.addButton(learn);
     return learn;
   }
 

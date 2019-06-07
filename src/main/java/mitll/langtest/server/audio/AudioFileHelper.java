@@ -130,10 +130,8 @@ public class AudioFileHelper implements AlignDecode {
   private HTKDictionary htkDictionary;
 
 
-
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_PRON = false;
-
 
 
   /**
@@ -574,6 +572,9 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   /**
+   * So if it's an english phrase, use the english oov detection, if it's, say, a chinese phrase, use the
+   * standard oov detector...
+   *
    * @param exercise
    * @param idToNorm
    * @return oov tokens, if any
@@ -583,7 +584,33 @@ public class AudioFileHelper implements AlignDecode {
     Map<String, List<OOV>> oovToEquivalents = db.getOOVDAO().getOOVToEquivalents(language);
 
     Set<String> oovCumulative = new HashSet<>();
-    isValidForeignPhraseEither(exercise, oovToEquivalents, true, idToNorm, oovCumulative, new HashSet<>());
+
+    boolean hasEnglishAttr = exercise.asCommon().hasEnglishAttr();
+
+    logger.info("isValid check " + (hasEnglishAttr ? "ENGLISH" : "") + " for " + exercise.getForeignLanguage());
+
+    Language language = hasEnglishAttr ? Language.ENGLISH : this.language;
+    //logger.info("getAudioAnswer Ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " language " + language);
+    exercise.asCommon().getMutable().setNormalizedFL(exercise.getForeignLanguage());
+
+    String phraseToDecode = getPhraseToDecode(exercise, language);
+
+    if (!phraseToDecode.equalsIgnoreCase(exercise.getForeignLanguage())) {
+      logger.info("isValid : " + phraseToDecode + " vs original " + exercise.getForeignLanguage());
+    }
+
+    exercise.getMutableShell().setForeignLanguage(phraseToDecode);
+    exercise.asCommon().getMutable().setNormalizedFL(phraseToDecode);
+
+
+
+    getAudioFileHelperPerLanguage(hasEnglishAttr)
+        .isValidForeignPhraseEither(exercise, oovToEquivalents, true, idToNorm, oovCumulative, new HashSet<>());
+
+    if (!oovCumulative.isEmpty()) {
+      logger.info("isValid " + phraseToDecode + " generated OOV tokens : " + oovCumulative);
+    }
+
     return oovCumulative;
   }
 
@@ -685,6 +712,7 @@ public class AudioFileHelper implements AlignDecode {
     boolean validForeignPhrase = true;
     String foreignLanguage = exercise.getForeignLanguage();
     Collection<String> oov = null;
+    logger.info("checkWithHydra " + foreignLanguage + " given " + language);
     if (!foreignLanguage.isEmpty()) {
       String transliteration = exercise.getTransliteration();
       oov = getASRScoring().getCheckLTSHelper().checkLTS(foreignLanguage, transliteration);
@@ -711,12 +739,12 @@ public class AudioFileHelper implements AlignDecode {
         }
       } else {
 //        safeToNorm.put(exercise.getID(), foreignLanguage);
-       if (DEBUG) {
-         logger.info("isValidForeignPhrase (2) " +
-             "\n\tvalid " + validForeignPhrase +
-             "\n\tfl    " + foreignLanguage +
-             "\n\toov   " + oov);
-       }
+        if (DEBUG) {
+          logger.info("isValidForeignPhrase (2) " +
+              "\n\tvalid " + validForeignPhrase +
+              "\n\tfl    " + foreignLanguage +
+              "\n\toov   " + oov);
+        }
       }
       oovCumulative.addAll(oov);
       validForeignPhrase = oov.isEmpty();
@@ -1160,12 +1188,13 @@ public class AudioFileHelper implements AlignDecode {
         //logger.info("getAlignmentsFromDB using " + customOrPredefExercise.getID() + " " + customOrPredefExercise.getEnglish() + " instead ");
       }
 
-      boolean hasEnglishAttr = customOrPredefExercise != null && customOrPredefExercise.hasEnglishAttr();
-
-      logger.info("recalcRefAudioWithHelper decoding " +
-          "\n\taudio    #" + audioID + " '" + byID.getTranscript() + "' " +
-          "\n\tenglish   " + hasEnglishAttr +
-          "\n\texercise #" + byID.getExid() + "...");
+      {
+        boolean hasEnglishAttr = customOrPredefExercise != null && customOrPredefExercise.hasEnglishAttr();
+        logger.info("recalcRefAudioWithHelper decoding " +
+            "\n\taudio    #" + audioID + " '" + byID.getTranscript() + "' " +
+            "\n\tenglish   " + hasEnglishAttr +
+            "\n\texercise #" + byID.getExid() + "...");
+      }
 
       audioFileHelper = getExerciseDependentAudioFileHelper(audioFileHelper, customOrPredefExercise);
 
@@ -1201,6 +1230,7 @@ public class AudioFileHelper implements AlignDecode {
    * @param audioFileHelper
    * @param customOrPredefExercise
    * @return
+   * @see #recalcRefAudioWithHelper
    */
   private AudioFileHelper getExerciseDependentAudioFileHelper(AudioFileHelper audioFileHelper, CommonExercise customOrPredefExercise) {
     if (customOrPredefExercise != null && customOrPredefExercise.hasEnglishAttr()) {
@@ -1338,10 +1368,7 @@ public class AudioFileHelper implements AlignDecode {
   }
 
   private Language getLanguage(CommonExercise exercise) {
-    boolean b = exercise.hasEnglishAttr();
-/*    if (b)
-      logger.info("exercise " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " has english lang attr");*/
-    return b ? Language.ENGLISH : this.language;
+    return exercise.hasEnglishAttr() ? Language.ENGLISH : this.language;
   }
 
   private PretestScore getPretestScoreMaybeUseCache(String testAudioFile,
@@ -2179,16 +2206,15 @@ public class AudioFileHelper implements AlignDecode {
                 file,
                 language);
 
-
         // if the item is marked english but this is not an english project - so we can do interpreter english turns in a korean dialog for instance
-        AudioFileHelper toUse = (hasEnglishAttr && this.language != Language.ENGLISH) ? getEnglishProductionAudioFileHelper(language) : this;
 
-        PretestScore asrScoreForAudio = toUse.getASRScoreForAudio(reqid,
-            file,
-            Collections.singleton(phraseToDecode),
-            "",
-            decoderOptions,
-            precalcScores);
+        PretestScore asrScoreForAudio = getAudioFileHelperPerLanguage(hasEnglishAttr)
+            .getASRScoreForAudio(reqid,
+                file,
+                Collections.singleton(phraseToDecode),
+                "",
+                decoderOptions,
+                precalcScores);
 
 //      logger.info("getAudioAnswer for file " + file + " asr score " + asrScoreForAudio);
 
@@ -2204,6 +2230,11 @@ public class AudioFileHelper implements AlignDecode {
     }
 
     return audioAnswer;
+  }
+
+  private AudioFileHelper getAudioFileHelperPerLanguage(boolean hasEnglishAttr) {
+    Language language = hasEnglishAttr ? Language.ENGLISH : this.language;
+    return (hasEnglishAttr && this.language != Language.ENGLISH) ? getEnglishProductionAudioFileHelper(language) : this;
   }
 
   @NotNull

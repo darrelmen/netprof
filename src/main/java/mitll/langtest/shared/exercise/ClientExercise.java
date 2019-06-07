@@ -30,6 +30,8 @@
 package mitll.langtest.shared.exercise;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface ClientExercise extends CommonShell, MutableAnnotationExercise, AudioRefExercise, ScoredExercise, Details, HasUnitChapter {
   String getNormalizedFL();
@@ -81,6 +83,10 @@ public interface ClientExercise extends CommonShell, MutableAnnotationExercise, 
    */
   List<ExerciseAttribute> getAttributes();
 
+  /**
+   * @see mitll.langtest.server.audio.AudioFileHelper#isValidForeignPhraseEither
+   * @return
+   */
   boolean hasEnglishAttr();
   String getSpeaker();
   List<String> getTokens();

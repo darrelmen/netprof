@@ -325,6 +325,10 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     return validateCreateList(titleBox);
   }
 
+  /**
+   *
+   * @return
+   */
   @NotNull
   Widget getPrivacyChoices() {
     publicChoice = new RadioButton(PUBLIC_PRIVATE_GROUP, PUBLIC);
@@ -345,7 +349,6 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
     radioButton2.addStyleName("leftFiveMargin");
     hp.add(radioButton2);
 
-//    FluidRow row = new FluidRow();
     Panel row = new FlowPanel();
     row.add(publicPrivateGroup = addControlGroupEntry(row, KEEP_LIST_PUBLIC_PRIVATE, hp, ""));
     return row;
@@ -427,12 +430,11 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
   private boolean getDefaultPrivacy() {
     boolean isPrivate = true;
     if (isEditing()) {
-      T current = getCurrent();
+  //    T current = getCurrent();
+//      logger.info("current " + current);
+//      logger.info("priv    " + current.isPrivate());
 
-      logger.info("current " + current);
-      logger.info("priv    " + current.isPrivate());
-
-      isPrivate = current.isPrivate();
+      isPrivate = getCurrent().isPrivate();
     }
     return isPrivate;
   }

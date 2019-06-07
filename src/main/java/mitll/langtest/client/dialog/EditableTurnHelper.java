@@ -83,28 +83,14 @@ public class EditableTurnHelper {
   }
 
   @NotNull
-  public DivWidget getTextBox(boolean addMargin) {
+  DivWidget getTextBox(boolean addMargin) {
     DivWidget textBoxContainer = new DivWidget();
     if (addMargin) {
-      textBoxContainer.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+      textBoxContainer.getElement().getStyle().setMarginBottom(6, Style.Unit.PX);
     }
     textBoxContainer.add(contentTextBox = addTextBox(addMargin));
-    //  textBoxContainer.add(getTurnFeedback());
     return textBoxContainer;
   }
-//
-//  @NotNull
-//  private HTML getTurnFeedback() {
-//    HTML turnFeedback = new HTML("");
-//
-//    Style style = turnFeedback.getElement().getStyle();
-//
-//    style.setMarginTop(-12, Style.Unit.PX);
-//    style.setMarginLeft(12, Style.Unit.PX);
-//    style.setTextAlign(Style.TextAlign.LEFT);
-//    this.turnFeedback = turnFeedback;
-//    return turnFeedback;
-//  }
 
   /**
    * @param wrapper
@@ -112,7 +98,6 @@ public class EditableTurnHelper {
    * @see #addWidgets(boolean, boolean, PhonesChoices, EnglishDisplayChoices)
    */
   private TextBox addTextBox(boolean addTopMargin) {
-    // TODO : instead, make this a div contenteditable!
     TextBox w = new TextBox();
     w.getElement().getStyle().setFontSize(16, Style.Unit.PX);
 //    w.setId("TextBox_" + getExID());
@@ -120,19 +105,9 @@ public class EditableTurnHelper {
 
     String foreignLanguage = getBoxContent();
     if (foreignLanguage.isEmpty()) {
-//      String placeholder = clientExercise.hasEnglishAttr() ? "English... (" + simpleTurn.getExID() +
-//          ")" : language.toDisplay() + " translation (" + simpleTurn.getExID() +
-//          ")";
-
-/*      if (addPlaceHolder) {
-        if (!turnContainer.isInterpreter()) {
-          placeholder = (columns == ITurnContainer.COLUMNS.LEFT ? SPEAKER_A : SPEAKER_B) + " says...";
-        }
-      }*/
       w.setPlaceholder(placeholder);
     } else {
       w.setText(foreignLanguage);
-      //prev = foreignLanguage;
     }
     w.addBlurHandler(event -> gotBlur());
     w.addFocusHandler(event -> gotFocus());

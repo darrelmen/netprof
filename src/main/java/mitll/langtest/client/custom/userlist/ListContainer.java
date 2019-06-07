@@ -55,7 +55,6 @@ import static mitll.langtest.shared.custom.UserList.LIST_TYPE.QUIZ;
  */
 public class ListContainer<T extends UserList<CommonShell>> extends ButtonMemoryItemContainer<T> {
   //private final Logger logger = Logger.getLogger("ListContainer");
-
   private static final String DESCRIPTION = "Description";
   private static final String CLASS = "Class";
   private static final String CREATOR = "Creator";

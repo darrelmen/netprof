@@ -67,8 +67,12 @@ import static mitll.langtest.client.custom.INavigation.QC_PERMISSIONS;
  * Created by go22670 on 7/3/17.
  */
 public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
-  public static final String UPLOAD_A_DIALOG_IMAGE = "Upload a dialog image.";
+  public static final String LISTEN = "Listen";
+  public static final String CORE_VOCAB = "Core Vocab";
+  public static final String UPLOAD_IMAGE = "Upload Image";
+
   private final Logger logger = Logger.getLogger("DialogEditorView");
+  private static final String UPLOAD_A_DIALOG_IMAGE = "Upload a dialog image.";
 
   private static final String LIST = "dialog";
   private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to view a " + LIST;
@@ -102,7 +106,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   @NotNull
   @Override
   protected DivWidget getButtons(ButtonMemoryItemContainer<T> container) {
-    DivWidget buttons = getCommonButtonContainer();
+    DivWidget buttons = getCommonButtonContainer(container);
 
     Button coreVocabButton = getCoreVocabButton(container);
 
@@ -111,52 +115,49 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     buttons.add(uploadImageButton);
     uploadImageButton.addStyleName("rightTenMargin");
 
-    buttons.add(share = getShare());
+    buttons.add(share = getShare(container));
 
     buttons.add(getListenButton(container));
     return buttons;
   }
 
-  protected Button getShare() {
+  protected Button getShare(ButtonMemoryItemContainer<T> container) {
     Button successButton = new Button(SHARE);
     successButton.setType(ButtonType.INFO);
     successButton.addStyleName("leftFiveMargin");
 
     successButton.setIcon(IconType.SHARE);
     addTooltip(successButton, SHARE_THE_LIST + getSuffix());
+    container.addButton(successButton);
     return successButton;
   }
 
   @NotNull
   private Button getListenButton(ButtonMemoryItemContainer<T> container) {
-    Button learn = getSuccessButton("Listen");
+    Button learn = getSuccessButton(container, LISTEN);
     learn.setType(ButtonType.INFO);
     learn.addClickHandler(event -> showLearnList(container));
     addTooltip(learn, "Listen to the dialog.");
-    //learn.setEnabled(!container.isEmpty());
-    container.addButton(learn);
     return learn;
   }
 
   @NotNull
   private Button getCoreVocabButton(ButtonMemoryItemContainer<T> container) {
-    Button learn = getSuccessButton("Core Vocab");
+    Button learn = getSuccessButton(container, CORE_VOCAB);
     learn.setIcon(IconType.PENCIL);
     learn.addClickHandler(event -> editCoreVocabList(getCurrentSelection()));
     addTooltip(learn, "Edit the core vocabulary for the dialog.");
-    container.addButton(learn);
     return learn;
   }
 
   @NotNull
   private Button getUploadImageButton(ButtonMemoryItemContainer<T> container) {
-    Button learn = getSuccessButton("Upload Image");
+    Button learn = getSuccessButton(container, UPLOAD_IMAGE);
     learn.setIcon(IconType.PICTURE);
-//    learn.setType(ButtonType.INFO);
 
     learn.addClickHandler(event -> {
       int itemID = getItemID(container);
-      logger.info("dialog item ID " + itemID);
+//      logger.info("dialog item ID " + itemID);
       ImageUpload widgets1 = new ImageUpload(controller.getUser(), itemID, getCurrentSelection().getImageRef()) {
         @Override
         protected void handleFormSubmitSuccess(UploadResult result) {
@@ -187,7 +188,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
       widgets1.showModal(new DialogHelper.CloseListener() {
         @Override
         public boolean gotYes() {
-         // UploadViewBase.UploadResult result = widgets1.getResult();
+          // UploadViewBase.UploadResult result = widgets1.getResult();
  /*         if (result != null && result.getImageID() > 0) {
             logger.info("got back " + result.getImageID() + " " + result.getFilePath());
           } else {
@@ -209,8 +210,6 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
       });
     });
     addTooltip(learn, UPLOAD_A_DIALOG_IMAGE);
-    //learn.setEnabled(!container.isEmpty());
-    container.addButton(learn);
     return learn;
   }
 
@@ -231,9 +230,8 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     showYours(Collections.emptyList(), left);
 
     int user = controller.getUser();
-    logger.info("addYours project " + controller.getProjectID());
-    ExerciseListRequest request =
-        new ExerciseListRequest(0, user, controller.getProjectID()).setSortByDate(true);
+    //  logger.info("addYours project " + controller.getProjectID());
+    ExerciseListRequest request = new ExerciseListRequest(0, user, controller.getProjectID()).setSortByDate(true);
 
     final boolean fcanSeeAll = isCanSeeAll();
 
@@ -251,10 +249,15 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
               if (!fcanSeeAll) {
                 exercises = exercises.stream().filter(d -> d.getUserid() == user).collect(Collectors.toList());
               }
-              getMyLists().populateTable(exercises);
+              ButtonMemoryItemContainer<T> myLists = getMyLists();
+              myLists.populateTable(exercises);
+
+              if (exercises.isEmpty()) myLists.disableAll();
             }
             populateUniqueListNames(result.getExercises());
             setShareHREFLater();
+
+
           }
         });
   }
@@ -479,13 +482,13 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
      */
     @Override
     protected void gotDoubleClickOn(T selected) {
-      logger.info("gotDoubleClickOn got double click on " + selected);
+      //  logger.info("gotDoubleClickOn got double click on " + selected);
       editList(getCurrentSelection());
     }
   }
 
   @Override
-  protected void addImportButton(DivWidget buttons) {
+  protected void addImportButton(DivWidget buttons, ButtonMemoryItemContainer<T> container) {
   }
 
 
