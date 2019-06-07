@@ -676,10 +676,15 @@ public class ProjectTest extends BaseTest {
 
   @Test
   public void testAnalysis() {
-    DatabaseImpl database = getAndPopulate();
-    int projectid = 3;
+//    DatabaseImpl database = getAndPopulate();
+
+    DatabaseImpl database = getDatabase();
+    database.setInstallPath("").getProject(5,true);
+
+
+    int projectid = 5;
     IAnalysis analysis = database.getAnalysis(projectid);
-    List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5, -1);
+    List<UserInfo> userInfo = analysis.getUserInfo(database.getUserDAO(), 5, -1, true);
 //
 //    List<WordScore> wordScoresForUser = analysis.getWordScoresForUser(6, 5, -1);
 //

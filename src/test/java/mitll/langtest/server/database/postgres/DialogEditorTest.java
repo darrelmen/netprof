@@ -63,8 +63,8 @@ public class DialogEditorTest extends BaseTest {
 
   private static final int USERID = 6;
   private static final int PROJECTID = 21;//5;//21;//5;//21;
-  public static final String SECOND = "second";
-  public static final String FIRST = "first";
+  private static final String SECOND = "second";
+  private static final String FIRST = "first";
 
   @Test
   public void testNewDialog() {
@@ -1122,7 +1122,6 @@ public class DialogEditorTest extends BaseTest {
 
       toAdd.getExercises().forEach(logger::info);
     }
-
 
     logger.warn("testDeleteNormalDialog END ==--------- ");
     andPopulate.close();
