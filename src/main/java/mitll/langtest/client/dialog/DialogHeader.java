@@ -65,10 +65,12 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * @see ListenViewHelper#addDialogHeader(IDialog, Panel)
  */
 public class DialogHeader {
-  public static final String GROUP = "group";
+  private final Logger logger = Logger.getLogger("DialogHeader");
+
+  private static final String GROUP = "group";
   public static final String DIALOG = "Dialog";
   public static final String INTERPRETER = "Interpreter";
-  private final Logger logger = Logger.getLogger("DialogHeader");
+  private static final String VIEW_AS = "Practice as";
 
   private static final String IS_DIALOG_MODE_CHOICE = "isDialogModeChoice";
   private static final String HEIGHT = 100 + "px";
@@ -414,7 +416,7 @@ public class DialogHeader {
     hp.add(radioButton2);
 
     Panel row = new FlowPanel();
-    ControlGroup view_as = new BasicDialog().addControlGroupEntry(row, "View as", hp, "");
+    ControlGroup view_as = new BasicDialog().addControlGroupEntry(row, VIEW_AS, hp, "");
     view_as.addStyleName("floatLeft");
     view_as.getElement().getStyle().setMarginBottom(0, PX);
     row.addStyleName("floatLeft");

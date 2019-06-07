@@ -488,7 +488,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return right;
   }
 
-  protected void styleOverallFeedback(DivWidget breadRow) {
+  void styleOverallFeedback(DivWidget breadRow) {
     breadRow.getElement().setId("overallFeedbackRow");
 
     Style style = breadRow.getElement().getStyle();
@@ -783,15 +783,15 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   List<T> getAllTurns() {
-    logger.info("getAllTurns : " + allTurns.size());
+ //   logger.info("getAllTurns : " + allTurns.size());
     return allTurns;
   }
 
-  protected void report(String prefix, List<T> allTurns) {
-    StringBuilder builder = new StringBuilder();
-    allTurns.forEach(turn -> builder.append(turn.getExID()).append(", "));
-    logger.info("report : " + prefix + " seq " + builder);
-  }
+//  protected void report(String prefix, List<T> allTurns) {
+//    StringBuilder builder = new StringBuilder();
+//    allTurns.forEach(turn -> builder.append(turn.getExID()).append(", "));
+//    logger.info("report : " + prefix + " seq " + builder);
+//  }
 
   /**
    * @return

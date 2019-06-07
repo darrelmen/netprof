@@ -33,7 +33,6 @@ import com.google.gwt.event.dom.client.DoubleClickEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.safehtml.shared.SafeHtmlBuilder;
 import com.google.gwt.user.cellview.client.*;
-import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.RequiresResize;
@@ -52,11 +51,11 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   public static final int MAX_WIDTH = 320;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
-  private static final int VERTICAL_SLOP = 35;
-  private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 395;
-  private static final float MAX_PAGES = 2f;
-  private static final int MIN_PAGE_SIZE = 3;
-  private static final float DEFAULT_PAGE_SIZE = 15f;
+//  private static final int VERTICAL_SLOP = 35;
+//  private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 395;
+//  private static final float MAX_PAGES = 2f;
+//  private static final int MIN_PAGE_SIZE = 3;
+//  private static final float DEFAULT_PAGE_SIZE = 15f;
   protected final ExerciseController<?> controller;
   private final ListDataProvider<T> dataProvider;
   /**
@@ -195,9 +194,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
     int pageSize = getPageSize();
-
-    logger.info("makeCellTable (" + getClass() + ") " + pageSize);
-
+   // logger.info("makeCellTable (" + getClass() + ") " + pageSize);
     return o == null ? new CellTable<>(pageSize) : new CellTable<>(pageSize, o);
   }
 
@@ -231,7 +228,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     {
       int numRows = getNumTableRowsGivenScreenHeight();
 
-      if (DEBUG || true) logger.info("configureTable size is " + numRows + " " + this.getClass());
+      if (DEBUG) logger.info("configureTable size is " + numRows + " " + this.getClass());
 
       if (table.getPageSize() != numRows) {
         table.setPageSize(numRows);

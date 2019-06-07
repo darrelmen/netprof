@@ -248,7 +248,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
     int selectedUser = getSelectedUser(selectedUserKey);
 
-    logger.info("populateTable for " + selectedUserKey + " selected item is " + selectedUser);
+    if (false) {
+      logger.info("populateTable for " + selectedUserKey + " selected item is " + selectedUser);
+    }
 
     for (T user : users) {
       addItem(user);
@@ -256,8 +258,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
       if (selectedUser != -1 && user.getID() == selectedUser) {
         index = i;
         userToSelect = user;
-        logger.info("populateTable Selected user found #" + selectedUser + " (" + user.toString() +
-            ") at " + index + " out of " + users.size());
+
+        if (false) {
+          logger.info("populateTable Selected user found #" + selectedUser + " (" + user.toString() +
+              ") at " + index + " out of " + users.size());
+        }
       }
       i++;
     }
