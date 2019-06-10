@@ -65,6 +65,7 @@ public class DialogEditorTest extends BaseTest {
   private static final int PROJECTID = 21;//5;//21;//5;//21;
   private static final String SECOND = "second";
   private static final String FIRST = "first";
+  private static final int DOMINO_ID = 99;
 
   @Test
   public void testNewDialog() {
@@ -73,6 +74,8 @@ public class DialogEditorTest extends BaseTest {
 
     Project project = getProject(andPopulate);
 
+    int numRows = andPopulate.getDialogDAO().getNumRows();
+    logger.info("testNewDialog before " + numRows);
     Dialog toAdd = addDialog(andPopulate, PROJECTID, DialogType.DIALOG);
 
     for (ClientExercise exercise : toAdd.getExercises()) {
@@ -82,8 +85,61 @@ public class DialogEditorTest extends BaseTest {
     }
 
     logger.warn("testNewDialog END ==--------- ");
-    andPopulate.close();
 
+    finish(andPopulate);
+  }
+
+  @Test
+  public void testConvertDialog() {
+    DatabaseImpl andPopulate = getDatabase();
+    logger.warn("testNewDialog START ==--------- ");
+
+    Project project = getProject(andPopulate);
+
+    IDialogDAO dialogDAO = andPopulate.getDialogDAO();
+    int numRows = dialogDAO.getNumRows();
+    logger.info("testNewDialog before " + numRows);
+
+    int id;
+    {
+      Dialog toAdd = addDialog(andPopulate, PROJECTID, DialogType.DIALOG);
+      id = toAdd.getID();
+      for (ClientExercise exercise : toAdd.getExercises()) {
+        logger.info("new " + exercise);
+        CommonExercise lookup = project.getExerciseByID(exercise.getID());
+        logger.info("lookup " + lookup);
+      }
+
+      logger.warn("testNewDialog END ==--------- ");
+
+      Assert.assertEquals(1, toAdd.getExercises().size());
+
+      dialogDAO.convertDialogToInterpreter(toAdd);
+    }
+
+    {
+      IDialog toAdd2 = getiDialog(andPopulate, PROJECTID, id);
+
+
+      Assert.assertEquals(2, toAdd2.getExercises().size());
+
+      ClientExercise exercise = toAdd2.getExercises().get(0);
+      logger.info("first is " + exercise);
+      Assert.assertTrue(exercise.hasEnglishAttr());
+
+      ClientExercise exercise1 = toAdd2.getExercises().get(1);
+      logger.info("second is " + exercise1);
+      Assert.assertFalse(exercise1.hasEnglishAttr());
+    }
+
+    finish(andPopulate);
+  }
+
+  private void finish(DatabaseImpl andPopulate) {
+    andPopulate.getDialogDAO().deleteByDominoID(DOMINO_ID);
+    int numRows = andPopulate.getDialogDAO().getNumRows();
+    logger.info("finish : after " + numRows);
+    andPopulate.close();
   }
 
   @Test
@@ -105,7 +161,7 @@ public class DialogEditorTest extends BaseTest {
     }
 
     logger.warn("testGetDialog2 END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -130,7 +186,7 @@ public class DialogEditorTest extends BaseTest {
 
     andPopulate.getDialogSectionHelper(PROJECTID).report();
     logger.warn("testGetDialog2 END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -409,7 +465,7 @@ public class DialogEditorTest extends BaseTest {
       toAdd.getExercises().forEach(logger::info);
     }
     logger.warn("testNewDialogOps END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -534,7 +590,7 @@ public class DialogEditorTest extends BaseTest {
 
     logger.warn("testNewDialogOpsAlternate END ==--------- ");
 
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -704,7 +760,7 @@ public class DialogEditorTest extends BaseTest {
       toAdd.getExercises().forEach(logger::info);
     }
     logger.warn("testNewIntepreterDialogOps END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -791,7 +847,7 @@ public class DialogEditorTest extends BaseTest {
     exercises.forEach(logger::info);
 
     logger.warn("testNewIntepreterDialogOps END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -913,7 +969,7 @@ public class DialogEditorTest extends BaseTest {
       toAdd.getExercises().forEach(logger::info);
     }
     logger.warn("testNewIntepreterLeftRightDialogOps END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
   }
 
 
@@ -1124,7 +1180,7 @@ public class DialogEditorTest extends BaseTest {
     }
 
     logger.warn("testDeleteNormalDialog END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
   }
 
   @NotNull
@@ -1142,6 +1198,7 @@ public class DialogEditorTest extends BaseTest {
         dialog,
         "us", true
     );
+    toAdd.setDominoID(DOMINO_ID);
 
     andPopulate.getDialogDAO().add(toAdd, getLanguage(andPopulate, projectid));
     return toAdd;
@@ -1181,7 +1238,7 @@ public class DialogEditorTest extends BaseTest {
       logger.info("lookup " + lookup);
     }
     logger.warn("testNewDialogAndInsert END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -1192,7 +1249,7 @@ public class DialogEditorTest extends BaseTest {
     Project project = andPopulate.getProject(PROJECTID, true);
     project.getDialogs().forEach(logger::info);
     logger.warn("testGetNewDialog END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -1211,7 +1268,7 @@ public class DialogEditorTest extends BaseTest {
 
     Assert.assertEquals(iDialog.getExercises().size(), 1);
     logger.warn("testGetDialog END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -1227,7 +1284,7 @@ public class DialogEditorTest extends BaseTest {
     IDialog iDialog = getiDialog(andPopulate, projectid, i);
     logger.info("before has " + iDialog.getExercises().size());
     iDialog.getExercises().forEach(logger::info);
-    andPopulate.close();
+    finish(andPopulate);
   }
 
   @Ignore
@@ -1242,7 +1299,7 @@ public class DialogEditorTest extends BaseTest {
     IDialog iDialog = getiDialog(andPopulate, projectid, i);
     logger.info("before has " + iDialog.getExercises().size());
     iDialog.getExercises().forEach(logger::info);
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -1283,7 +1340,7 @@ public class DialogEditorTest extends BaseTest {
 
     Assert.assertTrue(iDialog.isPrivate());
     logger.warn("testChangeDialog END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -1300,7 +1357,7 @@ public class DialogEditorTest extends BaseTest {
 
     doInsert(andPopulate, projectid, id, iDialog);
     logger.warn("testInsertAtFrontDialog END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
   }
 
 /*
@@ -1379,7 +1436,7 @@ public class DialogEditorTest extends BaseTest {
     Project project = getProject(andPopulate);
     report(andPopulate, project);
     logger.warn("testInterpreterStored END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -1412,7 +1469,7 @@ public class DialogEditorTest extends BaseTest {
         "\n\treq          " + request +
         "\n\ttype->values " + typeToValues);
     logger.warn("testInterpreterFrenchToRecord END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -1468,7 +1525,7 @@ public class DialogEditorTest extends BaseTest {
         "\n\treq          " + request +
         "\n\ttype->values " + typeToValues);
     logger.warn("testInterpreterFrench END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -1519,7 +1576,7 @@ public class DialogEditorTest extends BaseTest {
         "\n\treq          " + request +
         "\n\ttype->values " + typeToValues);
     logger.warn("testNormalFrench END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
 
   }
 
@@ -1588,7 +1645,7 @@ public class DialogEditorTest extends BaseTest {
     }
 
     logger.warn("testInterpreterRecord END ==--------- ");
-    andPopulate.close();
+    finish(andPopulate);
 
     //  report(andPopulate, project);
   }

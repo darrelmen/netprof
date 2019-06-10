@@ -49,8 +49,11 @@ public interface IDialogDAO extends IDAO {
    */
   IDialog add(IDialog toAdd, String language);
 
+  int getNumRows();
+
   boolean update(IDialog toAdd);
-  boolean updateImage(int dialogID,int imageID);
+
+  boolean updateImage(int dialogID, int imageID);
 
   List<ClientExercise> addEmptyExercises(IDialog toAdd, int userid, int afterExid, boolean isLeft, long now);
 
@@ -73,6 +76,8 @@ public interface IDialogDAO extends IDAO {
 
   boolean delete(int projid, int id);
 
+  boolean deleteByDominoID(int dialogID);
+
   int ensureDefault(int defaultUser);
 
   List<IDialog> getDialogs(int projid);
@@ -94,7 +99,10 @@ public interface IDialogDAO extends IDAO {
   void removeForProject(int id);
 
   List<Integer> deleteExercise(int projid, int dialogID, int exid);
-  boolean deleteCoreExercise( int dialogID, int exid);
+
+  boolean deleteCoreExercise(int dialogID, int exid);
 
   int getProjectForDialog(int dialogID);
+
+  void convertDialogToInterpreter(IDialog dialog);
 }

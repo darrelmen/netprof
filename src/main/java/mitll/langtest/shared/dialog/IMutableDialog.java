@@ -40,10 +40,6 @@ public interface IMutableDialog extends MutableShell {
 
   void setIsPrivate(boolean val);
 
-//
-//  @Deprecated
-//  void setFilePath(String filePath);
-
   void setImageRef(String imageRef);
 
   void setImageID(int imageID);

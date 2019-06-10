@@ -48,7 +48,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
   private final transient Logger logger = Logger.getLogger("Dialog");
 
   // TODO : needed?
-  private static final String DIALOG_PNG = "dialog.png";
+  //private static final String DIALOG_PNG = "dialog.png";
   private static final String INTERPRETER_PNG = "interpreter.png";
 
   private static final String SPEAKER = "Speaker".toLowerCase();
@@ -61,7 +61,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
   private int userid;
   private int projid;
   private int imageid;
-  // private String filePath;
+  private int dominoID;
 
   private long modified;
 
@@ -569,5 +569,13 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
         "\n\t# ex        " + exercises.size() +
         "\n\t# core      " + coreVocabulary.size() +
         "\n\tattr        " + attributes;
+  }
+
+  public int getDominoID() {
+    return dominoID;
+  }
+
+  public void setDominoID(int dominoID) {
+    this.dominoID = dominoID;
   }
 }

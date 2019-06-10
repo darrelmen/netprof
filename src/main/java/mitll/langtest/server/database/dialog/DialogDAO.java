@@ -78,7 +78,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
   public static final boolean DEBUG = false;
   private static final boolean DEBUG_ADD_EXERCISE = false;
-  public static final String INTERPRETER_PREFIX = "I-";
+  private static final String INTERPRETER_PREFIX = "I-";
 
   private final DialogDAOWrapper dao;
 
@@ -623,7 +623,12 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
   @Override
   public String getName() {
-    return dao.dao().name();
+    return dao.getName();
+  }
+
+  @Override
+  public int getNumRows() {
+    return dao.getNumRows();
   }
 
   /**
@@ -643,7 +648,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     int add = add(
         userid,
         projid,
-        -1,
+        toAdd.getDominoID(),
         toAdd.getImageID(),
         toAdd.getModified(),
         toAdd.getModified(),
@@ -726,6 +731,12 @@ public class DialogDAO extends DAO implements IDialogDAO {
       }
     }
 
+    afterAdding(projid, project, clientExercises, dialogID);
+
+    return clientExercises;
+  }
+
+  private void afterAdding(int projid, Project project, List<ClientExercise> clientExercises, int dialogID) {
     refreshExercises(clientExercises, project);
 
     // refresh dialogs on project
@@ -733,15 +744,16 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     // report on changes
     report(projid, clientExercises, dialogID);
-
-    return clientExercises;
   }
 
   private void report(int projid, List<ClientExercise> clientExercises, int dialogID) {
-    List<ClientExercise> exercises = databaseImpl.getProject(projid).getDialog(dialogID).getExercises();
+    Project project = databaseImpl.getProject(projid);
+    logger.info("project " + project);
+    IDialog dialog = project.getDialog(dialogID);
+    List<ClientExercise> exercises = dialog.getExercises();
 
-    clientExercises.forEach(exercise -> logger.info("addEmptyExercises : new exercise " + exercise.getID() + " : " + exercise.getSpeaker() + " (" + exercise.hasEnglishAttr() + ") at position " + exercises.indexOf(exercise)));
-    exercises.forEach(exercise -> logger.info("addEmptyExercises : dialog exercises are now " + exercise.getID() + " : " + exercise.getSpeaker() + " eng " + exercise.hasEnglishAttr()));
+    clientExercises.forEach(exercise -> logger.info("report : new exercise " + exercise.getID() + " : " + exercise.getSpeaker() + " (" + exercise.hasEnglishAttr() + ") at position " + exercises.indexOf(exercise)));
+    exercises.forEach(exercise -> logger.info("report : dialog exercises are now " + exercise.getID() + " : " + exercise.getSpeaker() + " eng " + exercise.hasEnglishAttr()));
   }
 
   @Override
@@ -999,13 +1011,11 @@ public class DialogDAO extends DAO implements IDialogDAO {
                                                     int exidAfter,
                                                     boolean isLeft) {
     ClientExercise exerciseAfter = toAdd.getExByID(exidAfter);
-    //   List<ClientExercise> collect = toAdd.getExercises().stream().filter(exercise -> exercise.getID() == exidAfter).collect(Collectors.toList());
 
     if (exerciseAfter == null && exidAfter != -1) {
       logger.error("addExercisesToDialog : can't find " + exidAfter);
       return Collections.emptyList();
     }
-
 
     Map<String, String> defaultUnitAndChapter = getDefaultUnitAndChapter(toAdd, typeOrder);
 
@@ -1077,6 +1087,17 @@ public class DialogDAO extends DAO implements IDialogDAO {
     for (int i = 0; i < exercises.size(); i++) {
       if (exercises.get(i).getID() == exidAfter) {
         found = i + 1;
+        break;
+      }
+    }
+    return found;
+  }
+
+  private int getSimpleIndexOfEx(int exidAfter, List<ClientExercise> exercises) {
+    int found = 0;
+    for (int i = 0; i < exercises.size(); i++) {
+      if (exercises.get(i).getID() == exidAfter) {
+        found = i;
         break;
       }
     }
@@ -1222,8 +1243,48 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return b;
   }
 
-  public boolean simpleDelete(int id) {
+  private boolean simpleDelete(int id) {
     return dao.delete(id) > 0;
+  }
+
+  public boolean deleteByDominoID(int dominoID) {
+    Collection<SlickDialog> slickDialogs = dao.byDominoID(dominoID);
+
+    boolean success = true;
+    for (SlickDialog slickDialog : slickDialogs) {
+      //SlickDialog next = slickDialogs.iterator().next();
+
+      int id = slickDialog.id();
+
+      logger.info("found dialog #" + id);
+      //  int projid = next.projid();
+
+      IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
+
+      IRelatedExercise relatedExercise = userExerciseDAO.getRelatedExercise();
+//    Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated =
+//        relatedExercise.getDialogIDToRelated(projid);
+//
+//    List<SlickRelatedExercise> slickRelatedExercises = dialogIDToRelated.get(id);
+
+      logger.info("delete for " + id);
+
+      int i = relatedExercise.deleteRelatedForDialog(id);
+      logger.info("deleted " + i);
+
+      IRelatedExercise relatedCoreExercise = userExerciseDAO.getRelatedCoreExercise();
+//    Map<Integer, List<SlickRelatedExercise>> dialogIDToCoreRelated =
+//        relatedCoreExercise.getDialogIDToRelated(projid);
+      int j = relatedCoreExercise.deleteRelatedForDialog(id);
+      logger.info("deleted " + j);
+
+      boolean b = dao.reallyDelete(id) > 0;
+      if (!b) {
+        logger.warn("didn't delete " + id);
+        success = false;
+      }
+    }
+    return success;
   }
 
   @Override
@@ -1235,5 +1296,73 @@ public class DialogDAO extends DAO implements IDialogDAO {
   public int getProjectForDialog(int dialogID) {
     Collection<SlickDialog> byID = getByID(dialogID);
     return (byID.isEmpty()) ? -1 : byID.iterator().next().projid();
+  }
+
+  public void convertDialogToInterpreter(IDialog toConvert) {
+    if (toConvert.getKind() == DialogType.INTERPRETER) {
+      logger.info("skip convert " + toConvert.getID());
+    } else {
+      int projid = toConvert.getProjid();
+      Project project = databaseImpl.getProject(projid);
+      List<String> typeOrder = project.getTypeOrder();
+
+      ClientExercise first = toConvert.getExercises().get(0);
+      int beforeID = first.getID();
+
+      logger.info("num exercises " + toConvert.getExercises().size());
+      logger.info("beforeID  " + beforeID);
+
+      List<ClientExercise> clientExercises = addEnglishToDialog(toConvert, typeOrder, beforeID, true);
+      DialogPopulate dialogPopulate = new DialogPopulate(databaseImpl, project.getPathHelper());
+
+
+      int userid = toConvert.getUserid();
+      dialogPopulate.addExercisesAndSetID(projid, userid, typeOrder, clientExercises);
+
+      IRelatedExercise relatedExercise = databaseImpl.getUserExerciseDAO().getRelatedExercise();
+
+      int id = clientExercises.get(0).getID();
+      if (!relatedExercise.insertBefore(beforeID, id)) {
+        logger.warn("didn't insert before");
+      }
+
+      // set the type
+      toConvert.getMutable().setDialogType(DialogType.INTERPRETER);
+
+      update(toConvert);
+
+      refreshExercises(clientExercises, project);
+
+      // report on changes
+      report(projid, clientExercises, toConvert.getID());
+    }
+  }
+
+  private List<ClientExercise> addEnglishToDialog(IDialog toAdd,
+                                                  List<String> typeOrder,
+                                                  int relativeTo,
+                                                  boolean isLeft) {
+    ClientExercise beforeEx = toAdd.getExByID(relativeTo);
+
+    if (beforeEx == null && relativeTo != -1) {
+      logger.error("addEnglishToDialog : can't find " + relativeTo);
+      return Collections.emptyList();
+    }
+
+    Map<String, String> defaultUnitAndChapter = getDefaultUnitAndChapter(toAdd, typeOrder);
+    List<ClientExercise> exercises = toAdd.getExercises();
+
+    int index = getSimpleIndexOfEx(relativeTo, exercises);
+
+    BaseDialogReader baseDialogReader = new BaseDialogReader(null, null);
+
+    Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.INTERPRETERSPEAKER, ENGLISH,
+        INTERPRETER_PREFIX + index, defaultUnitAndChapter);
+    exercises.add(index + (isLeft ? 1 : 0), exercise1);
+
+
+    List<ClientExercise> newEx = new ArrayList<>();
+    newEx.add(exercise1);
+    return newEx;
   }
 }

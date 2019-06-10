@@ -136,4 +136,9 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
   private Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(Map<Integer, List<SlickRelatedExercise>> dialogToRelations) {
     return new SortedRelations().getDialogIDToRelated(dialogToRelations);
   }
+
+  @Override
+  public boolean insertBefore(int after, int exid) {
+    return false;
+  }
 }

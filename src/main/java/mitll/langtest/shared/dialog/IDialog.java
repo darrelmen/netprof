@@ -43,6 +43,7 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable,
   int getUserid();
 
   int getProjid();
+  int getDominoID();
 
   long getModified();
 

@@ -132,6 +132,11 @@ public class RelatedExerciseHelper implements IRelatedExercise {
   }
 
   @Override
+  public boolean insertBefore(int after, int exid) {
+    return daoWrapper.insertBefore(after, exid) > 0;
+  }
+
+  @Override
   public boolean insertPair(int after, int first, int second) {
     return daoWrapper.insertPair(after, first, second) > 0;
   }
