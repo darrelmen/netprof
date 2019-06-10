@@ -40,6 +40,7 @@ import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.SlickExercise;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -378,12 +379,22 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   public String getSpeaker() {
-    Set<ExerciseAttribute> collect = getAttributes()
+    Set<ExerciseAttribute> collect = getExerciseAttributes();
+    return collect.isEmpty() ? "" : collect.iterator().next().getValue();
+  }
+
+  public ExerciseAttribute getSpeakerAttribute() {
+    Set<ExerciseAttribute> collect = getExerciseAttributes();
+    return collect.isEmpty() ? null : collect.iterator().next();
+  }
+
+  @NotNull
+  private Set<ExerciseAttribute> getExerciseAttributes() {
+    return getAttributes()
         .stream()
         .filter(attr ->
             attr.getProperty().equalsIgnoreCase(DialogMetadata.SPEAKER.name()))
         .collect(Collectors.toSet());
-    return collect.isEmpty() ? "" : collect.iterator().next().getValue();
   }
 
   /**
@@ -617,8 +628,8 @@ public class Exercise extends AudioExercise implements CommonExercise,
   }
 
   /**
-   * @see mitll.langtest.server.audio.AudioFileHelper#checkOOV
    * @param normalizedFL
+   * @see mitll.langtest.server.audio.AudioFileHelper#checkOOV
    */
   public void setNormalizedFL(String normalizedFL) {
     this.normalizedFL = normalizedFL;
@@ -636,7 +647,7 @@ public class Exercise extends AudioExercise implements CommonExercise,
     }
 
     return "Exercise " +
-        "\n\t#" +        getID() +
+        "\n\t#" + getID() +
         ", domino # " + getDominoID() +
         (isContext() ? "\n\tcontext " + isContext() : "") +
         (getOldID().isEmpty() ? "" : "\n\tnp id '" + getOldID() + "'") +

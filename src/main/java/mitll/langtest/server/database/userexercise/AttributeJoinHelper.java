@@ -37,6 +37,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @see SlickUserExerciseDAO
+ */
 public class AttributeJoinHelper implements IAttributeJoin {
   private final ExerciseAttributeJoinDAOWrapper attributeJoinDAOWrapper;
 
@@ -54,6 +57,7 @@ public class AttributeJoinHelper implements IAttributeJoin {
 
   /**
    * Exercise attribute join table is independent of project - makes no reference to project - nothing to update
+   *
    * @param oldID
    * @param newprojid
    * @return
@@ -81,5 +85,10 @@ public class AttributeJoinHelper implements IAttributeJoin {
   @Override
   public void removeBulkAttributeJoins(List<SlickExerciseAttributeJoin> joins) {
     attributeJoinDAOWrapper.removeBulk(joins);
+  }
+
+  @Override
+  public boolean removeByExAndAttribute(int exid, int attrid) {
+    return attributeJoinDAOWrapper.removeByExAndAttribute(exid, attrid) > 0;
   }
 }

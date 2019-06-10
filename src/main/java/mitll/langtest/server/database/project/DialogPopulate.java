@@ -325,16 +325,25 @@ public class DialogPopulate {
   }
 
   @NotNull
-  public Map<CommonExercise, Integer> addExercisesAndSetID(int projid, int defaultUser, List<String> typeOrder, List<ClientExercise> exercises) {
+  public Map<CommonExercise, Integer> addExercisesAndSetID(int projid, int defaultUser, List<String> typeOrder,
+                                                           List<ClientExercise> exercises) {
     Map<CommonExercise, Integer> importExToID = addExercises(projid, defaultUser, typeOrder, toCommon(exercises));
     importExToID.forEach((k, v) -> k.getMutable().setID(v));
     return importExToID;
   }
 
+  /**
+   * @see #addExercisesAndSetID(int, int, List, List)
+   * @param projid
+   * @param defaultUser
+   * @param typeOrder
+   * @param commonExercisesFromDialog
+   * @return
+   */
   private Map<CommonExercise, Integer> addExercises(int projid,
                                                     int defaultUser,
                                                     List<String> typeOrder,
-                                                    List<CommonExercise> commonExercisesFromDialog) {
+                                                    Collection<CommonExercise> commonExercisesFromDialog) {
 //    commonExercisesFromDialog
 //        .forEach(ex -> logger.info("ex fl " + ex.getForeignLanguage() + " = " + ex.getEnglish() + " " + ex.hasEnglishAttr()));
     return new ExerciseCopy().addExercisesAndAttributes(
@@ -348,10 +357,12 @@ public class DialogPopulate {
         true);
   }
 
+/*
   @NotNull
   private List<CommonExercise> getCommonExercisesFromDialog(IDialog dialog) {
     return toCommon(dialog.getExercises());
   }
+*/
 
   @NotNull
   private List<CommonExercise> toCommon(Collection<ClientExercise> exercises) {

@@ -33,6 +33,7 @@ import mitll.langtest.server.database.DAO;
 import mitll.langtest.server.database.Database;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.SlickAudioDAO;
+import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.exercise.ExerciseDAO;
 import mitll.langtest.server.database.project.DialogPopulate;
 import mitll.langtest.server.database.project.IProject;
@@ -60,6 +61,8 @@ import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.server.database.dialog.BaseDialogReader.ENGLISH_SPEAKER;
+import static mitll.langtest.server.database.dialog.BaseDialogReader.INTERPRETER_SPEAKER;
 import static mitll.langtest.shared.project.Language.ENGLISH;
 
 public class DialogDAO extends DAO implements IDialogDAO {
@@ -76,7 +79,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
   private static final String SPEAKER_B = BaseDialogReader.SPEAKER_B;
   private static final String SPEAKER_PREFIX = "S-";
 
-  public static final boolean DEBUG = false;
+  public static final boolean DEBUG = true;
   private static final boolean DEBUG_ADD_EXERCISE = false;
   private static final String INTERPRETER_PREFIX = "I-";
 
@@ -270,7 +273,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     //add exercises
     {
-      List<ClientExercise> clientExercises = addExercises(projid, dialogIDToRelated, /*dialogID,*/ dialog);
+      List<ClientExercise> clientExercises = addExercises(projid, dialogIDToRelated, dialog);
 
       // sanity check for interpreter dialogs
       if (dialog.getKind() == DialogType.INTERPRETER) {
@@ -481,7 +484,8 @@ public class DialogDAO extends DAO implements IDialogDAO {
       Map<Integer, CommonExercise> idToEx = new HashMap<>();
 
       slickRelatedExercises.forEach(slickRelatedExercise -> {
-        if (DEBUG) logger.info("addExercises relation " + slickRelatedExercise);
+        if (DEBUG) logger.info("addExercises (" + dialogID +
+            ") relation " + slickRelatedExercise);
 
         int exid = slickRelatedExercise.exid();
         CommonExercise exercise = idToEx.get(exid);
@@ -754,6 +758,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     clientExercises.forEach(exercise -> logger.info("report : new exercise " + exercise.getID() + " : " + exercise.getSpeaker() + " (" + exercise.hasEnglishAttr() + ") at position " + exercises.indexOf(exercise)));
     exercises.forEach(exercise -> logger.info("report : dialog exercises are now " + exercise.getID() + " : " + exercise.getSpeaker() + " eng " + exercise.hasEnglishAttr()));
+    exercises.forEach(exercise -> logger.info("report2 : dialog exercises are now " + exercise.getID() + " : " + exercise.getAttributes()));
   }
 
   @Override
@@ -1026,7 +1031,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     boolean interpreter = toAdd.getKind() == DialogType.INTERPRETER;
 
     String speaker = interpreter ?
-        isLeft ? BaseDialogReader.ENGLISH_SPEAKER : SPEAKER_B :
+        isLeft ? ENGLISH_SPEAKER : SPEAKER_B :
         (isLeft ? SPEAKER_A : SPEAKER_B);
 
     int index = getIndexOfEx(exidAfter, exercises);
@@ -1045,7 +1050,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
       {
         Language secondLang = isLeft ? projectLang : ENGLISH;
-        Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.INTERPRETERSPEAKER, secondLang,
+        Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.INTERPRETER_SPEAKER, secondLang,
             INTERPRETER_PREFIX + index, defaultUnitAndChapter);
         exercises.add(index + 1, exercise1);
         newEx.add(exercise1);
@@ -1154,7 +1159,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     }
 
     int imageID = dialog.getImageID();
-    logger.info("update image id " + imageID);
+//    logger.info("update image id " + imageID);
     Timestamp modified1 = new Timestamp(modified);
     boolean b = dao.update(new SlickDialog(
         dialog.getID(),
@@ -1300,48 +1305,114 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
   public void convertDialogToInterpreter(IDialog toConvert) {
     if (toConvert.getKind() == DialogType.INTERPRETER) {
-      logger.info("skip convert " + toConvert.getID());
+      logger.info("convertDialogToInterpreter skip convert " + toConvert.getID());
     } else {
       int projid = toConvert.getProjid();
       Project project = databaseImpl.getProject(projid);
+      List<ClientExercise> exercises1 = toConvert.getExercises();
+      report(projid, exercises1, toConvert.getID());
       List<String> typeOrder = project.getTypeOrder();
 
-      ClientExercise first = toConvert.getExercises().get(0);
+      ClientExercise first = exercises1.get(0);
       int beforeID = first.getID();
+      first = project.getExerciseByID(beforeID);
 
-      logger.info("num exercises " + toConvert.getExercises().size());
-      logger.info("beforeID  " + beforeID);
+      logger.info("convertDialogToInterpreter num exercises " + exercises1.size());
+      logger.info("convertDialogToInterpreter beforeID      " + beforeID);
+      logger.info("convertDialogToInterpreter first         " + first);
+      logger.info("convertDialogToInterpreter first attr    " + first.getAttributes());
 
-      List<ClientExercise> clientExercises = addEnglishToDialog(toConvert, typeOrder, beforeID, true);
       DialogPopulate dialogPopulate = new DialogPopulate(databaseImpl, project.getPathHelper());
 
-
+      List<ClientExercise> added = new ArrayList<>();
       int userid = toConvert.getUserid();
-      dialogPopulate.addExercisesAndSetID(projid, userid, typeOrder, clientExercises);
+      IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
 
-      IRelatedExercise relatedExercise = databaseImpl.getUserExerciseDAO().getRelatedExercise();
+      // put in the first english turn and then rename the speaker
+      {
+        List<ClientExercise> c = addEnglishToDialog(toConvert, typeOrder, beforeID);
+        added.addAll(c);
+        dialogPopulate.addExercisesAndSetID(projid, userid, typeOrder, c);
+        if (!userExerciseDAO.getRelatedExercise().insertBefore(beforeID, c.get(0).getID())) {
+          logger.error("convertDialogToInterpreter didn't insert before");
+        }
 
-      int id = clientExercises.get(0).getID();
-      if (!relatedExercise.insertBefore(beforeID, id)) {
-        logger.warn("didn't insert before");
+        // change first speaker to interpreter!
+        replaceSpeaker(projid, project, userid, userExerciseDAO, first);
       }
+
+      List<ClientExercise> exercises = new ArrayList<>(exercises1.subList(2, exercises1.size()));
+      ClientExercise prev = null;
+      for (ClientExercise ex : exercises) {
+        int turnID = ex.getID();
+        ex=project.getExerciseByID(turnID);
+
+
+        logger.info("convertDialogToInterpreter ex         " + ex);
+        logger.info("convertDialogToInterpreter ex attr    " + ex.getAttributes());
+
+
+
+        boolean isLeft = ex.getSpeaker().equalsIgnoreCase(SPEAKER_A);
+
+        logger.info("convertDialogToInterpreter original turn " + ex + " is left " + isLeft);
+
+        List<ClientExercise> newExercises = isLeft ?
+            addEnglishToDialog(toConvert, typeOrder, beforeID) :
+            addInterpreterToDialog(toConvert, typeOrder, turnID, project.getLanguageEnum());
+
+        if (newExercises.size() != 1) {
+          logger.error("\n\nhuh? expecting to add one exercise to dialog");
+        }
+
+        added.addAll(newExercises);
+
+        dialogPopulate.addExercisesAndSetID(projid, userid, typeOrder, newExercises);
+
+        ClientExercise exercise = newExercises.get(0);
+        logger.info("convertDialogToInterpreter new eng turn " + exercise + " is left " + exercise.getSpeaker().equalsIgnoreCase(SPEAKER_A));
+
+        int newID = exercise.getID();
+        if (isLeft) {
+          logger.info("convertDialogToInterpreter after " + prev.getID() + " insert " + newID);
+          if (!userExerciseDAO.getRelatedExercise().insertAfter(prev.getID(), newID)) {
+            logger.warn("convertDialogToInterpreter didn't insert");
+          }
+        } else {
+          logger.info("convertDialogToInterpreter after " + turnID + " insert " + newID);
+          if (!userExerciseDAO.getRelatedExercise().insertAfter(turnID, newID)) {
+            logger.warn("convertDialogToInterpreter didn't insert");
+          }
+        }
+
+        prev = exercise;
+
+        // A becomes english speaker
+        if (isLeft) {
+          replaceSpeaker(projid, project, userid, userExerciseDAO, ex);
+        }
+      }
+
+      refreshExercises(added, project);
 
       // set the type
       toConvert.getMutable().setDialogType(DialogType.INTERPRETER);
 
       update(toConvert);
 
-      refreshExercises(clientExercises, project);
-
       // report on changes
-      report(projid, clientExercises, toConvert.getID());
+      report(projid, added, toConvert.getID());
     }
+  }
+
+  private void replaceSpeaker(int projid, Project project, int userid, IUserExerciseDAO userExerciseDAO, ClientExercise ex) {
+    new ExerciseCopy().replaceSpeaker(userExerciseDAO, ex, INTERPRETER_SPEAKER, projid, userid);
+    refreshExercises(Collections.singletonList(ex), project);
   }
 
   private List<ClientExercise> addEnglishToDialog(IDialog toAdd,
                                                   List<String> typeOrder,
-                                                  int relativeTo,
-                                                  boolean isLeft) {
+                                                  int relativeTo) {
     ClientExercise beforeEx = toAdd.getExByID(relativeTo);
 
     if (beforeEx == null && relativeTo != -1) {
@@ -1356,10 +1427,46 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     BaseDialogReader baseDialogReader = new BaseDialogReader(null, null);
 
-    Exercise exercise1 = baseDialogReader.getExercise("", "", "", BaseDialogReader.INTERPRETERSPEAKER, ENGLISH,
-        INTERPRETER_PREFIX + index, defaultUnitAndChapter);
-    exercises.add(index + (isLeft ? 1 : 0), exercise1);
+    Exercise exercise1 = baseDialogReader.getExercise(
+        "",
+        "",
+        "",
+        ENGLISH_SPEAKER,
+        ENGLISH,
+        SPEAKER_PREFIX + index, defaultUnitAndChapter);
+    exercises.add(index, exercise1);
 
+    List<ClientExercise> newEx = new ArrayList<>();
+    newEx.add(exercise1);
+    return newEx;
+  }
+
+  private List<ClientExercise> addInterpreterToDialog(IDialog toAdd,
+                                                      List<String> typeOrder,
+                                                      int relativeTo,
+                                                      Language language) {
+    ClientExercise beforeEx = toAdd.getExByID(relativeTo);
+
+    if (beforeEx == null && relativeTo != -1) {
+      logger.error("addEnglishToDialog : can't find " + relativeTo);
+      return Collections.emptyList();
+    }
+
+    Map<String, String> defaultUnitAndChapter = getDefaultUnitAndChapter(toAdd, typeOrder);
+    List<ClientExercise> exercises = toAdd.getExercises();
+
+    int index = getIndexOfEx(relativeTo, exercises);
+
+    BaseDialogReader baseDialogReader = new BaseDialogReader(null, null);
+
+    Exercise exercise1 = baseDialogReader.getExercise(
+        "",
+        "",
+        "",
+        INTERPRETER_SPEAKER,
+        ENGLISH,
+        INTERPRETER_PREFIX + index, defaultUnitAndChapter);
+    exercises.add(index, exercise1);
 
     List<ClientExercise> newEx = new ArrayList<>();
     newEx.add(exercise1);

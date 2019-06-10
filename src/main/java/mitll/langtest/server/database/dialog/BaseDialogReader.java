@@ -54,13 +54,13 @@ import static mitll.langtest.shared.dialog.DialogMetadata.FLTITLE;
 public class BaseDialogReader {
   private static final Logger logger = LogManager.getLogger(BaseDialogReader.class);
 
-  static final String ENGLISH_SPEAKER = "English Speaker";
-  static final String INTERPRETERSPEAKER = "Interpreter";
-  static final String SPEAKER_A = "A";
+  public static final String ENGLISH_SPEAKER = "English Speaker";
+  public static final String INTERPRETER_SPEAKER = "Interpreter";
+  public static final String SPEAKER_A = "A";
+  public static final String SPEAKER_B = "B";
 
   private static final String OPT_NETPROF_DIALOG = "/opt/netprof/dialog/";
 
-  static final String SPEAKER_B = "B";
   private static final List<String> SPEAKER_LABELS = Arrays.asList(SPEAKER_A, SPEAKER_B, "C", "D", "E", "F", "I");
   private static final String IMAGES = "images/";
   protected final String unit;

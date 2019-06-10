@@ -304,11 +304,11 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
                   if (speakers.isEmpty()) {
                     if (talker.equalsIgnoreCase(A_TALKER)) {
                       speakers.add(ENGLISH_SPEAKER);
-                      speakers.add(INTERPRETERSPEAKER);
+                      speakers.add(INTERPRETER_SPEAKER);
                       speakers.add(nativeSpeaker);
                     } else {
                       speakers.add(nativeSpeaker);
-                      speakers.add(INTERPRETERSPEAKER);
+                      speakers.add(INTERPRETER_SPEAKER);
                       speakers.add(ENGLISH_SPEAKER);
                     }
                   }
@@ -321,20 +321,20 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
                     exercises.add(exercise);
                   }
                   {
-                    Exercise exercise1 = getExercise(l2Text, engText, colToValue.get(Columns.TEXTTRANSLITERATION), INTERPRETERSPEAKER, projectLang, interpreterTurn, defaultUnitAndChapter);
+                    Exercise exercise1 = getExercise(l2Text, engText, colToValue.get(Columns.TEXTTRANSLITERATION), INTERPRETER_SPEAKER, projectLang, interpreterTurn, defaultUnitAndChapter);
                     //    logger.info("readFromSheet add " + interpreterTurn + " " + exercise1.getForeignLanguage() + " " + exercise1.getEnglish());
                     exercises.add(exercise1);
                   }
-                  addCoreVocab(coreFL, colToValue, interpreterTurn, INTERPRETERSPEAKER);
+                  addCoreVocab(coreFL, colToValue, interpreterTurn, INTERPRETER_SPEAKER);
                 } else {
                   if (speakers.isEmpty()) {
                     if (talker.equalsIgnoreCase(A_TALKER)) {
                       speakers.add(nativeSpeaker);
-                      speakers.add(INTERPRETERSPEAKER);
+                      speakers.add(INTERPRETER_SPEAKER);
                       speakers.add(ENGLISH_SPEAKER);
                     } else {
                       speakers.add(ENGLISH_SPEAKER);
-                      speakers.add(INTERPRETERSPEAKER);
+                      speakers.add(INTERPRETER_SPEAKER);
                       speakers.add(nativeSpeaker);
                     }
                   }
@@ -342,7 +342,7 @@ public class InterpreterReader extends BaseDialogReader implements IDialogReader
                   logger.info("readFromSheet 2 add " + realID + " : " + talker + " @ " + turnID + " " + colToValue.get(Columns.LANGUAGE) + " " + engText);
 
                   exercises.add(getExercise(l2Text, engText, colToValue.get(Columns.TEXTTRANSLITERATION), nativeSpeaker, projectLang, turnID, defaultUnitAndChapter));
-                  exercises.add(getExercise(engText, "", "", INTERPRETERSPEAKER, Language.ENGLISH, interpreterTurn, defaultUnitAndChapter));
+                  exercises.add(getExercise(engText, "", "", INTERPRETER_SPEAKER, Language.ENGLISH, interpreterTurn, defaultUnitAndChapter));
                   addCoreVocab(coreFL, (Map<Columns, String>) colToValue, turnID, nativeSpeaker);
                 }
               } catch (NumberFormatException e) {

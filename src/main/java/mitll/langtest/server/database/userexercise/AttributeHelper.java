@@ -29,10 +29,13 @@
 
 package mitll.langtest.server.database.userexercise;
 
+import mitll.langtest.server.database.copy.ExerciseCopy;
 import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.npdata.dao.SlickExerciseAttribute;
 import mitll.npdata.dao.userexercise.ExerciseAttributeDAOWrapper;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.Timestamp;
@@ -40,6 +43,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class AttributeHelper implements IAttributeDAO {
+  private static final Logger logger = LogManager.getLogger(AttributeHelper.class);
+
   private final ExerciseAttributeDAOWrapper attributeDAOWrapper;
 
   AttributeHelper(ExerciseAttributeDAOWrapper attributeDAOWrapper) {
@@ -82,6 +87,7 @@ public class AttributeHelper implements IAttributeDAO {
           new Timestamp(now),
           attribute.getProperty(), attribute.getValue(), attribute.isFacet()));
       if (exists.isEmpty()) {
+        logger.info("findOrAddAttribute new attr " + attribute);
         return insertAttribute(projid, now, userid, attribute.getProperty(), attribute.getValue(), attribute.isFacet());
       } else {
         return exists.iterator().next().id();

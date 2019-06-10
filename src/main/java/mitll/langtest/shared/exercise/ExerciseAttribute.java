@@ -53,7 +53,8 @@ public class ExerciseAttribute extends Pair implements Comparable<ExerciseAttrib
   }
 
   public ExerciseAttribute(ExerciseAttribute other) {
-    super(other.getProperty(), other.getValue());
+    this(other.getProperty(), other.getValue(), other.isFacet);
+    this.id = other.id;
   }
 
   /**
@@ -110,8 +111,8 @@ public class ExerciseAttribute extends Pair implements Comparable<ExerciseAttrib
     return this;
   }
 
-/*  @Override
+  @Override
   public String toString() {
-    return super.toString() + (isFacet? "": ("(not facet)"));
-  }*/
+    return super.toString() + " (#" + getId() + ")";
+  }
 }

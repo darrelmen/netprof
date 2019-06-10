@@ -60,7 +60,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private final SlickProject project;
   private final Project fullProject;
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_REFRESH = true;
+  private static final boolean DEBUG_REFRESH = false;
   private static final boolean DEBUG_REFRESH_ATTRIBUTES = false;
   private static final boolean DEBUG_ROOT_TYPE = false;
   private static final boolean DEBUG_USER_CREATED = false;
@@ -734,6 +734,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   @NotNull
   private CommonExercise setAttributes(int exid, CommonExercise replacement) {
     List<ExerciseAttribute> attributesFor = userExerciseDAO.getExerciseAttributeDAO().getAttributesFor(exid);
+
+    logger.info("setAttributes refresh (" +exid+ ") attributes after " + attributesFor);
 
     if (replacement == null) {
       logger.warn("setAttributes no replacement exercise for #" + exid);

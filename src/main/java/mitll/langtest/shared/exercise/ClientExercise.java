@@ -89,6 +89,7 @@ public interface ClientExercise extends CommonShell, MutableAnnotationExercise, 
    */
   boolean hasEnglishAttr();
   String getSpeaker();
+  ExerciseAttribute getSpeakerAttribute();
   List<String> getTokens();
 
 }

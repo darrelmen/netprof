@@ -33,6 +33,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.database.userexercise.UserExerciseDAO;
 import mitll.langtest.server.scoring.TextNormalizer;
+import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
@@ -592,6 +593,40 @@ public class ExerciseCopy {
       }
       joins.add(id);
     }
+  }
+
+  /**
+   * Remove the previous speaker
+   * add the new speaker attribute
+   *
+   * @param slickUEDAO
+   * @param exercise
+   * @param newSpeaker
+   * @param projid
+   * @param userid
+   */
+  public void replaceSpeaker(IUserExerciseDAO slickUEDAO, ClientExercise exercise, String newSpeaker, int projid, int userid) {
+    int id = exercise.getID();
+
+    ExerciseAttribute speakerAttribute = exercise.getSpeakerAttribute();
+    int id1 = speakerAttribute.getId();
+    if (id1 == 0) throw new IllegalArgumentException("need the join id on " +speakerAttribute + " in " +exercise);
+
+    logger.info("replaceSpeaker removing " + id1 + " from " + id + " : " + speakerAttribute);
+
+    boolean b = slickUEDAO.getExerciseAttributeJoin().removeByExAndAttribute(id, id1);
+    if (!b) logger.error("\n\n\nreplaceSpeaker : didn't remove attr " + speakerAttribute + " from " + id);
+
+    long now = System.currentTimeMillis();
+    ExerciseAttribute attribute = new ExerciseAttribute(speakerAttribute.getProperty(), newSpeaker, false);
+    logger.info("adding new speaker " + attribute);
+    int orAddAttribute = slickUEDAO.getExerciseAttributeDAO().findOrAddAttribute(projid, now, userid, attribute, true);
+    logger.info("adding new speaker attr id " + orAddAttribute);
+
+    List<SlickExerciseAttributeJoin> objects = new ArrayList<>();
+    objects.add(new SlickExerciseAttributeJoin(-1, userid, new Timestamp(now), id, orAddAttribute));
+
+    slickUEDAO.getExerciseAttributeJoin().addBulkAttributeJoins(objects);
   }
 
   /**
