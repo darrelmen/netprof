@@ -47,6 +47,15 @@ import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.OperatingSystemMXBean;
 
+/**
+ * Do quality checks on audio - especially Paul's dynamic range measurement.
+ *
+ * For the dynamic range check it shells out to sox to do a high pass filter.
+ *
+ * The main method is:
+ *
+ * @see #isValid(File, boolean, boolean)
+ */
 public class AudioCheck {
   private static final Logger logger = LogManager.getLogger(AudioCheck.class);
 
@@ -60,9 +69,7 @@ public class AudioCheck {
 
   private static final short clippedThreshold = 32704; // 32768-64
   private static final short clippedThresholdMinus = -32704; // 32768-64
-  //private static final short ct = 32112;
-  // private static final short clippedThreshold2 = 32752; // 32768-16
-  // private static final short clippedThreshold2Minus = -32752; // 32768-16
+
   private static final float MAX_VALUE = 32768.0F;
   private static final ValidityAndDur INVALID_AUDIO = new ValidityAndDur();
   private static final boolean DEBUG = false;
@@ -126,9 +133,9 @@ public class AudioCheck {
   }
 
   /**
-   * @param file
-   * @param useSensitiveTooLoudCheck
-   * @param quietAudioOK
+   * @param file to check
+   * @param useSensitiveTooLoudCheck if you're recording reference audio
+   * @param quietAudioOK if you're testing via browserstack and don't want it to reject flatline audio.
    * @return
    * @see AudioConversion#isValid(File, boolean, boolean)
    * @see AudioFileHelper#getAnswer
@@ -265,7 +272,6 @@ public class AudioCheck {
     }
   }
 
-
   /**
    * Verify audio messages
    *
@@ -295,10 +301,9 @@ public class AudioCheck {
     }
   }
 
-  public AudioInputStream getAudioInputStream(File wavFile) throws UnsupportedAudioFileException, IOException {
+  private AudioInputStream getAudioInputStream(File wavFile) throws UnsupportedAudioFileException, IOException {
     return AudioSystem.getAudioInputStream(new BufferedInputStream(new FileInputStream(wavFile)));
   }
-
 
   @NotNull
   private ValidityAndDur getValidityAndDur(String name,
@@ -308,7 +313,6 @@ public class AudioCheck {
                                            AudioInputStream ais,
                                            boolean shortOK) throws IOException {
     AudioFormat format = ais.getFormat();
-
 
     if (DEBUG) {
       // AudioFileFormat format2 = AudioSystem.getAudioFileFormat(wavFile);
@@ -439,22 +443,12 @@ public class AudioCheck {
 
     ValidityAndDur validityAndDur = new ValidityAndDur(validity, dur, quietAudioOK);
 
-    //if (validityAndDur.validity != AudioAnswer.Validity.OK) {
-    //logger.info("validity " + validityAndDur);
-    //}
     return validityAndDur;
   }
 
   private double dB(double power) {
     return 20.0 * Math.log(power < 0.0001f ? 0.0001f : power) / LOG_OF_TEN;
   }
-
-//  private AudioInputStream getAudioInputStream(File wavFile) throws UnsupportedAudioFileException, IOException {
-//    //logger.info("getAudioInputStream : getting audio input stream for " + wavFile.getAbsolutePath());
-//    AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(wavFile);
-//    //logger.info("getAudioInputStream : got stream " + audioInputStream + " for " + wavFile.getAbsolutePath());
-//    return audioInputStream;
-//  }
 
   /**
    * @return
@@ -469,6 +463,9 @@ public class AudioCheck {
     return dynamicRange == null ? 0f : (float) dynamicRange.dnr;
   }
 
+  /**
+   * Validity, duration, and dynamic range measurements for an audio file.
+   */
   public static class ValidityAndDur {
     private Validity validity;
     private final boolean isValid;
@@ -521,10 +518,6 @@ public class AudioCheck {
     public void setDuration(double duration) {
       this.durationInMillis = (int) (1000d * duration);
     }
-
-   /* String dump() {
-      return getValidity() + "," + durationInMillis + "," + maxMinRange;
-    }*/
 
     public int getDurationInMillis() {
       return durationInMillis;

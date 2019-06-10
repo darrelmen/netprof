@@ -653,6 +653,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
         columns = ITurnContainer.COLUMNS.RIGHT;
       } else {
         columns = ITurnContainer.COLUMNS.MIDDLE;
+        logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs ex speaker : " + speaker + " => " + columns);
       }
     } else {
       if (speaker.equalsIgnoreCase(INTERPRETER) || speaker.equalsIgnoreCase(I)) {
@@ -662,7 +663,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
       }
     }
 
-    if (DEBUG) {
+    if (DEBUG || true) {
       logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs ex speaker : " + speaker + " => " + columns);
     }
 
