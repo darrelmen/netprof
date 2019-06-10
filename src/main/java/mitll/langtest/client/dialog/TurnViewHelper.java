@@ -67,6 +67,7 @@ import static com.google.gwt.dom.client.Style.Unit.PX;
 public abstract class TurnViewHelper<T extends ISimpleTurn>
     extends DialogView
     implements ContentView, IModeListener {
+  public static final String I = "I";
   private final Logger logger = Logger.getLogger("TurnViewHelper");
 
   private static final int DELETE_DELAY = 500;
@@ -392,7 +393,8 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   @Override
   public void setIsDialog(boolean val) {
     isInterpreterMode = !val;
-    logger.info("isInterpreter " + val + " : is interpreter : " + isInterpreterMode);
+
+    if (DEBUG) logger.info("isInterpreter " + val + " : is interpreter : " + isInterpreterMode);
   }
 
   /**
@@ -596,22 +598,25 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     addTurnForEachExercise(rowOne, left, right, dialog.getExercises());
   }
 
+  /**
+   * Filters out english turns if just practicing as a dialog.
+   *
+   * @param rowOne
+   * @param left
+   * @param right
+   * @param exercises
+   */
   protected void addTurnForEachExercise(DivWidget rowOne, String left, String right, List<ClientExercise> exercises) {
     ClientExercise prev = null;
     int index = 0;
-    logger.info("addTurnForEachExercise got " + exercises.size() + " : " + isInterpreterMode);
+
+    if (DEBUG) logger.info("addTurnForEachExercise got " + exercises.size() + " : " + isInterpreterMode);
 
     if (!isInterpreterMode) {
       exercises = exercises
           .stream()
           .filter(ex -> !ex.hasEnglishAttr())
           .collect(Collectors.toList());
-/*      exercises.forEach(clientExercise -> {
-        String speaker = clientExercise.getSpeaker();
-        logger.info("speaker " + speaker);
-        if (speaker.equalsIgnoreCase("Interpreter")) {
-        }
-      });*/
     }
 
     for (ClientExercise clientExercise : exercises) {
@@ -625,12 +630,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
   ITurnContainer.COLUMNS getColumnForEx(String left, String right, ClientExercise clientExercise) {
     String speaker = clientExercise == null ? "" : clientExercise.getSpeaker();
-    if (speaker.isEmpty()) {
-      //logger.info("getColumnForEx : no speaker, ex = " + clientExercise);
-      return ITurnContainer.COLUMNS.UNK;
-    } else {
-      return getColumnForSpeaker(left, right, speaker);
-    }
+    return (speaker.isEmpty()) ? ITurnContainer.COLUMNS.UNK : getColumnForSpeaker(left, right, speaker);
   }
 
   /**
@@ -655,7 +655,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
         columns = ITurnContainer.COLUMNS.MIDDLE;
       }
     } else {
-      if (speaker.equalsIgnoreCase(INTERPRETER)) {
+      if (speaker.equalsIgnoreCase(INTERPRETER) || speaker.equalsIgnoreCase(I)) {
         columns = ITurnContainer.COLUMNS.LEFT;
       } else {
         columns = ITurnContainer.COLUMNS.RIGHT;
@@ -783,7 +783,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   List<T> getAllTurns() {
- //   logger.info("getAllTurns : " + allTurns.size());
+    //   logger.info("getAllTurns : " + allTurns.size());
     return allTurns;
   }
 

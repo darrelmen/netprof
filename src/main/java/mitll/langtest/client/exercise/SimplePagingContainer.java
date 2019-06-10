@@ -51,11 +51,6 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   public static final int MAX_WIDTH = 320;
   private static final int PAGE_SIZE = 10;   // TODO : make this sensitive to vertical real estate?
-//  private static final int VERTICAL_SLOP = 35;
-//  private static final int HEIGHT_OF_CELL_TABLE_WITH_15_ROWS = 395;
-//  private static final float MAX_PAGES = 2f;
-//  private static final int MIN_PAGE_SIZE = 3;
-//  private static final float DEFAULT_PAGE_SIZE = 15f;
   protected final ExerciseController<?> controller;
   private final ListDataProvider<T> dataProvider;
   /**
@@ -66,10 +61,12 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
   int verticalUnaccountedFor = 100;
   private SimplePager pager;
 
+  private ContainerList<T> containerList;
+
+
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_SORTING = false;
-  private static final boolean DEBUG_SCROLL = true;
-  private ContainerList<T> containerList;
+  private static final boolean DEBUG_SCROLL = false;
 
   protected SimplePagingContainer(ExerciseController controller) {
     this.controller = controller;
@@ -340,48 +337,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   protected int getNumTableRowsGivenScreenHeight() {
     return getPageSize();
-/*    int header = getTableHeaderHeight();
-    int pixelsAbove = header + verticalUnaccountedFor;
-    if (table.getElement().getAbsoluteTop() > 0) {
-      pixelsAbove = table.getElement().getAbsoluteTop() + VERTICAL_SLOP;
-    }
-    int leftOver = Window.getClientHeight() - pixelsAbove;
-*//*    if (DEBUG) {
-      logger.info("getNumTableRowsGivenScreenHeight Got on resize window height " + Window.getClientHeight() +
-          " header " + header + " result = " + leftOver + "( vert unaccount " +
-          verticalUnaccountedFor + " vs absolute top " + table.getElement().getAbsoluteTop() +
-          " pix above " + pixelsAbove +
-          ")");
-    }*//*
-
-    float rawRatio = ((float) leftOver) / (float) heightOfCellTableWith15Rows();
-    float tableRatio = Math.min(MAX_PAGES, rawRatio);
-    float ratio = DEFAULT_PAGE_SIZE * tableRatio;
-
-*//*    if (DEBUG) logger.debug("getNumTableRowsGivenScreenHeight : left over " + leftOver + " raw " + rawRatio +
-      " table ratio " + tableRatio + " ratio " + ratio);*//*
-
-    ratio = adjustVerticalRatio(ratio);
-    int attempt = (int) Math.floor(ratio);
-    attempt--;
-    int rows = Math.max(MIN_PAGE_SIZE, attempt);
-
-    if (DEBUG) logger.info("getNumTableRowsGivenScreenHeight : rows " + rows);
-
-    return rows;*/
   }
-
-/*  private float adjustVerticalRatio(float ratio) {
-    return ratio;
-  }
-
-  private int heightOfCellTableWith15Rows() {
-    return HEIGHT_OF_CELL_TABLE_WITH_15_ROWS;
-  }
-
-  private int getTableHeaderHeight() {
-    return controller.getHeightOfTopRows();
-  }*/
 
   protected void addItem(T item) {
     getList().add(item);
