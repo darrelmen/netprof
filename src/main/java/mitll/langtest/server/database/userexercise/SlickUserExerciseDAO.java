@@ -108,13 +108,6 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
 
     userDAO = database.getUserDAO();
     this.database = database;
-
-    // String mediaDir = database.getServerProps().getMediaDir();
-//    hasMediaDir = new File(mediaDir).exists();
-//    if (!hasMediaDir) {
-//      logger.info("SlickUserExerciseDAO : no media dir at " + mediaDir + " - this is OK on netprof host.");
-//    }
-    //  hostName = database.getServerProps().getHostName();
   }
 
   public void createTable() {

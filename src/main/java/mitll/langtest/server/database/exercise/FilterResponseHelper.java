@@ -136,11 +136,9 @@ public class FilterResponseHelper implements IResponseFilter {
   private boolean isDialog(IRequest request) {
     return request.getMode() == ProjectMode.DIALOG;
   }
-
   private boolean hasDialogs(int projectID) {
     return !getDialogs(projectID).isEmpty();
   }
-
 
   private ExerciseListRequest getRequestForUninspected(FilterRequest request, int userID) {
     return getExerciseListRequest(request, userID).setOnlyUninspected(true);

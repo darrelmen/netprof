@@ -47,7 +47,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
 
   private final Map<Integer, T> idToExercise = new HashMap<>();
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_MARK_CURRENT = false;
   private static final boolean DEBUG_ADDING = false;
 

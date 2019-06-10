@@ -32,11 +32,13 @@ package mitll.langtest.server.database.dialog;
 import mitll.langtest.client.custom.dialog.CreateDialogDialog;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.dialog.DialogStatus;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
 
+import java.util.Collection;
 import java.util.List;
 
 public interface IDialogDAO extends IDAO {
@@ -104,5 +106,7 @@ public interface IDialogDAO extends IDAO {
 
   int getProjectForDialog(int dialogID);
 
-  void convertDialogToInterpreter(IDialog dialog);
+  void convertDialogToInterpreter(IDialog dialog, IUserExerciseDAO userExerciseDAO);
+
+  void convertAll(Collection<IDialog> toCheck, IUserExerciseDAO userExerciseDAO);
 }

@@ -50,7 +50,6 @@ public enum DialogMetadata implements IsSerializable {
   public String getLC() {
     return toString().toLowerCase();
   }
-
   public String getCap() {
     return toString().substring(0, 1).toUpperCase() + toString().substring(1);
   }

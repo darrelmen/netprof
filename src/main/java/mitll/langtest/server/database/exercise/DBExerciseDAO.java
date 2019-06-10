@@ -116,7 +116,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
                   "\n\tuser      " + idToUserExercise.size() + " user exercises"
               );
             }
-          } else {
+          } else if (DEBUG) {
             logger.info("getExercise found user ex " +
                 "\n\tfor  #" + id +
                 "\n\teng  '" + commonExercise.getEnglish() + "'" +
@@ -735,7 +735,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private CommonExercise setAttributes(int exid, CommonExercise replacement) {
     List<ExerciseAttribute> attributesFor = userExerciseDAO.getExerciseAttributeDAO().getAttributesFor(exid);
 
-    logger.info("setAttributes refresh (" +exid+ ") attributes after " + attributesFor);
+    logger.info("setAttributes refresh (" + exid + ") attributes after " + attributesFor);
 
     if (replacement == null) {
       logger.warn("setAttributes no replacement exercise for #" + exid);

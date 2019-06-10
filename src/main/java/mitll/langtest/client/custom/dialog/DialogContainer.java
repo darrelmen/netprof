@@ -78,7 +78,7 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
 
     Column<T, SafeHtml> tSafeHtmlColumn = addDateCol(list);
 
-    addDialogType();
+//    addDialogType();
     addIsPublic();
 
     table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tSafeHtmlColumn, true));
@@ -147,14 +147,15 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
     return column;
   }
 
-  private void addDialogType() {
+/*  private void addDialogType() {
     Column<T, SafeHtml> diff = getDialogType();
     diff.setSortable(true);
     addColumn(diff, new TextHeader("Type"));
     table.addColumnSortHandler(getDialogTypeSorted(diff, getList()));
     table.setColumnWidth(diff, 50 + "px");
-  }
+  }*/
 
+/*
   private Column<T, SafeHtml> getDialogType() {
     return new Column<T, SafeHtml>(new ClickableCell()) {
       @Override
@@ -170,13 +171,14 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
       }
     };
   }
+*/
 
-  private ColumnSortEvent.ListHandler<T> getDialogTypeSorted(Column<T, SafeHtml> englishCol,
+/*  private ColumnSortEvent.ListHandler<T> getDialogTypeSorted(Column<T, SafeHtml> englishCol,
                                                              List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, (o1, o2) -> o1.getKind().compareTo(o2.getKind()));
     return columnSortHandler;
-  }
+  }*/
 
   /**
    * @param list

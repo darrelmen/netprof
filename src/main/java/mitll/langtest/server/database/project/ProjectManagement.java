@@ -58,6 +58,7 @@ import mitll.langtest.server.database.image.ImageResult;
 import mitll.langtest.server.database.result.SlickResultDAO;
 import mitll.langtest.server.database.security.IUserSecurityManager;
 import mitll.langtest.server.database.user.IUserDAO;
+import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.server.domino.DominoImport;
 import mitll.langtest.server.domino.IDominoImport;
 import mitll.langtest.server.domino.ImportInfo;
@@ -311,11 +312,6 @@ public class ProjectManagement implements IProjectManagement {
     configureProjects();
   }
 
-//  @NotNull
-//  private List<SlickProject> getProjectsByID(int projID, Collection<SlickProject> allSlickProjects) {
-//    return allSlickProjects.stream().filter(slickProject -> slickProject.id() == projID).collect(Collectors.toList());
-//  }
-
   /**
    * Production only
    *
@@ -502,15 +498,14 @@ public class ProjectManagement implements IProjectManagement {
     }
   }
 
-/*
-  private void addDialogInfo(int projID) {
-    addDialogInfo(getProject(projID, false));
-  }
-*/
-
   private void addDialogInfo(Project project) {
-    if (new DialogPopulate(db, pathHelper).addDialogInfo(project)) {
-      logger.info("addDialogInfo : add dialog info to " + project.getID() + " " + project.getName() + " now " + project.getDialogs().size() + " dialogs...");
+    DialogPopulate dialogPopulate = new DialogPopulate(db, pathHelper);
+    if (dialogPopulate.addDialogInfo(project)) {
+      IUserExerciseDAO userExerciseDAO = db.getUserExerciseDAO();
+
+      if (userExerciseDAO == null) logger.error("expecting userExerciseDAO\n\n\n");
+      logger.info("addDialogInfo : add dialog info to project #" + project.getID() + " " + project.getName() + " now " + project.getDialogs().size() + " dialogs...");
+      db.getDialogDAO().convertAll(project.getDialogs(), userExerciseDAO);
     } else if (project.getKind() == ProjectType.DIALOG) {
       logger.warn("addDialogInfo didn't add dialog info for " + project.getID());
     }

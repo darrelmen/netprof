@@ -42,7 +42,6 @@ import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.project.ThumbnailChoices;
 import mitll.langtest.shared.dialog.DialogMetadata;
-import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
@@ -61,10 +60,8 @@ import java.util.stream.Collectors;
 public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
-  //  private static final String TYPE = "Type";
-//  private static final String DIALOG_PNG = "dialog.png";
   private static final String INTERPRETER_PNG = "interpreter.png";
-  private static final String DIALOG_COLOR = "#f0fff7";
+//  private static final String DIALOG_COLOR = "#f0fff7";
   public static final String INTERP_COLOR = "aliceblue";
 
   private static final String ENGLISH = "english";
@@ -269,7 +266,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
         }
       });
 
-      props.put("type", dialog.getKind().toString());
+     // props.put("type", dialog.getKind().toString());
 
       thumbnailChoices.addPopover(button, props, Placement.BOTTOM);
     }
