@@ -113,7 +113,7 @@ public class DialogEditorTest extends BaseTest {
 
       Assert.assertEquals(1, toAdd.getExercises().size());
 
-      dialogDAO.convertDialogToInterpreter(toAdd);
+      dialogDAO.convertDialogToInterpreter(toAdd, andPopulate.getUserExerciseDAO());
     }
 
     {
@@ -189,7 +189,7 @@ public class DialogEditorTest extends BaseTest {
 
         Assert.assertEquals(2, exercises.size());
 
-        dialogDAO.convertDialogToInterpreter(toAdd3);
+        dialogDAO.convertDialogToInterpreter(toAdd3, andPopulate.getUserExerciseDAO());
       }
 
 
@@ -305,7 +305,7 @@ public class DialogEditorTest extends BaseTest {
         Assert.assertEquals(3, toAdd.getExercises().size());
 
 
-        dialogDAO.convertDialogToInterpreter(toAdd);
+        dialogDAO.convertDialogToInterpreter(toAdd, andPopulate.getUserExerciseDAO());
       }
     }
 
@@ -350,6 +350,173 @@ public class DialogEditorTest extends BaseTest {
         ClientExercise exercise3 = toAdd2.getExercises().get(5);
         logger.info("sixth is " + exercise3);
         Assert.assertFalse(exercise3.hasEnglishAttr());
+        Assert.assertEquals(INTERPRETER_SPEAKER, exercise3.getSpeaker());
+      }
+    }
+
+    finish(andPopulate);
+  }
+
+  @Test
+  public void testConvertDialogFullLonger2() {
+    DatabaseImpl andPopulate = getDatabase();
+    logger.warn("testNewDialog START ==--------- ");
+
+    Project project = getProject(andPopulate);
+
+    IDialogDAO dialogDAO = andPopulate.getDialogDAO();
+    int numRows = dialogDAO.getNumRows();
+    logger.info("testNewDialog before " + numRows);
+
+    int id;
+    {
+      Dialog toAdd = addDialog(andPopulate, PROJECTID, DialogType.DIALOG);
+      id = toAdd.getID();
+      for (ClientExercise exercise : toAdd.getExercises()) {
+        logger.info("new " + exercise);
+        CommonExercise lookup = project.getExerciseByID(exercise.getID());
+        logger.info("lookup " + lookup);
+      }
+
+      // insert after first
+      {
+        List<ClientExercise> exercises = toAdd.getExercises();
+        int exid = exercises.get(0).getID();
+        logger.info("first exid is " + exid);
+        List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, exid, false, System.currentTimeMillis());
+        Assert.assertEquals(clientExercises.size(), 1);
+        Assert.assertEquals(clientExercises.get(0).getAttributes().size(), 2);
+
+        IDialog toAdd3 = getiDialog(andPopulate, PROJECTID, id);
+        exercises = toAdd3.getExercises();
+        Assert.assertEquals(exercises.size(), 2);
+
+        ClientExercise added = exercises.get(1);
+        added.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute));
+        added.getAttributes().forEach(exerciseAttribute -> Assert.assertTrue(exerciseAttribute.getId() > 0));
+
+        // newly added exercise should be after the first one
+        Assert.assertEquals(toAdd.getExercises().indexOf(added), 1);
+
+        toAdd.getExercises().forEach(exercise -> Assert.assertEquals(exercise.getAttributes().size(), 2));
+
+        toAdd.getExercises().forEach(logger::info);
+      }
+
+      Assert.assertEquals(2, toAdd.getExercises().size());
+
+      {
+        List<ClientExercise> exercises = toAdd.getExercises();
+        int exid = exercises.get(1).getID();
+        logger.info("first exid is " + exid);
+        List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, exid, true, System.currentTimeMillis());
+        Assert.assertEquals(clientExercises.size(), 1);
+        Assert.assertEquals(clientExercises.get(0).getAttributes().size(), 2);
+
+        IDialog toAdd3 = getiDialog(andPopulate, PROJECTID, id);
+        exercises = toAdd3.getExercises();
+        Assert.assertEquals(exercises.size(), 3);
+
+        ClientExercise added = exercises.get(2);
+        added.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute));
+        added.getAttributes().forEach(exerciseAttribute -> Assert.assertTrue(exerciseAttribute.getId() > 0));
+
+        // newly added exercise should be after the first one
+        Assert.assertEquals(toAdd.getExercises().indexOf(added), 2);
+
+        exercises.forEach(exercise -> Assert.assertEquals(exercise.getAttributes().size(), 2));
+
+        exercises.forEach(logger::info);
+        Assert.assertEquals(3, toAdd.getExercises().size());
+
+
+      }
+
+      {
+        IDialog toAdd3 = getiDialog(andPopulate, PROJECTID, id);
+
+        List<ClientExercise> exercises = toAdd3.getExercises();
+        int exid = exercises.get(2).getID();
+        logger.info("exid is " + exid);
+        List<ClientExercise> clientExercises = dialogDAO.addEmptyExercises(toAdd, USERID, exid, false, System.currentTimeMillis());
+        Assert.assertEquals(clientExercises.size(), 1);
+        Assert.assertEquals(clientExercises.get(0).getAttributes().size(), 2);
+
+        toAdd3 = getiDialog(andPopulate, PROJECTID, id);
+        exercises = toAdd3.getExercises();
+        Assert.assertEquals(exercises.size(), 4);
+
+        ClientExercise added = exercises.get(3);
+        added.getAttributes().forEach(exerciseAttribute -> logger.info(exerciseAttribute));
+        added.getAttributes().forEach(exerciseAttribute -> Assert.assertTrue(exerciseAttribute.getId() > 0));
+
+        // newly added exercise should be after the first one
+        Assert.assertEquals(toAdd.getExercises().indexOf(added), 3);
+
+        exercises.forEach(exercise -> Assert.assertEquals(exercise.getAttributes().size(), 2));
+
+        exercises.forEach(logger::info);
+        Assert.assertEquals(4, toAdd.getExercises().size());
+
+
+        dialogDAO.convertDialogToInterpreter(toAdd, andPopulate.getUserExerciseDAO());
+      }
+    }
+
+    {
+      IDialog toAdd2 = getiDialog(andPopulate, PROJECTID, id);
+
+      Assert.assertEquals(8, toAdd2.getExercises().size());
+
+      {
+        ClientExercise exercise = toAdd2.getExercises().get(0);
+        logger.info("first is " + exercise);
+        Assert.assertTrue(exercise.hasEnglishAttr());
+        Assert.assertEquals(ENGLISH_SPEAKER, exercise.getSpeaker());
+      }
+      {
+        ClientExercise exercise1 = toAdd2.getExercises().get(1);
+        logger.info("second is " + exercise1);
+        Assert.assertFalse(exercise1.hasEnglishAttr());
+        Assert.assertEquals(INTERPRETER_SPEAKER, exercise1.getSpeaker());
+      }
+      {
+        ClientExercise exercise2 = toAdd2.getExercises().get(2);
+        logger.info("third is " + exercise2);
+        Assert.assertFalse(exercise2.hasEnglishAttr());
+        Assert.assertEquals(SPEAKER_B, exercise2.getSpeaker());
+      }
+      {
+        ClientExercise exercise3 = toAdd2.getExercises().get(3);
+        logger.info("fourth is " + exercise3);
+        Assert.assertTrue(exercise3.hasEnglishAttr());
+        Assert.assertEquals(INTERPRETER_SPEAKER, exercise3.getSpeaker());
+      }
+
+      {
+        ClientExercise exercise2 = toAdd2.getExercises().get(4);
+        logger.info("fifth is " + exercise2);
+        Assert.assertTrue(exercise2.hasEnglishAttr());
+        Assert.assertEquals(ENGLISH_SPEAKER, exercise2.getSpeaker());
+      }
+
+      {
+        ClientExercise exercise3 = toAdd2.getExercises().get(5);
+        logger.info("sixth is " + exercise3);
+        Assert.assertFalse(exercise3.hasEnglishAttr());
+        Assert.assertEquals(INTERPRETER_SPEAKER, exercise3.getSpeaker());
+      }
+
+      {
+        ClientExercise exercise2 = toAdd2.getExercises().get(6);
+        logger.info("seventh is " + exercise2);
+        Assert.assertFalse(exercise2.hasEnglishAttr());
+        Assert.assertEquals(SPEAKER_B, exercise2.getSpeaker());
+      }
+      {
+        ClientExercise exercise3 = toAdd2.getExercises().get(7);
+        logger.info("eighth is " + exercise3);
+        Assert.assertTrue(exercise3.hasEnglishAttr());
         Assert.assertEquals(INTERPRETER_SPEAKER, exercise3.getSpeaker());
       }
     }
