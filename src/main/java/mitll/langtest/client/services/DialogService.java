@@ -72,8 +72,6 @@ public interface DialogService extends RemoteService {
 
   void update(IDialog dialog) throws DominoSessionException;
 
-//  boolean updateImage(int dialogID, int imageID) throws DominoSessionException;
-
   /**
    * @param projid
    * @param id

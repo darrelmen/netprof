@@ -304,12 +304,6 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     return db.getDialogSessionDAO().add(dialogSession);
   }
 
-//  private Collection<IDialog> getDialogs(ExerciseListRequest request, ISection<IDialog> sectionHelper) {
-//    return (request.getTypeToSelection().isEmpty()) ?
-//        getDialogVisibleToMe(request.getUserID(),getDialogs(request.getProjID())) :
-//        new ArrayList<>(sectionHelper.getExercisesForSelectionState(request.getTypeToSelection()));
-//  }
-
   /**
    * Delete a dialog!
    *

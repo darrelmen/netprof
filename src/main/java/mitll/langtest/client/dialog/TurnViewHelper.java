@@ -437,6 +437,29 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    */
   @NotNull
   String getFirstSpeakerLabel() {
+    /*    String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
+
+    if (DEBUG) logger.info("getFirstSpeakerLabel first speaker " + firstSpeaker);
+
+    if (!dialog.getExercises().isEmpty()) {
+      ClientExercise next = dialog.getExercises().iterator().next();
+      boolean hasEnglishAttr = next.hasEnglishAttr();
+
+      if (hasEnglishAttr &&
+          (firstSpeaker == null || getExerciseSpeaker(next).equalsIgnoreCase(firstSpeaker))) {
+        firstSpeaker = ENGLISH_SPEAKER;
+      }
+    } else if (isInterpreter()) {
+      firstSpeaker = ENGLISH_SPEAKER;
+    }
+
+    if (firstSpeaker == null) firstSpeaker = SPEAKER_A;
+    if (DEBUG) {
+      logger.info("getFirstSpeakerLabel 2 " +
+          "first speaker " + firstSpeaker);
+    }
+    */
+
     return isInterpreterMode ? ENGLISH_SPEAKER : SPEAKER_A;
   }
 
@@ -447,6 +470,24 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    */
   @Nullable
   String getSecondSpeakerLabel() {
+     /*   String secondSpeaker = dialog.getSpeakers().size() > 1 ? dialog.getSpeakers().get(1) : null;
+
+    // OK guess from the language of the first turn
+    if (!dialog.getExercises().isEmpty()) {
+      ClientExercise next = dialog.getExercises().iterator().next();
+      boolean hasEnglishAttr = next.hasEnglishAttr();
+
+      if (hasEnglishAttr && !getExerciseSpeaker(next).equalsIgnoreCase(secondSpeaker)) {
+        secondSpeaker = getProjectLangSpeaker();
+      }
+    } else if (isInterpreter()) {
+      secondSpeaker = getProjectLangSpeaker();
+    }
+
+    if (secondSpeaker == null) secondSpeaker = ListenViewHelper.SPEAKER_B;
+    return secondSpeaker;*/
+
+
     return isInterpreterMode ? getProjectLangSpeaker() : ListenViewHelper.SPEAKER_B;
   }
 
