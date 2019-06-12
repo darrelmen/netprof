@@ -709,7 +709,9 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
         columns = ITurnContainer.COLUMNS.RIGHT;
       } else {
         columns = ITurnContainer.COLUMNS.MIDDLE;
-        logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs ex speaker : " + speaker + " => " + columns);
+        if (DEBUG) {
+          logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs ex speaker : " + speaker + " => " + columns);
+        }
       }
     } else {  // only two columns, left and right, A and B
       if (leftSpeakerMatch || speaker.equalsIgnoreCase(INTERPRETER) || speaker.equalsIgnoreCase(I)) {

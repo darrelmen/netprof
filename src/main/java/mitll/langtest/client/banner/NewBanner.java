@@ -57,10 +57,10 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.banner.NewContentChooser.MODE;
 import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
-import static mitll.langtest.shared.project.ProjectMode.*;
+import static mitll.langtest.shared.project.ProjectMode.EITHER;
+import static mitll.langtest.shared.project.ProjectMode.UNSET;
 import static mitll.langtest.shared.project.ProjectType.DIALOG;
 
 /**
@@ -70,8 +70,12 @@ import static mitll.langtest.shared.project.ProjectType.DIALOG;
 public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
 
-  private static final String DIALOGS = "Dialogs";
-  private static final String DIALOG_PRACTICE = "Rehearsal";//"Practice";
+  /**
+   * @see #getDialogNav
+   */
+  private static final String DIALOGS = "Interpreter / Dialogs";
+  //  private static final String DIALOG_PRACTICE = "Rehearsal";
+  private static final String MY_DIALOG_EDITOR = "Editor";
 
   private static final String RECORD = "Record";
   private static final String QC = "QC";
@@ -80,13 +84,15 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private static final List<VIEWS> DIALOG_VIEWS_IN_DROPDOWN =
       Arrays.asList(
-          //STUDY,
           LISTEN,
           REHEARSE,
           CORE_REHEARSE,
           PERFORM_PRESS_AND_HOLD,
           PERFORM,
-          SCORES,
+          SCORES);
+
+  private static final List<VIEWS> DIALOG_EDITOR_VIEWS =
+      Arrays.asList(
           TURN_EDITOR,
           CORE_EDITOR);
 
@@ -231,32 +237,38 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setCogVisible(userManager.hasUser());
   }
 
+  private Dropdown dialogEditorDropdown;
   /**
    * @return nav that is initial hidden
    */
   @NotNull
   private Nav getDialogNav() {
-    Nav recnav = new Nav();
-    recnav.setVisible(false);
-    recnav.getElement().setId("dialogNav");
+    Nav dialogNav = new Nav();
+    dialogNav.setVisible(false);
+    dialogNav.getElement().setId("dialogNav");
 
-    recnav.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
-    zeroRightMargin(recnav);
+    dialogNav.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+    zeroRightMargin(dialogNav);
 
     Dropdown dialogChoicesNav = new Dropdown(DIALOGS);
-    recnav.add(dialogChoicesNav);
+    dialogNav.add(dialogChoicesNav);
 
     rememberViewAndLink(dialogChoicesNav, VIEWS.DIALOG);
-    rememberViewAndLink(dialogChoicesNav, DIALOG_EDITOR);
 
-    Dropdown dialogPracticeNav = new Dropdown(DIALOG_PRACTICE);
-    recnav.add(dialogPracticeNav);
 
-    DIALOG_VIEWS_IN_DROPDOWN.forEach(views -> rememberViewAndLink(dialogPracticeNav, views));
+    //rememberViewAndLink(dialogChoicesNav, DIALOG_EDITOR);
 
-    //  rememberViewAndLink(recnav, SCORES);
+    Dropdown dialogPracticeNav = new Dropdown(MY_DIALOG_EDITOR);
+    dialogNav.add(dialogPracticeNav);
+    dialogEditorDropdown = dialogPracticeNav;
+    rememberViewAndLink(dialogPracticeNav, DIALOG_EDITOR);
 
-    return recnav;
+
+    DIALOG_VIEWS_IN_DROPDOWN.forEach(views -> rememberViewAndLink(dialogChoicesNav, views));
+
+    DIALOG_EDITOR_VIEWS.forEach(views -> rememberViewAndLink(dialogPracticeNav, views));
+
+    return dialogNav;
   }
 
 
@@ -641,7 +653,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     boolean showDialogEditor = shouldShowDialogEditor();
 
-    NavLink widgets = viewToLink.get(DIALOG_EDITOR);
+    dialogEditorDropdown.setVisible(showDialogEditor);
+
+/*    NavLink widgets = viewToLink.get(DIALOG_EDITOR);
     if (widgets != null) {
       widgets.setVisible(showDialogEditor);
     }
@@ -652,7 +666,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     widgets = viewToLink.get(CORE_EDITOR);
     if (widgets != null) {
       widgets.setVisible(showDialogEditor);
-    }
+    }*/
 
 //    logger.info("setDialogNavVisible dialog nav " + dialognav.isVisible());
   }
