@@ -29,10 +29,12 @@
 
 package mitll.langtest.client.exercise;
 
+import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.services.*;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.HasUnitChapter;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.SlimProject;
 
 import java.util.Collection;
@@ -41,42 +43,22 @@ import java.util.List;
 /**
  * Created by go22670 on 6/14/17.
  */
-public interface Services<T extends CommonShell & HasUnitChapter> extends EventRegistration, EditorServices<T> {
-  List<SlimProject> getAllProjects();
+public interface EditorServices<T extends CommonShell & HasUnitChapter>   {
+  void handleNonFatalError(String message, Throwable throwable);
 
-  String getHost();
-
-
-  AudioServiceAsync getAudioServiceAsyncForHost(String host);
-
-  ScoringServiceAsync getScoringServiceAsyncForHost(String host);
-
- // AudioServiceAsync getAudioService();
-
-  Collection<AudioServiceAsync> getAllAudioServices();
-
-  void tellOtherServerToRefreshProject(int projID);
+  AudioServiceAsync getAudioService();
 
   /**
+   *
    * @return
    */
-//  ScoringServiceAsync getScoringService();
+  ScoringServiceAsync getScoringService();
 
-  ScoringServiceAsync getScoringServiceAsync(int projectid);
+  ExerciseServiceAsync<T> getExerciseService();
 
-  LangTestDatabaseAsync getService();
+  DialogServiceAsync getDialogService();
 
-  QCServiceAsync getQCService();
+  Language getLanguageInfo();
 
-  UserServiceAsync getUserService();
-
-  OpenUserServiceAsync getOpenUserService();
-
-//  ExerciseServiceAsync<T> getExerciseService();
-
- // DialogServiceAsync getDialogService();
-
-  ListServiceAsync getListService();
-
-  DLIClassServiceAsync getDLIClassService();
+  void showView(INavigation.VIEWS view);
 }

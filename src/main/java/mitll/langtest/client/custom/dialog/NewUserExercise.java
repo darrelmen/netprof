@@ -66,7 +66,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
 
-abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> extends BasicDialog {
+abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise>
+    extends BasicDialog {
   private final Logger logger = Logger.getLogger("NewUserExercise");
 
   private static final int LINE_HEIGHT = 22;
@@ -135,6 +136,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   ControlGroup slowSpeedRecording = null;
 
   private final int listID;
+  private final int projID;
   private Panel toAddTo;
 
   private ListInterface<T, U> listInterface;
@@ -153,6 +155,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     this.controller = controller;
     this.newUserExercise = newExercise;
     this.listID = listID;
+    this.projID = controller.getProjectID();
   }
 
   /**
@@ -519,7 +522,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
       }
     }
 
-    getAudioService().getTranscriptMatch(controller.getProjectStartupInfo().getProjectid(),
+    getAudioService().getTranscriptMatch(projID,
         exid, audioID, true, text, new AsyncCallback<AudioAttribute>() {
           @Override
           public void onFailure(Throwable throwable) {
@@ -617,7 +620,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
   }
 
   private void refreshEx() {
-    controller.getExerciseService().refreshExercise(controller.getProjectStartupInfo().getProjectid(),
+    controller.getExerciseService().refreshExercise(projID,
         newUserExercise.getID(), new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -827,7 +830,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     if (safeText.isEmpty()) {
       checkContext(toAddTo, onClick);
     } else {
-      controller.getScoringService().isValidForeignPhrase(controller.getProjectID(), safeText, "", new AsyncCallback<Collection<String>>() {
+      controller.getScoringService().isValidForeignPhrase(projID, safeText, "", new AsyncCallback<Collection<String>>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("is valid exercise", caught);
@@ -1073,7 +1076,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise> 
     }
 
     private void disableOthers(boolean b) {
-     // logger.info("disableOthers disable others " + b);
+      // logger.info("disableOthers disable others " + b);
       boolean enabled = b && hasRecordPermission();
 
       if (enabled) {

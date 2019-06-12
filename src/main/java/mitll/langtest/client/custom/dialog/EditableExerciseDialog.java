@@ -50,7 +50,8 @@ import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.dialog.EditableExerciseList.SAFE_TEXT_REPLACEMENT;
 
-abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise> extends NewUserExercise<T, U> {
+abstract class EditableExerciseDialog<T extends CommonShell, U extends ClientExercise>
+    extends NewUserExercise<T, U> {
   private final Logger logger = Logger.getLogger("EditableExerciseDialog");
 
   private static final String FOREIGN_LANGUAGE = "foreignLanguage";

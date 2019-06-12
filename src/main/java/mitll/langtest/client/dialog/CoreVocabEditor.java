@@ -73,9 +73,10 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   }
 
   @NotNull
-  @Override protected DivWidget getOverallFeedback() {
+  @Override
+  protected DivWidget getOverallFeedback() {
     DivWidget widget = new DivWidget();
-  //  styleOverallFeedback(widget);
+    //  styleOverallFeedback(widget);
     return widget;
   }
 
@@ -343,7 +344,9 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
         clientExercise,
         controller.getLanguageInfo(),
         false,
-        getDialogID(), dialog.getExercises().size() == 1);
+        getDialog().getProjid(),
+        getDialogID(),
+        dialog.getExercises().size() == 1);
   }
 
   @Override

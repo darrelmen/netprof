@@ -51,22 +51,22 @@ import mitll.langtest.client.scoring.ASRScoringAudioPanel;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
+import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.project.SlimProject;
 import mitll.langtest.shared.user.MiniUser;
 
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
-import static mitll.langtest.client.exercise.WaveformExercisePanel.DOMINO_PROJECT;
 import static mitll.langtest.shared.answer.AudioType.*;
 
-public class ReviewEditableExercise<T extends CommonShell, U extends ClientExercise> extends EditableExerciseDialog<T, U> {
-  private static final String CONTEXT = "context";
+public class ReviewEditableExercise<T extends CommonShell, U extends ClientExercise>
+    extends EditableExerciseDialog<T, U> {
   private final Logger logger = Logger.getLogger("ReviewEditableExercise");
+
+  private static final String CONTEXT = "context";
 
   private static final String MARKING_AUDIO_DEFECT = "marking audio defect";
 
@@ -140,22 +140,8 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
   @Override
   protected void addItemsAtTop(Panel container) {
     List<String> typeOrder = new ArrayList<>(controller.getProjectStartupInfo().getTypeOrder());
-    addDominoProject(typeOrder);
+    new BasicDialog().addDominoProject(typeOrder, newUserExercise, controller.getProjectID(), controller);
     new UnitChapterItemHelper<U>(typeOrder).addUnitChapterItem(newUserExercise, container);
-  }
-
-  private void addDominoProject(List<String> typeOrder) {
-    List<SlimProject> allProjects = controller.getAllProjects();
-    int projectID = controller.getProjectID();
-    List<SlimProject> collect = allProjects.stream().filter(s -> s.getID() == projectID).collect(Collectors.toList());
-    if (!collect.isEmpty()) {
-      SlimProject slimProject = collect.get(0);
-      int dominoID = slimProject.getDominoID();
-      if (dominoID > -1) {
-        typeOrder.add(DOMINO_PROJECT);
-        newUserExercise.getUnitToValue().put(DOMINO_PROJECT, "" + dominoID);
-      }
-    }
   }
 
   private int currentTab = 0;

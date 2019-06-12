@@ -39,11 +39,11 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.scoring.AudioPanel;
 import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.services.ExerciseServiceAsync;
+import mitll.langtest.client.user.BasicDialog;
 import mitll.langtest.shared.ExerciseFormatter;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.exercise.*;
-import mitll.langtest.shared.project.SlimProject;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -52,7 +52,8 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class WaveformExercisePanel<L extends CommonShell, T extends ClientExercise & HasUnitChapter & Details> extends ExercisePanel<L, T> {
+public class WaveformExercisePanel<L extends CommonShell, T extends ClientExercise & HasUnitChapter & Details>
+    extends ExercisePanel<L, T> {
   private Logger logger = Logger.getLogger("WaveformExercisePanel");
   public static final String DOMINO_PROJECT = "Domino Project";
   public static final String PARENT_ITEM = "Parent";
@@ -81,7 +82,8 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
    * @see mitll.langtest.client.custom.SimpleChapterNPFHelper#getFactory(mitll.langtest.client.list.PagingExerciseList)
    */
   public WaveformExercisePanel(T e,
-                               ExerciseController controller, ListInterface<L, T> exerciseList,
+                               ExerciseController controller,
+                               ListInterface<L, T> exerciseList,
                                boolean doNormalRecording) {
     super(e, controller, exerciseList, doNormalRecording);
   }
@@ -134,7 +136,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
 
     add(container2);
 
-   // logger.info("typeOrder " + typeOrder);
+    // logger.info("typeOrder " + typeOrder);
     UIObject unitChapterItem = new UnitChapterItemHelper<T>(typeOrder).addUnitChapterItem(exercise, container2);
     if (unitChapterItem != null) {
       unitChapterItem.getElement().getStyle().setMarginTop(-8, Style.Unit.PX);
@@ -179,17 +181,7 @@ public class WaveformExercisePanel<L extends CommonShell, T extends ClientExerci
   }
 
   private void addDominoProject(List<String> typeOrder) {
-    List<SlimProject> allProjects = controller.getAllProjects();
-    int projectID = controller.getProjectID();
-    List<SlimProject> collect = allProjects.stream().filter(s -> s.getID() == projectID).collect(Collectors.toList());
-    if (!collect.isEmpty()) {
-      SlimProject slimProject = collect.get(0);
-      int dominoID = slimProject.getDominoID();
-      if (dominoID > -1) {
-        typeOrder.add(DOMINO_PROJECT);
-        exercise.getUnitToValue().put(DOMINO_PROJECT, "" + dominoID);
-      }
-    }
+    new BasicDialog().addDominoProject(typeOrder, exercise, controller.getProjectID(), controller);
   }
 
   @NotNull

@@ -157,6 +157,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
     learn.addClickHandler(event -> {
       int itemID = getItemID(container);
+      int projid = getCurrentSelection().getProjid();
 //      logger.info("dialog item ID " + itemID);
       ImageUpload widgets1 = new ImageUpload(controller.getUser(), itemID, getCurrentSelection().getImageRef()) {
         @Override
@@ -184,7 +185,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
         }
       };
-      widgets1.init(controller.getProjectID());
+      widgets1.init(projid);
       widgets1.showModal(new DialogHelper.CloseListener() {
         @Override
         public boolean gotYes() {
@@ -231,6 +232,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
     int user = controller.getUser();
     //  logger.info("addYours project " + controller.getProjectID());
+
     ExerciseListRequest request = new ExerciseListRequest(0, user, controller.getProjectID()).setSortByDate(true);
 
     final boolean fcanSeeAll = isCanSeeAll();
@@ -321,13 +323,15 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     DialogEditor editorTurnDialogEditor = new DialogEditor(controller, INavigation.VIEWS.DIALOG_EDITOR, selectedItem);
     editorTurnDialogEditor.showContent(listContent, INavigation.VIEWS.DIALOG_EDITOR);
 
+    int id = selectedItem.getID();
+    int projid = selectedItem.getProjid();
     new DialogHelper(true).show(
         "Add/Edit Turns" + " : " + getListName(),
         Collections.emptyList(),
         listContent,
         "Done",
         null,
-        new MyShownCloseListener(editorTurnDialogEditor, selectedItem.getID()), 720, -1, true);
+        new MyShownCloseListener(editorTurnDialogEditor, id, projid), 720, -1, true);
   }
 
   //  @Override
@@ -339,22 +343,26 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
     //  logger.info("list content " + listContent);
 
+    int projid = selectedItem.getProjid();
+    int id = selectedItem.getID();
     new DialogHelper(true).show(
         "Add/Edit Core Vocab" + " : " + getListName(),
         Collections.emptyList(),
         listContent,
         "Done",
         null,
-        new MyShownCloseListener(editorTurnDialogEditor, selectedItem.getID()), 740, -1, true);
+        new MyShownCloseListener(editorTurnDialogEditor, id, projid), 740, -1, true);
   }
 
   private class MyShownCloseListener implements DialogHelper.ShownCloseListener {
-    IFocusable editItem;
-    int dialogID;
+    private final IFocusable editItem;
+    private final int dialogID;
+    private final int projid;
 
-    MyShownCloseListener(IFocusable editItem, int dialogID) {
+    MyShownCloseListener(IFocusable editItem, int dialogID, int projid) {
       this.editItem = editItem;
       this.dialogID = dialogID;
+      this.projid = projid;
     }
 
     @Override
@@ -375,8 +383,8 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
       // editItem.removeHistoryListener();
       // History.newItem("");
 
-      int projectID = controller.getProjectID();
-      if (projectID != -1) {
+      // int projectID = controller.getProjectID();
+      if (projid != -1) {
         controller.getAudioService().reloadDialog(dialogID, new AsyncCallback<Void>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -387,7 +395,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
           @Override
           public void onSuccess(Void result) {
             logger.info("did reload on other server.");
-            controller.getExerciseService().reloadDialog(projectID, dialogID, new AsyncCallback<Void>() {
+            controller.getExerciseService().reloadDialog(projid, dialogID, new AsyncCallback<Void>() {
               @Override
               public void onFailure(Throwable caught) {
                 controller.handleNonFatalError("reloading dialog on netprof.", caught);
@@ -436,7 +444,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   protected void doDelete(UIObject delete, T currentSelection) {
     final int uniqueID = currentSelection.getID();
 
-    controller.getDialogService().delete(controller.getProjectID(), uniqueID, new AsyncCallback<Boolean>() {
+    controller.getDialogService().delete(currentSelection.getProjid(), uniqueID, new AsyncCallback<Boolean>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("deleting a dialog", caught);

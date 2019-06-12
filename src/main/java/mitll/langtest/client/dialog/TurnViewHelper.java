@@ -105,7 +105,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_NEXT = false;
 
-  TurnViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
+  TurnViewHelper(ExerciseController<?> controller, INavigation.VIEWS thisView) {
     this.controller = controller;
     this.thisView = thisView;
     this.prev = thisView.getPrev();
@@ -196,7 +196,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
       isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
       showDialog(dialogID, dialog, child);
     } else {
-      controller.getNavigation().showView(INavigation.VIEWS.DIALOG);
+      controller.showView(INavigation.VIEWS.DIALOG);
     }
   }
 
@@ -410,13 +410,14 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     style.setMarginTop(5, PX);
     style.setOverflow(Style.Overflow.HIDDEN);
 
+    boolean interpreter = isInterpreter();
     {
-      String firstSpeakerLabel = isInterpreter ? getFirstSpeakerLabel() : ListenViewHelper.SPEAKER_A;
+      String firstSpeakerLabel = interpreter ? ENGLISH_SPEAKER : ListenViewHelper.SPEAKER_A;
       rowOne.add(getLeftSpeaker(firstSpeakerLabel));
     }
 
     {
-      String secondSpeakerLabel = isInterpreter ? getSecondSpeakerLabel() : ListenViewHelper.SPEAKER_B;
+      String secondSpeakerLabel = interpreter ? getProjectLangSpeaker() : ListenViewHelper.SPEAKER_B;
       rowOne.add(getRightSpeaker(secondSpeakerLabel));
     }
 
@@ -434,19 +435,21 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
   /**
    * @return
+   * @see DialogEditor#addTurns
+   * @see #getSpeakerRow
+   * @see #addAllTurns(IDialog, DivWidget)
    */
   @NotNull
   String getFirstSpeakerLabel() {
-    /*    String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
+    String firstSpeaker = dialog.getSpeakers().isEmpty() ? null : dialog.getSpeakers().get(0);
 
     if (DEBUG) logger.info("getFirstSpeakerLabel first speaker " + firstSpeaker);
 
     if (!dialog.getExercises().isEmpty()) {
-      ClientExercise next = dialog.getExercises().iterator().next();
-      boolean hasEnglishAttr = next.hasEnglishAttr();
+      ClientExercise first = getFirstExercise();
 
-      if (hasEnglishAttr &&
-          (firstSpeaker == null || getExerciseSpeaker(next).equalsIgnoreCase(firstSpeaker))) {
+      if (first.hasEnglishAttr() &&
+          (firstSpeaker == null || first.getSpeaker().equalsIgnoreCase(firstSpeaker))) {
         firstSpeaker = ENGLISH_SPEAKER;
       }
     } else if (isInterpreter()) {
@@ -458,9 +461,13 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
       logger.info("getFirstSpeakerLabel 2 " +
           "first speaker " + firstSpeaker);
     }
-    */
 
-    return isInterpreterMode ? ENGLISH_SPEAKER : SPEAKER_A;
+//    return isInterpreterMode ? ENGLISH_SPEAKER : SPEAKER_A;
+    return firstSpeaker;
+  }
+
+  private ClientExercise getFirstExercise() {
+    return dialog.getExercises().iterator().next();
   }
 
   /**
@@ -470,14 +477,14 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    */
   @Nullable
   String getSecondSpeakerLabel() {
-     /*   String secondSpeaker = dialog.getSpeakers().size() > 1 ? dialog.getSpeakers().get(1) : null;
+    String secondSpeaker = dialog.getSpeakers().size() > 1 ? dialog.getSpeakers().get(1) : null;
 
     // OK guess from the language of the first turn
     if (!dialog.getExercises().isEmpty()) {
-      ClientExercise next = dialog.getExercises().iterator().next();
-      boolean hasEnglishAttr = next.hasEnglishAttr();
+      ClientExercise firstExercise = getFirstExercise();
+      boolean hasEnglishAttr = firstExercise.hasEnglishAttr();
 
-      if (hasEnglishAttr && !getExerciseSpeaker(next).equalsIgnoreCase(secondSpeaker)) {
+      if (hasEnglishAttr && !firstExercise.getSpeaker().equalsIgnoreCase(secondSpeaker)) {
         secondSpeaker = getProjectLangSpeaker();
       }
     } else if (isInterpreter()) {
@@ -485,10 +492,9 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     }
 
     if (secondSpeaker == null) secondSpeaker = ListenViewHelper.SPEAKER_B;
-    return secondSpeaker;*/
+    return secondSpeaker;
 
-
-    return isInterpreterMode ? getProjectLangSpeaker() : ListenViewHelper.SPEAKER_B;
+    //return isInterpreterMode ? getProjectLangSpeaker() : ListenViewHelper.SPEAKER_B;
   }
 
   @NotNull
@@ -617,15 +623,6 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return rowOne;
   }
 
-  void onUnload() {
-  }
-
-  void addAllTurns(IDialog dialog, DivWidget rowOne) {
-    String left = getFirstSpeakerLabel();
-    String right = getSecondSpeakerLabel();
-    addTurnPerExercise(dialog, rowOne, left, right);
-  }
-
   protected void styleTurnContainer(DivWidget rowOne) {
     rowOne.getElement().setId("turnContainer");
     rowOne.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
@@ -634,9 +631,22 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     rowOne.getElement().getStyle().setMarginBottom(10, PX);
   }
 
+  /**
+   * @param dialog
+   * @param rowOne
+   * @see #getTurns
+   * @see RehearseViewHelper#addTurns
+   */
+  void addAllTurns(IDialog dialog, DivWidget rowOne) {
+    addTurnPerExercise(dialog, rowOne, getFirstSpeakerLabel(), getSecondSpeakerLabel());
+  }
+
   protected void addTurnPerExercise(IDialog dialog, DivWidget rowOne, String left, String right) {
     rowOne.clear();
     addTurnForEachExercise(rowOne, left, right, dialog.getExercises());
+  }
+
+  void onUnload() {
   }
 
   /**
@@ -675,11 +685,14 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   /**
-   * TODO : make the column decision based on the dialog vs interpreter mode in the UI, not on speakers in the dialog
+   * make the column decision based on the dialog vs interpreter mode in the UI, not on only on the speakers in the dialog
    *
-   * @param left
-   * @param right
-   * @param speaker
+   * if interpreter, look at the speaker matches to determine left, right, or middle (interpreter)
+   * if dialog, look at the left speaker match to determine the left or right column
+   *
+   * @param left    if the dialog attribute specifies the name of the left speaker, the left speaker's name
+   * @param right   if the dialog attribute specifies the name of the right speaker, the right speaker's name
+   * @param speaker for the exercise we're trying to figure out the column for
    * @return
    * @see #getColumnForEx(String, String, ClientExercise)
    */
@@ -687,8 +700,10 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   private ITurnContainer.COLUMNS getColumnForSpeaker(String left, String right, String speaker) {
     ITurnContainer.COLUMNS columns;
 
+    boolean leftSpeakerMatch = speaker.equalsIgnoreCase(left);
+
     if (isInterpreterMode) {
-      if (speaker.equalsIgnoreCase(left) || speaker.equalsIgnoreCase(SPEAKER_A)) {
+      if (leftSpeakerMatch || speaker.equalsIgnoreCase(SPEAKER_A)) {
         columns = ITurnContainer.COLUMNS.LEFT;
       } else if (speaker.equalsIgnoreCase(right) || speaker.equalsIgnoreCase(SPEAKER_B)) {
         columns = ITurnContainer.COLUMNS.RIGHT;
@@ -696,16 +711,19 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
         columns = ITurnContainer.COLUMNS.MIDDLE;
         logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs ex speaker : " + speaker + " => " + columns);
       }
-    } else {
-      if (speaker.equalsIgnoreCase(INTERPRETER) || speaker.equalsIgnoreCase(I)) {
+    } else {  // only two columns, left and right, A and B
+      if (leftSpeakerMatch || speaker.equalsIgnoreCase(INTERPRETER) || speaker.equalsIgnoreCase(I)) {
         columns = ITurnContainer.COLUMNS.LEFT;
       } else {
         columns = ITurnContainer.COLUMNS.RIGHT;
       }
     }
 
-    if (DEBUG || true) {
-      logger.info("getColumnForSpeaker : l " + left + " r " + right + " vs ex speaker : " + speaker + " => " + columns);
+    if (DEBUG) {
+      logger.info("getColumnForSpeaker : " +
+          "\n\tl          " + left +
+          "\n\tr          " + right + " vs " +
+          "\n\tex speaker " + speaker + " => " + columns);
     }
 
     return columns;
@@ -873,7 +891,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   void reloadDialog() {
-    int projectID = controller.getProjectID();
+    int projectID = getDialog().getProjid();
     if (projectID != -1) {
       int dialogID = getDialogID();
 

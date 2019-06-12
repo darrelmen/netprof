@@ -7,25 +7,21 @@ buildscript {
             url "${artifactory_contextUrl}/libs-release"
         }
     }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.4'
-    }
 }
 
 plugins {
-    id "com.jfrog.artifactory" version "4.9.0"
-    id "com.github.hierynomus.license" version "0.13.1"
-    id "org.sonarqube" version "2.5"
+    id "com.jfrog.artifactory" //version "4.9.6"
+    id "com.github.hierynomus.license" //version "0.13.1"
+//    id "org.sonarqube" //version "2.5"
     // this one dies with jna thing!
 //    id "com.sourcemuse.mongo" version "0.13.0"
-    id "fr.putnami.gwt" version "0.6.1"
+    id "fr.putnami.gwt" //version "0.6.1"
 }
 
 apply from: 'gradle-common/common.gradle'
 apply from: 'gradle-common/common-java.gradle'
 apply plugin: 'war'
 apply plugin: 'eclipse'
-apply plugin: 'com.github.johnrengelman.shadow'
 apply plugin: 'distribution'
 apply plugin: "jacoco"
 
@@ -95,10 +91,19 @@ dependencies {
         artifact { name = 'domino'; type = 'jar'; extension = 'jar' }
 
         exclude group: 'org.moxieapps.gwt', module: 'highcharts'
+
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-api'
+        exclude group: 'org.apache.logging.log4j', module: 'log4j-core'
+
+        exclude module: 'domino-data-1.10.0-SNAPSHOT' //by  name
+        exclude group: 'mitll.hlt:domino-data', module: '1.10.0-SNAPSHOT' //by  name
+        exclude group: 'mitll.hlt', module: 'domino-data' //by  name
     }
 
+    implementation files('libs/domino-data-1.10.0-SNAPSHOT-early.jar')
+
     // super special location for npdata that's on the branch
-  //  compile('mitll.hlt:npdata-22:1.0.0-topicNetprof22') { changing = true }
+    //  compile('mitll.hlt:npdata-22:1.0.0-topicNetprof22') { changing = true }
     compile('mitll.hlt:npdata:1.0.0') { changing = true }
 
     // if we want to show a spectrogram
@@ -206,15 +211,6 @@ war {
     }
 }
 
-// make standalone jar
-shadowJar {
-    zip64 true
-}
-
-task showMeCache << {
-    configurations.compile.each { println it }
-}
-
 distributions {
     main {
         baseName = 'netprof-installation'
@@ -251,8 +247,6 @@ distributions {
     }
 }
 
-shadowJar.dependsOn war
-
 // ***************************** Publishing **************************************
 
 publishing {
@@ -276,7 +270,7 @@ jacocoTestReport {
     reports {
         xml.enabled true
         csv.enabled false
-        html.destination "${buildDir}/jacoco/html"
+        //     html.destination "${buildDir}/jacoco/html"
     }
 }
 

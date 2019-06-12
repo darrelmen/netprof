@@ -113,6 +113,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
         controller,
         this,
         this,
+        getDialog().getProjid(),
         getDialogID(),
         isFirst,
         this);
@@ -334,6 +335,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     String left = getFirstSpeakerLabel();
     String right = getSecondSpeakerLabel();
 
+    logger.info("addTurns : left " + left + " right " +right);
     clearColumnTurnLists();
 
     for (ClientExercise clientExercise : changed) {

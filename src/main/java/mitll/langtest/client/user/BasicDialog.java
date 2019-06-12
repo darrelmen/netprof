@@ -46,12 +46,17 @@ import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.exercise.Services;
 import mitll.langtest.client.recorder.RecordButton;
+import mitll.langtest.shared.exercise.HasUnitChapter;
+import mitll.langtest.shared.project.SlimProject;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import static com.github.gwtbootstrap.client.ui.constants.Placement.TOP;
 
@@ -62,6 +67,7 @@ public class BasicDialog {
 
   private static final boolean DEBUG = false;
   static final String TRY_AGAIN = "Try Again";
+  public static final String DOMINO_PROJECT = "Domino Project";
 
   public FormField addControlFormField(Panel dialogBox) {
     return addControlFormField(dialogBox, "", false, 0, 30, -1, "");
@@ -71,7 +77,7 @@ public class BasicDialog {
     return addControlFormField(dialogBox, label, false, 0, 30, -1, hint);
   }
 
-  protected FormField addControlFormField(Panel dialogBox, String label, String hint, int maxLength,int optWidth) {
+  protected FormField addControlFormField(Panel dialogBox, String label, String hint, int maxLength, int optWidth) {
     return addControlFormField(dialogBox, label, false, 0, maxLength, optWidth, hint);
   }
 
@@ -631,5 +637,20 @@ public class BasicDialog {
    */
   protected Tooltip addTooltip(Widget w, String tip) {
     return new TooltipHelper().addTooltip(w, tip);
+  }
+
+  public <T extends HasUnitChapter> void addDominoProject(List<String> typeOrder, T exercise,
+                                                          int projectID, Services services) {
+    List<SlimProject> allProjects = services.getAllProjects();
+    //  int projectID = controller.getProjectID();
+    List<SlimProject> collect = allProjects.stream().filter(s -> s.getID() == projectID).collect(Collectors.toList());
+    if (!collect.isEmpty()) {
+      SlimProject slimProject = collect.get(0);
+      int dominoID = slimProject.getDominoID();
+      if (dominoID > -1) {
+        typeOrder.add(DOMINO_PROJECT);
+        exercise.getUnitToValue().put(DOMINO_PROJECT, "" + dominoID);
+      }
+    }
   }
 }

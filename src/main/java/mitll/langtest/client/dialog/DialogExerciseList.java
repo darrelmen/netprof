@@ -61,7 +61,6 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
   private static final String INTERPRETER_PNG = "interpreter.png";
-//  private static final String DIALOG_COLOR = "#f0fff7";
   public static final String INTERP_COLOR = "aliceblue";
 
   private static final String ENGLISH = "english";
@@ -87,7 +86,9 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
    */
   private final ThumbnailChoices thumbnailChoices = new ThumbnailChoices();
 
-  DialogExerciseList(Panel topRow, Panel currentExercisePanel, INavigation.VIEWS instanceName, DivWidget listHeader,
+  DialogExerciseList(Panel topRow, Panel currentExercisePanel,
+                     INavigation.VIEWS instanceName,
+                     DivWidget listHeader,
                      ExerciseController controller) {
     super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, INavigation.VIEWS.DIALOG);
   }
@@ -100,20 +101,6 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     super.showPrevNext();
     setDownloadVisible(false);
   }
-
-/*  @Override
-  protected List<String> getTypeOrderSimple() {
-    List<String> strings = new ArrayList<>(getStartupInfo().getTypeOrder());
-    strings.add(TYPE);
-    return strings;
-  }*/
-
-/*  @Override
-  protected Set<String> getRootNodes(ProjectStartupInfo projectStartupInfo) {
-    Set<String> strings = new HashSet<>(projectStartupInfo.getRootNodes());
-    strings.add(TYPE);
-    return strings;
-  }*/
 
   @Override
   protected int getFirstPageSize() {
@@ -250,7 +237,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     // logger.info("show image " + imageRef);
     String imageRef = dialog.getImageRef();
     if (imageRef == null || imageRef.isEmpty()) {
-      imageRef = getDefaultImage(dialog);
+      imageRef = getDefaultImage();
     }
     PushButton button = new PushButton(getFlag(imageRef));
     button.addClickHandler(clickEvent -> gotClickOnDialog(dialog));
@@ -282,10 +269,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   }
 
   @NotNull
-  private String getDefaultImage(IDialog dialog) {
-//    String imageRef;
-//    String s = dialog.getKind() == DialogType.INTERPRETER ? INTERPRETER_PNG : DIALOG_PNG;
-//    imageRef = "langtest/cc/" + s;
+  private String getDefaultImage() {
     return "langtest/cc/" + INTERPRETER_PNG;
   }
 

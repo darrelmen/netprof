@@ -735,7 +735,7 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private CommonExercise setAttributes(int exid, CommonExercise replacement) {
     List<ExerciseAttribute> attributesFor = userExerciseDAO.getExerciseAttributeDAO().getAttributesFor(exid);
 
-    logger.info("setAttributes refresh (" + exid + ") attributes after " + attributesFor);
+    logger.info("setAttributes refresh for exid " + exid + " attributes after " + attributesFor);
 
     if (replacement == null) {
       logger.warn("setAttributes no replacement exercise for #" + exid);

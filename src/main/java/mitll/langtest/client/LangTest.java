@@ -649,7 +649,7 @@ public class LangTest implements
   @Override
   public void recordingModeSelect(boolean checkLogin) {
     if (BrowserRecording.gotPermission()) {
-      if (DEBUG_MODE) logger.info("checkInitFlash : initFlash - has permission " +checkLogin);
+      if (DEBUG_MODE) logger.info("checkInitFlash : initFlash - has permission " + checkLogin);
       if (checkLogin) userManager.checkLogin();
     } else {
       if (DEBUG_MODE) logger.info("checkInitFlash : initFlash - no permission yet " + checkLogin);
@@ -832,7 +832,7 @@ public class LangTest implements
     storage.setUser(user.getID());
 
     projectStartupInfo = user.getStartupInfo();
-  //  setProjectStartupInfo(user);
+    //  setProjectStartupInfo(user);
 
     if (DEBUG) logger.info("\ngotUser Got startup info " + projectStartupInfo);
     initialUI.gotUser(user);
@@ -1239,6 +1239,10 @@ public class LangTest implements
   @Override
   public void setBannerVisible(boolean visible) {
     getNavigation().setBannerVisible(visible);
+  }
+
+  public void showView(INavigation.VIEWS view) {
+    getNavigation().showView(view);
   }
 
   public INavigation getNavigation() {

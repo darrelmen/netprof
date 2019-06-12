@@ -45,6 +45,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.SessionManager;
+import mitll.langtest.client.exercise.EditorServices;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.*;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -80,6 +81,8 @@ public class EditorTurn extends PlayAudioExercisePanel
 
   private final ExerciseController<?> controller;
   private final ITurnContainer<EditorTurn> turnContainer;
+  private final int projID;
+
   private final int dialogID;
 
   /**
@@ -110,6 +113,7 @@ public class EditorTurn extends PlayAudioExercisePanel
    * @param prevColumn
    * @param rightJustify
    * @param controller
+   * @param projID
    * @see DialogEditor#makeTurnPanel(ClientExercise, ListenViewHelper.COLUMNS, ListenViewHelper.COLUMNS, boolean, int)
    */
   EditorTurn(final ClientExercise clientExercise,
@@ -119,6 +123,7 @@ public class EditorTurn extends PlayAudioExercisePanel
              ExerciseController<?> controller,
              ITurnContainer<EditorTurn> turnContainer,
              IEditableTurnContainer<EditorTurn> editableTurnContainer,
+             int projID,
              int dialogID,
              boolean isFirstTurn,
              SessionManager sessionManager) {
@@ -165,6 +170,7 @@ public class EditorTurn extends PlayAudioExercisePanel
     Style style = getElement().getStyle();
     style.setProperty("minWidth", "500px");
 
+    this.projID = projID;
     this.dialogID = dialogID;
     this.clientExercise = clientExercise;
 
@@ -524,13 +530,13 @@ public class EditorTurn extends PlayAudioExercisePanel
   }
 
   private void updateText(String s, EditorTurn outer, int audioID, boolean moveToNextTurn) {
-    int projectID = controller.getProjectID();
-    if (projectID != -1) {
+
+    if (projID != -1) {
       final int exID = getExID();
-      if (DEBUG) logger.info("updateText : Checking '" + s + "' on project #" + projectID + " for ex #" + exID);
+      if (DEBUG) logger.info("updateText : Checking '" + s + "' on project #" + projID + " for ex #" + exID);
 
       // talk to the audio service first to determine the oov
-      controller.getAudioService().isValid(projectID, exID, getSanitized(s), new AsyncCallback<OOVWordsAndUpdate>() {
+      controller.getAudioService().isValid(projID, exID, getSanitized(s), new AsyncCallback<OOVWordsAndUpdate>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("isValid on text...", caught);
@@ -545,7 +551,7 @@ public class EditorTurn extends PlayAudioExercisePanel
 
           showOOVResult(result);
 
-          updateTextViaExerciseService(projectID, exID, audioID, s, result.getNormalizedText(), moveToNextTurn, outer);
+          updateTextViaExerciseService(projID, exID, audioID, s, result.getNormalizedText(), moveToNextTurn, outer);
         }
       });
     }
@@ -770,7 +776,7 @@ public class EditorTurn extends PlayAudioExercisePanel
   }
 
   private void tellNetprofAudioHasChanged(int id, int previousAudioID) {
-    controller.getExerciseService().refreshAudio(controller.getProjectID(), getExID(), previousAudioID, new AsyncCallback<Void>() {
+    controller.getExerciseService().refreshAudio(projID, getExID(), previousAudioID, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("refresh audio for " + getExID(), caught);

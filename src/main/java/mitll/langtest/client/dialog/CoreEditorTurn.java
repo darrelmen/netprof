@@ -35,7 +35,7 @@ import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.event.dom.client.KeyCodes;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.EditorServices;
 import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.PhonesChoices;
 import mitll.langtest.client.scoring.SimpleTurn;
@@ -50,15 +50,17 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteListener {
-  public static final boolean DEBUG_UPDATE_TEXT = true;
   private final Logger logger = Logger.getLogger("CoreEditorTurn");
+
+  public static final boolean DEBUG_UPDATE_TEXT = true;
 
   private CoreVocabEditor coreVocabEditor;
   private EditableTurnHelper editableTurnHelper;
   private EditableTurnHelper englishEditableTurnHelper;
   private TurnAddDelete turnAddDelete;
-  private ExerciseController<?> controller;
-  private int dialogID;
+  private EditorServices<?> controller;
+  private final int projID;
+  private final int dialogID;
 
   private static final int WIDTH_TO_USE = 210;
 
@@ -75,19 +77,25 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
    * @param vocab
    * @param language
    * @param isInterpreter
+   * @param projID
    * @param dialogID
    * @param onlyOneTurn
+   * @see CoreVocabEditor#reallyGetTurnPanel
    */
-  CoreEditorTurn(ExerciseController<?> controller,
+  CoreEditorTurn(EditorServices<?> controller,
                  CoreVocabEditor coreVocabEditor,
                  ClientExercise vocab,
                  Language language,
                  boolean isInterpreter,
-                 int dialogID, boolean onlyOneTurn) {
+                 int projID,
+                 int dialogID,
+                 boolean onlyOneTurn) {
     super(vocab, ITurnContainer.COLUMNS.RIGHT, false, controller.getLanguageInfo());
     this.onlyOneTurn = onlyOneTurn;
     this.controller = controller;
     this.coreVocabEditor = coreVocabEditor;
+
+    this.projID = projID;
     this.dialogID = dialogID;
 
     if (DEBUG) logger.info("core " + vocab.getID() + " " + vocab.getForeignLanguage());
@@ -205,9 +213,8 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
   }
 
   private void updateEnglish(boolean moveOn) {
-    int projectID = controller.getProjectID();
-    if (projectID != -1) {
-      updateEnglishText(projectID, getExID(), englishEditableTurnHelper.getContent(), moveOn);
+    if (projID != -1) {
+      updateEnglishText(projID, getExID(), englishEditableTurnHelper.getContent(), moveOn);
     }
   }
 
@@ -284,15 +291,15 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
   }
 
   private void updateText(String s, boolean moveToNextTurn) {
-    int projectID = controller.getProjectID();
-    if (projectID != -1) {
+    //int projectID = controller.getProjectID();
+    if (projID != -1) {
       final int exID = getExID();
 
-      if (DEBUG) logger.info("updateText : Checking " + s + " on " + projectID + " for " + exID);
+      if (DEBUG) logger.info("updateText : Checking " + s + " on " + projID + " for " + exID);
 
       // talk to the audio service first to determine the oov
 
-      controller.getAudioService().isValid(projectID, exID, getSanitized(s), new AsyncCallback<OOVWordsAndUpdate>() {
+      controller.getAudioService().isValid(projID, exID, getSanitized(s), new AsyncCallback<OOVWordsAndUpdate>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("isValid on text...", caught);
@@ -307,7 +314,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
 
           showOOVResult(result);
 
-          updateTextViaExerciseService(projectID, exID, s, result.getNormalizedText(), moveToNextTurn);
+          updateTextViaExerciseService(projID, exID, s, result.getNormalizedText(), moveToNextTurn);
         }
       });
     }

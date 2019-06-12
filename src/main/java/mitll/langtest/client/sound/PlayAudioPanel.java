@@ -40,6 +40,7 @@ import mitll.langtest.client.LangTest;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.PlayAudioEvent;
 import mitll.langtest.client.flashcard.MyCustomIconType;
+import mitll.langtest.client.instrumentation.EventRegistration;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Date;
