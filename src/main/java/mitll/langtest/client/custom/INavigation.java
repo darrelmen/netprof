@@ -106,10 +106,11 @@ public interface INavigation extends IViewContaner {
 
     /**
      * @see NewBanner#getDialogNav
+     * June 12, 2019 - Tamas said teachers should not be able to edit dialogs.
      */
-    DIALOG_EDITOR("Dialog Editor", ProjectMode.DIALOG, QC_PERMISSIONS_PLUS_TEACHER),
-    TURN_EDITOR("Turn Editor", ProjectMode.DIALOG, QC_PERMISSIONS_PLUS_TEACHER),
-    CORE_EDITOR("Vocab Editor", ProjectMode.DIALOG, QC_PERMISSIONS_PLUS_TEACHER)
+    DIALOG_EDITOR("Dialog Editor", ProjectMode.DIALOG, QC_PERMISSIONS),
+    TURN_EDITOR("Turn Editor", ProjectMode.DIALOG, QC_PERMISSIONS),
+    CORE_EDITOR("Vocab Editor", ProjectMode.DIALOG, QC_PERMISSIONS)
     ;
 
     private final List<Permission> perms;

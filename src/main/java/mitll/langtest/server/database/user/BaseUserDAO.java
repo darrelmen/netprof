@@ -54,7 +54,6 @@ public abstract class BaseUserDAO extends DAO {
   static final String EMAIL = "emailH";
   static final String DEVICE = "device";
   static final String USER_ID = "userID";
-  static final List<Permission> CD_PERMISSIONS = Arrays.asList(Permission.QUALITY_CONTROL, Permission.RECORD_AUDIO);
   static final List<Permission> EMPTY_PERM = new ArrayList<>();
   static final String ENABLED = "enabled";
   static final String RESET_PASSWORD_KEY = "resetPasswordKey";

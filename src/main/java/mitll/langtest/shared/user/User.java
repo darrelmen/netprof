@@ -250,22 +250,6 @@ public class User extends MiniUser implements ReportUser {
     return startupInfo;
   }
 
-//  public String getFirst() {
-//    return first;
-//  }
-//
-//  public void setFirst(String first) {
-//    this.first = first;
-//  }
-//
-//  public String getLastDialog() {
-//    return last;
-//  }
-//
-//  public void setLast(String last) {
-//    this.last = last;
-//  }
-
   public Collection<Permission> getPermissions() {
     return permissions;
   }

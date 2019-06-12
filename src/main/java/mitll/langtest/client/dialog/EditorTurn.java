@@ -45,7 +45,6 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.UIObject;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.SessionManager;
-import mitll.langtest.client.exercise.EditorServices;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.*;
 import mitll.langtest.shared.answer.AudioAnswer;
@@ -155,7 +154,7 @@ public class EditorTurn extends PlayAudioExercisePanel
 
     this.turnAddDelete = new TurnAddDelete(this, 26);
     this.editableTurnHelper = new EditableTurnHelper(controller.getLanguageInfo(), clientExercise.hasEnglishAttr(), clientExercise.getForeignLanguage(), this);
-    editableTurnHelper.setPlaceholder(turnContainer.isInterpreter(), columns);
+    editableTurnHelper.setPlaceholder(columns);
 
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify) {
       @Override

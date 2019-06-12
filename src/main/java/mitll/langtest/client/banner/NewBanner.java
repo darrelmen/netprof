@@ -624,6 +624,8 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   /**
+   * Do we have a current project?
+   *
    * Having any of the required permissions allows you access to the dialog editor.
    *
    * @param visible
@@ -698,22 +700,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private ProjectMode getMode() {
     return controller.getMode();
-/*
-    ProjectMode storedMode = UNSET;
-
-    String value = controller.getStorage().getValue(MODE);
-    if (value != null && !value.isEmpty()) {
-      storedMode = ProjectMode.valueOf(value);
-      // ProjectMode viewMode = currentStoredView.getMode();
-      logger.info("getMode : storedMode " + storedMode
-          //    + " mode " + viewMode
-      );
-    } else {
-      logger.info("getMode : storedMode value = " + value);
-    }
-
-    return storedMode;
-*/
   }
 
   private void setChoicesVisibility(boolean admin, boolean teacher) {
@@ -861,11 +847,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     }
 
     setDialogNavVisible(isDialogMode);
-//
-//    if (dialogEditor != null) {
-//      maybeShowDialogEditor();
-//      //  dialogEditor.setVisible(isDialogMode);
-//    }
   }
 
   private void hideOrShowByMode(List<VIEWS> standardViews) {

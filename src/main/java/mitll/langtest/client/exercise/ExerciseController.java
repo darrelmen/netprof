@@ -98,7 +98,6 @@ public interface ExerciseController<T extends CommonShell & HasUnitChapter> exte
 
   void getImage(int reqid, String path, String type, int toUse, int height, int exerciseID, AsyncCallback<ImageResponse> client);
 
-  //Language getLanguageInfo();
 
   boolean isRightAlignContent();
 

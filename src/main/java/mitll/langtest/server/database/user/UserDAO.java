@@ -46,6 +46,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
   private static final Logger logger = LogManager.getLogger(UserDAO.class);
   private static final String OTHER = "OTHER";
   private static final boolean DEBUG = false;
+  static final List<Permission> CD_PERMISSIONS = Arrays.asList(Permission.QUALITY_CONTROL, Permission.RECORD_AUDIO);
 
   @Override
   public boolean updateProject(int oldID, int newprojid) {
@@ -209,11 +210,14 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
    * @param email
    * @see BaseUserDAO#addUser
    */
+/*
   protected void updateUser(int id, Kind kind, String emailH, String email) {
     try {
+*/
 /*      if (passwordH == null) {
         logger.error("Got null password Hash?", new Exception("empty password hash"));
-      }*/
+      }*//*
+
       logger.debug(language + " : update user #" + id + " kind " + kind);
 
       Connection connection = getConnection();
@@ -246,6 +250,7 @@ public class UserDAO extends BaseUserDAO implements IUserDAO {
       database.logEvent("unk", "update user: " + ee.toString(), 0, UNKNOWN, -1);
     }
   }
+*/
 
 
   @Override

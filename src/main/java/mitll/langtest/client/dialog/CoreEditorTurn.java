@@ -113,7 +113,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
         return WIDTH_TO_USE;
       }
     };
-    editableTurnHelper.setPlaceholder(isInterpreter, ITurnContainer.COLUMNS.RIGHT);
+    editableTurnHelper.setPlaceholder(ITurnContainer.COLUMNS.RIGHT);
     editableTurnHelper.setPlaceholder("Core Vocabulary");
 
     this.englishEditableTurnHelper = new EditableTurnHelper(language, true, vocab.getEnglish(),

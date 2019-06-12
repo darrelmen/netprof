@@ -34,15 +34,22 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
+import mitll.langtest.client.banner.SessionManager;
+import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.PhonesChoices;
+import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
-import static mitll.langtest.client.dialog.TurnViewHelper.SPEAKER_A;
-import static mitll.langtest.client.dialog.TurnViewHelper.SPEAKER_B;
+import java.util.logging.Logger;
+
+import static mitll.langtest.server.database.dialog.BaseDialogReader.ENGLISH_SPEAKER;
+import static mitll.langtest.server.database.dialog.BaseDialogReader.INTERPRETER_SPEAKER;
 
 public class EditableTurnHelper {
+  private final Logger logger = Logger.getLogger("EditableTurnHelper");
+
   private TextBox contentTextBox;
   private final Language language;
 
@@ -61,8 +68,24 @@ public class EditableTurnHelper {
     this.initialContent = initialContent;
   }
 
-  public void setPlaceholder(boolean isInterpreter, ITurnContainer.COLUMNS columns) {
-    this.placeholder = getPlaceholder(isInterpreter, columns);
+  /**
+   * @see EditorTurn#EditorTurn
+   * @param columns
+   */
+  public void setPlaceholder(ITurnContainer.COLUMNS columns) {
+    this.placeholder = getPlaceholder(columns);
+//    logger.info("for " + isInterpreter + " has english " + hasEnglishAttr +
+//        ": " + columns + " = " + placeholder);
+  }
+
+  private String getPlaceholder(ITurnContainer.COLUMNS columns) {
+    String placeholder = (hasEnglishAttr ? "English" : language.toDisplay()) +
+        (columns == ITurnContainer.COLUMNS.MIDDLE ? " translation" : "") //+        " (" + simpleTurn.getExID() + ")"
+        ;
+    return
+        (columns == ITurnContainer.COLUMNS.LEFT ? ENGLISH_SPEAKER :
+            columns == ITurnContainer.COLUMNS.MIDDLE ? INTERPRETER_SPEAKER :
+                (language.toDisplay() + " speaker")) + " speaks " + placeholder;
   }
 
   public void setPlaceholder(String placeholder) {
@@ -127,14 +150,6 @@ public class EditableTurnHelper {
 
   protected int getTextBoxWidth() {
     return 350;
-  }
-
-  private String getPlaceholder(boolean isInterpreter, ITurnContainer.COLUMNS columns) {
-    String placeholder = hasEnglishAttr ? "English..." //+" (" + simpleTurn.getExID() + ")"
-        :
-        language.toDisplay() + " translation" //+        " (" + simpleTurn.getExID() + ")"
-        ;
-    return isInterpreter ? (columns == ITurnContainer.COLUMNS.LEFT ? SPEAKER_A : SPEAKER_B) + " says..." : placeholder;
   }
 
   public String getSanitizedContent() {

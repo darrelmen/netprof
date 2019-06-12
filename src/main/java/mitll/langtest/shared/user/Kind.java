@@ -31,8 +31,15 @@ package mitll.langtest.shared.user;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
 
+/**
+ * These user kinds map to domino roles.
+ */
 public enum Kind implements IsSerializable {
   UNSET("Unset", "UST", false),
+
+  /**
+   * Not clear this is used right now.
+   */
   INTERNAL("INTERNAL", "INT", false),  // for users we keep to maintain referential integrity, for instance an importUser
 
   STUDENT("Student", "STU", true),
@@ -42,8 +49,14 @@ public enum Kind implements IsSerializable {
   CONTENT_DEVELOPER("Content Developer", "CDEV", true), // someone who can edit content and record audio
   AUDIO_RECORDER("Audio Recorder", "AREC", true),       // someone who is just an audio recorder
 
+  /**
+   * Not clear this is used right now.
+   */
   TEST("Test Account", "TST", true),                   // e.g. for developers at Lincoln or DLI, demo accounts
 
+  /**
+   * Not clear this is used right now.
+   */
   SPAM("Spam Account", "SPM", true),                   // for marking nuisance accounts
 
   PROJECT_ADMIN("Project Admin", "PrAdmin", true),    // invite new users, admin accounts below
@@ -52,7 +65,7 @@ public enum Kind implements IsSerializable {
 
   String name;
   String role;
-  boolean show;
+ // boolean show;
 
   Kind() {
   }
@@ -60,7 +73,7 @@ public enum Kind implements IsSerializable {
   Kind(String name, String role, boolean show) {
     this.name = name;
     this.role = role;
-    this.show = show;
+   // this.show = show;
   }
 
   public String getName() {
@@ -71,7 +84,7 @@ public enum Kind implements IsSerializable {
     return role;
   }
 
-  public boolean shouldShow() {
+/*  public boolean shouldShow() {
     return show;
-  }
+  }*/
 }
