@@ -81,7 +81,7 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
  //   table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tSafeHtmlColumn, true));
   }
 
-  protected void addID(List<T> list) {
+  void addID(List<T> list) {
     Column<T, SafeHtml> userCol = getItemIDColumn();
     table.setColumnWidth(userCol, getIdWidth() + "px");
     addColumn(userCol, new TextHeader(ID));
@@ -236,7 +236,7 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
    * @param list
    * @param maxLength
    */
-  protected void addChapter(List<T> list, int maxLength) {
+  void addChapter(List<T> list, int maxLength) {
     Column<T, SafeHtml> userCol = getChapterColumn(maxLength);
     table.setColumnWidth(userCol, getIdWidth() + "px");
     addColumn(userCol, new TextHeader("Chapter"));

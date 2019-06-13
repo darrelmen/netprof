@@ -392,7 +392,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
 
   @NotNull
   private Button getLearnButton(ButtonMemoryItemContainer<T> container) {
-    Button learn = getSuccessButton(container, LEARN);
+    Button learn = buttonHelper.getSuccessButton(container, LEARN);
     learn.setType(ButtonType.INFO);
     learn.addClickHandler(event -> showLearnList(container));
     addTooltip(learn, LEARN_THE_LIST);
@@ -413,7 +413,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
 
   @NotNull
   private Button getDrillButton(ButtonMemoryItemContainer<T> container) {
-    Button drill = getSuccessButton(container, DRILL);
+    Button drill = buttonHelper.getSuccessButton(container, DRILL);
     drill.setType(ButtonType.INFO);
 
     drill.addClickHandler(event -> controller.showListIn(getItemID(container), INavigation.VIEWS.PRACTICE));
@@ -424,7 +424,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
 
   @NotNull
   private Button getQuizButton(ButtonMemoryItemContainer<T> container) {
-    Button drill = getSuccessButton(container, QUIZ);
+    Button drill = buttonHelper.getSuccessButton(container, QUIZ);
     drill.setType(ButtonType.INFO);
 
     drill.addClickHandler(event -> showQuiz(getCurrentSelection(container)));
@@ -515,37 +515,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     return getNewListButton(contents, createListDialog, "Create New Quiz");
   }
 
-//  @NotNull
-//  private DialogHelper getNewListButton(DivWidget contents, CreateListDialog createListDialog, String title) {
-//    DialogHelper dialogHelper = new DialogHelper(true);
-//    createListDialog.setDialogHelper(dialogHelper);
-//    Button closeButton = dialogHelper.show(
-//        title,
-//        Collections.emptyList(),
-//        contents,
-//        ADD,
-//        CANCEL,
-//        new DialogHelper.CloseListener() {
-//          @Override
-//          public boolean gotYes() {
-//            return createListDialog.isOKToCreate();
-//          }
-//
-//          @Override
-//          public void gotNo() {
-//          }
-//
-//          @Override
-//          public void gotHidden() {
-//
-//          }
-//        }, 580);
-//
-//    closeButton.setType(ButtonType.SUCCESS);
-//    closeButton.setIcon(IconType.PLUS);
-//    return dialogHelper;
-//  }
-
   @Override
   protected void afterGotYesOnEdit() {
     enableQuizButton(quizButton);
@@ -565,10 +534,6 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
   /**
    * @seex CreateListDialog#makeCreateButton
    */
-//  @Override
-//  public void gotEdit() {
-//    editDialog.doEdit(getMyLists().getCurrentSelection(), getMyLists());
-//  }
   private void enableQuizButton(Button quizButton) {
     UserList<CommonShell> currentSelection = getCurrentSelection(getMyLists());
     if (quizButton != null) {

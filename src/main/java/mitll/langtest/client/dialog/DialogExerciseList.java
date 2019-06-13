@@ -29,28 +29,30 @@
 
 package mitll.langtest.client.dialog;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.*;
-import mitll.langtest.client.analysis.MemoryItemContainer;
+import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.banner.Emoticon;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.custom.dialog.ButtonHelper;
 import mitll.langtest.client.custom.dialog.SummaryDialogContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.project.ThumbnailChoices;
+import mitll.langtest.client.scoring.UserListSupport;
 import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ExerciseAttribute;
@@ -226,9 +228,11 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   }
 
   private void showYours(Collection<IDialog> result, DivWidget left) {
-    MemoryItemContainer<IDialog> myLists = new DialogExerciseList.MyDialogContainer();
+    ButtonMemoryItemContainer<IDialog> myLists = new DialogExerciseList.MyDialogContainer();
+
     // setMyLists(myLists);
     Panel tableWithPager = myLists.getTableWithPager(result);
+    tableWithPager.addStyleName("cardBorderShadow");
 
     new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.BOTTOM);
     //  new TableAndPager().addPagerAndHeader(tableWithPager, YOUR_LISTS1, left);
@@ -236,16 +240,86 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     left.add(tableWithPager);
     //   tableWithPager.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
 
-    //  left.add(getButtons(this.getMyLists()));
+    left.add(getButtons(myLists));
+  }
+
+  protected Button share;
+  protected ButtonHelper<IDialog> buttonHelper = new ButtonHelper<IDialog>() {
+
+    @Override
+    protected String getName() {
+      return "Dialog";
+    }
+  };
+
+
+  /**
+   * @param container
+   * @return
+   */
+  @NotNull
+  protected DivWidget getButtons(ButtonMemoryItemContainer<IDialog> container) {
+    DivWidget buttons = buttonHelper.getCommonButtonContainer();
+
+
+    buttons.add(share = getShare(container));
+    buttons.add(getListenButton(container));
+
+    return buttons;
+  }
+
+  @NotNull
+  private Button getListenButton(ButtonMemoryItemContainer<IDialog> container) {
+    Button learn = buttonHelper.getSuccessButton(container, LISTEN);
+    learn.setType(ButtonType.INFO);
+
+    learn.addClickHandler(event -> showLearnList(container));
+
+    buttonHelper.addTooltip(learn, "Listen to the dialog.");
+    return learn;
+  }
+
+  private void showLearnList(ButtonMemoryItemContainer<IDialog> container) {
+    controller.getNavigation().showDialogIn(getItemID(container), INavigation.VIEWS.LISTEN);
+  }
+
+  protected int getItemID(ButtonMemoryItemContainer<IDialog> container) {
+    if (container == null) return -1;
+    else {
+      IDialog currentSelection = container.getCurrentSelection();
+      return currentSelection == null ? -1 : currentSelection.getID();
+    }
+  }
+
+
+  /**
+   * @param container
+   * @return
+   * @see #getButtons
+   */
+  protected Button getShare(ButtonMemoryItemContainer<IDialog> container) {
+    Button successButton = buttonHelper.getShare(container);
+    return successButton;
+  }
+
+  @NotNull
+  DivWidget getCommonButtonContainer(ButtonMemoryItemContainer<IDialog> container) {
+    DivWidget buttons = buttonHelper.getCommonButtonContainer();
+
+    buttons.add(getShare(container));
+    return buttons;
   }
 
   /**
    * @see #showYours(Collection, DivWidget)
    */
   private class MyDialogContainer extends SummaryDialogContainer<IDialog> {
+
+
     MyDialogContainer() {
       super(DialogExerciseList.this.controller, "summaryDialog", 15);
     }
+
 
     @Override
     protected int getNumTableRowsGivenScreenHeight() {
@@ -256,6 +330,29 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     protected void addColumnsToTable() {
       super.addColumnsToTable();
       addScore(getList());
+    }
+
+    @Override
+    public void gotClickOnItem(final IDialog user) {
+      super.gotClickOnItem(user);
+      setShareHREF(user);
+    }
+
+    void setShareHREF(IDialog user) {
+      if (user != null) {
+        setShareButtonHREF();
+      }
+    }
+
+    private void setShareButtonHREF() {
+      share.setHref(getMailTo());
+    }
+
+    @NotNull
+    String getMailTo() {
+      IDialog currentSelection = getCurrentSelection();
+      return new UserListSupport(controller)
+          .getMailToDialog(currentSelection.getID(), currentSelection.getForeignLanguage());
     }
 
     void addScore(List<IDialog> list) {

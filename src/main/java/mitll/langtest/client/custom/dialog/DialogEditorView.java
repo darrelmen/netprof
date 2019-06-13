@@ -134,7 +134,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
   @NotNull
   private Button getListenButton(ButtonMemoryItemContainer<T> container) {
-    Button learn = getSuccessButton(container, LISTEN);
+    Button learn = buttonHelper.getSuccessButton(container, LISTEN);
     learn.setType(ButtonType.INFO);
     learn.addClickHandler(event -> showLearnList(container));
     addTooltip(learn, "Listen to the dialog.");
@@ -143,7 +143,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
   @NotNull
   private Button getCoreVocabButton(ButtonMemoryItemContainer<T> container) {
-    Button learn = getSuccessButton(container, CORE_VOCAB);
+    Button learn = buttonHelper.getSuccessButton(container, CORE_VOCAB);
     learn.setIcon(IconType.PENCIL);
     learn.addClickHandler(event -> editCoreVocabList(getCurrentSelection()));
     addTooltip(learn, "Edit the core vocabulary for the dialog.");
@@ -152,7 +152,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
   @NotNull
   private Button getUploadImageButton(ButtonMemoryItemContainer<T> container) {
-    Button learn = getSuccessButton(container, UPLOAD_IMAGE);
+    Button learn = buttonHelper.getSuccessButton(container, UPLOAD_IMAGE);
     learn.setIcon(IconType.PICTURE);
 
     learn.addClickHandler(event -> {

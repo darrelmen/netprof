@@ -45,13 +45,10 @@ import java.util.List;
 public class DialogContainer<T extends IDialog> extends SummaryDialogContainer<T> {
   //private final Logger logger = Logger.getLogger("DialogContainer");
 
-  private static final String ID = "ID";
-
   /**
-   *
    * @param controller
    */
-  public DialogContainer(ExerciseController<?> controller) {
+  DialogContainer(ExerciseController<?> controller) {
     super(controller, "dialogs", 10);
   }
 

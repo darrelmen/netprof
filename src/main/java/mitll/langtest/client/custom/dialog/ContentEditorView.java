@@ -98,12 +98,24 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   protected final Set<String> names = new HashSet<>();
   protected final ExerciseController<?> controller;
   protected DivWidget leftRight, left;
+  /**
+   * @see #getButtons
+   */
   protected Button share;
   private static final int MIN_WIDTH = 668;//659;
   protected DialogHelper dialogHelper;
   private ButtonMemoryItemContainer<T> myLists;
 
   protected Button editButton, removeButton;
+
+  protected ButtonHelper<T> buttonHelper = new ButtonHelper<T>() {
+    ContentEditorView outer = ContentEditorView.this;
+
+    @Override
+    protected String getName() {
+      return outer.getName();
+    }
+  };
 
   public ContentEditorView(ExerciseController controller) {
     this.controller = controller;
@@ -149,10 +161,8 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
 
   @NotNull
   DivWidget getCommonButtonContainer(ButtonMemoryItemContainer<T> container) {
-    DivWidget buttons = new DivWidget();
-    buttons.addStyleName("inlineFlex");
-    buttons.addStyleName("topFiveMargin");
-    buttons.getElement().getStyle().setProperty("minWidth", MIN_WIDTH + "px");
+    DivWidget buttons = buttonHelper.getCommonButtonContainer();
+
     buttons.add(getAddButton());
 
     if (canMakeQuiz()) {
@@ -191,7 +201,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
   }
 
   private IsWidget getImport(ButtonMemoryItemContainer<T> container) {
-    Button successButton = getSuccessButton(container, IMPORT);
+    Button successButton = buttonHelper.getSuccessButton(container, IMPORT);
     successButton.setIcon(IconType.UPLOAD);
     successButton.addClickHandler(event -> doImport());
     return successButton;
@@ -358,7 +368,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    * @see #getCommonButtonContainer
    */
   private Button getEdit(ButtonMemoryItemContainer<T> container) {
-    Button successButton = getSuccessButton(container, EDIT_TITLE);
+    Button successButton = buttonHelper.getSuccessButton(container, EDIT_TITLE);
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> doEdit());
     addTooltip(successButton, EDIT_THE_LIST + getSuffix());
@@ -372,7 +382,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    * @see #getButtons
    */
   private IsWidget getAddItems(ButtonMemoryItemContainer<T> container) {
-    Button successButton = getSuccessButton(container, getEditItemButtonTitle());
+    Button successButton = buttonHelper.getSuccessButton(container, getEditItemButtonTitle());
     successButton.setIcon(IconType.PENCIL);
     successButton.addClickHandler(event -> editList(getCurrentSelection()));
     addTooltip(successButton, getEditItemTooltipPrefix() + getSuffix());
@@ -400,7 +410,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    * @see #getButtons
    */
   protected Button getShare(ButtonMemoryItemContainer<T> container) {
-    Button successButton = getSuccessButton(container, SHARE);
+    Button successButton = buttonHelper.getSuccessButton(container, SHARE);
     successButton.setIcon(IconType.SHARE);
     addTooltip(successButton, SHARE_THE_LIST + getSuffix());
     return successButton;
@@ -412,14 +422,14 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    */
   protected abstract void editList(T selectedItem);
 
-  @NotNull
-  protected Button getSuccessButton(ButtonMemoryItemContainer<T> container, String learn1) {
-    Button learn = new Button(learn1);
-    learn.setType(ButtonType.SUCCESS);
-    learn.addStyleName("leftFiveMargin");
-    container.addButton(learn);
-    return learn;
-  }
+//  @NotNull
+//  protected Button getSuccessButton(ButtonMemoryItemContainer<T> container, String learn1) {
+//    Button learn = new Button(learn1);
+//    learn.setType(ButtonType.SUCCESS);
+//    learn.addStyleName("leftFiveMargin");
+//    container.addButton(learn);
+//    return learn;
+//  }
 
   @NotNull
   private Button getRemoveButton() {
@@ -555,12 +565,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
     } catch (Exception e) {
       logger.warning("got " + e);
     }
-
-/*    Scheduler.get().scheduleDeferred(() -> {
-      logger.info("madeIt markCurrentExercise " + userList.getName());
-
-      myLists.markCurrentExercise(userList.getID());
-    });*/
   }
 
   public ButtonMemoryItemContainer<T> getMyLists() {
