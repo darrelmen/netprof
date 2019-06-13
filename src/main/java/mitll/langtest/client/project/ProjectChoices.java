@@ -74,6 +74,7 @@ import static mitll.langtest.shared.user.Permission.*;
  */
 public class ProjectChoices extends ThumbnailChoices {
   private final Logger logger = Logger.getLogger("ProjectChoices");
+  public static final int MAX_LENGTH_ID = 24;
 
   private static final int THUMB_WIDTH = 181;
 
@@ -703,7 +704,9 @@ public class ProjectChoices extends ThumbnailChoices {
     DivWidget container = new DivWidget();
     Heading label;
 
-    container.add(label = getLabel(truncate(name, 23), projectForLang, numVisibleChildren, allDialog));
+    String truncate = truncate(name, MAX_LENGTH_ID);
+    logger.info("getContainerWithButtons from " + name +" to " + truncate);
+    container.add(label = getLabel(truncate, projectForLang, numVisibleChildren, allDialog));
     container.setWidth("100%");
     container.addStyleName("floatLeft");
 

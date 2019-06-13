@@ -32,13 +32,22 @@ package mitll.langtest.client.dialog;
 import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.user.cellview.client.Column;
+import com.google.gwt.user.cellview.client.ColumnSortEvent;
+import com.google.gwt.user.cellview.client.TextHeader;
+import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.*;
+import mitll.langtest.client.analysis.MemoryItemContainer;
 import mitll.langtest.client.banner.Emoticon;
 import mitll.langtest.client.custom.INavigation;
-import mitll.langtest.client.custom.SimpleChapterNPFHelper;
+import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.custom.dialog.SummaryDialogContainer;
 import mitll.langtest.client.exercise.ExerciseController;
+import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.project.ThumbnailChoices;
@@ -65,6 +74,14 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   public static final String INTERP_COLOR = "aliceblue";
 
   private static final String ENGLISH = "english";
+  public static final String LISTEN = "Listen";
+  public static final String CORE_VOCAB = "Core Vocab";
+
+  private static final String LIST = "dialog";
+  private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to view a " + LIST;
+  private static final String YOUR_LISTS1 = "Your Dialogs";
+  public static final String DIALOG = "Dialog";
+  private static final int MY_LIST_HEIGHT = 450;//500;//530;//560;
 
   /**
    * Gah - doesn't really work very well as me make the window narrower or wider
@@ -88,12 +105,12 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private final ThumbnailChoices thumbnailChoices = new ThumbnailChoices();
 
   /**
-   * @see DialogViewHelper#getMyListLayout
    * @param topRow
    * @param currentExercisePanel
    * @param instanceName
    * @param listHeader
    * @param controller
+   * @see DialogViewHelper#getMyListLayout
    */
   DialogExerciseList(Panel topRow, Panel currentExercisePanel,
                      INavigation.VIEWS instanceName,
@@ -113,7 +130,12 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
   @Override
   protected int getFirstPageSize() {
-    return 10;
+    return 15;
+  }
+
+  @Override
+  protected int getChosenPageSize() {
+    return 15;
   }
 
   protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
@@ -128,6 +150,10 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
       if (DEBUG) logger.info("getTypeToValues filterRequest " + filterRequest);
       controller.getDialogService().getTypeToValues(filterRequest, getTypeToValuesCallback(typeToSelection, then));
     }
+  }
+
+  @Override
+  protected void addPageSize(DivWidget footer) {
   }
 
   /**
@@ -152,7 +178,6 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     }
   }
 
-
   @Override
   protected void setScores(ExerciseListWrapper<IDialog> result) {
     super.setScores(result);
@@ -164,10 +189,6 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
                                   int currentReq,
                                   Collection<Integer> requested,
                                   List<IDialog> alreadyFetched) {
-//    logger.info("getFullExercises " + visibleIDs);
-//    logger.info("getFullExercises " + requested);
-//    logger.info("getFullExercises " + alreadyFetched.size());
-//    logger.info("getFullExercises " + getInOrder().size());
     showDialogs(visibleIDs, getInOrder());
   }
 
@@ -180,11 +201,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
   private void sortDialogs(List<IDialog> toShow, Collection<Integer> visibleIDs) {
     List<Integer> ordered = new ArrayList<>(visibleIDs);
-    toShow.sort((o1, o2) -> {
-      int i = ordered.indexOf(o1.getID());
-      int j = ordered.indexOf(o2.getID());
-      return Integer.compare(i, j);
-    });
+    toShow.sort(Comparator.comparingInt(o -> ordered.indexOf(o.getID())));
   }
 
   @Override
@@ -193,7 +210,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
   /**
    * TODO : replace with something very close to dialog editor list.
-   * 
+   *
    * @param result
    * @param reqID
    * @param exerciseContainer
@@ -201,8 +218,96 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
    */
   protected void populatePanels(Collection<IDialog> result, int reqID, DivWidget exerciseContainer) {
     //  long then = System.currentTimeMillis();
-    exerciseContainer.add(showProjectChoices(result));
+    //exerciseContainer.add(showProjectChoices(result));
+    //showOnlySortBox();
+
+    showYours(result, exerciseContainer);
     //  long now = System.currentTimeMillis();
+  }
+
+  private void showYours(Collection<IDialog> result, DivWidget left) {
+    MemoryItemContainer<IDialog> myLists = new DialogExerciseList.MyDialogContainer();
+    // setMyLists(myLists);
+    Panel tableWithPager = myLists.getTableWithPager(result);
+
+    new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.BOTTOM);
+    //  new TableAndPager().addPagerAndHeader(tableWithPager, YOUR_LISTS1, left);
+    tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
+    left.add(tableWithPager);
+    //   tableWithPager.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
+
+    //  left.add(getButtons(this.getMyLists()));
+  }
+
+  /**
+   * @see #showYours(Collection, DivWidget)
+   */
+  private class MyDialogContainer extends SummaryDialogContainer<IDialog> {
+    MyDialogContainer() {
+      super(DialogExerciseList.this.controller, "summaryDialog", 15);
+    }
+
+    @Override
+    protected int getNumTableRowsGivenScreenHeight() {
+      return 15;
+    }
+
+    @Override
+    protected void addColumnsToTable() {
+      super.addColumnsToTable();
+      addScore(getList());
+    }
+
+    void addScore(List<IDialog> list) {
+      Column<IDialog, SafeHtml> userCol = getClickable(this::getScoreVal);
+      table.setColumnWidth(userCol, getIdWidth() + "px");
+      addColumn(userCol, new TextHeader("Score"));
+      table.addColumnSortHandler(getScoreSorter(userCol, list));
+    }
+
+    private String getScoreVal(IDialog thing) {
+      int v = getScore(thing);
+      return v == 0 ? "" : "" + v;
+    }
+
+    private int getScore(IDialog thing) {
+      CorrectAndScore correctAndScore = scoreHistoryPerDialog.get(thing.getID());
+      return correctAndScore == null ? 0 : correctAndScore.getPercentScore();
+    }
+
+    private ColumnSortEvent.ListHandler<IDialog> getScoreSorter(Column<IDialog, SafeHtml> englishCol,
+                                                                List<IDialog> dataList) {
+      ColumnSortEvent.ListHandler<IDialog> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+      columnSortHandler.setComparator(englishCol, this::getScoreCompare);
+      return columnSortHandler;
+    }
+
+    private int getScoreCompare(IDialog o1, IDialog o2) {
+      int i = Integer.compare(getScore(o1), getScore(o2));
+      return i == 0 ? o1.getForeignLanguage().compareTo(o2.getForeignLanguage()) : i;
+    }
+
+    @NotNull
+    @Override
+    protected ListOptions getListOptions() {
+      return super.getListOptions().setShowPager(false);
+    }
+
+    @Override
+    protected boolean hasDoubleClick() {
+      return true;
+    }
+
+    /**
+     * @param selected
+     * @see SimplePagingContainer#addDoubleClick
+     */
+    @Override
+    protected void gotDoubleClickOn(IDialog selected) {
+      //  logger.info("gotDoubleClickOn got double click on " + selected);
+      // editList(getCurrentSelection());
+      gotClickOnDialog(getCurrentSelection());
+    }
   }
 
   private Section showProjectChoices(Collection<IDialog> result) {
@@ -264,7 +369,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
         }
       });
 
-     // props.put("type", dialog.getKind().toString());
+      // props.put("type", dialog.getKind().toString());
 
       thumbnailChoices.addPopover(button, props, Placement.BOTTOM);
     }
@@ -334,7 +439,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     container.addStyleName("floatLeft");
 
     // no more distinction
-   // container.getElement().getStyle().setBackgroundColor(dialog.getKind() == DialogType.DIALOG ? DIALOG_COLOR : INTERP_COLOR);
+    // container.getElement().getStyle().setBackgroundColor(dialog.getKind() == DialogType.DIALOG ? DIALOG_COLOR : INTERP_COLOR);
     container.getElement().getStyle().setBackgroundColor(INTERP_COLOR);
     return container;
   }

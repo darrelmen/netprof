@@ -52,7 +52,7 @@ public class TableAndPager {
     return tableWithPager;
   }
 
-  protected void addPagerAndHeader(Panel tableWithPager, String label, DivWidget top) {
+  public void addPagerAndHeader(Panel tableWithPager, String label, DivWidget top) {
     Heading w = new Heading(HEADING_SIZE, label);
     w.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
     w.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);

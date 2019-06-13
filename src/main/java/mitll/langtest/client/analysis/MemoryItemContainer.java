@@ -156,7 +156,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see SimplePagingContainer#makeCellTable
    */
   protected int getPageSize() {
-    return isOnLaptop() ? shortPageSize : pageSize;
+    int i = isOnLaptop() ? shortPageSize : pageSize;
+    logger.info("getPageSize " +i);
+    return i;
   }
 
   /**
@@ -184,11 +186,12 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @param list
    * @param maxLength
    */
-  protected void addItemID(List<T> list, int maxLength) {
+  protected Column<T, SafeHtml> addItemID(List<T> list, int maxLength) {
     Column<T, SafeHtml> userCol = getItemColumn(maxLength);
     table.setColumnWidth(userCol, getIdWidth() + "px");
     addColumn(userCol, new TextHeader(getHeaderColumnTitle()));
     table.addColumnSortHandler(getUserSorter(userCol, list));
+    return userCol;
   }
 
   protected String getHeaderColumnTitle() {
@@ -426,7 +429,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
     return column;
   }
-
 
   /**
    * Is sortable.

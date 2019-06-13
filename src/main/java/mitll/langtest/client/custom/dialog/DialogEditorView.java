@@ -375,15 +375,10 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     }
 
     /**
-     * CRITICAL TO REMOVE LISTENER!
+     * TODO : CRITICAL TO REMOVE LISTENER!
      */
     @Override
     public void gotHidden() {
-      // logger.info("Got hidden ");
-      // editItem.removeHistoryListener();
-      // History.newItem("");
-
-      // int projectID = controller.getProjectID();
       if (projid != -1) {
         controller.getAudioService().reloadDialog(dialogID, new AsyncCallback<Void>() {
           @Override
@@ -418,8 +413,6 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
     @Override
     public void gotShown() {
-      // logger.info("editList : edit view shown!");
-      //editItem.reload();
       editItem.grabFocus();
     }
   }

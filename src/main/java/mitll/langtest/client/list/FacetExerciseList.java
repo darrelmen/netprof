@@ -268,7 +268,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     DivWidget breadRow = new DivWidget();
     breadRow.setWidth("100%");
     breadRow.getElement().setId("breadRow");
-    //    breadRow.addStyleName("floatLeftList");
+
+    breadRow.getElement().getStyle().setProperty("minWidth", 500 + "px");
 
     {
       breadRow.add(practicedProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT));
@@ -286,7 +287,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         .getParent()
         .getParent()
         .setVisible(false);
-
 
     Widget parent = sectionPanel
         .getParent()
@@ -367,7 +367,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @return
    * @see #FacetExerciseList
    */
-  private void addPageSize(DivWidget footer) {
+  protected void addPageSize(DivWidget footer) {
     pageSizeContainer = new DivWidget();
     {
       pageSizeContainer.addStyleName("floatRight");
@@ -402,10 +402,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return pagesize;
   }
 
-  List<Integer> getPageSizeChoiceValues() {
-    return PAGE_SIZE_CHOICES;
-  }
-
   private int getChosenPageIndex() {
     int pageIndex = getPageIndex();
 //    if (logger == null) {
@@ -419,8 +415,12 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     return FIRST_PAGE_SIZE;
   }
 
-  private int getChosenPageSize() {
+  protected int getChosenPageSize() {
     return getPageSizeChoiceValues().get((getChosenPageIndex()));
+  }
+
+  List<Integer> getPageSizeChoiceValues() {
+    return PAGE_SIZE_CHOICES;
   }
 
   protected int getPageIndex() {
@@ -1726,15 +1726,13 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   protected void hidePrevNextWidgets() {
     //   logger.info("hidePrevNextWidgets");
-
-    pageSizeContainer.setVisible(false);
+    if (pageSizeContainer != null) pageSizeContainer.setVisible(false);
     setSortBoxVisible(false);
     setPagerRowVisible(false);
   }
 
   protected void showOnlySortBox() {
     //logger.info("showOnlySortBox");
-
     pageSizeContainer.setVisible(false);
     setSortBoxVisible(true);
     setDownloadVisible(false);
@@ -1743,8 +1741,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   protected void showPrevNext() {
     // logger.info("showPrevNext");
-
-    pageSizeContainer.setVisible(true);
+    if (pageSizeContainer != null) pageSizeContainer.setVisible(true);
     setSortBoxVisible(true);
     setProgressVisible(true);
     setPagerRowVisible(true);

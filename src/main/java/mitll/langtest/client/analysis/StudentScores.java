@@ -30,6 +30,8 @@
 package mitll.langtest.client.analysis;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.safehtml.shared.SafeHtml;
+import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
@@ -101,7 +103,8 @@ public class StudentScores extends TwoColumnAnalysis<UserInfo> {
       }
 
       @Override
-      protected void addItemID(List<UserInfo> list, int maxLength) {
+      protected Column<UserInfo, SafeHtml> addItemID(List<UserInfo> list, int maxLength) {
+        return null;
       }
 
       @NotNull

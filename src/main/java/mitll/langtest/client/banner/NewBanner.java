@@ -73,7 +73,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   /**
    * @see #getDialogNav
    */
-  private static final String DIALOGS = "Interpreter / Dialogs";
+  private static final String DIALOGS = "Interpreter / Dialog";
   //  private static final String DIALOG_PRACTICE = "Rehearsal";
   private static final String MY_DIALOG_EDITOR = "Editor";
 
@@ -655,6 +655,16 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
     dialogEditorDropdown.setVisible(showDialogEditor);
 
+    if (showDialogEditor) {
+      NavLink widgets = viewToLink.get(FIX_SENTENCES);
+      if (widgets != null) {
+        widgets.setVisible(false);
+      }
+      widgets = viewToLink.get(QC_SENTENCES);
+      if (widgets != null) {
+        widgets.setVisible(false);
+      }
+    }
 /*    NavLink widgets = viewToLink.get(DIALOG_EDITOR);
     if (widgets != null) {
       widgets.setVisible(showDialogEditor);
@@ -875,7 +885,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 //            " '" + widgets.getName() + "' display " + widgets.getElement().getStyle().getDisplay() +
 //            " now " + contains);
         widgets.setVisible(contains);
-
       }
     });
   }

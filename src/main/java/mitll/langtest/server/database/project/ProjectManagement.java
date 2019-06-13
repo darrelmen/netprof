@@ -113,7 +113,8 @@ public class ProjectManagement implements IProjectManagement {
   /**
    * @see #addModeChoices
    */
-  private static final String VOCABULARY = "Vocabulary / Context Sentences";//"Vocabulary";
+ // private static final String VOCABULARY = "Vocabulary / Context Sentences";//"Vocabulary";
+  private static final String VOCABULARY = "Vocabulary / Sentences";//"Vocabulary";
   /**
    * @see #addModeChoices
    */
