@@ -51,8 +51,9 @@ import static mitll.langtest.client.dialog.DialogExerciseList.INTERP_COLOR;
  * @param <T>
  */
 public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContainer<T> {
-  public static final String ID = "ID";
   //private final Logger logger = Logger.getLogger("DialogContainer");
+
+  public static final String ID = "ID";
 
   DialogContainer(ExerciseController<?> controller) {
     super(controller, "netprof" + ":" + controller.getUser() + ":" + "dialogs", "Dialogs",
@@ -78,7 +79,6 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
 
     Column<T, SafeHtml> tSafeHtmlColumn = addDateCol(list);
 
-//    addDialogType();
     addIsPublic();
 
     table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tSafeHtmlColumn, true));
@@ -116,11 +116,6 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
     return columnSortHandler;
   }
 
-//  @Override
-//  protected Column<T, SafeHtml> getItemColumn(int maxLength) {
-//    return getTruncatedCol2(maxLength, this::getItemLabel);
-//  }
-
   private Column<T, SafeHtml> getTruncatedCol2(int maxLength, GetSafe<T> getSafe) {
     Column<T, SafeHtml> column = new Column<T, SafeHtml>(new ClickableCell()) {
       @Override
@@ -131,12 +126,12 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
 
       /**
        * No more distinction between dialog and interpreter
+       *
        * @param shell
        * @return
        */
       @Override
       public SafeHtml getValue(T shell) {
-        //String truncate = truncate(getSafe.getSafe(shell), maxLength);
 //        return shell.getKind() == DialogType.DIALOG ?
 //            getNoWrapContentBackground(truncate, "aliceblue") : getNoWrapContentBackground(truncate, INTERP_COLOR);
         return getNoWrapContentBackground(truncate(getSafe.getSafe(shell), maxLength), INTERP_COLOR);
@@ -146,39 +141,6 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
 
     return column;
   }
-
-/*  private void addDialogType() {
-    Column<T, SafeHtml> diff = getDialogType();
-    diff.setSortable(true);
-    addColumn(diff, new TextHeader("Type"));
-    table.addColumnSortHandler(getDialogTypeSorted(diff, getList()));
-    table.setColumnWidth(diff, 50 + "px");
-  }*/
-
-/*
-  private Column<T, SafeHtml> getDialogType() {
-    return new Column<T, SafeHtml>(new ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public SafeHtml getValue(T shell) {
-        // logger.info("shell " + shell);
-        return getSafeHtml(shell.getKind().toString());
-      }
-    };
-  }
-*/
-
-/*  private ColumnSortEvent.ListHandler<T> getDialogTypeSorted(Column<T, SafeHtml> englishCol,
-                                                             List<T> dataList) {
-    ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
-    columnSortHandler.setComparator(englishCol, (o1, o2) -> o1.getKind().compareTo(o2.getKind()));
-    return columnSortHandler;
-  }*/
 
   /**
    * @param list
@@ -210,7 +172,6 @@ public class DialogContainer<T extends IDialog> extends ButtonMemoryItemContaine
   private String getEquivValue(T thing) {
     return thing.getEnglish();
   }
-
 
   /**
    * @param list

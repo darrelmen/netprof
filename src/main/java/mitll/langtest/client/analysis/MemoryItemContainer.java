@@ -307,7 +307,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     int pageNum = i / pageSize;
     int newIndex = pageNum * pageSize;
 
-    logger.info("scrollIntoView " + i + " page size " + pageSize + " page num " + pageNum + " new index " + newIndex);
+    if (false)
+      logger.info("scrollIntoView " + i + " page size " + pageSize + " page num " + pageNum + " new index " + newIndex);
 
     if (i < table.getPageStart()) {
       int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());

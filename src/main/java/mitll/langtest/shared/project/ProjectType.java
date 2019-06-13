@@ -37,6 +37,7 @@ import mitll.langtest.server.database.project.IProjectDAO;
  */
 public enum ProjectType implements IsSerializable {
   NP(true),
+  @Deprecated
   POLYGLOT(false),
   DIALOG(true),
   DEFAULT(false);

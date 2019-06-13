@@ -170,7 +170,7 @@ public class ProjectChoices extends ThumbnailChoices {
   private boolean isSuperUser = false;
 
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_CLICK = false;
 
   /**
@@ -355,6 +355,7 @@ public class ProjectChoices extends ThumbnailChoices {
    * @param languages
    */
   private void sortLanguages(final int nest, List<SlimProject> languages) {
+    logger.info("sort " + nest + " " + languages);
     languages.sort((o1, o2) -> {
       if (nest == 0) {
         return getDisplayLang(o1).compareTo(getDisplayLang(o2));
@@ -632,7 +633,7 @@ public class ProjectChoices extends ThumbnailChoices {
         nest == 0 &&
             projectForLang.hasChildren() ? lang : projectForLang.getName();
     if (DEBUG) {
-      logger.info("getLangIcon " + lang + " " + projectForLang.getName() + " nest " + nest + " '" + lang1 + "'");
+      logger.info("getLangIcon '" + lang + "' '" + projectForLang.getName() + "' nest " + nest + " '" + lang1 + "'");
     }
     return getImageAnchor(capitalize(lang1), projectForLang);
   }
@@ -656,15 +657,15 @@ public class ProjectChoices extends ThumbnailChoices {
       boolean isQC = isQC();
       {
         String countryCode = projectForLang.getCountryCode();
-        //    logger.info("for " + name +" cc " + countryCode);
+        logger.info("getImageAnchor : for " + name + " cc " + countryCode);
         PushButton button = new PushButton(getFlag(countryCode));
-        final int projid = projectForLang.getID();
-        button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projid, 1));
+        // final int projid = projectForLang.getID();
+        button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projectForLang.getID(), 1));
         thumbnail.add(button);
 
-        boolean hasChildren = projectForLang.hasChildren();
         if (isQC) {
-          if (!hasChildren) {
+          //boolean hasChildren = projectForLang.hasChildren();
+          if (!projectForLang.hasChildren()) {
             addPopover(button, getProps(projectForLang));
           }
         } else {
@@ -678,9 +679,9 @@ public class ProjectChoices extends ThumbnailChoices {
 
       DivWidget horiz = new DivWidget();
       horiz.getElement().getStyle().setProperty("minHeight", (isQC ? MIN_HEIGHT : NORMAL_MIN_HEIGHT) + "px"); // so they wrap nicely
-      thumbnail.add(horiz);
-
       horiz.add(getContainerWithButtons(name, projectForLang, isQC, numVisibleChildren));
+
+      thumbnail.add(horiz);
 
       return thumbnail;
     }
@@ -774,7 +775,7 @@ public class ProjectChoices extends ThumbnailChoices {
   }
 
   private List<SlimProject> getDialogProjects(SlimProject projectForLang) {
-    return projectForLang.getChildren().stream().filter(slimProject -> slimProject.getProjectType() == ProjectType.DIALOG).collect(Collectors.toList());
+    return projectForLang.getChildren().stream().filter(ProjectInfo::isDialog).collect(Collectors.toList());
   }
 
   @NotNull

@@ -109,24 +109,23 @@ public class ProjectManagement implements IProjectManagement {
    * @see #addOtherProps
    */
   private static final String DOMINO_NAME = "Domino Project";
+
   /**
    * @see #addModeChoices
    */
-  private static final String VOCABULARY = "Vocabulary";
+  private static final String VOCABULARY = "Vocabulary / Context Sentences";//"Vocabulary";
   /**
    * @see #addModeChoices
    */
-  private static final String DIALOG = "Dialog";
+  private static final String DIALOG = "Interpreter / Dialog";
+
   private static final String VOCAB = "vocab";
   private static final String DIALOG1 = "dialog";
   private static final String NO_PROJECT_FOR_ID = "NO_PROJECT_FOR_ID";
- // private static final String INTERPRETER = "Interpreter";
-  // private static final String INTERPRETER1 = "interpreter";
-  //public static final String ANSWERS1 = "^.*answers\\/(.+)\\/.+";
   private static final String ANSWERS1 = "answers{1}\\/([^\\/]+)\\/(answers|\\d+)\\/.+";
-  private static final Pattern pattern = Pattern.compile(ANSWERS1);
+  private static final Pattern ANSWERS_PATTERN = Pattern.compile(ANSWERS1);
+
   private static final boolean DEBUG_USER_FOR_FILE = false;
- // private static final boolean CHECK_FOR_OOV_ON_STARTUP = false;
   public static final boolean DEBUG = false;
 
   /**
@@ -573,7 +572,7 @@ public class ProjectManagement implements IProjectManagement {
     if (mappedUser == null) {
       int userID = -1;
 
-      Matcher matcher = pattern.matcher(requestURI);
+      Matcher matcher = ANSWERS_PATTERN.matcher(requestURI);
       if (matcher.find()) {
         String group = matcher.group(1);
         // logger.info("getUserForFile lang " + group);
@@ -1262,6 +1261,7 @@ public class ProjectManagement implements IProjectManagement {
         vocab.setProjectType(ProjectType.DIALOG);
         vocab.setMode(ProjectMode.VOCABULARY);
         vocab.setCountryCode(VOCAB);
+        vocab.setDisplayOrder(0);
 
         projectInfo.addChild(vocab);
       }
@@ -1273,6 +1273,7 @@ public class ProjectManagement implements IProjectManagement {
         dialog.setProjectType(ProjectType.DIALOG);
         dialog.setMode(ProjectMode.DIALOG);
         dialog.setCountryCode(DIALOG1);
+        dialog.setDisplayOrder(1);
 
         projectInfo.addChild(dialog);
       }

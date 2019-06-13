@@ -143,12 +143,20 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     return projectType;
   }
 
+  public boolean isDialog() {
+    return getProjectType() == ProjectType.DIALOG;
+  }
+
   public void setProjectType(ProjectType projectType) {
     this.projectType = projectType;
   }
 
   public int getDisplayOrder() {
     return displayOrder;
+  }
+
+  public void setDisplayOrder(int order) {
+    this.displayOrder = order;
   }
 
   public String getCourse() {
@@ -160,8 +168,8 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
   }
 
   /**
-   * @see mitll.langtest.server.database.project.ProjectManagement#addModeChoices
    * @param cc
+   * @see mitll.langtest.server.database.project.ProjectManagement#addModeChoices
    */
   public void setCountryCode(String cc) {
     this.countryCode = cc;

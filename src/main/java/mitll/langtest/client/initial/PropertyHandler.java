@@ -94,14 +94,15 @@ public class PropertyHandler {
   private static final String PREFERRED_VOICES = "preferredVoices";
   private static final String DOMINO_SERVER = "domino.url";
 
+//  private static final String VOCAB_MODE_CHOICE_TITLE = "preferredVoices";
+//  private static final String DIALOG_MODE_CHOICE_TITLE = "preferredVoices";
+
   private static final String HELP = "help";
   private static final String HELP_EMAIL = "helpEmail";
   private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
 
   private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
   //private static final String INITIAL_PROMPT = "Practice dialogs to improve pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
-
-  //private boolean isAMAS;
 
   private boolean usePhoneToDisplay;
 
@@ -178,11 +179,6 @@ public class PropertyHandler {
   private String appTitle = null;
   private boolean allowPlusInURL;
 
- // private static final String RESPONSE_TYPE = "responseType";
-  private static final String SPEECH = "Speech";
-  private static final String TEXT = "Text";
-  private static final String AUDIO = "Audio";
-  // private String responseType = AUDIO;
   private String helpEmail = NETPROF_HELP_DLIFLC_EDU;
   private String helpMessage = "";
 
@@ -267,9 +263,6 @@ public class PropertyHandler {
       appTitle = getAppTitleSuffix();
     }
 
-//    if (isAMAS()) {
-//      appTitle = getAppTitleSuffix();
-//    }
     if (splashTitle == null) {
       splashTitle = "";//language + getSpashTitleSuffix();
     }

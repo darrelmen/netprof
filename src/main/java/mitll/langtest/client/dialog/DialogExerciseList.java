@@ -37,6 +37,7 @@ import com.google.gwt.user.client.ui.Image;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.banner.Emoticon;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
@@ -86,6 +87,14 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
    */
   private final ThumbnailChoices thumbnailChoices = new ThumbnailChoices();
 
+  /**
+   * @see DialogViewHelper#getMyListLayout
+   * @param topRow
+   * @param currentExercisePanel
+   * @param instanceName
+   * @param listHeader
+   * @param controller
+   */
   DialogExerciseList(Panel topRow, Panel currentExercisePanel,
                      INavigation.VIEWS instanceName,
                      DivWidget listHeader,
@@ -183,6 +192,8 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   }
 
   /**
+   * TODO : replace with something very close to dialog editor list.
+   * 
    * @param result
    * @param reqID
    * @param exerciseContainer
