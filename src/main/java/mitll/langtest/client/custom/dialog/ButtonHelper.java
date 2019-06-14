@@ -33,6 +33,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -73,7 +74,7 @@ public abstract class ButtonHelper<T extends HasID & IPublicPrivate> {
   }
 
   @NotNull
-  public  DivWidget getCommonButtonContainer() {
+  public DivWidget getCommonButtonContainer() {
     DivWidget buttons = getButtonContainer();
     buttons.getElement().getStyle().setProperty("minWidth", MIN_WIDTH + "px");
     return buttons;
@@ -84,6 +85,7 @@ public abstract class ButtonHelper<T extends HasID & IPublicPrivate> {
     DivWidget buttons = new DivWidget();
     buttons.addStyleName("inlineFlex");
     buttons.addStyleName("topFiveMargin");
+    buttons.getElement().getStyle().setClear(Style.Clear.BOTH);
     return buttons;
   }
 

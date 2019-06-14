@@ -33,6 +33,7 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
+import com.google.gwt.dom.builder.shared.DivBuilder;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
@@ -66,8 +67,10 @@ import java.util.stream.Collectors;
  * A facet list display of dialogs.
  */
 public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
-  public static final String SUMMARY_DIALOG = "summaryDialog";
   private final Logger logger = Logger.getLogger("DialogExerciseList");
+
+  public static final String SUMMARY_DIALOG = "summaryDialog";
+  public static final String LISTEN_TO_THE_DIALOG = "Listen to the dialog.";
 
   public static final String SCORE = "Score";
   public static final String STEP = "Step";
@@ -84,7 +87,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to rehearse a " + LIST;
   // private static final String YOUR_LISTS1 = "Your Dialogs";
   public static final String DIALOG = "Dialog";
-  private static final int MY_LIST_HEIGHT = 450;//500;//530;//560;
+  private static final int MY_LIST_HEIGHT = 420;//500;//530;//560;
 
   /**
    * Gah - doesn't really work very well as me make the window narrower or wider
@@ -170,9 +173,11 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
                                 ExerciseListRequest request) {
     waitCursorHelper.scheduleWaitTimer();
 
-    logger.info("getExerciseIDs " +
-        "\n\trequest " + request +
-        "\n\t ex     " + exerciseID + " type " + typeToSection);
+    if (DEBUG) {
+      logger.info("getExerciseIDs " +
+          "\n\trequest " + request +
+          "\n\t ex     " + exerciseID + " type " + typeToSection);
+    }
 
     if (controller.getUser() > 0) {
       controller.getDialogService().getDialogs(request,
@@ -191,6 +196,10 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
                                   int currentReq,
                                   Collection<Integer> requested,
                                   List<IDialog> alreadyFetched) {
+    if (prev != null) {
+      prev.setEnabled(pagingContainer.hasPrevPage());
+      next.setEnabled(pagingContainer.hasNextPage());
+    }
     showDialogs(visibleIDs, getInOrder());
   }
 
@@ -221,23 +230,32 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   protected void populatePanels(Collection<IDialog> result, int reqID, DivWidget exerciseContainer) {
     //  long then = System.currentTimeMillis();
     //exerciseContainer.add(showProjectChoices(result));
-    myContainer = showYours(result, exerciseContainer);
+    myContainer = showDialogs(result, exerciseContainer);
     //  long now = System.currentTimeMillis();
   }
 
   private MemoryItemContainer<IDialog> myContainer;
 
-  private ButtonMemoryItemContainer<IDialog> showYours(Collection<IDialog> result, DivWidget left) {
+  private ButtonMemoryItemContainer<IDialog> showDialogs(Collection<IDialog> result, DivWidget left) {
     ButtonMemoryItemContainer<IDialog> myLists = new ReadOnlyDialogContainer();
     Panel tableWithPager = myLists.getTableWithPager(result);
+
+//    myLists.setWidth(900, true);
+
+//    tableWithPager.getElement().getStyle().setProperty("minWidth", "900px");
+
+
     tableWithPager.addStyleName("cardBorderShadow");
 
     new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.BOTTOM);
-    //  new TableAndPager().addPagerAndHeader(tableWithPager, YOUR_LISTS1, left);
     tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
     left.add(tableWithPager);
-    //   tableWithPager.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
-    left.add(getButtons(myLists));
+
+    DivWidget bb = new DivWidget();
+  //  bb.setWidth("900px");
+    DivWidget buttons = getButtons(myLists);
+    bb.add(buttons);
+    left.add(bb);
 
     return myLists;
   }
@@ -246,7 +264,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     return myContainer.getSelectedItem();
   }
 
-  protected Button share;
+  protected Button share, next, prev;
   private ButtonHelper<IDialog> buttonHelper = new ButtonHelper<IDialog>() {
     @Override
     protected String getName() {
@@ -257,12 +275,27 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   /**
    * @param container
    * @return
+   * @see #showDialogs(Collection, DivWidget)
    */
   @NotNull
   private DivWidget getButtons(ButtonMemoryItemContainer<IDialog> container) {
     DivWidget buttons = buttonHelper.getButtonContainer();
-    buttons.addStyleName("floatRight");
+    //buttons.addStyleName("floatRight");
+    buttons.addStyleName("floatLeft");
     buttons.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+
+    buttons.add(prev = buttonHelper.getSuccessButton(container, "Prev"));
+    prev.setType(ButtonType.INFO);
+    prev.addClickHandler(event -> gotClickOnPrev());
+    //prev.addStyleName("rightFiveMargin");
+
+    buttons.add(next = buttonHelper.getSuccessButton(container, "Next"));
+    next.setType(ButtonType.INFO);
+    next.addClickHandler(event -> gotClickOnNext());
+    next.addStyleName("rightFiveMargin");
+
+    prev.setEnabled(pagingContainer.hasPrevPage());
+    next.setEnabled(pagingContainer.hasNextPage());
 
     buttons.add(share = getShare(container));
     buttons.add(getListenButton(container));
@@ -270,14 +303,28 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     return buttons;
   }
 
+  private void gotClickOnPrev() {
+    if (pagingContainer.hasPrevPage()) {
+      pagingContainer.prevPage();
+    } else logger.info("has prev is false");
+  }
+
+  private void gotClickOnNext() {
+    if (pagingContainer.hasNextPage()) {
+      pagingContainer.nextPage();
+    } else logger.info("has next is false");
+  }
+
   @NotNull
   private Button getListenButton(ButtonMemoryItemContainer<IDialog> container) {
     Button learn = buttonHelper.getSuccessButton(container, LISTEN);
-    learn.setType(ButtonType.INFO);
+    //learn.setType(ButtonType.INFO);
+
 
     learn.addClickHandler(event -> showLearnList(container));
 
-    buttonHelper.addTooltip(learn, "Listen to the dialog.");
+
+    buttonHelper.addTooltip(learn, LISTEN_TO_THE_DIALOG);
     return learn;
   }
 
@@ -310,11 +357,19 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   }
 
   /**
-   * @see #showYours(Collection, DivWidget)
+   * @see #showDialogs(Collection, DivWidget)
    */
   private class ReadOnlyDialogContainer extends SummaryDialogContainer<IDialog> {
+    /**
+     * @see #showDialogs(Collection, DivWidget)
+     */
     ReadOnlyDialogContainer() {
       super(DialogExerciseList.this.controller, SUMMARY_DIALOG, 15);
+    }
+
+    @Override
+    protected void setMaxWidth() {
+      //  table.getElement().getStyle().setProperty("maxWidth", getMaxTableWidth() + "px");
     }
 
     @Override
@@ -327,6 +382,10 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
       super.addColumnsToTable();
       addScore(getList());
       addScoreStep(getList(), getMaxLengthId());
+    }
+
+    protected int getMaxLengthId() {
+      return 25;
     }
 
     /**

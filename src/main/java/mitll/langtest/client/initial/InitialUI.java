@@ -89,7 +89,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
   private static final boolean DO_HEARTBEAT = true;
 
-  private static final int TOP_OF_ROOT = 52;//58;//48;//58;
+  private static final int TOP_OF_ROOT = 56;//52;//58;//48;//58;
 
   /**
    * Make sure we can talk to the server...
@@ -598,10 +598,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   public void chooseProjectAgain() {
     if (userManager.hasUser()) {
       // logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
-
-//      if (userManager.isPolyglot()) {
-//        logger.info("\tpolyglot users don't get to change projects.");
-//      } else {
       forgetProjectForUser();
 
       pushClearHistory();
@@ -613,7 +609,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       clearContent();
       addProjectChoices(0, null);
       showCogMenu();
-//      }
     } else {
       logger.warning("chooseProjectAgain no user --- ");
     }
@@ -690,6 +685,14 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     return false;
   }
 
+  public void showCogMenu() {
+    banner.setCogVisible(true);
+  }
+
+  private void hideCogMenu() {
+    banner.setCogVisible(false);
+  }
+
   private void showLogin(EventRegistration eventRegistration) {
     if (DEBUG) logger.info("showLogin (" + contentRow.getId() + ") " + contentRow.getWidgetCount());
     contentRow.add(new UserPassLogin(props, userManager, eventRegistration, lifecycleSupport.getStartupInfo()).getContent());
@@ -699,14 +702,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     clearPadding(verticalContainer);
     RootPanel.get().add(verticalContainer);
     hideCogMenu();
-  }
-
-  public void showCogMenu() {
-    banner.setCogVisible(true);
-  }
-
-  private void hideCogMenu() {
-    banner.setCogVisible(false);
   }
 
   /**

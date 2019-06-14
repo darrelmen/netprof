@@ -37,6 +37,7 @@ import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
+import mitll.langtest.client.dialog.DialogExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.dialog.IDialog;
 
@@ -57,10 +58,12 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
   public static final String SUMMARY_DIALOG = "summaryDialog";
   public static final String CHAPTER = "Chapter";
   public static final String ENGLISH = "English";
+  public static final String ORIENTATION = "Orientation";
 
   /**
    * @param controller
    * @param shortPageSize
+   * @see DialogExerciseList.ReadOnlyDialogContainer#ReadOnlyDialogContainer()
    */
   protected SummaryDialogContainer(ExerciseController<?> controller, String key, int shortPageSize) {
     super(controller, NETPROF + ":" + controller.getUser() + ":" + key, "Dialogs",
@@ -153,7 +156,7 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
   void addOrientation(List<T> list, int maxLength) {
     Column<T, SafeHtml> userCol = getOrientColumn(maxLength);
     table.setColumnWidth(userCol, getIdWidth() + "px");
-    addColumn(userCol, new TextHeader("Orientation"));
+    addColumn(userCol, new TextHeader(ORIENTATION));
     table.addColumnSortHandler(getOrientSorter(userCol, list));
   }
 

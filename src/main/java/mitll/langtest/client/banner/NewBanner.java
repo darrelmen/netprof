@@ -36,8 +36,10 @@ import com.github.gwtbootstrap.client.ui.constants.*;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.HasClickHandlers;
 import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.IndexedPanel;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.user.client.ui.UIObject;
+import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.LangTest;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
@@ -58,6 +60,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.banner.NewContentChooser.VIEWS;
+import static mitll.langtest.client.custom.INavigation.QC_PERMISSIONS;
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
 import static mitll.langtest.shared.project.ProjectMode.EITHER;
 import static mitll.langtest.shared.project.ProjectMode.UNSET;
@@ -187,6 +190,20 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     setPosition(NavbarPosition.TOP);
     this.controller = controller;
     this.lifecycle = lifecycle;
+
+    Widget widget = getWidget(0);
+
+    Style style1 = widget.getElement().getStyle();
+    style1.setPaddingTop(5, Style.Unit.PX);
+    style1.setPaddingBottom(5, Style.Unit.PX);
+
+    //for (int i = 0; i < getWidgetCount(); i++) logger.info("# " + i + " : " + getWidget(i).getClass());
+
+    if (widget instanceof IndexedPanel) {
+      widget = ((IndexedPanel) widget).getWidget(0);
+    }
+    widget.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+
     //  logger.info("--- addWidgets ---");
     addWidgets(userManager, userMenu, breadcrumbs);
   }
@@ -200,6 +217,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     DivWidget navCollapse = new DivWidget();
     navCollapse.addStyleName("topFiveMargin");
     navCollapse.getElement().setId("navCollapse1");
+//    navCollapse.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
 
     add(navCollapse);
 
@@ -238,6 +256,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private Dropdown dialogEditorDropdown;
+
   /**
    * @return nav that is initial hidden
    */
@@ -298,7 +317,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private void styleNav(ComplexWidget recnav) {
-    //  recnav.addStyleName("inlineFlex");
     zeroLeftRightMargins(recnav);
   }
 
@@ -399,8 +417,21 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see #setUserName(String)
    */
   public void setCogTitle() {
-//    logger.info("setCogTitle  project " + controller.getProjectID());
-    if (controller.getProjectID() > -1) {
+    if (controller.getProjectID() == -1) {
+//      logger.info("setCogTitle : no project");
+      setChoicesVisibility(isAdmin(), isTeacher());
+      setVisibleChoices(false);
+    } else {
+      //    logger.info("setCogTitle  project " + controller.getProjectID());
+      checkPendingTeacher();
+    }
+  }
+
+  private void checkPendingTeacher() {
+    if (controller.getProjectID() == -1) {
+      cog.setText("");
+      userMenu.setPendingTitle(0);
+    } else {
       controller.getUserService().getPendingUsers(controller.getProjectID(), new AsyncCallback<List<ActiveUser>>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -409,14 +440,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
         @Override
         public void onSuccess(List<ActiveUser> result) {
+          if (DEBUG) logger.info("onSucces " + result.size() + " for " + controller.getLanguageInfo().toDisplay());
+
           cog.setText(result.isEmpty() ? "" : "(" + result.size() + ")");
           userMenu.setPendingTitle(result.size());
         }
       });
-    } else {
-      //   logger.info("setCogTitle : no project");
-      setChoicesVisibility(isAdmin(), isTeacher());
-      setVisibleChoices(false);
     }
   }
 
@@ -446,7 +475,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     userDrop.addClickHandler(event -> {
       userDrop.clear();
       userMenu.getStandardUserMenuChoices(teacherReq).forEach(linkAndTitle -> userDrop.add(linkAndTitle.makeNewLink()));
-      // hasProjectChoices.addAll(teacherReq);
     });
   }
 
@@ -622,6 +650,16 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
           "\n\tmode " + getMode()
       );
     }
+
+    // cheesy hack to get around responsive nav bar thing
+    Style style = getElement().getStyle();
+    Set<Permission> permissions1 = new HashSet<>(QC_PERMISSIONS);
+    permissions1.retainAll(permissions);
+    int w = permissions1.isEmpty() ? 800 : 1240;
+    style.setProperty("minWidth", w + "px");
+
+    checkPendingTeacher();
+
   }
 
   private boolean isDialogNavVisible() {
@@ -854,12 +892,11 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   /**
    * @param mode
-   * @see NewBanner#setCogVisible
+   * @see #setCogVisible
    */
   @Override
   public void setVisibleChoicesByMode(ProjectMode mode) {
     if (DEBUG) logger.info("setVisibleChoicesByMode set visible choices " + mode);
-
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("mode " + mode));
 //    logger.info("logException stack " + exceptionAsString);
 

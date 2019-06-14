@@ -92,6 +92,10 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
     return getTable(listOptions);
   }
 
+  public void setWidth(int width, boolean fixed) {
+    table.setWidth(width+"px", fixed);
+  }
+
   /**
    * From Ray.
    *
@@ -191,7 +195,7 @@ public abstract class SimplePagingContainer<T> implements RequiresResize, Exerci
 
   private CellTable<T> makeCellTable(CellTable.Resources o) {
     int pageSize = getPageSize();
-   // logger.info("makeCellTable (" + getClass() + ") " + pageSize);
+    // logger.info("makeCellTable (" + getClass() + ") " + pageSize);
     return o == null ? new CellTable<>(pageSize) : new CellTable<>(pageSize, o);
   }
 
