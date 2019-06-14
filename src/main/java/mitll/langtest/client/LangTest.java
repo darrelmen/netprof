@@ -759,7 +759,7 @@ public class LangTest implements
 
   @Override
   public ProjectStartupInfo getProjectStartupInfo() {
-    //logger.info("\ngetStartupInfo Got startup info " + projectStartupInfo);
+    //  logger.info("getStartupInfo Got startup info " + projectStartupInfo);
     return projectStartupInfo;
   }
 
@@ -782,6 +782,8 @@ public class LangTest implements
       logger.info("setProjectStartupInfo project startup null for " + user);
 //      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("no startup?"));
 //      logger.info("logException stack " + exceptionAsString);
+    } else {
+      if (DEBUG) logger.info("setProjectStartupInfo got project startup for " + user);
     }
 
     initialUI.showCogMenu();

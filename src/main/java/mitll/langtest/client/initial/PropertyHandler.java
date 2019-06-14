@@ -52,8 +52,7 @@ public class PropertyHandler {
 
   private static final String AFTER_STOP_DELAY_MILLIS = "afterStopDelayMillis";
   private static final String SHOW_SPECTROGRAM1 = "showSpectrogram";
-  private static final String PRACTICE_VOCABULARY_WITH_AUDIO_FLASHCARDS = "Practice vocabulary with audio flashcards.";
-  public static final String RECEIVE_FEEDBACK_ON_STRENGTHS_AND_WEAKNESSES = "Receive feedback on strengths and weaknesses.";
+
 
   private static final String PRONUNCIATION_FEEDBACK = "netprof";//"Pronunciation Feedback";
   private static final String CPW_TOKEN = "CPWtoken";
@@ -101,8 +100,16 @@ public class PropertyHandler {
   private static final String HELP_EMAIL = "helpEmail";
   private static final String NETPROF_HELP_DLIFLC_EDU = "netprof-help@dliflc.edu";
 
-  private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
+  // private static final String INITIAL_PROMPT = "Practice pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
+  private static final String INITIAL_PROMPT = "Practice speaking words, sentences, and conversations.";//"Learn how to pronounce words and practice vocabulary.";
+
   //private static final String INITIAL_PROMPT = "Practice dialogs to improve pronunciation and learn vocabulary.";//"Learn how to pronounce words and practice vocabulary.";
+
+  //  private static final String PRACTICE_VOCABULARY_WITH_AUDIO_FLASHCARDS = "Practice vocabulary with audio flashcards.";
+ // private static final String PRACTICE_VOCABULARY_WITH_AUDIO_FLASHCARDS = "Practice two person conversations and as an interpreter.";
+  private static final String PRACTICE_VOCABULARY_WITH_AUDIO_FLASHCARDS = "Play the role of an interpreter in a dialog.";
+  //  public static final String RECEIVE_FEEDBACK_ON_STRENGTHS_AND_WEAKNESSES = "Receive feedback on strengths and weaknesses.";
+  private static final String THIRD_BULLET = "Create and share vocabulary lists for study and review.";//"Make your own lists of words to study later or to share.";
 
   private boolean usePhoneToDisplay;
 
@@ -280,6 +287,10 @@ public class PropertyHandler {
     return PRACTICE_VOCABULARY_WITH_AUDIO_FLASHCARDS;
   }
 
+  public String getThirdBullet() {
+    return PRACTICE_VOCABULARY_WITH_AUDIO_FLASHCARDS;
+  }
+
   @Deprecated
   private void getPreferredVoices(String value) {
     for (String userid : value.split(",")) {
@@ -385,6 +396,7 @@ public class PropertyHandler {
 
   /**
    * Just like in KeyStorage... TODO : move to using it for all storage
+   *
    * @return
    */
   @NotNull

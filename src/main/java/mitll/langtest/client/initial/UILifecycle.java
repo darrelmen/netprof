@@ -73,7 +73,7 @@ public interface UILifecycle {
   @NotNull
   NavLink makeBreadcrumb(String name);
 
-  void clickOnParentCrumb(SlimProject parent);
+  void clickOnParentCrumb(SlimProject parent, NavLink breadcrumb);
 
   /**
    * @see LangTest#makeFlashContainer()

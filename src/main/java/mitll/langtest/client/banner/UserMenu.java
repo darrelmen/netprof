@@ -388,12 +388,12 @@ public class UserMenu {
         controller.getProjectStartupInfo() != null;
   }
 
-  private boolean isATeacherAndThereIsAProject(User current) {
+/*  private boolean isATeacherAndThereIsAProject(User current) {
     return current != null &&
         (current.isTeacher() ||
             current.getPermissions().contains(Permission.TEACHER_PERM)) &&
         controller.getProjectStartupInfo() != null;
-  }
+  }*/
 
   @NotNull
   private DialogHelper.CloseListener getListener() {

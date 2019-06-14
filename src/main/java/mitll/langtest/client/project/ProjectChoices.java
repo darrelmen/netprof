@@ -172,7 +172,7 @@ public class ProjectChoices extends ThumbnailChoices {
 
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_CLICK = false;
+  private static final boolean DEBUG_CLICK = true;
 
   /**
    * @param langTest
@@ -356,7 +356,7 @@ public class ProjectChoices extends ThumbnailChoices {
    * @param languages
    */
   private void sortLanguages(final int nest, List<SlimProject> languages) {
-   // logger.info("sort " + nest + " " + languages);
+    // logger.info("sort " + nest + " " + languages);
     languages.sort((o1, o2) -> {
       if (nest == 0) {
         return getDisplayLang(o1).compareTo(getDisplayLang(o2));
@@ -1172,22 +1172,19 @@ public class ProjectChoices extends ThumbnailChoices {
 
       setProjectForUser(projid, projectForLang.getMode());
     } else { // at this point, the breadcrumb should be empty?
+      Set<Integer> childIDs = new HashSet<>();
+      children.forEach(slimProject -> childIDs.add(slimProject.getID()));
+      if (childIDs.size() == 1) {
+        logger.info("OK, remember project for user =" + projid);
+        easyRemember(projid);
+      }
       if (DEBUG_CLICK)
         logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
-      breadcrumb.addClickHandler(clickEvent -> {
-//        SlimProject projectForLang1 = projectForLang;
-//        logger.info("gotClickOnFlag Click on crumb " + projectForLang1.getName() + " nest " + nest);
-        uiLifecycle.clickOnParentCrumb(projectForLang);
-      });
+      breadcrumb.addClickHandler(clickEvent -> uiLifecycle.clickOnParentCrumb(projectForLang, breadcrumb));
 
       uiLifecycle.clearContent();
       addProjectChoices(nest, children);
     }
-  }
-
-  @NotNull
-  private NavLink makeBreadcrumb(String name) {
-    return uiLifecycle.makeBreadcrumb(name);
   }
 
   /**
@@ -1195,12 +1192,10 @@ public class ProjectChoices extends ThumbnailChoices {
    * @param children
    */
   private void addProjectChoices(int nest, List<SlimProject> children) {
-    // int widgetCount = contentRow.getWidgetCount();
-    // logger.info("addProjectChoices " + widgetCount);
     if (contentRow.getWidgetCount() == 0) {
       contentRow.add(showProjectChoices(getVisibleProjects(children), nest));
     } else {
-      if (DEBUG || true) logger.info("addProjectChoices not adding project choices again...");
+      if (DEBUG) logger.info("addProjectChoices not adding project choices again...");
     }
   }
 
@@ -1220,7 +1215,7 @@ public class ProjectChoices extends ThumbnailChoices {
    * @see #gotClickOnFlag
    */
   private void setProjectForUser(int projectid, ProjectMode mode) {
-    //   logger.info("setProjectForUser set project for " + projectid + " mode " + mode);
+    logger.info("setProjectForUser set project for " + projectid + " mode " + mode);
     uiLifecycle.clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override
@@ -1248,6 +1243,28 @@ public class ProjectChoices extends ThumbnailChoices {
     });
   }
 
+  private void easyRemember(int projectid) {
+    userService.setProject(projectid, new AsyncCallback<User>() {
+      @Override
+      public void onFailure(Throwable throwable) {
+        controller.handleNonFatalError("setting project", throwable);
+      }
+
+      @Override
+      public void onSuccess(User aUser) {
+        if (aUser == null) {
+          logger.warning("setProjectForUser : no current user? ");
+          uiLifecycle.logout();
+        } else {
+//          if (aUser.getStartupInfo() == null) { // no project with that project id
+//            lifecycleSupport.getStartupInfo();
+//          } else {
+//            userNotification.setProjectStartupInfo(aUser);
+//          }
+        }
+      }
+    });
+  }
   /**
    * @param contentRow
    * @see InitialUI#populateRootPanel

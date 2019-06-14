@@ -31,14 +31,15 @@ package mitll.langtest.client.initial;
 
 import com.github.gwtbootstrap.client.ui.Breadcrumbs;
 import com.github.gwtbootstrap.client.ui.NavLink;
+import com.google.gwt.user.client.ui.Widget;
 import org.jetbrains.annotations.NotNull;
 
 interface IBreadcrumbHelper {
   void setVisible(boolean visible);
 
-  Breadcrumbs getBreadcrumbs();
+  Breadcrumbs getBreadcrumbs(UILifecycle uiLifecycle);
 
-  void addCrumbs(boolean showOnlyHomeLink);
+  void addCrumbs(boolean showOnlyHomeLink, UILifecycle uiLifecycle);
 
   void clearBreadcrumbs();
 
@@ -46,7 +47,9 @@ interface IBreadcrumbHelper {
   NavLink makeBreadcrumb(String name);
 
   /**
-   * @see InitialUI#clickOnParentCrumb
+   * @see UILifecycle#clickOnParentCrumb
    */
   void removeLastCrumb();
+
+  void removeUntil(Widget widget);
 }

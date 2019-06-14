@@ -89,7 +89,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
   private static final boolean DO_HEARTBEAT = true;
 
-  private static final int TOP_OF_ROOT = 56;//52;//58;//48;//58;
+  private static final int TOP_OF_ROOT = 62;//56;//52;//58;//48;//58;
 
   /**
    * Make sure we can talk to the server...
@@ -165,7 +165,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
         new NewBanner(userManager,
             this,
             userMenu,
-            breadcrumbHelper.getBreadcrumbs(),
+            breadcrumbHelper.getBreadcrumbs(this),
             controller);
     userMenu.setBanner(banner);
   }
@@ -339,7 +339,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   }
 
   /**
-   * @see BreadcrumbHelper#getBreadcrumbs
+   * @see IBreadcrumbHelper#getBreadcrumbs
    */
   public void clearContent() {
     if (DEBUG) logger.info("clearContent - " + contentRow.getId());
@@ -592,19 +592,19 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   }
 
   /**
-   * @see BreadcrumbHelper#addCrumbs
+   * @see IBreadcrumbHelper#addCrumbs
    */
   @Override
   public void chooseProjectAgain() {
     if (userManager.hasUser()) {
-      // logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
+      logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
       forgetProjectForUser();
 
       pushClearHistory();
       clearStartupInfo();
 
       breadcrumbHelper.clearBreadcrumbs();
-      breadcrumbHelper.addCrumbs(true);
+      breadcrumbHelper.addCrumbs(true, this);
 
       clearContent();
       addProjectChoices(0, null);
@@ -690,6 +690,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   }
 
   private void hideCogMenu() {
+    logger.info("hideCogMenu");
     banner.setCogVisible(false);
   }
 
@@ -837,6 +838,26 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   }
 
   /**
+   * @param parent
+   * @param breadcrumb
+   * @see ProjectChoices#gotClickOnFlag
+   */
+  @Override
+  public void clickOnParentCrumb(SlimProject parent, NavLink breadcrumb) {
+    if (DEBUG) {
+      logger.info("clickOnParentCrumb click on parent : " + parent);
+    }
+
+    pushClearHistory(); // clear history!
+
+    breadcrumbHelper.removeUntil(breadcrumb);
+
+    addProjectChoices(1, parent);
+
+    banner.reset();
+  }
+
+  /**
    * @see #configureUIGivenUser
    * @see #chooseProjectAgain
    * @see #clickOnParentCrumb
@@ -848,19 +869,19 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       logger.info("addProjectChoices level " + level + " parent " + parent);
     }
 
-    breadcrumbHelper.addCrumbs(level == 0);
+    breadcrumbHelper.addCrumbs(level == 0, this);
 
     choices.showProjectChoices(parent, level);
   }
 
   /**
-   * TODO : move breadcrump stuff to another class!
+   *  move breadcrump stuff to another class!
    *
    * @see #addProjectChoices
    */
   @Override
   public void addBreadcrumbs() {
-    breadcrumbHelper.addCrumbs(true);
+    breadcrumbHelper.addCrumbs(true, this);
   }
 
   /**
@@ -872,23 +893,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   @NotNull
   public NavLink makeBreadcrumb(String name) {
     return breadcrumbHelper.makeBreadcrumb(name);
-  }
-
-  /**
-   * @param parent
-   * @see ProjectChoices#gotClickOnFlag
-   */
-  @Override
-  public void clickOnParentCrumb(SlimProject parent) {
-    if (DEBUG) {
-      logger.info("clickOnParentCrumb click on parent : " + parent);
-    }
-
-    pushClearHistory(); // clear history!
-    breadcrumbHelper.removeLastCrumb();
-    addProjectChoices(1, parent);
-
-    banner.reset();
   }
 
   /**

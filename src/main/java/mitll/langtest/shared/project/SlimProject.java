@@ -30,6 +30,7 @@
 package mitll.langtest.shared.project;
 
 import mitll.langtest.server.database.project.ProjectManagement;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -114,6 +115,20 @@ public class SlimProject extends ProjectInfo {
     return !children.isEmpty();
   }
 
+  public SlimProject getChildByMode(int projectid, ProjectMode mode) {
+    List<SlimProject> collect = getSlimProjectsByMode(projectid, mode);
+    return (collect.isEmpty()) ? getChild(projectid) : collect.iterator().next();
+  }
+
+  @NotNull
+  public List<SlimProject> getSlimProjectsByMode(int projectid, ProjectMode mode) {
+    return children.stream()
+          .filter(slimProject ->
+              slimProject.getID() == projectid &&
+                  slimProject.getMode() == mode)
+          .collect(Collectors.toList());
+  }
+
   public boolean hasChild(int projectid) {
     return getChild(projectid) != null;
   }
@@ -123,15 +138,6 @@ public class SlimProject extends ProjectInfo {
       if (child.getID() == projectid) return child;
     }
     return null;
-  }
-
-  public SlimProject getChildByMode(int projectid, ProjectMode mode) {
-    List<SlimProject> collect = children.stream()
-        .filter(slimProject ->
-            slimProject.getID() == projectid &&
-                slimProject.getMode() == mode)
-        .collect(Collectors.toList());
-    return (collect.isEmpty()) ? getChild(projectid) : collect.iterator().next();
   }
 
   public List<SlimProject> getChildren() {

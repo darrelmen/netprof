@@ -71,6 +71,7 @@ import static mitll.langtest.shared.project.ProjectType.DIALOG;
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
+  public static final int MIN_WIDTH_WIDE = 1150;
   private final Logger logger = Logger.getLogger("NewBanner");
 
   /**
@@ -160,6 +161,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private INavigation navigation;
   private final Collection<NavLink> navLinks = new ArrayList<>();
+  /**
+   * @see #addUserMenu
+   */
   private Dropdown userDrop;
   /**
    * @see #addChoicesForUser(ComplexWidget)
@@ -655,7 +659,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     Style style = getElement().getStyle();
     Set<Permission> permissions1 = new HashSet<>(QC_PERMISSIONS);
     permissions1.retainAll(permissions);
-    int w = permissions1.isEmpty() ? 800 : 1240;
+    int w = permissions1.isEmpty() ? 800 : MIN_WIDTH_WIDE;
     style.setProperty("minWidth", w + "px");
 
     checkPendingTeacher();
@@ -775,10 +779,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   /**
    * @see InitialUI#logout
+   * @see UILifecycle#clickOnParentCrumb
    */
   @Override
   public void reset() {
+//    logger.info("reset");
     setCogVisible(false);
+
+    userDrop.setVisible(controller.getUserManager().hasUser());
 
     setRecNavVisible(false);
     setDefectNavVisible(false);

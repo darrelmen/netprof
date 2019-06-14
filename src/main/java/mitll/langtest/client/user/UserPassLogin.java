@@ -73,7 +73,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
 
   private static final int LEFT_SIDE_WIDTH = 453;
   private static final String SECOND_BULLET = "Record your voice and get feedback on your pronunciation.";//"Get feedback on your pronunciation";
-  private static final String THIRD_BULLET = "Create and share vocab lists for study and review.";//"Make your own lists of words to study later or to share.";
+  private static final String THIRD_BULLET = "Create and share vocabulary lists for study and review.";//"Make your own lists of words to study later or to share.";
   private static final String CHECK_EMAIL = "Check Email";
   private static final String PLEASE_CHECK_YOUR_EMAIL = "Please check your email";
   /**
@@ -91,6 +91,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
    *
    */
   public static final String INSTALL_APP = "Install App?";
+  public static final int SECOND_ICON_WIDTH = 44;
 
   private final KeyPressHelper enterKeyButtonHelper;
 
@@ -300,6 +301,7 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
   /**
    * So only enables the send button when a grammatically valid email address is in the text box.
    * Fix for <a href='https://gh.ll.mit.edu/DLI-LTEA/netprof2/issues/326'>326</a>
+   *
    * @return
    * @see SignInForm#populateSignInForm
    */
@@ -403,13 +405,11 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     w2.getElement().getStyle().setTextAlign(Style.TextAlign.LEFT);
 
     String firstBullet = props.getFirstBullet();
-    if (props.isAMAS()) {
-      addBullet(left, firstBullet, "NewProF2_48x48.png");
-    } else {
-      addBullet(left, SECOND_BULLET, "NewProF1_48x48.png");
-      addBullet(left, firstBullet, "NewProF2_48x48.png").setWidth("33px");
-      addBullet(left, THIRD_BULLET, "listIcon_48x48_transparent.png").setWidth("38px");
-    }
+
+    addBullet(left, SECOND_BULLET, "NewProF1_48x48.png");
+    addBullet(left, firstBullet, "NewProF2_48x48.png").setWidth(SECOND_ICON_WIDTH +
+        "px");
+    addBullet(left, THIRD_BULLET, "listIcon_48x48_transparent.png").setWidth("38px");
 
     left.add(flagsDisplay.getFlagsDisplay());
   }

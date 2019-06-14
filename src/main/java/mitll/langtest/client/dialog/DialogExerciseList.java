@@ -30,6 +30,7 @@
 package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
@@ -47,6 +48,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.dialog.ButtonHelper;
 import mitll.langtest.client.custom.dialog.SummaryDialogContainer;
+import mitll.langtest.client.custom.userlist.TableAndPager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.FacetExerciseList;
@@ -237,6 +239,12 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private MemoryItemContainer<IDialog> myContainer;
 
   private ButtonMemoryItemContainer<IDialog> showDialogs(Collection<IDialog> result, DivWidget left) {
+//
+//    Heading w = new Heading(3, "Please select a dialog");
+//    w.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
+//    w.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
+//    left.add(w);
+
     ButtonMemoryItemContainer<IDialog> myLists = new ReadOnlyDialogContainer();
     Panel tableWithPager = myLists.getTableWithPager(result);
 
@@ -248,11 +256,14 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     tableWithPager.addStyleName("cardBorderShadow");
 
     new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.BOTTOM);
+
+   new TableAndPager().addPagerAndHeader(tableWithPager, "Please select a dialog", left);
+
     tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
     left.add(tableWithPager);
 
     DivWidget bb = new DivWidget();
-  //  bb.setWidth("900px");
+    //  bb.setWidth("900px");
     DivWidget buttons = getButtons(myLists);
     bb.add(buttons);
     left.add(bb);

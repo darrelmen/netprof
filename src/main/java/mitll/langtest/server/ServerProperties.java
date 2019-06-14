@@ -192,7 +192,8 @@ public class ServerProperties {
   /**
    * For development, from a laptop.
    */
-  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
+//  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof1-dev.llan.ll.mit.edu/netprof/";
+  private static final String HYDRA_HOST_URL_DEFAULT = "https://netprof.ll.mit.edu/netprof/";
 
   private static final String USE_SCORE_CACHE = "useScoreCache";
 
