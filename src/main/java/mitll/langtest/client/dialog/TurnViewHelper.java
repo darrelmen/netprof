@@ -63,19 +63,25 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static com.google.gwt.dom.client.Style.Unit.PX;
+import static mitll.langtest.client.custom.dialog.SummaryDialogContainer.NETPROF;
+import static mitll.langtest.client.dialog.DialogExerciseList.SUMMARY_DIALOG;
 
 public abstract class TurnViewHelper<T extends ISimpleTurn>
     extends DialogView
     implements ContentView, IModeListener {
-  public static final String I = "I";
   private final Logger logger = Logger.getLogger("TurnViewHelper");
 
   private static final int DELETE_DELAY = 500;
-  private static final String ENGLISH_SPEAKER = "English Speaker";
 
+  private static final String ENGLISH_SPEAKER = "English Speaker";
   private static final String INTERPRETER = "Interpreter";
+  public static final String I = "I";
+  /**
+   * Can't be private
+   */
   static final String SPEAKER_A = "A";
   static final String SPEAKER_B = "B";
+
   private static final int INTERPRETER_WIDTH = 165;//235;
   private static final int PADDING_LOZENGE = 14;
 
@@ -96,8 +102,12 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   DivWidget dialogHeader;
   private DivWidget speakerRow;
   DivWidget overallFeedback;
+  private String storedDialogKey = SUMMARY_DIALOG;
 
-  private boolean isInterpreter = false;
+  /**
+   * @deprecatedx all dialogs are interpreter dialogs...
+   */
+ // private boolean isInterpreter = false;
   private boolean isInterpreterMode = true;
 
   DivWidget turnContainer;
@@ -134,7 +144,8 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   private void showContentForDialogInURL(Panel listContent) {
-    int dialogFromURL = getDialogFromURL();
+    int dialogFromURL = getDialogIDFromURL();
+
     controller.getDialogService().getDialog(dialogFromURL, new AsyncCallback<IDialog>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -147,6 +158,18 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
         showDialogGetRef(dialogFromURL, dialog, listContent);
       }
     });
+  }
+
+  private int getDialogIDFromURL() {
+    int dialogFromURL = getDialogFromURL();
+    if (dialogFromURL == -1) {
+      String prefix = NETPROF + ":" + controller.getUser() + ":";
+      int storedChoice = controller.getStorage().getInt(prefix + storedDialogKey);
+//      logger.info("storedChoice " + storedChoice);
+//      logger.info("dialog " + dialogFromURL);
+      dialogFromURL = storedChoice;
+    }
+    return dialogFromURL;
   }
 
   public IDialog getDialog() {
@@ -190,13 +213,16 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    */
   void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
     this.dialog = dialog;
-    if (DEBUG) logger.info("showDialogGetRef : show dialog " + dialogID);
-    if (dialog != null) {
-      this.dialogContainer = child;
-      isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
-      showDialog(dialogID, dialog, child);
-    } else {
+    if (DEBUG) {
+      logger.info("showDialogGetRef : show dialog " + dialogID);
+    }
+    if (dialog == null) { // should never happen
+      logger.warning("showDialogGetRef : huh? somehow don't know what dialog to show for " + dialogID);
       controller.showView(INavigation.VIEWS.DIALOG);
+    } else {
+      this.dialogContainer = child;
+//      isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
+      showDialog(dialogID, dialog, child);
     }
   }
 
@@ -423,10 +449,12 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
     {
       DivWidget middleSpeaker = getMiddleSpeaker();
-      if (!isInterpreter || !isInterpreterMode) {
+
+      if (!isInterpreterMode) {
         middleSpeaker.setHeight("5px");
         middleSpeaker.setVisible(false);
       }
+
       rowOne.add(middleSpeaker);
     }
 
@@ -1103,5 +1131,10 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    */
   public boolean isInterpreter() {
     return isInterpreterMode;
+  }
+
+  public TurnViewHelper<T> setStoredDialogKey(String storedDialogKey) {
+    this.storedDialogKey = storedDialogKey;
+    return this;
   }
 }

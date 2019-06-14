@@ -74,10 +74,16 @@ public abstract class ButtonHelper<T extends HasID & IPublicPrivate> {
 
   @NotNull
   public  DivWidget getCommonButtonContainer() {
+    DivWidget buttons = getButtonContainer();
+    buttons.getElement().getStyle().setProperty("minWidth", MIN_WIDTH + "px");
+    return buttons;
+  }
+
+  @NotNull
+  public DivWidget getButtonContainer() {
     DivWidget buttons = new DivWidget();
     buttons.addStyleName("inlineFlex");
     buttons.addStyleName("topFiveMargin");
-    buttons.getElement().getStyle().setProperty("minWidth", MIN_WIDTH + "px");
     return buttons;
   }
 

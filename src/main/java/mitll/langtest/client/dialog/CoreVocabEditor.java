@@ -343,7 +343,6 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
         this,
         clientExercise,
         controller.getLanguageInfo(),
-        false,
         getDialog().getProjid(),
         getDialogID(),
         dialog.getExercises().size() == 1);

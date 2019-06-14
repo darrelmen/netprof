@@ -152,12 +152,14 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   /**
+   * Try to be adaptive and do a shorter table if on a laptop - good idea?
+   *
    * @return
    * @see SimplePagingContainer#makeCellTable
    */
   protected int getPageSize() {
     int i = isOnLaptop() ? shortPageSize : pageSize;
-    logger.info("getPageSize " +i);
+    // logger.info("getPageSize " + i);
     return i;
   }
 
@@ -249,7 +251,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     T userToSelect = null;
     getList().clear();
 
-    int selectedUser = getSelectedUser(selectedUserKey);
+    int selectedUser = getSelectedItem(selectedUserKey);
 
     if (false) {
       logger.info("populateTable for " + selectedUserKey + " selected item is " + selectedUser);
@@ -372,21 +374,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return new SafeHtmlBuilder().appendHtmlConstant(columnText).toSafeHtml();
   }
 
-  /**
-   * @param selectedUserKey
-   * @return
-   * @see #populateTable
-   * @see #storeSelectedUser
-   */
-  private int getSelectedUser(String selectedUserKey) {
-    if (selectedUserKey == null) return -1;
-    return controller.getStorage().getInt(selectedUserKey);
-  }
-
   @Override
   public boolean markCurrentExercise(int itemID) {
     boolean b = super.markCurrentExercise(itemID);
-    if (b) storeSelectedUser(itemID);
+    if (b) storeSelectedItem(itemID);
     return b;
   }
 
@@ -394,14 +385,28 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @param selectedUser
    * @see #gotClickOnItem
    */
-  private void storeSelectedUser(int selectedUser) {
-    //  logger.info("storeSelectedUser " + selectedUserKey + " = " + selectedUser);
+  private void storeSelectedItem(int selectedUser) {
+    //  logger.info("storeSelectedItem " + selectedUserKey + " = " + selectedUser);
 
     controller.getStorage().storeValue(selectedUserKey, "" + selectedUser);
 
-    if (selectedUser != getSelectedUser(selectedUserKey)) {
-      logger.warning("storeSelectedUser : huh? stored " + selectedUserKey + " but got " + getSelectedUser(selectedUserKey));
+    if (selectedUser != getSelectedItem(selectedUserKey)) {
+      logger.warning("storeSelectedItem : huh? stored " + selectedUserKey + " but got " + getSelectedItem(selectedUserKey));
     }
+  }
+
+  public int getSelectedItem() {
+    return getSelectedItem(selectedUserKey);
+  }
+
+  /**
+   * @param selectedUserKey
+   * @return
+   * @see #populateTable
+   * @see #storeSelectedItem
+   */
+  private int getSelectedItem(String selectedUserKey) {
+    return (selectedUserKey == null) ? -1 : controller.getStorage().getInt(selectedUserKey);
   }
 
   void addTooltip() {
@@ -573,7 +578,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   public void gotClickOnItem(final T user) {
     if (user != null) {
-      storeSelectedUser(user.getID());
+      storeSelectedItem(user.getID());
     }
   }
 }

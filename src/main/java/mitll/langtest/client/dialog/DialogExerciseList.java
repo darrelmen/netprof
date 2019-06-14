@@ -30,7 +30,6 @@
 package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
@@ -39,10 +38,10 @@ import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
-import com.google.gwt.user.client.ui.Image;
-import com.google.gwt.user.client.ui.*;
+import com.google.gwt.user.client.ui.Panel;
+import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
-import mitll.langtest.client.banner.Emoticon;
+import mitll.langtest.client.analysis.MemoryItemContainer;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.dialog.ButtonHelper;
@@ -51,11 +50,8 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.list.FacetExerciseList;
 import mitll.langtest.client.list.ListOptions;
-import mitll.langtest.client.project.ThumbnailChoices;
 import mitll.langtest.client.scoring.UserListSupport;
-import mitll.langtest.shared.dialog.DialogMetadata;
 import mitll.langtest.shared.dialog.IDialog;
-import mitll.langtest.shared.exercise.ExerciseAttribute;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
 import mitll.langtest.shared.exercise.FilterRequest;
@@ -70,18 +66,23 @@ import java.util.stream.Collectors;
  * A facet list display of dialogs.
  */
 public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
+  public static final String SUMMARY_DIALOG = "summaryDialog";
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
-  private static final String INTERPRETER_PNG = "interpreter.png";
+  public static final String SCORE = "Score";
+  public static final String STEP = "Step";
+  public static final String DIALOG1 = "Dialog";
+
+  //  private static final String INTERPRETER_PNG = "interpreter.png";
   public static final String INTERP_COLOR = "aliceblue";
 
-  private static final String ENGLISH = "english";
+  // private static final String ENGLISH = "english";
   public static final String LISTEN = "Listen";
   public static final String CORE_VOCAB = "Core Vocab";
 
   private static final String LIST = "dialog";
-  private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to view a " + LIST;
-  private static final String YOUR_LISTS1 = "Your Dialogs";
+  private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to rehearse a " + LIST;
+  // private static final String YOUR_LISTS1 = "Your Dialogs";
   public static final String DIALOG = "Dialog";
   private static final int MY_LIST_HEIGHT = 450;//500;//530;//560;
 
@@ -89,22 +90,21 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
    * Gah - doesn't really work very well as me make the window narrower or wider
    * Gotta turn off the @media thing in bootstrap!
    */
-  private static final int CHOICES_WIDTH = 762;//970;//800;//970;
+//  private static final int CHOICES_WIDTH = 762;//970;//800;//970;
 
-  private static final int MAX_LENGTH_ID = 19;
-  private static final int MAX_LENGTH_ID1 = 2 * MAX_LENGTH_ID + 12;
-  private static final int NORMAL_MIN_HEIGHT = 101;// 67;
-  private static final int LANGUAGE_SIZE = 6;
+//  private static final int MAX_LENGTH_ID = 19;
+//  private static final int MAX_LENGTH_ID1 = 2 * MAX_LENGTH_ID + 12;
+//  private static final int NORMAL_MIN_HEIGHT = 101;// 67;
+//  private static final int LANGUAGE_SIZE = 6;
 
   private Map<Integer, CorrectAndScore> scoreHistoryPerDialog;
-
 
   private static final boolean DEBUG = false;
 
   /**
    *
    */
-  private final ThumbnailChoices thumbnailChoices = new ThumbnailChoices();
+//  private final ThumbnailChoices thumbnailChoices = new ThumbnailChoices();
 
   /**
    * @param topRow
@@ -211,7 +211,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   }
 
   /**
-   * TODO : replace with something very close to dialog editor list.
+   * replace with something very close to dialog editor list.
    *
    * @param result
    * @param reqID
@@ -221,16 +221,14 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   protected void populatePanels(Collection<IDialog> result, int reqID, DivWidget exerciseContainer) {
     //  long then = System.currentTimeMillis();
     //exerciseContainer.add(showProjectChoices(result));
-    //showOnlySortBox();
-
-    showYours(result, exerciseContainer);
+    myContainer = showYours(result, exerciseContainer);
     //  long now = System.currentTimeMillis();
   }
 
-  private void showYours(Collection<IDialog> result, DivWidget left) {
-    ButtonMemoryItemContainer<IDialog> myLists = new DialogExerciseList.MyDialogContainer();
+  private MemoryItemContainer<IDialog> myContainer;
 
-    // setMyLists(myLists);
+  private ButtonMemoryItemContainer<IDialog> showYours(Collection<IDialog> result, DivWidget left) {
+    ButtonMemoryItemContainer<IDialog> myLists = new ReadOnlyDialogContainer();
     Panel tableWithPager = myLists.getTableWithPager(result);
     tableWithPager.addStyleName("cardBorderShadow");
 
@@ -239,28 +237,32 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
     left.add(tableWithPager);
     //   tableWithPager.getElement().getStyle().setMarginBottom(10, Style.Unit.PX);
-
     left.add(getButtons(myLists));
+
+    return myLists;
+  }
+
+  public int getSelectedDialog() {
+    return myContainer.getSelectedItem();
   }
 
   protected Button share;
-  protected ButtonHelper<IDialog> buttonHelper = new ButtonHelper<IDialog>() {
-
+  private ButtonHelper<IDialog> buttonHelper = new ButtonHelper<IDialog>() {
     @Override
     protected String getName() {
-      return "Dialog";
+      return DIALOG1;
     }
   };
-
 
   /**
    * @param container
    * @return
    */
   @NotNull
-  protected DivWidget getButtons(ButtonMemoryItemContainer<IDialog> container) {
-    DivWidget buttons = buttonHelper.getCommonButtonContainer();
-
+  private DivWidget getButtons(ButtonMemoryItemContainer<IDialog> container) {
+    DivWidget buttons = buttonHelper.getButtonContainer();
+    buttons.addStyleName("floatRight");
+    buttons.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
 
     buttons.add(share = getShare(container));
     buttons.add(getListenButton(container));
@@ -283,7 +285,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     controller.getNavigation().showDialogIn(getItemID(container), INavigation.VIEWS.LISTEN);
   }
 
-  protected int getItemID(ButtonMemoryItemContainer<IDialog> container) {
+  private int getItemID(ButtonMemoryItemContainer<IDialog> container) {
     if (container == null) return -1;
     else {
       IDialog currentSelection = container.getCurrentSelection();
@@ -291,21 +293,18 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     }
   }
 
-
   /**
    * @param container
    * @return
    * @see #getButtons
    */
-  protected Button getShare(ButtonMemoryItemContainer<IDialog> container) {
-    Button successButton = buttonHelper.getShare(container);
-    return successButton;
+  private Button getShare(ButtonMemoryItemContainer<IDialog> container) {
+    return buttonHelper.getShare(container);
   }
 
   @NotNull
   DivWidget getCommonButtonContainer(ButtonMemoryItemContainer<IDialog> container) {
     DivWidget buttons = buttonHelper.getCommonButtonContainer();
-
     buttons.add(getShare(container));
     return buttons;
   }
@@ -313,13 +312,10 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   /**
    * @see #showYours(Collection, DivWidget)
    */
-  private class MyDialogContainer extends SummaryDialogContainer<IDialog> {
-
-
-    MyDialogContainer() {
-      super(DialogExerciseList.this.controller, "summaryDialog", 15);
+  private class ReadOnlyDialogContainer extends SummaryDialogContainer<IDialog> {
+    ReadOnlyDialogContainer() {
+      super(DialogExerciseList.this.controller, SUMMARY_DIALOG, 15);
     }
-
 
     @Override
     protected int getNumTableRowsGivenScreenHeight() {
@@ -330,6 +326,38 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     protected void addColumnsToTable() {
       super.addColumnsToTable();
       addScore(getList());
+      addScoreStep(getList(), getMaxLengthId());
+    }
+
+    /**
+     * @param list
+     * @param maxLength
+     */
+    void addScoreStep(List<IDialog> list, int maxLength) {
+      Column<IDialog, SafeHtml> userCol = getScoreStepColumn(maxLength);
+      table.setColumnWidth(userCol, getIdWidth() + "px");
+      addColumn(userCol, new TextHeader(STEP));
+      table.addColumnSortHandler(getScoreStepSorter(userCol, list));
+    }
+
+    private Column<IDialog, SafeHtml> getScoreStepColumn(int maxLength) {
+      return getTruncatedCol(maxLength, this::getScoreStepValue);
+    }
+
+    private String getScoreStepValue(IDialog thing) {
+      return getScoreStep(thing);
+    }
+
+    private ColumnSortEvent.ListHandler<IDialog> getScoreStepSorter(Column<IDialog, SafeHtml> englishCol,
+                                                                    List<IDialog> dataList) {
+      ColumnSortEvent.ListHandler<IDialog> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
+      columnSortHandler.setComparator(englishCol, this::getScoreStepCompare);
+      return columnSortHandler;
+    }
+
+    private int getScoreStepCompare(IDialog o1, IDialog o2) {
+      int i = getScoreStep(o1).compareTo(getScoreStep(o2));
+      return i == 0 ? getScoreCompare(o1, o2) : i;
     }
 
     @Override
@@ -358,7 +386,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     void addScore(List<IDialog> list) {
       Column<IDialog, SafeHtml> userCol = getClickable(this::getScoreVal);
       table.setColumnWidth(userCol, getIdWidth() + "px");
-      addColumn(userCol, new TextHeader("Score"));
+      addColumn(userCol, new TextHeader(SCORE));
       table.addColumnSortHandler(getScoreSorter(userCol, list));
     }
 
@@ -370,6 +398,11 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     private int getScore(IDialog thing) {
       CorrectAndScore correctAndScore = scoreHistoryPerDialog.get(thing.getID());
       return correctAndScore == null ? 0 : correctAndScore.getPercentScore();
+    }
+
+    private String getScoreStep(IDialog thing) {
+      CorrectAndScore correctAndScore = scoreHistoryPerDialog.get(thing.getID());
+      return correctAndScore == null ? "" : getViewForScore(correctAndScore).toString();
     }
 
     private ColumnSortEvent.ListHandler<IDialog> getScoreSorter(Column<IDialog, SafeHtml> englishCol,
@@ -407,6 +440,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     }
   }
 
+/*
   private Section showProjectChoices(Collection<IDialog> result) {
     // logger.info("showProjectChoices choices # = " + result.size() + " : nest level " + nest);
     final Section section = thumbnailChoices.getScrollingSection();
@@ -421,7 +455,9 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
     return section;
   }
+*/
 
+/*
   private Thumbnails addFlags(Collection<IDialog> dialogs) {
     Thumbnails current = new Thumbnails();
     current.getElement().getStyle().setMarginBottom(70, Style.Unit.PX);
@@ -437,6 +473,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
     return current;
   }
+*/
 
   /**
    * Use default image if none is associated...
@@ -444,7 +481,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
    * @param dialog
    * @return
    */
-  private Panel getImageAnchor(IDialog dialog) {
+/*  private Panel getImageAnchor(IDialog dialog) {
     Thumbnail thumbnail = thumbnailChoices.getThumbnail();
 
     // logger.info("show image " + imageRef);
@@ -479,24 +516,30 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
       thumbnail.add(horiz);
     }
     return thumbnail;
-  }
+  }*/
 
+/*
   @NotNull
   private String getDefaultImage() {
     return "langtest/cc/" + INTERPRETER_PNG;
   }
-
+*/
   private void setMinHeight(UIObject horiz1, int normalMinHeight) {
     horiz1.getElement().getStyle().setProperty("minHeight", normalMinHeight + "px"); // so they wrap nicely
   }
+/*
 
   private String getProperty(ExerciseAttribute attr) {
     return isTitle(attr) ? "title" : attr.getProperty();
   }
+*/
 
+/*
   private boolean isTitle(ExerciseAttribute attr) {
     return attr.getProperty().equals(DialogMetadata.FLTITLE.toString().toLowerCase());
   }
+*/
+/*
 
   @NotNull
   private com.google.gwt.user.client.ui.Image getFlag(String cc) {
@@ -505,8 +548,9 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     image.setWidth("150px");
     return image;
   }
+*/
 
-  @NotNull
+/*  @NotNull
   private DivWidget getContainerWithButtons(IDialog dialog) {
     DivWidget container = new DivWidget();
 
@@ -539,7 +583,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     // container.getElement().getStyle().setBackgroundColor(dialog.getKind() == DialogType.DIALOG ? DIALOG_COLOR : INTERP_COLOR);
     container.getElement().getStyle().setBackgroundColor(INTERP_COLOR);
     return container;
-  }
+  }*/
 
   /**
    * Show score and mode
@@ -547,6 +591,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
    * @param dialog
    * @return
    */
+/*
   @NotNull
   private DivWidget getEmoticonRow(IDialog dialog) {
     Emoticon overallSmiley = getEmoticon(dialog);
@@ -566,7 +611,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     }
     return smiley;
   }
-
+*/
   @NotNull
   private INavigation.VIEWS getViewForScore(CorrectAndScore correctAndScore) {
     String name = correctAndScore.getPath().toUpperCase();
@@ -578,6 +623,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     }
   }
 
+/*
   @NotNull
   private Emoticon getEmoticon(IDialog dialog) {
     Emoticon overallSmiley = new Emoticon();
@@ -599,12 +645,14 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     }
     return overallSmiley;
   }
+*/
 
   /**
    * TODO : make this a css entry
    *
    * @param overallSmiley
    */
+/*
   private void styleAnimatedSmiley(Emoticon overallSmiley) {
     overallSmiley.setWidth(24 + "px");
     overallSmiley.setHeight(24 + "px");
@@ -615,6 +663,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private Heading getLabel(String name) {
     return thumbnailChoices.getChoiceLabel(LANGUAGE_SIZE, name, false);
   }
+*/
 
   /**
    * Will push be bad? Will other parts wake up?

@@ -52,7 +52,7 @@ import java.util.logging.Logger;
 class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteListener {
   private final Logger logger = Logger.getLogger("CoreEditorTurn");
 
-  public static final boolean DEBUG_UPDATE_TEXT = true;
+  private static final boolean DEBUG_UPDATE_TEXT = false;
 
   private CoreVocabEditor coreVocabEditor;
   private EditableTurnHelper editableTurnHelper;
@@ -76,7 +76,6 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
    * @param coreVocabEditor
    * @param vocab
    * @param language
-   * @param isInterpreter
    * @param projID
    * @param dialogID
    * @param onlyOneTurn
@@ -86,7 +85,6 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
                  CoreVocabEditor coreVocabEditor,
                  ClientExercise vocab,
                  Language language,
-                 boolean isInterpreter,
                  int projID,
                  int dialogID,
                  boolean onlyOneTurn) {

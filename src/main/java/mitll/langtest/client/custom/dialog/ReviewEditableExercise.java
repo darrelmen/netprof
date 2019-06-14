@@ -77,7 +77,6 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
    */
   private static final String DELETE_AUDIO = "Delete Audio";
   private static final String DELETE_THIS_AUDIO_CUT = "Delete this audio cut.";
- // private static final String TRANSLITERATION = "Transliteration";
 
   private static final String MARK_FIXED_TOOLTIP = "Mark item as fixed, removed defective audio, and remove item from the review list.";
 
@@ -407,9 +406,6 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
       tabAndContent.getContent().getElement().getStyle().setMarginRight(70, Style.Unit.PX);
     }
 
-//    if (appendEye) {
-//      tabAndContent.getContent().addStyleName("checkboxGreen");
-//    }
     return tabAndContent;
   }
 
@@ -597,18 +593,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
 
-//    PrevNextList prevNext = getPrevNext(pagingContainer);
-//    prevNext.addStyleName("floatLeftAndClear");
-//    row.add(prevNext);
-
- /*   if (newUserExercise.isPredefined()) {//getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list
-//    if (newUserExercise.getCombinedMutableUserExercise().checkPredef()) {   // for now, only the owner of the list can remove or add to their list
-      //    row.add(getRemove());
-      row.add(getDuplicate());
-    }
-*/
     row.add(getFixedButton(toAddTo, normalSpeedRecording));
-    //boolean keepAudioSelection = getKeepAudioSelection();
 
     //   logger.info("value is  " + keepAudioSelection);
     keepAudio.setValue(getKeepAudioSelection());
@@ -635,98 +620,8 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
   @Override
   void afterValidForeignPhrase(final Panel toAddTo, boolean onClick) {
     super.afterValidForeignPhrase(toAddTo, onClick);
-
     LangTest.EVENT_BUS.fireEvent(new DefectEvent(instance.toString()));
   }
-
-/*  private Button getRemove() {
-    Button remove = new Button(DELETE);
-    remove.setType(ButtonType.WARNING);
-    remove.addStyleName("floatRight");
-    remove.addStyleName("leftFiveMargin");
-    addTooltip(remove, DELETE_THIS_ITEM);
-
-    remove.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        confirmThenDeleteItem();
-      }
-    });
-    return remove;
-  }*/
-
-/*  private void confirmThenDeleteItem() {
-    DialogHelper dialogHelper = new DialogHelper(true);
-    dialogHelper.show(ARE_YOU_SURE, MSGS, new DialogHelper.CloseListener() {
-      @Override
-      public void gotYes() {
-        controller.getQCService().deleteItem(newUserExercise.getID(), new AsyncCallback<Boolean>() {
-          @Override
-          public void onFailure(Throwable caught) {
-          }
-
-          @Override
-          public void onSuccess(Boolean result) {
-            exerciseList.removeExercise(newUserExercise);
-            originalList.remove(newUserExercise.getID());
-          }
-        });
-      }
-
-      @Override
-      public void gotNo() {
-      }
-    });
-  }*/
-
-  /**
-   * @return
-   */
-/*  private Button getDuplicate() {
-    final Button duplicate = new Button(DUPLICATE);
-    duplicate.setType(ButtonType.SUCCESS);
-    duplicate.addStyleName("floatRight");
-    addTooltip(duplicate, COPY_THIS_ITEM);
-
-    duplicate.addClickHandler(new ClickHandler() {
-      @Override
-      public void onClick(ClickEvent event) {
-        duplicateExercise(duplicate);
-      }
-    });
-    return duplicate;
-  }*/
-
-  /**
-   * Disable the button initially so we don't accidentally duplicate twice.
-   *
-   * @param duplicate
-   */
- /* private void duplicateExercise(final Button duplicate) {
-    duplicate.setEnabled(false);
-    newUserExercise.getMutable().setCreator(controller.getUser());
-    T commonShell = exerciseList.byHasID(newUserExercise);
-    if (commonShell != null) {
-      newUserExercise.setState(commonShell.getState());
-      newUserExercise.setSecondState(commonShell.getSecondState());
-    }
-    //logger.info("to duplicate " + newUserExercise + " state " + newUserExercise.getState());
-    listService.duplicateExercise(newUserExercise, new AsyncCallback<U>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        duplicate.setEnabled(true);
-      }
-
-      @Override
-      public void onSuccess(U result) {
-        duplicate.setEnabled(true);
-
-        exerciseList.addItemAfter(newUserExercise, result);
-        exerciseList.redraw();
-        originalList.addItemAfter(newUserExercise, result);
-      }
-    });
-  }*/
 
   /**
    * @return
@@ -808,7 +703,10 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
   }
 
   private void userSaidExerciseIsFixed() {
-    final int id = isContext() ? newUserExercise.getDirectlyRelated().iterator().next().getID() : newUserExercise.getID();
+    final int id = isContext() && !newUserExercise.getDirectlyRelated().isEmpty() ?
+        newUserExercise.getDirectlyRelated().iterator().next().getID() :
+        newUserExercise.getID();
+
     controller.getQCService().markState(id, STATE.FIXED, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -822,16 +720,6 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
       }
     });
   }
-
-//  @Override
-//  protected String getEnglishLabel() {
-//    return isEnglish() ? "Meaning<br/>" : "English<br/>";
-//  }
-//
-//  @Override
-//  protected String getTransliterationLabel() {
-//    return TRANSLITERATION;
-//  }
 
   private class MyDivWidget extends DivWidget implements BusyPanel {
     @Override

@@ -67,9 +67,11 @@ import static mitll.langtest.client.custom.INavigation.QC_PERMISSIONS;
  * Created by go22670 on 7/3/17.
  */
 public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
-  public static final String LISTEN = "Listen";
-  public static final String CORE_VOCAB = "Core Vocab";
-  public static final String UPLOAD_IMAGE = "Upload Image";
+  private static final String LISTEN = "Listen";
+  private static final String CORE_VOCAB = "Core Vocab";
+  private static final String UPLOAD_IMAGE = "Upload Image";
+  public static final String LISTEN_TO_THE_DIALOG = "Listen to the dialog.";
+  public static final String EDIT_THE_CORE_VOCABULARY_FOR_THE_DIALOG = "Edit the core vocabulary for the dialog.";
 
   private final Logger logger = Logger.getLogger("DialogEditorView");
   private static final String UPLOAD_A_DIALOG_IMAGE = "Upload a dialog image.";
@@ -122,13 +124,18 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   }
 
   protected Button getShare(ButtonMemoryItemContainer<T> container) {
-    Button successButton = new Button(SHARE);
+    DialogEditorView<?> outer = this;
+    Button successButton = new ButtonHelper<T>() {
+      protected String getName() {
+        return outer.getName();
+      }
+    }.getShare(container);
     successButton.setType(ButtonType.INFO);
-    successButton.addStyleName("leftFiveMargin");
-
-    successButton.setIcon(IconType.SHARE);
-    addTooltip(successButton, SHARE_THE_LIST + getSuffix());
-    container.addButton(successButton);
+//    successButton.addStyleName("leftFiveMargin");
+//
+//    successButton.setIcon(IconType.SHARE);
+//    addTooltip(successButton, SHARE_THE_LIST + getSuffix());
+  //  container.addButton(successButton);
     return successButton;
   }
 
@@ -137,7 +144,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     Button learn = buttonHelper.getSuccessButton(container, LISTEN);
     learn.setType(ButtonType.INFO);
     learn.addClickHandler(event -> showLearnList(container));
-    addTooltip(learn, "Listen to the dialog.");
+    addTooltip(learn, LISTEN_TO_THE_DIALOG);
     return learn;
   }
 
@@ -146,7 +153,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     Button learn = buttonHelper.getSuccessButton(container, CORE_VOCAB);
     learn.setIcon(IconType.PENCIL);
     learn.addClickHandler(event -> editCoreVocabList(getCurrentSelection()));
-    addTooltip(learn, "Edit the core vocabulary for the dialog.");
+    addTooltip(learn, EDIT_THE_CORE_VOCABULARY_FOR_THE_DIALOG);
     return learn;
   }
 
@@ -173,11 +180,10 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
               }
 
               @Override
-              public void onSuccess(Boolean result) {
+              public void onSuccess(Boolean setResult) {
                 //  logger.info("Set image path " + result);
-                if (!result) {
-                  logger.warning("Set image path " + result);
-
+                if (!setResult) {
+                  logger.warning("Set image path failed for " + result);
                 }
               }
             });
@@ -308,7 +314,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   @NotNull
   @Override
   protected CreateDialog<T> getCreateDialog() {
-    return new CreateDialogDialog<T>(names, controller, this);
+    return new CreateDialogDialog<>(names, controller, this);
   }
 
   /**
@@ -428,7 +434,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
 
   @NotNull
-  protected String truncate(String columnText, int maxLengthId) {
+  private String truncate(String columnText, int maxLengthId) {
     if (columnText.length() > maxLengthId) columnText = columnText.substring(0, maxLengthId - 3) + "...";
     return columnText;
   }
@@ -496,7 +502,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   @NotNull
   @Override
   protected CreateDialog<T> getEditDialog() {
-    return new CreateDialogDialog<T>(getCurrentSelectionFromMyLists(), names, true, controller, this);
+    return new CreateDialogDialog<>(getCurrentSelectionFromMyLists(), names, true, controller, this);
   }
 
   @Override

@@ -57,6 +57,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
+import static com.google.gwt.dom.client.Style.Clear.BOTH;
 import static com.google.gwt.dom.client.Style.Unit.PX;
 import static mitll.langtest.client.LangTest.LANGTEST_IMAGES;
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
@@ -65,6 +66,8 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * @see ListenViewHelper#addDialogHeader(IDialog, Panel)
  */
 public class DialogHeader {
+  public static final String DIALOG_AS_EXCEL_SPREADSHEET_WITH_AUDIO = "Download dialog as excel spreadsheet with audio";
+  public static final String SEE_VOCAB = "See Vocab";
   private final Logger logger = Logger.getLogger("DialogHeader");
 
   private static final String GROUP = "group";
@@ -143,7 +146,7 @@ public class DialogHeader {
       // add prev view
       boolean mine = dialog.getUserid() == controller.getUser();
       if (getPrevView() != null) {
-        Widget leftArrow = getLeftArrow(mine);
+        Widget leftArrow = getLeftArrow();
         leftArrow.setWidth(sides + "%");
         row.add(leftArrow);
       }
@@ -339,7 +342,7 @@ public class DialogHeader {
 
     style.setMarginLeft(89, PX);
     style.setPaddingRight(27, PX);
-    style.setClear(Style.Clear.BOTH);
+    style.setClear(BOTH);
     return child;
   }
 
@@ -364,27 +367,37 @@ public class DialogHeader {
     return w1;
   }
 
+  /**
+   *
+   * @return
+   */
   @NotNull
-  private Widget getLeftArrow(boolean mine) {
+  private Widget getLeftArrow() {
     DivWidget buttonDiv = new DivWidget();
-    Button widgets = new Button(getCapitalized(getPrevView().toString().toLowerCase()), IconType.ARROW_LEFT, event -> gotGoBack());
-    new TooltipHelper().addTooltip(widgets, getPrevTooltip());
-
-    styleButton(widgets);
-    buttonDiv.add(widgets);
-
     setMinWidth(buttonDiv, ARROW_WIDTH);
 
-    Widget modeChoices = getModeChoices();
+    {
+      Button leftArrowButton = new Button(getCapitalized(getPrevView().toString().toLowerCase()), IconType.ARROW_LEFT,
+          event -> gotGoBack());
+      leftArrowButton.setType(ButtonType.SUCCESS);
+      leftArrowButton.addStyleName("floatLeft");
+      new TooltipHelper().addTooltip(leftArrowButton, getPrevTooltip());
 
-    modeChoices.setVisible(thisView != CORE_EDITOR && thisView != TURN_EDITOR && thisView != SCORES);
+      styleButton(leftArrowButton);
+      buttonDiv.add(leftArrowButton);
+    }
 
-    Style style = modeChoices.getElement().getStyle();
-    style.setMarginTop(30, PX);
+    {
+      Widget modeChoices = getModeChoices();
 
-    style.setBackgroundColor("aliceblue");
-    style.setPadding(5, PX);
-    buttonDiv.add(modeChoices);
+      modeChoices.setVisible(thisView != CORE_EDITOR && thisView != TURN_EDITOR && thisView != SCORES);
+
+      Style style = modeChoices.getElement().getStyle();
+      style.setMarginTop(30, PX);
+      style.setBackgroundColor("aliceblue");
+      style.setPadding(5, PX);
+      buttonDiv.add(modeChoices);
+    }
 
     return buttonDiv;
   }
@@ -420,6 +433,7 @@ public class DialogHeader {
     view_as.addStyleName("floatLeft");
     view_as.getElement().getStyle().setMarginBottom(0, PX);
     row.addStyleName("floatLeft");
+    row.getElement().getStyle().setClear(BOTH);
     row.add(view_as);
     return row;
   }
@@ -455,6 +469,7 @@ public class DialogHeader {
 
     {
       Button rightButton = new Button(getCapitalized(nameForAnswer), IconType.ARROW_RIGHT, event -> gotGoForward());
+      rightButton.setType(ButtonType.SUCCESS);
       new TooltipHelper().createAddTooltip(rightButton, getNextTooltip(), Placement.LEFT);
       styleButton(rightButton);
       rightButton.addStyleName("floatRight");
@@ -463,6 +478,12 @@ public class DialogHeader {
       buttonDiv.add(rightButton);
     }
 
+    maybeAddEditorOptions(dialog, mine, buttonDiv);
+
+    return buttonDiv;
+  }
+
+  private void maybeAddEditorOptions(IDialog dialog, boolean mine, DivWidget buttonDiv) {
     boolean b = shouldShowDialogEditor(mine);
     if (b && thisView == LISTEN) {
       buttonDiv.add(getTurnEditor());
@@ -481,15 +502,13 @@ public class DialogHeader {
     if (!dialog.getCoreVocabulary().isEmpty() & thisView != CORE_EDITOR && thisView != SCORES) {
       buttonDiv.add(getCoreVocab(dialog));
     }
-
-    return buttonDiv;
   }
 
   @NotNull
   private DivWidget getDownloadLink() {
     DivWidget widgets = new DivWidget();
     Anchor download = new Anchor(DOWNLOAD);
-    new TooltipHelper().createAddTooltip(download, "Download dialog as excel spreadsheet with audio", Placement.BOTTOM);
+    new TooltipHelper().createAddTooltip(download, DIALOG_AS_EXCEL_SPREADSHEET_WITH_AUDIO, Placement.BOTTOM);
 
     download.addClickHandler(event -> gotDownload());
     download.addStyleName("leftFiveMargin");
@@ -499,13 +518,15 @@ public class DialogHeader {
     widgets.addStyleName("floatRight");
     widgets.getElement().getStyle().setMarginTop(25, PX);
     widgets.getElement().getStyle().setMarginRight(12, PX);
-    widgets.getElement().getStyle().setClear(Style.Clear.BOTH);
+    widgets.getElement().getStyle().setClear(BOTH);
     return widgets;
   }
 
   @NotNull
   private Widget getCoreVocab(IDialog dialog) {
-    HTML core_vocab = new HTML("<b>See Vocab</b>");
+    HTML core_vocab = new HTML("<b>" +
+        SEE_VOCAB +
+        "</b>");
 
     Map<String, String> objectObjectHashMap = new TreeMap<>();
 
@@ -522,7 +543,7 @@ public class DialogHeader {
     DivWidget wrapper = new DivWidget();
     wrapper.add(core_vocab);
 
-    wrapper.getElement().getStyle().setClear(Style.Clear.BOTH);
+    wrapper.getElement().getStyle().setClear(BOTH);
     wrapper.getElement().getStyle().setPaddingLeft(10, PX);
     wrapper.getElement().getStyle().setMarginLeft(10, PX);
     wrapper.addStyleName("floatRight");
@@ -581,7 +602,7 @@ public class DialogHeader {
     styleButton(editButton);
     if (addFloatRight) {
       editButton.addStyleName("floatRight");
-      editButton.getElement().getStyle().setClear(Style.Clear.BOTH);
+      editButton.getElement().getStyle().setClear(BOTH);
     }
     if (!addFloatRight) {
       editButton.addStyleName("topFiftyMargin");

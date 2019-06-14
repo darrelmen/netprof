@@ -144,6 +144,12 @@ public class ListenViewHelper<T extends ITurnPanel>
     middleTurnPanels.remove(toRemove);
   }
 
+  /**
+   * @see TurnViewHelper#showDialogGetRef(int, IDialog, Panel)
+   * @param dialogID
+   * @param dialog
+   * @param child
+   */
   protected void showDialog(int dialogID, IDialog dialog, Panel child) {
     super.showDialog(dialogID, dialog, child);
     if (dialog != null) {

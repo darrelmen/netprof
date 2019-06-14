@@ -43,13 +43,14 @@ import java.util.List;
  * @param <T>
  */
 public class DialogContainer<T extends IDialog> extends SummaryDialogContainer<T> {
+  public static final String DIALOGS = "dialogs";
   //private final Logger logger = Logger.getLogger("DialogContainer");
 
   /**
    * @param controller
    */
   DialogContainer(ExerciseController<?> controller) {
-    super(controller, "dialogs", 10);
+    super(controller, DIALOGS, 10);
   }
 
   @Override

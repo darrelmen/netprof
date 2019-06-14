@@ -51,19 +51,24 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
   //private final Logger logger = Logger.getLogger("DialogContainer");
 
   private static final String ID = "ID";
+  private static final String MODIFIED = "Modified";
+  public static final String NETPROF = "netprof";
+  public static final String TITLE = "Title";
+  public static final String SUMMARY_DIALOG = "summaryDialog";
+  public static final String CHAPTER = "Chapter";
+  public static final String ENGLISH = "English";
 
   /**
-   *
    * @param controller
    * @param shortPageSize
    */
   protected SummaryDialogContainer(ExerciseController<?> controller, String key, int shortPageSize) {
-    super(controller, "netprof" + ":" + controller.getUser() + ":" + key, "Dialogs",
+    super(controller, NETPROF + ":" + controller.getUser() + ":" + key, "Dialogs",
         15, shortPageSize);
   }
 
   protected String getHeaderColumnTitle() {
-    return "Title";
+    return TITLE;
   }
 
   @Override
@@ -73,12 +78,9 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
     addUnit(list, 10);
     addChapter(list, 10);
     int maxLengthId = getMaxLengthId();
-    /*Column<T, SafeHtml> tSafeHtmlColumn =*/ addItemID(list, maxLengthId);
-
+    addItemID(list, maxLengthId);
     addEnglish(list, maxLengthId); //50
     addOrientation(list, maxLengthId);
-
- //   table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(tSafeHtmlColumn, true));
   }
 
   void addID(List<T> list) {
@@ -113,40 +115,14 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
     return columnSortHandler;
   }
 
-/*  private Column<T, SafeHtml> getTruncatedCol2(int maxLength, GetSafe<T> getSafe) {
-    Column<T, SafeHtml> column = new Column<T, SafeHtml>(new ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      *//**
-       * No more distinction between dialog and interpreter
-       *
-       * @param shell
-       * @return
-       *//*
-      @Override
-      public SafeHtml getValue(T shell) {
-//        return shell.getKind() == DialogType.DIALOG ?
-//            getNoWrapContentBackground(truncate, "aliceblue") : getNoWrapContentBackground(truncate, INTERP_COLOR);
-        return getNoWrapContentBackground(truncate(getSafe.getSafe(shell), maxLength), INTERP_COLOR);
-      }
-    };
-    column.setSortable(true);
-
-    return column;
-  }*/
-
   /**
    * @param list
    * @param maxLength
    */
-  protected void addEnglish(List<T> list, int maxLength) {
+  void addEnglish(List<T> list, int maxLength) {
     Column<T, SafeHtml> userCol = getEquivColumn(maxLength);
     table.setColumnWidth(userCol, getIdWidth() + "px");
-    addColumn(userCol, new TextHeader("English"));
+    addColumn(userCol, new TextHeader(ENGLISH));
     table.addColumnSortHandler(getSorter(userCol, list));
   }
 
@@ -174,7 +150,7 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
    * @param list
    * @param maxLength
    */
-  protected void addOrientation(List<T> list, int maxLength) {
+  void addOrientation(List<T> list, int maxLength) {
     Column<T, SafeHtml> userCol = getOrientColumn(maxLength);
     table.setColumnWidth(userCol, getIdWidth() + "px");
     addColumn(userCol, new TextHeader("Orientation"));
@@ -239,7 +215,7 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
   void addChapter(List<T> list, int maxLength) {
     Column<T, SafeHtml> userCol = getChapterColumn(maxLength);
     table.setColumnWidth(userCol, getIdWidth() + "px");
-    addColumn(userCol, new TextHeader("Chapter"));
+    addColumn(userCol, new TextHeader(CHAPTER));
     table.addColumnSortHandler(getChapterSorter(userCol, list));
   }
 
@@ -263,9 +239,8 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
     return i == 0 ? o1.getForeignLanguage().compareTo(o2.getForeignLanguage()) : i;
   }
 
-
   protected String getDateColHeader() {
-    return "Modified";
+    return MODIFIED;
   }
 
   protected int getMaxLengthId() {
@@ -284,14 +259,7 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
 
   @Override
   protected String getItemLabel(IDialog shell) {
-    //  logger.info("shell is " + shell);
-    String foreignLanguage = shell.getForeignLanguage();
-    // logger.info("fl    is '" + foreignLanguage + "'");
-
-/*    if (foreignLanguage.isEmpty()) {
-      logger.warning("got " + shell);
-    }*/
-    return foreignLanguage;
+    return shell.getForeignLanguage();
   }
 
   @Override

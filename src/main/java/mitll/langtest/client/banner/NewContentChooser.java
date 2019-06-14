@@ -41,6 +41,7 @@ import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.ExerciseListContent;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.KeyStorage;
+import mitll.langtest.client.custom.dialog.DialogContainer;
 import mitll.langtest.client.custom.dialog.DialogEditorView;
 import mitll.langtest.client.custom.recording.RecorderNPFHelper;
 import mitll.langtest.client.custom.userlist.ListView;
@@ -190,7 +191,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
             "\n\trequired perms " + currentStoredView.getPerms() + " from " + currentStoredView +
             " falling back to default view for (" + storedMode + ")");
         currentStoredView = hasStartup && storedMode == ProjectMode.DIALOG ? DIALOG : LEARN;
-      } else  {
+      } else {
         if (hasStartup) {
           //String value = getStorage().getValue(MODE);
           // logger.info("selected mode is " + value);
@@ -378,7 +379,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
             protected int getDialogFromURL() {
               return new SelectionState().getDialog();
             }
-          }, TURN_EDITOR);
+          }.setStoredDialogKey(DialogContainer.DIALOGS), TURN_EDITOR);
           break;
         case CORE_EDITOR:
           clearPushAndShow(new CoreVocabEditor(controller, CORE_EDITOR, null) {
@@ -386,7 +387,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
             protected int getDialogFromURL() {
               return new SelectionState().getDialog();
             }
-          }, CORE_EDITOR);
+          }.setStoredDialogKey(DialogContainer.DIALOGS), CORE_EDITOR);
           break;
         case NONE:
           logger.warning("showView skipping choice '" + view + "'");
