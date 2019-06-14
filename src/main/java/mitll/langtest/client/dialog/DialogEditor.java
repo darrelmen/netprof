@@ -69,12 +69,13 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     isInModal = theDialog != null;
     this.sessionStorage = new SessionStorage(controller.getStorage(), "editorSession");
   }
+
   @NotNull
-  @Override protected DivWidget getOverallFeedback() {
-    DivWidget widget = new DivWidget();
-    //  styleOverallFeedback(widget);
-    return widget;
+  @Override
+  protected DivWidget getOverallFeedback() {
+    return new DivWidget();
   }
+
   @Override
   void onUnload() {
     reloadDialog();
@@ -335,7 +336,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     String left = getFirstSpeakerLabel();
     String right = getSecondSpeakerLabel();
 
-    logger.info("addTurns : left " + left + " right " +right);
+    // logger.info("addTurns : left " + left + " right " + right);
     clearColumnTurnLists();
 
     for (ClientExercise clientExercise : changed) {

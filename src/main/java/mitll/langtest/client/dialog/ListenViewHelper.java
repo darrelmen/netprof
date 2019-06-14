@@ -44,6 +44,7 @@ import mitll.langtest.client.banner.IBanner;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.custom.ContentView;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.ITurnPanel;
 import mitll.langtest.client.scoring.RefAudioGetter;
@@ -66,6 +67,8 @@ public class ListenViewHelper<T extends ITurnPanel>
     extends TurnViewHelper<T>
     implements ContentView, PlayListener, IListenView, ITurnContainer<T> {
   private final Logger logger = Logger.getLogger("ListenViewHelper");
+
+  public static final String YOURSELF = "Yourself";
 
   private static final String VALUE = "value";
   private static final String SLIDER_MAX = "100";
@@ -102,7 +105,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   private static final boolean DEBUG = false;
   private static final boolean DEBUG_PLAY_ENDED = false;
   private static final boolean DEBUG_BLUR = false;
-//  private static final boolean DEBUG_DETAIL = false;
+
   private static final boolean DEBUG_PLAY = false;
   private static final boolean DEBUG_NEXT = false;
 
@@ -145,10 +148,10 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   /**
-   * @see TurnViewHelper#showDialogGetRef(int, IDialog, Panel)
    * @param dialogID
    * @param dialog
    * @param child
+   * @see TurnViewHelper#showDialogGetRef(int, IDialog, Panel)
    */
   protected void showDialog(int dialogID, IDialog dialog, Panel child) {
     super.showDialog(dialogID, dialog, child);
@@ -319,7 +322,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
 
     {
-      Button widgets1 = new Button("Yourself", IconType.PLAY, event -> gotPlayYourself());
+      Button widgets1 = new Button(YOURSELF, IconType.PLAY, event -> gotPlayYourself());
       widgets1.setActive(false);
       widgets1.setEnabled(false);
       widgets1.setType(ButtonType.SUCCESS);
@@ -332,6 +335,8 @@ public class ListenViewHelper<T extends ITurnPanel>
       }
       playYourselfButton = widgets1;
       playYourselfButton.setVisible(getView() != INavigation.VIEWS.LISTEN);
+
+      new TooltipHelper().addTooltip(playYourselfButton, "Hear your own recordings.");
     }
 
     {
@@ -545,7 +550,16 @@ public class ListenViewHelper<T extends ITurnPanel>
     ifOnLastJumpBackToFirst();
   }
 
+  /**
+   * @see #getControls()
+   */
   private void gotPlayYourself() {
+//    if (sessionGoingNow) {
+//      setNormalPlayButtonToPlay();
+//    } else {
+//      setPlayButtonToRepeat();
+//    }
+
     gotHearYourself();
 
     togglePlayState();
@@ -562,10 +576,23 @@ public class ListenViewHelper<T extends ITurnPanel>
    * if paused, don't continue when audio ends or says it stopped.
    */
   void togglePlayState() {
+    //logger.info("togglePlayState - " + sessionGoingNow);
+
     if (sessionGoingNow) {
       setPlayButtonToPlay();
+
+//      if (!isDoRehearse()) {
+//        logger.info("togglePlayState - " + sessionGoingNow + " normal to play");
+//
+      //  setNormalPlayButtonToPlay();
+//      }
     } else {
       setPlayButtonToPause();
+//      if (!isDoRehearse()) {
+//        logger.info("togglePlayState - " + sessionGoingNow + " normal to play");
+//
+//        setNormalPlayButtonToPlay();
+//      }
     }
   }
 
@@ -616,19 +643,18 @@ public class ListenViewHelper<T extends ITurnPanel>
   void ifOnLastJumpBackToFirst() {
     T currentTurn = getCurrentTurn();
 
-
     boolean last = isLast(currentTurn);
-    if (last) logger.info("ifOnLastJumpBackToFirst : OK, on last - let's consider going back to start");
 
-    if (last && currentTurn != null
-      //    && !currentTurn.hasCurrentMark()
-    ) {
-      logger.info("ifOnLastJumpBackToFirst mark first turn\n\n\n");
+    if (last && DEBUG) {
+      logger.info("ifOnLastJumpBackToFirst : OK, on last - let's consider going back to start");
+    }
+
+    if (last && currentTurn != null) {
+//      logger.info("ifOnLastJumpBackToFirst mark first turn");
       removeMarkCurrent();
       markFirstTurn();
     }
   }
-
 
   boolean onFirstPromptTurn() {
     return getPromptSeq().indexOf(getCurrentTurn()) == 0;
@@ -643,13 +669,6 @@ public class ListenViewHelper<T extends ITurnPanel>
     if (isInterpreter()) {
       return promptTurns;
     } else {
-//      boolean leftSpeaker = isLeftSpeakerSet();
-//      boolean rightSpeaker = isRightSpeakerSet();
-//      List<T> ts = (leftSpeaker && !rightSpeaker) ? leftTurnPanels : (!leftSpeaker && rightSpeaker) ? rightTurnPanels : allTurns;
-
-      // logger.info("getPromptSeq " + ts.size());
-      //    if (DEBUG_DETAIL) report("prompts", ts);
-      //  return ts;
       return leftTurnPanels;
     }
   }
@@ -663,10 +682,7 @@ public class ListenViewHelper<T extends ITurnPanel>
     if (isInterpreter()) {
       return middleTurnPanels;
     } else {
-      //  boolean leftSpeaker = isLeftSpeakerSet();
-      //  boolean rightSpeaker = isRightSpeakerSet();
-      // return leftSpeaker ? rightTurnPanels : rightSpeaker ? leftTurnPanels : null;
-      return rightTurnPanels;// : rightSpeaker ? leftTurnPanels : null;
+      return rightTurnPanels;
     }
   }
 
@@ -821,6 +837,20 @@ public class ListenViewHelper<T extends ITurnPanel>
   void setPlayButtonToPlay() {
     getPlayButtonToUse().setIcon(IconType.PLAY);
     sessionGoingNow = false;
+  }
+
+  void setNormalPlayButtonToPlay() {
+    if (DEBUG) {
+      logger.info("setNormalPlayButtonToPlay doRehearse " + doRehearse);
+    }
+    this.playButton.setIcon(IconType.PLAY);
+  }
+
+  void setPlayButtonToRepeat() {
+    if (DEBUG) {
+      logger.info("setPlayButtonToRepeat doRehearse " + doRehearse);
+    }
+    this.playButton.setIcon(IconType.REPEAT);
   }
 
   boolean isSessionGoingNow() {

@@ -92,6 +92,8 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
    */
   public static final String INSTALL_APP = "Install App?";
   public static final int SECOND_ICON_WIDTH = 44;
+  //public static final String SECOND_BULLET_IMAGE = "NewProF2_48x48.png";
+  private static final String SECOND_BULLET_IMAGE = "interpreter.png";
 
   private final KeyPressHelper enterKeyButtonHelper;
 
@@ -404,20 +406,23 @@ public class UserPassLogin extends UserDialog implements UserPassDialog {
     w2.getElement().getStyle().setPaddingBottom(24, Style.Unit.PX);
     w2.getElement().getStyle().setTextAlign(Style.TextAlign.LEFT);
 
-    String firstBullet = props.getFirstBullet();
-
     addBullet(left, SECOND_BULLET, "NewProF1_48x48.png");
-    addBullet(left, firstBullet, "NewProF2_48x48.png").setWidth(SECOND_ICON_WIDTH +
-        "px");
+//    addBullet(left, firstBullet, SECOND_BULLET_IMAGE).setWidth(SECOND_ICON_WIDTH +
+//        "px");
+
+    addBullet(left, props.getFirstBullet(), new Image("langtest/cc/" + SECOND_BULLET_IMAGE)).setWidth("32px");
     addBullet(left, THIRD_BULLET, "listIcon_48x48_transparent.png").setWidth("38px");
 
     left.add(flagsDisplay.getFlagsDisplay());
   }
 
   private Image addBullet(DivWidget left, String bulletText, String image) {
+    return addBullet(left, bulletText, new Image(LangTest.LANGTEST_IMAGES + image));
+  }
+
+  private Image addBullet(DivWidget left, String bulletText, Image child) {
     Widget w1 = new HTML(bulletText);
     Panel h = new HorizontalPanel();
-    Image child = new Image(LangTest.LANGTEST_IMAGES + image);
     h.add(child);
     h.add(w1);
     configure(h);

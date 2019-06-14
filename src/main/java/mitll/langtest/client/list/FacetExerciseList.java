@@ -29,12 +29,15 @@
 
 package mitll.langtest.client.list;
 
+import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.ProgressBar;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.ProgressBarBase;
 import com.github.gwtbootstrap.client.ui.base.UnorderedList;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -45,8 +48,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
+import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.custom.dialog.ButtonHelper;
 import mitll.langtest.client.download.DownloadEvent;
 import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
@@ -58,6 +63,7 @@ import mitll.langtest.client.scoring.RefAudioGetter;
 import mitll.langtest.client.scoring.ScoreProgressBar;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
+import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.Language;
@@ -2006,15 +2012,66 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    */
   private void reallyShowExercises(Collection<U> result, int reqID) {
     // logger.info("reallyShowExercises req " + reqID + " vs current " + getCurrentExerciseReq());
+    buttonContainer = getButtons();
 
     DivWidget exerciseContainer = new DivWidget();
     populatePanels(result, reqID, exerciseContainer);
 
     innerContainer.setWidget(exerciseContainer);  // immediate feedback that something is happening...
+
+    exerciseContainer.add(buttonContainer);
     showPrevNext();
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("here for " + reqID));
 //    logger.info("logException stack:\n" + exceptionAsString);
   }
+
+  protected DivWidget buttonContainer;
+  protected Button next, prev;
+
+  @NotNull
+  protected DivWidget getButtons() {
+    ButtonHelper<?> uButtonHelper = new ButtonHelper() {
+      @Override
+      protected String getName() {
+        return "Exercise";
+      }
+    };
+    DivWidget buttons = uButtonHelper.getButtonContainer();
+    //buttons.addStyleName("floatRight");
+    buttons.addStyleName("floatLeft");
+    buttons.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+
+    {
+      buttons.add(prev = uButtonHelper.getSuccess("Prev"));
+      prev.setIcon(IconType.ARROW_LEFT);
+      prev.setType(ButtonType.INFO);
+      prev.addClickHandler(event -> gotClickOnPrev());
+    }
+    {
+      buttons.add(next = uButtonHelper.getSuccess("Next"));
+      next.setIcon(IconType.ARROW_RIGHT);
+      next.setType(ButtonType.INFO);
+      next.addClickHandler(event -> gotClickOnNext());
+      next.addStyleName("rightFiveMargin");
+    }
+    prev.setEnabled(pagingContainer.hasPrevPage());
+    next.setEnabled(pagingContainer.hasNextPage());
+
+    return buttons;
+  }
+
+  private void gotClickOnPrev() {
+    if (pagingContainer.hasPrevPage()) {
+      pagingContainer.prevPage();
+    } else logger.info("has prev is false");
+  }
+
+  private void gotClickOnNext() {
+    if (pagingContainer.hasNextPage()) {
+      pagingContainer.nextPage();
+    } else logger.info("has next is false");
+  }
+
 
   /**
    * TODO : don't do this - add the cached alignments as a separate return field in ExerciseListWrapper.

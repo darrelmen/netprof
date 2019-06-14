@@ -115,7 +115,7 @@ public class LearnHelper<T extends CommonShell & ScoredExercise> extends SimpleC
 
       @Override
       public Panel getExercisePanel(ClientExercise e) {
-        return new TwoColumnExercisePanel<>(e,
+        return new TwoColumnExercisePanel<ClientExercise>(e,
             controller,
             exerciseList,
             alignments,

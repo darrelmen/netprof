@@ -160,7 +160,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
       @Override
       protected AudioType getAudioType() {
         AudioType audioType = outer.getAudioType();
-        logger.info("getAudioType ex " + exercise.getID() + " = " + audioType);
+     //   logger.info("getAudioType ex " + exercise.getID() + " = " + audioType);
         return audioType;
       }
     };

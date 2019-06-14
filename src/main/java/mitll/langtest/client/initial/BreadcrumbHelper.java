@@ -106,7 +106,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
 
     addCrumbs(true, uiLifecycle);
 
-    logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
+   // logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
 
     return crumbs;
   }
@@ -164,49 +164,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
 
     for (SlimProject project : lifecycleSupport.getStartupInfo().getProjects()) {
       if (project.hasChildren() && project.hasChild(currentProject)) {
-        ProjectType type = project.getProjectType();
-        if (DEBUG) {
-          ProjectMode mode = project.getMode();
-
-          logger.info("addBreadcrumbLevels add for " +
-              "\n\tproject id " + project.getID() +
-              "\n\tproject  " + project.getName() +
-              "\n\tkind     " + mode +
-              "\n\ttype     " + type +
-              "\n\tchildren " + project.getChildren().size());
-        }
-
-        // first the language
-        crumbs.add(getLangBreadcrumb(project));
-
-        INavigation.VIEWS currentView = breadcrumbPartner.getNavigation().getCurrentView();
-        ProjectMode mode = currentView.getMode();
-
-        logger.info("addBreadcrumbLevels : currentView " + currentView + " mode " + mode);
-        List<SlimProject> slimProjectsByMode = project.getSlimProjectsByMode(currentProject, mode);
-        logger.info("addBreadcrumbLevels : currentView " + currentView + " by mode = " + slimProjectsByMode);
-        // then the project underneath the language - could be several projects under a language - like chinese simplified and traditional
-
-        SlimProject childByMode = project.getChildByMode(currentProject, mode);
-        addProjectCrumb2(childByMode, uiLifecycle);
-        //  addProjectCrumb(crumbs, childByMode);
-
-        if (type == ProjectType.DIALOG) {
-          List<SlimProject> children = childByMode.getChildren();
-          logger.info("project " + childByMode.getName() + " has " + children.size());
-          if (children.size() == 2) {
-            List<SlimProject> childrenMatchingMode = children.stream().filter(slimProject ->
-                (slimProject.getMode() == mode)).collect(Collectors.toList());
-            childrenMatchingMode.forEach(slimProject -> logger.info(slimProject.getID() + " " + slimProject.getName() + " " + slimProject.getMode()));
-
-            if (!childrenMatchingMode.isEmpty()) {
-              SlimProject modeChoice = childrenMatchingMode.get(0);
-              // addProjectCrumb(crumbs, modeChoice);
-              addProjectCrumb2(modeChoice, uiLifecycle);
-            }
-          }
-        }
-
+        addBreadcrumbsForCurrentState(crumbs, uiLifecycle, currentProject, project);
         break;
       } else if (project.getID() == currentProject) {
         if (DEBUG) {
@@ -218,6 +176,56 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
       //else {
       // logger.info("addBreadcrumbLevels skipping project " + project);
       //}
+    }
+  }
+
+  /**
+   * Maybe have to add three : one for language choice, one for project choice, one for mode choice - dialog vs vocab
+   *
+   * @param crumbs
+   * @param uiLifecycle
+   * @param currentProject
+   * @param project
+   */
+  private void addBreadcrumbsForCurrentState(Breadcrumbs crumbs, UILifecycle uiLifecycle, int currentProject, SlimProject project) {
+    ProjectType type = project.getProjectType();
+
+    if (DEBUG) {
+      ProjectMode mode = project.getMode();
+
+      logger.info("addBreadcrumbLevels add for " +
+          "\n\tproject id " + project.getID() +
+          "\n\tproject  " + project.getName() +
+          "\n\tkind     " + mode +
+          "\n\ttype     " + type +
+          "\n\tchildren " + project.getChildren().size());
+    }
+
+    // first the language
+    crumbs.add(getLangBreadcrumb(project));
+
+    INavigation.VIEWS currentView = breadcrumbPartner.getNavigation().getCurrentView();
+    ProjectMode mode = currentView.getMode();
+
+    // then the project underneath the language - could be several projects under a language - like chinese simplified and traditional
+    SlimProject childByMode = project.getChildByMode(currentProject, mode);
+    addProjectCrumb2(childByMode, uiLifecycle);
+
+    if (type == ProjectType.DIALOG) {
+      List<SlimProject> children = childByMode.getChildren();
+
+   //   logger.info("project " + childByMode.getName() + " has " + children.size());
+
+      if (children.size() == 2) {
+        List<SlimProject> childrenMatchingMode = children.stream().filter(slimProject ->
+            (slimProject.getMode() == mode)).collect(Collectors.toList());
+
+//        childrenMatchingMode.forEach(slimProject -> logger.info(slimProject.getID() + " " + slimProject.getName() + " " + slimProject.getMode()));
+        if (!childrenMatchingMode.isEmpty()) {
+          SlimProject modeChoice = childrenMatchingMode.get(0);
+          addProjectCrumb2(modeChoice, uiLifecycle);
+        }
+      }
     }
   }
 
@@ -278,7 +286,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
    * @param crumbs
    */
   private void addHomeLink(Breadcrumbs crumbs) {
-    logger.info("addHomeLink " + crumbs.getWidgetCount());
+    // logger.info("addHomeLink " + crumbs.getWidgetCount());
     crumbs.clear();
 
     NavLink all = new NavLink("");

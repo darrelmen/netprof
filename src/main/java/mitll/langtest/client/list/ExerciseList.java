@@ -871,10 +871,12 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
     if (DEBUG) logger.info("ExerciseList.loadNextExercise current is : " + current);// + " instance " + getInstance());
     boolean onLast = isOnLast(current);
 
-    logger.info("ExerciseList.loadNextExercise current is : " + current.getID() +
-        //" index " + index +
-        " of " + getSize() + " last is " + (getSize() - 1) +
-        "\n\ton last " + onLast);
+    if (DEBUG) {
+      logger.info("ExerciseList.loadNextExercise current is : " + current.getID() +
+          //" index " + index +
+          " of " + getSize() + " last is " + (getSize() - 1) +
+          "\n\ton last " + onLast);
+    }
 
     if (isOnLast(current)) {
       onLastItem();

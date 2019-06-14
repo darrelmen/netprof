@@ -66,9 +66,10 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * @see ListenViewHelper#addDialogHeader(IDialog, Panel)
  */
 public class DialogHeader {
+  private final Logger logger = Logger.getLogger("DialogHeader");
+
   public static final String DIALOG_AS_EXCEL_SPREADSHEET_WITH_AUDIO = "Download dialog as excel spreadsheet with audio";
   public static final String SEE_VOCAB = "See Vocab";
-  private final Logger logger = Logger.getLogger("DialogHeader");
 
   private static final String GROUP = "group";
   public static final String DIALOG = "Dialog";
@@ -278,13 +279,7 @@ public class DialogHeader {
 
   private void addViewHint(DivWidget row) {
     switch (thisView) {
-//      case STUDY:
-//        row.add(getHint("<i><b>Study</b> the core words and phrases used in the dialog. " +
-//            "<br/><b>Record</b> yourself to get ready for rehearsing the dialog. " +
-//            "<br/>" +
-//            PRESS_AND_HOLD_HINT +
-//            "</i>"));
-//        break;
+
       case LISTEN:
         row.add(new DivWidget());
         break;
@@ -414,9 +409,8 @@ public class DialogHeader {
 
     {
       boolean isDialog = controller.getStorage().isTrue(IS_DIALOG_MODE_CHOICE);
-
       boolean isEditorView = thisView == TURN_EDITOR || thisView == CORE_EDITOR;
-      logger.info("isDialog " + isDialog + " is editor " + isEditorView);
+    //  logger.info("isDialog " + isDialog + " is editor " + isEditorView);
 
       modeListener.setIsDialog(isDialog && !isEditorView);
 
@@ -439,13 +433,13 @@ public class DialogHeader {
   }
 
   private void gotClickOnDialog() {
-    logger.info("got click on dialog choice");
+   // logger.info("got click on dialog choice");
     controller.getStorage().setBoolean(IS_DIALOG_MODE_CHOICE, true);
     modeListener.gotDialog();
   }
 
   private void gotClickOnInterpreter() {
-    logger.info("got click on dialog choice");
+   // logger.info("got click on dialog choice");
     controller.getStorage().setBoolean(IS_DIALOG_MODE_CHOICE, false);
     modeListener.gotInterpreter();
   }

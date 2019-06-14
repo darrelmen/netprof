@@ -172,7 +172,7 @@ public class ProjectChoices extends ThumbnailChoices {
 
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_CLICK = true;
+  private static final boolean DEBUG_CLICK = false;
 
   /**
    * @param langTest

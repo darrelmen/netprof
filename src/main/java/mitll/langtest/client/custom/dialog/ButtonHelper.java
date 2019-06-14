@@ -55,10 +55,16 @@ public abstract class ButtonHelper<T extends HasID & IPublicPrivate> {
 
   @NotNull
   public Button getSuccessButton(ButtonMemoryItemContainer<T> container, String learn1) {
+    Button learn = getSuccess(learn1);
+    container.addButton(learn);
+    return learn;
+  }
+
+  @NotNull
+  public Button getSuccess(String learn1) {
     Button learn = new Button(learn1);
     learn.setType(ButtonType.SUCCESS);
     learn.addStyleName("leftFiveMargin");
-    container.addButton(learn);
     return learn;
   }
 
