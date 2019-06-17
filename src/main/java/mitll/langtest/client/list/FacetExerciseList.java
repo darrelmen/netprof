@@ -48,7 +48,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
 import com.google.gwt.view.client.Range;
 import mitll.langtest.client.LangTest;
-import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.dialog.ButtonHelper;
@@ -63,7 +62,6 @@ import mitll.langtest.client.scoring.RefAudioGetter;
 import mitll.langtest.client.scoring.ScoreProgressBar;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
-import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.Language;
@@ -76,8 +74,8 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.client.dialog.ExceptionHandlerDialog.getExceptionAsString;
-import static mitll.langtest.client.scoring.ScoreFeedbackDiv.FIRST_STEP;
-import static mitll.langtest.client.scoring.ScoreFeedbackDiv.SECOND_STEP;
+import static mitll.langtest.client.scoring.ScoreFeedbackHelper.FIRST_STEP;
+import static mitll.langtest.client.scoring.ScoreFeedbackHelper.SECOND_STEP;
 
 /**
  * A facet list display - facets on the left that when you click on them

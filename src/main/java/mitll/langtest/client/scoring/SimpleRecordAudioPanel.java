@@ -30,6 +30,7 @@
 package mitll.langtest.client.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.dialog.IListenView;
@@ -44,8 +45,6 @@ import mitll.langtest.shared.answer.SimpleAudioAnswer;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
-import mitll.langtest.shared.instrumentation.TranscriptSegment;
-import mitll.langtest.shared.scoring.NetPronImageType;
 import mitll.langtest.shared.scoring.PretestScore;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -59,23 +58,26 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  */
 public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends NoFeedbackRecordAudioPanel<T>
     implements SessionManager {
-//  private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+  //private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
 
   private static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
 
   private static final float HUNDRED = 100.0f;
+  /**
+   * Try to line up history word(s) with prompt
+   */
+  private static final int LEFT_MARGIN_FOR_SCORE = 112;
   private WaitCursorHelper waitCursorHelper = null;
 
   private MiniScoreListener miniScoreListener;
 
   private String audioPath;
 
-
   private boolean hasScoreHistory;
   private final ListInterface<?, ?> listContainer;
   private final boolean isRTL;
-  private ScoreFeedbackDiv scoreFeedbackDiv;
+  private ScoreFeedbackHelper scoreFeedbackHelper;
   private final boolean addPlayer;
   private Widget scoreHistory;
   /**
@@ -94,11 +96,11 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
    * @see TwoColumnExercisePanel#addContextFields
    */
   public SimpleRecordAudioPanel(ExerciseController controller,
-                         T exercise,
-                         ListInterface<?, ?> listContainer,
-                         boolean addPlayer,
-                         IListenView listenView,
-                         SessionManager sessionManager) {
+                                T exercise,
+                                ListInterface<?, ?> listContainer,
+                                boolean addPlayer,
+                                IListenView listenView,
+                                SessionManager sessionManager) {
     super(exercise, controller, sessionManager);
     this.listenView = listenView;
     this.listContainer = listContainer;
@@ -109,7 +111,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
     addWidgets();
     List<CorrectAndScore> scores = exercise.getScores();
 
-  //  logger.info("SimpleRecordAudioPanel : exercise " + exercise.getID() + " has\n\t" + scores + " scores");
+    //  logger.info("SimpleRecordAudioPanel : exercise " + exercise.getID() + " has\n\t" + scores + " scores");
 
     showRecordingHistory(scores);
     hasScoreHistory = scores != null && !scores.isEmpty();
@@ -124,38 +126,58 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
   /**
    * Replace the html 5 audio tag with our fancy waveform widget.
    *
+   * First is record feedback
+   * next is score feedback
+   * next is history
+   *
    * @return
    * @seex #AudioPanel
    * @see SimpleRecordAudioPanel#SimpleRecordAudioPanel
    */
+  @Override
   public void addWidgets() {
     //long then = System.currentTimeMillis();
     DivWidget col = new DivWidget();
+    col.getElement().setId("scoreFeedback_" + exercise.getID() + "_container");
+
+    recordFeedback = makePlayAudioPanel().getRecordFeedback(makeWaitCursor().getWaitCursor());
+    recordFeedback.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
+    col.add(recordFeedback);
+
     col.add(scoreFeedback = new DivWidget());
     getScoreFeedback().getElement().setId("scoreFeedback_" + exercise.getID());
 
-    {
-      DivWidget historyHoriz = new DivWidget();
-      historyHoriz.addStyleName("inlineFlex");
-      DivWidget spacer = new DivWidget();
-      spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
+    col.add(getScoreHistoryDiv());
 
-      historyHoriz.add(spacer);
-      historyHoriz.add(scoreHistory = getScoreHistory());
-      col.add(historyHoriz);
-    }
-    makeWaitCursor();
-    recordFeedback = makePlayAudioPanel().getRecordFeedback(makeWaitCursor().getWaitCursor());
-    recordFeedback.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
-
-    getScoreFeedback().add(recordFeedback);
-
-    this.scoreFeedbackDiv = new ScoreFeedbackDiv(getPlayAudioPanel(), getPlayAudioPanel(), getPlayAudioPanel().getRealDownloadContainer(), true);
+    this.scoreFeedbackHelper = new ScoreFeedbackHelper(getPlayAudioPanel(), getPlayAudioPanel(), getPlayAudioPanel().getRealDownloadContainer(), true);
 
     add(col);
     // long now = System.currentTimeMillis();
     // logger.info("addWidgets "+ (now-then)+ " millis");
-    //scoreFeedback.getElement().setId("scoreFeedbackRow");
+  }
+
+  /**
+   * So just make the score invisible, to avoid the record button bouncing up at the moment when you press it.
+   */
+  @Override
+  void clearScoreFeedback() {
+    scoreFeedback.getElement().getStyle().setOpacity(0.0);
+  }
+
+  @NotNull
+  private Widget getScoreHistoryDiv() {
+//    DivWidget historyHoriz = new DivWidget();
+//    historyHoriz.addStyleName("inlineFlex");
+//    DivWidget spacer = new DivWidget();
+//    spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
+//
+//    historyHoriz.add(spacer);
+
+    // historyHoriz.add(scoreHistory = getScoreHistory());
+    scoreHistory = getScoreHistory();
+    scoreHistory.getElement().getStyle().setMarginLeft(LEFT_MARGIN_FOR_SCORE, Style.Unit.PX);
+
+    return scoreHistory;
   }
 
   private void addMiniScoreListener(MiniScoreListener l) {
@@ -171,8 +193,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
   private ASRHistoryPanel getScoreHistory() {
     ASRHistoryPanel historyPanel = new ASRHistoryPanel(controller, exercise.getID(), addPlayer);
     addMiniScoreListener(historyPanel);
-    historyPanel.showChart(controller.getHost());
-    historyPanel.setWidth("50%");
+    historyPanel.showChart();
     return historyPanel;
   }
 
@@ -189,29 +210,12 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
     return controller.getUserState().getUser();
   }
 
-  /**
-   * @param result
-   * @param isRTL
-   * @see #useResult
-   */
-  private void scoreAudio(SimpleAudioAnswer result, boolean isRTL) {
-    clearScoreFeedback();
-    PretestScore pretestScore = result.getPretestScore();
-    getScoreFeedback().add(scoreFeedbackDiv.getWordTableContainer(pretestScore, isRTL));
-    useScoredResult(pretestScore, false, result.getPath());
-
-    // Gotta remember the score on the exercise now...
-    exercise.getScores().add(new CorrectAndScore(result));
-//    logger.info("exercise " + exercise.getID() + " now has " + exercise.getScores().size() + " scores");
-  }
 
   @Override
   public void startRecording() {
     //logger.info("startRecording...");
     super.startRecording();
-
-    scoreFeedbackDiv.hideScore();
-
+    // scoreFeedbackHelper.hideScore();
     waitCursorHelper.showFinished();
 
     scoreHistory.setVisible(false);
@@ -256,32 +260,61 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
   }
 
   /**
-   * TODO : this is a bad idea to alter the score unless the praise is based on the same score...
+   * Really remove the former score when we get a new one.
+   * Make the score div visible again.
    *
    * @param result
-   * @param scoredBefore
+   * @param isRTL
+   * @see #useResult
+   */
+  private void scoreAudio(SimpleAudioAnswer result, boolean isRTL) {
+    scoreFeedback.clear();
+
+    clearScoreFeedback();
+
+    PretestScore pretestScore = result.getPretestScore();
+    getScoreFeedback().add(scoreFeedbackHelper.getWordTableContainer(pretestScore, isRTL));
+    scoreFeedback.getElement().getStyle().setOpacity(1.0);
+    scoreHistory.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
+    useScoredResult(pretestScore, result.getPath());
+
+    // Gotta remember the score on the exercise now...
+    exercise.getScores().add(new CorrectAndScore(result));
+//    logger.info("exercise " + exercise.getID() + " now has " + exercise.getScores().size() + " scores");
+  }
+
+  /**
+   * TODO : this is a bad idea to alter the score unless the praise is based on the same score...
+   *
+   * Has hack to use word score for the overall score if there's only one word - needed???
+   *
+   * @param result
    * @param path
    * @see #scoreAudio
    */
-  private void useScoredResult(PretestScore result, boolean scoredBefore, String path) {
-    float hydecScore = result.getOverallScore();
-    boolean isValid = hydecScore > 0;
-    if (!scoredBefore && miniScoreListener != null && isValid) {
+  private void useScoredResult(PretestScore result, String path) {
+    float overallScore = result.getOverallScore();
+    boolean isValid = overallScore > 0;
+    if (miniScoreListener != null && isValid) {
       miniScoreListener.gotScore(result, path);
     }
-    getReadyToPlayAudio(path);
+    if (path != null) getReadyToPlayAudio(path);  // not sure why path would ever be null...
     if (isValid) {
-      List<TranscriptSegment> transcriptSegments = result.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
+/*      List<TranscriptSegment> transcriptSegments = result.getTypeToSegments().get(NetPronImageType.WORD_TRANSCRIPT);
       if (transcriptSegments != null && transcriptSegments.size() == 1) {
-        float wordScore = transcriptSegments.get(0).getScore();
+        //  float wordScore = transcriptSegments.get(0).getScore();
         //  logger.info("useScoredResult using word score " + wordScore + " instead of hydec score " + overallScore);
-        hydecScore = wordScore;
-      }
+        float wordScore = transcriptSegments.get(0).getScore();
+        if (Math.abs(overallScore - wordScore) > 0.001) {
+          logger.info("useScoredResult using word score " + wordScore + " instead of overall score " + overallScore);
+          overallScore = wordScore;
+        }
+      }*/
 
-      scoreFeedbackDiv.showScore(Math.min(HUNDRED, hydecScore * HUNDRED), result.isFullMatch());
-      listContainer.setScore(exercise.getID(), hydecScore);
+      scoreFeedbackHelper.showScore(Math.min(HUNDRED, overallScore * HUNDRED), result.isFullMatch());
+      listContainer.setScore(exercise.getID(), overallScore);
     } else {
-      scoreFeedbackDiv.hideScore();
+      scoreFeedbackHelper.hideScore();
     }
   }
 
@@ -289,9 +322,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
   private void getReadyToPlayAudio(String path) {
     //logger.info("getReadyToPlayAudio : get ready to play " +path);
     path = CompressedAudio.getPath(path);
-    if (path != null) {
-      this.audioPath = path;
-    }
+    this.audioPath = path;
     if (getPlayAudioPanel() != null) {
       //logger.info("getReadyToPlayAudio startSong ready to play " +path);
       getPlayAudioPanel().startSong(path, true);
@@ -309,11 +340,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
       }
       setVisible(hasScoreHistory);
     }
-    //else {
-    //logger.warning("scores is null?");
-    // }
-
-    miniScoreListener.showChart(controller.getHost());
+    miniScoreListener.showChart();
   }
 
   private WaitCursorHelper makeWaitCursor() {

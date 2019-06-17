@@ -51,7 +51,7 @@ import mitll.langtest.client.download.DownloadContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
 import mitll.langtest.client.flashcard.MySoundFeedback;
-import mitll.langtest.client.scoring.ScoreFeedbackDiv;
+import mitll.langtest.client.scoring.ScoreFeedbackHelper;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.HeadlessPlayAudio;
 import mitll.langtest.client.sound.PlayListener;
@@ -538,7 +538,7 @@ public abstract class AudioExampleContainer<T extends WordScore> extends SimpleP
 
     addPlayListener(this);
 
-    ScoreFeedbackDiv scoreFeedbackDiv = new ScoreFeedbackDiv(headlessPlayAudio, null, downloadContainer, false);
+    ScoreFeedbackHelper scoreFeedbackDiv = new ScoreFeedbackHelper(headlessPlayAudio, null, downloadContainer, false);
     headlessPlayAudio.rememberAudio(answerAudio);
     downloadContainer.getDownloadContainer().setVisible(false);
     recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, controller.getProjectStartupInfo().getLanguageInfo().isRTL()));

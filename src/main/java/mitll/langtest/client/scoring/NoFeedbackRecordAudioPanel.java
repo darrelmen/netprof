@@ -80,6 +80,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     long then = System.currentTimeMillis();
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
+    col.getElement().setId("scoreFeedbackContainer");
     scoreFeedback.getElement().setId("scoreFeedback_" + exercise.getID());
 
     // add record feedback
@@ -159,9 +160,9 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
 
       @Override
       protected AudioType getAudioType() {
-        AudioType audioType = outer.getAudioType();
-     //   logger.info("getAudioType ex " + exercise.getID() + " = " + audioType);
-        return audioType;
+        //   AudioType audioType = outer.getAudioType();
+        //   logger.info("getAudioType ex " + exercise.getID() + " = " + audioType);
+        return outer.getAudioType();
       }
     };
     postAudioRecordButton.addStyleName("leftFiveMargin");
@@ -180,7 +181,6 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   }
 
   public void showInvalidResultPopup(String message) {
-
   }
 
   protected boolean shouldUseRecordingStopDelay() {
@@ -222,10 +222,11 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
    */
   @Override
   public void startRecording() {
-    //logger.info("startRecording...");
+    if (DEBUG) logger.info("startRecording...");
     setVisible(true);
     playAudioPanel.setEnabled(false);
     playAudioPanel.showFirstRecord();
+
     clearScoreFeedback();
   }
 
@@ -239,7 +240,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
    */
   @Override
   public void stopRecording() {
-    //  logger.info("stopRecording on " + exercise.getID());
+    if (DEBUG) logger.info("stopRecording on " + exercise.getID());
     playAudioPanel.setEnabled(true);
     playAudioPanel.hideRecord();
   }
@@ -252,7 +253,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   }
 
   public void gotShortDurationRecording() {
-    logger.info("gotShortDurationRecording");
+    if (DEBUG) logger.info("gotShortDurationRecording");
     playAudioPanel.hideRecord();
     setVisible(true);
   }
@@ -292,6 +293,10 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     playAudioPanel.setEnabled(isValid);
   }
 
+  /**
+   * @return
+   * @see SimpleRecordAudioPanel#addWidgets()
+   */
   DivWidget getScoreFeedback() {
     return scoreFeedback;
   }

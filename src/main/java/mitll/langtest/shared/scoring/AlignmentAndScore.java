@@ -29,13 +29,14 @@
 
 package mitll.langtest.shared.scoring;
 
+import mitll.langtest.client.scoring.ScoreFeedbackHelper;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
 import java.util.List;
 import java.util.Map;
 
 /**
- * @see mitll.langtest.client.scoring.ScoreFeedbackDiv#showScoreFeedback
+ * @see ScoreFeedbackHelper#showScoreFeedback
  */
 public class AlignmentAndScore extends AlignmentOutput {
   float overallScore = -1f;

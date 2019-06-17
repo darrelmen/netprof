@@ -52,7 +52,7 @@ import mitll.langtest.client.recorder.FlashcardRecordButton;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.recorder.RecordButtonPanel;
 import mitll.langtest.client.recorder.RecordingKeyPressHelper;
-import mitll.langtest.client.scoring.ScoreFeedbackDiv;
+import mitll.langtest.client.scoring.ScoreFeedbackHelper;
 import mitll.langtest.client.scoring.ScoreProgressBar;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayAudioPanel;
@@ -689,7 +689,7 @@ public class BootstrapExercisePanel<L extends CommonShell, T extends ClientExerc
     recoOutput.clear();
 
     playAudioPanel = new PlayAudioPanel(null, controller, exercise.getID());
-    ScoreFeedbackDiv scoreFeedbackDiv = new ScoreFeedbackDiv(playAudioPanel, playAudioPanel, downloadContainer, true);
+    ScoreFeedbackHelper scoreFeedbackDiv = new ScoreFeedbackHelper(playAudioPanel, playAudioPanel, downloadContainer, true);
     downloadContainer.getDownloadContainer().setVisible(true);
 
     recoOutput.add(scoreFeedbackDiv.getWordTableContainer(pretestScore, isRTL()));

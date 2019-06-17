@@ -91,7 +91,7 @@ public class WaitCursorHelper {
     waitTimer.schedule(delayMillis);
   }
 
-  public void showAnimated() {
+  private void showAnimated() {
     waitCursor.setUrl(animated);
     show();
   }

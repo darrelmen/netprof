@@ -327,7 +327,7 @@ public class WordTable {
    * @param audioControl
    * @param isRTL
    * @return
-   * @see ScoreFeedbackDiv#getWordTableContainer
+   * @see ScoreFeedbackHelper#getWordTableContainer
    */
   Widget getDivWord(Map<NetPronImageType, List<TranscriptSegment>> netPronImageTypeToEndTime,
                     AudioControl audioControl,

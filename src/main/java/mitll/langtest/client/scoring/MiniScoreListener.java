@@ -38,9 +38,8 @@ import mitll.langtest.shared.scoring.PretestScore;
 public interface MiniScoreListener {
   /**
    * @see SimpleRecordAudioPanel#getScoreHistory
-   * @param host
    */
-  void showChart(String host);
+  void showChart();
 
   /**
    * @see SimpleRecordAudioPanel#useResult(PretestScore, boolean, String)

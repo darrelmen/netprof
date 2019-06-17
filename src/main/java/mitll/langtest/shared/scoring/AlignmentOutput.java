@@ -31,6 +31,7 @@ package mitll.langtest.shared.scoring;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.client.scoring.ScoreFeedbackHelper;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 
 import java.util.HashMap;
@@ -64,7 +65,7 @@ public class AlignmentOutput implements IsSerializable {
 
   /**
    * @return
-   * @see mitll.langtest.client.scoring.ScoreFeedbackDiv#showScoreFeedback(AlignmentAndScore, boolean, DivWidget, float)
+   * @see ScoreFeedbackHelper#showScoreFeedback(AlignmentAndScore, boolean, DivWidget, float)
    */
   public Map<NetPronImageType, List<TranscriptSegment>> getTypeToSegments() {
     return sTypeToEndTimes;

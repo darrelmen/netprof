@@ -56,8 +56,9 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
-  private static final String BEST_SCORE = "Best Score";
   private final Logger logger = Logger.getLogger("ASRHistoryPanel");
+
+  private static final String BEST_SCORE = "Best Score";
 
   private static final int YEAR_LENGTH = 2;
   private static final int YEAR_SUFFIX = (YEAR_LENGTH + 2);
@@ -81,7 +82,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   public ASRHistoryPanel(ExerciseController controller, int exerciseID, boolean addPlayer) {
     this.controller = controller;
     this.exerciseID = exerciseID;
-    getElement().setId("ASRHistoryPanel");
+    getElement().setId("ASRHistoryPanel_" + exerciseID);
     addStyleName("inlineFlex");
 
     todaysDate = format.format(new Date());
@@ -110,7 +111,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#useResult
    */
   public void gotScore(PretestScore score, String path) {
-    showChart(controller.getHost());
+    showChart();
     addPlayer();
 
     CorrectAndScore hydecScore = new CorrectAndScore(score.getOverallScore(), path);
@@ -132,13 +133,12 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
   }
 
   /**
-   * @param host
    * @see mitll.langtest.client.scoring.ScoringAudioPanel#showChart()
    * @see MiniScoreListener#gotScore(PretestScore, String)
    */
-  public void showChart(String host) {
+  public void showChart() {
     clear();
-    addHistory(this, host);
+    addHistory(this);
   }
 
   //call this after adding the widget to the page
@@ -155,14 +155,13 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
 
   /**
    * @param vp
-   * @param host
    * @return
    * @see MiniScoreListener#showChart
    */
   @NotNull
-  private void addHistory(Panel vp, String host) {
+  private void addHistory(Panel vp) {
     if (currentMax != null) {
-      Panel hp = getAudioAndScore(new TooltipHelper(), currentMax, BEST_SCORE, 1, host);
+      Panel hp = getAudioAndScore(new TooltipHelper(), currentMax, BEST_SCORE, 1);
       hp.addStyleName("floatLeft");
       hp.addStyleName("rightTenMargin");
       hp.addStyleName("buttonGroupInset6");
@@ -176,15 +175,13 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    * @param tooltipHelper to make tooltips
    * @param scoreAndPath  the audio path and score for the audio
    * @param title         link title
-   * @param host
    * @return
    * @see #addHistory
    */
   private Panel getAudioAndScore(TooltipHelper tooltipHelper,
                                  CorrectAndScore scoreAndPath,
                                  String title,
-                                 int linkIndex,
-                                 String host) {
+                                 int linkIndex) {
     Panel hp = new DivWidget();
     hp.addStyleName("inlineFlex");
 
@@ -200,7 +197,8 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     {
       DivWidget downloadC = new DivWidget();
       downloadC.add(new DownloadContainer()
-          .getDownload(scoreAndPath.getPath(), linkIndex, getDateToDisplay(scoreAndPath.getTimestamp()), host, exerciseID, controller));
+          .getDownload(scoreAndPath.getPath(), linkIndex, getDateToDisplay(scoreAndPath.getTimestamp()),
+              controller.getHost(), exerciseID, controller));
       hp.add(downloadC);
     }
 
@@ -215,7 +213,7 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
    * @param scoreAndPath
    * @param title
    * @return
-   * @see #getAudioAndScore(TooltipHelper, CorrectAndScore, String, int, String)
+   * @see #getAudioAndScore(TooltipHelper, CorrectAndScore, String, int)
    */
   private Anchor getAudioWidget(CorrectAndScore scoreAndPath, String title) {
     return new PlayAudioWidget().getAudioWidgetWithEventRecording(scoreAndPath.getPath(), title,
