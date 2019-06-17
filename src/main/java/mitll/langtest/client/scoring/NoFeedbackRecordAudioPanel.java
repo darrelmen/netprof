@@ -81,7 +81,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     DivWidget col = new DivWidget();
     col.add(scoreFeedback = new DivWidget());
     col.getElement().setId("scoreFeedbackContainer");
-    scoreFeedback.getElement().setId("scoreFeedback_" + exercise.getID());
+    scoreFeedback.getElement().setId("scoreFeedback_" + getExID());
 
     // add record feedback
     {
@@ -103,6 +103,10 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     //scoreFeedback.getElement().setId("scoreFeedbackRow");
   }
 
+  public int getExID() {
+    return exercise.getID();
+  }
+
   /**
    * So here we're trying to make the record and play buttons know about each other
    * to the extent that when we're recording, we can't play audio, and when we're playing
@@ -115,7 +119,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   RecorderPlayAudioPanel makePlayAudioPanel() {
     // long then = System.currentTimeMillis();
     NoFeedbackRecordAudioPanel outer = this;
-    postAudioRecordButton = new FeedbackPostAudioRecordButton(exercise.getID(), this, controller) {
+    postAudioRecordButton = new FeedbackPostAudioRecordButton(getExID(), this, controller) {
       /**
        * @see PostAudioRecordButton#startRecording()
        * @return
@@ -240,7 +244,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
    */
   @Override
   public void stopRecording() {
-    if (DEBUG) logger.info("stopRecording on " + exercise.getID());
+    if (DEBUG) logger.info("stopRecording on " + getExID());
     playAudioPanel.setEnabled(true);
     playAudioPanel.hideRecord();
   }

@@ -42,7 +42,7 @@ import java.util.logging.Logger;
  * @see SimpleRecordAudioPanel#makePlayAudioPanel
  */
 class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
-  private final Logger logger = Logger.getLogger("FeedbackPostAudioRecordButton");
+ // private final Logger logger = Logger.getLogger("FeedbackPostAudioRecordButton");
 
   private static final String STOP = "Stop";
   private static final String RECORD_BUTTON = "RecordButton";
@@ -152,8 +152,7 @@ class FeedbackPostAudioRecordButton extends PostAudioRecordButton {
    * @see #stopRecording(long, boolean)
    */
   protected void gotShortDurationRecording() {
-    logger.info("gotShortDurationRecording");
-
+    // logger.info("gotShortDurationRecording");
     simpleRecordAudioPanel.gotShortDurationRecording();
   }
 }

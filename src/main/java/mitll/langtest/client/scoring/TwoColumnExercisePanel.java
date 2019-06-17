@@ -47,6 +47,7 @@ import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.sound.IHighlightSegment;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.instrumentation.TranscriptSegment;
 import mitll.langtest.shared.project.Language;
@@ -140,6 +141,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
   private Dropdown dropdownContainer;
 
+  private SimpleRecordAudioPanel recordPanel, contextRecordPanel;
+  private Widget meaningWidget, flEntry, firstRow;
   private static final boolean DEBUG = false;
 
   /**
@@ -182,8 +185,8 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
    * @param showALTFL
    * @param phonesChoices
    * @param englishDisplayChoices
-   * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels
    * @return
+   * @see mitll.langtest.client.list.FacetExerciseList#makeExercisePanels
    */
   @Override
   public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
@@ -199,13 +202,25 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     if (projectStartupInfo != null) {
       makeClickableWords(projectStartupInfo, listContainer);
       commonExerciseUnitChapterItemHelper = new UnitChapterItemHelper<>(controller.getTypeOrder());
-      add(widgets=getItemContent(exercise));
+      add(widgets = getItemContent(exercise));
     } else {
       //  logger.warning("addWidgets no project startup info?");
       clickableWords = null;
       commonExerciseUnitChapterItemHelper = null;
     }
     return widgets;
+  }
+
+  public int getContextExerciseID() {
+    return contextRecordPanel == null ? -1 : contextRecordPanel.getExID();
+  }
+
+  public void useResult(AudioAnswer answer) {
+    if (recordPanel != null && recordPanel.getExID() == answer.getExid()) {
+      recordPanel.useResult(answer);
+    } else if (contextRecordPanel != null && contextRecordPanel.getExID() == answer.getExid()) {
+      contextRecordPanel.useResult(answer);
+    }
   }
 
   /**
@@ -239,8 +254,6 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     }
   }
 
-  private SimpleRecordAudioPanel recordPanel;
-  private Widget meaningWidget, flEntry, firstRow;
 
   /**
    * Row 1: FL - ENGLISH
@@ -570,6 +583,7 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
       SimpleRecordAudioPanel<ClientExercise> recordPanel = addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
       if (recordPanel != null) {
         card.add(getScoringRow(recordPanel));
+        this.contextRecordPanel = recordPanel;
       }
       //else {
       // logger.warning("can't add record panel?");

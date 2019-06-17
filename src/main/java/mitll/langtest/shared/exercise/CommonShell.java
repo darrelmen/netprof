@@ -29,6 +29,8 @@
 
 package mitll.langtest.shared.exercise;
 
+import mitll.langtest.client.list.ListInterface;
+
 public interface CommonShell extends HasID {
   /**
    * @return
@@ -55,7 +57,7 @@ public interface CommonShell extends HasID {
   String getFLToShow();
 
   /**
-   * @see mitll.langtest.client.list.ExerciseList#setScore
+   * @see ListInterface#setScore
    * @return
    */
   MutableShell getMutableShell();

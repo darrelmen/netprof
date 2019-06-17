@@ -165,7 +165,7 @@ public abstract class PostAudioRecordButton extends RecordButton
     } else {
       hideWaveform();
       gotShortDurationRecording();
-      logger.info("stopRecording duration " + duration + " < min = " + MIN_DURATION);
+      if (DEBUG) logger.info("stopRecording duration " + duration + " < min = " + MIN_DURATION);
       return false;
     }
   }
@@ -478,12 +478,12 @@ public abstract class PostAudioRecordButton extends RecordButton
    * @param toShow
    */
   public void showPopupLater(String toShow) {
-  //  logger.info("showPopupLater " + toShow + " on " + getExerciseID());
+    //  logger.info("showPopupLater " + toShow + " on " + getExerciseID());
     Scheduler.get().scheduleDeferred((Command) () -> showPopupDismissLater(toShow));
   }
 
   void showPopupDismissLater(String toShow) {
-  //  logger.info("showPopup " + toShow + " on " + getExerciseID());
+    //  logger.info("showPopup " + toShow + " on " + getExerciseID());
     new PopupHelper().showPopup(toShow, getPopupTargetWidget(), 5000);
   }
 

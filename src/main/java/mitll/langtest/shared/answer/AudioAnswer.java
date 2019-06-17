@@ -267,6 +267,7 @@ public class AudioAnswer extends SimpleAudioAnswer {
   public String toString() {
     return "Answer id " + getResultID() +
         " : audio attr " + audioAttribute +
+        "\n\texid        " + exid +
         "\n\tpath        " + path +
         "\n\tduration    " + durationInMillis +
         "\n\tid          " + reqid +

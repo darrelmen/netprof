@@ -48,6 +48,7 @@ import mitll.langtest.client.services.ExerciseServiceAsync;
 import mitll.langtest.client.user.UserFeedback;
 import mitll.langtest.client.user.UserState;
 import mitll.langtest.shared.answer.ActivityType;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.exercise.ExerciseListRequest;
 import mitll.langtest.shared.exercise.ExerciseListWrapper;
@@ -1019,7 +1020,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   @Override
   public void setShuffle(boolean doShuffle) {
     simpleSetShuffle(doShuffle);
-    logger.info("setShuffle - " + doShuffle);
+    if (DEBUG) logger.info("setShuffle - " + doShuffle);
     Scheduler.get().scheduleDeferred(() -> rememberAndLoadFirst(getInOrder()));
     // rememberAndLoadFirst(getInOrder());
   }
@@ -1039,12 +1040,13 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
   protected abstract List<T> getInOrder();
 
   @Override
-  public void setScore(int id, float hydecScore) {
-    T t = byID(id);
+  public void setScore(AudioAnswer answer, boolean pleaseFindReceiver) {
+    int exid = answer.getExid();
+    T t = byID(exid);
     if (t == null) {
-      logger.info("setScore no exercise found for id " + id + " score " + hydecScore);
+      if (DEBUG) logger.info("setScore no exercise found for id " + exid + " score " + answer.getScore());
     } else {
-      t.getMutableShell().setScore(hydecScore);
+      t.getMutableShell().setScore(answer.getPretestScore().getOverallScore());
     }
   }
 }

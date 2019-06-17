@@ -56,10 +56,8 @@ import mitll.langtest.client.download.DownloadHelper;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
-import mitll.langtest.client.scoring.EnglishDisplayChoices;
-import mitll.langtest.client.scoring.PhonesChoices;
-import mitll.langtest.client.scoring.RefAudioGetter;
-import mitll.langtest.client.scoring.ScoreProgressBar;
+import mitll.langtest.client.scoring.*;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.custom.UserList;
 import mitll.langtest.shared.exercise.*;
@@ -2088,25 +2086,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       logger.info("populatePanels made " + getters.size() + " panels in " + (now - then) + " millis for req " + getCurrentExerciseReq() + " ");
     }
 
-    // get existing alignment info in one call!
-    //   {
-
-//      if (DEBUG) {
-    //   Set<Integer> audioIDs = new HashSet<>();
-    //   getters.forEach(refAudioGetter -> audioIDs.addAll(refAudioGetter.getReqAudioIDs()));
-    //      logger.info("populatePanels asking for " + audioIDs.size() + " to fill cache...");
-    //  }
-    // long then2 = System.currentTimeMillis();
-//      getters.iterator().next().getAndRememberCachedAlignents(
-//          () -> {
-//            logger.info("got answer back for request for " + audioIDs.size() + " audio ids in " +
-//                (System.currentTimeMillis() - then2));
-//           // if (!getters.isEmpty()) {
-//              getRefAudio(getters.iterator());
-//          //  }
-//          }, audioIDs);
-
-
     getRefAudio(getters.iterator());
 
     // }
@@ -2284,29 +2263,65 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
     }
   }
 
-
   /**
-   * @param id
-   * @param hydecScore
+   * @param answer
+   * @param pleaseFindReceiver
    * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#useResult
    */
   @Override
-  public void setScore(int id, float hydecScore) {
-    super.setScore(id, hydecScore);
-    if (hydecScore > -1f) {
-      if (DEBUGSCORE) logger.info("setScore # " + id + " Score " + hydecScore);
+  public void setScore(AudioAnswer answer, boolean pleaseFindReceiver) {
+    super.setScore(answer, pleaseFindReceiver);
+    int answerExid = answer.getExid();
+    float overallScore = answer.getPretestScore().getOverallScore();
+    if (overallScore > -1f) {
+      if (DEBUGSCORE) logger.info("setScore # " + answerExid + " Score " + answer);
 
-      T t = byID(id);
+      T t = byID(answerExid);
       if (t == null) {
-        logger.info("setScore not adding score for " + id + " since likely a context sentence ");
+        logger.info("setScore not adding score for " + answerExid + " since likely a context sentence ");
       } else {
-        exerciseToScore.put(id, hydecScore);
+        exerciseToScore.put(answerExid, overallScore);
       }
     } else {
-      logger.info("skipping low score for " + id);
+      logger.info("skipping low score for " + answerExid);
     }
     showNumberPracticed(exerciseToScore.size(), pagingContainer.getSize());
     showAvgScore();
+
+    if (pleaseFindReceiver) {
+      findRealReceiverForAnswer(answer, answerExid);
+    }
+  }
+
+  /**
+   * Look through the exercise panels for a match to the exercise for this answer.
+   * @param answer
+   * @param answerExid
+   */
+  private void findRealReceiverForAnswer(AudioAnswer answer, int answerExid) {
+    Widget widget = innerContainer.getWidget();
+    boolean found = false;
+    if (widget instanceof DivWidget) {
+      DivWidget widget1 = (DivWidget) widget;
+      int widgetCount = widget1.getWidgetCount();
+      for (int i = 0; i < widgetCount; i++) {
+        Widget widget2 = widget1.getWidget(i);
+        if (widget2 instanceof TwoColumnExercisePanel) {
+          TwoColumnExercisePanel widget21 = (TwoColumnExercisePanel) widget2;
+          int exID = widget21.getExID();
+          if (exID == answerExid || widget21.getContextExerciseID() == answerExid) {
+            logger.info("setScore found real receiver for result for " + exID);
+            widget21.useResult(answer);
+            found = true;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!found) {
+      logger.warning("setScore couldn't find real receiver for " + answer);
+    }
   }
 
   /**
@@ -2434,7 +2449,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
 
   @Override
   public void gotShow() {
-    logger.info("gotShow ");
+    //  logger.info("gotShow ");
     askServerForExercise(-1);
   }
 

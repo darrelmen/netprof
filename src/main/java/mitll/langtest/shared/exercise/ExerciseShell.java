@@ -29,7 +29,7 @@
 
 package mitll.langtest.shared.exercise;
 
-import mitll.langtest.client.list.ExerciseList;
+import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 
@@ -143,7 +143,7 @@ public class ExerciseShell extends BaseExercise implements CommonShell, MutableS
 
   /**
    * @param score
-   * @see ExerciseList#setScore
+   * @see ListInterface#setScore
    * @see mitll.langtest.client.list.FacetExerciseList#setScores
    */
   @Override

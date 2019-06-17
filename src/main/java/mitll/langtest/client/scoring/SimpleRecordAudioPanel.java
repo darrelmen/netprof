@@ -41,7 +41,6 @@ import mitll.langtest.client.list.WaitCursorHelper;
 import mitll.langtest.client.recorder.RecordButton;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.shared.answer.AudioAnswer;
-import mitll.langtest.shared.answer.SimpleAudioAnswer;
 import mitll.langtest.shared.exercise.HasID;
 import mitll.langtest.shared.exercise.ScoredExercise;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
@@ -50,6 +49,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDENT;
 
@@ -58,7 +58,7 @@ import static mitll.langtest.client.scoring.TwoColumnExercisePanel.CONTEXT_INDEN
  */
 public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends NoFeedbackRecordAudioPanel<T>
     implements SessionManager {
-  //private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
+  private final Logger logger = Logger.getLogger("SimpleRecordAudioPanel");
 
   private static final String MP3 = ".mp3";
   public static final String OGG = ".ogg";
@@ -84,6 +84,8 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
    * @see #getDialogSessionID
    */
   private final IListenView listenView;
+
+  private static final boolean DEBUG = false;
 
   /**
    * @param controller
@@ -166,22 +168,9 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
 
   @NotNull
   private Widget getScoreHistoryDiv() {
-//    DivWidget historyHoriz = new DivWidget();
-//    historyHoriz.addStyleName("inlineFlex");
-//    DivWidget spacer = new DivWidget();
-//    spacer.getElement().getStyle().setProperty("minWidth", CONTEXT_INDENT + "px");
-//
-//    historyHoriz.add(spacer);
-
-    // historyHoriz.add(scoreHistory = getScoreHistory());
     scoreHistory = getScoreHistory();
     scoreHistory.getElement().getStyle().setMarginLeft(LEFT_MARGIN_FOR_SCORE, Style.Unit.PX);
-
     return scoreHistory;
-  }
-
-  private void addMiniScoreListener(MiniScoreListener l) {
-    this.miniScoreListener = l;
   }
 
   /**
@@ -195,6 +184,10 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
     addMiniScoreListener(historyPanel);
     historyPanel.showChart();
     return historyPanel;
+  }
+
+  private void addMiniScoreListener(MiniScoreListener l) {
+    this.miniScoreListener = l;
   }
 
   /**
@@ -240,14 +233,21 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
 
   @Override
   public void useResult(AudioAnswer result) {
-    super.useResult(result);
-    //logger.info("useResult " + result);
-    waitCursorHelper.showFinished();
-    hasScoreHistory = true;
+//    SimpleAudioAnswer simpleAudioAnswer = result;
+    if (result.getExid() != exercise.getID()) {
+      if (DEBUG) logger.info("useResult : mismatch! " + exercise.getID() + " vs " + result.getExid());
+      listContainer.setScore(result, true);
+    } else {
+      super.useResult(result);
+      if (DEBUG) logger.info("useResult " + result.getExid());
 
-    audioPath = result.getPath();
-    setDownloadHref();
-    scoreAudio(result, isRTL);
+      waitCursorHelper.showFinished();
+      hasScoreHistory = true;
+
+      audioPath = result.getPath();
+      setDownloadHref();
+      scoreAudio(result, isRTL);
+    }
   }
 
   @Override
@@ -267,7 +267,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
    * @param isRTL
    * @see #useResult
    */
-  private void scoreAudio(SimpleAudioAnswer result, boolean isRTL) {
+  private void scoreAudio(AudioAnswer result, boolean isRTL) {
     scoreFeedback.clear();
 
     clearScoreFeedback();
@@ -276,7 +276,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
     getScoreFeedback().add(scoreFeedbackHelper.getWordTableContainer(pretestScore, isRTL));
     scoreFeedback.getElement().getStyle().setOpacity(1.0);
     scoreHistory.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
-    useScoredResult(pretestScore, result.getPath());
+    useScoredResult(pretestScore, result.getPath(), result);
 
     // Gotta remember the score on the exercise now...
     exercise.getScores().add(new CorrectAndScore(result));
@@ -292,7 +292,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
    * @param path
    * @see #scoreAudio
    */
-  private void useScoredResult(PretestScore result, String path) {
+  private void useScoredResult(PretestScore result, String path, AudioAnswer answer) {
     float overallScore = result.getOverallScore();
     boolean isValid = overallScore > 0;
     if (miniScoreListener != null && isValid) {
@@ -312,7 +312,7 @@ public class SimpleRecordAudioPanel<T extends HasID & ScoredExercise> extends No
       }*/
 
       scoreFeedbackHelper.showScore(Math.min(HUNDRED, overallScore * HUNDRED), result.isFullMatch());
-      listContainer.setScore(exercise.getID(), overallScore);
+      listContainer.setScore(answer, false);
     } else {
       scoreFeedbackHelper.hideScore();
     }

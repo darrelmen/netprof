@@ -32,6 +32,7 @@ package mitll.langtest.client.list;
 import com.google.gwt.user.client.ui.RequiresResize;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
+import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.exercise.HasID;
 
 import java.util.Collection;
@@ -129,10 +130,10 @@ public interface ListInterface<T extends HasID, U extends HasID> extends Require
 
   /**
    * @see mitll.langtest.client.scoring.SimpleRecordAudioPanel#useScoredResult
-   * @param id
    * @param hydecScore
+   * @param pleaseFindReceiver
    */
-  void setScore(int id, float hydecScore);
+  void setScore(AudioAnswer hydecScore, boolean pleaseFindReceiver);
 
   boolean isCurrentReq(int req);
 }
