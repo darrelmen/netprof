@@ -78,6 +78,7 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
   private static final String WAV = ".wav";
   private static final String MP_3 = ".mp3";
   private static final String OGG = ".ogg";
+  public static final boolean DEBUG = false;
 
   private IEnsureAudioHelper ensureAudioHelper;
   private TranscriptSegmentGenerator transcriptSegmentGenerator;
@@ -272,13 +273,14 @@ public class ScoringServiceImpl extends MyRemoteServiceServlet implements Scorin
    */
   @Override
   public Map<Integer, AlignmentAndScore> getAlignments(int projid, Set<Integer> audioIDs) throws DominoSessionException {
-    logger.info("getAlignments project " + projid + " asking for " + audioIDs);
+    if (DEBUG) logger.info("getAlignments project " + projid + " asking for " + audioIDs);
+
     Map<Integer, ISlimResult> audioIDMap = db.getRefResultDAO().getAudioIDMap(projid, audioIDs);
 
     Project project = getProject(projid);
     ensureAudio(projid, audioIDMap, project);
 
-    logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
+    if (DEBUG)  logger.info("getAlignments project " + projid + " asking for " + audioIDs + " audio ids, found " + audioIDMap.size() + " remembered alignments...");
 
     audioIDMap.forEach((k, v) -> logger.info("getAlignments " + k + " = " + v));
 

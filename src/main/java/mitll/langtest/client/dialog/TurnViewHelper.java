@@ -100,14 +100,17 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    */
   private final List<T> allTurns = new ArrayList<>();
   DivWidget dialogHeader;
+  private DialogHeader dialogHeaderForReal;
   private DivWidget speakerRow;
+  /**
+   *
+   */
   DivWidget overallFeedback;
   private String storedDialogKey = SUMMARY_DIALOG;
 
   /**
-   * @deprecatedx all dialogs are interpreter dialogs...
    */
- // private boolean isInterpreter = false;
+  // private boolean isInterpreter = false;
   private boolean isInterpreterMode = true;
 
   DivWidget turnContainer;
@@ -160,14 +163,18 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     });
   }
 
+  /**
+   * first from url, but if not then look at storage
+   * @return
+   */
   private int getDialogIDFromURL() {
     int dialogFromURL = getDialogFromURL();
     if (dialogFromURL == -1) {
       String prefix = NETPROF + ":" + controller.getUser() + ":";
-      int storedChoice = controller.getStorage().getInt(prefix + storedDialogKey);
+  //    int storedChoice = controller.getStorage().getInt(prefix + storedDialogKey);
 //      logger.info("storedChoice " + storedChoice);
 //      logger.info("dialog " + dialogFromURL);
-      dialogFromURL = storedChoice;
+      dialogFromURL = controller.getStorage().getInt(prefix + storedDialogKey);
     }
     return dialogFromURL;
   }
@@ -397,9 +404,14 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    * @see #showDialog(int, IDialog, Panel)
    */
   protected void addDialogHeader(IDialog dialog, Panel child) {
-    child.add(dialogHeader =
-        new DialogHeader(controller, thisView, getPrevView(), getNextView(), this)
-            .getHeader(dialog));
+    dialogHeaderForReal = new DialogHeader(controller, thisView, getPrevView(), getNextView(), this);
+    DivWidget header = dialogHeaderForReal.getHeader(dialog);
+
+    child.add(this.dialogHeader = header);
+  }
+
+  void gotGoForward() {
+    dialogHeaderForReal.gotGoForward();
   }
 
   @Override

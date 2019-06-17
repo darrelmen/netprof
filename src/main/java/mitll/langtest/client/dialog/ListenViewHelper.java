@@ -30,6 +30,7 @@
 package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
+import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.Icon;
 import com.github.gwtbootstrap.client.ui.base.ComplexWidget;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -39,6 +40,8 @@ import com.github.gwtbootstrap.client.ui.resources.ButtonSize;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ChangeEvent;
+import com.google.gwt.event.dom.client.ClickEvent;
+import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.banner.IBanner;
 import mitll.langtest.client.banner.NewContentChooser;
@@ -66,9 +69,10 @@ import java.util.logging.Logger;
 public class ListenViewHelper<T extends ITurnPanel>
     extends TurnViewHelper<T>
     implements ContentView, PlayListener, IListenView, ITurnContainer<T> {
+  public static final String TO_THE_NEXT_STEP = "Click here to move on to the next step ";
   private final Logger logger = Logger.getLogger("ListenViewHelper");
 
-  public static final String YOURSELF = "Yourself";
+  private static final String YOURSELF = "Yourself";
 
   private static final String VALUE = "value";
   private static final String SLIDER_MAX = "100";
@@ -196,10 +200,8 @@ public class ListenViewHelper<T extends ITurnPanel>
   T getTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn, int index) {
     T turn = super.getTurnPanel(clientExercise, columns, prevColumn, index);
     if (!turn.addPlayListener(this)) logger.warning("didn't add the play listener...");
-    turn.addClickHandler(event -> {
-      //    logger.info("got event " + event.getClass());
-      gotTurnClick(turn);
-    });
+    //    logger.info("got event " + event.getClass());
+    turn.addClickHandler(event -> gotTurnClick(turn));
     return turn;
   }
 
@@ -218,10 +220,7 @@ public class ListenViewHelper<T extends ITurnPanel>
         getView() == INavigation.VIEWS.LISTEN && clientExercise.hasEnglishAttr();
 
     T widgets = makeTurnPanel(clientExercise, columns, prevColumn, rightJustify, index);
-//    widgets.asWidget().getElement().getStyle().setProperty("tabindex", "" + index);
-//
 //    logger.info("reallyGetTurnPanel set tab index to " +index);
-
     return widgets;
   }
 
@@ -426,11 +425,8 @@ public class ListenViewHelper<T extends ITurnPanel>
     clearHighlightAndRemoveMark();
 
     if (!makePrevVisible()) {
-      //makeVisible(currentTurn);
       //  logger.info("gotBackward make current turn visible " + currentTurn.getExID() + " at " + i);
       makeVisible(seq.get(seq.size() - 1));
-      // turnContainer.getElement().setScrollTop(300);
-      //   turnContainer.getParent().getElement().setScrollTop(0);
     }
 
     if (i1 < 0) {
@@ -469,12 +465,6 @@ public class ListenViewHelper<T extends ITurnPanel>
     boolean isPlaying = getCurrentTurn().doPause();
     if (DEBUG_NEXT) logger.info("setCurrentTurnTo current turn paused " + isPlaying);
 
-    /*int i = */
-//    beforeChangeTurns();
-//    setCurrentTurn(newTurn);
-//    markCurrent();
-    //   logger.info("setCurrentTurnTo ex #" + currentTurn.getExID());
-    // afterChangeTurns(isPlaying);
 
     super.setCurrentTurnTo(newTurn);
   }
@@ -495,20 +485,7 @@ public class ListenViewHelper<T extends ITurnPanel>
 
     clearHighlightAndRemoveMark();
 
-//    if (!makeNextVisible()) {
-//      if (DEBUG_NEXT) {
-//        logger.info("beforeChangeTurns : make header visible");
-//      }
-//      if (dialogHeader == null) {
-//        makeVisible(speakerRow);
-//        //  logger.info("no dialog header?");
-//      } else {
-//        makeVisible(dialogHeader);  // make the top header visible...
-//      }
-//    }
-
     return super.beforeChangeTurns();
-//    return i;
   }
 
   private void afterChangeTurns(boolean isPlaying) {
@@ -595,7 +572,6 @@ public class ListenViewHelper<T extends ITurnPanel>
 //      }
     }
   }
-
 
   public void setSessionGoingNow(boolean val) {
     sessionGoingNow = val;
@@ -807,12 +783,42 @@ public class ListenViewHelper<T extends ITurnPanel>
       markCurrent();
       makeVisible(getCurrentTurn());
       setPlayButtonToPlay();
+      lastTurnPlayEnded();
     } else {
       if (DEBUG_PLAY_ENDED) logger.info("currentTurnPlayEnded : play next " + getBlurb(next));
       removeMarkCurrent();
       setCurrentTurn(next);
       playCurrentTurn();
     }
+  }
+
+  private void lastTurnPlayEnded() {
+    overallFeedback.clear();
+    INavigation.VIEWS nextView = getNextView();
+    if (nextView != null) {
+      overallFeedback.add(getMoveOnNudge(nextView));
+    }
+  }
+
+  @NotNull
+   DivWidget getMoveOnNudge(INavigation.VIEWS nextView) {
+    DivWidget horiz = new DivWidget();
+    horiz.addStyleName("inlineFlex");
+    Heading w = new Heading(4, TO_THE_NEXT_STEP);
+    horiz.add(w);
+
+    Button w1 = new Button(nextView.toString());
+    w1.setType(ButtonType.SUCCESS);
+    w1.setIcon(IconType.ARROW_RIGHT);
+    w1.addStyleName("topFiveMargin");
+    w1.addStyleName("leftFiveMargin");
+    w1.addClickHandler(event -> gotGoForward());
+
+    DivWidget horiz2 = new DivWidget();
+    horiz2.add(w1);
+    horiz.add(horiz2);
+    horiz.addStyleName("leftFiveMargin");
+    return horiz;
   }
 
   @NotNull

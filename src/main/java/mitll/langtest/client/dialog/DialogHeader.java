@@ -634,7 +634,7 @@ public class DialogHeader {
     controller.getNavigation().show(getPrevView());
   }
 
-  private void gotGoForward() {
+  public void gotGoForward() {
     controller.getNavigation().show(getNextView());
   }
 

@@ -57,6 +57,7 @@ public class SessionContainer<T extends IDialogSession> extends MemoryItemContai
 
   private int req = 0;
   private int user = -1;
+  private int dialogID;
 
   @Override
   public int getReq() {
@@ -74,8 +75,9 @@ public class SessionContainer<T extends IDialogSession> extends MemoryItemContai
   SessionContainer(ExerciseController controller,
                    DivWidget overallBottom,
                    DivWidget rightSide,
-                   int user) {
+                   int user, int dialogID) {
     super(controller, "dialogSession", "Session", 10, 10);
+    this.dialogID = dialogID;
     this.overallBottom = overallBottom;
     this.rightSide = rightSide;
     this.user = user;
@@ -135,8 +137,8 @@ public class SessionContainer<T extends IDialogSession> extends MemoryItemContai
         overallBottom,
         this,
         req++,
-        user
-    ).setItemColumnWidth(ITEM_COLUMN_WIDTH);
+        user,
+        dialogID).setItemColumnWidth(ITEM_COLUMN_WIDTH);
   }
 
   /**

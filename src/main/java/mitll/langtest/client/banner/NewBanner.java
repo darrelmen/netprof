@@ -71,14 +71,14 @@ import static mitll.langtest.shared.project.ProjectType.DIALOG;
  * Created by go22670 on 4/10/17.
  */
 public class NewBanner extends ResponsiveNavbar implements IBanner {
-  public static final int MIN_WIDTH_WIDE = 1150;
   private final Logger logger = Logger.getLogger("NewBanner");
+
+  public static final int MIN_WIDTH_WIDE = 1150;
 
   /**
    * @see #getDialogNav
    */
   private static final String DIALOGS = "Interpreter / Dialog";
-  //  private static final String DIALOG_PRACTICE = "Rehearsal";
   private static final String MY_DIALOG_EDITOR = "Editor";
 
   private static final String RECORD = "Record";
@@ -273,23 +273,23 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     dialogNav.getElement().getStyle().setMarginLeft(5, Style.Unit.PX);
     zeroRightMargin(dialogNav);
 
-    Dropdown dialogChoicesNav = new Dropdown(DIALOGS);
-    dialogNav.add(dialogChoicesNav);
+    {
+      Dropdown dialogChoicesNav = new Dropdown(DIALOGS);
+      rememberViewAndLink(dialogChoicesNav, VIEWS.DIALOG);
+      DIALOG_VIEWS_IN_DROPDOWN.forEach(views -> rememberViewAndLink(dialogChoicesNav, views));
 
-    rememberViewAndLink(dialogChoicesNav, VIEWS.DIALOG);
+      dialogNav.add(dialogChoicesNav);
+    }
 
+    {
+      Dropdown dialogPracticeNav = new Dropdown(MY_DIALOG_EDITOR);
+      rememberViewAndLink(dialogPracticeNav, DIALOG_EDITOR);
 
-    //rememberViewAndLink(dialogChoicesNav, DIALOG_EDITOR);
+      dialogEditorDropdown = dialogPracticeNav;
+      DIALOG_EDITOR_VIEWS.forEach(views -> rememberViewAndLink(dialogPracticeNav, views));
 
-    Dropdown dialogPracticeNav = new Dropdown(MY_DIALOG_EDITOR);
-    dialogNav.add(dialogPracticeNav);
-    dialogEditorDropdown = dialogPracticeNav;
-    rememberViewAndLink(dialogPracticeNav, DIALOG_EDITOR);
-
-
-    DIALOG_VIEWS_IN_DROPDOWN.forEach(views -> rememberViewAndLink(dialogChoicesNav, views));
-
-    DIALOG_EDITOR_VIEWS.forEach(views -> rememberViewAndLink(dialogPracticeNav, views));
+      dialogNav.add(dialogPracticeNav);
+    }
 
     return dialogNav;
   }
@@ -518,7 +518,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     boolean first = true;
     for (VIEWS choice : toShow) {
       NavLink choice1 = getChoice(nav, choice);
-      //   choice1.getElement().setId("Link_" + choice.name());
       if (first) {
         choice1.addStyleName("leftTenMargin");
         first = false;
@@ -566,10 +565,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     navigation.showView(getViews(instanceName), false, fromClick);
     showActive(learn);  // how can this be null?
   }
-
-//  private void showSectionAfterClick(String instance1, boolean fromClick) {
-//    navigation.showView(getViews(instance1), false, fromClick);
-//  }
 
   @NotNull
   private VIEWS getViews(String instance1) {
@@ -640,6 +635,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     defectMenuVisible();
 
     boolean isDialog = isDialogMode();
+  if (DEBUG)  logger.info("isDialog " + isDialog);
     setDialogNavVisible(hasProjectChoice() && isDialog);
 
     NavLink widgets = viewToLink.get(RECORD_SENTENCES);
@@ -671,10 +667,26 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   }
 
   private boolean isDialogMode() {
+    ProjectMode mode = getModeMaybeFromView();
+    if (DEBUG)     logger.info("isDialogMode " + mode);
     return
         controller.getProjectStartupInfo() != null &&
             controller.getProjectStartupInfo().getProjectType() == DIALOG &&
-            getMode() == ProjectMode.DIALOG;
+            mode == ProjectMode.DIALOG;
+  }
+
+  private ProjectMode getModeMaybeFromView() {
+    ProjectMode mode = getMode();
+    if (navigation != null) {
+      VIEWS currentView = navigation.getCurrentView();
+      if (DEBUG)      logger.info("currentView " + currentView);
+      ProjectMode mode1 = currentView.getMode();
+      if (mode1 != mode && mode1 != EITHER) {
+        logger.info("currentView " + currentView + " trumps the stored mode " + mode);
+        mode = mode1;
+      }
+    }
+    return mode;
   }
 
   /**
@@ -688,10 +700,16 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private void setDialogNavVisible(boolean visible) {
     boolean hasProject = controller.getProjectStartupInfo() != null;
     boolean hasProjectChoice = hasProject && controller.getProjectID() != -1;
-    ProjectMode mode = controller.getMode();
+    ProjectMode mode = getModeMaybeFromView();
     dialognav.setVisible(visible && hasProjectChoice && (mode == ProjectMode.DIALOG || mode == UNSET));
 
-    //  logger.info("setDialogNavVisible dialog nav " + dialognav.isVisible());
+    if (DEBUG)    logger.info("setDialogNavVisible dialog nav " + dialognav.isVisible());
+
+    if (!dialogEditorDropdown.isVisible()) {
+      logger.info("setDialogNavVisible visible " + visible);
+      logger.info("setDialogNavVisible mode    " + mode);
+      logger.info("setDialogNavVisible hasProjectChoice " + hasProjectChoice);
+    }
 
     boolean showDialogEditor = shouldShowDialogEditor();
 
@@ -707,20 +725,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
         widgets.setVisible(false);
       }
     }
-/*    NavLink widgets = viewToLink.get(DIALOG_EDITOR);
-    if (widgets != null) {
-      widgets.setVisible(showDialogEditor);
-    }
-    widgets = viewToLink.get(TURN_EDITOR);
-    if (widgets != null) {
-      widgets.setVisible(showDialogEditor);
-    }
-    widgets = viewToLink.get(CORE_EDITOR);
-    if (widgets != null) {
-      widgets.setVisible(showDialogEditor);
-    }*/
-
-//    logger.info("setDialogNavVisible dialog nav " + dialognav.isVisible());
   }
 
   private boolean shouldShowDialogEditor() {
@@ -743,7 +747,6 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     viewToLink.values().forEach(choice -> choice.setVisible(val));
 
     if (val && navigation != null) {
-      // VIEWS currentView = navigation.getCurrentView();
       VIEWS currentView = navigation.getCurrentView();
       if (DEBUG) logger.info("setCogVisible current view " + currentView);
 

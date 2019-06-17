@@ -688,7 +688,7 @@ public class LangTest implements
        * @see mitll.langtest.client.recorder.WebAudioRecorder
        */
       public void gotPermission() {
-        if (DEBUG || true) logger.info("initBrowserRecording - got permission!");
+        if (DEBUG) logger.info("initBrowserRecording - got permission!");
         checkLogin();
       }
 
@@ -1194,6 +1194,7 @@ public class LangTest implements
       return ProjectMode.UNSET;
     } else {
       try {
+        logger.info("getMode mode " +mode);
         return ProjectMode.valueOf(mode);
       } catch (IllegalArgumentException e) {
         logger.warning("got unknown mode '" + mode + "'");

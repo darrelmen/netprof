@@ -67,6 +67,8 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static mitll.langtest.client.custom.INavigation.VIEWS.*;
+import static mitll.langtest.client.custom.dialog.SummaryDialogContainer.NETPROF;
+import static mitll.langtest.client.dialog.DialogExerciseList.SUMMARY_DIALOG;
 import static mitll.langtest.shared.project.ProjectMode.VOCABULARY;
 
 /**
@@ -115,7 +117,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
 
     dialogHelper = new DialogViewHelper(controller);
 
-    // studyHelper = new StudyHelper<>(controller);
     listenHelper = new ListenViewHelper(controller, LISTEN);
     rehearseHelper = new RehearseViewHelper(controller, REHEARSE);
     coreRehearseHelper = new CoreRehearseViewHelper(controller, CORE_REHEARSE);
@@ -400,6 +401,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     }
   }
 
+
   private void clearPushAndShow(ContentView contentView, VIEWS perform) {
     clearAndPushKeep(perform);
     //   logger.info("show perform " + PERFORM);
@@ -421,7 +423,8 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void showScores(DivWidget divWidget) {
-    controller.getDialogService().getDialog(new SelectionState().getDialog(), new AsyncCallback<IDialog>() {
+    logger.info("showScores dialog ");
+    controller.getDialogService().getDialog(getDialogIDFromURL(), new AsyncCallback<IDialog>() {
       @Override
       public void onFailure(Throwable caught) {
         controller.handleNonFatalError("getting dialogs", caught);
@@ -432,6 +435,21 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         NewContentChooser.this.showScores(divWidget, dialog);
       }
     });
+  }
+
+  /**
+   * @return
+   * @see TurnViewHelper#getDialogIDFromURL()
+   */
+  private int getDialogIDFromURL() {
+    int dialogFromURL = new SelectionState().getDialog();
+    if (dialogFromURL == -1) {
+      String prefix = NETPROF + ":" + controller.getUser() + ":";
+      dialogFromURL = controller.getStorage().getInt(prefix + SUMMARY_DIALOG);
+      logger.info("getDialogIDFromURL storage dialog # " + dialogFromURL);
+    }
+    logger.info("getDialogIDFromURL dialog # " + dialogFromURL);
+    return dialogFromURL;
   }
 
   /**
@@ -470,9 +488,13 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         header.addStyleName("bottomFiveMargin");
         divWidget.add(header);
       }
+
+      logger.info("showScores teacher " + isTeacher() + " dialog " + dialog);
+
+      int id = dialog.getID();
       divWidget.add(isTeacher() ?
-          new StudentScores(controller) :
-          new SessionAnalysis(controller, controller.getUser(), null));
+          new StudentScores(controller, id) :
+          new SessionAnalysis(controller, controller.getUser(), null, id));
       currentSection = SCORES;
     }
   }

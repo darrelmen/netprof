@@ -47,13 +47,15 @@ class DialogSessionAnalysisTab<T extends IDialogSession> extends AnalysisTab {
    * @param reqCounter
    * @param reqID
    * @param userID
+   * @param dialogID
    * @see SessionContainer#getAnalysisTab
    */
   DialogSessionAnalysisTab(ExerciseController controller,
                            T selectedUser,
                            DivWidget overallBottom,
                            ReqCounter reqCounter,
-                           int reqID, int userID) {
+                           int reqID,
+                           int userID, int dialogID) {
     super(controller, overallBottom,
         selectedUser.getView().toString(), false, reqCounter, INavigation.VIEWS.LISTEN, new AnalysisRequest()
             .setUserid(userID)

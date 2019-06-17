@@ -49,22 +49,24 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
   private static final String NO_SESSIONS_YET = "No Sessions yet...";
   private final int user;
   private final DivWidget userContainerBottom;
+  private int dialogID;
 
   /**
    * @param controller
    * @param user
    * @param userContainerBottom
+   * @param dialogID
    * @see NewContentChooser#showProgress
    */
-  public SessionAnalysis(final ExerciseController controller, int user, DivWidget userContainerBottom) {
+  public SessionAnalysis(final ExerciseController controller, int user, DivWidget userContainerBottom, int dialogID) {
     Timer pleaseWaitTimer = getPleaseWaitTimer(controller);
-
+    this.dialogID = dialogID;
     this.user = user;
     this.userContainerBottom = userContainerBottom;
 
     controller.getDialogService().getDialogSessions(
         user,
-        new SelectionState().getDialog(),
+        dialogID,
         new AsyncCallback<List<IDialogSession>>() {
           @Override
           public void onFailure(Throwable caught) {
@@ -105,12 +107,7 @@ public class SessionAnalysis extends TwoColumnAnalysis<IDialogSession> {
   protected MemoryItemContainer<IDialogSession> getItemContainer(ExerciseController controller,
                                                                  DivWidget bottom,
                                                                  DivWidget rightSide) {
-    return new SessionContainer<IDialogSession>(controller, userContainerBottom == null ? bottom : userContainerBottom, rightSide, user) {
-  /*    @Override
-      protected int getNumTableRowsGivenScreenHeight() {
-        return 10;
-      }*/
-
+    return new SessionContainer<IDialogSession>(controller, userContainerBottom == null ? bottom : userContainerBottom, rightSide, user, dialogID) {
       @Override
       public Panel getTableWithPager(Collection<IDialogSession> users) {
         Panel tableWithPager = super.getTableWithPager(users);

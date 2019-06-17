@@ -38,7 +38,6 @@ import mitll.langtest.shared.WordsAndTotal;
 import mitll.langtest.shared.analysis.*;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.common.RestrictedOperationException;
-import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.CommonShell;
 import mitll.langtest.shared.project.ProjectType;
@@ -118,7 +117,7 @@ public class AnalysisServiceImpl extends MyRemoteServiceServlet implements Analy
    * @return
    * @throws DominoSessionException
    * @throws RestrictedOperationException
-   * @see mitll.langtest.client.analysis.StudentScores#StudentScores(ExerciseController)
+   * @see mitll.langtest.client.analysis.StudentScores#StudentScores(ExerciseController, int)
    */
   @Override
   public Collection<UserInfo> getUsersWithRecordingsForDialog(int dialogID)

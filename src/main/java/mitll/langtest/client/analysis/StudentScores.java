@@ -37,7 +37,6 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
 import mitll.langtest.client.banner.NewContentChooser;
 import mitll.langtest.client.exercise.ExerciseController;
-import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.analysis.UserInfo;
 import org.jetbrains.annotations.NotNull;
 
@@ -48,16 +47,19 @@ import java.util.logging.Logger;
 import static mitll.langtest.client.analysis.MemoryItemContainer.SELECTED_USER;
 
 public class StudentScores extends TwoColumnAnalysis<UserInfo> {
+  public static final String STUDENTS = "Students";
   private final Logger logger = Logger.getLogger("StudentAnalysis");
+  private  int dialogID;
 
   /**
    * @param controller
+   * @param dialogID
    * @see NewContentChooser#showProgress
    */
-  public StudentScores(final ExerciseController controller) {
+  public StudentScores(final ExerciseController controller, int dialogID) {
     Timer pleaseWaitTimer = getPleaseWaitTimer(controller);
-
-    analysisServiceAsync.getUsersWithRecordingsForDialog(new SelectionState().getDialog(),
+    this.dialogID = dialogID;
+    analysisServiceAsync.getUsersWithRecordingsForDialog(dialogID,
         new AsyncCallback<Collection<UserInfo>>() {
           @Override
           public void onFailure(Throwable throwable) {
@@ -126,7 +128,7 @@ public class StudentScores extends TwoColumnAnalysis<UserInfo> {
       @NotNull
       @Override
       protected Widget getAnalysisTab(UserInfo selectedUser) {
-        SessionAnalysis widgets = new SessionAnalysis(controller, selectedUser.getID(), bottom);
+        SessionAnalysis widgets = new SessionAnalysis(controller, selectedUser.getID(), bottom, dialogID);
         widgets.addStyleName("leftFiveMargin");
         return widgets;
       }
@@ -135,81 +137,6 @@ public class StudentScores extends TwoColumnAnalysis<UserInfo> {
 
   @Override
   protected String getHeaderLabel() {
-    return "Students";
+    return STUDENTS;
   }
-
-  /**
-   * @paramx users
-   * @paramx controller
-   * @paramx bottom
-   * @paramx rightSide
-   * @paramx noDataMessage
-   * @return
-   * @see #addTop
-   */
-/*
-  protected DivWidget getTable(Collection<UserInfo> users,
-                               ExerciseController controller, DivWidget bottom, DivWidget rightSide, String noDataMessage) {
-    UserContainer userContainer = new UserContainer(controller, bottom, rightSide, getRememberedSelectedUser(controller)) {
-      @Override
-      protected void addLastTwoColumns(List<UserInfo> list) {
-      }
-
-      @Override
-      protected void addItemID(List<UserInfo> list, int maxLength) {
-      }
-
-      @NotNull
-      @Override
-      protected String getLifetimeCountTitle() {
-        return "#";
-      }
-
-      @NotNull
-      @Override
-      protected String getLifetimeAvgTitle() {
-        return "Avg.";
-      }
-
-      @Override
-      protected void addListChoiceBox(DivWidget filterContainer) {
-      }
-
-  */
-/*    @Override
-      protected void addRightSideContent(UserInfo selectedUser) {
-        return new DialogSessionAnalysisTab<T>(this.controller,
-            selectedUser,
-            overallBottom,
-            this,
-            req++
-        ).setItemColumnWidth(485);
-      }*//*
-
-
-      @NotNull
-      @Override
-      protected Widget getAnalysisTab(UserInfo selectedUser) {
-        SessionAnalysis widgets = new SessionAnalysis(controller, selectedUser.getID());
-        widgets.addStyleName("leftFiveMargin");
-        return widgets;
-      }
-    };
-
-    DivWidget table = userContainer.getTable(getUserInfos(users));
-    table.addStyleName("cardBorderShadow");
-    return table;
-  }
-*/
-
-/*  private List<UserInfo> getUserInfos(Collection<UserInfo> users) {
-    List<UserInfo> filtered = new ArrayList<>();
-    for (UserInfo userInfo : users) {
-      String userID = userInfo.getUserID();
-      if (userID != null && !userID.equals("defectDetector")) {
-        filtered.add(userInfo);
-      }
-    }
-    return filtered;
-  }*/
 }

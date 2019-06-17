@@ -188,7 +188,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   @Override
   protected void showDialogGetRef(int dialogID, IDialog dialog, Panel child) {
     super.showDialogGetRef(dialogID, dialog, child);
-    //   child.add(overallFeedback = getOverallFeedback());
     startSession();
   }
 
@@ -344,6 +343,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
 
   }
 
+  private DivWidget moveOnNudge;
+
   /**
    * Three parts : wait cursor, emoticon for overall score, progress bar for quantitive feedback.
    *
@@ -373,7 +374,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     rateProgress = new ProgressBar(ProgressBarBase.Style.DEFAULT);
 
     container.add(getProgressBarDiv(rateProgress));
-
+    moveOnNudge = getMoveOnNudge(getNextView());
+    moveOnNudge.setVisible(false);
+    moveOnNudge.addStyleName("topFiveMargin");
+    container.add(moveOnNudge);
     return container;
   }
 
@@ -595,7 +599,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     } else {
       showOverallDialogScore();
       recordDialogTurns.forEach(IRecordDialogTurn::showScoreInfo);
-      // setCurrentTurn(getFirstPrompt());
     }
   }
 
@@ -792,10 +795,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     rateProgress.setVisible(false);
     exToScore.clear();
     exToStudentDur.clear();
-    // exToRefDur.clear();
 
     getAllTurns().forEach(IRecordDialogTurn::clearScoreInfo);
     recordDialogTurns.clear();
+    moveOnNudge.setVisible(false);
   }
 
   @Override
@@ -1061,6 +1064,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
     setHearYourself(true);
 
     startSession();  // OK, start a new session
+
+    if (DEBUG) logger.info("total score " + total);
+
+    moveOnNudge.setVisible(total > 0.5);
   }
 
   private float roundToTens(double totalHours) {

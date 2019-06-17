@@ -94,7 +94,7 @@ public interface INavigation extends IViewContaner {
      * @see mitll.langtest.client.banner.NewContentChooser#showView(VIEWS, boolean, boolean)
      */
     RECORD_ENTRIES("Record Entries", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
-    RECORD_SENTENCES("Record Sentences", Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
+    RECORD_SENTENCES("Record Sentences", VOCABULARY, Arrays.asList(RECORD_AUDIO, QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN)),
 
 
     QC_ENTRIES("QC Entries", QC_PERMISSIONS, true, false, false),

@@ -358,18 +358,16 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 //    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("clearContent"));
 //    logger.info("logException stack " + exceptionAsString);
 
-
     clearStartupInfo();
     contentRow.clear();
-//    contentRow.getElement().getStyle().setPosition(Style.Position.FIXED);
-//    contentRow.add(lifecycleSupport.getFlashRecordPanel()); // put back record panel
   }
 
   /**
    *
    */
   private void clearStartupInfo() {
-    logger.info("clearStartupInfo -");
+    if (DEBUG) logger.info("clearStartupInfo -");
+
     lifecycleSupport.clearStartupInfo();
   }
 
