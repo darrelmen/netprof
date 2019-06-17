@@ -671,7 +671,7 @@ public class LangTest implements
    */
   private void checkLogin() {
     //console("checkLogin");
-    //logger.info("checkLogin -- ");
+    if (DEBUG) logger.info("checkLogin -- ");
     userManager.checkLogin();
   }
 
@@ -682,41 +682,21 @@ public class LangTest implements
    * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#micConnected()
    */
   private void initBrowserRecording() {
-    // logger.info("initBrowserRecording - called");
+    if (DEBUG) logger.info("initBrowserRecording - called");
     MicPermission micPermission = new MicPermission() {
       /**
        * @see mitll.langtest.client.recorder.WebAudioRecorder
        */
       public void gotPermission() {
-//        logger.info("initBrowserRecording - got permission!");
-
+        if (DEBUG || true) logger.info("initBrowserRecording - got permission!");
         checkLogin();
       }
-
-      /**
-       * @seex FlashRecordPanelHeadless#noMicrophoneFound
-       */
- /*     public void noMicAvailable() {
-        if (!showingPlugInNotice) {
-          showingPlugInNotice = true;
-          List<String> messages = Arrays.asList("If you want to record audio, ",
-              "plug in or enable your mic and reload the page.");
-          new ModalInfoDialog("Plug in microphone", messages, Collections.emptyList(),
-              null,
-              hiddenEvent -> {
-
-                checkLogin();
-                initialUI.setSplash(RECORDING_DISABLED);
-                isMicConnected = false;
-              }, false, true, 600, 400);
-        }
-      }*/
 
       /**
        * @see
        */
       public void noRecordingMethodAvailable() {
-        logger.info("\tnoRecordingMethodAvailable - no way to record");
+        logger.warning("noRecordingMethodAvailable - no way to record");
 
         new ModalInfoDialog(CAN_T_RECORD_AUDIO, RECORDING_AUDIO_IS_NOT_SUPPORTED, hiddenEvent -> checkLogin());
 
@@ -740,7 +720,6 @@ public class LangTest implements
 
     BrowserRecording.init(micPermission);
   }
-
 
   public boolean hasModel() {
     return projectStartupInfo != null && getProjectStartupInfo().isHasModel();
@@ -821,7 +800,7 @@ public class LangTest implements
   }
 
   /**
-   * Init Flash recorder once we login.
+   * Init  once we login.
    * <p>
    * Only get the exercises if the user has accepted mic access.
    *

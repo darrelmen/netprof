@@ -43,41 +43,6 @@ public class WebAudioRecorder {
   private static boolean webAudioMicAvailable;
   private static boolean gotResponse = false;
 
-//  private Timer theTimer = null;
-
-  /**
-   * The valid responses to this are : webAudioMicAvailable, webAudioMicNotAvailable, webAudioPermissionDenied
-   * IF we get no response in 5 seconds, ask again!
-   *
-   * The user can easily ignore the dialog by clicking away.
-   *
-   * @seex FlashRecordPanelHeadless#tryWebAudio
-   */
-/*
-  private void tryWebAudio() {
-    if (!tried) {
-      tried = true;
-      //attempts--;
-      //logger.info("webAudioMicAvailable -- tryWebAudio!");
-      initWebaudio();
-
-      if (theTimer != null) theTimer.cancel();
-
-      theTimer = new Timer() {
-        @Override
-        public void run() {
-          if (!gotResponse) {
-            tried = false;
-            tryWebAudio();
-          }
-        }
-      };
-      theTimer.schedule(DELAY_MILLIS);
-    } else {
-    }
-  }
-*/
-
   /**
    * Call initWebAudio in webaudiorecorder.js.
    * That will result in either webAudioMicAvailable being called (from startUserMedia), if you can record,
@@ -175,6 +140,14 @@ public class WebAudioRecorder {
     console("webAudioMicNotAvailable!");
 
     noWebRTC();
+  }
+
+  /**
+   * Has the user made a mic decision yet?
+   * @return
+   */
+  public static boolean didCheckDevices() {
+    return gotResponse;
   }
 
   public static boolean isWebRTCAvailable() {

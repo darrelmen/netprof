@@ -42,6 +42,100 @@ var mics = {};
 
 var start = new Date().getTime();
 
+//var audioInputSelect = document.querySelector('#audioSource');
+
+function startUserMediaAfterChoice(stream) {
+    var input = audio_context.createMediaStreamSource(stream);
+//    __log('startUserMediaAfterChoice Media stream created : ' + input);
+
+    recorder = new Recorder(input);
+//    __log('Recorder initialised.');
+
+    rememberedInput = input;
+    webAudioMicAvailable();
+    document.addEventListener('webkitvisibilitychange', onVisibilityChange);
+}
+
+function madeChoice() {
+    const audioInputSelect = document.querySelector('#audioSource');
+
+    const audioSource = audioInputSelect.value;
+    const constraints = {
+        audio: {deviceId: audioSource ? {exact: audioSource} : undefined}
+    };
+
+    //console.log('start: ' + audioSource);
+
+    navigator.mediaDevices.getUserMedia(constraints)
+        .then(function (stream) {
+            /* use the stream */
+            startUserMediaAfterChoice(stream);
+        })
+        .catch(function (err) {
+            /* handle the error */
+            __log('getUserMedia error: ' + err.name);
+
+            if (err.name.startsWith("NotAllowedError")) {
+                webAudioPermissionDenied();
+            }
+            webAudioMicNotAvailable();
+        });
+}
+
+function gotDevices(deviceInfos) {
+    // Handles being called several times to update labels. Preserve values.
+
+    const audioInputSelect = document.querySelector('#audioSource');
+    const audioInputSelectButton = document.querySelector('#audioSourceButton');
+
+    const selectors = [audioInputSelect];
+
+    //   __log('gotDevices : selectors ' + selectors);
+
+    const values = selectors.map(select => select.value);
+
+    selectors.forEach(select => {
+        while (select.firstChild) {
+            select.removeChild(select.firstChild);
+        }
+    });
+
+    //  __log('gotDevices deviceInfos : ' + deviceInfos);
+
+    for (let i = 0; i !== deviceInfos.length; ++i) {
+        const deviceInfo = deviceInfos[i];
+        //     __log('gotDevices deviceInfo : ' + deviceInfo);
+
+        const option = document.createElement('option');
+        option.value = deviceInfo.deviceId;
+        if (deviceInfo.kind === 'audioinput') {
+            option.text = deviceInfo.label || `microphone ${audioInputSelect.length + 1}`;
+            audioInputSelect.appendChild(option);
+            //       console.log('add mic: ', deviceInfo);
+        } else {
+            //       console.log('Some other kind of source/device: ', deviceInfo);
+        }
+    }
+
+    if (audioInputSelect && audioInputSelect.childElementCount == 0) {
+        webAudioMicNotAvailable();
+    }
+
+    selectors.forEach((select, selectorIndex) => {
+        if (Array.prototype.slice.call(select.childNodes).some(n => n.value === values[selectorIndex])) {
+            select.value = values[selectorIndex];
+        }
+    });
+
+    // __log('audioInputSelect : ' + audioInputSelect);
+    // __log('audioInputSelectButton : ' + audioInputSelectButton);
+    audioInputSelectButton.onclick = madeChoice;
+}
+
+function handleError(error) {
+    console.log('navigator.MediaDevices.getUserMedia error: ', error.message, error.name);
+}
+
 // called from initWebAudio
 function startUserMedia(stream) {
     var input = audio_context.createMediaStreamSource(stream);
@@ -51,7 +145,19 @@ function startUserMedia(stream) {
 //    __log('Recorder initialised.');
 
     rememberedInput = input;
-    webAudioMicAvailable();
+
+    var isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
+        navigator.userAgent &&
+        navigator.userAgent.indexOf('CriOS') == -1 &&
+        navigator.userAgent.indexOf('FxiOS') == -1;
+
+    if (isSafari) {
+        navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
+    } else {
+        //     __log('not safari...');
+        webAudioMicAvailable();
+    }
+
     document.addEventListener('webkitvisibilitychange', onVisibilityChange);
 
     /*    if (audio_context) {
@@ -64,6 +170,7 @@ function startUserMedia(stream) {
             });
         }*/
 }
+
 
 // if the user goes to another tab or changes focus, stop recording.
 function onVisibilityChange() {
@@ -124,7 +231,7 @@ function stopRecording() {
            });
        }*/
 
-  //  __log('webaudiorecorder.stopRecording');
+    //  __log('webaudiorecorder.stopRecording');
 
     //   var end = new Date().getTime();
     //  __log("duration " + (end-start));
@@ -134,7 +241,7 @@ function stopRecording() {
 
 // see WebAudioRecorder.startStream
 function serviceStartStream(url, exid, reqid, isreference, audioType, dialogSessionID, recordingSession) {
-  //  __log('webaudiorecorder.startStream ');
+    //  __log('webaudiorecorder.startStream ');
     //  __log('webaudiorecorder.startStream calling recorder');
 
     recorder && recorder.serviceStartStream(url, exid, reqid, isreference, audioType, dialogSessionID, recordingSession,
@@ -283,8 +390,7 @@ function initWebAudio() {
                         }
                         webAudioMicNotAvailable();
                     });
-            }
-            else if (navigator.getMedia) {
+            } else if (navigator.getMedia) {
                 __log('initWebAudio (old) getMedia ...');
                 navigator.getMedia(
                     {audio: true},  // only a mic
@@ -297,8 +403,7 @@ function initWebAudio() {
                         }
                         webAudioMicNotAvailable();
                     });
-            }
-            else {
+            } else {
                 __log('initWebAudio getMedia null - no mic.');
                 webAudioMicNotAvailable();
             }

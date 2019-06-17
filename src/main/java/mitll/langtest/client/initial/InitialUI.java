@@ -29,11 +29,9 @@
 
 package mitll.langtest.client.initial;
 
-import com.github.gwtbootstrap.client.ui.FluidContainer;
-import com.github.gwtbootstrap.client.ui.Heading;
-import com.github.gwtbootstrap.client.ui.Modal;
-import com.github.gwtbootstrap.client.ui.NavLink;
+import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.google.gwt.dom.client.Element;
 import com.google.gwt.dom.client.Node;
 import com.google.gwt.dom.client.Style;
@@ -59,6 +57,8 @@ import mitll.langtest.client.download.DownloadIFrame;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.instrumentation.EventRegistration;
 import mitll.langtest.client.project.ProjectChoices;
+import mitll.langtest.client.recorder.BrowserRecording;
+import mitll.langtest.client.recorder.WebAudioRecorder;
 import mitll.langtest.client.user.ResetPassword;
 import mitll.langtest.client.user.SendResetPassword;
 import mitll.langtest.client.user.UserManager;
@@ -300,6 +300,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    * @see UserMenu#getLogOut()
    */
   public void logout() {
+    if (DEBUG) logger.info(("logout---"));
     userManager.clearUser();
 
     banner.reset();
@@ -325,12 +326,22 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    * @seex mitll.langtest.client.LangTest.LogoutClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
    */
   private void resetState() {
+    logger.info("resetState");
     pushClearHistory(); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
     clearContent();
 
-    lifecycleSupport.recordingModeSelect(true);
+    if (BrowserCheck.isSafari()) {
+      if (BrowserRecording.gotPermission()) {
+        lifecycleSupport.recordingModeSelect(true);
+      } else {
+        populateRootPanel();
+        lifecycleSupport.recordingModeSelect(true);
+      }
+    } else {
+      lifecycleSupport.recordingModeSelect(true);
+    }
   }
 
   private void pushClearHistory() {
@@ -358,7 +369,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    *
    */
   private void clearStartupInfo() {
-    //logger.info("clearStartupInfo -");
+    logger.info("clearStartupInfo -");
     lifecycleSupport.clearStartupInfo();
   }
 
@@ -525,9 +536,12 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     return headerRow.getOffsetHeight();
   }
 
-  private Heading child;
+  private DivWidget pleaseAllow;
 
   /**
+   * So do fancy stuff for safari where the user is forced to choose a mic, since safari doesn't respect
+   * the default choice.
+   *
    * @param verticalContainer
    * @see #populateRootPanel
    * @see #showLogin()
@@ -536,26 +550,62 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     RootPanel.get().add(verticalContainer);
 
     {
-      child = new Heading(3, PLEASE_ALLOW_RECORDING);
-      child.setVisible(false);
+      DivWidget widget = getPleaseAllowRecording();
 
-      Timer waitTimer = new Timer() {
-        @Override
-        public void run() {
-          child.setVisible(true);
-        }
-      };
-      waitTimer.schedule(1000);
+      this.pleaseAllow = widget;
 
-      child.getElement().getStyle().setMarginLeft(550, Style.Unit.PX);
+      if (DEBUG)
+        logger.info("populateBelowHeader adding please allow recording... add notice to " + contentRow.getId());
 
-      if (DEBUG) logger.info("adding please allow recording... add notice to " + contentRow.getId());
-      contentRow.add(child);
+      contentRow.add(widget);
     }
 
     lifecycleSupport.recordingModeSelect(false);
     makeNavigation();
     addResizeHandler();
+  }
+
+  @NotNull
+  private DivWidget getPleaseAllowRecording() {
+    DivWidget widget = new DivWidget();
+    widget.getElement().getStyle().setMarginLeft(550, Style.Unit.PX);
+
+    if (BrowserCheck.isSafari()) {
+      Heading child = new Heading(3, "Please choose a microphone");
+      widget.add(child);
+
+      DivWidget upper = new DivWidget();
+      ListBox w = new ListBox();
+      w.addStyleName("leftFiveMargin");
+      w.setId("audioSource");
+      upper.add(w);
+
+
+      widget.add(upper);
+      DivWidget c = new DivWidget();
+
+      Button ok = new Button("OK");
+      ok.getElement().setId("audioSourceButton");
+      ok.setType(ButtonType.SUCCESS);
+      c.add(ok);
+      widget.add(c);
+
+      c.getElement().getStyle().setClear(Style.Clear.BOTH);
+      c.addStyleName("leftFiveMargin");
+      c.addStyleName("floatRight");
+    } else {
+      Heading child = new Heading(3, PLEASE_ALLOW_RECORDING);
+      widget.add(child);
+      widget.setVisible(false);
+      Timer waitTimer = new Timer() {
+        @Override
+        public void run() {
+          widget.setVisible(true);
+        }
+      };
+      waitTimer.schedule(1000);
+    }
+    return widget;
   }
 
   /**
@@ -574,7 +624,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
             ") root = " + childCount);
       }
 
-      contentRow.remove(child);
+      contentRow.remove(pleaseAllow);
       if (navigation == null) makeNavigation(); // TODO : cheesy
       contentRow.add(navigation.getNavigation());
     } else {
@@ -746,7 +796,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   }
 
   /**
-   * Init Flash recorder once we login.
+   * Makre sure we have checked the mic choice before continuing to show the usual UI.
    * <p>
    * Only get the exercises if the user has accepted mic access.
    *
@@ -757,19 +807,42 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    */
   @Override
   public void gotUser(HasID user) {
+    tries = 5;
+
     populateRootPanelIfLogin();
 
     long userID = -1;
     if (user != null) {
       userID = user.getID();
     }
+    final long fuserID = userID;
 
     if (DEBUG) logger.info("gotUser : userID " + userID);
 
     banner.setUserName(getGreeting());
 
+    if (WebAudioRecorder.didCheckDevices()) {
+      doAfterGotMics(userID);
+    } else {
+      logger.info("gotUser : Waiting on input mic selection...");
+//      while (tries-- > 0) {
+//        Timer timer = new Timer() {
+//          @Override
+//          public void run() {
+//            logger.info("gotUser : check...");
+//            if (WebAudioRecorder.didCheckDevices()) {
+//              doAfterGotMics(fuserID);
+//            }
+//          }
+//        };
+//        timer.schedule(1000);
+//      }
+    }
+  }
+
+  private void doAfterGotMics(long userID) {
     if (userID != lastUser) {
-      if (DEBUG) logger.info("\tgotUser : userID " + userID + " vs last " + lastUser);
+      if (DEBUG) logger.info("gotUser : userID " + userID + " vs last " + lastUser);
       configureUIGivenUser(userID);
       lifecycleSupport.logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
     } else {
@@ -788,6 +861,8 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       showCogMenu();
     }
   }
+
+  int tries = 5;
 
   /**
    * @see ProjectChoices#showDeleteDialog
@@ -875,7 +950,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   }
 
   /**
-   *  move breadcrump stuff to another class!
+   * move breadcrump stuff to another class!
    *
    * @see #addProjectChoices
    */

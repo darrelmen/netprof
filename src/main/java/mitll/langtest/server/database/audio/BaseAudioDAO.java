@@ -233,6 +233,14 @@ public abstract class BaseAudioDAO extends DAO {
     }
   }
 
+  /**
+   * @see #attachAudioToExercises(Collection, Language, Map, boolean)
+   * @param exercises
+   * @param language
+   * @param audioAttributesForExercises
+   * @param checkTranscript
+   * @param <T>
+   */
   private <T extends ClientExercise> void attachAudioToExercises(Collection<T> exercises,
                                                                  Language language,
                                                                  Map<Integer, List<AudioAttribute>> audioAttributesForExercises, boolean checkTranscript) {
@@ -431,7 +439,7 @@ public abstract class BaseAudioDAO extends DAO {
    * @see AudioExport#writeFolderContents
    * @see #attachAudioToExercise
    * @see mitll.langtest.server.json.JsonExport#getJsonArray
-   * @see
+   * @see #attachAudioToExercises
    */
   private boolean attachAudio(ClientExercise firstExercise,
                               Collection<AudioAttribute> audioAttributes,
@@ -441,7 +449,6 @@ public abstract class BaseAudioDAO extends DAO {
     boolean allSucceeded = true;
 
     // unfortunately we update existing records, so the id will not change, but the path will
-    //  Collection<Integer> currentIDs = getAudioIDs(firstExercise);
     Collection<String> currentPaths = firstExercise.getAudioPaths();
 
     boolean doDebug = debug || DEBUG_ATTACH;
@@ -918,7 +925,6 @@ public abstract class BaseAudioDAO extends DAO {
 
   abstract int markDefect(int userid, int exerciseID, AudioType audioType);
 
-
   boolean isBadUser(int userid) {
     return userid < BaseUserDAO.DEFAULT_FEMALE_ID;
   }
@@ -935,11 +941,9 @@ public abstract class BaseAudioDAO extends DAO {
     return getContextAudioExercises(projid, userDAO.isMale(userid), exToTranscript);
   }
 
-
   abstract Set<Integer> getAudioExercisesForGender(boolean male,
                                                    String audioSpeed,
                                                    int projid);
-
 
   abstract Set<Integer> getAudioExercisesThatHaveBeenRecorded(int projid,
                                                               boolean isMale,

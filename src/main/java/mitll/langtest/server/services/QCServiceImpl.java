@@ -99,7 +99,7 @@ public class QCServiceImpl extends MyRemoteServiceServlet implements QCService {
   public void markAudioDefect(AudioAttribute audioAttribute, HasID exid) throws DominoSessionException, RestrictedOperationException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
     if (hasQCPerm(userIDFromSessionOrDB)) {
-      logger.debug("markAudioDefect mark audio defect for " + exid + " on " + audioAttribute);
+      logger.info("markAudioDefect mark audio defect for " + exid + " on " + audioAttribute);
       //CommonExercise before = db.getCustomOrPredefExercise(exid);  // allow custom items to mask out non-custom items
       //int beforeNumAudio = before.getAudioAttributes().size();
       db.markAudioDefect(audioAttribute);

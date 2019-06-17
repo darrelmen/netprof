@@ -1087,7 +1087,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    */
   @Override
   public ExerciseListWrapper<ClientExercise> getFullExercises(ExerciseListRequest request, Collection<Integer> ids) throws DominoSessionException {
-    //List<ClientExercise> exercises = new ArrayList<>();
     long start = System.currentTimeMillis();
 
     int userID = getUserIDFromSessionOrDB();

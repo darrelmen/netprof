@@ -46,6 +46,7 @@ public class UserManager {
   private final Logger logger = Logger.getLogger("UserManager");
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_FIRST = false;
 
   private static final int NO_USER_SET = -1;
   private final UserServiceAsync userServiceAsync;
@@ -90,15 +91,17 @@ public class UserManager {
   public void checkLogin() {
     final int user = getUser();
 
-    if (DEBUG) logger.info("UserManager.checkLogin : current user : " + user);
+    if (DEBUG_FIRST) logger.info("UserManager.checkLogin : current user : " + user);
 
     if (user != NO_USER_SET) {
-      if (DEBUG) logger.info("\n\nUserManager.checkLogin : we have a current user : " + user);
+      if (DEBUG_FIRST) logger.info("\n\nUserManager.checkLogin : we have a current user : " + user);
       if (current == null) {
         getPermissionsAndSetUser();
       } else {
-        if (DEBUG)
+        if (DEBUG_FIRST) {
           logger.info("UserManager.checkLogin : user " + user + " and full info " + current.getUserID() + " " + current.getUserKind());
+        }
+        userNotification.showLogin();
       }
     } else {
       userNotification.showLogin();
@@ -196,8 +199,6 @@ public class UserManager {
   public int getUser() {
     if (Storage.isLocalStorageSupported()) {
       return storage.getUserID();
-//      String sid = getUserFromStorage();
-//      return (sid == null || sid.equals("" + NO_USER_SET)) ? NO_USER_SET : Integer.parseInt(sid);
     } else {
       return userID;
     }
