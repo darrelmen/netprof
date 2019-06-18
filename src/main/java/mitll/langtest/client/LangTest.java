@@ -93,6 +93,10 @@ public class LangTest implements
     EntryPoint, UserFeedback, ExerciseController<ClientExercise>, UserNotification, LifecycleSupport, UserState {
   private final Logger logger = Logger.getLogger("LangTest");
 
+  private static final boolean DEBUG = false;
+  private static final boolean DEBUG_MODE = false;
+
+
   private static final String UNKNOWN1 = "Unknown";
 
   private static final String LOCALHOST = "127.0.0.1";
@@ -122,8 +126,6 @@ public class LangTest implements
   private static final String DIVIDER = "|";
   private static final int MAX_EXCEPTION_STRING = 600;
   private static final int MAX_CACHE_SIZE = 100;
-  private static final boolean DEBUG = false;
-  private static final boolean DEBUG_MODE = true;
 
   private UserManager userManager;
 
@@ -649,14 +651,23 @@ public class LangTest implements
   @Override
   public void recordingModeSelect(boolean checkLogin) {
     if (BrowserRecording.gotPermission()) {
-      if (DEBUG_MODE) logger.info("checkInitFlash : initFlash - has permission " + checkLogin);
-      if (checkLogin) userManager.checkLogin();
+      if (DEBUG_MODE) logger.info("recordingModeSelect : has permission " + checkLogin);
+      if (checkLogin) {
+        userManager.checkLogin();
+      } else {
+       // userManager.report();
+        if (userManager.getCurrent() != null && initialUI.isShowingPleaseAllow()) {
+          initialUI.gotUser(userManager.getCurrent());
+        } else {
+          logger.info("recordingModeSelect : skip gotUser call to ui.");
+        }
+      }
     } else {
-      if (DEBUG_MODE) logger.info("checkInitFlash : initFlash - no permission yet " + checkLogin);
+      if (DEBUG_MODE) logger.info("recordingModeSelect : no permission yet " + checkLogin);
       BrowserRecording.getWebAudio().initWebaudio();
       if (!WebAudioRecorder.isWebRTCAvailable()) {
         if (checkLogin) {
-          if (DEBUG_MODE) logger.info("checkInitFlash : initFlash - checkLogin " + checkLogin);
+          if (DEBUG_MODE) logger.info("recordingModeSelect : checkLogin " + checkLogin);
           userManager.checkLogin();
         }
       }
@@ -759,8 +770,6 @@ public class LangTest implements
 
     if (projectStartupInfo == null) {
       logger.info("setProjectStartupInfo project startup null for " + user);
-//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("no startup?"));
-//      logger.info("logException stack " + exceptionAsString);
     } else {
       if (DEBUG) logger.info("setProjectStartupInfo got project startup for " + user);
     }
@@ -813,7 +822,6 @@ public class LangTest implements
     storage.setUser(user.getID());
 
     projectStartupInfo = user.getStartupInfo();
-    //  setProjectStartupInfo(user);
 
     if (DEBUG) logger.info("\ngotUser Got startup info " + projectStartupInfo);
     initialUI.gotUser(user);
@@ -1194,7 +1202,7 @@ public class LangTest implements
       return ProjectMode.UNSET;
     } else {
       try {
-        logger.info("getMode mode " +mode);
+        //  logger.info("getMode mode " +mode);
         return ProjectMode.valueOf(mode);
       } catch (IllegalArgumentException e) {
         logger.warning("got unknown mode '" + mode + "'");

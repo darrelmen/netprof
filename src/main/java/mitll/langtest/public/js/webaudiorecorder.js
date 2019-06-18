@@ -40,16 +40,17 @@ var rememberedInput;
 var allZero;
 var mics = {};
 
+var debug = false;
 var start = new Date().getTime();
 
 //var audioInputSelect = document.querySelector('#audioSource');
 
 function startUserMediaAfterChoice(stream) {
     var input = audio_context.createMediaStreamSource(stream);
-//    __log('startUserMediaAfterChoice Media stream created : ' + input);
+    if (debug) __log('startUserMediaAfterChoice Media stream created : ' + input);
 
     recorder = new Recorder(input);
-//    __log('Recorder initialised.');
+    if (debug) __log('Recorder initialised.');
 
     rememberedInput = input;
     webAudioMicAvailable();
@@ -64,7 +65,7 @@ function madeChoice() {
         audio: {deviceId: audioSource ? {exact: audioSource} : undefined}
     };
 
-    //console.log('start: ' + audioSource);
+    // console.log('choose mic: ' + audioSource);
 
     navigator.mediaDevices.getUserMedia(constraints)
         .then(function (stream) {
@@ -90,7 +91,7 @@ function gotDevices(deviceInfos) {
 
     const selectors = [audioInputSelect];
 
-    //   __log('gotDevices : selectors ' + selectors);
+    if (debug) __log('gotDevices : selectors ' + selectors);
 
     const values = selectors.map(select => select.value);
 
@@ -100,20 +101,20 @@ function gotDevices(deviceInfos) {
         }
     });
 
-    //  __log('gotDevices deviceInfos : ' + deviceInfos);
+    if (debug) __log('gotDevices deviceInfos : ' + deviceInfos);
 
     for (let i = 0; i !== deviceInfos.length; ++i) {
         const deviceInfo = deviceInfos[i];
-        //     __log('gotDevices deviceInfo : ' + deviceInfo);
+        if (debug) __log('gotDevices deviceInfo : ' + deviceInfo);
 
         const option = document.createElement('option');
         option.value = deviceInfo.deviceId;
         if (deviceInfo.kind === 'audioinput') {
             option.text = deviceInfo.label || `microphone ${audioInputSelect.length + 1}`;
             audioInputSelect.appendChild(option);
-            //       console.log('add mic: ', deviceInfo);
+            if (debug) console.log('add mic: ', deviceInfo);
         } else {
-            //       console.log('Some other kind of source/device: ', deviceInfo);
+            if (debug) console.log('Some other kind of source/device: ', deviceInfo);
         }
     }
 
@@ -127,8 +128,8 @@ function gotDevices(deviceInfos) {
         }
     });
 
-    // __log('audioInputSelect : ' + audioInputSelect);
-    // __log('audioInputSelectButton : ' + audioInputSelectButton);
+    if (debug) __log('audioInputSelect : ' + audioInputSelect);
+    if (debug) __log('audioInputSelectButton : ' + audioInputSelectButton);
     audioInputSelectButton.onclick = madeChoice;
 }
 
@@ -138,14 +139,6 @@ function handleError(error) {
 
 // called from initWebAudio
 function startUserMedia(stream) {
-    var input = audio_context.createMediaStreamSource(stream);
-    __log('Media stream created : ' + input);
-
-    recorder = new Recorder(input);
-//    __log('Recorder initialised.');
-
-    rememberedInput = input;
-
     var isSafari = navigator.vendor && navigator.vendor.indexOf('Apple') > -1 &&
         navigator.userAgent &&
         navigator.userAgent.indexOf('CriOS') == -1 &&
@@ -154,7 +147,15 @@ function startUserMedia(stream) {
     if (isSafari) {
         navigator.mediaDevices.enumerateDevices().then(gotDevices).catch(handleError);
     } else {
-        //     __log('not safari...');
+        if (debug) __log('not safari...');
+
+        var input = audio_context.createMediaStreamSource(stream);
+        if (debug) __log('Media stream created : ' + input);
+
+        recorder = new Recorder(input);
+        if (debug) __log('Recorder initialised.');
+
+        rememberedInput = input;
         webAudioMicAvailable();
     }
 

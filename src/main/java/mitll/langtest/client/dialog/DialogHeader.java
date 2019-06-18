@@ -363,7 +363,6 @@ public class DialogHeader {
   }
 
   /**
-   *
    * @return
    */
   @NotNull
@@ -410,7 +409,7 @@ public class DialogHeader {
     {
       boolean isDialog = controller.getStorage().isTrue(IS_DIALOG_MODE_CHOICE);
       boolean isEditorView = thisView == TURN_EDITOR || thisView == CORE_EDITOR;
-    //  logger.info("isDialog " + isDialog + " is editor " + isEditorView);
+      //  logger.info("isDialog " + isDialog + " is editor " + isEditorView);
 
       modeListener.setIsDialog(isDialog && !isEditorView);
 
@@ -433,13 +432,13 @@ public class DialogHeader {
   }
 
   private void gotClickOnDialog() {
-   // logger.info("got click on dialog choice");
+    // logger.info("got click on dialog choice");
     controller.getStorage().setBoolean(IS_DIALOG_MODE_CHOICE, true);
     modeListener.gotDialog();
   }
 
   private void gotClickOnInterpreter() {
-   // logger.info("got click on dialog choice");
+    // logger.info("got click on dialog choice");
     controller.getStorage().setBoolean(IS_DIALOG_MODE_CHOICE, false);
     modeListener.gotInterpreter();
   }
@@ -634,8 +633,10 @@ public class DialogHeader {
     controller.getNavigation().show(getPrevView());
   }
 
-  public void gotGoForward() {
-    controller.getNavigation().show(getNextView());
+  void gotGoForward() {
+    if (controller != null && controller.getNavigation() != null && getNextView() != null) {
+      controller.getNavigation().show(getNextView());
+    }
   }
 
   private String getPrevTooltip() {

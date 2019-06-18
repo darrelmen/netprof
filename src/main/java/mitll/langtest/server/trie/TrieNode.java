@@ -39,7 +39,7 @@ public class TrieNode<T> {
 
   private List<EmitValue<T>> emitList; // define emission values for each node
 
-  public TrieNode() {
+  TrieNode() {
     this.gotoMap = null;
     this.failureNode = null;
     this.emitList = null;
@@ -55,7 +55,7 @@ public class TrieNode<T> {
    * @return
    * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    */
-  public List<EmitValue<T>> getEmitList() {
+  List<EmitValue<T>> getEmitList() {
     return emitList;
   }
 
@@ -63,7 +63,7 @@ public class TrieNode<T> {
    * @return
    * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    */
-  public TrieNode<T> getFailureNode() {
+  TrieNode<T> getFailureNode() {
     return failureNode;
   }
 
@@ -71,7 +71,7 @@ public class TrieNode<T> {
    * @return
    * @see mitll.langtest.server.trie.Trie#computeFailureFunction()
    */
-  public boolean hasTransitionLabel(String transitionLabel) {
+  boolean hasTransitionLabel(String transitionLabel) {
     return getNextState(transitionLabel) != null;
   }
 
@@ -81,7 +81,7 @@ public class TrieNode<T> {
    * @param transitionLabel
    * @return node for label or null if not known
    */
-  public TrieNode<T> getNextState(String transitionLabel) {
+  TrieNode<T> getNextState(String transitionLabel) {
     if (singleTransition != null) {
       return (singleTransition.equals(transitionLabel)) ? singleNode : null;
     }

@@ -58,12 +58,9 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
   private final Logger logger = Logger.getLogger("CreateDialogDialog");
 
   private static final String PLEASE_CHOOSE = "Please choose.";
- // public static final String CHOOSE_TYPE_OF_DIALOG = "-- Choose type of dialog --";
   static final String HEIGHT = 100 + "px";
 
   private FormField entitleBox;
-//  private ListBox dialogType;
-//  private ControlGroup dialogTypeContainer;
 
   /**
    * @param current
@@ -120,20 +117,9 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
 
     child.add(grid);
 
-  //  addDialogType(child);
-
     if (isEdit) {
       child.add(getImageContainer());
     }
-   /* {
-      ListBox listBox = getListBox(200);
-      listBox.addStyleName("leftFiveMargin");
-      listBox.addItem("-- Choose first speaker --");
-      listBox.addItem("English Speaker");
-      listBox.addItem(controller.getProjectStartupInfo().getLanguageInfo().toDisplay() + " Speaker");
-      child.add(listBox);
-    }*/
-    //listBox.addChangeHandler(event -> gotChangeOn);
 
     Widget privacyChoices = getPrivacyChoices();
     privacyChoices.setHeight("105px");
@@ -161,32 +147,6 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     image.setWidth(HEIGHT);
     return image;
   }
-
-/*
-  private void addDialogType(Panel child) {
-    ListBox listBox = getListBox(200);
-    listBox.addStyleName("leftFiveMargin");
-    listBox.addItem(CHOOSE_TYPE_OF_DIALOG);
-    listBox.addItem(DialogType.DIALOG.toString());
-    listBox.addItem(DialogType.INTERPRETER.toString());
-    dialogTypeContainer = new ControlGroup();
-
-    dialogTypeContainer.setWidth("50%");
-    dialogTypeContainer.addStyleName("floatLeft");
-    dialogTypeContainer.add(listBox);
-    dialogType = listBox;
-    child.add(dialogTypeContainer);
-
-    if (isEdit) {
-      if (getCurrent().getKind() == DialogType.DIALOG) {
-        listBox.setSelectedValue(DialogType.DIALOG.toString());
-      } else if (getCurrent().getKind() == DialogType.INTERPRETER) {
-        listBox.setSelectedValue(DialogType.INTERPRETER.toString());
-      }
-      listBox.setEnabled(false);
-    }
-  }
-*/
 
   @Override
   protected void addDescription(Panel child) {
@@ -227,25 +187,6 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
           break;
         }
       }
-
-/*      if (validUnit) {
-        boolean valid = false;
-        try {
-          DialogType.valueOf(this.dialogType.getSelectedValue());
-          valid = true;
-        } catch (IllegalArgumentException e) {
-          // e.printStackTrace();
-        }
-
-        if (!valid) {
-          markError(dialogTypeContainer, dialogType, dialogType, PLEASE_CHOOSE, "Please choose a dialog type");
-        }
-
-        logger.info("isValid " + valid);
-        return valid;
-      } else {
-        return false;
-      }*/
 
       return validUnit;
     } else {
@@ -288,7 +229,6 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
         new ArrayList<>(),
         new ArrayList<>(),
         new ArrayList<>(),
-//        DialogType.valueOf(this.dialogType.getSelectedValue()),
         DialogType.INTERPRETER, // always interpreter
         "",
         isPrivate
@@ -323,14 +263,21 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     return "Orientation";
   }
 
+  /**
+   * @see #getPrivacyChoices
+   */
   @Override
   protected void gotClickOnPublic() {
-    getCurrent().getMutable().setIsPrivate(false);
+    if (isEdit) {
+      getCurrent().getMutable().setIsPrivate(false);
+    }
   }
 
   @Override
   protected void gotClickOnPrivate() {
-    getCurrent().getMutable().setIsPrivate(true);
+    if (isEdit) {
+      getCurrent().getMutable().setIsPrivate(true);
+    }
   }
 
   @Override
@@ -339,9 +286,6 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     mutable.setForeignLanguage(titleBox.getSafeText());
     mutable.setEnglish(entitleBox.getSafeText());
     mutable.setOrientation(theDescription.getText());
-//    mutable.setDialogType(DialogType.valueOf(dialogType.getSelectedValue()));
-//    logger.info("doEdit : using image " + imageID);
-    //  mutable.setImageID(imageID);
 
     controller.getDialogService().update(currentSelection, new AsyncCallback<Void>() {
       @Override

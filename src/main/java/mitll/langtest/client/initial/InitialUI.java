@@ -85,7 +85,10 @@ import static mitll.langtest.client.user.UserPassLogin.*;
 public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private final Logger logger = Logger.getLogger("InitialUI");
 
+  private static final String PLEASE_ALLOW_RECORDING1 = "pleaseAllowRecording";
+
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_GOT_MICS = false;
 
   private static final boolean DO_HEARTBEAT = true;
 
@@ -147,7 +150,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private DivWidget verticalContainer;
   private final ProjectChoices choices;
 
-
   /**
    * @param langTest
    * @param userManager
@@ -176,7 +178,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   public INavigation getNavigation() {
     return navigation;
   }
-
 
   /**
    * So, if we're currently showing the login, let's switch to the tab panel...
@@ -324,9 +325,10 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
   /**
    * @seex mitll.langtest.client.LangTest.LogoutClickHandler#onClick(com.google.gwt.event.dom.client.ClickEvent)
+   * @see #logout
    */
   private void resetState() {
-    logger.info("resetState");
+   // logger.info("resetState");
     pushClearHistory(); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
@@ -566,6 +568,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   @NotNull
   private DivWidget getPleaseAllowRecording() {
     DivWidget widget = new DivWidget();
+    widget.setId(PLEASE_ALLOW_RECORDING1);
     widget.getElement().getStyle().setMarginLeft(550, Style.Unit.PX);
 
     if (BrowserCheck.isSafari()) {
@@ -613,20 +616,32 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    *
    * @see #configureUIGivenUser
    * @see UILifecycle#gotUser(HasID)
+   * @see #doAfterGotMics
    */
-  private void showNavigation() {
+  private boolean showNavigation() {
     int childCount = contentRow.getElement().getChildCount();
     if (childCount <= 2) {
       if (DEBUG) {
+        if (childCount > 0) {
+          Widget widget = contentRow.getWidget(0);
+          logger.info("showNavigation is " + widget.getElement().getId());
+        }
         logger.info("showNavigation : - add to content (" + contentRow.getId() +
-            ") root = " + childCount);
+            ")" +
+            "\n\tcount = " + childCount);
       }
 
-      contentRow.remove(pleaseAllow);
-      if (navigation == null) makeNavigation(); // TODO : cheesy
-      contentRow.add(navigation.getNavigation());
+      if (contentRow.remove(pleaseAllow) || childCount == 0) {
+        if (navigation == null) makeNavigation(); // TODO : cheesy
+        contentRow.add(navigation.getNavigation());
+        return true;
+      } else {
+        logger.info("showNavigation : didn't remove please allow.");
+        return false;
+      }
     } else {
       logger.warning("\n\n\nshowNavigation : first row has " + childCount + " child(ren) - not adding tab panel???");
+      return false;
     }
   }
 
@@ -738,7 +753,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   }
 
   private void hideCogMenu() {
-    logger.info("hideCogMenu");
+    // logger.info("hideCogMenu");
     banner.setCogVisible(false);
   }
 
@@ -793,6 +808,11 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     verticalContainer.getElement().getStyle().setPaddingRight(0, Style.Unit.PX);
   }
 
+  public boolean isShowingPleaseAllow() {
+    return contentRow.getWidgetCount() == 1 &&
+        contentRow.getWidget(0).getElement().getId().equalsIgnoreCase(PLEASE_ALLOW_RECORDING1);
+  }
+
   /**
    * Makre sure we have checked the mic choice before continuing to show the usual UI.
    * <p>
@@ -805,17 +825,14 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    */
   @Override
   public void gotUser(HasID user) {
-    tries = 5;
-
     populateRootPanelIfLogin();
 
     long userID = -1;
     if (user != null) {
       userID = user.getID();
     }
-    final long fuserID = userID;
 
-    if (DEBUG) logger.info("gotUser : userID " + userID);
+    if (DEBUG_GOT_MICS) logger.info("gotUser : userID " + userID);
 
     banner.setUserName(getGreeting());
 
@@ -823,35 +840,25 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       doAfterGotMics(userID);
     } else {
       logger.info("gotUser : Waiting on input mic selection...");
-//      while (tries-- > 0) {
-//        Timer timer = new Timer() {
-//          @Override
-//          public void run() {
-//            logger.info("gotUser : check...");
-//            if (WebAudioRecorder.didCheckDevices()) {
-//              doAfterGotMics(fuserID);
-//            }
-//          }
-//        };
-//        timer.schedule(1000);
-//      }
     }
   }
 
   private void doAfterGotMics(long userID) {
     if (userID != lastUser) {
-      if (DEBUG) logger.info("gotUser : userID " + userID + " vs last " + lastUser);
+      if (DEBUG_GOT_MICS) logger.info("doAfterGotMics : userID " + userID + " vs last " + lastUser);
       configureUIGivenUser(userID);
       lifecycleSupport.logEvent("No widget", "UserLogin", "N/A", "User Login by " + userID);
     } else {
-      if (DEBUG) {
-        logger.info("gotUser ignoring got user for current user " + userID + " perms " + userManager.getPermissions());
+      if (DEBUG_GOT_MICS) {
+        logger.info("doAfterGotMics ignoring got user for current user " + userID + " perms " + userManager.getPermissions());
       }
+
       if (navigation != null) {
-        showNavigation();
-        navigation.showPreviousState();
+        if (showNavigation()) {
+          navigation.showPreviousState();
+        }
       } else {
-        logger.warning("gotUser how can navigation be null????");
+        logger.warning("doAfterGotMics how can navigation be null????");
       }
     }
 
@@ -859,8 +866,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       showCogMenu();
     }
   }
-
-  int tries = 5;
 
   /**
    * @see ProjectChoices#showDeleteDialog

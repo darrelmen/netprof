@@ -52,7 +52,7 @@ public interface UILifecycle {
    * @param user
    */
   void gotUser(HasID user);
-
+  boolean isShowingPleaseAllow();
   void startOver();
 
   void getUserPermissions();

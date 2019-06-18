@@ -635,7 +635,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     defectMenuVisible();
 
     boolean isDialog = isDialogMode();
-  if (DEBUG)  logger.info("isDialog " + isDialog);
+    if (DEBUG) logger.info("isDialog " + isDialog);
     setDialogNavVisible(hasProjectChoice() && isDialog);
 
     NavLink widgets = viewToLink.get(RECORD_SENTENCES);
@@ -668,7 +668,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
   private boolean isDialogMode() {
     ProjectMode mode = getModeMaybeFromView();
-    if (DEBUG)     logger.info("isDialogMode " + mode);
+    if (DEBUG) logger.info("isDialogMode " + mode);
     return
         controller.getProjectStartupInfo() != null &&
             controller.getProjectStartupInfo().getProjectType() == DIALOG &&
@@ -679,10 +679,10 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     ProjectMode mode = getMode();
     if (navigation != null) {
       VIEWS currentView = navigation.getCurrentView();
-      if (DEBUG)      logger.info("currentView " + currentView);
+      if (DEBUG) logger.info("currentView " + currentView);
       ProjectMode mode1 = currentView.getMode();
       if (mode1 != mode && mode1 != EITHER) {
-        logger.info("currentView " + currentView + " trumps the stored mode " + mode);
+        if (DEBUG) logger.info("currentView " + currentView + " trumps the stored mode " + mode);
         mode = mode1;
       }
     }
@@ -703,12 +703,14 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     ProjectMode mode = getModeMaybeFromView();
     dialognav.setVisible(visible && hasProjectChoice && (mode == ProjectMode.DIALOG || mode == UNSET));
 
-    if (DEBUG)    logger.info("setDialogNavVisible dialog nav " + dialognav.isVisible());
+    if (DEBUG) {
+      logger.info("setDialogNavVisible dialog nav " + dialognav.isVisible());
 
-    if (!dialogEditorDropdown.isVisible()) {
-      logger.info("setDialogNavVisible visible " + visible);
-      logger.info("setDialogNavVisible mode    " + mode);
-      logger.info("setDialogNavVisible hasProjectChoice " + hasProjectChoice);
+      if (!dialogEditorDropdown.isVisible()) {
+        logger.info("setDialogNavVisible visible " + visible);
+        logger.info("setDialogNavVisible mode    " + mode);
+        logger.info("setDialogNavVisible hasProjectChoice " + hasProjectChoice);
+      }
     }
 
     boolean showDialogEditor = shouldShowDialogEditor();

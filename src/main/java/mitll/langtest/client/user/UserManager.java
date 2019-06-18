@@ -108,6 +108,10 @@ public class UserManager {
     }
   }
 
+  public void report() {
+    logger.info("user  " +getUser() + " current " + current);
+  }
+
   /**
    * instead have call to get permissions for a user.
    *
@@ -197,17 +201,12 @@ public class UserManager {
    * @see mitll.langtest.client.LangTest#getUser
    */
   public int getUser() {
-    if (Storage.isLocalStorageSupported()) {
-      return storage.getUserID();
-    } else {
-      return userID;
-    }
+    return (Storage.isLocalStorageSupported()) ? storage.getUserID() : userID;
   }
 
   void setPendingUserStorage(String pendingID) {
     storage.setPendingUserStorage(pendingID);
   }
-
 
   /**
    * don't store the password hash in local storage :)
