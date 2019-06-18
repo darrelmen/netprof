@@ -29,6 +29,7 @@
 
 package mitll.langtest.server.database.postgres;
 
+import mitll.langtest.server.audio.tools.OOVWordsHelper;
 import mitll.langtest.server.database.BaseTest;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.dialog.IDialogDAO;
@@ -67,6 +68,32 @@ public class DialogEditorTest extends BaseTest {
   private static final String SECOND = "second";
   private static final String FIRST = "first";
   private static final int DOMINO_ID = 99;
+
+  @Test
+  public void testChineseOOV() {
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = andPopulate.getProject(12, false);
+    andPopulate.waitForSetupComplete();
+    String foreignLanguagePhrase = "Hello, how are you? how are you?";
+    Collection<String> strings = project.getAudioFileHelper().checkLTSOnForeignPhrase(foreignLanguagePhrase, "");
+    logger.warn("got " + strings);
+    Project englishProject = andPopulate.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
+
+    List<CommonExercise> rawExercises = project.getRawExercises();
+
+    CommonExercise easy = null;
+    for (CommonExercise commonExercise : rawExercises) {
+      if (!commonExercise.hasEnglishAttr()) {
+        easy = commonExercise;
+        break;
+      }
+    }
+//    CommonExercise commonExercise = rawExercises.get(0);
+    logger.info("First is " + easy.getForeignLanguage() + " " + easy.getEnglish() + " has eng " + easy.hasEnglishAttr());
+
+    OOVWordsAndUpdate oovWordsAndUpdate = new OOVWordsHelper().get(easy, foreignLanguagePhrase, englishProject, project);
+    logger.info("got " + oovWordsAndUpdate);
+  }
 
   @Test
   public void testNewDialog() {
