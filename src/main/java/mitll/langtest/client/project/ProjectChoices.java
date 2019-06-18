@@ -659,8 +659,13 @@ public class ProjectChoices extends ThumbnailChoices {
       {
         String countryCode = projectForLang.getCountryCode();
         if (DEBUG) logger.info("getImageAnchor : for " + name + " cc " + countryCode);
-
+        String actualName = projectForLang.getLanguage().getActualName();
         PushButton button = new PushButton(getFlag(countryCode));
+       // button.setText(actualName);
+        String html = "<h3 style='color:darkblue'>" + actualName + "</h3>";
+        logger.info("length " + actualName.length() + " " + name);
+        if (actualName.length()>24) html= "<h4 style='color:darkblue'>" + actualName + "</h4>";
+        button.setHTML(html);
 
         button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projectForLang.getID(), 1));
         thumbnail.add(button);

@@ -42,33 +42,33 @@ import com.google.gwt.user.client.rpc.IsSerializable;
  * Also see <a href='https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl#Locale_identification_and_negotiation'>Locale identification and negotiation</a>
  */
 public enum Language implements IsSerializable {
-  ARABIC(true, "ar", "al"),
-  MANDARIN(32, "CHINESE-MANDARIN", "cmn", "cn", "Chinese"),
-  CROATIAN("SERBO-CROATIAN","hr","hr"),
-  DARI(true, "PERSIAN-AFGHAN", "prs", "af"),
-  EGYPTIAN(true, "ARABIC-EGYPTIAN", "arz", "eg"),
-  ENGLISH("en", "us"),
-  FARSI(true, "PERSIAN-IRANIAN", "fa", "ir"),
-  FRENCH("fr"),
-  GERMAN("de"),
-  HINDI("hi", "in"),
-  IRAQI(true, "ARABIC-IRAQI", "ar-IQ", "iq"),
-  JAPANESE("ja", "jp"),
-  LEVANTINE(true, "ARABIC-LEVANTINE", "ar-SY", "sy"),
-  KOREAN(32, "ko", "kr"),
-  MSA(true, "ARABIC (MODERN STANDARD)", "ar", "al","MSA"),
-  PASHTO(true, "PUSHTU-AFGHAN", "ps", "af"),
-  PORTUGUESE("PORTUGUESE-BRAZILIAN", "pt", "br"),
-  RUSSIAN("ru"),
-  SERBIAN("SERBO-CROATIAN", "sr", "rs"),
-  SORANI(true, "ku", "ku"),
-  SPANISH("es"),
-  SUDANESE(true, "ARABIC-SUDANESE", "apd", "sd"),
-  TAGALOG("tl", "ph"),
-  TURKISH("tr", "tr"),
-  URDU(true, "ur", "pk"),
+  ARABIC(true, "ar", "al", " العربية"),
+  MANDARIN(32, "CHINESE-MANDARIN", "cmn", "cn", "Chinese", "中文"),
+  CROATIAN("SERBO-CROATIAN", "hr", "hr", "Hrvatski"),
+  DARI(true, "PERSIAN-AFGHAN", "prs", "af", "دری"),
+  EGYPTIAN(true, "ARABIC-EGYPTIAN", "arz", "eg", "اللغة المصرية العامية"),
+  ENGLISH("en", "us", "English"),
+  FARSI(true, "PERSIAN-IRANIAN", "fa", "ir", "فارسی"),
+  FRENCH("fr", "Français"),
+  GERMAN("de", "Deutsch"),
+  HINDI("hi", "in", "हिन्दी"),
+  IRAQI(true, "ARABIC-IRAQI", "ar-IQ", "iq", "اللهجة العراقية"),
+  JAPANESE("ja", "jp", "日本語"),
+  LEVANTINE(true, "ARABIC-LEVANTINE", "ar-SY", "sy", "اللَّهْجَةُ الشَّامِيَّة"),
+  KOREAN(32, "ko", "kr", "한국어"),
+  MSA(true, "ARABIC (MODERN STANDARD)", "ar", "al", "MSA", "العربية الفصحى, عربي فصيح"),
+  PASHTO(true, "PUSHTU-AFGHAN", "ps", "af", "پښتو"),
+  PORTUGUESE("PORTUGUESE-BRAZILIAN", "pt", "br", "Português"),
+  RUSSIAN("ru", "Русский"),
+  SERBIAN("SERBO-CROATIAN", "sr", "rs", "српски"),
+  SORANI(true, "ku", "ku", "سۆرانی"),
+  SPANISH("es", "Español"),
+  SUDANESE(true, "ARABIC-SUDANESE", "apd", "sd", "سوداني"),
+  TAGALOG("tl", "ph", "Tagalog"),
+  TURKISH("tr", "tr", "Türkçe"),
+  URDU(true, "ur", "pk", "اُردُو"),
 
-  UNKNOWN("unk", "us");  // TROUBLE
+  UNKNOWN("unk", "us", "Unknown");  // TROUBLE
 
   private final boolean isRTL;
   private int fontSize = 24;
@@ -76,43 +76,47 @@ public enum Language implements IsSerializable {
   private String locale = "";
   private String cc = "";
   private String displayName = "";
+  private String actualName = "";
 
-  Language(String locale, String cc) {
+  Language(String locale, String cc, String actualName) {
     this.isRTL = false;
     this.locale = locale;
     this.cc = cc;
+    this.actualName = actualName;
   }
 
-  Language(String localeAndCC) {
+  Language(String localeAndCC, String actualName) {
     this.isRTL = false;
     this.locale = localeAndCC;
     this.cc = localeAndCC;
+    this.actualName = actualName;
   }
 
-  Language(boolean isRTL, String locale, String cc) {
+  Language(boolean isRTL, String locale, String cc, String actualName) {
     this.isRTL = isRTL;
     this.locale = locale;
     this.cc = cc;
+    this.actualName = actualName;
   }
 
-  Language(boolean isRTL, String dominoName, String locale, String cc) {
-    this(isRTL, locale, cc);
+  Language(boolean isRTL, String dominoName, String locale, String cc, String actualName) {
+    this(isRTL, locale, cc, actualName);
     this.dominoName = dominoName;
   }
 
-  Language(boolean isRTL, String dominoName, String locale, String cc, String displayName) {
-    this(isRTL, locale, cc);
+  Language(boolean isRTL, String dominoName, String locale, String cc, String displayName, String actualName) {
+    this(isRTL, locale, cc, actualName);
     this.dominoName = dominoName;
     this.displayName = displayName;
   }
 
-  Language(String dominoName, String locale, String cc) {
-    this(false, locale, cc);
+  Language(String dominoName, String locale, String cc, String actualName) {
+    this(false, locale, cc, actualName);
     this.dominoName = dominoName;
   }
 
-  Language(int fontSize, String locale, String cc) {
-    this(false, locale, cc);
+  Language(int fontSize, String locale, String cc, String actualName) {
+    this(false, locale, cc, actualName);
     this.fontSize = fontSize;
   }
 
@@ -125,10 +129,11 @@ public enum Language implements IsSerializable {
    * @param cc
    * @param displayName
    */
-  Language(int fontSize, String dominoName, String locale, String cc, String displayName) {
-    this(fontSize, locale, cc);
+  Language(int fontSize, String dominoName, String locale, String cc, String displayName, String actualName) {
+    this(fontSize, locale, cc, actualName);
     this.dominoName = dominoName;
     this.displayName = displayName;
+    this.actualName = actualName;
   }
 
   public String toDisplay() {
@@ -157,5 +162,9 @@ public enum Language implements IsSerializable {
 
   public String getCC() {
     return cc;
+  }
+
+  public String getActualName() {
+    return actualName;
   }
 }
