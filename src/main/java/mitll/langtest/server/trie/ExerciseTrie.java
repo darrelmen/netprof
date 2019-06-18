@@ -37,16 +37,17 @@ import mitll.langtest.shared.exercise.CommonShell;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
   private static final Logger logger = LogManager.getLogger(ExerciseTrie.class);
 
   private static final int TOOLONG_TO_WAIT = 150;
+  private static final int MAX_TOKENS = 3;
 
   private static final String MANDARIN = "Mandarin";
   private static final String KOREAN = "Korean";
@@ -231,22 +232,54 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
     // addSubstrings(exercise, english);
   }
 
+  /**
+   * @param exercise
+   * @param english
+   * @see #addContextSentences(boolean, boolean, CommonExercise)
+   */
   private void addEnglish(T exercise, String english) {
     if (english != null && !english.isEmpty()) {
       String trimmed = getTrimmed(english);
       if (!trimmed.isEmpty()) {
-        if (debug) logger.info("addEnglish 2 " + trimmed);
+        if (debug) logger.info("addEnglish 2 '" + trimmed + "'");
         addEntryToTrie(new ExerciseWrapper<>(trimmed, exercise));
         addSuffixes(exercise, trimmed);
       }
     }
   }
 
+  /**
+   * Max of 3 tokens for an entry.
+   * @param exercise
+   * @param trimmed
+   */
   private void addSuffixes(T exercise, String trimmed) {
-    Collection<String> tokens = smallVocabDecoder.getTokens(trimmed, false);
+   // Collection<String> tokens = smallVocabDecoder.getTokens(trimmed.toLowerCase(), false);
+    List<String> trimmedTokens = getTrimmedTokens(smallVocabDecoder.getTokens(trimmed.toLowerCase(), false));
 
-    if (tokens.size() > 1) {
-      trimmed = trimmed.toLowerCase();
+    if (trimmedTokens.size() > 1) {
+      Deque<String> slidingWindow = new LinkedList<>();
+      Iterator<String> iterator = trimmedTokens.iterator();
+      for (int i = 0; i < Math.min(MAX_TOKENS, trimmedTokens.size()); i++) slidingWindow.add(iterator.next());
+
+      while (iterator.hasNext()) {
+        String substring = getStringFromSlidingWindow(slidingWindow);
+        if (debug) logger.info("addSuffixes '" + substring + "'");
+
+        addEntryNoLC(exercise, substring);
+
+        slidingWindow.removeFirst();
+        slidingWindow.addLast(iterator.next());
+      }
+
+      while (!slidingWindow.isEmpty()) {
+        String substring = getStringFromSlidingWindow(slidingWindow);
+        if (debug) logger.info("addSuffixes '" + substring + "'");
+
+        addEntryNoLC(exercise, substring);
+        slidingWindow.removeFirst();
+      }
+/*
       for (String token : tokens) {
         if (token.length() > trimmed.length()) {
           logger.error("token   " + token);
@@ -263,8 +296,30 @@ public class ExerciseTrie<T extends CommonExercise> extends Trie<T> {
           }
           trimmed = trimmed1;
         }
-      }
+      }*/
     }
+  }
+
+  @NotNull
+  private List<String> getTrimmedTokens(Collection<String> tokens) {
+    List<String> trimmedTokens = new ArrayList<>(tokens.size());
+    tokens.forEach(t -> {
+      String trimmedToken = smallVocabDecoder.getTrimmed(t);
+      if (!trimmedToken.isEmpty()) trimmedTokens.add(trimmedToken);
+    });
+    return trimmedTokens;
+  }
+
+  @NotNull
+  private String getStringFromSlidingWindow(Deque<String> slidingWindow) {
+    StringBuilder builder = new StringBuilder();
+
+    Iterator<String> iterator1 = slidingWindow.iterator();
+    while (iterator1.hasNext()) {
+      builder.append(iterator1.next());
+      if (iterator1.hasNext()) builder.append(" ");
+    }
+    return builder.toString();
   }
 
   private String getTrimmed(String english) {

@@ -706,14 +706,18 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       CommonExercise exercise = setAttributes(exid, replacement);
 
-      if (exercise.getEnglish().equals(replacement.getEnglish())) {
-        if (exercise.getForeignLanguage().equals(replacement.getForeignLanguage())) {
-
-        } else {
-          logger.warn("simpleRefresh huh? after refresh, new " + exercise.getForeignLanguage() + " vs " + replacement.getForeignLanguage());
-        }
+      if (exercise == null) {
+        logger.warn("simpleRefresh didn't find " + exid);
       } else {
-        logger.warn("simpleRefresh huh? after refresh, new " + exercise.getEnglish() + " vs " + replacement.getEnglish());
+        if (exercise.getEnglish().equals(replacement.getEnglish())) {
+          if (exercise.getForeignLanguage().equals(replacement.getForeignLanguage())) {
+
+          } else {
+            logger.warn("simpleRefresh huh? after refresh, new " + exercise.getForeignLanguage() + " vs " + replacement.getForeignLanguage());
+          }
+        } else {
+          logger.warn("simpleRefresh huh? after refresh, new " + exercise.getEnglish() + " vs " + replacement.getEnglish());
+        }
       }
 
       if (DEBUG_REFRESH) {
@@ -731,7 +735,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
    * @return
    * @see #simpleRefresh(int)
    */
-  @NotNull
   private CommonExercise setAttributes(int exid, CommonExercise replacement) {
     List<ExerciseAttribute> attributesFor = userExerciseDAO.getExerciseAttributeDAO().getAttributesFor(exid);
 
@@ -747,9 +750,17 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
     }
 
     CommonExercise exercise = getExercise(exid);
-    if (exercise.getAttributes().size() != attributesFor.size()) {
-      logger.error("setAttributes refresh attributes after " + exercise.getAttributes());
-      logger.error("setAttributes refresh attributes after " + attributesFor);
+    if (exercise == null) {
+      if (!refresh(exid)) logger.warn("setAttributes couldn't refresh " + exid);
+      else exercise = getExercise(exid);
+    }
+    if (exercise == null) {
+      logger.warn("setAttributes couldn't find " + exid);
+    } else {
+      if (exercise.getAttributes().size() != attributesFor.size()) {
+        logger.error("setAttributes refresh attributes after " + exercise.getAttributes());
+        logger.error("setAttributes refresh attributes after " + attributesFor);
+      }
     }
     return exercise;
   }

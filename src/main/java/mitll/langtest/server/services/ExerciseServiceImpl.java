@@ -1316,30 +1316,50 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * @see #getFullExercises
    */
   @NotNull
-  private List<ClientExercise> getCommonExercisesWithAnnotationsAdded(Collection<Integer> ids,
-
-                                                                      int projectID) {
+  private List<ClientExercise> getCommonExercisesWithAnnotationsAdded(Collection<Integer> ids, int projectID) {
     Set<ClientExercise> toAddAudioTo = new HashSet<>();
 
     if (DEBUG) logger.info("getCommonExercisesWithAnnotationsAdded " + ids);
     long then = System.currentTimeMillis();
+
+    Project project = getProject(projectID);
+
     for (int exid : ids) {
       // make a copy so when we add audio attributes to it, they don't collide with each other in serialization!
-      CommonExercise byID = new Exercise(db.getCustomOrPredefExercise(projectID, exid));
+      CommonExercise customOrPredefExercise = project.getExerciseByID(exid);
+      if (customOrPredefExercise == null) {
+        boolean refresh = project.getExerciseDAO().refresh(exid);
+        if (!refresh) {
+          logger.warn("getCommonExercisesWithAnnotationsAdded couldn't find " + exid + " and couldn't refresh it?");
 
-      // deep copy!
-      List<ClientExercise> dirs = new ArrayList<>();
+        }
+        customOrPredefExercise = project.getExerciseByID(exid);
+      }
 
-      byID.getDirectlyRelated().forEach(dir -> dirs.add(new Exercise(dir.asCommon())));
-      byID.getDirectlyRelated().clear();
-      byID.getDirectlyRelated().addAll(dirs);
+      if (customOrPredefExercise == null) {
+        logger.warn("getCommonExercisesWithAnnotationsAdded : skipping " + exid);
+      } else {
+        CommonExercise byID = new Exercise(customOrPredefExercise);
 
-      toAddAudioTo.add(byID);
+        // deep copy!
+        copyContextSentences(byID);
+
+        toAddAudioTo.add(byID);
+      }
     }
     long now = System.currentTimeMillis();
     if (now - then > 30) logger.info("took " + (now - then) + " top copy " + ids.size());
     addAnnotationsToAll(toAddAudioTo);
     return new ArrayList<>(toAddAudioTo);
+  }
+
+  private void copyContextSentences(CommonExercise byID) {
+    List<ClientExercise> dirs = new ArrayList<>();
+
+    List<ClientExercise> directlyRelated = byID.getDirectlyRelated();
+    directlyRelated.forEach(dir -> dirs.add(new Exercise(dir.asCommon())));
+    directlyRelated.clear();
+    directlyRelated.addAll(dirs);
   }
 
   /**

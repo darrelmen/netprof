@@ -46,6 +46,7 @@ import mitll.langtest.server.audio.PathWriter;
 import mitll.langtest.server.audio.TrackInfo;
 import mitll.langtest.server.audio.image.ImageType;
 import mitll.langtest.server.audio.imagewriter.SimpleImageWriter;
+import mitll.langtest.server.audio.tools.OOVWordsHelper;
 import mitll.langtest.server.database.AnswerInfo;
 import mitll.langtest.server.database.audio.AudioInfo;
 import mitll.langtest.server.database.audio.EnsureAudioHelper;
@@ -1294,57 +1295,18 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
     CommonExercise exerciseByID = project.getExerciseByID(exid);
 
     if (exerciseByID == null) {
+      boolean refresh = project.getExerciseDAO().refresh(exid);
+      if (refresh) logger.info("isValid Did refresh of " + exerciseByID);
+      else logger.warn("isValid no refresh for " + exerciseByID);
+
+      exerciseByID = project.getExerciseByID(exid);
+    }
+    if (exerciseByID == null) {
       logger.warn("isValid can't find " + exid);
       return new OOVWordsAndUpdate(false);
     } else {
-      Exercise exercise = new Exercise(exerciseByID);
-      String trim = getTrim(text);
-
-      if (DEBUG_VALID) logger.info("isValid " + text + " = " + trim);
-
-      exercise.getMutable().setForeignLanguage(trim);
-
-      boolean hasEnglishAttr = exercise.hasEnglishAttr();
-      boolean allEnglish = hasEnglishAttr;
-      boolean noEnglish = !hasEnglishAttr;
-
       Project englishProject = db.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
-      IPronunciationLookup.InDictStat tokenStats = null;
-      if (englishProject == null) {
-        logger.warn("isValid : no english project?");
-      } else {
-        tokenStats = englishProject.getAudioFileHelper().getASR().getPronunciationLookup().getTokenStats(trim);
-      }
-
-      if (tokenStats != null) {
-        if (hasEnglishAttr) {      // expecting english, but there is none there, probably got swapped content
-          if (DEBUG_VALID) logger.info("isValid, expecting english, got " + tokenStats);
-          if (tokenStats.getNumInDict() == 0 && tokenStats.getNumTokens() > 0) {
-            noEnglish = true;
-          }
-        } else { // expecting chinese (say) but it's all english? probably a swap
-          if (DEBUG_VALID) logger.info("isValid, expecting " + project.getLanguage() + ", got " + tokenStats);
-          if (tokenStats.getNumTokens() == tokenStats.getNumInDict() && tokenStats.getNumTokens() > 0) {
-            IPronunciationLookup.InDictStat tokenStats2 = getAudioFileHelper().getASR().getPronunciationLookup().getTokenStats(trim);
-            allEnglish = (tokenStats2.getNumInDict() == 0);  // all the tokens are english, and none are fl tokens
-          }
-        }
-      }
-
-      Map<Integer, String> idToNorm = new HashMap<>();
-      Set<String> oovTokens = project.getAudioFileHelper().isValid(exercise, idToNorm);
-      Collection<String> values = idToNorm.values();
-
-      String normText = values.isEmpty() ? trim : values.iterator().next();
-
-      OOVWordsAndUpdate oovWordsAndUpdate = new OOVWordsAndUpdate(false, oovTokens, project.getModelType() == ModelType.HYDRA, normText);
-      oovWordsAndUpdate.setAllEnglish(allEnglish);
-      oovWordsAndUpdate.setNoEnglish(noEnglish);
-      oovWordsAndUpdate.setCheckValid(true);
-
-      if (DEBUG_VALID) logger.info("isValid : Sending " + oovWordsAndUpdate);
-
-      return oovWordsAndUpdate;
+      return new OOVWordsHelper().get(exerciseByID, text, englishProject, project);
     }
   }
 

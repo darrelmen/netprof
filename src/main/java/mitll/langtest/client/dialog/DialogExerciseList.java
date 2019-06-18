@@ -69,15 +69,16 @@ import java.util.stream.Collectors;
  * A facet list display of dialogs.
  */
 public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
-  public static final String PLEASE_SELECT_A_DIALOG = "Please select a dialog";
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
+  private static final String PLEASE_SELECT_A_DIALOG = "Please select a dialog";
+
   public static final String SUMMARY_DIALOG = "summaryDialog";
-  public static final String LISTEN_TO_THE_DIALOG = "Listen to the dialog.";
+  private static final String LISTEN_TO_THE_DIALOG = "Listen to the dialog.";
 
   public static final String SCORE = "Score";
-  public static final String STEP = "Step";
-  public static final String DIALOG1 = "Dialog";
+  private static final String STEP = "Step";
+  private static final String DIALOG1 = "Dialog";
 
   //  private static final String INTERPRETER_PNG = "interpreter.png";
   public static final String INTERP_COLOR = "aliceblue";
@@ -86,8 +87,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   public static final String LISTEN = "Listen";
   public static final String CORE_VOCAB = "Core Vocab";
 
-  private static final String LIST = "dialog";
-  private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to rehearse a " + LIST;
+  private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to rehearse a dialog";
   // private static final String YOUR_LISTS1 = "Your Dialogs";
   public static final String DIALOG = "Dialog";
   private static final int MY_LIST_HEIGHT = 420;//500;//530;//560;

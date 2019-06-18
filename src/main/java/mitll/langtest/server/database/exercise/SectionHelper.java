@@ -507,6 +507,11 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     return typeToMatchRet;
   }
 
+  /**
+   * @see #getTypeToMatchPairs(List, SectionNode, boolean)
+   * @param node
+   * @param typeToCount
+   */
   private void recurseAndCountMatchInfo(SectionNode node, Map<String, Map<String, MatchInfo>> typeToCount) {
     String childType = node.getChildType();
 

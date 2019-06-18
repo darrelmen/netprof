@@ -85,13 +85,13 @@ public class CheckLTS {
     return checkLTS(letterToSoundClass, foreignLanguagePhrase, transliteration);
   }
 
-  //private int spew = 0;
-
   /**
    * So chinese is special -- it doesn't do lts -- it just uses a dictionary
+   * Maybe later turn back on looking at transliteration.
    *
    * @param lts
    * @param foreignLanguagePhrase
+   * @param transliteration
    * @return set of oov tokens
    * @see #checkLTS(String, String)
    */
@@ -107,11 +107,9 @@ public class CheckLTS {
 //    if (removeAllAccents) logger.info("checkLTS " +foreignLanguagePhrase);
 
     Collection<String> tokens = smallVocabDecoder.getTokens(foreignLanguagePhrase);
-  //  Collection<String> translitTokens = transliteration.isEmpty() ? Collections.emptyList() : smallVocabDecoder.getTokens(transliteration);
+    //  Collection<String> translitTokens = transliteration.isEmpty() ? Collections.emptyList() : smallVocabDecoder.getTokens(transliteration);
 
     boolean translitOk = false;//isTranslitOk(lts, transliteration, tokens, translitTokens);
-
-    //   String language = isAsianLanguage ? " MANDARIN " : "";
 
     if (DEBUG) {
       logger.info("checkLTS '" + languageInfo + "'" +
@@ -134,9 +132,15 @@ public class CheckLTS {
 
         if (isAsianLanguage) {
           String segmentation = smallVocabDecoder.segmentation(trim);
+
           if (segmentation.isEmpty() && !translitOk) {
             logger.warn("checkLTSOnForeignPhrase: mandarin token : '" + token + "' invalid!");
             oov.add(trim);
+          } else {
+           // logger.info("checkLTSOnForeignPhrase : '" + token + "' = '" + segmentation + "'");
+            Arrays.stream(segmentation.split("\\s++")).forEach(tt -> {
+              if (!smallVocabDecoder.inDict(tt)) oov.add(tt);
+            });
           }
         } else {
           boolean htkEntry = htkDictionary.contains(token) || htkDictionary.contains(token.toLowerCase());

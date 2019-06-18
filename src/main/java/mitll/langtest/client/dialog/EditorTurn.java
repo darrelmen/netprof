@@ -69,9 +69,9 @@ public class EditorTurn extends PlayAudioExercisePanel
     implements ITurnPanel, IRehearseView, IRecordingTurnPanel, IFocusListener, AddDeleteListener {
   private final Logger logger = Logger.getLogger("EditorTurn");
 
-  public static final String PREFIX = "This turn should be in ";
+  private static final String PREFIX = "This turn should be in ";
   // public static final String IS_THERE_ENGLISH_IN_THIS_TURN = "Is there english in this turn?";
-  public static final String IS_THERE_ENGLISH_IN_THIS_TURN = PREFIX + "English.";
+  private static final String IS_THERE_ENGLISH_IN_THIS_TURN = PREFIX + "English.";
 
   private static final String REALLY_AVOID_LONG_PHRASES = "Really avoid long phrases.";
   private static final String AVOID_LONG_PHRASES = "Avoid long phrases.";
@@ -479,7 +479,7 @@ public class EditorTurn extends PlayAudioExercisePanel
       }
     } else {
       int length = content.split(" ").length;
-      logger.info("num tokens " + length);
+   //   logger.info("num tokens " + length);
 
       if (length > 10) {
         markRed();
@@ -623,6 +623,7 @@ public class EditorTurn extends PlayAudioExercisePanel
    */
   private void showOOVResult(OOVWordsAndUpdate result) {
     boolean hasEnglishAttr = clientExercise.hasEnglishAttr();
+    logger.info("showOOVResult " +result +" has english " + hasEnglishAttr);
     if (hasEnglishAttr && result.isNoEnglish()) {
       showFeedback(IS_THERE_ENGLISH_IN_THIS_TURN);
       turnFeedback.getElement().getStyle().setBackgroundColor("yellow");

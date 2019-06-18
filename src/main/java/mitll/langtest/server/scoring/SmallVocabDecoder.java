@@ -42,19 +42,6 @@ public class SmallVocabDecoder extends TextNormalizer {
   private static final Logger logger = LogManager.getLogger(SmallVocabDecoder.class);
 
   /**
-   * @see #getTrimmed(String)
-   * @see #lcToken
-   * <p>
-   * remove latin capital letter i with dot above - 0130
-   * 0x2026 = three dot elipsis
-   * FF01 = full width exclamation
-   * FF1B - full semi
-   * 002D - hyphen
-   */
-//  private static final String REMOVE_ME = "[\\u0130\\u2022\\u2219\\u2191\\u2193\\u2026\\uFF01\\uFF1B\\u002D;~/']";
-//  private static final String REPLACE_ME_OE = "[\\u0152\\u0153]";
-
-  /**
    * u00B7 = middle dot
    *
    * @see #segmentation
@@ -65,22 +52,18 @@ public class SmallVocabDecoder extends TextNormalizer {
   /**
    * @see #getTrimmedLeaveAccents
    */
-//  private static final String FRENCH_PUNCT = "[,.?!]";
   private static final boolean WARN_ABOUT_BAD_CHINESE = false;
-
-//  private static final String P_P = "\\p{P}";
-//  private static final String INTERNAL_PUNCT_REGEX = "(?:(?<!\\S)\\p{Punct}+)|(?:\\p{Punct}+(?!\\S))";
+  public static final char HIGHEST_ASCII = 'z';
 
   private HTKDictionary htkDictionary;
   private boolean isAsianLanguage;
 
   private static final int TOO_LONG = 8;
 
-  // private static final boolean DEBUG = false;
+  private final boolean removeAllAccents;
+
   private static final boolean DEBUG_PREFIX = false;
   private static final boolean DEBUG_SEGMENT = false;
-  // private static final boolean DEBUG_MANDARIN = true;
-  private final boolean removeAllAccents;
 
   /**
    * Compiles some handy patterns.
@@ -244,6 +227,7 @@ public class SmallVocabDecoder extends TextNormalizer {
   //back in
 
   /**
+   * check to see if all characters in a token are ASCII and if so doesn't attempt to split them into characters.
    * @param phrase
    * @return
    * @see CheckLTS#checkLTS
@@ -264,51 +248,62 @@ public class SmallVocabDecoder extends TextNormalizer {
       StringBuilder builder = new StringBuilder();
 
       List<Character> characters = new ArrayList<>(phrase.length());
+      boolean allASCII = true;
       for (char c : phrase.toCharArray()) {
         characters.add(c);
+        if (c > HIGHEST_ASCII) allASCII = false;
       }
 
-      for (int i = 0; i < characters.size(); i++) {
-        Character first = characters.get(i);
-        Character second = (i < characters.size() - 1) ? characters.get(i + 1) : null;
-        Character third = (i < characters.size() - 2) ? characters.get(i + 2) : null;
-        boolean found = false;
-        if (third != null) {
-          String trigram = String.valueOf(first) + second + third;
-          if (inDict(trigram)) {
-            if (DEBUG_SEGMENT) logger.info("segmentation match trigram " + trigram);
-            builder.append(trigram).append(ONE_SPACE);
-            i++;
-            i++;
-            found = true;
-          }
-        }
+      if (allASCII) {
+        //logger.info("segmentation : is all ascii " + phrase);
+        builder.append(phrase).append(ONE_SPACE);
+      } else {
+        //logger.info("segmentation : *not* all ascii '" + phrase +"'");
 
-        if (!found) {
-          if (second != null) {
-            String bigram = String.valueOf(first) + second;
-            if (inDict(bigram)) {
-              if (DEBUG_SEGMENT) logger.info("segmentation match bigram " + bigram);
-              builder.append(bigram).append(ONE_SPACE);
+        for (int i = 0; i < characters.size(); i++) {
+          Character first = characters.get(i);
+          Character second = (i < characters.size() - 1) ? characters.get(i + 1) : null;
+          Character third = (i < characters.size() - 2) ? characters.get(i + 2) : null;
+          boolean found = false;
+          String s1 = String.valueOf(first);
+          if (third != null) {
+            String trigram = s1 + second + third;
+            if (inDict(trigram)) {
+              if (DEBUG_SEGMENT) logger.info("segmentation match trigram " + trigram);
+              builder.append(trigram).append(ONE_SPACE);
               i++;
+              i++;
+              found = true;
+            }
+          }
+
+          if (!found) {
+            if (second != null) {
+              String bigram = s1 + second;
+              if (inDict(bigram)) {
+                if (DEBUG_SEGMENT) logger.info("segmentation match bigram " + bigram);
+                builder.append(bigram).append(ONE_SPACE);
+                i++;
+              } else {
+                builder.append(first).append(ONE_SPACE);
+              }
             } else {
               builder.append(first).append(ONE_SPACE);
             }
-          } else {
-            builder.append(first).append(ONE_SPACE);
           }
         }
       }
-
       String result = builder.toString();
       if (DEBUG_SEGMENT) logger.info("segmentation" +
           "\n\tphrase    " + phrase +
           "\n\tsegmented " + result);
       return result;
     } else {
+//      if (DEBUG_SEGMENT || true) logger.info("segmentation : " +
+//          "\n\tphrase    " + phrase +
+//          "\n\tsegmented " + s);
       return s;
     }
-//    return failedToSegment ? phrase : s;
   }
 
   private String longest_prefix(String phrase, int i, Map<String, String> phraseToPrefix) {
@@ -366,7 +361,7 @@ public class SmallVocabDecoder extends TextNormalizer {
    * @see #segmentation(String)
    * @see #longest_prefix(String, int, Map)
    */
-  private boolean inDict(String token) {
+  boolean inDict(String token) {
     try {
       scala.collection.immutable.List<?> apply = htkDictionary.apply(token);
       boolean b = (apply != null) && apply.nonEmpty();

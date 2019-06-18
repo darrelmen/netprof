@@ -753,7 +753,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
 
     // report on changes
-    report(projid, clientExercises, dialogID);
+   // report(projid, clientExercises, dialogID);
   }
 
   private void report(int projid, List<ClientExercise> clientExercises, int dialogID) {

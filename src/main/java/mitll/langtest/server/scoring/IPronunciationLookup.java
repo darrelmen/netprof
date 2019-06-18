@@ -29,9 +29,7 @@
 
 package mitll.langtest.server.scoring;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public interface IPronunciationLookup {
   /**
@@ -44,6 +42,8 @@ public interface IPronunciationLookup {
   TransNormDict createHydraDict(String transcript, String transliteration, List<WordAndProns> possibleProns);
 
   InDictStat getTokenStats(String transcript);
+
+  InDictStat getTokenStats(String transcript, boolean report);
 
   TransNormDict getPronunciationsFromDictOrLTS(String transcript, String transliteration, boolean justPhones, boolean makeCandidates, List<WordAndProns> possible);
 
@@ -62,10 +62,12 @@ public interface IPronunciationLookup {
   class InDictStat {
     private int numTokens;
     private int numInDict;
+    private Set<String> tokens;// = new TreeSet<>();
 
-    InDictStat(int numInDict, int numTokens) {
+    InDictStat(int numInDict, int numTokens, Set<String> tokens) {
       this.numInDict = numInDict;
       this.numTokens = numTokens;
+      this.tokens = tokens;
     }
 
     public int getNumTokens() {
@@ -77,7 +79,11 @@ public interface IPronunciationLookup {
     }
 
     public String toString() {
-      return numInDict + "/" + numTokens;
+      return numInDict + "/" + numTokens + (tokens.isEmpty() ? "" : " : " + getInDictTokens());
+    }
+
+    public Set<String> getInDictTokens() {
+      return tokens;
     }
   }
 }

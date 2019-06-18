@@ -30,6 +30,8 @@
 package mitll.langtest.shared.project;
 
 import com.google.gwt.user.client.rpc.IsSerializable;
+import mitll.langtest.server.database.project.Project;
+import mitll.langtest.shared.exercise.CommonExercise;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -86,7 +88,7 @@ public class OOVWordsAndUpdate implements IsSerializable {
     return this;
   }
 
-  public boolean isFoundExercise() {
+  private boolean isFoundExercise() {
     return foundExercise;
   }
 
@@ -98,6 +100,10 @@ public class OOVWordsAndUpdate implements IsSerializable {
     return allEnglish;
   }
 
+  /**
+   * @see mitll.langtest.server.services.AudioServiceImpl#isValid
+   * @param allEnglish
+   */
   public void setAllEnglish(boolean allEnglish) {
     this.allEnglish = allEnglish;
   }
@@ -106,28 +112,32 @@ public class OOVWordsAndUpdate implements IsSerializable {
     return noEnglish;
   }
 
+  /**
+   * @see mitll.langtest.server.audio.tools.OOVWordsHelper#get(CommonExercise, String, Project, Project)
+   * @param noEnglish
+   */
   public void setNoEnglish(boolean noEnglish) {
     this.noEnglish = noEnglish;
+  }
+
+  private boolean isCheckValid() {
+    return checkValid;
+  }
+
+  public void setCheckValid(boolean checkValid) {
+    this.checkValid = checkValid;
   }
 
   public String toString() {
     return "OOVWordsAndUpdate : " +
         "\n\toov        " + getOov() +
         "\n\tnorm       " + getNormalizedText() +
-        "\n\tdidUpdate  " + isDidUpdate() +
-        "\n\tisPossible " + isPossible() +
+        "\n\tdidUpdate   " + isDidUpdate() +
+        "\n\tisPossible  " + isPossible() +
         "\n\tall english " + isAllEnglish() +
         "\n\tno  english " + isNoEnglish() +
-        "\n\tcheck      " + isCheckValid() +
-        "\n\tisFound    " + isFoundExercise()
+        "\n\tcheck       " + isCheckValid() +
+        "\n\tisFound     " + isFoundExercise()
         ;
-  }
-
-  public boolean isCheckValid() {
-    return checkValid;
-  }
-
-  public void setCheckValid(boolean checkValid) {
-    this.checkValid = checkValid;
   }
 }

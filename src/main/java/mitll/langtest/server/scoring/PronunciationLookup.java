@@ -207,18 +207,29 @@ public class PronunciationLookup implements IPronunciationLookup {
 
   @Override
   public InDictStat getTokenStats(String transcript) {
+    return getTokenStats(transcript, false);
+  }
+
+  @Override
+  public InDictStat getTokenStats(String transcript, boolean report) {
     List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct);
+   // if (report) logger.info("getTokenStats " + transcript + " = " + transcriptTokens);
     int total = transcriptTokens.size();
     int inDict = 0;
+    Set<String> inDictTokens = new TreeSet<>();
     for (String word : transcriptTokens) {
       String trim = word.trim();
       if ((htkDictionary.contains(trim)) ||
           (htkDictionary.contains(trim.toLowerCase())) ||
           (russian && (htkDictionary.contains(getSmallVocabDecoder().removeAccents(trim))))) {
+        if (report) {
+     //     logger.info("getTokenStats found " + trim);
+          inDictTokens.add(trim);
+        }
         inDict++;
       }
     }
-    return new InDictStat(inDict, total);
+    return new InDictStat(inDict, total, inDictTokens);
   }
 
   /**
@@ -243,22 +254,22 @@ public class PronunciationLookup implements IPronunciationLookup {
                                                       List<WordAndProns> possible) {
     StringBuilder dict = new StringBuilder();
 
-    boolean debug = false;// language == Language.ENGLISH;
+    boolean debug = false;
 
-    if (debug) {
+ /*   if (debug) {
       logger.info("getPronunciationsFromDictOrLTS ask for pron for '" + transcript + "'");
-    }
+    }*/
 
     List<String> transcriptTokens = svDecoderHelper.getTokens(transcript, removeAllPunct);
 
-    if (debug) {
+  /*  if (debug) {
       logger.info("getPronunciationsFromDictOrLTS got              '" + transcriptTokens + "'");
       {
         StringBuilder builder = new StringBuilder();
         transcriptTokens.forEach(token -> builder.append(token).append(" "));
         logger.info("getPronunciationsFromDictOrLTS : transcript '" + transcript + "' = " + builder.toString());
       }
-    }
+    }*/
 
     String norm = String.join(" ", transcriptTokens);
     int numTokens = transcriptTokens.size();
@@ -375,9 +386,10 @@ public class PronunciationLookup implements IPronunciationLookup {
       } else {
 //                logger.info("can't use transliteration");
         if (!seen.contains(key)) {
-          if (WARN_ABOUT_LTS) logger.warn("getPronunciationsFromDictOrLTS couldn't get letter to sound map from " + lts +
-              "\n\tfor '" + word1 + "'" +
-              "\n\tin  '" + transcript + "'");
+          if (WARN_ABOUT_LTS)
+            logger.warn("getPronunciationsFromDictOrLTS couldn't get letter to sound map from " + lts +
+                "\n\tfor '" + word1 + "'" +
+                "\n\tin  '" + transcript + "'");
         }
         seen.add(key);
         oov.add(word1);

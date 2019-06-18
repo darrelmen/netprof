@@ -131,7 +131,7 @@ public class AudioFileHelper implements AlignDecode {
   private HTKDictionary htkDictionary;
 
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_PRON = false;
 
 
@@ -588,7 +588,9 @@ public class AudioFileHelper implements AlignDecode {
 
     boolean hasEnglishAttr = exercise.asCommon().hasEnglishAttr();
 
-    logger.info("isValid check " + (hasEnglishAttr ? "ENGLISH" : "") + " for " + exercise.getForeignLanguage());
+    if (DEBUG) {
+      logger.info("isValid check " + (hasEnglishAttr ? "ENGLISH" : "") + " for " + exercise.getForeignLanguage());
+    }
 
     Language language = hasEnglishAttr ? Language.ENGLISH : this.language;
     //logger.info("getAudioAnswer Ex " + exercise.getID() + " " + exercise.getEnglish() + " " + exercise.getForeignLanguage() + " language " + language);
@@ -596,8 +598,10 @@ public class AudioFileHelper implements AlignDecode {
 
     String phraseToDecode = getPhraseToDecode(exercise, language);
 
-    if (!phraseToDecode.equalsIgnoreCase(exercise.getForeignLanguage())) {
-      logger.info("isValid : " + phraseToDecode + " vs original " + exercise.getForeignLanguage());
+    if (DEBUG) {
+      if (!phraseToDecode.equalsIgnoreCase(exercise.getForeignLanguage())) {
+        logger.info("isValid : " + phraseToDecode + " vs original " + exercise.getForeignLanguage());
+      }
     }
 
     exercise.getMutableShell().setForeignLanguage(phraseToDecode);
@@ -2629,9 +2633,8 @@ public class AudioFileHelper implements AlignDecode {
       File file = new File(dictFile);
       this.dictModified = file.lastModified();
 
-      String s = project.getLanguageEnum().toDisplay();
-
       if (DEBUG) {
+        String s = project.getLanguageEnum().toDisplay();
         logger.info("makeDict (" + project.getID() + " " + project.getName() + " " + s +
             ") read " + file.getAbsolutePath() + " with mod date " + new Date(dictModified));
       }
@@ -2642,7 +2645,7 @@ public class AudioFileHelper implements AlignDecode {
         long now = System.currentTimeMillis();
         int size = htkDictionary.size(); // force read from lazy val
         if (now - then > 10) {
-          logger.info("makeDict for " + s + " read" +
+          logger.info("makeDict for " + project.getLanguageEnum().toDisplay() + " read" +
               " dict " + dictFile + " of size " + size + " took " + (now - then) + " millis");
         }
       }
