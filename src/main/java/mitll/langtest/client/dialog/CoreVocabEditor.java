@@ -75,11 +75,8 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   @NotNull
   @Override
   protected DivWidget getOverallFeedback() {
-    DivWidget widget = new DivWidget();
-    //  styleOverallFeedback(widget);
-    return widget;
+    return new DivWidget();
   }
-
 
   @NotNull
   protected INavigation.VIEWS getNextView() {

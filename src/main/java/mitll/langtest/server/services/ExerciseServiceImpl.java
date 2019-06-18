@@ -153,8 +153,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
   @Override
   public ExerciseListWrapper<T> getExerciseIds(ExerciseListRequest request) throws DominoSessionException {
     long then = System.currentTimeMillis();
-    //  int projectID = request.getProjID() == -1 ? getProjectIDFromUser() : request.getProjID();
-    int projectID = getProjectIDFromUser();// : request.getProjID();
+    // use the request if it's there
+    int projectID = request.getProjID() == -1 ? getProjectIDFromUser() : request.getProjID();
+    //  int projectID = getProjectIDFromUser();
 
     if (projectID == -1) { // not sure how this can happen now that we throw DominoSessionException
       logger.warn("getExerciseIds project id is -1?  It should probably have a real value.");

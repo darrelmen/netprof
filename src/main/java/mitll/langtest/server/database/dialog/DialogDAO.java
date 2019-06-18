@@ -436,25 +436,27 @@ public class DialogDAO extends DAO implements IDialogDAO {
       if (s == null) {
         logger.warn("addImage no image by " + imageid + "for dialog " + dialog);
       } else {
-        logger.info("addImage image ref " + s);
+        if (DEBUG) logger.info("addImage image ref " + s);
         String audioBaseDir = databaseImpl.getServerProps().getAudioBaseDir();
 
         boolean b = s.startsWith(audioBaseDir);
         if (!b) {
-          logger.info("addImage Expecting " + s + " to start with " + audioBaseDir);
+          if (DEBUG) logger.info("addImage Expecting " + s + " to start with " + audioBaseDir);
           audioBaseDir = "/opt/dialog/";
           b = s.startsWith(audioBaseDir);
         }
 
-        if (!b) {
-          logger.warn("addImage (legacy image?) expecting " + s + " to start with " + audioBaseDir);
+        if (DEBUG) {
+          if (!b) {
+            logger.warn("addImage (legacy image?) expecting " + s + " to start with " + audioBaseDir);
+          }
         }
 
         if (b) { // may not be true for legacy images...
           s = s.substring(audioBaseDir.length());
-          logger.info("addImage image ref now " + s);
+          if (DEBUG) logger.info("addImage image ref now " + s);
         } else {
-          logger.info("addImage no truncation : image ref now " + s);
+          if (DEBUG) logger.info("addImage no truncation : image ref now " + s);
         }
 
         dialog.getMutable().setImageRef(s);
@@ -753,7 +755,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
     databaseImpl.getProjectManagement().addDialogInfo(projid, dialogID);
 
     // report on changes
-   // report(projid, clientExercises, dialogID);
+    // report(projid, clientExercises, dialogID);
   }
 
   private void report(int projid, List<ClientExercise> clientExercises, int dialogID) {

@@ -217,15 +217,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
 
       int projid = project.id();
 
-      //   IRefResultDAO refResultDAO = userExerciseDAO.getRefResultDAO();
-
-//      logger.info("Ref result dao " + refResultDAO);
-//      Map<Integer, ExercisePhoneInfo> exerciseToPhoneForProject =
-//          userExerciseDAO.getRefResultDAO().getExerciseToPhoneForProject(projid);
-
       Map<Integer, ExerciseAttribute> allAttributesByProject = userExerciseDAO.getExerciseAttributeDAO().getIDToPair(projid);
       logger.info("readExercises" +
-          //      "\n\tread           " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
           "\n\ttype order     " + typeOrder +
           "\n\tnum attributes " + allAttributesByProject.size()
       );
@@ -249,7 +242,6 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
           "\n\tfor        " + projid +
           "\n\tproject    " + project.name() +
           "\n\ttype order " + typeOrder +
-          // "\n\tread       " + exerciseToPhoneForProject.size() + " ExercisePhoneInfo" +
           "\n\tgot        " + allNonContextExercises.size() + " predef exercises");
 
       List<CommonExercise> contextByProject = userExerciseDAO.getContextByProject(
@@ -738,7 +730,8 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
   private CommonExercise setAttributes(int exid, CommonExercise replacement) {
     List<ExerciseAttribute> attributesFor = userExerciseDAO.getExerciseAttributeDAO().getAttributesFor(exid);
 
-    logger.info("setAttributes refresh for exid " + exid + " attributes after " + attributesFor);
+    if (DEBUG_REFRESH_ATTRIBUTES)
+      logger.info("setAttributes refresh for exid " + exid + " attributes after " + attributesFor);
 
     if (replacement == null) {
       logger.warn("setAttributes no replacement exercise for #" + exid);

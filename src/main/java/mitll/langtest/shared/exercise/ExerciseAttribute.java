@@ -29,6 +29,8 @@
 
 package mitll.langtest.shared.exercise;
 
+import mitll.langtest.shared.dialog.DialogMetadata;
+import mitll.langtest.shared.project.Language;
 import mitll.npdata.dao.SlickExerciseAttribute;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,6 +39,8 @@ import java.util.Map;
 
 public class ExerciseAttribute extends Pair implements Comparable<ExerciseAttribute> {
   private boolean isFacet = true;
+
+  private static final String LANGUAGE_META_DATA = DialogMetadata.LANGUAGE.name();
 
   private int id;
 
@@ -109,6 +113,10 @@ public class ExerciseAttribute extends Pair implements Comparable<ExerciseAttrib
   public ExerciseAttribute setId(int id) {
     this.id = id;
     return this;
+  }
+
+  public boolean hasEnglishLanguage() {
+    return getProperty().equalsIgnoreCase(LANGUAGE_META_DATA) && getValue().equalsIgnoreCase(Language.ENGLISH.name());
   }
 
   @Override

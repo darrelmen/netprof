@@ -355,7 +355,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       @Override
       public void onSuccess(OOVWordsAndUpdate result) {
         // showOOVResult(result);
-        logger.info("updateTextViaExerciseService OK, update was " + result);
+        if (DEBUG) logger.info("updateTextViaExerciseService OK, update was " + result);
 
         coreVocabEditor.setHighlights();
         if (moveToNextTurn) {
@@ -381,7 +381,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
       @Override
       public void onSuccess(Boolean result) {
         // showOOVResult(result);
-        logger.info("updateEnglishText OK, update was " + result + " move to next " + moveToNextTurn);
+        if (DEBUG) logger.info("updateEnglishText OK, update was " + result + " move to next " + moveToNextTurn);
         //coreVocabEditor.setHighlights();
         if (moveToNextTurn) {
           coreVocabEditor.gotForward(outer);

@@ -136,6 +136,7 @@ public class FilterResponseHelper implements IResponseFilter {
   private boolean isDialog(IRequest request) {
     return request.getMode() == ProjectMode.DIALOG;
   }
+
   private boolean hasDialogs(int projectID) {
     return !getDialogs(projectID).isEmpty();
   }
@@ -522,9 +523,6 @@ public class FilterResponseHelper implements IResponseFilter {
       exercises = getCommonExercisesWithoutEnglish(exercises);
       //      logger.info("filterExercises remove english - after  " + exercises.size());
     }
-//    else if (request.isExactMatch()) {
-//      exercises = getExactMatch(request.getPrefix(), databaseServices.getProject(projid).getLanguageEnum(), exercises);
-//    }
 
     if (DEBUG) {
       logger.info("filterExercises" +
@@ -558,14 +556,7 @@ public class FilterResponseHelper implements IResponseFilter {
   public List<CommonExercise> getCommonExercisesWithoutEnglish(List<CommonExercise> exercises) {
     exercises = exercises
         .stream()
-        .filter(ex ->
-            ex.getAttributes()
-                .stream()
-                .filter(attr ->
-                    attr.getProperty().equalsIgnoreCase(LANGUAGE_META_DATA) &&
-                        attr.getValue().equalsIgnoreCase(Language.ENGLISH.name()))
-                .collect(Collectors.toList())
-                .isEmpty())
+        .filter(ex -> ex.getAttributes().stream().noneMatch(ExerciseAttribute::hasEnglishLanguage))
         .collect(Collectors.toList());
     return exercises;
   }

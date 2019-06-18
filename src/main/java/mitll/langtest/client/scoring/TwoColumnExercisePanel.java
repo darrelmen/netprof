@@ -284,18 +284,25 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
 
       String english = getEnglishToShow(e);
       boolean hasEnglish = isValid(english);
+
+/*      logger.info("getItemContent " + hasEnglish + " '" + english +"'");
+      if (!hasEnglish && e.hasContext() && e.getDirectlyRelated().get(0).hasEnglishAttr()) {
+        hasEnglish = true;
+        english = e.getDirectlyRelated().get(0).getForeignLanguage();
+
+        logger.info("getItemContent NOW " + hasEnglish + " " + english);
+
+      }
+      else if (e.hasContext()) {
+        logger.info("dir " + e.getDirectlyRelated());
+      }*/
+
       {
         DivWidget flContainer = makeFirstRow(e, recordPanel);
-//        flContainer.addStyleName("floatLeft");
-
         flContainer.setWidth(hasEnglish ? LEFT_WIDTH : LEFT_WIDTH_NO_ENGLISH);
         this.firstRow = flContainer;
-//        DivWidget w = new DivWidget();
-//        w.getElement().setId("middle");
-//        flContainer.add(w);
         rowWidget.add(flContainer);
       }
-
       //long now = System.currentTimeMillis();
       //  logger.info("getItemContent for " + e.getID() + " took " + (now - then) + " to add first row");
 
