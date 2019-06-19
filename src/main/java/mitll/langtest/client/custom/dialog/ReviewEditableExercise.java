@@ -57,6 +57,7 @@ import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.user.MiniUser;
 
 import java.util.*;
@@ -141,9 +142,12 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
 
   @Override
   protected void addItemsAtTop(Panel container) {
-    List<String> typeOrder = new ArrayList<>(controller.getProjectStartupInfo().getTypeOrder());
-    new BasicDialog().addDominoProject(typeOrder, newUserExercise, controller.getProjectID(), controller);
-    new UnitChapterItemHelper<U>(typeOrder).addUnitChapterItem(newUserExercise, container);
+    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
+    if (projectStartupInfo != null) {
+      List<String> typeOrder = new ArrayList<>(projectStartupInfo.getTypeOrder());
+      new BasicDialog().addDominoProject(typeOrder, newUserExercise, controller.getProjectID(), controller);
+      new UnitChapterItemHelper<U>(typeOrder).addUnitChapterItem(newUserExercise, container);
+    }
   }
 
   private int currentTab = 0;

@@ -92,7 +92,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
   private static final boolean DO_HEARTBEAT = true;
 
-  private static final int TOP_OF_ROOT = 57;//62;//56;//52;//58;//48;//58;
+  private static final int TOP_OF_ROOT = 62;//56;//52;//58;//48;//58;
 
   /**
    * Make sure we can talk to the server...

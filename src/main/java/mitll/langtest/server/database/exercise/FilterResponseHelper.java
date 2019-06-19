@@ -523,6 +523,7 @@ public class FilterResponseHelper implements IResponseFilter {
       exercises = getCommonExercisesWithoutEnglish(exercises);
       //      logger.info("filterExercises remove english - after  " + exercises.size());
     }
+  //  exercises = getNonEmptyExercises(exercises);
 
     if (DEBUG) {
       logger.info("filterExercises" +
@@ -557,6 +558,15 @@ public class FilterResponseHelper implements IResponseFilter {
     exercises = exercises
         .stream()
         .filter(ex -> ex.getAttributes().stream().noneMatch(ExerciseAttribute::hasEnglishLanguage))
+        .collect(Collectors.toList());
+    return exercises;
+  }
+
+  @NotNull
+  public List<CommonExercise> getNonEmptyExercises(List<CommonExercise> exercises) {
+    exercises = exercises
+        .stream()
+        .filter(ex -> !ex.getForeignLanguage().isEmpty())
         .collect(Collectors.toList());
     return exercises;
   }

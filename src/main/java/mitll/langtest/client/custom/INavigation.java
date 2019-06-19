@@ -49,7 +49,6 @@ import static mitll.langtest.shared.user.Permission.*;
  */
 public interface INavigation extends IViewContaner {
   List<Permission> QC_PERMISSIONS = Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN);
-  //List<Permission> QC_PERMISSIONS_PLUS_TEACHER = Arrays.asList(QUALITY_CONTROL, DEVELOP_CONTENT, PROJECT_ADMIN, TEACHER_PERM);
 
   enum VIEWS {
     NONE("", EITHER),

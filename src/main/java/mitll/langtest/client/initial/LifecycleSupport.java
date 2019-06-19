@@ -30,6 +30,7 @@
 package mitll.langtest.client.initial;
 
 import mitll.langtest.client.instrumentation.EventRegistration;
+import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.project.StartupInfo;
 import mitll.langtest.shared.user.Permission;
@@ -56,5 +57,6 @@ public interface LifecycleSupport extends EventRegistration {
 
   Collection<Permission> getPermissions();
 
+  ProjectMode getMode();
   void onFailure(Throwable caught, long then);
 }

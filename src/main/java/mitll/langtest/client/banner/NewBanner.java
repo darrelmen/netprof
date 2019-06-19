@@ -73,7 +73,7 @@ import static mitll.langtest.shared.project.ProjectType.DIALOG;
 public class NewBanner extends ResponsiveNavbar implements IBanner {
   private final Logger logger = Logger.getLogger("NewBanner");
 
-  public static final int MIN_WIDTH_WIDE = 1150;
+  private static final int MIN_WIDTH_WIDE = 1150;
 
   /**
    * @see #getDialogNav
@@ -103,7 +103,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final List<VIEWS> DIALOG_VIEWS =
       Arrays.asList(
           VIEWS.DIALOG,
-          // STUDY,
+
           LISTEN,
           REHEARSE,
           CORE_REHEARSE,
@@ -180,6 +180,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    * @see #setCogVisible
    */
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_PENDING = false;
 
   /**
    * @param userManager
@@ -217,11 +218,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     add(getBrand());
     add(breadcrumbs);
 
-//    NavCollapse navCollapse = new NavCollapse();
     DivWidget navCollapse = new DivWidget();
     navCollapse.addStyleName("topFiveMargin");
     navCollapse.getElement().setId("navCollapse1");
-//    navCollapse.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
 
     add(navCollapse);
 
@@ -309,7 +308,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     rememberViewAndLink(nav, RECORD_ENTRIES);
 
     boolean dialogNavVisible = isDialogMode();
-    if (DEBUG) logger.info("Dialog nav visible : " + dialogNavVisible);
+    if (DEBUG) logger.info("getRecNav Dialog nav visible : " + dialogNavVisible);
     if (!dialogNavVisible) {
       rememberViewAndLink(nav, RECORD_SENTENCES);
     }
@@ -444,7 +443,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
 
         @Override
         public void onSuccess(List<ActiveUser> result) {
-          if (DEBUG) logger.info("onSucces " + result.size() + " for " + controller.getLanguageInfo().toDisplay());
+          if (DEBUG_PENDING) logger.info("checkPendingTeacher : " + result.size() + " for " + controller.getLanguageInfo().toDisplay());
 
           cog.setText(result.isEmpty() ? "" : "(" + result.size() + ")");
           userMenu.setPendingTitle(result.size());
@@ -642,6 +641,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     if (widgets != null) {
       widgets.setVisible(!isDialog);
       widgets.setDisabled(isDialog);
+      recnav.remove(widgets);
     }
 
     if (DEBUG) {

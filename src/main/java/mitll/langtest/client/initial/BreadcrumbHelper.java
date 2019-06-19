@@ -48,6 +48,8 @@ import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.shared.project.ProjectMode.EITHER;
+
 /**
  * Created by go22670 on 6/13/17.
  */
@@ -56,13 +58,12 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
 
   private Breadcrumbs breadcrumbs;
   private static final String DIVIDER = ">";
-  // private static final String HOME = "Home";
 
   private final UserManager userManager;
   private final LifecycleSupport lifecycleSupport;
   private final BreadcrumbPartner breadcrumbPartner;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_REMOVE = false;
 
   /**
@@ -106,7 +107,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
 
     addCrumbs(true, uiLifecycle);
 
-   // logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
+    // logger.info("getBreadcrumbs now has " + crumbs.getElement().getChildCount() + " links");
 
     return crumbs;
   }
@@ -205,8 +206,9 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
     crumbs.add(getLangBreadcrumb(project));
 
     INavigation.VIEWS currentView = breadcrumbPartner.getNavigation().getCurrentView();
-    ProjectMode mode = currentView.getMode();
+    ProjectMode mode = getModeMaybeFromView(currentView);
 
+    logger.info("view " + currentView + " mode " + mode);
     // then the project underneath the language - could be several projects under a language - like chinese simplified and traditional
     SlimProject childByMode = project.getChildByMode(currentProject, mode);
     addProjectCrumb2(childByMode, uiLifecycle);
@@ -214,7 +216,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
     if (type == ProjectType.DIALOG) {
       List<SlimProject> children = childByMode.getChildren();
 
-   //   logger.info("project " + childByMode.getName() + " has " + children.size());
+      //   logger.info("project " + childByMode.getName() + " has " + children.size());
 
       if (children.size() == 2) {
         List<SlimProject> childrenMatchingMode = children.stream().filter(slimProject ->
@@ -223,10 +225,25 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
 //        childrenMatchingMode.forEach(slimProject -> logger.info(slimProject.getID() + " " + slimProject.getName() + " " + slimProject.getMode()));
         if (!childrenMatchingMode.isEmpty()) {
           SlimProject modeChoice = childrenMatchingMode.get(0);
+          logger.info("modeChoice " + modeChoice);
           addProjectCrumb2(modeChoice, uiLifecycle);
         }
       }
     }
+  }
+
+  private ProjectMode getModeMaybeFromView(INavigation.VIEWS currentView) {
+    ProjectMode mode = lifecycleSupport.getMode();
+    if (DEBUG) logger.info("currentView " + currentView);
+    ProjectMode mode1 = currentView.getMode();
+    if (mode1 != EITHER) {
+      if (mode1 != mode) {
+        if (DEBUG) logger.info("currentView " + currentView + " trumps the stored mode " + mode);
+        mode = mode1;
+      }
+    }
+
+    return mode;
   }
 
   /**
