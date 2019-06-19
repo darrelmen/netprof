@@ -70,6 +70,14 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     this.sessionStorage = new SessionStorage(controller.getStorage(), "editorSession");
   }
 
+  /**
+   * No nudge.
+   */
+  @Override
+  protected void maybeDoMoveOn() {
+
+  }
+
   @NotNull
   @Override
   protected DivWidget getOverallFeedback() {

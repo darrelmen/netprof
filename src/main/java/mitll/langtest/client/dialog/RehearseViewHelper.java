@@ -1299,7 +1299,8 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       mouseDown = true;
 
       T currentTurn = getCurrentTurn();
-      if (currentTurn.isPushToTalk()) {
+
+      if (isCurrentTurnARecordingTurn() && currentTurn.isPushToTalk()) {
         currentTurn.reallyStartOrStopRecording();
       }
     }

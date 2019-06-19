@@ -69,8 +69,9 @@ import java.util.logging.Logger;
 public class ListenViewHelper<T extends ITurnPanel>
     extends TurnViewHelper<T>
     implements ContentView, PlayListener, IListenView, ITurnContainer<T> {
-  public static final String TO_THE_NEXT_STEP = "Click here to move on to the next step ";
   private final Logger logger = Logger.getLogger("ListenViewHelper");
+
+  private static final String TO_THE_NEXT_STEP = "Click here to move on to the next step ";
 
   private static final String YOURSELF = "Yourself";
 
@@ -794,6 +795,10 @@ public class ListenViewHelper<T extends ITurnPanel>
 
   private void lastTurnPlayEnded() {
     overallFeedback.clear();
+    maybeDoMoveOn();
+  }
+
+  protected void maybeDoMoveOn() {
     INavigation.VIEWS nextView = getNextView();
     if (nextView != null) {
       overallFeedback.add(getMoveOnNudge(nextView));

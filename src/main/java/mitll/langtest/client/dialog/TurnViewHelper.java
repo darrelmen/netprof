@@ -115,7 +115,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
   DivWidget turnContainer;
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
   private static final boolean DEBUG_NEXT = false;
 
   TurnViewHelper(ExerciseController<?> controller, INavigation.VIEWS thisView) {
@@ -763,9 +763,9 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
     if (DEBUG) {
       logger.info("getColumnForSpeaker : " +
-          "\n\tl          " + left +
+          "\n\tl          '" + left + "'"+
           "\n\tr          " + right + " vs " +
-          "\n\tex speaker " + speaker + " => " + columns);
+          "\n\tex speaker '" + speaker + "' => " + columns);
     }
 
     return columns;

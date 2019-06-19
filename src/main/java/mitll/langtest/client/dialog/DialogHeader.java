@@ -36,7 +36,6 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.github.gwtbootstrap.client.ui.constants.Trigger;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.INavigation;
@@ -55,7 +54,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.logging.Logger;
 
 import static com.google.gwt.dom.client.Style.Clear.BOTH;
 import static com.google.gwt.dom.client.Style.Unit.PX;
@@ -66,10 +64,10 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * @see ListenViewHelper#addDialogHeader(IDialog, Panel)
  */
 public class DialogHeader {
-  private final Logger logger = Logger.getLogger("DialogHeader");
+//  private final Logger logger = Logger.getLogger("DialogHeader");
 
-  public static final String DIALOG_AS_EXCEL_SPREADSHEET_WITH_AUDIO = "Download dialog as excel spreadsheet with audio";
-  public static final String SEE_VOCAB = "See Vocab";
+  private static final String DIALOG_AS_EXCEL_SPREADSHEET_WITH_AUDIO = "Download dialog as spreadsheet and with audio";
+  private static final String SEE_VOCAB = "See Vocab";
 
   private static final String GROUP = "group";
   public static final String DIALOG = "Dialog";
@@ -161,10 +159,8 @@ public class DialogHeader {
         row.add(rightArrow);
       }
 
-      //outer.add(row);
       return row;
     }
-    // return outer;
   }
 
   @NotNull
@@ -402,9 +398,9 @@ public class DialogHeader {
         new com.github.gwtbootstrap.client.ui.RadioButton(GROUP, DIALOG);
     dialogChoice.addClickHandler(event -> gotClickOnDialog());
 
-    com.github.gwtbootstrap.client.ui.RadioButton radioButton2 =
+    com.github.gwtbootstrap.client.ui.RadioButton interpreterChoice =
         new com.github.gwtbootstrap.client.ui.RadioButton(GROUP, INTERPRETER);
-    radioButton2.addClickHandler(event -> gotClickOnInterpreter());
+    interpreterChoice.addClickHandler(event -> gotClickOnInterpreter());
 
     {
       boolean isDialog = controller.getStorage().isTrue(IS_DIALOG_MODE_CHOICE);
@@ -414,12 +410,12 @@ public class DialogHeader {
       modeListener.setIsDialog(isDialog && !isEditorView);
 
       dialogChoice.setValue(isDialog);
-      radioButton2.setValue(!isDialog);
+      interpreterChoice.setValue(!isDialog);
     }
 
     Panel hp = new FlowPanel();
+    hp.add(interpreterChoice);
     hp.add(dialogChoice);
-    hp.add(radioButton2);
 
     Panel row = new FlowPanel();
     ControlGroup view_as = new BasicDialog().addControlGroupEntry(row, VIEW_AS, hp, "");
@@ -557,7 +553,7 @@ public class DialogHeader {
     return wrapper;
   }
 
-  private void simplePopover(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
+/*  private void simplePopover(Popover popover, Widget w, String heading, String message, Placement placement, boolean isHTML) {
     popover.setWidget(w);
     popover.setHtml(isHTML);
     popover.setText(message);
@@ -569,7 +565,7 @@ public class DialogHeader {
     if (heading == null) {
       popover.getWidget().getElement().removeAttribute("data-original-title");
     }
-  }
+  }*/
 
   @NotNull
   private String getTypeAndValue2(String type, String subtext) {
