@@ -45,6 +45,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.userlist.ImportBulk;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.ListOptions;
 import mitll.langtest.client.list.NPExerciseList;
@@ -226,25 +227,17 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
     });
 
     this.searchTypeahead = new SearchTypeahead(controller, add);
-
-/*
-    quickAddText.addFocusHandler(new FocusHandler() {
-      @Override
-      public void onFocus(FocusEvent focusEvent) {
-        logger.info("Got " + focusEvent);
-      }
-    });*/
-
     return searchTypeahead.getTypeaheadUsing(quickAddText);
   }
 
   private void checkForKeyUpDown(KeyUpEvent event) {
     // arrow up down Paul suggestion.
     int keyCode = event.getNativeEvent().getKeyCode();
-
     if (keyCode == 40) {  // down
       loadNext();
-    } else if (keyCode == 38) loadPrev();
+    } else if (keyCode == 38) {
+      loadPrev();
+    }
   }
 
   /**
@@ -290,7 +283,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
   private void onClickAdd(Button add) {
     add.setEnabled(false);
 
-    // logger.info("click add " + add);
+    //  logger.info("onClickAdd click add " + add);
 
     final CommonShell currentExercise = searchTypeahead.getCurrentExercise();
     if (currentExercise != null) {
@@ -320,6 +313,9 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
       }
     } else {
       String safeText = getSafeText(quickAddText);
+
+      //   logger.info("onClickAdd safeText " + safeText);
+
       if (safeText.trim().isEmpty()) {  // necessary?
         logger.info("\n\n\nempty box???");
         enableButton(add);
@@ -344,8 +340,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
   private void checkIsValidPhrase(Button add, String safeText) {
     enableButton(add);
 
-//        logger.info("\tisValidForeignPhrase : checking phrase " + foreignLang.getSafeText() +
-//        " before adding/changing " + newUserExercise + " -> " + result);
+    if (false) logger.info("\tisValidForeignPhrase : checking phrase " + safeText + " on list " + list.getID());
 
     controller.getListService().newExercise(list.getID(), safeText,
         new AsyncCallback<CommonExercise>() {
@@ -359,6 +354,7 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
             if (newExercise == null) {
               // logger.info("onSuccess not in dict!");
               message.setText("This is not in our " + controller.getLanguageInfo().toDisplay() + " dictionary. Please edit.");
+
             } else {
               // logger.info("checkIsValidPhrase got " + newExercise.getID() + " dir " + newExercise.getDirectlyRelated());
               showNewItem(newExercise);
@@ -474,8 +470,4 @@ class EditableExerciseList extends NPExerciseList<CommonShell, ClientExercise> i
   private void enableRemove(boolean enabled) {
     delete.setEnabled(enabled);
   }
-
-//  public void getTypeAheadGrabFocus() {
-//    searchTypeahead.grabFocus();
-//  }
 }

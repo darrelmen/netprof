@@ -50,14 +50,11 @@ public class FixNPFHelper<T extends CommonShell & ScoredExercise> extends Simple
 
   /**
    * @param controller
-   * @param forSentences
    * @see mitll.langtest.client.banner.NewContentChooser#showView(INavigation.VIEWS, boolean, boolean)
    * @see
    */
-  public FixNPFHelper(ExerciseController controller, boolean forSentences, INavigation.VIEWS views) {
+  public FixNPFHelper(ExerciseController controller, INavigation.VIEWS views) {
     super(controller);
-    //  private final Logger logger = Logger.getLogger("MarkDefectsChapterNPFHelper");
-  //  boolean forSentences1 = forSentences;
     this.views = views;
   }
 
@@ -94,7 +91,6 @@ public class FixNPFHelper<T extends CommonShell & ScoredExercise> extends Simple
                                                                        INavigation.VIEWS instanceName,
                                                                        DivWidget listHeader,
                                                                        DivWidget footer) {
-
         return new FixExerciseList<>(controller,
             topRow, currentExercisePanel, instanceName, listHeader, instanceName == FIX_SENTENCES);
       }

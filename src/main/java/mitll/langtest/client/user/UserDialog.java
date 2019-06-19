@@ -173,12 +173,8 @@ public class UserDialog extends BasicDialog {
   }
 
   /**
-   * TODO: store selector and validator?
-   *
    * @param result
    * @param userManager
-   * @paramx passwordHash
-   * @seex SignInForm#foundExistingUser
    * @see SignUpForm#gotSignUp
    */
   void storeUser(User result, UserManager userManager) {

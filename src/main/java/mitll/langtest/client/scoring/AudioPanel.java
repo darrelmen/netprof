@@ -120,7 +120,8 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
     this(controller, showSpectrogram, rightMargin, exercise, exerciseID);
     this.audioPath = path;
 
-    logger.info("AudioPanel : (" + exerciseID + ") button title is " + RECORD);
+    if (DEBUG) logger.info("AudioPanel : (" + exerciseID + ") button title is " + RECORD);
+
     addWidgets(playButtonSuffix, RECORD);
     if (playAudio != null) {
       if (exercise == null) {
@@ -161,7 +162,9 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
     getElement().setId("AudioPanel_exercise_" + id);
 
     int width = getImageWidth();
-    logger.info("AudioPanel " + getElement().getId() + " width " + width);
+
+    if (DEBUG) logger.info("AudioPanel " + getElement().getId() + " width " + width);
+
     setWidth(width + "px");
   }
 

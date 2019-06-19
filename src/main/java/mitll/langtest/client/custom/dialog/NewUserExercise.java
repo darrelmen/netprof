@@ -82,15 +82,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise>
   private static final int WIDE_TEXT_FIELD_WIDTH = 750;
   private static final int LABEL_WIDTH = 105;
 
-//  private static final String ENGLISH_LABEL = "English";
-//  private static final String ENGLISH_LABEL_2 = "Meaning";
-//  private static final String TRANSLITERATION_OPTIONAL = "Transliteration";
-
-//  static final String NORMAL_SPEED_REFERENCE_RECORDING = "Normal speed reference recording";
-//  static final String SLOW_SPEED_REFERENCE_RECORDING_OPTIONAL = "Slow speed reference recording (optional)";
-  //private static final String ENTER_THE_FOREIGN_LANGUAGE_PHRASE = "Enter the foreign language phrase.";
-  // private static final String RECORD_REFERENCE_AUDIO_FOR_THE_FOREIGN_LANGUAGE_PHRASE = "Record reference audio for the foreign language phrase.";
-
   final U newUserExercise;
 
   final ExerciseController<?> controller;
@@ -142,7 +133,6 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise>
   private ListInterface<T, U> listInterface;
 
   private static final boolean DEBUG = false;
-
 
   /**
    * @param controller
@@ -401,36 +391,35 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise>
    * @return
    */
   private FormField makeForeignLangRow(Panel container, String foreignLanguageAnnotation) {
-    if (true) {
+    if (DEBUG) {
       logger.info("EditableExerciseDialog.makeForeignLangRow ---> " + foreignLanguageAnnotation);
     }
 
     Panel row = new DivWidget();
     container.add(row);
 
-    //  String foreignLanguageAnnotation = "foreignLanguageAnnotation";
     foreignAnno.getElement().setId(foreignLanguageAnnotation);
-//    if (DEBUG) logger.info("makeForeignLangRow make fl row " + foreignAnno);
+
     FormField foreignLang = makeBoxAndAnno(row, "", foreignAnno);
     if (getLanguage() == Language.URDU) {
       foreignLang.getWidget().getElement().getStyle().setProperty("fontFamily", "'MyUrduWebFont'");
     }
     foreignLang.box.setDirectionEstimator(true);   // automatically detect whether text is RTL
-
-
-    foreignLang.box.addKeyUpHandler(keyUpEvent -> {
-      boolean val = foreignLang.getSafeText().length() > 0 && hasRecordPermission();
-      if (rap != null) {
-        rap.setEnabled(val);
-      }
-      if (rapSlow != null) {
-        rapSlow.setEnabled(val);
-      }
-    });
+    foreignLang.box.addKeyUpHandler(keyUpEvent -> gotKeyUp(foreignLang));
 
     setFontSize(foreignLang);
     setMarginBottom(foreignLang);
     return foreignLang;
+  }
+
+  private void gotKeyUp(FormField foreignLang) {
+    boolean val = foreignLang.getSafeText().length() > 0 && hasRecordPermission();
+    if (rap != null) {
+      rap.setEnabled(val);
+    }
+    if (rapSlow != null) {
+      rapSlow.setEnabled(val);
+    }
   }
 
   private HTML makeForeignLangRow2(Panel container) {
@@ -696,9 +685,10 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise>
       }
       //logger.info("postChangeIfDirty keep audio = " + getKeepAudio());
       reallyChange(onClick, getKeepAudio());
-    } else {
-      //logger.info("ignore change");
     }
+    //else {
+    //logger.info("ignore change");
+    //}
   }
 
   private boolean anyFieldsDirty() {
@@ -820,7 +810,8 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise>
   private void isValidForeignPhrase(final Panel toAddTo, final boolean onClick) {
     if (DEBUG) {
       logger.info("isValidForeignPhrase : checking " +
-          "\n\tphrase " + foreignLang.getSafeText() + " before adding/changing " + newUserExercise);
+          "\n\tphrase " + foreignLang.getSafeText() +
+          "\n\tbefore adding/changing " + newUserExercise);
     }
 
     final FormField foreignLang = this.foreignLang;
@@ -838,15 +829,12 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise>
 
         @Override
         public void onSuccess(Collection<String> result) {
-          if (result.isEmpty()) {
-            checkContext(toAddTo, onClick);
-          } else {
-            markWarn(foreignLang, getOOVMessage(result), Placement.BOTTOM);
-          }
+          gotValidForeignPhraseResponse(result, toAddTo, onClick, foreignLang);
         }
       });
     }
   }
+
 
   @NotNull
   private String getOOVMessage(Collection<String> result) {
@@ -868,7 +856,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise>
         "not in our " + getLanguage().toDisplay() + " dictionary. Please edit.";
   }
 
-  private void checkContext(Panel toAddTo, boolean onClick) {
+  protected void checkContext(Panel toAddTo, boolean onClick) {
     String safeText1 = context.getSafeText().trim();
     if (safeText1.isEmpty()) {
       afterValidForeignPhrase(toAddTo, onClick);
@@ -881,16 +869,31 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise>
 
         @Override
         public void onSuccess(Collection<String> result) {
-          if (result.isEmpty()) {
-            afterValidForeignPhrase(toAddTo, onClick);
-          } else {
-            markWarn(context, getOOVMessage(result), Placement.BOTTOM);
-          }
+          gotValidForeignContextResponse(result, toAddTo, onClick);
         }
       });
     }
   }
 
+  protected void gotValidForeignPhraseResponse(Collection<String> result, Panel toAddTo, boolean onClick, FormField foreignLang) {
+    if (result.isEmpty()) {
+      checkContext(toAddTo, onClick);
+    } else {
+      gotOOVForField(result, foreignLang);
+    }
+  }
+
+  protected void gotValidForeignContextResponse(Collection<String> result, Panel toAddTo, boolean onClick) {
+    if (result.isEmpty()) {
+      afterValidForeignPhrase(toAddTo, onClick);
+    } else {
+      gotOOVForField(result, context);
+    }
+  }
+
+  protected void gotOOVForField(Collection<String> result, FormField foreignLang) {
+    markWarn(foreignLang, getOOVMessage(result), Placement.BOTTOM);
+  }
 
   /**
    * Why would we want to change the creator of an exercise?
@@ -907,7 +910,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise>
 
     if (DEBUG && clientExercise != null) {
       logger.info("reallyChange : edit item " + clientExercise.getID() +
-          "\n\teng " + clientExercise.getEnglish() + " " + clientExercise.getForeignLanguage());
+          "\n\teng " + clientExercise.getEnglish() + " = '" + clientExercise.getForeignLanguage() + "'");
     }
 
     if ((contextChanged() || contextTransChanged()) && clientExercise != null) {
@@ -983,7 +986,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise>
    * @see #makeEnglishRow
    */
   private FormField makeBoxAndAnno(Panel row, String subtext, HTML annoBox) {
-    FormField formField = addControlFormFieldHorizontal(row, "", subtext,
+    FormField formField = addControlFormFieldVert(row, "", subtext,
         false, 1, annoBox,
         LABEL_WIDTH, WIDE_TEXT_FIELD_WIDTH);
     styleBox(annoBox, formField);
@@ -993,7 +996,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise>
   private FormField makeBoxAndAnnoArea(Panel row, String subtext, HTML annoBox) {
     TextArea textBox = new TextArea();
     textBox.setVisibleLines(LINES);
-    FormField formField = getFormField(
+    FormField formField = getFormFieldVert(
         row,
         "",
         subtext,
@@ -1085,9 +1088,7 @@ abstract class NewUserExercise<T extends CommonShell, U extends ClientExercise>
 
       final boolean val = enabled;
 
-      otherRAPs.forEach(otherRAP ->
-          otherRAP.setEnabled(val && otherRAP.isOKToEnable())
-      );
+      otherRAPs.forEach(otherRAP -> otherRAP.setEnabled(val && otherRAP.isOKToEnable()));
     }
 
     @Override

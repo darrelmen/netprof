@@ -41,6 +41,7 @@ import com.google.gwt.user.client.rpc.IncompatibleRemoteServiceException;
 import com.google.gwt.user.client.ui.*;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.SimpleChapterNPFHelper;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.ExercisePanelFactory;
@@ -900,9 +901,14 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
    * @see #loadNext
    */
   public boolean loadNextExercise(int id) {
-    if (DEBUG) logger.info("ExerciseList.loadNextExercise id = " + id);// + " instance ");// + getInstance());
+    if (DEBUG) logger.info("loadNextExercise id = " + id);
     T exerciseByID = byID(id);
-    if (exerciseByID == null) logger.warning("huh? couldn't find exercise with id " + id);
+    if (exerciseByID == null) {
+      logger.warning("loadNextExercise : huh? couldn't find exercise with id " + id);
+
+//      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("can't find " +id));
+//      logger.info("logException stack " + exceptionAsString);
+    }
     return exerciseByID != null && loadNextExercise(exerciseByID);
   }
 

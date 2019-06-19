@@ -601,7 +601,7 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   protected void getTypeOrder() {
     ProjectStartupInfo projectStartupInfo = getStartupInfo();
-    if (projectStartupInfo == null) logger.warning("no project startup info?");
+    if (projectStartupInfo == null) logger.warning("getTypeOrder : no project startup info?");
     else {
       typeOrder = getTypeOrderSimple();
       //logger.info("\n\n\ngetTypeOrder type order " + typeOrder);
@@ -1516,16 +1516,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     askServerForExercise(-1);
   }
 
- /* @Override
-  public void onResize() {
-    if (!pagingContainer.onResize(getCurrentExercise())) {
-    }
-    didntResize();
-  }*/
-
-
-//  protected Set<Integer> justRequested = new HashSet<>();
-
   @Override
   protected void didntResize() {
     int remembered = getVisibleItem();
@@ -1682,13 +1672,21 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
       if (DEBUG) logger.info("askServerForVisibleExercises show empty -- ");
     } else {
       if (DEBUG) logger.info("askServerForVisibleExercises item " + itemID + " and " + visibleIDs.size());
-      getVisibleExercises(getVisibleForDrill(itemID, visibleIDs), currentReq);
+      getVisibleExercises(getVisibleForSingleItemList(itemID, visibleIDs), currentReq);
     }
   }
 
-  protected Collection<Integer> getVisibleForDrill(int itemID, Collection<Integer> visibleIDs) {
-    return visibleIDs;
-  }
+  /**
+   * So if we're only showing one item, we have to override this method.
+   *
+   * @param itemID
+   * @param visibleIDs
+   * @return
+   */
+//  protected Collection<Integer> getVisibleForSingleItemList(int itemID, Collection<Integer> visibleIDs) {
+//    return visibleIDs;
+//  }
+  protected abstract Collection<Integer> getVisibleForSingleItemList(int itemID, Collection<Integer> visibleIDs);
 
   @Override
   public boolean isCurrentReq(int reqID) {
@@ -2295,6 +2293,7 @@ logger.info("makeExercisePanels took " + (now - then) + " req " + reqID + " vs c
 
   /**
    * Look through the exercise panels for a match to the exercise for this answer.
+   *
    * @param answer
    * @param answerExid
    */

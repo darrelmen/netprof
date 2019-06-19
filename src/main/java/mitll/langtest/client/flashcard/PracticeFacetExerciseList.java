@@ -155,19 +155,15 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
     return practiceHelper == null ? null : practiceHelper.getStatsFlashcardFactory();
   }
 
-//  @Override
-//  protected void gotRangeChanged() {
-//  }
-
   @Override
   protected void getVisibleExercises(final Collection<Integer> visibleIDs, final int currentReq) {
     checkAndGetExercises(visibleIDs, currentReq);
   }
 
   @Override
-  protected Collection<Integer> getVisibleForDrill(int itemID, Collection<Integer> visibleIDs) {
+  protected Collection<Integer> getVisibleForSingleItemList(int itemID, Collection<Integer> visibleIDs) {
     if (DEBUG) {
-      logger.info("getVisibleForDrill " + visibleIDs.size() +
+      logger.info("getVisibleForSingleItemList " + visibleIDs.size() +
           " visible ids : " + visibleIDs + " itemID " + itemID);
     }
 
@@ -243,5 +239,4 @@ public class PracticeFacetExerciseList<T extends CommonShell & ScoredExercise, U
         newState.isOnlyDefault(),
         newState.isOnlyUninspected());
   }
-
 }

@@ -67,13 +67,14 @@ import static mitll.langtest.client.custom.INavigation.QC_PERMISSIONS;
  * Created by go22670 on 7/3/17.
  */
 public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
+  private final Logger logger = Logger.getLogger("DialogEditorView");
+
   private static final String LISTEN = "Listen";
   private static final String CORE_VOCAB = "Core Vocab";
   private static final String UPLOAD_IMAGE = "Upload Image";
   public static final String LISTEN_TO_THE_DIALOG = "Listen to the dialog.";
   public static final String EDIT_THE_CORE_VOCABULARY_FOR_THE_DIALOG = "Edit the core vocabulary for the dialog.";
 
-  private final Logger logger = Logger.getLogger("DialogEditorView");
   private static final String UPLOAD_A_DIALOG_IMAGE = "Upload a dialog image.";
 
   private static final String LIST = "dialog";
@@ -135,7 +136,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 //
 //    successButton.setIcon(IconType.SHARE);
 //    addTooltip(successButton, SHARE_THE_LIST + getSuffix());
-  //  container.addButton(successButton);
+    //  container.addButton(successButton);
     return successButton;
   }
 
@@ -143,6 +144,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   private Button getListenButton(ButtonMemoryItemContainer<T> container) {
     Button learn = buttonHelper.getSuccessButton(container, LISTEN);
     learn.setType(ButtonType.INFO);
+    learn.setIcon(IconType.VOLUME_UP);
     learn.addClickHandler(event -> showLearnList(container));
     addTooltip(learn, LISTEN_TO_THE_DIALOG);
     return learn;

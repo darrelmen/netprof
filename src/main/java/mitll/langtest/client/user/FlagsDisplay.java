@@ -41,8 +41,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 class FlagsDisplay {
-  private static final int FLAG_DIM = 32;
-  private static final int COLUMNS = 4;
+//  private static final int FLAG_DIM = 32;
+  private static final int COLUMNS = 5;
   private final List<LangCC> ccs = new ArrayList<>();
 
   void getFlags(StartupInfo startupInfo) {
@@ -52,7 +52,7 @@ class FlagsDisplay {
       Language language = slimProject.getLanguage();
       if (slimProject.getStatus() == ProjectStatus.PRODUCTION) {
         if (!seen.contains(language)) {
-          ccs.add(new LangCC(slimProject.getCountryCode(), language.toDisplay()));
+          ccs.add(new LangCC(slimProject.getCountryCode(), language.toDisplay(), language.getActualName()));
           seen.add(language);
         }
       }
@@ -68,18 +68,27 @@ class FlagsDisplay {
 
     for (LangCC langCC : ccs) {
       DivWidget both = new DivWidget();
-      both.addStyleName("inlineFlex");
+      both.addStyleName("bottomFiveMargin");
+      both.addStyleName("rightFiveMargin");
+      //  both.addStyleName("inlineFlex");
 
       {
-        com.google.gwt.user.client.ui.Image flag = getFlag(langCC.cc);
+        //com.google.gwt.user.client.ui.Image flag = getFlag(langCC.cc);
+
+        HTML flag = new HTML(langCC.getActualName());
+
         flag.addStyleName("rightFiveMargin");
-        flag.setHeight(FLAG_DIM + "px");
-        flag.setWidth(FLAG_DIM + "px");
+        Style style = flag.getElement().getStyle();
+        style.setColor("darkblue");
+        style.setProperty("fontSize", "larger");
+//        flag.setHeight(FLAG_DIM + "px");
+//        flag.setWidth(FLAG_DIM + "px");
         both.add(flag);
       }
 
       {
         HTML w = new HTML(langCC.language);
+        // w.addStyleName("blueColor");
         w.addStyleName("rightTenMargin");
         w.addStyleName("topFiveMargin");
         both.add(w);
@@ -101,17 +110,31 @@ class FlagsDisplay {
    * Sorts by language
    */
   private static class LangCC implements Comparable<LangCC> {
-    final String cc;
-    final String language;
+    private final String cc;
+    private final String language;
+    private final String actualName;
 
-    LangCC(String cc, String language) {
+    LangCC(String cc, String language, String actualName) {
       this.cc = cc;
       this.language = language;
+      this.actualName = actualName;
     }
 
     @Override
     public int compareTo(@NotNull LangCC o) {
       return language.toLowerCase().compareTo(o.language.toLowerCase());
+    }
+
+    public String getCc() {
+      return cc;
+    }
+
+    public String getLanguage() {
+      return language;
+    }
+
+    public String getActualName() {
+      return actualName;
     }
   }
 }

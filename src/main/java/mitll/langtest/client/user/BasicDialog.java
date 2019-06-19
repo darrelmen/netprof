@@ -90,7 +90,7 @@ public class BasicDialog {
     return getSimpleFormField(dialogBox, label, user, minLength, hint);
   }
 
-  protected FormField addControlFormFieldHorizontal(Panel dialogBox,
+/*  protected FormField addControlFormFieldHorizontal(Panel dialogBox,
                                                     String label,
                                                     String subtext,
                                                     boolean isPassword,
@@ -100,8 +100,20 @@ public class BasicDialog {
                                                     int optWidth) {
     final TextBox textBox = isPassword ? new PasswordTextBox() : new TextBox();
     return getFormField(dialogBox, label, subtext, minLength, rightSide, labelWidth, optWidth, textBox);
-  }
+  }*/
 
+  protected FormField addControlFormFieldVert(Panel dialogBox,
+                                              String label,
+                                              String subtext,
+                                              boolean isPassword,
+                                              int minLength,
+                                              Widget rightSide,
+                                              int labelWidth,
+                                              int optWidth) {
+    final TextBox textBox = isPassword ? new PasswordTextBox() : new TextBox();
+    return getFormFieldVert(dialogBox, label, subtext, minLength, rightSide, labelWidth, optWidth, textBox);
+  }
+/*
   @NotNull
   protected FormField getFormField(Panel dialogBox,
                                    String label,
@@ -117,11 +129,36 @@ public class BasicDialog {
     Panel row = new HorizontalPanel();
     row.add(textBox);
     row.add(rightSide);
+
     final ControlGroup userGroup = addControlGroupEntryHorizontal(dialogBox, label, row, labelWidth, subtext);
     userGroup.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+
     FormField formField = new FormField(textBox, userGroup, minLength);
     textBox.getElement().getStyle().setProperty("fontFamily", "sans-serif");
-    // formField.setRightSide(rightSide);
+    return formField;
+  }*/
+
+  @NotNull
+  protected FormField getFormFieldVert(Panel dialogBox,
+                                       String label,
+                                       String subtext,
+                                       int minLength,
+                                       Widget rightSide,
+                                       int labelWidth,
+                                       int optWidth,
+                                       TextBoxBase textBox) {
+    if (optWidth > 0) textBox.setWidth(optWidth + "px");
+
+    textBox.getElement().setId("textBox");
+    DivWidget divWidget = new DivWidget();
+    divWidget.add(textBox);
+    divWidget.add(rightSide);
+
+    final ControlGroup userGroup = addControlGroupEntryHorizontal(dialogBox, label, divWidget, labelWidth, subtext);
+    userGroup.getElement().getStyle().setMarginBottom(5, Style.Unit.PX);
+
+    FormField formField = new FormField(textBox, userGroup, minLength);
+    textBox.getElement().getStyle().setProperty("fontFamily", "sans-serif");
     return formField;
   }
 
@@ -197,7 +234,6 @@ public class BasicDialog {
     hp.addStyleName("leftFiveMargin");
 
     if (!label.isEmpty()) {
-      // Heading labelHeading = getLabel(label, labelWidth, subtext);
       hp.add(getLabel(label, labelWidth, subtext));
     }
     hp.add(widget);

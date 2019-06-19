@@ -354,7 +354,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         case FIX_ENTRIES:
           clear();
           setInstanceHistory(FIX_ENTRIES, true, false);
-          new FixNPFHelper(controller, false, FIX_ENTRIES).showNPF(divWidget, FIX_ENTRIES);
+          new FixNPFHelper(controller, FIX_ENTRIES).showNPF(divWidget, FIX_ENTRIES);
           break;
         case QC_SENTENCES:
           clear();
@@ -364,7 +364,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         case FIX_SENTENCES:
           clear();
           setInstanceHistory(FIX_SENTENCES, true, false);
-          new FixNPFHelper(controller, true, FIX_SENTENCES).showNPF(divWidget, FIX_SENTENCES);
+          new FixNPFHelper(controller, FIX_SENTENCES).showNPF(divWidget, FIX_SENTENCES);
           break;
 
         case OOV_EDITOR:

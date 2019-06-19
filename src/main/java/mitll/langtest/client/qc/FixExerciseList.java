@@ -37,12 +37,15 @@ import mitll.langtest.client.custom.recording.NoListFacetExerciseList;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.HistoryExerciseList;
+import mitll.langtest.client.list.SelectionState;
 import mitll.langtest.shared.exercise.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * A list for items to fix (review).
@@ -50,8 +53,9 @@ import java.util.Map;
  * @param <T>
  */
 class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFacetExerciseList<T> {
-  // private final Logger logger = Logger.getLogger("FixExerciseList");
+  private final Logger logger = Logger.getLogger("FixExerciseList");
   private final boolean isContext;
+  private static final boolean DEBUG = false;
 
   /**
    * @param controller
@@ -68,8 +72,7 @@ class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFace
                   INavigation.VIEWS instanceName,
                   DivWidget listHeader,
                   boolean isContext) {
-    super(
-        controller,
+    super(controller,
         topRow,
         currentExercisePanel,
         instanceName,
@@ -89,30 +92,32 @@ class FixExerciseList<T extends CommonShell & ScoredExercise> extends NoListFace
   protected ExerciseListRequest getExerciseListRequest(Map<String, Collection<String>> typeToSection,
                                                        String prefix,
                                                        boolean onlyUninspected) {
-
-    ExerciseListRequest exerciseListRequest = super
+    return super
         .getExerciseListRequest(typeToSection, prefix, onlyUninspected)
         .setOnlyWithAnno(true)
         .setQC(true)
         .setAddContext(isContext);
-    // logger.info("getExerciseListRequest req " + exerciseListRequest);
-
-    return exerciseListRequest;
   }
 
   protected ExerciseListRequest getExerciseListRequest(String prefix) {
-    ExerciseListRequest exerciseListRequest =
-        super.getExerciseListRequest(prefix)
-            .setOnlyWithAnno(true)
-            .setQC(true)
-            .setAddContext(isContext);
-    // logger.info("getExerciseListRequest prefix req " + exerciseListRequest);
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("getExerciseListRequest prefix "));
-//    logger.info("logException stack " + exceptionAsString);
-
-    return exerciseListRequest;
+    return super.getExerciseListRequest(prefix)
+        .setOnlyWithAnno(true)
+        .setQC(true)
+        .setAddContext(isContext);
   }
 
+ /* @Override
+  protected void loadFromSelectionState(SelectionState selectionState, SelectionState newState) {
+    loadExercisesUsingPrefix(
+        newState.getTypeToSection(),
+        selectionState.getSearch(),
+        selectionState.getItem(),
+
+        newState.isOnlyWithAudioDefects(),
+        newState.isOnlyDefault(),
+        newState.isOnlyUninspected());
+  }
+*/
   /**
    * @param userListID
    * @param pairs

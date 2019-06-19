@@ -33,6 +33,7 @@ import com.github.gwtbootstrap.client.ui.*;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.github.gwtbootstrap.client.ui.constants.Placement;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -52,6 +53,7 @@ import mitll.langtest.client.scoring.UnitChapterItemHelper;
 import mitll.langtest.client.sound.CompressedAudio;
 import mitll.langtest.client.sound.PlayListener;
 import mitll.langtest.client.user.BasicDialog;
+import mitll.langtest.client.user.FormField;
 import mitll.langtest.shared.answer.AudioAnswer;
 import mitll.langtest.shared.answer.AudioType;
 import mitll.langtest.shared.exercise.*;
@@ -64,6 +66,7 @@ import static mitll.langtest.shared.answer.AudioType.*;
 
 public class ReviewEditableExercise<T extends CommonShell, U extends ClientExercise>
     extends EditableExerciseDialog<T, U> {
+  public static final boolean DEBUG = false;
   private final Logger logger = Logger.getLogger("ReviewEditableExercise");
 
   private static final String CONTEXT = "context";
@@ -375,11 +378,12 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
             tabAndContent.getTab().setIcon(IconType.CHECK_SIGN);
           }
         } else {
-          logger.warning("no audio for " + user);
+          logger.warning("addTabsForUsers  no audio for " + user);
         }
-      } else {
-        logger.info("it's by me");
       }
+      //else {
+      //  logger.info("it's by me");
+      // }
     }
   }
 
@@ -541,10 +545,13 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
       @Override
       public void playStarted() {
         audioWasPlayed.add(audioPanel);
-        logger.info("now audio was played is size " + audioWasPlayed.size());
+
+        if (DEBUG) logger.info("now audio was played is size " + audioWasPlayed.size());
+
         for (RememberTabAndContent tabAndContent : tabs) {
           tabAndContent.checkAllPlayed(audioWasPlayed);
         }
+
         controller.logEvent(audioPanel, "qcPlayAudio", id, audio.getAudioRef());
       }
 
@@ -597,7 +604,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     Panel row = new DivWidget();
     row.addStyleName("marginBottomTen");
 
-    row.add(getFixedButton(toAddTo, normalSpeedRecording));
+    row.add(getFixedButton(toAddTo));
 
     //   logger.info("value is  " + keepAudioSelection);
     keepAudio.setValue(getKeepAudioSelection());
@@ -609,7 +616,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     return row;
   }
 
-  private Button getFixedButton(final Panel toAddTo, final ControlGroup normalSpeedRecording) {
+  private Button getFixedButton(final Panel toAddTo) {
     final Button fixed = makeFixedButton();
     fixed.addClickHandler(event -> validateThenPost(toAddTo, true));
     return fixed;
@@ -629,7 +636,7 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
 
   /**
    * @return
-   * @see NewUserExercise#getCreateButton(Panel, ControlGroup)
+   * @see #getFixedButton(Panel)
    */
   private Button makeFixedButton() {
     Button fixed = new Button(FIXED);
@@ -639,7 +646,6 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
     fixed.addStyleName("floatLeftAndClear");
     fixed.addStyleName("marginRight");
 
-    // fixed.addMouseOverHandler(event -> checkForForeignChange());
     addTooltip(fixed, MARK_FIXED_TOOLTIP);
     return fixed;
   }
@@ -719,10 +725,19 @@ public class ReviewEditableExercise<T extends CommonShell, U extends ClientExerc
       @Override
       public void onSuccess(Void result) {
         logger.info("doAfterEditComplete : forgetting exercise " + id);
-        exerciseList.forgetExercise(id);
         exerciseList.loadNext();
+        exerciseList.forgetExercise(id);
       }
     });
+  }
+
+
+  protected void gotValidForeignPhraseResponse(Collection<String> result, Panel toAddTo, boolean onClick, FormField foreignLang) {
+    checkContext(toAddTo, onClick);
+  }
+
+  protected void gotValidForeignContextResponse(Collection<String> result, Panel toAddTo, boolean onClick) {
+    afterValidForeignPhrase(toAddTo, onClick);
   }
 
   private class MyDivWidget extends DivWidget implements BusyPanel {

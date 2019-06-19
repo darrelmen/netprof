@@ -30,18 +30,14 @@
 package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.Button;
-import com.github.gwtbootstrap.client.ui.Heading;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.github.gwtbootstrap.client.ui.constants.ButtonType;
+import com.github.gwtbootstrap.client.ui.constants.IconType;
 import com.github.gwtbootstrap.client.ui.constants.Placement;
-import com.google.gwt.dom.builder.shared.DivBuilder;
-import com.google.gwt.dom.client.Style;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Panel;
-import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
 import mitll.langtest.client.analysis.MemoryItemContainer;
 import mitll.langtest.client.custom.INavigation;
@@ -69,6 +65,7 @@ import java.util.stream.Collectors;
  * A facet list display of dialogs.
  */
 public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
+  public static final int PAGE_SIZE = 15;
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
   private static final String PLEASE_SELECT_A_DIALOG = "Please select a dialog";
@@ -137,13 +134,18 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   }
 
   @Override
+  protected Collection<Integer> getVisibleForSingleItemList(int itemID, Collection<Integer> visibleIDs) {
+    return visibleIDs;
+  }
+
+  @Override
   protected int getFirstPageSize() {
-    return 15;
+    return PAGE_SIZE;
   }
 
   @Override
   protected int getChosenPageSize() {
-    return 15;
+    return PAGE_SIZE;
   }
 
   protected void getTypeToValues(Map<String, String> typeToSelection, int userListID) {
@@ -258,7 +260,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
     new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.BOTTOM);
 
-   new TableAndPager().addPagerAndHeader(tableWithPager, PLEASE_SELECT_A_DIALOG, left);
+    new TableAndPager().addPagerAndHeader(tableWithPager, PLEASE_SELECT_A_DIALOG, left);
 
     tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
     left.add(tableWithPager);
@@ -281,8 +283,6 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   }
 
   protected Button share;
-//
-//      , next, prev;
 
   private ButtonHelper<IDialog> buttonHelper = new ButtonHelper<IDialog>() {
     @Override
@@ -291,55 +291,11 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     }
   };
 
-  /**
-   * @param container
-   * @return
-   * @see #showDialogs(Collection, DivWidget)
-   */
- /* @NotNull
-  private DivWidget getButtons(ButtonMemoryItemContainer<IDialog> container) {
-    DivWidget buttons = buttonHelper.getButtonContainer();
-    //buttons.addStyleName("floatRight");
-    buttons.addStyleName("floatLeft");
-    buttons.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
-
-    {
-      buttons.add(prev = buttonHelper.getSuccessButton(container, "Prev"));
-      prev.setType(ButtonType.INFO);
-      prev.addClickHandler(event -> gotClickOnPrev());
-    }
-    {
-      buttons.add(next = buttonHelper.getSuccessButton(container, "Next"));
-      next.setType(ButtonType.INFO);
-      next.addClickHandler(event -> gotClickOnNext());
-      next.addStyleName("rightFiveMargin");
-    }
-    prev.setEnabled(pagingContainer.hasPrevPage());
-    next.setEnabled(pagingContainer.hasNextPage());
-
-    buttons.add(share = getShare(container));
-    buttons.add(getListenButton(container));
-
-    return buttons;
-  }
-
-  private void gotClickOnPrev() {
-    if (pagingContainer.hasPrevPage()) {
-      pagingContainer.prevPage();
-    } else logger.info("has prev is false");
-  }
-
-  private void gotClickOnNext() {
-    if (pagingContainer.hasNextPage()) {
-      pagingContainer.nextPage();
-    } else logger.info("has next is false");
-  }
-*/
   @NotNull
   private Button getListenButton(ButtonMemoryItemContainer<IDialog> container) {
     Button learn = buttonHelper.getSuccessButton(container, LISTEN);
     //learn.setType(ButtonType.INFO);
-
+    learn.setIcon(IconType.VOLUME_UP);
 
     learn.addClickHandler(event -> showLearnList(container));
 
@@ -384,7 +340,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
      * @see #showDialogs(Collection, DivWidget)
      */
     ReadOnlyDialogContainer() {
-      super(DialogExerciseList.this.controller, SUMMARY_DIALOG, 15);
+      super(DialogExerciseList.this.controller, SUMMARY_DIALOG, PAGE_SIZE);
     }
 
     @Override
@@ -394,7 +350,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
     @Override
     protected int getNumTableRowsGivenScreenHeight() {
-      return 15;
+      return PAGE_SIZE;
     }
 
     @Override
@@ -603,9 +559,9 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     return "langtest/cc/" + INTERPRETER_PNG;
   }
 */
-  private void setMinHeight(UIObject horiz1, int normalMinHeight) {
+/*  private void setMinHeight(UIObject horiz1, int normalMinHeight) {
     horiz1.getElement().getStyle().setProperty("minHeight", normalMinHeight + "px"); // so they wrap nicely
-  }
+  }*/
 /*
 
   private String getProperty(ExerciseAttribute attr) {

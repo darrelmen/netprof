@@ -110,7 +110,7 @@ public class NoListFacetExerciseList<T extends CommonShell & ScoredExercise>
   }
 
   @Override
-  protected Collection<Integer> getVisibleForDrill(int itemID, Collection<Integer> visibleIDs) {
+  protected Collection<Integer> getVisibleForSingleItemList(int itemID, Collection<Integer> visibleIDs) {
     if (itemID > 0) {
       visibleIDs = new ArrayList<>();
       visibleIDs.add(itemID);

@@ -92,7 +92,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    * @param id
    * @param listID
    * @return
-   * @see ExerciseList#pushNewItem
+   * @see #pushNewItem
    * @see #pushNewSectionHistoryToken
    */
   String getHistoryTokenFromUIState(String search, int id, int listID) {
@@ -246,11 +246,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
             "\n\tcurrentToken         '" + currentToken + "' " +
             "\n\tdifferent menu state '" + historyToken + "' from new " +
             "\n\texid                 " + exerciseID);
-
-/*
-        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("pushNewItem " +
-            "search " +search + " list " +listID  + " ex " + exerciseID));
-        logger.info(getClass() + " : logException stack " + exceptionAsString);*/
       }
       setHistoryItem(historyToken);
     }
@@ -308,15 +303,11 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     //logger.info("before " + token);
     if (DEBUG_HISTORY) {
       logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' -------------- ");
-
-      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception(historyToken));
-      logger.info("setHistoryItem logException stack " + exceptionAsString);
     }
     // logger.info("HistoryExerciseList.setHistoryItem '" + historyToken + "' ");
 
     History.newItem(historyToken);
   }
-
 
   /**
    * @param e
@@ -328,7 +319,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
   }
 
   public void loadExercise(int itemID) {
-   // logger.info("loadExercise " + itemID);
+    if (DEBUG) logger.info("loadExercise " + itemID);
     pushNewItem(getTypeAheadText(), itemID, new SelectionState().getList());
   }
 
@@ -344,7 +335,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    * @see #restoreUIState
    */
   void restoreListBoxState(SelectionState selectionState) {
-    if (DEBUG) logger.info("restoreListBoxState restore '" + selectionState + "'");
+    if (DEBUG) logger.info("restoreListBoxState restore '" + selectionState + "' / " + selectionState.getInfo());
     ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
     if (projectStartupInfo != null) {
       if (sectionWidgetContainer != null) {
@@ -353,7 +344,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     }
   }
 
-  protected List<String> getTypeOrderSimple() {
+  List<String> getTypeOrderSimple() {
     return getStartupInfo().getTypeOrder();
   }
 
@@ -366,7 +357,10 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    */
   @Override
   public void onValueChange(ValueChangeEvent<String> event) {
-    if (DEBUG_ON_VALUE_CHANGE) logger.info("onValueChange : ------ start ---- " + getInstance());
+    if (DEBUG_ON_VALUE_CHANGE) {
+      logger.info("onValueChange : ------ start ---- " + getInstance() + " : " + event.getValue());
+    }
+
     if (controller.getProjectStartupInfo() == null) {
       logger.warning("onValueChange skipping change event since no project");
       return;
@@ -383,10 +377,8 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
       maybeSwitchProject(selectionState, projectStartupInfo.getProjectid());
 
       if (DEBUG_ON_VALUE_CHANGE) {
-        logger.info("onValueChange got '" + value + "' sel '" + selectionState + "' '" + selectionState.getInfo() + "'");
-
-//        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("got change"));
-//        logger.info("onValueChange logException stack " + exceptionAsString);
+        logger.info("restoreUIAndLoadExercises " +
+            "got '" + value + "' sel '" + selectionState + "' '" + selectionState.getInfo() + "'");
       }
 
       if (DEBUG_ON_VALUE_CHANGE) {
@@ -431,6 +423,14 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
    * @see #restoreUIAndLoadExercises
    */
   void restoreUIState(SelectionState selectionState) {
+    if (DEBUG) {
+      logger.info("restoreUIState : " +
+          "\n\tselectionState " + selectionState +
+          "\n\tselectionState " + selectionState.getInfo() +
+          "\n\tsearch from token '" + selectionState.getSearch() +
+          "'");
+    }
+
     restoreListBoxState(selectionState);
 
     if (DEBUG_ON_VALUE_CHANGE) {
@@ -439,8 +439,6 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
           "'");
     }
 
-    // String search = selectionState.getSearch();
-    // logger.info("restoreUIState search box should be "+search);
     setTypeAheadText(selectionState.getSearch());
   }
 

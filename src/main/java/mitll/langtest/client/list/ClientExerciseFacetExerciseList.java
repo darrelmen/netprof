@@ -72,6 +72,11 @@ public class ClientExerciseFacetExerciseList<T extends CommonShell & ScoredExerc
     super(secondRow, currentExerciseVPanel, controller, listOptions, listHeader, views);
   }
 
+  @Override
+  protected Collection<Integer> getVisibleForSingleItemList(int itemID, Collection<Integer> visibleIDs) {
+    return visibleIDs;
+  }
+
   /**
    * @param visibleIDs
    * @param currentReq

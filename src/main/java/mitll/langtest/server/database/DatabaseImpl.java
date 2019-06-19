@@ -178,6 +178,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
 
   private boolean setupComplete = false;
   private boolean defaultUserFound = false;
+  private boolean CHECK_TRAINING_AUDIO = false;
 
   public DatabaseImpl() {
   }
@@ -1022,7 +1023,7 @@ public class DatabaseImpl implements Database, DatabaseServices {
           userExerciseDAO.setExerciseDAO(projectManagement.setDependencies());
         }
 
-        trainingAudioDAO.checkAndAddAudio(projectManagement.getProjects(), audioDAO);
+        if (CHECK_TRAINING_AUDIO) trainingAudioDAO.checkAndAddAudio(projectManagement.getProjects(), audioDAO);
       }
       userManagement = new mitll.langtest.server.database.user.UserManagement(userDAO);
     }
@@ -1700,13 +1701,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   * @see DownloadServlet#writeDialogList
    * @param out
    * @param dialogID
    * @param projectid
    * @param options
    * @return
    * @throws Exception
+   * @see DownloadServlet#writeDialogList
    */
   public String writeDialogItems(OutputStream out,
                                  int dialogID,

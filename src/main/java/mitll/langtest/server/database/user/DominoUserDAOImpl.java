@@ -1229,12 +1229,6 @@ public class DominoUserDAOImpl extends BaseUserDAO implements IUserDAO, IDominoU
     }
   }
 
-/*
-  public String lookupUserId(int id) {
-    return delegate.lookupUserId(id);
-  }
-*/
-
   @Override
   public mitll.hlt.domino.shared.model.user.User lookupDominoUser(int id) {
     return delegate.lookupUser(id);
