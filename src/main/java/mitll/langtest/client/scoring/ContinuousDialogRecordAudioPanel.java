@@ -105,7 +105,9 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
 
   @Override
   Widget getPopupTargetWidget() {
-    return recordDialogTurn.myGetPopupTargetWidget();
+    Widget widget = recordDialogTurn.myGetPopupTargetWidget();
+  //  logger.info("getPopupTargetWidget " + widget);
+    return widget;
   }
 
   /**

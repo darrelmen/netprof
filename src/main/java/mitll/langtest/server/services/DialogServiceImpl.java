@@ -60,6 +60,7 @@ import static mitll.langtest.client.custom.INavigation.QC_PERMISSIONS;
 @SuppressWarnings("serial")
 public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet implements DialogService {
   private static final Logger logger = LogManager.getLogger(DialogServiceImpl.class);
+  public static final boolean DEBUG = false;
 
   /**
    * @param request
@@ -84,9 +85,10 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
 
   /**
    * Worry about visibility.
-   * @see #getTypeToValues(FilterRequest)
+   *
    * @param request
    * @return
+   * @see #getTypeToValues(FilterRequest)
    */
   private ISection<IDialog> getDialogSectionHelper(FilterRequest request) {
     Project project = getProject(request.getProjID());
@@ -186,7 +188,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       getProject(request.getProjID()).populateDialogSectionHelper(dialogVisibleToMe, sectionHelper);
     }
 
-    List<IDialog> dialogList =  (request.getTypeToSelection().isEmpty()) ?
+    List<IDialog> dialogList = (request.getTypeToSelection().isEmpty()) ?
         dialogVisibleToMe :
         new ArrayList<>(sectionHelper.getExercisesForSelectionState(request.getTypeToSelection()));
 
@@ -230,7 +232,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
           db.getDialogSessionDAO().getLatestDialogSessionScoresPerMode(iDialog.getProjid(), userIDFromSessionOrDB);
       latestDialogSessionScoresPerMode.forEach((k, v) -> {
         if (v.isEmpty()) {
-          logger.info("getScoreHistoryForDialogs : no scores for dialog #" + k);
+          if (DEBUG) logger.info("getScoreHistoryForDialogs : no scores for dialog #" + k);
         } else {
           scoreHistoryPerDialog.put(k, new CorrectAndScore(v.values().iterator().next(), v.keySet().iterator().next()));
         }

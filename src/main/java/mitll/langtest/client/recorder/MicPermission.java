@@ -32,7 +32,7 @@ package mitll.langtest.client.recorder;
 public interface MicPermission {
   void gotPermission();
 
-  void noRecordingMethodAvailable();
+//  void noRecordingMethodAvailable();
   void noWebRTCAvailable();
   void silenceDetected();
 }

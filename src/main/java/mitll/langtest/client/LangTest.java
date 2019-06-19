@@ -94,10 +94,12 @@ public class LangTest implements
   private final Logger logger = Logger.getLogger("LangTest");
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_MIC_PERM = false;
   private static final boolean DEBUG_MODE = false;
 
 
   private static final String UNKNOWN1 = "Unknown";
+  private static final String UNKNOWN = "unknown";
 
   private static final String LOCALHOST = "127.0.0.1";
 
@@ -111,9 +113,7 @@ public class LangTest implements
    */
   private static final String INTRO = "Learn pronunciation and practice vocabulary.";
 
-  private static final String UNKNOWN = "unknown";
   public static final String LANGTEST_IMAGES = "langtest/images/";
-
 
   private static final String RED_X = LangTest.LANGTEST_IMAGES + "redx32.png";
   public static final SafeUri RED_X_URL = UriUtils.fromSafeConstant(RED_X);
@@ -655,7 +655,7 @@ public class LangTest implements
       if (checkLogin) {
         userManager.checkLogin();
       } else {
-       // userManager.report();
+        // userManager.report();
         if (userManager.getCurrent() != null && initialUI.isShowingPleaseAllow()) {
           initialUI.gotUser(userManager.getCurrent());
         } else {
@@ -693,31 +693,35 @@ public class LangTest implements
    * @see mitll.langtest.client.recorder.FlashRecordPanelHeadless#micConnected()
    */
   private void initBrowserRecording() {
-    if (DEBUG) logger.info("initBrowserRecording - called");
+    if (DEBUG_MIC_PERM) logger.info("initBrowserRecording - called");
     MicPermission micPermission = new MicPermission() {
       /**
        * @see mitll.langtest.client.recorder.WebAudioRecorder
        */
       public void gotPermission() {
-        if (DEBUG) logger.info("initBrowserRecording - got permission!");
+        if (DEBUG_MIC_PERM) logger.info("initBrowserRecording - got permission!");
         checkLogin();
       }
 
       /**
-       * @see
+       * @see WebAudioRecorder#noWebRTC()
        */
-      public void noRecordingMethodAvailable() {
-        logger.warning("noRecordingMethodAvailable - no way to record");
-
-        new ModalInfoDialog(CAN_T_RECORD_AUDIO, RECORDING_AUDIO_IS_NOT_SUPPORTED, hiddenEvent -> checkLogin());
-
-        initialUI.setSplash(RECORDING_DISABLED);
-        isMicConnected = false;
-      }
-
       @Override
       public void noWebRTCAvailable() {
-        noRecordingMethodAvailable();
+        logger.info("noWebRTCAvailable - no way to record");
+//        String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("noWebRTCAvailable"));
+//        logger.info("logException stack " + exceptionAsString);
+
+        if (isMicConnected) {
+          new ModalInfoDialog(CAN_T_RECORD_AUDIO, RECORDING_AUDIO_IS_NOT_SUPPORTED, hiddenEvent -> checkLogin());
+
+          initialUI.setSplash(RECORDING_DISABLED);
+          isMicConnected = false;
+        } else {
+          if (userManager.getCurrent() == null) {
+            checkLogin();
+          }
+        }
       }
 
       /**

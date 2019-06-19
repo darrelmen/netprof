@@ -73,6 +73,7 @@ import static mitll.langtest.shared.user.Permission.*;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices extends ThumbnailChoices {
+  public static final String GREY_COLOR = "#0000008a";
   private final Logger logger = Logger.getLogger("ProjectChoices");
   public static final int MAX_LENGTH_ID = 24;
 
@@ -138,7 +139,7 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private static final String NEW_PROJECT = "New Project";
 
-  private static final int LANGUAGE_SIZE = 3;
+  private static final int LANGUAGE_SIZE = 4;
 
   /**
    * @see #showProjectChoices
@@ -657,21 +658,12 @@ public class ProjectChoices extends ThumbnailChoices {
 
       boolean isQC = isQC();
       {
-        String countryCode = projectForLang.getCountryCode();
-        if (DEBUG) logger.info("getImageAnchor : for " + name + " cc " + countryCode);
-        String actualName = projectForLang.getLanguage().getActualName();
+//        String countryCode = projectForLang.getCountryCode();
+//        if (DEBUG) logger.info("getImageAnchor : for " + name + " cc " + countryCode);
         PushButton button = new PushButton();//getFlag(countryCode));
+        button.setHTML(getButtonLabel(projectForLang));
+        button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, 1));
 
-        String darkblue = "black";
-        boolean rtl = projectForLang.getLanguage().isRTL();
-        String align = rtl ? ";text-align: right;" : "";
-        darkblue += align;
-        String html = "<h3 style='color:" + darkblue + "'>" + actualName + "</h3>";
-      //  logger.info("length " + actualName.length() + " " + name);
-        if (actualName.length() > 24) html = "<h4 style='color:" + darkblue + "'>" + actualName + "</h4>";
-        button.setHTML(html);
-
-        button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, projectForLang.getID(), 1));
         thumbnail.add(button);
 
         if (isQC) {
@@ -697,6 +689,29 @@ public class ProjectChoices extends ThumbnailChoices {
 
       return thumbnail;
     }
+  }
+
+  /**
+   * Get button label - grey for retired projects, worry about rtl languages.
+   *
+   * @param projectForLang
+   * @param actualName
+   * @return
+   */
+  @NotNull
+  private String getButtonLabel(SlimProject projectForLang) {
+    String actualName = projectForLang.getLanguage().getActualName();
+
+    boolean retired = projectForLang.getStatus() == ProjectStatus.RETIRED;
+    String colorToUse = retired ? GREY_COLOR : "black";
+
+    boolean rtl = projectForLang.getLanguage().isRTL();
+    String align = rtl ? ";text-align: right;" : "";
+    colorToUse += align;
+    String html = "<h3 style='color:" + colorToUse + "'>" + actualName + "</h3>";
+    //  logger.info("length " + actualName.length() + " " + name);
+    if (actualName.length() > 24) html = "<h4 style='color:" + colorToUse + "'>" + actualName + "</h4>";
+    return html;
   }
 
   /**
@@ -756,9 +771,7 @@ public class ProjectChoices extends ThumbnailChoices {
    */
   private void addPopover(FocusWidget button, Map<String, String> origProps) {
     Map<String, String> props = new HashMap<>(origProps);
-
     props.remove(MODEL_TYPE.toString());
-
     //logger.info("addPopover " + projectForLang + " : " + props);
     addPopover(button, props, Placement.RIGHT);
   }
@@ -796,12 +809,14 @@ public class ProjectChoices extends ThumbnailChoices {
   private Heading getLabel(String name, boolean hasChildren, int numVisibleChildren,
                            String statusText, boolean alldialog) {
     Heading label = getChoiceLabel(LANGUAGE_SIZE, name, true);
+    label.getElement().getStyle().setColor(GREY_COLOR);
 
-    String subtext = alldialog ? MODES : hasChildren ?
-        (numVisibleChildren + ((numVisibleChildren == 1) ? COURSE1 : COURSES)) : statusText;
+    {
+      String subtext = alldialog ? MODES : hasChildren ?
+          (numVisibleChildren + ((numVisibleChildren == 1) ? COURSE1 : COURSES)) : statusText;
 
-    label.setSubtext(subtext);
-
+      label.setSubtext(subtext);
+    }
     return label;
   }
 
@@ -1158,7 +1173,8 @@ public class ProjectChoices extends ThumbnailChoices {
    * @param nest
    * @see #getImageAnchor
    */
-  private void gotClickOnFlag(String name, SlimProject projectForLang, int projid, int nest) {
+  private void gotClickOnFlag(String name, SlimProject projectForLang, int nest) {
+    int projid = projectForLang.getID();
     List<SlimProject> children = projectForLang.getChildren();
     if (DEBUG_CLICK)
       logger.info("gotClickOnFlag project " + projid + " has " + children.size() + " children, name " + name);
@@ -1264,13 +1280,14 @@ public class ProjectChoices extends ThumbnailChoices {
         if (aUser == null) {
           logger.warning("setProjectForUser : no current user? ");
           uiLifecycle.logout();
-        } else {
+        }
+        //else {
 //          if (aUser.getStartupInfo() == null) { // no project with that project id
 //            lifecycleSupport.getStartupInfo();
 //          } else {
 //            userNotification.setProjectStartupInfo(aUser);
 //          }
-        }
+        // }
       }
     });
   }

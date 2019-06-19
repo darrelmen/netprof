@@ -63,7 +63,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
   private final LifecycleSupport lifecycleSupport;
   private final BreadcrumbPartner breadcrumbPartner;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_REMOVE = false;
 
   /**
@@ -208,7 +208,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
     INavigation.VIEWS currentView = breadcrumbPartner.getNavigation().getCurrentView();
     ProjectMode mode = getModeMaybeFromView(currentView);
 
-    logger.info("view " + currentView + " mode " + mode);
+    if (DEBUG) logger.info("view " + currentView + " mode " + mode);
     // then the project underneath the language - could be several projects under a language - like chinese simplified and traditional
     SlimProject childByMode = project.getChildByMode(currentProject, mode);
     addProjectCrumb2(childByMode, uiLifecycle);
@@ -225,7 +225,7 @@ public class BreadcrumbHelper implements IBreadcrumbHelper {
 //        childrenMatchingMode.forEach(slimProject -> logger.info(slimProject.getID() + " " + slimProject.getName() + " " + slimProject.getMode()));
         if (!childrenMatchingMode.isEmpty()) {
           SlimProject modeChoice = childrenMatchingMode.get(0);
-          logger.info("modeChoice " + modeChoice);
+          if (DEBUG) logger.info("modeChoice " + modeChoice);
           addProjectCrumb2(modeChoice, uiLifecycle);
         }
       }

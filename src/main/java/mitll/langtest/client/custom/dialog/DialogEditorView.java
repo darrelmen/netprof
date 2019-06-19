@@ -43,6 +43,7 @@ import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.CoreVocabEditor;
 import mitll.langtest.client.dialog.DialogEditor;
+import mitll.langtest.client.dialog.DialogExerciseList;
 import mitll.langtest.client.dialog.DialogHelper;
 import mitll.langtest.client.domino.common.UploadViewBase;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -67,13 +68,16 @@ import static mitll.langtest.client.custom.INavigation.QC_PERMISSIONS;
  * Created by go22670 on 7/3/17.
  */
 public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
+  public static final String ADD_EDIT_TURNS = "Add/Edit Turns : ";
+  public static final String ADD_EDIT_CORE_VOCAB = "Add/Edit Core Vocab : ";
+  public static final String DONE = "Done";
   private final Logger logger = Logger.getLogger("DialogEditorView");
 
   private static final String LISTEN = "Listen";
-  private static final String CORE_VOCAB = "Core Vocab";
+  private static final String CORE_VOCAB = DialogExerciseList.CORE_VOCAB;
   private static final String UPLOAD_IMAGE = "Upload Image";
-  public static final String LISTEN_TO_THE_DIALOG = "Listen to the dialog.";
-  public static final String EDIT_THE_CORE_VOCABULARY_FOR_THE_DIALOG = "Edit the core vocabulary for the dialog.";
+  private static final String LISTEN_TO_THE_DIALOG = "Listen to the dialog.";
+  private static final String EDIT_THE_CORE_VOCABULARY_FOR_THE_DIALOG = "Edit the core vocabulary for the dialog.";
 
   private static final String UPLOAD_A_DIALOG_IMAGE = "Upload a dialog image.";
 
@@ -132,11 +136,6 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
       }
     }.getShare(container);
     successButton.setType(ButtonType.INFO);
-//    successButton.addStyleName("leftFiveMargin");
-//
-//    successButton.setIcon(IconType.SHARE);
-//    addTooltip(successButton, SHARE_THE_LIST + getSuffix());
-    //  container.addButton(successButton);
     return successButton;
   }
 
@@ -153,7 +152,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   @NotNull
   private Button getCoreVocabButton(ButtonMemoryItemContainer<T> container) {
     Button learn = buttonHelper.getSuccessButton(container, CORE_VOCAB);
-    learn.setIcon(IconType.PENCIL);
+    learn.setIcon(IconType.EDIT_SIGN);
     learn.addClickHandler(event -> editCoreVocabList(getCurrentSelection()));
     addTooltip(learn, EDIT_THE_CORE_VOCABULARY_FOR_THE_DIALOG);
     return learn;
@@ -254,20 +253,22 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
 
           @Override
           public void onSuccess(ExerciseListWrapper<T> result) {
-            {
-              List<T> exercises = result.getExercises();
-              if (!fcanSeeAll) {
-                exercises = exercises.stream().filter(d -> d.getUserid() == user).collect(Collectors.toList());
+            if (result.getExercises() == null) {
+              logger.warning("huh? no exercises for " + request);
+            } else {
+              {
+                List<T> exercises = result.getExercises();
+                if (!fcanSeeAll) {
+                  exercises = exercises.stream().filter(d -> d.getUserid() == user).collect(Collectors.toList());
+                }
+                ButtonMemoryItemContainer<T> myLists = getMyLists();
+                myLists.populateTable(exercises);
+
+                if (exercises.isEmpty()) myLists.disableAll();
               }
-              ButtonMemoryItemContainer<T> myLists = getMyLists();
-              myLists.populateTable(exercises);
-
-              if (exercises.isEmpty()) myLists.disableAll();
+              populateUniqueListNames(result.getExercises());
+              setShareHREFLater();
             }
-            populateUniqueListNames(result.getExercises());
-            setShareHREFLater();
-
-
           }
         });
   }
@@ -334,10 +335,10 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     int id = selectedItem.getID();
     int projid = selectedItem.getProjid();
     new DialogHelper(true).show(
-        "Add/Edit Turns" + " : " + getListName(),
+        ADD_EDIT_TURNS + getListName(),
         Collections.emptyList(),
         listContent,
-        "Done",
+        DONE,
         null,
         new MyShownCloseListener(editorTurnDialogEditor, id, projid), 720, -1, true);
   }
@@ -354,10 +355,10 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     int projid = selectedItem.getProjid();
     int id = selectedItem.getID();
     new DialogHelper(true).show(
-        "Add/Edit Core Vocab" + " : " + getListName(),
+        ADD_EDIT_CORE_VOCAB + getListName(),
         Collections.emptyList(),
         listContent,
-        "Done",
+        DONE,
         null,
         new MyShownCloseListener(editorTurnDialogEditor, id, projid), 740, -1, true);
   }

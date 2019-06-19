@@ -126,7 +126,6 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
        */
       @Override
       protected String getDevice() {
-        // logger.info("no feedback device");
         return getDeviceValue();
       }
 
@@ -142,8 +141,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
 
       @Override
       protected Widget getPopupTargetWidget() {
-//        logger.info("getPopupTargetWidget target is " + outer.getElement().getId());
-        return scoreFeedback;
+        return outer.getPopupTargetWidget();
       }
 
       public void showPopupLater(String toShow) {
@@ -175,11 +173,6 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
     playAudioPanel = new RecorderPlayAudioPanel(postAudioRecordButton, controller, exercise, useMicrophoneIcon());
 
     playAudioPanel.hidePlayButton();
-//
-//    if (DEBUG) {
-//      long now = System.currentTimeMillis();
-//      logger.info("makePlayAudioPanel : took " + (now - then) + " for makeAudioPanel");
-//    }
 
     return playAudioPanel;
   }
@@ -204,7 +197,7 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   }
 
   Widget getPopupTargetWidget() {
-    //  logger.info("getPopupTargetWidget " + this.getId());
+  //  logger.info("getPopupTargetWidget " + postAudioRecordButton);
     return postAudioRecordButton;
   }
 
@@ -292,9 +285,14 @@ public abstract class NoFeedbackRecordAudioPanel<T extends HasID & ScoredExercis
   @Override
   public void useInvalidResult(int exid, boolean isValid) {
     //  logger.info("useInvalidResult " + isValid);
-    if (!isValid) playAudioPanel.hidePlayButton();
-    else playAudioPanel.showPlayButton();
+    useInvalidEffectPlayButton(isValid);
+
     playAudioPanel.setEnabled(isValid);
+  }
+
+  protected void useInvalidEffectPlayButton(boolean isValid) {
+    if (isValid) playAudioPanel.showPlayButton();
+    else playAudioPanel.hidePlayButton();
   }
 
   /**

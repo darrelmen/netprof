@@ -61,6 +61,8 @@ public class OOVWordsHelper {
 
     boolean hasEnglishAttr = exercise.hasEnglishAttr();
     boolean allEnglish = hasEnglishAttr;
+    boolean allOOV = false;
+    boolean someAreOOV = false;
     boolean noEnglish = !hasEnglishAttr;
 
     IPronunciationLookup.InDictStat englishTokenStats = null;
@@ -79,7 +81,8 @@ public class OOVWordsHelper {
           noEnglish = true;
         }
       } else { // expecting chinese (say) but it's all english? probably a swap
-        if (DEBUG_VALID) logger.info("isValid, expecting " + project.getLanguage() + ", got " + englishTokenStats);
+        if (DEBUG_VALID)
+          logger.info("isValid, expecting " + project.getLanguage() + ", got " + englishTokenStats + " for english");
         boolean allTokensInDict = englishTokenStats.getNumTokens() == englishTokenStats.getNumInDict();
         if (allTokensInDict && englishTokenStats.getNumTokens() > 0) {
           IPronunciationLookup.InDictStat flTokenStats = project.getAudioFileHelper().getASR().getPronunciationLookup().getTokenStats(trim, true);
@@ -93,13 +96,15 @@ public class OOVWordsHelper {
             final IPronunciationLookup fengPronLookup = engPronLookup;
 
             Set<String> flInDict = flTokenStats.getInDictTokens();
-            flInDict.forEach(logger::info);
+            flInDict.forEach(t -> logger.info("isValid fl dict in dict token " + t));
             List<String> collect = flInDict.stream().filter(t -> fengPronLookup.getTokenStats(t).getNumInDict() == 1).collect(Collectors.toList());
-            logger.info("isValid : found " + collect + " as english tokens vs " + flInDict.size());
+            if (DEBUG_VALID) logger.info("isValid : found " + collect + " as english tokens from set " + flInDict);
             allInDictAreEnglish = collect.size() == flInDict.size();
+            someAreOOV = flTokenStats.areSomeOOV();
           }
 
-          allEnglish = (flTokenStats.getNumInDict() == 0 || allInDictAreEnglish);  // all the tokens are english, and none are fl tokens
+          allEnglish = allInDictAreEnglish;  // all the tokens are english
+          allOOV = (flTokenStats.getNumInDict() == 0);  //
         }
       }
     }
@@ -113,8 +118,11 @@ public class OOVWordsHelper {
     OOVWordsAndUpdate oovWordsAndUpdate =
         new OOVWordsAndUpdate(false, oovTokens, project.getModelType() == ModelType.HYDRA, normText);
     oovWordsAndUpdate.setAllEnglish(allEnglish);
+    oovWordsAndUpdate.setAllOOV(allOOV);
+    oovWordsAndUpdate.setSomeOOV(someAreOOV);
     oovWordsAndUpdate.setNoEnglish(noEnglish);
     oovWordsAndUpdate.setCheckValid(true);
+    oovWordsAndUpdate.setPossible(oovTokens.isEmpty());
 
     if (DEBUG_VALID) logger.info("isValid : Sending " + oovWordsAndUpdate);
 

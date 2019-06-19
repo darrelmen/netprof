@@ -67,10 +67,12 @@ import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.MIDDLE;
  */
 public class EditorTurn extends PlayAudioExercisePanel
     implements ITurnPanel, IRehearseView, IRecordingTurnPanel, IFocusListener, AddDeleteListener {
+  public static final String YELLOW = "yellow";
+  public static final String WHITE = "white";
+  public static final String RED = "red";
   private final Logger logger = Logger.getLogger("EditorTurn");
 
   private static final String PREFIX = "This turn should be in ";
-  // public static final String IS_THERE_ENGLISH_IN_THIS_TURN = "Is there english in this turn?";
   private static final String IS_THERE_ENGLISH_IN_THIS_TURN = PREFIX + "English.";
 
   private static final String REALLY_AVOID_LONG_PHRASES = "Really avoid long phrases.";
@@ -243,11 +245,18 @@ public class EditorTurn extends PlayAudioExercisePanel
             // logger.info("addWidgets : Got partial..." + response);
           }
 
+
           @Override
           public Widget myGetPopupTargetWidget() {
-            return recordAudioPanel;
+         //   logger.info("myGetPopupTargetWidget " + recordAudioPanel);
+            return recordAudioPanel.getPostAudioRecordButton();
           }
         }) {
+
+          @Override
+          protected void useInvalidEffectPlayButton(boolean isValid) {
+          }
+
           @Override
           protected boolean shouldAddToAudioTable() {
             return true;
@@ -329,6 +338,9 @@ public class EditorTurn extends PlayAudioExercisePanel
   @NotNull
   private Widget getPlayButton(RecorderPlayAudioPanel playAudioPanel) {
     Widget playButton = playAudioPanel.getPlayButton();
+    if (getAudioID() != -1) {
+      ((Button) getPlayButton()).setType(ButtonType.SUCCESS);
+    }
     turnAddDelete.removeFromTabSequence((Focusable) playButton);
 
     playButton.addStyleName("floatRight");
@@ -479,13 +491,13 @@ public class EditorTurn extends PlayAudioExercisePanel
       }
     } else {
       int length = content.split(" ").length;
-   //   logger.info("num tokens " + length);
+      //   logger.info("num tokens " + length);
 
       if (length > 10) {
         markRed();
         showFeedback(REALLY_AVOID_LONG_PHRASES);
       } else if (length > 7) {
-        editableTurnHelper.setBackgroundColor("yellow");
+        editableTurnHelper.setBackgroundColor(YELLOW);
         showFeedback(AVOID_LONG_PHRASES);
       } else {
         markWhite();
@@ -498,13 +510,11 @@ public class EditorTurn extends PlayAudioExercisePanel
   }
 
   private void markRed() {
-    //  logger.info("markRed");
-    editableTurnHelper.setBackgroundColor("red");
+    editableTurnHelper.setBackgroundColor(RED);
   }
 
   private void markWhite() {
-    //  logger.info("markWhite");
-    editableTurnHelper.setBackgroundColor("white");
+    editableTurnHelper.setBackgroundColor(WHITE);
   }
 
   /**
@@ -533,7 +543,6 @@ public class EditorTurn extends PlayAudioExercisePanel
   }
 
   private void updateText(String s, EditorTurn outer, int audioID, boolean moveToNextTurn) {
-
     if (projID != -1) {
       final int exID = getExID();
       if (DEBUG) logger.info("updateText : Checking '" + s + "' on project #" + projID + " for ex #" + exID);
@@ -623,15 +632,20 @@ public class EditorTurn extends PlayAudioExercisePanel
    */
   private void showOOVResult(OOVWordsAndUpdate result) {
     boolean hasEnglishAttr = clientExercise.hasEnglishAttr();
-    logger.info("showOOVResult " +result +" has english " + hasEnglishAttr);
+    logger.info("showOOVResult " + result + " has english " + hasEnglishAttr);
     if (hasEnglishAttr && result.isNoEnglish()) {
       showFeedback(IS_THERE_ENGLISH_IN_THIS_TURN);
-      turnFeedback.getElement().getStyle().setBackgroundColor("yellow");
+      turnFeedback.getElement().getStyle().setBackgroundColor(YELLOW);
     } else if (!hasEnglishAttr && result.isAllEnglish()) {
-      showFeedback(PREFIX + controller.getLanguageInfo().toDisplay());
-      turnFeedback.getElement().getStyle().setBackgroundColor("yellow");
+      if (result.isAllOOV()) {
+        showFeedback(PREFIX + controller.getLanguageInfo().toDisplay());
+      } else if (result.isSomeOOV()) {
+        showFeedback("Is this " + controller.getLanguageInfo().toDisplay() + "? All the words are English.");
+      }
+      // so if the sentence is all english and all in the target language???
+      turnFeedback.getElement().getStyle().setBackgroundColor(YELLOW);
     } else {
-      turnFeedback.getElement().getStyle().setBackgroundColor("white");
+      turnFeedback.getElement().getStyle().setBackgroundColor(WHITE);
 
       Set<String> oov1 = result.getOov();
       if (oov1.isEmpty()) {
@@ -810,7 +824,6 @@ public class EditorTurn extends PlayAudioExercisePanel
 
   @Override
   public void addPacketValidity(Validity validity) {
-    //  logger.info("addPacketValidity " + validity);
   }
 
   @Override

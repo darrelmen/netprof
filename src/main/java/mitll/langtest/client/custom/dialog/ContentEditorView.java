@@ -383,7 +383,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    */
   private IsWidget getAddItems(ButtonMemoryItemContainer<T> container) {
     Button successButton = buttonHelper.getSuccessButton(container, getEditItemButtonTitle());
-    successButton.setIcon(IconType.PENCIL);
+    successButton.setIcon(IconType.EDIT);
     successButton.addClickHandler(event -> editList(getCurrentSelection()));
     addTooltip(successButton, getEditItemTooltipPrefix() + getSuffix());
     return successButton;
@@ -421,15 +421,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    * @see DialogEditorView#editList
    */
   protected abstract void editList(T selectedItem);
-
-//  @NotNull
-//  protected Button getSuccessButton(ButtonMemoryItemContainer<T> container, String learn1) {
-//    Button learn = new Button(learn1);
-//    learn.setType(ButtonType.SUCCESS);
-//    learn.addStyleName("leftFiveMargin");
-//    container.addButton(learn);
-//    return learn;
-//  }
 
   @NotNull
   private Button getRemoveButton() {

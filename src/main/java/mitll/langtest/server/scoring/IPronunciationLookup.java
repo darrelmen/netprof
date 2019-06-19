@@ -78,6 +78,10 @@ public interface IPronunciationLookup {
       return numInDict;
     }
 
+    public boolean areSomeOOV() {
+      return numInDict < numTokens;
+    }
+
     public String toString() {
       return numInDict + "/" + numTokens + (tokens.isEmpty() ? "" : " : " + getInDictTokens());
     }

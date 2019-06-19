@@ -194,15 +194,6 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     if (DEBUG_TYPE_ORDER) logger.info("reorderTypes before " + types);
     List<String> uniq = getUniq(types);
     if (DEBUG_TYPE_ORDER) logger.info("reorderTypes uniq   " + uniq);
-
-    // cheesy thing to put exercise facets after project type hierarchy - be careful if the name overlap like in German
-    // and Pashto!
-
-//    for (Facet f : Facet.values()) {
-//      if (!f.isAlsoProjectType()) {
-//        putAtEnd(uniq, f.getName());
-//      }
-//    }
     types.clear();
     types.addAll(uniq);
     if (DEBUG_TYPE_ORDER) logger.info("reorderTypes after " + types);
@@ -221,19 +212,6 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
     });
     return uniq;
   }
-
-//  private void putAtEnd(List<String> types, String sound) {
-//    if (types.contains(sound)) {
-//      types.remove(sound);
-//      types.add(sound);
-//    } else {
-//      String o = sound.toLowerCase();
-//      if (types.contains(o)) {
-//        types.remove(o);
-//        types.add(o);
-//      }
-//    }
-//  }
 
   /**
    * @return
@@ -521,7 +499,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
       for (SectionNode child : node.getChildren()) {
         if (!child.getType().equals(childType)) {
-          logger.error("recurseAndCountMatchInfo child " + child + " doesn't match " + childType);
+          logger.warn("recurseAndCountMatchInfo child " + child + " doesn't match " + childType);
         }
 
         addOrMerge(members, child);
