@@ -124,6 +124,11 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     super(topRow, currentExercisePanel, controller, new ListOptions(instanceName), listHeader, INavigation.VIEWS.DIALOG);
   }
 
+  protected String getEmptySearchMessage() {
+    return "<b>No dialog content is available yet.</b>" +
+        "<br/><b>It will be soon, please wait!</b>";
+  }
+
   /**
    * Don't show the show options
    */
@@ -278,10 +283,6 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     return myLists;
   }
 
-  public int getSelectedDialog() {
-    return myContainer.getSelectedItem();
-  }
-
   protected Button share;
 
   private ButtonHelper<IDialog> buttonHelper = new ButtonHelper<IDialog>() {
@@ -294,7 +295,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   @NotNull
   private Button getListenButton(ButtonMemoryItemContainer<IDialog> container) {
     Button learn = buttonHelper.getSuccessButton(container, LISTEN);
-    //learn.setType(ButtonType.INFO);
+
     learn.setIcon(IconType.VOLUME_UP);
 
     learn.addClickHandler(event -> showLearnList(container));

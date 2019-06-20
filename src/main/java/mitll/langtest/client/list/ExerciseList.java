@@ -76,6 +76,7 @@ public abstract class ExerciseList<T extends CommonShell, U extends HasID> exten
 
   /***
    * @see #showEmptyExercise
+   * @see #getEmptySearchMessage()
    */
   private static final String EMPTY_SEARCH = "<b>Your search or selection did not match any items.</b>" +
       "<p>Try clearing one of your selections or changing the search.</p>";

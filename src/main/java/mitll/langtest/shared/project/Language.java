@@ -56,7 +56,7 @@ public enum Language implements IsSerializable {
   JAPANESE("ja", "jp", "日本語"),
   LEVANTINE(true, "ARABIC-LEVANTINE", "ar-SY", "sy", "اللَّهْجَةُ الشَّامِيَّة"),
   KOREAN(32, "ko", "kr", "한국어"),
-  MSA(true, "ARABIC (MODERN STANDARD)", "ar", "al", "MSA", "العربية"),
+  MSA(true, "ARABIC (MODERN STANDARD)", "ar", "al", "MSA", "العربیة الفصحى"),
   PASHTO(true, "PUSHTU-AFGHAN", "ps", "af", "پښتو"),
   PORTUGUESE("PORTUGUESE-BRAZILIAN", "pt", "br", "Português"),
   RUSSIAN("ru", "Русский"),

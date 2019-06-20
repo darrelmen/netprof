@@ -75,9 +75,10 @@ import static mitll.langtest.shared.project.ProjectMode.VOCABULARY;
  * Created by go22670 on 4/10/17.
  */
 public class NewContentChooser implements INavigation, ValueChangeHandler<String> {
+  private final Logger logger = Logger.getLogger("NewContentChooser");
+
   public static final String MODE = "Mode";
   public static final String LISTS = "Lists";
-  private final Logger logger = Logger.getLogger("NewContentChooser");
 
   /**
    *
@@ -127,6 +128,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     this.banner = banner;
 
     divWidget.addStyleName("topFiveMargin");
+    divWidget.setId("NewContentChooser");
 
     addHistoryListener();
   }
@@ -167,8 +169,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     } catch (IllegalArgumentException e) {
       currentStoredView = VIEWS.NONE;
     }
-
-//    ProjectType projectType = hasStartup ? controller.getProjectStartupInfo().getProjectType() : ProjectType.NP;
 
     ProjectMode storedMode = VOCABULARY;
     if (hasStartup) {
@@ -314,9 +314,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
           clearAndPush(isFirstTime, currentStoredView, DIALOG, true, keepList);
           dialogHelper.showContent(divWidget, DIALOG);
           break;
-//        case STUDY:
-//          clearPushAndShow(studyHelper, STUDY);
-//          break;
         case LISTEN:
           clearPushAndShow(listenHelper, LISTEN);
           break;
@@ -596,18 +593,12 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     return stringBuilder.toString();
   }
 
-
   /**
    * @see #showView(VIEWS, boolean, boolean)
    */
   private void showDrill(PracticeHelper practiceHelper, VIEWS views) {
     clear();
-
-//    if (isPolyglotProject()) {
-//      showPolyDialog();
-//    } else {
     showPractice(practiceHelper, views);
-//    }
   }
 
   /**

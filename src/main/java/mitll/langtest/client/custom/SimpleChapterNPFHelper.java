@@ -95,9 +95,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Ha
    */
   @Override
   public void showContent(Panel listContent, INavigation.VIEWS views) {
-    //logger.info(getClass() + " : showContent views = " + views);//+ " loadExercises " + loadExercises);
-//    Panel child = doNPF(views);
-
+//    logger.info(getClass() + " : showContent views = " + views + " in " + listContent.getElement().getId());
 /*
     logger.info("showContent - (" + views + " ) " +
         myView + " vs " + viewContaner.getCurrentView() +
@@ -119,7 +117,7 @@ public abstract class SimpleChapterNPFHelper<T extends CommonShell, U extends Ha
    * @see ContentView#showContent
    */
   private Panel doNPF(INavigation.VIEWS instanceName) {
-    // logger.info(getClass() + " : doNPF instanceName = " + instanceName);
+    //  logger.info(getClass() + " : doNPF instanceName = " + instanceName);
     Panel widgets = flexListLayout.doInternalLayout(-1, instanceName, false);
     npfExerciseList = flexListLayout.npfExerciseList;
     return widgets;

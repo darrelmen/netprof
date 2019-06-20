@@ -49,6 +49,7 @@ public class KeyStorage {
   private static final String USER_PENDING_ID = "userPendingID";
 
   private final boolean DEBUG = false;
+  private final boolean DEBUG_GET_VALUE = false;
 
   /**
    *
@@ -108,7 +109,7 @@ public class KeyStorage {
     if (Storage.isLocalStorageSupported()) {
       String localStorageKey = getKey(name);
       String item = Storage.getLocalStorageIfSupported().getItem(localStorageKey);
-      if (DEBUG) logger.info("getValue : (" + localStorageKey + ")" + " '" + name + "' = '" + item + "'");
+      if (DEBUG_GET_VALUE) logger.info("getValue : (" + localStorageKey + ")" + " '" + name + "' = '" + item + "'");
       if (item == null) item = "";
       return item;
     } else {
@@ -120,7 +121,7 @@ public class KeyStorage {
     if (Storage.isLocalStorageSupported()) {
       String localStorageKey = getSimpleKey(name);
       String item = Storage.getLocalStorageIfSupported().getItem(localStorageKey);
-      if (DEBUG) logger.info("getValue : (" + localStorageKey + ")" + " '" + name + "' = '" + item + "'");
+      if (DEBUG_GET_VALUE) logger.info("getValue : (" + localStorageKey + ")" + " '" + name + "' = '" + item + "'");
       if (item == null) item = "";
       return item;
     } else {

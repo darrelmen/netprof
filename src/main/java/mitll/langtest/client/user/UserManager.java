@@ -189,11 +189,11 @@ public class UserManager {
 
   /**
    * So we only have a valid user id here if we've logged in.
-   *
+   * @see InitialUI#showLogin
    * @return
    */
   public boolean hasUser() {
-    return getUser() != -1;//!getUserID().isEmpty();
+    return getUser() != -1;
   }
 
   /**

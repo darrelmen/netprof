@@ -49,6 +49,7 @@ import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.ISimpleTurn;
 import mitll.langtest.client.scoring.ITurnPanel;
 import mitll.langtest.client.scoring.PhonesChoices;
+import mitll.langtest.client.services.AudioServiceAsync;
 import mitll.langtest.shared.dialog.DialogType;
 import mitll.langtest.shared.dialog.IDialog;
 import mitll.langtest.shared.exercise.ClientExercise;
@@ -82,12 +83,15 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   static final String SPEAKER_A = "A";
   static final String SPEAKER_B = "B";
 
-  private static final int INTERPRETER_WIDTH = 165;//235;
+  private static final int INTERPRETER_WIDTH = 165;
   private static final int PADDING_LOZENGE = 14;
 
+  /**
+   * @see #getLeftSpeaker
+   */
+  private static final String LEFT_COLOR = "#e7e6ec";
   private static final String MIDDLE_COLOR = "#00800059";
   private static final String RIGHT_BKG_COLOR = "#4aa8eeb0";
-  private static final String LEFT_COLOR = "#e7e6ec";
 
   protected final ExerciseController controller;
 
@@ -109,13 +113,13 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   private String storedDialogKey = SUMMARY_DIALOG;
 
   /**
+   *
    */
-  // private boolean isInterpreter = false;
   private boolean isInterpreterMode = true;
 
   DivWidget turnContainer;
 
-  private static final boolean DEBUG = true;
+  private static final boolean DEBUG = false;
   private static final boolean DEBUG_NEXT = false;
 
   TurnViewHelper(ExerciseController<?> controller, INavigation.VIEWS thisView) {
@@ -142,39 +146,57 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    */
   @Override
   public void showContent(Panel listContent, INavigation.VIEWS instanceName) {
+    if (DEBUG)  logger.info("showContent (" + getView() + ") " + instanceName);
     clearTurnLists();
     showContentForDialogInURL(listContent);
   }
 
+  /**
+   * @param listContent
+   */
   private void showContentForDialogInURL(Panel listContent) {
     int dialogFromURL = getDialogIDFromURL();
 
-    controller.getDialogService().getDialog(dialogFromURL, new AsyncCallback<IDialog>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("getting a dialog", caught);
-      }
+    if (DEBUG) logger.info("showContentForDialogInURL (" + getView() + ") " + dialogFromURL);
 
-      @Override
-      public void onSuccess(IDialog dialog) {
-        if (DEBUG) logger.info("showContent Got back dialog " + dialog);
-        showDialogGetRef(dialogFromURL, dialog, listContent);
-      }
-    });
+    if (dialogFromURL == -1) {
+      controller.showView(INavigation.VIEWS.DIALOG);
+    } else {
+      controller.getDialogService().getDialog(dialogFromURL, new AsyncCallback<IDialog>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("getting a dialog", caught);
+        }
+
+        @Override
+        public void onSuccess(IDialog dialog) {
+          if (DEBUG) logger.info("showContent Got back dialog " + dialog);
+          showDialogGetRef(dialogFromURL, dialog, listContent);
+        }
+      });
+    }
   }
 
   /**
    * first from url, but if not then look at storage
+   *
    * @return
    */
   private int getDialogIDFromURL() {
     int dialogFromURL = getDialogFromURL();
     if (dialogFromURL == -1) {
       String prefix = NETPROF + ":" + controller.getUser() + ":";
-  //    int storedChoice = controller.getStorage().getInt(prefix + storedDialogKey);
+      //    int storedChoice = controller.getStorage().getInt(prefix + storedDialogKey);
 //      logger.info("storedChoice " + storedChoice);
 //      logger.info("dialog " + dialogFromURL);
       dialogFromURL = controller.getStorage().getInt(prefix + storedDialogKey);
+
+      if (DEBUG) {
+        logger.info("getDialogIDFromURL (" + getView() + ") " +
+            "dialog ID " + dialogFromURL);
+      }
+    } else {
+      if (DEBUG) logger.info("getDialogIDFromURL URL dialog ID " + dialogFromURL);
     }
     return dialogFromURL;
   }
@@ -224,11 +246,10 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
       logger.info("showDialogGetRef : show dialog " + dialogID);
     }
     if (dialog == null) { // should never happen
-      logger.warning("showDialogGetRef : huh? somehow don't know what dialog to show for " + dialogID);
+      logger.warning("showDialogGetRef : (" + getView() + ") huh? somehow don't know what dialog to show for " + dialogID);
       controller.showView(INavigation.VIEWS.DIALOG);
     } else {
       this.dialogContainer = child;
-//      isInterpreter = dialog.getKind() == DialogType.INTERPRETER;
       showDialog(dialogID, dialog, child);
     }
   }
@@ -344,8 +365,10 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
    */
   protected void showDialog(int dialogID, IDialog dialog, Panel child) {
     if (dialog == null) {
-      child.add(new HTML("hmmm can't find dialog #" + dialogID + " in database"));
+      logger.warning("showDialog : no dialog?");
+      child.add(new HTML("showDialog : hmmm can't find dialog #" + dialogID + " in database"));
     } else {
+      if (DEBUG) logger.info("showDialog 2 (" + getView() + ") " + dialogID + " clear " + child.getElement().getId());
       child.clear();  // dangerous???
 
       // add header
@@ -362,6 +385,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
         child.add(controlAndSpeakers);
       }
+      //    logger.info("showDialog 3 (" + getView() + ") " + dialogID);
 
       // add turns
       child.add(getTurns(dialog));
@@ -369,6 +393,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
       overallFeedback = getOverallFeedback();
 
       child.add(overallFeedback = getOverallFeedback());
+      //    logger.info("showDialog 4 (" + getView() + ") " + dialogID);
     }
   }
 
@@ -635,6 +660,8 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     checkBox.getElement().getStyle().setFontSize(32, PX);
   }
 
+  protected AudioServiceAsync currentAudioService;
+
   /**
    * @param dialog
    * @return
@@ -643,6 +670,9 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   @NotNull
   public DivWidget getTurns(IDialog dialog) {
     TurnViewHelper outer = this;
+
+    currentAudioService = controller.getAudioService();
+
     DivWidget rowOne = new DivWidget() {
       @Override
       protected void onUnload() {
@@ -763,7 +793,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
 
     if (DEBUG) {
       logger.info("getColumnForSpeaker : " +
-          "\n\tl          '" + left + "'"+
+          "\n\tl          '" + left + "'" +
           "\n\tr          " + right + " vs " +
           "\n\tex speaker '" + speaker + "' => " + columns);
     }
@@ -938,7 +968,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
       int dialogID = getDialogID();
 
       logger.info("onUnload - reload the dialog on hydra/score1");
-      controller.getAudioService().reloadDialog(dialogID, new AsyncCallback<Void>() {
+      currentAudioService.reloadDialog(dialogID, new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
           controller.handleNonFatalError("reloading dialog.", caught);
@@ -1017,12 +1047,14 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   }
 
   /**
+   * TODO : consider what to do on last turn...
+   *
    * @see EditorTurn#deleteGotFocus
    */
   public void moveFocusToNext() {
     T next = getNext();
     if (next != null) {
-      logger.info("moveFocusToNext - have " + next.getExID() + " grab focus.");
+      if (DEBUG) logger.info("moveFocusToNext - have " + next.getExID() + " grab focus.");
       next.grabFocus();
     }
     //else if (!getAllTurns().isEmpty()) {

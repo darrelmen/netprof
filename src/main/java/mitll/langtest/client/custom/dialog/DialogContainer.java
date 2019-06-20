@@ -29,9 +29,13 @@
 
 package mitll.langtest.client.custom.dialog;
 
+import com.google.gwt.cell.client.Cell;
+import com.google.gwt.dom.client.Element;
+import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.safehtml.shared.SafeHtml;
 import com.google.gwt.user.cellview.client.Column;
 import com.google.gwt.user.cellview.client.ColumnSortList;
+import com.google.gwt.user.cellview.client.TextHeader;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.dialog.IDialog;
 
@@ -45,6 +49,7 @@ import java.util.List;
 public class DialogContainer<T extends IDialog> extends SummaryDialogContainer<T> {
   public static final String DIALOGS = "dialogs";
   //private final Logger logger = Logger.getLogger("DialogContainer");
+  private static final String ID = "ID";
 
   /**
    * @param controller
@@ -71,5 +76,30 @@ public class DialogContainer<T extends IDialog> extends SummaryDialogContainer<T
     addIsPublic();
 
     table.getColumnSortList().push(new ColumnSortList.ColumnSortInfo(dateCol, true));
+  }
+
+  private void addID(List<T> list) {
+    Column<T, SafeHtml> userCol = getItemIDColumn();
+    table.setColumnWidth(userCol, getIdWidth() + "px");
+    addColumn(userCol, new TextHeader(ID));
+    table.addColumnSortHandler(getUserSorter(userCol, list));
+  }
+
+  private Column<T, SafeHtml> getItemIDColumn() {
+    Column<T, SafeHtml> column = new Column<T, SafeHtml>(new ClickableCell()) {
+      @Override
+      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
+        super.onBrowserEvent(context, elem, object, event);
+        checkGotClick(object, event);
+      }
+
+      @Override
+      public SafeHtml getValue(T shell) {
+        return getNoWrapContent("" + shell.getID());
+      }
+    };
+    column.setSortable(true);
+
+    return column;
   }
 }

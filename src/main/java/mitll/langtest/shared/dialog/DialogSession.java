@@ -42,7 +42,6 @@ public class DialogSession implements IDialogSession {
   private int dialogid = -1;
   private long modified = 0L, end = 0L;
 
- // private INavigation.VIEWS views = INavigation.VIEWS.STUDY;
   private INavigation.VIEWS views = INavigation.VIEWS.LISTEN;
   private DialogStatus status = DialogStatus.DEFAULT;
   private int numRecordings = 0;

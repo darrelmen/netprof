@@ -51,14 +51,13 @@ import java.util.List;
 public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemContainer<T> {
   //private final Logger logger = Logger.getLogger("DialogContainer");
 
-  private static final String ID = "ID";
   private static final String MODIFIED = "Modified";
   public static final String NETPROF = "netprof";
-  public static final String TITLE = "Title";
-  public static final String SUMMARY_DIALOG = "summaryDialog";
-  public static final String CHAPTER = "Chapter";
-  public static final String ENGLISH = "English";
-  public static final String ORIENTATION = "Orientation";
+  private static final String TITLE = "Title";
+  protected static final String SUMMARY_DIALOG = "summaryDialog";
+  private static final String CHAPTER = "Chapter";
+  private static final String ENGLISH = "English";
+  private static final String ORIENTATION = "Orientation";
 
   /**
    * @param controller
@@ -82,37 +81,11 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
     addChapter(list, 10);
     int maxLengthId = getMaxLengthId();
     addItemID(list, maxLengthId);
-    addEnglish(list, maxLengthId); //50
+    addEnglish(list, maxLengthId);
     addOrientation(list, maxLengthId);
   }
 
-  void addID(List<T> list) {
-    Column<T, SafeHtml> userCol = getItemIDColumn();
-    table.setColumnWidth(userCol, getIdWidth() + "px");
-    addColumn(userCol, new TextHeader(ID));
-    table.addColumnSortHandler(getUserSorter(userCol, list));
-  }
-
-  private Column<T, SafeHtml> getItemIDColumn() {
-    Column<T, SafeHtml> column = new Column<T, SafeHtml>(new ClickableCell()) {
-      @Override
-      public void onBrowserEvent(Cell.Context context, Element elem, T object, NativeEvent event) {
-        super.onBrowserEvent(context, elem, object, event);
-        checkGotClick(object, event);
-      }
-
-      @Override
-      public SafeHtml getValue(T shell) {
-        return getNoWrapContent("" + shell.getID());
-      }
-    };
-    column.setSortable(true);
-
-    return column;
-  }
-
-  protected ColumnSortEvent.ListHandler<T> getIDSorter(Column<T, SafeHtml> englishCol,
-                                                       List<T> dataList) {
+  protected ColumnSortEvent.ListHandler<T> getIDSorter(Column<T, SafeHtml> englishCol, List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, this::getIDCompare);
     return columnSortHandler;
@@ -133,8 +106,7 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
     return getTruncatedCol(maxLength, this::getEquivValue);
   }
 
-  private ColumnSortEvent.ListHandler<T> getSorter(Column<T, SafeHtml> englishCol,
-                                                   List<T> dataList) {
+  private ColumnSortEvent.ListHandler<T> getSorter(Column<T, SafeHtml> englishCol, List<T> dataList) {
     ColumnSortEvent.ListHandler<T> columnSortHandler = new ColumnSortEvent.ListHandler<>(dataList);
     columnSortHandler.setComparator(englishCol, this::getEquivCompare);
     return columnSortHandler;

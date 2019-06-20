@@ -328,7 +328,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
    * @see #logout
    */
   private void resetState() {
-   // logger.info("resetState");
+    // logger.info("resetState");
     pushClearHistory(); // clear history!
     userManager.clearUser();
     lastUser = NO_USER_INITIAL;
@@ -391,7 +391,6 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     style.setBottom(0, Style.Unit.PX);
     style.setOverflowY(Style.Overflow.AUTO);
     style.setPosition(Style.Position.FIXED);
-    //   style.setPaddingRight(225, Style.Unit.PX);
 
     return verticalContainer;
   }
@@ -554,7 +553,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
       this.pleaseAllow = widget;
 
-      if (DEBUG)
+      if (DEBUG || true)
         logger.info("populateBelowHeader adding please allow recording... add notice to " + contentRow.getId());
 
       contentRow.add(widget);
@@ -632,7 +631,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       }
 
       if (contentRow.remove(pleaseAllow) || childCount == 0) {
-        if (navigation == null) makeNavigation(); // TODO : cheesy
+        makeNavigation(); // TODO : cheesy
         contentRow.add(navigation.getNavigation());
         return true;
       } else {
@@ -660,7 +659,8 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   @Override
   public void chooseProjectAgain() {
     if (userManager.hasUser()) {
-      logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
+      if (DEBUG) logger.info("chooseProjectAgain user : " + userManager.getUser() + " " + userManager.getUserID());
+
       forgetProjectForUser();
 
       pushClearHistory();
@@ -692,9 +692,18 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     });
   }
 
+  /**
+   * @see #populateBelowHeader(DivWidget)
+   * @see #showNavigation()
+   */
   private void makeNavigation() {
-    navigation = new NewContentChooser(controller, banner);
-    banner.setNavigation(navigation);
+    if (navigation == null) {
+      if (DEBUG) logger.info("makeNavigation");
+      navigation = new NewContentChooser(controller, banner);
+      banner.setNavigation(navigation);
+    } else {
+      if (DEBUG) logger.info("makeNavigation : already have nav so not making it again...\n\n\n");
+    }
   }
 
   private void addResizeHandler() {

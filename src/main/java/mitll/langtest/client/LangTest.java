@@ -1006,7 +1006,7 @@ public class LangTest implements
 
         @Override
         public void onSuccess(Void result) {
-          logger.info("updateProject did update on project #" + projID + " on hydra server (maybe h2 or s1).");
+          if (DEBUG) logger.info("updateProject did update on project #" + projID + " on hydra server (maybe h2 or s1).");
         }
       });
     }
