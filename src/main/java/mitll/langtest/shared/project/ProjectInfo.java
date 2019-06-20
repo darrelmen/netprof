@@ -59,6 +59,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
 
   private boolean showOniOS = true;
   private boolean audioPerProject = false;
+  private boolean isArtificial = false;
 
   private Map<String, String> propertyValue = new HashMap<>();
   private int userID;
@@ -139,12 +140,12 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     return status;
   }
 
-  public ProjectType getProjectType() {
-    return projectType;
-  }
-
   public boolean isDialog() {
     return getProjectType() == ProjectType.DIALOG;
+  }
+
+  public ProjectType getProjectType() {
+    return projectType;
   }
 
   public void setProjectType(ProjectType projectType) {
@@ -282,6 +283,14 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
     return userID == sessionUser;
   }
 
+  public boolean isArtificial() {
+    return isArtificial;
+  }
+
+  public void setArtificial(boolean artificial) {
+    isArtificial = artificial;
+  }
+
   public String toString() {
     return "#" + getID() + " '" + getName() + "' '" + getStatus() + "' : " + getProjectType() +
         "\nlang      " + language +
@@ -291,6 +300,7 @@ public class ProjectInfo extends DominoProject implements HasID, MutableProject 
         "\ndomino    " + getDominoID() +
         "\nown audio " + audioPerProject +
         "\nshowOniOS " + showOniOS +
+        "\nisArtificial " + isArtificial +
         "\nmodel     " + getModelType() +
         "\nproperties " + getPropertyValue() +
         "\nimported  " + new Date(lastImport) +

@@ -116,9 +116,10 @@ public class ProjectManagement implements IProjectManagement {
   private static final String VOCABULARY = "Vocabulary and Sentences";//"Vocabulary";
 
   /**
+   * This needs to be consistent with other places in the UI...
    * @see #addModeChoices
    */
-  private static final String DIALOG = "Conversations";//"Interpreter / Dialogs";
+  private static final String DIALOG = "Interpreter / Dialogs"; //"Conversations";//
 
   private static final String VOCAB = "vocab";
   private static final String DIALOG1 = "dialog";
@@ -1263,6 +1264,7 @@ public class ProjectManagement implements IProjectManagement {
         vocab.setMode(ProjectMode.VOCABULARY);
         vocab.setCountryCode(VOCAB);
         vocab.setDisplayOrder(0);
+        vocab.setArtificial(true);
 
         projectInfo.addChild(vocab);
       }
@@ -1275,6 +1277,7 @@ public class ProjectManagement implements IProjectManagement {
         dialog.setMode(ProjectMode.DIALOG);
         dialog.setCountryCode(DIALOG1);
         dialog.setDisplayOrder(1);
+        dialog.setArtificial(true);
 
         projectInfo.addChild(dialog);
       }

@@ -347,7 +347,7 @@ public abstract class PostAudioRecordButton extends RecordButton
     long now = System.currentTimeMillis();
     long roundtrip = now - then;
 
-    if (DEBUG) {
+    if (DEBUG || roundtrip > 10000) {
       logger.info("PostAudioRecordButton : onPostSuccess Got audio " +
           "\n\tanswer for " + result.getExid() +
           "\n\tscore      " + result.getScore() +

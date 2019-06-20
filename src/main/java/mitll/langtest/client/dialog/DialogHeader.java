@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import static com.google.gwt.dom.client.Style.Clear.BOTH;
 import static com.google.gwt.dom.client.Style.Unit.PX;
@@ -64,7 +65,7 @@ import static mitll.langtest.client.custom.INavigation.VIEWS.*;
  * @see ListenViewHelper#addDialogHeader(IDialog, Panel)
  */
 public class DialogHeader {
-//  private final Logger logger = Logger.getLogger("DialogHeader");
+  private final Logger logger = Logger.getLogger("DialogHeader");
 
   private static final String DIALOG_AS_EXCEL_SPREADSHEET_WITH_AUDIO = "Download dialog as spreadsheet and with audio";
   private static final String SEE_VOCAB = "See Vocab";
@@ -74,8 +75,14 @@ public class DialogHeader {
   public static final String INTERPRETER = "Interpreter";
   private static final String VIEW_AS = "Practice as";
 
+  /**
+   *
+   */
   private static final String IS_DIALOG_MODE_CHOICE = "isDialogModeChoice";
   private static final String HEIGHT = 100 + "px";
+
+  private static final String INTERPRETER_PNG = "langtest/cc/interpreter.png";
+  private static final String DIALOG_PNG = "langtest/cc/simpleDialog.png";
 
   /**
    * @see #getRow()
@@ -163,6 +170,13 @@ public class DialogHeader {
     }
   }
 
+  /**
+   * If using the default icon, make it consistent with the dialog or interpreter mode choice.
+   * Tamas requested this.
+   *
+   * @param dialog
+   * @return
+   */
   @NotNull
   private DivWidget getMiddle(IDialog dialog) {
     DivWidget middle = new DivWidget();
@@ -171,7 +185,16 @@ public class DialogHeader {
     middle.add(getTitleBlurb());
     // add image
     {
-      com.google.gwt.user.client.ui.Image image = getImage(dialog.getImageRef());
+      String imageRef = dialog.getImageRef();
+
+      boolean isDefaultImage = INTERPRETER_PNG.equalsIgnoreCase(imageRef);
+    //  logger.info("imageRef " + imageRef + " default " + isDefaultImage);
+
+      if (isDefaultImage && isStoredModeChoiceDialog() && areModeChoicesVisible()) {
+        imageRef = DIALOG_PNG;
+      }
+
+      com.google.gwt.user.client.ui.Image image = getImage(imageRef);
       image.addStyleName("floatLeft");
       image.addStyleName("rightFiveMargin");
       middle.add(image);
@@ -380,7 +403,7 @@ public class DialogHeader {
     {
       Widget modeChoices = getModeChoices();
 
-      modeChoices.setVisible(thisView != CORE_EDITOR && thisView != TURN_EDITOR && thisView != SCORES);
+      modeChoices.setVisible(areModeChoicesVisible());
 
       Style style = modeChoices.getElement().getStyle();
       style.setMarginTop(30, PX);
@@ -390,6 +413,10 @@ public class DialogHeader {
     }
 
     return buttonDiv;
+  }
+
+  private boolean areModeChoicesVisible() {
+    return thisView != CORE_EDITOR && thisView != TURN_EDITOR && thisView != SCORES;
   }
 
   @NotNull
@@ -403,12 +430,11 @@ public class DialogHeader {
     interpreterChoice.addClickHandler(event -> gotClickOnInterpreter());
 
     {
-      boolean isDialog = controller.getStorage().isTrue(IS_DIALOG_MODE_CHOICE);
+      boolean isDialog = isStoredModeChoiceDialog();
       boolean isEditorView = thisView == TURN_EDITOR || thisView == CORE_EDITOR;
       //  logger.info("isDialog " + isDialog + " is editor " + isEditorView);
 
       modeListener.setIsDialog(isDialog && !isEditorView);
-
       dialogChoice.setValue(isDialog);
       interpreterChoice.setValue(!isDialog);
     }
@@ -427,14 +453,18 @@ public class DialogHeader {
     return row;
   }
 
+  private boolean isStoredModeChoiceDialog() {
+    return controller.getStorage().isTrue(IS_DIALOG_MODE_CHOICE);
+  }
+
   private void gotClickOnDialog() {
-    // logger.info("got click on dialog choice");
+//    logger.info("got click on dialog choice");
     controller.getStorage().setBoolean(IS_DIALOG_MODE_CHOICE, true);
     modeListener.gotDialog();
   }
 
   private void gotClickOnInterpreter() {
-    // logger.info("got click on dialog choice");
+//    logger.info("got click on interpreter choice");
     controller.getStorage().setBoolean(IS_DIALOG_MODE_CHOICE, false);
     modeListener.gotInterpreter();
   }

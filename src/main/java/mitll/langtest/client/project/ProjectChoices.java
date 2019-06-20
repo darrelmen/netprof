@@ -73,8 +73,12 @@ import static mitll.langtest.shared.user.Permission.*;
  * Created by go22670 on 1/12/17.
  */
 public class ProjectChoices extends ThumbnailChoices {
-  public static final String GREY_COLOR = "#0000008a";
   private final Logger logger = Logger.getLogger("ProjectChoices");
+
+  /**
+   *
+   */
+  public static final String GREY_COLOR = "#0000008a";
   public static final int MAX_LENGTH_ID = 24;
 
   private static final int THUMB_WIDTH = 181;
@@ -659,27 +663,34 @@ public class ProjectChoices extends ThumbnailChoices {
       boolean isQC = isQC();
       {
 
-        logger.info("getImageAnchor " +
-            "\n\tname    " +name +
-            "\n\tproject " +projectForLang);
+        if (DEBUG) {
+          logger.info("getImageAnchor " +
+              "\n\tname    " + name +
+              "\n\tproject " + projectForLang);
+        }
 
-//        String countryCode = projectForLang.getCountryCode();
-//        if (DEBUG) logger.info("getImageAnchor : for " + name + " cc " + countryCode);
-        PushButton button = new PushButton();//getFlag(countryCode));
-        button.setHTML(getButtonLabel(projectForLang));
+        PushButton button;
+        if (projectForLang.isArtificial()) {
+          String countryCode = projectForLang.getCountryCode();
+          if (DEBUG) logger.info("getImageAnchor : for " + name + " cc " + countryCode);
+          button = new PushButton(getFlag(countryCode));
+        } else {
+          button = new PushButton();
+          button.setHTML(getButtonLabel(projectForLang));
+        }
         button.addClickHandler(clickEvent -> gotClickOnFlag(name, projectForLang, 1));
 
         thumbnail.add(button);
 
         if (isQC) {
-          if (!projectForLang.hasChildren()) {
+          //if (!projectForLang.hasChildren()) {
             addPopover(button, getProps(projectForLang));
-          }
+       //   }
         } else {
           if (projectForLang.getCourse().isEmpty()) {
             // addPopover(button, projectForLang);
           } else {
-            addPopoverUsual(button, projectForLang);
+            //addPopoverUsual(button, projectForLang);
           }
         }
       }
@@ -687,7 +698,7 @@ public class ProjectChoices extends ThumbnailChoices {
       {
         DivWidget horiz = new DivWidget();
         horiz.getElement().getStyle().setProperty("minHeight", (isQC ? MIN_HEIGHT : NORMAL_MIN_HEIGHT) + "px"); // so they wrap nicely
-        horiz.add(getContainerWithButtons(name, projectForLang, isQC, numVisibleChildren));
+        horiz.add(getContainerWithButtons(name, projectForLang, isQC, numVisibleChildren, !projectForLang.isArtificial()));
 
         thumbnail.add(horiz);
       }
@@ -724,11 +735,13 @@ public class ProjectChoices extends ThumbnailChoices {
    * @param projectForLang
    * @param isQC
    * @param numVisibleChildren
+   * @param grayOutLabel
    * @return
    * @see #getImageAnchor
    */
   @NotNull
-  private DivWidget getContainerWithButtons(String name, SlimProject projectForLang, boolean isQC, int numVisibleChildren) {
+  private DivWidget getContainerWithButtons(String name, SlimProject projectForLang, boolean isQC, int numVisibleChildren,
+                                            boolean grayOutLabel) {
     boolean hasChildren = projectForLang.hasChildren();
     boolean allDialog = areAllChildrenDialogChoices(projectForLang, numVisibleChildren);
 
@@ -737,7 +750,7 @@ public class ProjectChoices extends ThumbnailChoices {
 
     String truncate = truncate(name, MAX_LENGTH_ID);
     if (DEBUG) logger.info("getContainerWithButtons from " + name + " to " + truncate);
-    container.add(label = getLabel(truncate, projectForLang, numVisibleChildren, allDialog));
+    container.add(label = getLabel(truncate, projectForLang, numVisibleChildren, allDialog, grayOutLabel));
     container.setWidth("100%");
     container.addStyleName("floatLeft");
 
@@ -790,15 +803,41 @@ public class ProjectChoices extends ThumbnailChoices {
    * @param projectForLang
    * @param numVisibleChildren
    * @param allDialog
+   * @param grayOutLabel
    * @return
-   * @paramx hasChildren
-   * @see #getContainerWithButtons(String, SlimProject, boolean, int)
+   * @see #getContainerWithButtons(String, SlimProject, boolean, int, boolean)
    */
   @NotNull
-  private Heading getLabel(String name, SlimProject projectForLang, int numVisibleChildren, boolean allDialog) {
+  private Heading getLabel(String name, SlimProject projectForLang, int numVisibleChildren, boolean allDialog,
+                           boolean grayOutLabel) {
     ProjectStatus status = projectForLang.getStatus();
     String statusText = status == ProjectStatus.PRODUCTION ? "" : status.name();
-    return getLabel(name, projectForLang.hasChildren(), numVisibleChildren, statusText, allDialog);
+    return getLabel(name, projectForLang.hasChildren(), numVisibleChildren, statusText, allDialog, grayOutLabel);
+  }
+
+  /**
+   * @param name
+   * @param hasChildren
+   * @param numVisibleChildren
+   * @param statusText
+   * @param alldialog
+   * @return
+   */
+  @NotNull
+  private Heading getLabel(String name, boolean hasChildren, int numVisibleChildren,
+                           String statusText, boolean alldialog, boolean grayOutLabel) {
+    Heading label = getChoiceLabel(LANGUAGE_SIZE, name, true);
+    if (grayOutLabel) {
+      label.getElement().getStyle().setColor(GREY_COLOR);
+    }
+
+    {
+      String subtext = alldialog ? MODES : hasChildren ?
+          (numVisibleChildren + ((numVisibleChildren == 1) ? COURSE1 : COURSES)) : statusText;
+
+      label.setSubtext(subtext);
+    }
+    return label;
   }
 
   private boolean areAllChildrenDialogChoices(SlimProject projectForLang, int numVisibleChildren) {
@@ -808,21 +847,6 @@ public class ProjectChoices extends ThumbnailChoices {
 
   private List<SlimProject> getDialogProjects(SlimProject projectForLang) {
     return projectForLang.getChildren().stream().filter(ProjectInfo::isDialog).collect(Collectors.toList());
-  }
-
-  @NotNull
-  private Heading getLabel(String name, boolean hasChildren, int numVisibleChildren,
-                           String statusText, boolean alldialog) {
-    Heading label = getChoiceLabel(LANGUAGE_SIZE, name, true);
-    label.getElement().getStyle().setColor(GREY_COLOR);
-
-    {
-      String subtext = alldialog ? MODES : hasChildren ?
-          (numVisibleChildren + ((numVisibleChildren == 1) ? COURSE1 : COURSES)) : statusText;
-
-      label.setSubtext(subtext);
-    }
-    return label;
   }
 
   private int getNumVisible(SlimProject projectForLang) {

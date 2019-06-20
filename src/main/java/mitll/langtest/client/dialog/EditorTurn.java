@@ -866,7 +866,9 @@ public class EditorTurn extends PlayAudioExercisePanel
 
       @Override
       public void onSuccess(Void result) {
-        logger.info("tellNetprofAudioHasChanged : refreshed audio for ex #" + getExID() + " and audio id " + id);
+        if (DEBUG) {
+          logger.info("tellNetprofAudioHasChanged : refreshed audio for ex #" + getExID() + " and audio id " + id);
+        }
       }
     });
   }

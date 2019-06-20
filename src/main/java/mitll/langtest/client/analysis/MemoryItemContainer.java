@@ -598,7 +598,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   public void gotClickOnItem(final T user) {
-    logger.info("gotClickOnItem " + user);
+   // logger.info("gotClickOnItem " + user);
     if (user != null) {
       storeSelectedItem(user.getID());
     }

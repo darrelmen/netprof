@@ -78,7 +78,6 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   private static final String STEP = "Step";
   private static final String DIALOG1 = "Dialog";
 
-  //  private static final String INTERPRETER_PNG = "interpreter.png";
   public static final String INTERP_COLOR = "aliceblue";
 
   // private static final String ENGLISH = "english";
@@ -203,12 +202,13 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
   /**
    * Tie both dialog lists together
+   *
    * @return
    */
   @Override
   protected int getVisibleItem() {
     int anInt = controller.getStorage().getInt(getKeyPrefix() + SUMMARY_DIALOG);
-   // logger.info("getVisibleItem Stored visible item is " + anInt);
+    // logger.info("getVisibleItem Stored visible item is " + anInt);
     return anInt;
   }
 
@@ -256,12 +256,9 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   protected void populatePanels(Collection<IDialog> result, int reqID, DivWidget exerciseContainer) {
     //  long then = System.currentTimeMillis();
     //exerciseContainer.add(showProjectChoices(result));
-    /*   myContainer =*/
     showDialogs(result, exerciseContainer);
     //  long now = System.currentTimeMillis();
   }
-
-  //private MemoryItemContainer<IDialog> myContainer;
 
   private ButtonMemoryItemContainer<IDialog> showDialogs(Collection<IDialog> result, DivWidget left) {
     ButtonMemoryItemContainer<IDialog> myLists = new ReadOnlyDialogContainer();
@@ -271,6 +268,7 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 //    tableWithPager.getElement().getStyle().setProperty("minWidth", "900px");
 
     tableWithPager.addStyleName("cardBorderShadow");
+    tableWithPager.addStyleName("topFiveMargin");
 
     new TooltipHelper().createAddTooltip(tableWithPager, DOUBLE_CLICK_TO_LEARN_THE_LIST, Placement.BOTTOM);
 
