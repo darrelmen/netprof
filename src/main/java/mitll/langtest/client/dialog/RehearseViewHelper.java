@@ -144,13 +144,10 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
   public RehearseViewHelper(ExerciseController controller, INavigation.VIEWS thisView) {
     super(controller, thisView);
     this.sessionStorage = new SessionStorage(controller.getStorage(), "rehearseSession");
-    //  this.rehearsalPrompt = thisView.isPressAndHold() ? HOLD_THE_RED_RECORD_BUTTON : RED_RECORD_BUTTON;
   }
 
   @Override
   public boolean isPressAndHold() {
-    //  boolean pressAndHold = getView().isPressAndHold();
-//    logger.info("isPressAndHold for " + getView() + " " + pressAndHold);
     return getView().isPressAndHold();
   }
 
@@ -1162,10 +1159,6 @@ public class RehearseViewHelper<T extends RecordDialogExercisePanel>
       waitCursor.setVisible(true);
     }
 //    logger.info("stopRecording received!");
-
-//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("stopRecording"));
-//    logger.info("logException stack " + exceptionAsString);
-
     recordingHasStopped();
   }
 

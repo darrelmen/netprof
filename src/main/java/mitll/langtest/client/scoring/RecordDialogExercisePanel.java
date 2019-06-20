@@ -260,7 +260,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     studentAudioAlignmentOutput = result.getPretestScore();
     studentAudioAttribute.setDurationInMillis(result.getDurationInMillis());
 
-    emoticon.setEmoticon(result.getScore(), controller.getLanguageInfo());
+    if (emoticon != null) {
+      emoticon.setEmoticon(result.getScore(), controller.getLanguageInfo());
+    }
   }
 
   @Override
@@ -437,7 +439,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
     return recordPanel.getPostAudioRecordButton();
   }
 
-  long totalDur = 0;
+  private long totalDur = 0;
 
   /**
    * @param response
@@ -461,7 +463,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
         w.getElement().getStyle().setBackgroundColor("green");
 
         totalDur += response.getDuration();
-        audioFeedback.add(w);
+        if (audioFeedback != null) {
+          audioFeedback.add(w);
+        }
       } else {
         if (DEBUG_PARTIAL) {
           logger.info("usePartial : (" + rehearseView.getNumValidities() +
@@ -479,7 +483,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
           if (totalDur < actualMinDur) value = "grey";
         }
         w.getElement().getStyle().setBackgroundColor(value);
-        audioFeedback.add(w);
+        if (audioFeedback != null) {
+          audioFeedback.add(w);
+        }
       }
 
       if (response.isStreamStop()) {
@@ -495,7 +501,7 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   private DivWidget getPacketDiv(StreamResponse response) {
     DivWidget w = new DivWidget();
     w.setHeight("10px");
-    long l = (100 * response.getDuration()) / actualMinDur;
+    long l = actualMinDur == 0 ? 100 : (100 * response.getDuration()) / actualMinDur;
     //  logger.info("1 percent " + l);
     w.setWidth(l + "%");
     return w;
@@ -623,9 +629,6 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
   public boolean reallyStartOrStopRecording() {
     if (DEBUG) logger.info("reallyStartOrStopRecording " + "\n\tfor  " + getExID());
     boolean b = getRecordButton().startOrStopRecording();
-//    if (!b) {
-//      hideAudioFeedback();
-//    }
     return b;
   }
 

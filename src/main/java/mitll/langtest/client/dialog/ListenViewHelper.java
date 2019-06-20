@@ -574,9 +574,9 @@ public class ListenViewHelper<T extends ITurnPanel>
     }
   }
 
-  public void setSessionGoingNow(boolean val) {
-    sessionGoingNow = val;
-  }
+//  public void setSessionGoingNow(boolean val) {
+//    sessionGoingNow = val;
+//  }
 
   /**
    * @return
@@ -703,6 +703,7 @@ public class ListenViewHelper<T extends ITurnPanel>
         }
       } else {
         currentTurn.showNoAudioToPlay();
+        setPlayButtonToPlay();
       }
 
     } else {
@@ -740,7 +741,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   @Override
   public void playStopped() {
     if (getCurrentTurn() != null) {
-      if (DEBUG) {
+      if (DEBUG_PLAY_ENDED) {
         logger.info("playStopped for turn " + blurb());
       }
       if (isSessionGoingNow()) {
@@ -749,6 +750,8 @@ public class ListenViewHelper<T extends ITurnPanel>
       } else {
         if (!isDoRehearse()) {
           logger.info("playStopped ignore since session has ended (via play button click)");
+        } else {
+          logger.info("playStopped no session so not continuing...");
         }
       }
     } else {
@@ -806,7 +809,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   }
 
   @NotNull
-   DivWidget getMoveOnNudge(INavigation.VIEWS nextView) {
+  DivWidget getMoveOnNudge(INavigation.VIEWS nextView) {
     DivWidget horiz = new DivWidget();
     horiz.addStyleName("inlineFlex");
     Heading w = new Heading(4, TO_THE_NEXT_STEP);
@@ -840,6 +843,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   private void setPlayButtonToPause() {
     getPlayButtonToUse().setIcon(IconType.PAUSE);
     sessionGoingNow = true;
+    //logger.info("setPlayButtonToPause sessionGoingNow " + sessionGoingNow);
   }
 
   /**
@@ -847,6 +851,7 @@ public class ListenViewHelper<T extends ITurnPanel>
    */
   void setPlayButtonToPlay() {
     getPlayButtonToUse().setIcon(IconType.PLAY);
+    //logger.info("setPlayButtonToPlay sessionGoingNow " + sessionGoingNow);
     sessionGoingNow = false;
   }
 

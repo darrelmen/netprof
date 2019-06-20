@@ -66,6 +66,7 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
 
   /**
    * Trouble if we have two consecutive recording turns!
+   *
    * @return
    */
   @Override
@@ -75,7 +76,7 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
 
   @Override
   public void gotShortDurationRecording() {
-  //  logger.info("gotShortDurationRecording");
+    //  logger.info("gotShortDurationRecording");
     super.gotShortDurationRecording();
     getPostAudioRecordButton().showPopupLater("Recording too short - press and hold to record.");
   }
@@ -106,7 +107,7 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
   @Override
   Widget getPopupTargetWidget() {
     Widget widget = recordDialogTurn.myGetPopupTargetWidget();
-  //  logger.info("getPopupTargetWidget " + widget);
+    //  logger.info("getPopupTargetWidget " + widget);
     return widget;
   }
 
@@ -139,6 +140,15 @@ public class ContinuousDialogRecordAudioPanel extends NoFeedbackRecordAudioPanel
   public void useInvalidResult(int exid, boolean isValid) {
     super.useInvalidResult(exid, isValid);
     rehearseView.useInvalidResult(exid);
+  }
+
+  @Override
+  public void startRecording() {
+    if (exercise.getForeignLanguage().isEmpty()) {
+      logger.info("startRecording can't record an empty turn!");
+    } else {
+      super.startRecording();
+    }
   }
 
   /**
