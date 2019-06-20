@@ -39,7 +39,6 @@ import com.google.gwt.user.cellview.client.ColumnSortEvent;
 import com.google.gwt.user.cellview.client.TextHeader;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.analysis.ButtonMemoryItemContainer;
-import mitll.langtest.client.analysis.MemoryItemContainer;
 import mitll.langtest.client.custom.INavigation;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.custom.dialog.ButtonHelper;
@@ -61,14 +60,16 @@ import java.util.*;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import static mitll.langtest.client.custom.dialog.SummaryDialogContainer.NETPROF;
+
 /**
  * A facet list display of dialogs.
  */
 public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
-  public static final int PAGE_SIZE = 15;
   private final Logger logger = Logger.getLogger("DialogExerciseList");
 
-  private static final String PLEASE_SELECT_A_DIALOG = "Please select a dialog";
+  private static final int PAGE_SIZE = 15;
+  private static final String PLEASE_SELECT_A_DIALOG = "Please select a dialog to rehearse.";
 
   public static final String SUMMARY_DIALOG = "summaryDialog";
   private static final String LISTEN_TO_THE_DIALOG = "Listen to the dialog.";
@@ -85,7 +86,6 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   public static final String CORE_VOCAB = "Core Vocab";
 
   private static final String DOUBLE_CLICK_TO_LEARN_THE_LIST = "Double click to rehearse a dialog";
-  // private static final String YOUR_LISTS1 = "Your Dialogs";
   public static final String DIALOG = "Dialog";
   private static final int MY_LIST_HEIGHT = 420;//500;//530;//560;
 
@@ -201,6 +201,22 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     scoreHistoryPerDialog = result.getScoreHistoryPerExercise();
   }
 
+  /**
+   * Tie both dialog lists together
+   * @return
+   */
+  @Override
+  protected int getVisibleItem() {
+    int anInt = controller.getStorage().getInt(getKeyPrefix() + SUMMARY_DIALOG);
+   // logger.info("getVisibleItem Stored visible item is " + anInt);
+    return anInt;
+  }
+
+  @NotNull
+  private String getKeyPrefix() {
+    return NETPROF + ":" + controller.getUser() + ":";
+  }
+
   @Override
   protected void getFullExercises(Collection<Integer> visibleIDs,
                                   int currentReq,
@@ -240,26 +256,19 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   protected void populatePanels(Collection<IDialog> result, int reqID, DivWidget exerciseContainer) {
     //  long then = System.currentTimeMillis();
     //exerciseContainer.add(showProjectChoices(result));
-    myContainer = showDialogs(result, exerciseContainer);
+    /*   myContainer =*/
+    showDialogs(result, exerciseContainer);
     //  long now = System.currentTimeMillis();
   }
 
-  private MemoryItemContainer<IDialog> myContainer;
+  //private MemoryItemContainer<IDialog> myContainer;
 
   private ButtonMemoryItemContainer<IDialog> showDialogs(Collection<IDialog> result, DivWidget left) {
-//
-//    Heading w = new Heading(3, "Please select a dialog");
-//    w.getElement().getStyle().setMarginTop(0, Style.Unit.PX);
-//    w.getElement().getStyle().setMarginBottom(0, Style.Unit.PX);
-//    left.add(w);
-
     ButtonMemoryItemContainer<IDialog> myLists = new ReadOnlyDialogContainer();
     Panel tableWithPager = myLists.getTableWithPager(result);
 
 //    myLists.setWidth(900, true);
-
 //    tableWithPager.getElement().getStyle().setProperty("minWidth", "900px");
-
 
     tableWithPager.addStyleName("cardBorderShadow");
 
@@ -270,14 +279,14 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
     tableWithPager.setHeight(MY_LIST_HEIGHT + "px");
     left.add(tableWithPager);
 
-    DivWidget bb = new DivWidget();
-    //  bb.setWidth("900px");
-    DivWidget buttons = buttonContainer;
 
+    DivWidget buttons = buttonContainer;
     buttons.add(share = getShare(myLists));
     buttons.add(getListenButton(myLists));
 
+    DivWidget bb = new DivWidget();
     bb.add(buttons);
+
     left.add(bb);
 
     return myLists;
@@ -295,12 +304,8 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
   @NotNull
   private Button getListenButton(ButtonMemoryItemContainer<IDialog> container) {
     Button learn = buttonHelper.getSuccessButton(container, LISTEN);
-
     learn.setIcon(IconType.VOLUME_UP);
-
     learn.addClickHandler(event -> showLearnList(container));
-
-
     buttonHelper.addTooltip(learn, LISTEN_TO_THE_DIALOG);
     return learn;
   }

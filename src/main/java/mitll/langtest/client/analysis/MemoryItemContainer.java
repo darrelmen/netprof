@@ -48,6 +48,7 @@ import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.custom.TooltipHelper;
 import mitll.langtest.client.dialog.DialogExerciseList;
+import mitll.langtest.client.dialog.ExceptionHandlerDialog;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
@@ -61,15 +62,13 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagingContainer<T> {
-  public static final boolean DEBUG = false;
   private final Logger logger = Logger.getLogger("MemoryItemContainer");
+
+  private static final boolean DEBUG = false;
 
   private static final int TABLE_WIDTH = 420;
   private static final int MAX_LENGTH_ID = 13;
 
-  /**
-   *
-   */
   private final String selectedItemKey;
   private final String header;
 
@@ -256,7 +255,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     int selectedUser = getSelectedItem(selectedItemKey);
 
     if (DEBUG || selectedUser == -1) {
-      logger.info("populateTable for " + selectedItemKey + " selected item is " + selectedUser);
+      logger.info("populateTable for " + getClass() +
+          "\n\tkey      " + selectedItemKey +
+          "\n\tselected " + selectedUser +
+          "\n\t# users  " + users.size()
+      );
     }
 
     for (T user : users) {
@@ -267,7 +270,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
         userToSelect = user;
 
         if (DEBUG) {
-          logger.info("populateTable Selected user found #" + selectedUser + " (" + user.toString() +
+          logger.info("\n\n\npopulateTable selected user found #" + selectedUser + " (" + user.toString() +
               ") at " + index + " out of " + users.size());
         }
       }
@@ -286,6 +289,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   protected void makeInitialSelectionFromSet(Collection<T> users, T userToSelect) {
     if (!users.isEmpty()) {
       makeInitialSelection(users.iterator().next(), userToSelect);
+    } else {
+      if (DEBUG)  logger.info("makeInitialSelection no users...");
     }
   }
 
@@ -295,7 +300,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #getTableWithPager
    */
   void makeInitialSelection(T firstUser, T userToSelect) {
-    //  logger.info("makeInitialSelection make initial selection : select " + userToSelect);
+    if (DEBUG)  logger.info("makeInitialSelection make initial selection : select " + userToSelect);
     Scheduler.get().scheduleDeferred(() -> selectAndClick((userToSelect == null) ? firstUser : userToSelect));
   }
 
@@ -314,8 +319,9 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     int pageNum = i / pageSize;
     int newIndex = pageNum * pageSize;
 
-    if (DEBUG)
+    if (DEBUG && false) {
       logger.info("scrollIntoView " + i + " page size " + pageSize + " page num " + pageNum + " new index " + newIndex);
+    }
 
     if (i < table.getPageStart()) {
       int newStart = Math.max(0, newIndex);//table.getPageStart() - table.getPageSize());
@@ -378,6 +384,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
   @Override
   public boolean markCurrentExercise(int itemID) {
+    logger.info("markCurrentExercise " + selectedItemKey + " = " + itemID);
     boolean b = super.markCurrentExercise(itemID);
     if (b) storeSelectedItem(itemID);
     return b;
@@ -388,7 +395,11 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #gotClickOnItem
    */
   private void storeSelectedItem(int selectedUser) {
-    logger.info("storeSelectedItem " + selectedItemKey + " = " + selectedUser);
+    if (DEBUG) logger.info("storeSelectedItem " + selectedItemKey + " = " + selectedUser);
+
+//    String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("storeSelectedItem on " + selectedItemKey + " = " + selectedUser));
+//    logger.info("logException stack:\n" + exceptionAsString);
+
     controller.getStorage().storeValue(selectedItemKey, "" + selectedUser);
 
     // post condition
@@ -399,16 +410,6 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   /**
-   * @see DialogExerciseList#getSelectedDialog()
-   * @return
-   */
-/*
-  public int getSelectedItem() {
-    return getSelectedItem(selectedItemKey);
-  }
-*/
-
-  /**
    * @param selectedUserKey
    * @return
    * @see #populateTable
@@ -416,7 +417,8 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    */
   private int getSelectedItem(String selectedUserKey) {
     int i = (selectedUserKey == null) ? -1 : controller.getStorage().getInt(selectedUserKey);
-    logger.info("getSelectedItem " + selectedItemKey + " = " + i);
+
+    if (DEBUG) logger.info("getSelectedItem " + selectedItemKey + " = " + i);
 
     return i;
   }
@@ -527,6 +529,13 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     return column;
   }
 
+  /**
+   *
+   */
+  public String getSelectedItemKey() {
+    return selectedItemKey;
+  }
+
   protected interface GetSafe<T> {
     String getSafe(T shell);
   }
@@ -589,6 +598,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   }
 
   public void gotClickOnItem(final T user) {
+    logger.info("gotClickOnItem " + user);
     if (user != null) {
       storeSelectedItem(user.getID());
     }

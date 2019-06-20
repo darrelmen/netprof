@@ -47,11 +47,12 @@ import java.util.List;
  * @param <T>
  */
 public class DialogContainer<T extends IDialog> extends SummaryDialogContainer<T> {
-  public static final String DIALOGS = "dialogs";
+  public static final String DIALOGS = SUMMARY_DIALOG;//  "dialogs";
   //private final Logger logger = Logger.getLogger("DialogContainer");
   private static final String ID = "ID";
 
   /**
+   * Use the same memory key for both dialog lists - so we don't get confused going back and forth.
    * @param controller
    */
   DialogContainer(ExerciseController<?> controller) {

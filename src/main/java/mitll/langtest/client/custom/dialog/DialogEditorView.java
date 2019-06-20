@@ -87,7 +87,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
   /**
    *
    */
-  private static final String YOUR_LISTS1 = "Your Dialogs";
+  private static final String YOUR_LISTS1 = "Select a dialog to edit.";
   public static final String DIALOG = "Dialog";
 
   private static final int MY_LIST_HEIGHT = 450;//500;//530;//560;

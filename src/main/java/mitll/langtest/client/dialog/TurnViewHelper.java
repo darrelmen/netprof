@@ -185,7 +185,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
   private int getDialogIDFromURL() {
     int dialogFromURL = getDialogFromURL();
     if (dialogFromURL == -1) {
-      String prefix = NETPROF + ":" + controller.getUser() + ":";
+      String prefix = getKeyPrefix();
       //    int storedChoice = controller.getStorage().getInt(prefix + storedDialogKey);
 //      logger.info("storedChoice " + storedChoice);
 //      logger.info("dialog " + dialogFromURL);
@@ -199,6 +199,11 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
       if (DEBUG) logger.info("getDialogIDFromURL URL dialog ID " + dialogFromURL);
     }
     return dialogFromURL;
+  }
+
+  @NotNull
+  private String getKeyPrefix() {
+    return NETPROF + ":" + controller.getUser() + ":";
   }
 
   public IDialog getDialog() {

@@ -1683,9 +1683,6 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
    * @param visibleIDs
    * @return
    */
-//  protected Collection<Integer> getVisibleForSingleItemList(int itemID, Collection<Integer> visibleIDs) {
-//    return visibleIDs;
-//  }
   protected abstract Collection<Integer> getVisibleForSingleItemList(int itemID, Collection<Integer> visibleIDs);
 
   @Override
