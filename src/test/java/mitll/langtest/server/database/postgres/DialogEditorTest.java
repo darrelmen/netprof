@@ -45,6 +45,7 @@ import mitll.langtest.shared.project.OOVWordsAndUpdate;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -69,6 +70,22 @@ public class DialogEditorTest extends BaseTest {
   private static final String FIRST = "first";
   private static final int DOMINO_ID = 99;
 
+  // 874141
+
+
+  @Test
+  public void testKoreanAttr() {
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = andPopulate.getProject(112, true);
+    CommonExercise exerciseByID = project.getExerciseByID(874141);
+
+
+    logger.info("got " + exerciseByID);
+    logger.info("has " + exerciseByID.getDirectlyRelated().size());
+    exerciseByID.getDirectlyRelated().forEach(logger::info);
+
+  }
+
   @Test
   public void testChineseOOV() {
     DatabaseImpl andPopulate = getDatabase();
@@ -79,8 +96,16 @@ public class DialogEditorTest extends BaseTest {
     logger.warn("got " + strings);
     Project englishProject = andPopulate.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
 
-    List<CommonExercise> rawExercises = project.getRawExercises();
+    CommonExercise easy = getFirstNonEnglish(project.getRawExercises());
+//    CommonExercise commonExercise = rawExercises.get(0);
+    logger.info("First is " + easy.getForeignLanguage() + " " + easy.getEnglish() + " has eng " + easy.hasEnglishAttr());
 
+    OOVWordsAndUpdate oovWordsAndUpdate = new OOVWordsHelper().get(easy, foreignLanguagePhrase, englishProject, project);
+    logger.info("got " + oovWordsAndUpdate);
+  }
+
+  @Nullable
+  private CommonExercise getFirstNonEnglish(List<CommonExercise> rawExercises) {
     CommonExercise easy = null;
     for (CommonExercise commonExercise : rawExercises) {
       if (!commonExercise.hasEnglishAttr()) {
@@ -88,10 +113,22 @@ public class DialogEditorTest extends BaseTest {
         break;
       }
     }
-//    CommonExercise commonExercise = rawExercises.get(0);
+    return easy;
+  }
+
+  @Test public void testFrench() {
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = andPopulate.getProject(21, false);
+    andPopulate.waitForSetupComplete();
+    String test = "Dude where's my car?";
+    String test2 = "Dude where's my car? car مرحبا كيف حالك؟";
+
+    CommonExercise easy = getFirstNonEnglish(project.getRawExercises());
+
+    Project englishProject = andPopulate.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
     logger.info("First is " + easy.getForeignLanguage() + " " + easy.getEnglish() + " has eng " + easy.hasEnglishAttr());
 
-    OOVWordsAndUpdate oovWordsAndUpdate = new OOVWordsHelper().get(easy, foreignLanguagePhrase, englishProject, project);
+    OOVWordsAndUpdate oovWordsAndUpdate = new OOVWordsHelper().get(easy, test, englishProject, project);
     logger.info("got " + oovWordsAndUpdate);
   }
 
