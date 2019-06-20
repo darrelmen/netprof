@@ -67,10 +67,12 @@ import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.MIDDLE;
  */
 public class EditorTurn extends PlayAudioExercisePanel
     implements ITurnPanel, IRehearseView, IRecordingTurnPanel, IFocusListener, AddDeleteListener {
-  public static final String YELLOW = "yellow";
-  public static final String WHITE = "white";
-  public static final String RED = "red";
   private final Logger logger = Logger.getLogger("EditorTurn");
+
+  private static final String YELLOW = "yellow";
+  private static final String WHITE = "white";
+  private static final String RED = "red";//"#ff000080";//"red";
+
 
   private static final String PREFIX = "This turn should be in ";
   private static final String IS_THERE_ENGLISH_IN_THIS_TURN = PREFIX + "English.";
@@ -110,7 +112,25 @@ public class EditorTurn extends PlayAudioExercisePanel
   private TurnAddDelete turnAddDelete;
   private IEditableTurnContainer<EditorTurn> editableTurnContainer;
 
+
+  enum ContentLanguageFeedback {
+    EXPECTING_ENGLISH,
+    EXPECTING_FL,
+    EXPECTING_FL_MAYBE_WRONG,
+    FOUND_OOV,
+    NO_PROBLEM
+  }
+
+  enum LengthFeedback {
+    REALLY_LONG,
+    KINDA_LONG,
+    NO_PROBLEM
+  }
+
+  private ContentLanguageFeedback contentLanguageFeedback = ContentLanguageFeedback.NO_PROBLEM;
+
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_BLUR = false;
 
   /**
    * @param clientExercise
@@ -248,7 +268,7 @@ public class EditorTurn extends PlayAudioExercisePanel
 
           @Override
           public Widget myGetPopupTargetWidget() {
-         //   logger.info("myGetPopupTargetWidget " + recordAudioPanel);
+            //   logger.info("myGetPopupTargetWidget " + recordAudioPanel);
             return recordAudioPanel.getPostAudioRecordButton();
           }
         }) {
@@ -490,27 +510,54 @@ public class EditorTurn extends PlayAudioExercisePanel
         updateText(content, this, audioID, true);
       }
     } else {
-      int length = content.split(" ").length;
-      //   logger.info("num tokens " + length);
+      checkLength(content);
+    }
+  }
 
-      if (length > 10) {
-        markRed();
+  private void checkLength(String content) {
+    int length = content.split(" ").length;
+    if (DEBUG_BLUR) logger.info("checkLength num tokens " + length + " : language feedback " + contentLanguageFeedback);
+
+    boolean noCurrentLangFeedback = contentLanguageFeedback == ContentLanguageFeedback.NO_PROBLEM;
+
+    if (length > 10) {
+      //  lengthFeedback = LengthFeedback.REALLY_LONG;
+      markRed();
+      // so don't step on any current message about content, if there is one
+      if (noCurrentLangFeedback) {
         showFeedback(REALLY_AVOID_LONG_PHRASES);
-      } else if (length > 7) {
-        editableTurnHelper.setBackgroundColor(YELLOW);
+      }
+    } else if (length > 7) {
+      //  lengthFeedback = LengthFeedback.KINDA_LONG;
+      markYellow();
+
+      // so don't step on any current message about content, if there is one
+      if (noCurrentLangFeedback) {
         showFeedback(AVOID_LONG_PHRASES);
-      } else {
-        markWhite();
-        String text = turnFeedback.getText();
-        if (text.equalsIgnoreCase(REALLY_AVOID_LONG_PHRASES) || text.equalsIgnoreCase(AVOID_LONG_PHRASES)) {
+      }
+    } else {
+      //   lengthFeedback = LengthFeedback.NO_PROBLEM;
+      markWhite();
+
+      // so don't step on any current message about content, if there is one
+      {
+        if (noCurrentLangFeedback) {
           showFeedback("");
         }
       }
     }
   }
 
+//  private boolean isPhraseNudge(String text) {
+//    return text.equalsIgnoreCase(REALLY_AVOID_LONG_PHRASES) || text.equalsIgnoreCase(AVOID_LONG_PHRASES);
+//  }
+
   private void markRed() {
     editableTurnHelper.setBackgroundColor(RED);
+  }
+
+  private void markYellow() {
+    editableTurnHelper.setBackgroundColor(YELLOW);
   }
 
   private void markWhite() {
@@ -525,16 +572,17 @@ public class EditorTurn extends PlayAudioExercisePanel
     turnContainer.gotBlur(this);
     String content = editableTurnHelper.getContent();
     if (content.equals(prev)) {
-      if (DEBUG) logger.info("gotBlur " + getExID() + " skip unchanged " + prev);
+      if (DEBUG_BLUR) logger.info("gotBlur " + getExID() + " skip unchanged " + prev);
     } else {
-
       int audioID = getAudioID();
 
-      if (DEBUG) logger.info("gotBlur " + getExID() +
-          "\n\tprev " + prev +
-          "\n\traw  " + editableTurnHelper.getContent() +
-          "\n\tsan  " + content +
-          " audio " + audioID);
+      if (DEBUG_BLUR) {
+        logger.info("gotBlur " + getExID() +
+            "\n\tprev " + prev +
+            "\n\traw  " + editableTurnHelper.getContent() +
+            "\n\tsan  " + content +
+            " audio " + audioID);
+      }
 
       prev = content;
 
@@ -626,6 +674,7 @@ public class EditorTurn extends PlayAudioExercisePanel
         });
   }
 
+
   /**
    * @param result
    * @see #updateText
@@ -636,11 +685,14 @@ public class EditorTurn extends PlayAudioExercisePanel
     if (hasEnglishAttr && result.isNoEnglish()) {
       showFeedback(IS_THERE_ENGLISH_IN_THIS_TURN);
       turnFeedback.getElement().getStyle().setBackgroundColor(YELLOW);
+      contentLanguageFeedback = ContentLanguageFeedback.EXPECTING_ENGLISH;
     } else if (!hasEnglishAttr && result.isAllEnglish()) {
       if (result.isAllOOV()) {
         showFeedback(PREFIX + controller.getLanguageInfo().toDisplay());
+        contentLanguageFeedback = ContentLanguageFeedback.EXPECTING_FL;
       } else if (result.isSomeOOV()) {
         showFeedback("Is this " + controller.getLanguageInfo().toDisplay() + "? All the words are English.");
+        contentLanguageFeedback = ContentLanguageFeedback.EXPECTING_FL_MAYBE_WRONG;
       }
       // so if the sentence is all english and all in the target language???
       turnFeedback.getElement().getStyle().setBackgroundColor(YELLOW);
@@ -649,15 +701,27 @@ public class EditorTurn extends PlayAudioExercisePanel
 
       Set<String> oov1 = result.getOov();
       if (oov1.isEmpty()) {
-        showFeedback("");
+        contentLanguageFeedback = ContentLanguageFeedback.NO_PROBLEM;
+
+        // if (lengthFeedback == LengthFeedback.NO_PROBLEM) {
+        checkLength(editableTurnHelper.getContent());
+        //showFeedback("");
+        // }
       } else {
-        StringBuilder builder = new StringBuilder();
-        builder.append(result.isPossible() ? "No pronunciation for " : "You can't use these words ");
-        oov1.forEach(oov -> builder.append(oov).append(" "));
-        String text = builder.toString();
-        showFeedback(text);
+        contentLanguageFeedback = ContentLanguageFeedback.FOUND_OOV;
+        showFeedback(getOOVMessage(result));
       }
     }
+  }
+
+  @NotNull
+  private String getOOVMessage(OOVWordsAndUpdate result) {
+    Set<String> oov1 = result.getOov();
+
+    StringBuilder builder = new StringBuilder();
+    builder.append(result.isPossible() ? "No pronunciation for " : "You can't use these words ");
+    oov1.forEach(oov -> builder.append(oov).append(" "));
+    return builder.toString();
   }
 
   private void showFeedback(String text) {

@@ -59,7 +59,9 @@ public class ClickableWords<T extends CommonShell & HasUnitChapter> extends Sear
   private final Logger logger = Logger.getLogger("ClickableWords");
 
   private static final String SEARCHMATCH = "searchmatch";
-
+  /**
+   * @see #getClickableDivFromSegments
+   */
   private static final String CLICKABLE_ROW = "clickableRow";
   private static final String CONTEXTMATCH = "contextmatch";
 

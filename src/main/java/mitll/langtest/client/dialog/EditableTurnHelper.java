@@ -33,6 +33,8 @@ import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
+import com.google.gwt.i18n.client.HasDirection;
+import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
@@ -126,20 +128,27 @@ public class EditableTurnHelper {
 //    w.setId("TextBox_" + getExID());
     w.setWidth(getTextBoxWidth() + "px");
 
-    String foreignLanguage = getBoxContent();
-    if (foreignLanguage.isEmpty()) {
-      w.setPlaceholder(placeholder);
-    } else {
-      w.setText(foreignLanguage);
+    {
+      String foreignLanguage = getBoxContent();
+      if (foreignLanguage.isEmpty()) {
+        w.setPlaceholder(placeholder);
+      } else {
+        w.setText(foreignLanguage);
+//        HasDirection.Direction dir =
+//            WordCountDirectionEstimator.get().estimateDirection(foreignLanguage);
+      }
     }
+    w.setDirectionEstimator(true);
+
     w.addBlurHandler(event -> gotBlur());
     w.addFocusHandler(event -> gotFocus());
     w.addKeyUpHandler(this::gotKey);
 
     w.addStyleName("leftTenMargin");
     w.addStyleName("rightTenMargin");
-    if (addTopMargin)
+    if (addTopMargin) {
       w.addStyleName("topFiveMargin");
+    }
 
     return w;
   }

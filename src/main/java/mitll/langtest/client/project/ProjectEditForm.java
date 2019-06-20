@@ -70,6 +70,7 @@ import static mitll.langtest.shared.project.Language.MANDARIN;
  * Created by go22670 on 1/17/17.
  */
 public class ProjectEditForm extends UserDialog {
+  public static final boolean DEBUG = false;
   private final Logger logger = Logger.getLogger("ProjectEditForm");
 
   private static final String GVIDAVER = "gvidaver";
@@ -238,17 +239,19 @@ public class ProjectEditForm extends UserDialog {
 
     {
       String selectedValue = modelTypeBox.getSelectedValue();
-      logger.info("updateProject : value is " + selectedValue);
+      if (DEBUG) logger.info("updateProject : value is " + selectedValue);
       info.setModelType(ModelType.valueOf(selectedValue));
     }
     //  logger.info("updateProject get model type " + info.getModelType());
-    DominoProject id = dominoToProject.get(dominoProjectsListBox.getSelectedValue());
+    {
+      DominoProject id = dominoToProject.get(dominoProjectsListBox.getSelectedValue());
 
-    if (id != null) {
-      info.setDominoID(id.getDominoID());
-      //logger.info(" project domino id now " + id.getDominoID());
-    } else {
+      if (id != null) {
+        info.setDominoID(id.getDominoID());
+        //logger.info(" project domino id now " + id.getDominoID());
+      } else {
 //      logger.info("updateProject no domino project for " + dominoProjectsListBox.getSelectedValue());
+      }
     }
 
     setCommonFields();
@@ -412,10 +415,10 @@ public class ProjectEditForm extends UserDialog {
   }
 
   /**
-   * @see #getForm(ProjectInfo, boolean)
    * @param info
    * @param isNew
    * @return
+   * @see #getForm(ProjectInfo, boolean)
    */
   private Fieldset getFields(ProjectInfo info, boolean isNew) {
     Fieldset fieldset = new Fieldset();

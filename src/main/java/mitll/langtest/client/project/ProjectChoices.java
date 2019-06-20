@@ -658,6 +658,11 @@ public class ProjectChoices extends ThumbnailChoices {
 
       boolean isQC = isQC();
       {
+
+        logger.info("getImageAnchor " +
+            "\n\tname    " +name +
+            "\n\tproject " +projectForLang);
+
 //        String countryCode = projectForLang.getCountryCode();
 //        if (DEBUG) logger.info("getImageAnchor : for " + name + " cc " + countryCode);
         PushButton button = new PushButton();//getFlag(countryCode));
@@ -1200,11 +1205,12 @@ public class ProjectChoices extends ThumbnailChoices {
       Set<Integer> childIDs = new HashSet<>();
       children.forEach(slimProject -> childIDs.add(slimProject.getID()));
       if (childIDs.size() == 1) {
-        logger.info("OK, remember project for user =" + projid);
+        if (DEBUG_CLICK) logger.info("gotClickOnFlag OK, remember project for user =" + projid);
         easyRemember(projid);
       }
-      if (DEBUG_CLICK)
+      if (DEBUG_CLICK) {
         logger.info("gotClickOnFlag onClick select parent project " + projid + " and " + children.size() + " children ");
+      }
       breadcrumb.addClickHandler(clickEvent -> uiLifecycle.clickOnParentCrumb(projectForLang, breadcrumb));
 
       uiLifecycle.clearContent();

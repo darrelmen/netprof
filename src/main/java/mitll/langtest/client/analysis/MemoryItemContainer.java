@@ -47,6 +47,7 @@ import com.google.gwt.user.client.ui.IsWidget;
 import com.google.gwt.user.client.ui.Panel;
 import com.google.gwt.view.client.SingleSelectionModel;
 import mitll.langtest.client.custom.TooltipHelper;
+import mitll.langtest.client.dialog.DialogExerciseList;
 import mitll.langtest.client.exercise.ClickablePagingContainer;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.exercise.SimplePagingContainer;
@@ -60,6 +61,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagingContainer<T> {
+  public static final boolean DEBUG = false;
   private final Logger logger = Logger.getLogger("MemoryItemContainer");
 
   private static final int TABLE_WIDTH = 420;
@@ -68,7 +70,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
   /**
    *
    */
-  private final String selectedUserKey;
+  private final String selectedItemKey;
   private final String header;
 
   private static final int STARTED_WIDTH = 90;
@@ -99,7 +101,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
                                 int pageSize,
                                 int shortPageSize) {
     super(controller);
-    this.selectedUserKey = selectedUserKey;
+    this.selectedItemKey = selectedUserKey;
     this.header = header;
     todaysDate = format.format(new Date());
     todayYear = todaysDate.substring(todaysDate.length() - 2);
@@ -251,10 +253,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     T userToSelect = null;
     getList().clear();
 
-    int selectedUser = getSelectedItem(selectedUserKey);
+    int selectedUser = getSelectedItem(selectedItemKey);
 
-    if (false) {
-      logger.info("populateTable for " + selectedUserKey + " selected item is " + selectedUser);
+    if (DEBUG || selectedUser == -1) {
+      logger.info("populateTable for " + selectedItemKey + " selected item is " + selectedUser);
     }
 
     for (T user : users) {
@@ -264,7 +266,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
         index = i;
         userToSelect = user;
 
-        if (false) {
+        if (DEBUG) {
           logger.info("populateTable Selected user found #" + selectedUser + " (" + user.toString() +
               ") at " + index + " out of " + users.size());
         }
@@ -312,7 +314,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     int pageNum = i / pageSize;
     int newIndex = pageNum * pageSize;
 
-    if (false)
+    if (DEBUG)
       logger.info("scrollIntoView " + i + " page size " + pageSize + " page num " + pageNum + " new index " + newIndex);
 
     if (i < table.getPageStart()) {
@@ -386,18 +388,25 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #gotClickOnItem
    */
   private void storeSelectedItem(int selectedUser) {
-    //  logger.info("storeSelectedItem " + selectedUserKey + " = " + selectedUser);
+    logger.info("storeSelectedItem " + selectedItemKey + " = " + selectedUser);
+    controller.getStorage().storeValue(selectedItemKey, "" + selectedUser);
 
-    controller.getStorage().storeValue(selectedUserKey, "" + selectedUser);
-
-    if (selectedUser != getSelectedItem(selectedUserKey)) {
-      logger.warning("storeSelectedItem : huh? stored " + selectedUserKey + " but got " + getSelectedItem(selectedUserKey));
+    // post condition
+    if (selectedUser != getSelectedItem(selectedItemKey)) {
+      logger.warning("storeSelectedItem : huh? " +
+          "\n\tstored " + selectedItemKey + " but got " + getSelectedItem(selectedItemKey));
     }
   }
 
+  /**
+   * @see DialogExerciseList#getSelectedDialog()
+   * @return
+   */
+/*
   public int getSelectedItem() {
-    return getSelectedItem(selectedUserKey);
+    return getSelectedItem(selectedItemKey);
   }
+*/
 
   /**
    * @param selectedUserKey
@@ -406,7 +415,10 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
    * @see #storeSelectedItem
    */
   private int getSelectedItem(String selectedUserKey) {
-    return (selectedUserKey == null) ? -1 : controller.getStorage().getInt(selectedUserKey);
+    int i = (selectedUserKey == null) ? -1 : controller.getStorage().getInt(selectedUserKey);
+    logger.info("getSelectedItem " + selectedItemKey + " = " + i);
+
+    return i;
   }
 
   void addTooltip() {
