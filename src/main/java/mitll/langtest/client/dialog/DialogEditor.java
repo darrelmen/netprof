@@ -30,6 +30,9 @@
 package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Panel;
@@ -59,6 +62,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   private final boolean isInModal;
 
   private static final boolean DEBUG_ADD_TURN = false;
+  private Canvas ifSupported;
 
   /**
    * @see DialogEditorView#editList
@@ -68,6 +72,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     setDialog(theDialog);
     isInModal = theDialog != null;
     this.sessionStorage = new SessionStorage(controller.getStorage(), "editorSession");
+    ifSupported = Canvas.createIfSupported();
   }
 
   /**
@@ -358,4 +363,15 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     makeNextTheCurrentTurn(getNextTurn(exid));
   }
 
+
+
+  @NotNull
+  public double getMeasuredWidth(String toMeasure) {
+    Context2d context2d = ifSupported.getContext2d();
+    context2d.setFont("16pt Arial Unicode MS, Arial, sans-serif");
+//    editableTurnHelper.setFontSize(context2d);
+
+    TextMetrics something = context2d.measureText(toMeasure);
+    return something.getWidth();
+  }
 }

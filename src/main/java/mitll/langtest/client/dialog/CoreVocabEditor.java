@@ -367,6 +367,11 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
   }
 
   @Override
+  public double getMeasuredWidth(String toMeasure) {
+    return 0;
+  }
+
+  @Override
   public void gotBlur(CoreEditorTurn widgets) {
     boolean last = isLast(widgets);
     if (last) {

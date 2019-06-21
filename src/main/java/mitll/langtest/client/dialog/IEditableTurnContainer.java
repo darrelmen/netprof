@@ -38,4 +38,6 @@ public interface IEditableTurnContainer<T extends ISimpleTurn> {
   void addTurnForOtherSpeaker(T editorTurn);
 
   void deleteCurrentTurnOrPair(T currentTurn);
+
+  double getMeasuredWidth(String toMeasure);
 }

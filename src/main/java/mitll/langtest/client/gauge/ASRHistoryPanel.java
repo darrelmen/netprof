@@ -232,9 +232,13 @@ public class ASRHistoryPanel extends FlowPanel implements MiniScoreListener {
     row.getElement().setId("wordScores");
     row.addStyleName("inlineFlex");
     Map<NetPronImageType, List<TranscriptSegment>> scores = scoreAndPath.getScores();
-    if (scores.isEmpty()) {
-      logger.info("makeColoredTable no segments for " + scoreAndPath);
+
+    if (false) {
+      if (scores.isEmpty()) {
+        logger.info("makeColoredTable no segments for " + scoreAndPath);
+      }
     }
+
     row.getElement().setInnerHTML(new WordTable().makeColoredTableFull(scores));
     tooltipHelper.createAddTooltip(row, "Score" + (" " + scoreAndPath.getPercentScore() + "%"), Placement.BOTTOM);
     row.addStyleName("leftFiveMargin");

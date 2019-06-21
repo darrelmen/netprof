@@ -33,6 +33,9 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
+import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -68,6 +71,10 @@ import static mitll.langtest.client.dialog.ITurnContainer.COLUMNS.MIDDLE;
 public class EditorTurn extends PlayAudioExercisePanel
     implements ITurnPanel, IRehearseView, IRecordingTurnPanel, IFocusListener, AddDeleteListener {
   private final Logger logger = Logger.getLogger("EditorTurn");
+
+  public static final int CHUNK_STEP = 50;
+  public static final int MAX_WIDTH = CHUNK_STEP * 12;
+  public static final double CHEESY_SCALAR = 0.9;
 
   private static final String YELLOW = "yellow";
   private static final String WHITE = "white";
@@ -152,17 +159,18 @@ public class EditorTurn extends PlayAudioExercisePanel
              int dialogID,
              boolean isFirstTurn,
              SessionManager sessionManager) {
+    String foreignLanguage = clientExercise.getForeignLanguage();
     if (DEBUG) {
       logger.info("EditorTurn : turn " +
           "\n\tdialog " + dialogID +
           "\n\tex     " + clientExercise.getID() +
-          "\n\tfl     '" + clientExercise.getForeignLanguage() + "' " +
+          "\n\tfl     '" + foreignLanguage + "' " +
           "\n\thas english " + clientExercise.hasEnglishAttr() +
           "\n\tcol    " + columns +
           "\n\taudio  " + clientExercise.getAudioAttributes()
       );
     }
-    this.prev = clientExercise.getForeignLanguage();
+    this.prev = foreignLanguage;
 
     if (DEBUG) {
       logger.info("EditorTurn : turn " +
@@ -179,7 +187,8 @@ public class EditorTurn extends PlayAudioExercisePanel
     this.isFirstTurn = isFirstTurn;
 
     this.turnAddDelete = new TurnAddDelete(this, 26);
-    this.editableTurnHelper = new EditableTurnHelper(controller.getLanguageInfo(), clientExercise.hasEnglishAttr(), clientExercise.getForeignLanguage(), this);
+    this.editableTurnHelper = new EditableTurnHelper(controller.getLanguageInfo(), clientExercise.hasEnglishAttr(),
+        foreignLanguage, this);
     editableTurnHelper.setPlaceholder(columns);
 
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify) {
@@ -230,7 +239,7 @@ public class EditorTurn extends PlayAudioExercisePanel
 
   @Override
   public String getText() {
-    return getExID() + " '" + clientExercise.getForeignLanguage() + "'";
+    return getExID() + " '" + getContent() + "'";
   }
 
   @Override
@@ -332,6 +341,7 @@ public class EditorTurn extends PlayAudioExercisePanel
 
       buttonContainer.add(getPlayButton(playAudioPanel));
       buttonContainer.getElement().getStyle().setMarginTop(3, Style.Unit.PX);
+      buttonContainer.addStyleName("inlineFlex");
     }
 
     wrapper.add(buttonContainer);
@@ -340,7 +350,8 @@ public class EditorTurn extends PlayAudioExercisePanel
     turnAddDelete.removeFromTabSequence(postAudioRecordButton);
 
     wrapper.add(getTextBox());
-
+//    logger.info("content " + getContent());
+    maybeGrowTextBox(getContent());
 
     styleMe(wrapper);
     wrapper.addStyleName("inlineFlex");
@@ -367,6 +378,7 @@ public class EditorTurn extends PlayAudioExercisePanel
     addPressAndHoldStyleForRecordButton(playButton);
     return playButton;
   }
+
 
   @NotNull
   private DivWidget getTextBox() {
@@ -514,9 +526,13 @@ public class EditorTurn extends PlayAudioExercisePanel
     }
   }
 
+  private int lastChunk = -1;
+
   private void checkLength(String content) {
     int length = content.split(" ").length;
     if (DEBUG_BLUR) logger.info("checkLength num tokens " + length + " : language feedback " + contentLanguageFeedback);
+
+    maybeGrowTextBox(content);
 
     boolean noCurrentLangFeedback = contentLanguageFeedback == ContentLanguageFeedback.NO_PROBLEM;
 
@@ -548,9 +564,36 @@ public class EditorTurn extends PlayAudioExercisePanel
     }
   }
 
-//  private boolean isPhraseNudge(String text) {
-//    return text.equalsIgnoreCase(REALLY_AVOID_LONG_PHRASES) || text.equalsIgnoreCase(AVOID_LONG_PHRASES);
-//  }
+  /**
+   * Grow the text box if there is too much text to fit.
+   * Not sure how robust this will be.
+   * max width 600
+   *
+   * @param content
+   */
+  private void maybeGrowTextBox(String content) {
+    double measuredWidth = editableTurnContainer.getMeasuredWidth(content) * CHEESY_SCALAR;
+    double chunks = measuredWidth / CHUNK_STEP;
+    int measuredChunks = Double.valueOf(chunks).intValue();
+//    logger.info("width " + measuredWidth);
+
+    if (lastChunk != measuredChunks && measuredChunks > 0) {
+      double textBoxWidth = Integer.valueOf(editableTurnHelper.getTextBoxWidth()).doubleValue();
+      double maxChunks = textBoxWidth / CHUNK_STEP;
+
+      if (chunks > maxChunks) {
+        int newWidth = Math.min(measuredChunks * CHUNK_STEP, MAX_WIDTH);
+        // logger.info("checkLength OK, now " + newWidth + " given " + measuredChunks);
+        editableTurnHelper.setMeasuredWidth(newWidth);
+        lastChunk = measuredChunks;
+      } else {
+        //  logger.info("checkLength back to normal " + chunks + " vs " + maxChunks);
+
+        lastChunk = measuredChunks;
+        editableTurnHelper.setMeasuredWidth(editableTurnHelper.getTextBoxWidth());
+      }
+    }
+  }
 
   private void markRed() {
     editableTurnHelper.setBackgroundColor(RED);

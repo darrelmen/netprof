@@ -31,11 +31,15 @@ package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
+import com.google.gwt.canvas.client.Canvas;
+import com.google.gwt.canvas.dom.client.Context2d;
+import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
+import com.google.gwt.user.client.ui.UIObject;
 import mitll.langtest.client.banner.SessionManager;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.EnglishDisplayChoices;
@@ -71,8 +75,8 @@ public class EditableTurnHelper {
   }
 
   /**
-   * @see EditorTurn#EditorTurn
    * @param columns
+   * @see EditorTurn#EditorTurn
    */
   public void setPlaceholder(ITurnContainer.COLUMNS columns) {
     this.placeholder = getPlaceholder(columns);
@@ -107,6 +111,10 @@ public class EditableTurnHelper {
     contentTextBox.getElement().getStyle().setBackgroundColor(color);
   }
 
+  /**
+   * @param addMargin
+   * @return
+   */
   @NotNull
   DivWidget getTextBox(boolean addMargin) {
     DivWidget textBoxContainer = new DivWidget();
@@ -124,18 +132,14 @@ public class EditableTurnHelper {
    */
   private TextBox addTextBox(boolean addTopMargin) {
     TextBox w = new TextBox();
-    w.getElement().getStyle().setFontSize(16, Style.Unit.PX);
-//    w.setId("TextBox_" + getExID());
+    setFontSize(w);
     w.setWidth(getTextBoxWidth() + "px");
-
     {
       String foreignLanguage = getBoxContent();
       if (foreignLanguage.isEmpty()) {
         w.setPlaceholder(placeholder);
       } else {
         w.setText(foreignLanguage);
-//        HasDirection.Direction dir =
-//            WordCountDirectionEstimator.get().estimateDirection(foreignLanguage);
       }
     }
     w.setDirectionEstimator(true);
@@ -151,6 +155,10 @@ public class EditableTurnHelper {
     }
 
     return w;
+  }
+
+  void setFontSize(UIObject w) {
+    w.getElement().getStyle().setFontSize(16, Style.Unit.PX);
   }
 
   private String getBoxContent() {
@@ -171,6 +179,14 @@ public class EditableTurnHelper {
 
   String getContent() {
     return contentTextBox.getText();
+  }
+
+  int getMeasuredWidth() {
+    return contentTextBox.getOffsetWidth();
+  }
+
+  void setMeasuredWidth(int newWidth) {
+    contentTextBox.setWidth(newWidth + "px");
   }
 
   private void gotBlur() {
