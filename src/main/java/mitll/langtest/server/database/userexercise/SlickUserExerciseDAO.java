@@ -1060,12 +1060,17 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
       boolean isPredef) {
     // TODO? : consider getting exercise->phone from the ref result table again
 //    logger.info("getByProject type order " + typeOrder);
+    int id = theProject.getID();
     List<SlickExercise> allPredefByProject = isPredef ?
-        dao.getAllPredefByProject(theProject.getID()) :
-        dao.getAllUserDefinedByProject(theProject.getID());
+        dao.getAllPredefByProject(id) :
+        dao.getAllUserDefinedByProject(id);
+
+//    Set<Integer> dialogExercises = getDialogExercises(id);
+//    logger.info("getByProject found " + dialogExercises.size() + " dialog exercises - before " + allPredefByProject.size());
+//    allPredefByProject = allPredefByProject.stream().filter(slickExercise -> !dialogExercises.contains(slickExercise.id())).collect(Collectors.toList());
 
     logger.info("getByProject isPredef " + isPredef +
-        " got " + allPredefByProject.size() + " from " + theProject);
+        " \n\tgot " + allPredefByProject.size() + " from " + theProject);
 
     return getExercises(allPredefByProject,
         typeOrder,
@@ -1074,6 +1079,12 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
         allByProject,
         exToAttrs,
         true);
+  }
+
+  private Set<Integer> getDialogExercises(int projid) {
+    Set<Integer> onDialogs = new HashSet<>();
+    getRelatedExercise().getDialogIDToRelated(projid).values().forEach(perDialog -> perDialog.forEach(slickRelatedExercise -> onDialogs.add(slickRelatedExercise.exid())));
+    return onDialogs;
   }
 
   public List<Integer> getUserDefinedByProjectExactMatch(int projid, int creator, String fl) {

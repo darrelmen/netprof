@@ -55,7 +55,6 @@ public class Exercise extends AudioExercise implements CommonExercise,
 
   private transient Collection<String> refSentences = new ArrayList<String>();
 
-  //  private transient List<String> firstPron = new ArrayList<>();
   private List<String> tokens;
   private long updateTime = 0;
 

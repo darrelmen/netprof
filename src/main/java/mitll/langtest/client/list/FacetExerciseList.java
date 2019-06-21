@@ -2111,6 +2111,9 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
     PhonesChoices phoneChoices = factory.getPhoneChoices();
     EnglishDisplayChoices englishDisplayChoices = factory.getEnglishChoices();
     for (U exercise : result) {
+//      logger.info("makeExercisePanels show " + exercise.getID() + " " + exercise.getForeignLanguage() + " " + exercise.getClass());
+//      List<ExerciseAttribute> attributes = ((Exercise) exercise).getAttributes();
+//      logger.info("Got " +attributes);
       if (isStale(reqID)) {
         if (DEBUG_STALE) {
           logger.info("makeExercisePanels stop stale req " + reqID + " vs current " + getCurrentExerciseReq());

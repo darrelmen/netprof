@@ -333,6 +333,11 @@ public class ExerciseListRequest implements IsSerializable, IRequest {
     return this;
   }
 
+  /**
+   * @deprecated only for study exercise list...
+   * @param dialogID
+   * @return
+   */
   public ExerciseListRequest setDialogID(int dialogID) {
     this.dialogID = dialogID;
     return this;

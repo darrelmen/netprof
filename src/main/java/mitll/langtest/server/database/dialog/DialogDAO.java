@@ -192,6 +192,13 @@ public class DialogDAO extends DAO implements IDialogDAO {
     return dialogs;
   }
 
+  public Set<Integer> getDialogExercises(int projid) {
+    IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
+    Set<Integer> onDialogs = new HashSet<>();
+    userExerciseDAO.getRelatedExercise().getDialogIDToRelated(projid).values().forEach(perDialog -> perDialog.forEach(slickRelatedExercise -> onDialogs.add(slickRelatedExercise.exid())));
+    return onDialogs;
+  }
+
   @Override
   public List<IDialog> getOneDialog(int id) {
     Collection<SlickDialog> byID = getByID(id);
