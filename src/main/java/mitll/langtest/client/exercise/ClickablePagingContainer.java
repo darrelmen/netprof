@@ -192,7 +192,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
    */
   public void addItemAfter(T afterThisOne, T item) {
     if (DEBUG_ADDING) {
-      logger.info("addItemAfter adding " + item + " current selection : " +getCurrentSelection());
+      logger.info("addItemAfter adding " + item + " current selection : " + getCurrentSelection());
     }
     List<T> list = getList();
     int before = list.size();
@@ -253,7 +253,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
       return false;
     } else {
       boolean b = markCurrent(getIndex(found), found);
-      if (DEBUG)  logger.info("markCurrentExercise : change visible range " + b);
+      if (DEBUG) logger.info("markCurrentExercise : change visible range " + b);
       return b;
     }
   }
@@ -300,7 +300,7 @@ public abstract class ClickablePagingContainer<T extends HasID> extends SimplePa
   }
 
   public void setPageSize(int pageSize) {
-    logger.info("setPageSize: page size is " + pageSize);
+    if (DEBUG) logger.info("setPageSize: page size is " + pageSize);
     table.setPageSize(pageSize);
     table.redraw();
   }

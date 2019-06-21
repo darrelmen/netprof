@@ -30,6 +30,7 @@
 package mitll.langtest.server.database.userexercise;
 
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.exercise.DBExerciseDAO;
 import mitll.langtest.server.database.project.Project;
 import mitll.npdata.dao.SlickExercise;
 import mitll.npdata.dao.SlickRelatedExercise;
@@ -45,6 +46,11 @@ public interface IRelatedExercise extends IDAO {
 
   int getParentForContextID(int contextID);
 
+  /**
+   * @see DBExerciseDAO#readExercises
+   * @param projid
+   * @return
+   */
   Collection<SlickRelatedExercise> getAllRelated(int projid);
 
   /**

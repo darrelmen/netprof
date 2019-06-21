@@ -159,7 +159,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
   public void convertAll(Collection<IDialog> toCheck, IUserExerciseDAO userExerciseDAO) {
     List<IDialog> collect = toCheck.stream().filter(dialog -> dialog.getKind() == DialogType.DIALOG).collect(Collectors.toList());
-    logger.info("Found " + collect.size() + " to convert.");
+    if (!collect.isEmpty()) logger.info("Found " + collect.size() + " to convert.");
     collect.forEach(dialog -> convertDialogToInterpreter(dialog, userExerciseDAO));
   }
 
@@ -486,7 +486,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
    */
   private List<ClientExercise> addExercises(int projid,
                                             Map<Integer, List<SlickRelatedExercise>> dialogIDToRelated,
-                                            Dialog dialog) {
+                                            IDialog dialog) {
     int dialogID = dialog.getID();
     List<SlickRelatedExercise> slickRelatedExercises = dialogIDToRelated.get(dialogID);
 
@@ -519,26 +519,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
             } else {
               logger.warn("addExercises ex " + exercise.getID() + " is not safe to decode");
             }
-          }
-
-//          if (exercise == null) {
-//            if (!databaseImpl.getExerciseDAO(projid).refresh(exid)) {
-//              logger.warn("addExercises : didn't refresh " + exid);
-//            }
-//            exercise = databaseImpl.getExercise(projid, exid);
-//            if (exercise == null) logger.warn("even after attempt to refresh, can't find " + exid);
-//          }
-          int before;
-          if (exercise != null) {
             if (DEBUG_ADD_EXERCISE) {
-              logger.info("addExercises (" + dialogID + ") " +
-                      "\n\tex #   " + exercise.getID() +
-                      "\n\tfl     '" + exercise.getForeignLanguage() + "'" +
-//                  "\n\ttokens " + exercise.getTokens() +
-                      "\n\tattr   " + exercise.getAttributes()
-              );
+              reportOnEx(dialogID, exercise);
             }
-            before = exercise.getAttributes().size();
+            int before = exercise.getAttributes().size();
             idToEx.put(exid, exercise = new Exercise(exercise));
 
             int after = exercise.getAttributes().size();
@@ -559,12 +543,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
               logger.warn("\n\n\naddExercises : can't find " + childid);
             } else {
               if (DEBUG_ADD_EXERCISE) {
-                logger.info("addExercises (" + dialogID + ") child - " +
-                    "\n\tex #   " + childExOrig.getID() +
-                    "\n\tfl     '" + childExOrig.getForeignLanguage() + "'" +
-                    //"\n\ttokens " + childExOrig.getTokens() +
-                    "\n\tattr   " + childExOrig.getAttributes()
-                );
+                reportOnEx(dialogID, childExOrig);
               }
               idToEx.put(childid, childEx = new Exercise(childExOrig));
             }
@@ -597,34 +576,33 @@ public class DialogDAO extends DAO implements IDialogDAO {
       //  logger.info("got candidates " + candidate.size() + " relations for " + dialogID + " : " + candidate);
 
       {
-//        List<CommonExercise> firstEx = exercises
-//            .stream()
-//            .filter(commonExercise -> candidate.contains(commonExercise.getID()))
-//            .collect(Collectors.toList());
-
         int size = exercises.size();
         if (size == 0) {
           logger.warn("addExercises huh no exercises on dialog #" + dialog.getID());
         }
-//      else if (size == 1) {
-        //   } else if (size == 2) logger.warn("not expecting multiple parents " + firstEx);
-
         exercises1.addAll(exercises);
       }
     } else {
 //      logger.warn("no exercises for " + dialogID);
     }
 
-    String message = "dialog " + dialog.getID() + " " + dialog.getUnit() + " " + dialog.getChapter() +
-        " has " + exercises1.size() + " exercises.";
-
     if (exercises1.isEmpty()) {
 //      logger.warn(message);
     } else if (DEBUG) {
+      String message = "dialog " + dialog.getID() + " " + dialog.getUnit() + " " + dialog.getChapter() +
+          " has " + exercises1.size() + " exercises.";
       logger.info(message);
     }
 
     return exercises1;
+  }
+
+  private void reportOnEx(int dialogID, CommonExercise exercise) {
+    logger.info("addExercises (" + dialogID + ") " +
+        "\n\tex #   " + exercise.getID() +
+        "\n\tfl     '" + exercise.getForeignLanguage() + "'" +
+        "\n\tattr   " + exercise.getAttributes()
+    );
   }
 
   /**

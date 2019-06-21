@@ -583,14 +583,18 @@ public class TwoColumnExercisePanel<T extends ClientExercise> extends DialogExer
     String altFL = getAltFL(e);
     Collection<ClientExercise> directlyRelated = e.getDirectlyRelated();
     for (ClientExercise contextEx : directlyRelated) {
-      DivWidget rowWidget = getRowWidget();
-      card.add(rowWidget);
+      if (contextEx.isContext()) {
+        DivWidget rowWidget = getRowWidget();
+        card.add(rowWidget);
 
-      // logger.info("Add context " +contextEx.getID() + " " + contextEx);
-      SimpleRecordAudioPanel<ClientExercise> recordPanel = addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
-      if (recordPanel != null) {
-        card.add(getScoringRow(recordPanel));
-        this.contextRecordPanel = recordPanel;
+        // logger.info("Add context " +contextEx.getID() + " " + contextEx);
+        SimpleRecordAudioPanel<ClientExercise> recordPanel = addContextFields(rowWidget, foreignLanguage, altFL, contextEx);
+        if (recordPanel != null) {
+          card.add(getScoringRow(recordPanel));
+          this.contextRecordPanel = recordPanel;
+        }
+      } else {
+        logger.info("addContext : skipping " + contextEx.getID() + " " + contextEx.getEnglish() + " " + contextEx.getForeignLanguage() + " since not context");
       }
       //else {
       // logger.warning("can't add record panel?");

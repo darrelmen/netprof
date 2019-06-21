@@ -116,7 +116,9 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
   @NotNull
   protected EditorTurn makeTurnPanel(ClientExercise clientExercise, COLUMNS columns, COLUMNS prevColumn,
                                      boolean rightJustify, int index) {
-    int i = getDialog().getExercises().indexOf(clientExercise);
+    IDialog dialog = getDialog();
+
+    int i = dialog.getExercises().indexOf(clientExercise);
     boolean isFirst = i == 0 && columns == ITurnContainer.COLUMNS.LEFT || i == 1 && columns == ITurnContainer.COLUMNS.MIDDLE;
     EditorTurn widgets = new EditorTurn(
         clientExercise,
@@ -126,7 +128,7 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
         controller,
         this,
         this,
-        getDialog().getProjid(),
+        dialog.getProjid(),
         getDialogID(),
         isFirst,
         this);

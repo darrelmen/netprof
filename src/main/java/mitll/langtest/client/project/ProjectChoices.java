@@ -684,8 +684,8 @@ public class ProjectChoices extends ThumbnailChoices {
 
         if (isQC) {
           //if (!projectForLang.hasChildren()) {
-            addPopover(button, getProps(projectForLang));
-       //   }
+          addPopover(button, getProps(projectForLang));
+          //   }
         } else {
           if (projectForLang.getCourse().isEmpty()) {
             // addPopover(button, projectForLang);
@@ -1270,7 +1270,8 @@ public class ProjectChoices extends ThumbnailChoices {
    * @see #gotClickOnFlag
    */
   private void setProjectForUser(int projectid, ProjectMode mode) {
-    logger.info("setProjectForUser set project for " + projectid + " mode " + mode);
+    if (DEBUG) logger.info("setProjectForUser set project for " + projectid + " mode " + mode);
+
     uiLifecycle.clearContent();
     userService.setProject(projectid, new AsyncCallback<User>() {
       @Override

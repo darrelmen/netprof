@@ -272,9 +272,11 @@ public class SlickUserExerciseDAO extends BaseUserExerciseDAO implements IUserEx
     String secondType = unitToValue.getOrDefault(second, "");
     if (secondType.isEmpty()) secondType = unitToValue.getOrDefault(second.toLowerCase(), "");
 
-    logger.info("toSlick for " + shared.getID() + " " + shared.getOldID() +
-        "\n\tfirst  " + first + " = '" + firstType + "' " +
-        "\n\tsecond " + second + " = '" + secondType + "'");
+    if (DEBUG) {
+      logger.info("toSlick for " + shared.getID() + " " + shared.getOldID() +
+          "\n\tfirst  " + first + " = '" + firstType + "' " +
+          "\n\tsecond " + second + " = '" + secondType + "'");
+    }
 
     String english = shared.getEnglish();
     if (english.length() > MAX_LENGTH) {

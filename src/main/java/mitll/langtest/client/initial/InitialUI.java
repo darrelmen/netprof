@@ -553,7 +553,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
       this.pleaseAllow = widget;
 
-      if (DEBUG || true)
+      if (DEBUG)
         logger.info("populateBelowHeader adding please allow recording... add notice to " + contentRow.getId());
 
       contentRow.add(widget);
