@@ -42,7 +42,7 @@ import mitll.langtest.shared.exercise.HasID;
 import org.jetbrains.annotations.NotNull;
 
 public abstract class ButtonHelper<T extends HasID & IPublicPrivate> {
-  private static final int MIN_WIDTH = 668;//659;
+  private static final int MIN_WIDTH = 671;//659;
   private static final String SHARE = "Share";
   private static final String SHARE_THE_LIST = "Share the ";// + LIST + " with someone.";
 

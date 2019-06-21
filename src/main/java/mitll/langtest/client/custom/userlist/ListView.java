@@ -143,8 +143,7 @@ public class ListView<T extends UserList<CommonShell>> extends ContentEditorView
     right.getElement().setId("right");
 
     leftRight.add(right);
-
-
+    leftRight.getElement().getStyle().setMarginLeft(-15, Style.Unit.PX);
     right.setWidth("100%");
     DivWidget top = new DivWidget();
     top.getElement().setId("top");

@@ -101,6 +101,7 @@ public class ListContainer<T extends UserList<CommonShell>> extends ButtonMemory
   }
 
   /**
+   * Removed the class column to save space, and since it's hardly used.
    * @see #configureTable
    */
   @Override
@@ -118,7 +119,7 @@ public class ListContainer<T extends UserList<CommonShell>> extends ButtonMemory
         addIsQuiz();
       }
     } else {
-      addClass();
+      //addClass();
       addOwner();
     }
 

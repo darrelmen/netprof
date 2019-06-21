@@ -38,7 +38,9 @@ body {
         flex: 1;*/
 }
 
-.tooltip { pointer-events: none; }
+.tooltip {
+    pointer-events: none;
+}
 
 .headerBackground {
     background-color: #404141;
@@ -174,6 +176,15 @@ body {
 
 .noPadding {
     padding-top: 5px;
+}
+
+.mynavbar {
+    margin-bottom: 20px;
+    position: static;
+    right: 0;
+    left: 0;
+    z-index: 1030;
+    overflow: visible;
 }
 
 .floatLeftAndClear {
@@ -1544,12 +1555,14 @@ document sections.*/
     text-shadow: none;
 }
 
+/* seems like 220 width has less wrap?
+ */
 .sidebar {
     font-family: BentonRegular, Arial, sans-serif;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
     font-size: 14px;
-    width: 210px;
+    width: 220px;
     margin-top: 2px;
 }
 
@@ -1569,7 +1582,7 @@ document sections.*/
 
 .leftBlock, .rightBlock {
     display: inline-block;
-    width: 210px;
+    width: 220px;
     margin-right: 6px;
     zoom: 1;
 }
@@ -2358,18 +2371,26 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
 }
 
 @keyframes opacity {
-    0%   {opacity: 0.1;}
-    100% {opacity: 1;}
+    0% {
+        opacity: 0.1;
+    }
+    100% {
+        opacity: 1;
+    }
 }
 
 .opacity-out-target {
-     animation-name: opacity-out;
-     animation-duration: 0.5s;
- }
+    animation-name: opacity-out;
+    animation-duration: 0.5s;
+}
 
 @keyframes opacity-out {
-    0%   {opacity: 0.5;}
-    100% {opacity: 0;}
+    0% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 
 .good-blink-target {
@@ -2378,9 +2399,15 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
 }
 
 @keyframes goodblink {
-    0%   {background-color: #2f96b4;}
-    50%  {background-color: green;}
-    100% {background-color: #2f96b4;}
+    0% {
+        background-color: #2f96b4;
+    }
+    50% {
+        background-color: green;
+    }
+    100% {
+        background-color: #2f96b4;
+    }
 }
 
 .blink-target {
@@ -2389,9 +2416,15 @@ body .modal-body .bulk-update-result-pdiv.right-first-col .bulk-update-result-de
 }
 
 @keyframes blink {
-    0%   {background-color: #2f96b4;}
-    50%  {background-color: red;}
-    100% {background-color: #2f96b4;}
+    0% {
+        background-color: #2f96b4;
+    }
+    50% {
+        background-color: red;
+    }
+    100% {
+        background-color: #2f96b4;
+    }
 }
 
 .animation-target {

@@ -284,7 +284,9 @@ public class RecordDialogExercisePanel extends TurnPanel implements IRecordDialo
    */
   @Override
   public void useInvalidResult() {
-    emoticon.setUrl(RED_X_URL);
+    if (emoticon != null) {
+      emoticon.setUrl(RED_X_URL);
+    }
   }
 
   private DivWidget placeForRecordButton;

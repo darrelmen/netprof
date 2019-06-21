@@ -108,7 +108,7 @@ public class ListenViewHelper<T extends ITurnPanel>
   private boolean doRehearse = true;
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_PLAY_ENDED = true;
+  private static final boolean DEBUG_PLAY_ENDED = false;
   private static final boolean DEBUG_BLUR = false;
 
   private static final boolean DEBUG_PLAY = false;

@@ -50,8 +50,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 import java.util.logging.Logger;
 
-import static mitll.langtest.client.custom.INavigation.VIEWS.LISTEN;
-import static mitll.langtest.client.custom.INavigation.VIEWS.SCORES;
+import static mitll.langtest.client.custom.INavigation.VIEWS.*;
 
 public class DialogEditor extends ListenViewHelper<EditorTurn> implements SessionManager, IFocusable, IEditableTurnContainer<EditorTurn> {
   private final Logger logger = Logger.getLogger("DialogEditor");
@@ -315,9 +314,13 @@ public class DialogEditor extends ListenViewHelper<EditorTurn> implements Sessio
     return getDialogID();
   }
 
+  /**
+   * Previous should be dialog editor...
+   * @return
+   */
   @NotNull
   protected INavigation.VIEWS getPrevView() {
-    return SCORES;
+    return DIALOG_EDITOR;
   }
 
   @NotNull

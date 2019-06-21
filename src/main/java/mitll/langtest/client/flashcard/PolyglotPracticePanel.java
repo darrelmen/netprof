@@ -58,6 +58,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExercise> extends StatsPracticePanel<L, T> {
+  public static final int TOP_MARGIN = -15;
   private final Logger logger = Logger.getLogger("PolyglotPracticePanel");
 
   private static final String ARROW_KEY_TIP = "<i><b>Space</b> to record. <b>Arrow keys</b> to advance or go back.</i>";
@@ -304,7 +305,7 @@ public class PolyglotPracticePanel<L extends CommonShell, T extends ClientExerci
   @Override
   AnalysisTab getScoreHistory() {
     AnalysisTab widgets = super.getScoreHistory();
-    widgets.getElement().getStyle().setMarginTop(-25, Style.Unit.PX);
+    widgets.getElement().getStyle().setMarginTop(TOP_MARGIN, Style.Unit.PX);
     return widgets;
   }
 

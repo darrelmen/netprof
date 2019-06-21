@@ -102,7 +102,6 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    * @see #getButtons
    */
   protected Button share;
-  private static final int MIN_WIDTH = 668;//659;
   protected DialogHelper dialogHelper;
   private ButtonMemoryItemContainer<T> myLists;
 

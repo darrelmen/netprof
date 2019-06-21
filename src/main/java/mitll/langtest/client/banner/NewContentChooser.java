@@ -420,7 +420,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
   }
 
   private void showScores(DivWidget divWidget) {
-    logger.info("showScores dialog ");
+    // logger.info("showScores dialog ");
     controller.getDialogService().getDialog(getDialogIDFromURL(), new AsyncCallback<IDialog>() {
       @Override
       public void onFailure(Throwable caught) {
@@ -443,9 +443,9 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     if (dialogFromURL == -1) {
       String prefix = NETPROF + ":" + controller.getUser() + ":";
       dialogFromURL = controller.getStorage().getInt(prefix + SUMMARY_DIALOG);
-      logger.info("getDialogIDFromURL storage dialog # " + dialogFromURL);
+      if (DEBUG) logger.info("getDialogIDFromURL storage dialog # " + dialogFromURL);
     }
-    logger.info("getDialogIDFromURL dialog # " + dialogFromURL);
+    if (DEBUG) logger.info("getDialogIDFromURL dialog # " + dialogFromURL);
     return dialogFromURL;
   }
 
@@ -486,7 +486,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
         divWidget.add(header);
       }
 
-      logger.info("showScores teacher " + isTeacher() + " dialog " + dialog);
+//      logger.info("showScores teacher " + isTeacher() + " dialog " + dialog);
 
       int id = dialog.getID();
       divWidget.add(isTeacher() ?
@@ -656,27 +656,6 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
     pushItem(s + "=" + next.getValue());
   }
 
-  /**
-   * Only for polyglot...
-   */
-/*  private void pushSecondUnit() {
-    ProjectStartupInfo projectStartupInfo = controller.getProjectStartupInfo();
-
-    if (projectStartupInfo != null) {
-      List<String> typeOrder = projectStartupInfo.getTypeOrder();
-      if (!typeOrder.isEmpty()) {
-        String s = typeOrder.get(0);
-        //  logger.info("First " + s);
-        Set<MatchInfo> matchInfos = projectStartupInfo.getTypeToDistinct().get(s);
-        if (!matchInfos.isEmpty()) {
-          Iterator<MatchInfo> iterator = matchInfos.iterator();
-          MatchInfo next = iterator.next();
-          if (iterator.hasNext()) next = iterator.next();
-          pushUnitOrChapter(s, next);
-        }
-      }
-    }
-  }*/
 
   /**
    * So an view specified in the url trumps a stored one in storage, but if there's none in storage, use it.
