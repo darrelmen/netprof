@@ -852,6 +852,10 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
     }
   }
 
+  /**
+   * Complicated...
+   * @param userID
+   */
   private void doAfterGotMics(long userID) {
     if (userID != lastUser) {
       if (DEBUG_GOT_MICS) logger.info("doAfterGotMics : userID " + userID + " vs last " + lastUser);
@@ -864,7 +868,14 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
       if (navigation != null) {
         if (showNavigation()) {
-          navigation.showPreviousState();
+          if (controller.getProjectStartupInfo() == null) {
+          //  logger.info("no project startup info yet...");
+            configureUIGivenUser(userID);
+          }
+          else {
+        //    logger.info("has project startup info ...");
+            navigation.showPreviousState();
+          }
         }
       } else {
         logger.warning("doAfterGotMics how can navigation be null????");

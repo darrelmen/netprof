@@ -273,7 +273,7 @@ public class NewContentChooser implements INavigation, ValueChangeHandler<String
       logger.info("showView : " +
           "\n\tshow    " + view +
           "\n\tcurrent " + currentStoredView + " from click " + fromClick);
-
+//
 //      String exceptionAsString = ExceptionHandlerDialog.getExceptionAsString(new Exception("showView " + view));
 //      logger.info("logException stack " + exceptionAsString);
     }
