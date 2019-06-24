@@ -91,15 +91,15 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
   private static final String APPROVED_BUTTON_TOOLTIP = "Indicate item has no defects.";
   private static final String APPROVED_BUTTON_TOOLTIP2 = "Item has been marked with a defect";
 
-//  private static final int DEFAULT_MALE_ID = -2;
+  //  private static final int DEFAULT_MALE_ID = -2;
 //  private static final int DEFAULT_FEMALE_ID = -3;
   private static final String MALE = "Male";
   /**
    * TODO : why ?
    */
- // private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, true, MiniUser.Gender.Male, MALE, false);
+  // private static final MiniUser DEFAULT_MALE = new MiniUser(DEFAULT_MALE_ID, 30, true, MiniUser.Gender.Male, MALE, false);
   private static final String FEMALE = "Female";
- // private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, false, MiniUser.Gender.Female, FEMALE, false);
+  // private static final MiniUser DEFAULT_FEMALE = new MiniUser(DEFAULT_FEMALE_ID, 30, false, MiniUser.Gender.Female, FEMALE, false);
 
   private Set<String> incorrectFields;
   /**
@@ -431,7 +431,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
 //        if (user.getID() == BaseUserDAO.DEFAULT_USER_ID) {    // add widgets to mark gender on default audio
 //          addGenderAssignmentButtons(tabAndContent, audioAttributes, audio, panelForAudio);
 //        } else {
-          tabAndContent.getContent().add(panelForAudio);
+        tabAndContent.getContent().add(panelForAudio);
 //        }
         if (audio.isHasBeenPlayed()) {
           audioWasPlayed.add(panelForAudio1.audioPanel);
@@ -536,6 +536,7 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
     });
   }
 */
+
   /**
    * Only show next button if both reg and slow have been set (if both are there)
    *
@@ -640,9 +641,14 @@ public class QCNPFExercise<T extends ClientExercise> extends GoodwaveExercisePan
       audioRef = CompressedAudio.getPathNoSlashChange(audioRef);   // todo why do we have to do this?
       // logger.info("getPanelForAudio path after  " + audioRef);
     }
-    String speed = audio.isRegularSpeed() ? " Regular speed" : " Slow speed";
+
+    String s = audio.getAudioType().toString();
+
+    String speed = audio.isRegularSpeed() ? " Regular speed" : audio.isSlow() ? " Slow speed" : s + " audio";
+
     final ASRScoringAudioPanel audioPanel = new ASRScoringAudioPanel<>(audioRef, e.getFLToShow(), e.getTransliteration(), controller,
         controller.getProps().showSpectrogram(), 70, speed, e);
+
     audioPanel.setShowColor(true);
     audioPanel.getElement().setId("ASRScoringAudioPanel");
     audioPanel.addPlayListener(new PlayListener() {

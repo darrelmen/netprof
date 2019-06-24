@@ -78,8 +78,8 @@ public class ProjectChoices extends ThumbnailChoices {
   /**
    *
    */
-  public static final String GREY_COLOR = "#0000008a";
-  public static final int MAX_LENGTH_ID = 24;
+  private static final String GREY_COLOR = "#0000008a";
+  private static final int MAX_LENGTH_ID = 24;
 
   private static final int THUMB_WIDTH = 181;
 

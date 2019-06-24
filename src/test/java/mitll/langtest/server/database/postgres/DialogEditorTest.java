@@ -79,7 +79,6 @@ public class DialogEditorTest extends BaseTest {
     Project project = andPopulate.getProject(112, true);
     CommonExercise exerciseByID = project.getExerciseByID(874141);
 
-
     logger.info("got " + exerciseByID);
     logger.info("has " + exerciseByID.getDirectlyRelated().size());
     exerciseByID.getDirectlyRelated().forEach(logger::info);
@@ -130,6 +129,19 @@ public class DialogEditorTest extends BaseTest {
 
     OOVWordsAndUpdate oovWordsAndUpdate = new OOVWordsHelper().get(easy, test, englishProject, project);
     logger.info("got " + oovWordsAndUpdate);
+  }
+
+  @Test public void testFrenchFilter() {
+    DatabaseImpl andPopulate = getDatabase();
+    Project project = andPopulate.getProject(21, true);
+    andPopulate.waitForSetupComplete();
+    List<CommonExercise> rawExercises = project.getRawExercises();
+    logger.info("OK, found " +rawExercises.size());
+    List<CommonExercise> collect = rawExercises.stream().filter(commonExercise -> commonExercise.getForeignLanguage().length() == 0).collect(Collectors.toList());
+
+    for (CommonExercise commonExercise : collect) {
+      logger.info("got " +commonExercise.getID() + " " + commonExercise.getForeignLanguage() + " " + commonExercise.getEnglish());
+    }
   }
 
   @Test
