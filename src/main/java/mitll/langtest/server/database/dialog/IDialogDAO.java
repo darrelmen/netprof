@@ -32,6 +32,7 @@ package mitll.langtest.server.database.dialog;
 import mitll.langtest.client.custom.dialog.CreateDialogDialog;
 import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.IDAO;
+import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.userexercise.IUserExerciseDAO;
 import mitll.langtest.shared.dialog.DialogStatus;
 import mitll.langtest.shared.dialog.DialogType;
@@ -103,6 +104,8 @@ public interface IDialogDAO extends IDAO {
   List<Integer> deleteExercise(int projid, int dialogID, int exid);
 
   boolean deleteCoreExercise(int dialogID, int exid);
+
+  boolean deleteCoreExercise(int dialogID, int exid, Project project);
 
   int getProjectForDialog(int dialogID);
 

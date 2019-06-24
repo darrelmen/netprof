@@ -942,12 +942,14 @@ public class DialogDAO extends DAO implements IDialogDAO {
   public boolean deleteCoreExercise(int dialogID, int exid) {
     int projid = databaseImpl.getDialogDAO().getProjectForDialog(dialogID);
     Project project = databaseImpl.getProject(projid);
-    //IDialog dialog = project.getDialog(dialogID);
 
+    return deleteCoreExercise(dialogID, exid, project);
+  }
+
+  public boolean deleteCoreExercise(int dialogID, int exid, Project project) {
     IUserExerciseDAO userExerciseDAO = databaseImpl.getUserExerciseDAO();
-    IRelatedExercise relatedExercise = userExerciseDAO.getRelatedCoreExercise();
-
-    if (relatedExercise.deleteAndFixForEx(exid)) {
+    int projid = project.getID();
+    if (userExerciseDAO.getRelatedCoreExercise().deleteAndFixForEx(exid)) {
       logger.info("deleteExercise : deleteAndFixForEx success for " + exid);
       deleteTheExercise(projid, dialogID, exid, project, userExerciseDAO);
       return true;

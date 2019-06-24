@@ -33,6 +33,7 @@ import mitll.langtest.client.custom.dialog.CreateDialogDialog;
 import mitll.langtest.client.dialog.EditorTurn;
 import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.client.services.DialogService;
+import mitll.langtest.server.database.dialog.IDialogDAO;
 import mitll.langtest.server.database.exercise.ISection;
 import mitll.langtest.server.database.exercise.SectionHelper;
 import mitll.langtest.server.database.project.Project;
@@ -309,6 +310,8 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   /**
    * Delete a dialog!
    *
+   * Remember to delete associated exercises too.
+   *
    * @param projid
    * @param id
    * @return
@@ -317,9 +320,65 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
   @Override
   public boolean delete(int projid, int id) throws DominoSessionException {
     getUserIDFromSessionOrDB();
-    boolean delete = db.getDialogDAO().delete(projid, id);
+
+    IDialogDAO dialogDAO = db.getDialogDAO();
+    IDialog dialog = getDialog(id);
+
+    List<ClientExercise> exercises = dialog.getExercises();
+    List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
+
+    boolean delete = dialogDAO.delete(projid, id);
     if (delete) {
-      getProject(projid).forgetDialog(id);
+      Project project = getProject(projid);
+
+// delete in pairs
+      for (int i = 1; i < exercises.size(); i += 2) {
+        ClientExercise clientExercise = exercises.get(i);
+        logger.info("delete #" + i + " which is " + clientExercise.getID());
+
+        int exid = clientExercise.getID();
+
+        List<Integer> exidsOfDeleted = dialogDAO.deleteExercise(projid, id, exid);
+        if (exidsOfDeleted.isEmpty()) {
+          logger.warn("\n\ndelete :didn't delete any exercises for " + exid);
+        } else if (!exidsOfDeleted.contains(exid)) {
+          logger.warn("delete : didn't delete the expected exercise " + exid);
+        } else {
+          db.getExerciseDAO(projid).forget(exid);
+//              db.getProjectManagement()
+        }
+      }
+
+/*
+      exercises.forEach(clientExercise -> {
+            int exid = clientExercise.getID();
+            List<Integer> integers = dialogDAO.deleteExercise(projid, id, exid);
+            if (integers.isEmpty()) {
+              logger.warn("\n\ndelete :didn't delete any exercises for " + exid);
+            } else if (!integers.contains(exid)) {
+              logger.warn("delete : didn't delete the expected exercise " + exid);
+            } else {
+              db.getExerciseDAO(projid).forget(exid);
+//              db.getProjectManagement()
+            }
+          }
+      );
+*/
+
+      coreVocabulary.forEach(clientExercise -> {
+            int exid = clientExercise.getID();
+            if (dialogDAO.deleteCoreExercise(id, exid, project)) {
+              db.getExerciseDAO(projid).forget(exid);
+            } else {
+              logger.warn("delete : didn't delete the expected core exercise " + exid);
+            }
+          }
+      );
+
+      if (!project.forgetDialog(id)) {
+        logger.warn("didn't forget dialog  #" + id);
+      }
+
     }
     return delete;
   }
@@ -367,7 +426,8 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
 //    return db.getDialogDAO().updateImage(dialogID,imageID);
 //  }
 
-  public DialogExChangeResponse addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker) throws DominoSessionException {
+  public DialogExChangeResponse addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker) throws
+      DominoSessionException {
     int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
 
     int projectForDialog = db.getDialogDAO().getProjectForDialog(dialogID);
