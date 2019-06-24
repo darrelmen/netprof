@@ -249,6 +249,15 @@ distributions {
 
 // ***************************** Publishing **************************************
 
+artifactory {
+  publish {
+    repository {
+      repoKey = 'ivy-libs-shapshot-dli'
+    }
+  }
+}
+
+
 publishing {
     publications {
         ivyJava(IvyPublication) {
