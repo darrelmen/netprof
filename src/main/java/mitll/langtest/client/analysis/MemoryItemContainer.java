@@ -254,7 +254,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
 
     int selectedUser = getSelectedItem(selectedItemKey);
 
-    if (DEBUG || selectedUser == -1) {
+    if (DEBUG) {
       logger.info("populateTable for " + getClass() +
           "\n\tkey      " + selectedItemKey +
           "\n\tselected " + selectedUser +

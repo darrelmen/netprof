@@ -406,9 +406,9 @@ public class PropertyHandler {
     String app = path.substring(0, path.lastIndexOf("/"));
     appName = app.isEmpty() ? appName : app;
 
-    if (!appName.equalsIgnoreCase("Netscape")) {
-      logger.info("appName " + appName);
-    }
+//    if (!appName.equalsIgnoreCase("Netscape")) {
+//      logger.info("appName " + appName);
+//    }
     return appName;
   }
 
