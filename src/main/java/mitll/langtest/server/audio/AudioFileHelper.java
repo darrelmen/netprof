@@ -95,7 +95,7 @@ public class AudioFileHelper implements AlignDecode {
    * @see #getSession
    */
   private static final String TEST_USER = "demo_";//"student";//"demo_";
-  private static final String TEST_PASSWORD = "demo";//"domino22";//"demo";
+  private static final String TEST_PASSWORD = "domino22";//"demo";
 
   private static final String COOKIE = "Cookie";
   private static final String SCORE_SERVLET = "scoreServlet";

@@ -120,7 +120,9 @@ public class AudioPanel<T extends HasID> extends DivWidget implements RequiresRe
     this(controller, showSpectrogram, rightMargin, exercise, exerciseID);
     this.audioPath = path;
 
-    if (DEBUG) logger.info("AudioPanel : (" + exerciseID + ") button title is " + RECORD);
+    if (DEBUG) {
+      logger.info("AudioPanel : (" + exerciseID + ") button title is " + RECORD + " path " + audioPath);
+    }
 
     addWidgets(playButtonSuffix, RECORD);
     if (playAudio != null) {

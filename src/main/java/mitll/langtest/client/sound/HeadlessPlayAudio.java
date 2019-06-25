@@ -329,11 +329,6 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     return currentAudioAttr;
   }
 
-/*  public Collection<Integer> getAllAudioIDs() {
-    return currentAudioAttr == null ?
-        Collections.emptySet() : Collections.singleton(currentAudioAttr.getUniqueID());
-  }*/
-
   /**
    *
    * @return
@@ -415,11 +410,11 @@ public class HeadlessPlayAudio extends DivWidget implements AudioControl, IPlayA
     }
     destroySound();
     this.currentPath = CompressedAudio.getPath(path);
-/*    if (DEBUG && path != null && path.endsWith(".wav")) {
+    if (DEBUG && path != null && path.endsWith(".wav")) {
       logger.info("rememberAudio convert" +
           "\nfrom " + path +
           "\nto   " + currentPath);
-    }*/
+    }
     return currentPath;
   }
 

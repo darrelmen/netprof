@@ -39,10 +39,12 @@ import mitll.langtest.shared.user.SimpleUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class AudioExercise extends ExerciseShell {
-  //private final transient Logger logger = Logger.getLogger("AudioExercise");
+ // private final transient Logger logger = Logger.getLogger("AudioExercise");
+
   private static final String SPEED = "speed";
   private static final String REGULAR = "regular";
   private static final String SLOW = "slow";
@@ -66,7 +68,7 @@ public class AudioExercise extends ExerciseShell {
    * @param isContext
    * @paramx shouldSwap
    */
-  AudioExercise(int id, int projectid, boolean isContext,boolean safeToDecode) {
+  AudioExercise(int id, int projectid, boolean isContext, boolean safeToDecode) {
     super(id, isContext, safeToDecode);
     this.projectid = projectid;
   }
@@ -107,6 +109,8 @@ public class AudioExercise extends ExerciseShell {
   /**
    * Latest recording by a user wins.
    *
+   * Deep copy everything.
+   *
    * @param audioAttribute
    * @see mitll.langtest.server.database.audio.BaseAudioDAO#attachAudioAndFixPath
    */
@@ -116,7 +120,11 @@ public class AudioExercise extends ExerciseShell {
       String key = audioAttribute.getKey();
       AudioAttribute currentByKey = audioAttributes.get(key);
       if (currentByKey == null || currentByKey.getTimestamp() < audioAttribute.getTimestamp()) {
+     //   logger.info("audioRef for " + audioAttribute.getExid() + " : " + audioAttribute.getAudioRef());
+     //   AudioAttribute copy = new AudioAttribute(audioAttribute);
+     //   logger.info("audioRef copy " + copy.getExid() + " : " + copy.getAudioRef());
         audioAttributes.put(key, audioAttribute);
+        //  audioAttributes.put(key, new AudioAttribute(audioAttribute));
         return true;
       } else {
         return false;
@@ -478,13 +486,9 @@ public class AudioExercise extends ExerciseShell {
 
       for (AudioAttribute audioAttribute : userToAudioForUser.getValue()) {
         if (!audioAttribute.isValid()) {
-         // logger.warning("getMostRecentAudioEasy skip invalid audio " + audioAttribute);
+          // logger.warning("getMostRecentAudioEasy skip invalid audio " + audioAttribute);
           continue;
         }
-
-//        if (audioAttribute.getExid() == 9444) {
-//          logger.info("got " + audioAttribute);
-//        }
 
         if (audioAttribute.isRegularSpeed()) reg = true;
         if (audioAttribute.isSlow()) slow = true;
@@ -499,10 +503,6 @@ public class AudioExercise extends ExerciseShell {
         if (reg) {
           if (latestReg == null || latestReg.getTimestamp() < candidateTimestamp) {
             latestReg = audioAttribute;
-
-//            if (audioAttribute.getExid() == 9444) {
-//              logger.info("\tnew latest  " + latestReg);
-//            }
           }
         }
         if (slow) {
@@ -597,7 +597,7 @@ public class AudioExercise extends ExerciseShell {
       for (AudioAttribute audioAttribute : pair.getValue()) {
 
         if (!audioAttribute.isValid()) {
-        //  logger.warning("skip invalid audio " + audioAttribute);
+          //  logger.warning("skip invalid audio " + audioAttribute);
           continue;
         }
 
@@ -624,7 +624,7 @@ public class AudioExercise extends ExerciseShell {
             }
           }
         } else {
-         // logger.info("\t\tgetMostRecentAudio found default user " + user);
+          // logger.info("\t\tgetMostRecentAudio found default user " + user);
         }
       }
     }
@@ -685,9 +685,9 @@ public class AudioExercise extends ExerciseShell {
   }
 
   /**
-   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getFLEntry
    * @param field
    * @return
+   * @see mitll.langtest.client.scoring.TwoColumnExercisePanel#getFLEntry
    */
   public ExerciseAnnotation getAnnotation(String field) {
     if (!fieldToAnnotation.containsKey(field)) {

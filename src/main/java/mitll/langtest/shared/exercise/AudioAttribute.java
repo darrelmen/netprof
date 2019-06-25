@@ -75,7 +75,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private String audioRef;
 
   // DON'T send this to client
-  private transient String actualPath; // where we found it on the hydra server - might be different from audioRef if it's been moved
+  //private transient String actualPath; // where we found it on the hydra server - might be different from audioRef if it's been moved
   private int exid;
   private transient String oldexid;
   private int userid;
@@ -93,7 +93,6 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   private Map<String, String> attributes = new HashMap<String, String>();
   private boolean hasBeenPlayed;
   private AudioType audioType;
-//  private AlignmentOutput alignmentOutput = null;
 
   public AudioAttribute() {
   }
@@ -101,6 +100,17 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   public AudioAttribute(int uniqueID, String audioRef) {
     this.uniqueID = uniqueID;
     this.audioRef = audioRef;
+  }
+
+  public AudioAttribute(AudioAttribute other) {
+    this(other.getUniqueID(), other.getUserid(), other.getExid(),
+        other.getAudioRef(), other.getTimestamp(), other.getDurationInMillis(),
+        other.getAudioType(), other.getUser(), other.getTranscript(),
+        "", other.getDnr(), other.getResultid(),
+        other.getRealGender());
+
+    attributes.putAll(other.getAttributes());
+    this.hasBeenPlayed = other.isHasBeenPlayed();
   }
 
   /**
@@ -142,7 +152,7 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.audioType = type;
 
     this.setUser(user);
-    this.actualPath = actualPath;
+    //  this.actualPath = actualPath;
 
     this.realGender = realGender;
 
@@ -180,14 +190,12 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
     this.exid = exid;
   }
 
-  private AudioAttribute markRegular() {
+  private void markRegular() {
     addAttribute(SPEED, REGULAR);
-    return this;
   }
 
-  private AudioAttribute markSlow() {
+  private void markSlow() {
     addAttribute(SPEED, SLOW);
-    return this;
   }
 
   public boolean isRegularSpeed() {
@@ -329,12 +337,12 @@ public class AudioAttribute implements IsSerializable, UserAndTime {
   /**
    * @return
    * @seex mitll.langtest.server.database.audio.BaseAudioDAO#addOrUpdateUser(int, int, AudioAttribute)
-   * @deprecated - do we ever set this properly???
    */
+/*
   public String getActualPath() {
     return actualPath;
   }
-
+*/
   public float getDnr() {
     return dnr;
   }

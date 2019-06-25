@@ -43,12 +43,15 @@ import mitll.npdata.dao.SlickExercise;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import static mitll.langtest.server.database.user.BaseUserDAO.UNDEFINED_USER;
 
 public class Exercise extends AudioExercise implements CommonExercise,
     MutableExercise, MutableAudioExercise, MutableAnnotationExercise, CommonAnnotatable {
+//  private final transient Logger logger = Logger.getLogger("Exercise");
+
   protected String oldid = "";
   private int dominoID = -1;
   private int dominoContextIndex = -1;
@@ -274,9 +277,20 @@ public class Exercise extends AudioExercise implements CommonExercise,
     this.tokens = exercise.getTokens();
     this.parentExerciseID = exercise.getParentExerciseID();
 
-    setFieldToAnnotation(exercise.getFieldToAnnotation());
-    setUnitToValue(exercise.getUnitToValue());
-    setAttributes(exercise.getAttributes());
+    {
+      Map<String, ExerciseAnnotation> copy = new HashMap<>();
+      exercise.getFieldToAnnotation().forEach((k, v) -> copy.put(k, new ExerciseAnnotation(v)));
+      setFieldToAnnotation(copy);
+    }
+    {
+      setUnitToValue(new HashMap<>(exercise.getUnitToValue()));
+    }
+
+    {
+      List<ExerciseAttribute> exerciseAttributes = new ArrayList<>();
+      exercise.getAttributes().forEach(exerciseAttribute -> exerciseAttributes.add(new ExerciseAttribute(exerciseAttribute)));
+      setAttributes(exerciseAttributes);
+    }
 
     exercise.getDirectlyRelated().forEach(this::addContextExercise);
 
@@ -292,8 +306,17 @@ public class Exercise extends AudioExercise implements CommonExercise,
     return this;
   }
 
-  private void copyAudio(AudioRefExercise exercise) {
-    exercise.getAudioAttributes().forEach(this::addAudio);
+  private void copyAudio(AudioRefExercise toCopy) {
+    Collection<AudioAttribute> from = toCopy.getAudioAttributes();
+//    int size = from.size();
+
+    Collection<AudioAttribute> audioAttributes1 = getAudioAttributes();
+
+    from.forEach(a -> audioAttributes1.add(new AudioAttribute(a)));
+//
+//    if (size != audioAttributes1.size()) {
+//      logger.warning("\n\n\n copyAudio: to copy size " + size + " vs " +audioAttributes1.size());
+//    }
   }
 
   @Override

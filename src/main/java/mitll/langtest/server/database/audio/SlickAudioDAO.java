@@ -359,33 +359,13 @@ public class SlickAudioDAO extends BaseAudioDAO implements IAudioDAO {
   }
 
   private void fixAudioRef(int projID, AudioAttribute audioAttribute) {
-    fixAudioRef(null, mediaDir, audioAttribute, database.getProject(projID).getLanguageEnum());
+    fixAudioRef(mediaDir, audioAttribute, database.getProject(projID).getLanguageEnum());
 
     String audioRef = audioAttribute.getAudioRef();
     if (audioRef.endsWith(".wav")) {
       audioAttribute.setAudioRef(audioRef.replaceAll(".wav", ".mp3"));
     }
   }
-//
-//  private final LoadingCache<Integer, List<AudioAttribute>> exidToAudioAttributes = CacheBuilder.newBuilder()
-//      .initialCapacity(100000)
-//    //  .expireAfterWrite(CACHE_TIMEOUT, TimeUnit.MINUTES)
-//      .build(
-//          new CacheLoader<Integer, List<AudioAttribute>>() {
-//            @Override
-//            public List<AudioAttribute> load(Integer key) {
-//              if (true) logger.info("idToDBUser Load " + key);
-////              DBUser dbUser = delegate.lookupDBUser(key);
-////              if (dbUser == null) {
-////                logger.warn("idToDBUser no db user with id " + key);
-////                dbUser = getStandIn(key);
-////              }
-//
-//
-//              return dbUser;
-//            }
-//          });
-
 
   /**
    * @param projID

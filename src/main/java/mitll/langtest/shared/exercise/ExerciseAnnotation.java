@@ -53,6 +53,10 @@ public class ExerciseAnnotation implements IsSerializable {
     this.comment = comment;
   }
 
+  public ExerciseAnnotation(ExerciseAnnotation topCopy) {
+    this(topCopy.getStatus(), topCopy.getComment());
+  }
+
   public boolean isCorrect() {
     return getStatus().equals(CORRECT);
   }

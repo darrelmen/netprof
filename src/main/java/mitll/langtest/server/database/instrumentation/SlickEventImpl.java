@@ -275,6 +275,11 @@ public class SlickEventImpl implements IEventDAO {
     return eventDAOWrapper.getFirstSlim(projid);
   }
 
+  /**
+   * @see mitll.langtest.server.services.ExerciseServiceImpl#addPlayedMarkings(int, CommonExercise)
+   * @param userID
+   * @param firstExercise
+   */
   @Override
   public void addPlayedMarkings(int userID, CommonExercise firstExercise) {
     List<String> forUserAndExercise = eventDAOWrapper.getForUserAndExercise(userID, firstExercise.getID());

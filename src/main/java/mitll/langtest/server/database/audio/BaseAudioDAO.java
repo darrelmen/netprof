@@ -445,7 +445,8 @@ public abstract class BaseAudioDAO extends DAO {
                               Collection<AudioAttribute> audioAttributes,
                               Language language,
                               boolean debug,
-                              SmallVocabDecoder smallVocabDecoder, boolean checkTranscript) {
+                              SmallVocabDecoder smallVocabDecoder,
+                              boolean checkTranscript) {
     boolean allSucceeded = true;
 
     // unfortunately we update existing records, so the id will not change, but the path will
@@ -573,7 +574,7 @@ public abstract class BaseAudioDAO extends DAO {
         }
       }
 
-      fixAudioRef(firstExercise, mediaDir, attr, language);
+      fixAudioRef(mediaDir, attr, language);
       return true;
     } else {  // no text match
       if (debug || DEBUG_ATTACH) {
@@ -598,22 +599,21 @@ public abstract class BaseAudioDAO extends DAO {
   }
 
   /**
-   * @param firstExercise
+   * so a path to the file on disk will now look like /opt/netProf/bestAudio/spanish/bestAudio/123/regular_XXX.wav
+   * in the database we store just bestAudio/123/regular_XXX.wav
+   *
+   * or if we store bestAudio/spanish/123/regular_YYY.wav ...? e.g. for newly recorded audio
+   *
    * @param mediaDir
    * @param attr
    * @param language
    * @see #attachAudioAndFixPath
    */
-  void fixAudioRef(ClientExercise firstExercise, String mediaDir, AudioAttribute attr, Language language) {
+  void fixAudioRef(String mediaDir, AudioAttribute attr, Language language) {
     String audioRef = attr.getAudioRef();
     if (audioRef == null)
-      logger.error("attachAudioAndFixPath huh? no audio ref for " + attr + " under " + firstExercise);
+      logger.error("attachAudioAndFixPath huh? no audio ref for " + attr);// + " under " + firstExercise);
     else {
-      // so a path to the file on disk will now look like /opt/netProf/bestAudio/spanish/bestAudio/123/regular_XXX.wav
-      // in the database we store just bestAudio/123/regular_XXX.wav
-
-      // or if we store bestAudio/spanish/123/regular_YYY.wav ...? e.g. for newly recorded audio
-
       String lang = language.getLanguage();
       String prefix = mediaDir + File.separator + lang;
       String relPrefix = prefix.substring(netProfDurLength);
