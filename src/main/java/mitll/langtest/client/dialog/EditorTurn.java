@@ -72,9 +72,9 @@ public class EditorTurn extends PlayAudioExercisePanel
     implements ITurnPanel, IRehearseView, IRecordingTurnPanel, IFocusListener, AddDeleteListener {
   private final Logger logger = Logger.getLogger("EditorTurn");
 
-  public static final int CHUNK_STEP = 50;
-  public static final int MAX_WIDTH = CHUNK_STEP * 12;
-  public static final double CHEESY_SCALAR = 0.9;
+  private static final int CHUNK_STEP = 50;
+  private static final int MAX_WIDTH = CHUNK_STEP * 12;
+  private static final double CHEESY_SCALAR = 0.9;
 
   private static final String YELLOW = "yellow";
   private static final String WHITE = "white";
@@ -191,7 +191,7 @@ public class EditorTurn extends PlayAudioExercisePanel
         foreignLanguage, this);
     editableTurnHelper.setPlaceholder(columns);
 
-    turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify) {
+    turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify, controller.getLanguageInfo()) {
       @Override
       protected void addMarginStyle(Style style2) {
         style2.setMarginLeft(15, Style.Unit.PX);

@@ -88,7 +88,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
   private static final String PLEASE_ALLOW_RECORDING1 = "pleaseAllowRecording";
 
   private static final boolean DEBUG = false;
-  private static final boolean DEBUG_GOT_MICS = false;
+  private static final boolean DEBUG_GOT_MICS = true;
 
   private static final boolean DO_HEARTBEAT = true;
 
@@ -854,6 +854,7 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
 
   /**
    * Complicated...
+   *
    * @param userID
    */
   private void doAfterGotMics(long userID) {
@@ -869,11 +870,10 @@ public class InitialUI implements UILifecycle, BreadcrumbPartner {
       if (navigation != null) {
         if (showNavigation()) {
           if (controller.getProjectStartupInfo() == null) {
-          //  logger.info("no project startup info yet...");
+            if (DEBUG_GOT_MICS) logger.info("doAfterGotMics no project startup info yet...");
             configureUIGivenUser(userID);
-          }
-          else {
-        //    logger.info("has project startup info ...");
+          } else {
+            if (DEBUG_GOT_MICS) logger.info("doAfterGotMics has project startup info ...");
             navigation.showPreviousState();
           }
         }

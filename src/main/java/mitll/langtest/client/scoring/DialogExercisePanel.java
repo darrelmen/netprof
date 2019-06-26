@@ -218,7 +218,7 @@ public class DialogExercisePanel<T extends ClientExercise> extends PlayAudioExer
     addMarginStyle(getFlClickableRow().getElement().getStyle());
   }
 
-  private void addMarginStyle(Style style2) {
+  protected void addMarginStyle(Style style2) {
     style2.setMarginLeft(15, Style.Unit.PX);
     style2.setMarginRight(10, Style.Unit.PX);
     style2.setMarginTop(7, Style.Unit.PX);

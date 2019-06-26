@@ -601,17 +601,16 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
 
   protected void getTypeOrder() {
     ProjectStartupInfo projectStartupInfo = getStartupInfo();
-    if (projectStartupInfo == null) logger.warning("getTypeOrder : no project startup info?");
+    if (projectStartupInfo == null) {
+      logger.warning("getTypeOrder : no project startup info?");
+      controller.startOver(); // hail mary! somehow got to here but lost project for user?
+    }
     else {
       typeOrder = getTypeOrderSimple();
       //logger.info("\n\n\ngetTypeOrder type order " + typeOrder);
       this.rootNodesInOrder = new ArrayList<>(typeOrder);
-      this.rootNodesInOrder.retainAll(getRootNodes(projectStartupInfo));
+      this.rootNodesInOrder.retainAll(projectStartupInfo.getRootNodes());
     }
-  }
-
-  protected Set<String> getRootNodes(ProjectStartupInfo projectStartupInfo) {
-    return projectStartupInfo.getRootNodes();
   }
 
   /**
@@ -1941,7 +1940,8 @@ public abstract class FacetExerciseList<T extends CommonShell & Scored, U extend
         logger.info("showExercises Skip stale req " + reqID + " vs current " + getCurrentExerciseReq());
     } else {
       if (DEBUG) logger.info("showExercises show req " + reqID + " exercises " + getIDs(result));
-      Scheduler.get().scheduleDeferred((Command) () -> showExercisesForCurrentReq(result, reqID));
+      // Scheduler.get().scheduleDeferred((Command) () -> showExercisesForCurrentReq(result, reqID));
+      showExercisesForCurrentReq(result, reqID);
     }
   }
 

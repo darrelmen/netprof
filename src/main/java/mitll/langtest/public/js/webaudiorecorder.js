@@ -43,8 +43,6 @@ var mics = {};
 var debug = false;
 var start = new Date().getTime();
 
-//var audioInputSelect = document.querySelector('#audioSource');
-
 function startUserMediaAfterChoice(stream) {
     var input = audio_context.createMediaStreamSource(stream);
     if (debug) __log('startUserMediaAfterChoice Media stream created : ' + input);
@@ -86,6 +84,12 @@ function madeChoice() {
 function gotDevices(deviceInfos) {
     // Handles being called several times to update labels. Preserve values.
 
+    var ua = window.navigator.userAgent;
+    if (ua.indexOf("Trident") > -1) {  // i.e. IE!
+        webAudioMicNotAvailable();
+        return;
+    }
+
     const audioInputSelect = document.querySelector('#audioSource');
     const audioInputSelectButton = document.querySelector('#audioSourceButton');
 
@@ -93,6 +97,7 @@ function gotDevices(deviceInfos) {
 
     if (debug) __log('gotDevices : selectors ' + selectors);
 
+    // IE doesn't like this
     const values = selectors.map(select => select.value);
 
     selectors.forEach(select => {

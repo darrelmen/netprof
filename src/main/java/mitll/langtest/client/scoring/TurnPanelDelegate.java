@@ -42,6 +42,7 @@ import mitll.langtest.client.list.ListInterface;
 import mitll.langtest.client.sound.AllHighlight;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -66,6 +67,7 @@ public class TurnPanelDelegate implements ITurnMarking {
 
   private ClientExercise exercise;
   private DivWidget widget;
+  Language language;
 
   /**
    * @param clientExercise
@@ -81,11 +83,12 @@ public class TurnPanelDelegate implements ITurnMarking {
   protected TurnPanelDelegate(final ClientExercise clientExercise,
                               DivWidget widget,
                               ListenViewHelper.COLUMNS columns,
-                              boolean rightJustify) {
+                              boolean rightJustify, Language language) {
     this.exercise = clientExercise;
     this.columns = columns;
     this.rightJustify = rightJustify;
     this.widget = widget;
+    this.language = language;
     Style style = widget.getElement().getStyle();
     style.setOverflow(Style.Overflow.HIDDEN);
     style.setClear(Style.Clear.BOTH);
@@ -186,8 +189,7 @@ public class TurnPanelDelegate implements ITurnMarking {
   private void setBorderColor(String white) {
     if (bubble == null) {
       logger.warning("huh? no bubble for " + exercise.getID());
-    }
-    else {
+    } else {
       bubble.getElement().getStyle().setBorderColor(white);
     }
   }

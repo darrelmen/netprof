@@ -45,17 +45,17 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 public class SimpleTurn extends DivWidget implements ISimpleTurn, IObscurable {
-  private final Logger logger = Logger.getLogger("SimpleTurn");
+//  private final Logger logger = Logger.getLogger("SimpleTurn");
 
   protected ClientExercise exercise;
   private TurnPanelDelegate turnPanelDelegate;
   private Language language;
   private boolean isChinese;
-  boolean deleting;
+  private boolean deleting;
 
   public SimpleTurn(ClientExercise exercise, ITurnContainer.COLUMNS columns, boolean rightJustify, Language language) {
     this.exercise = exercise;
-    turnPanelDelegate = new TurnPanelDelegate(exercise, this, columns, rightJustify);
+    turnPanelDelegate = new TurnPanelDelegate(exercise, this, columns, rightJustify, language);
     this.language = language;
     isChinese = language == Language.MANDARIN || language == Language.JAPANESE;
   }
@@ -97,7 +97,7 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn, IObscurable {
 
   @Override
   public void removeMarkCurrent() {
-  //  turnPanelDelegate.removeMarkCurrent();
+    //  turnPanelDelegate.removeMarkCurrent();
   }
 
   @Override
@@ -109,23 +109,17 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn, IObscurable {
   public void obscureText() {
     segments.forEach(iHighlightSegment -> {
       if (iHighlightSegment.isObscurable()) {
-       // logger.info("highlight " + iHighlightSegment);
+        // logger.info("highlight " + iHighlightSegment);
         iHighlightSegment.showHighlight();
       }
     });
-
   }
 
   @Override
   public void restoreText() {
-//    segments.forEach(IHighlightSegment::restoreText);
-
     segments.forEach(iHighlightSegment -> {
-      // if (iHighlightSegment.isObscurable()) {
       iHighlightSegment.clearObscurable();
-    //  iHighlightSegment.restoreText();
       iHighlightSegment.forceClearHighlight();
-      // }
     });
   }
 
@@ -151,14 +145,12 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn, IObscurable {
    */
   @Override
   public DivWidget addWidgets(boolean showFL, boolean showALTFL, PhonesChoices phonesChoices, EnglishDisplayChoices englishDisplayChoices) {
-    HTML html = new HTML(exercise.getForeignLanguage());
-//    html.addStyleName("flfont");
-//    html.getElement().getStyle().setPadding(10, Style.Unit.PX);
     //  logger.info("addWidgets : got '" + exercise.getForeignLanguage() + "' for " + exercise.getID());
     DivWidget widgets = new DivWidget();
     segments.clear();
-    widgets.getElement().getStyle().setPaddingTop(10, Style.Unit.PX);
-    widgets.getElement().getStyle().setPaddingLeft(10, Style.Unit.PX);
+
+    Style style = widgets.getElement().getStyle();
+    style.setPadding(10, Style.Unit.PX);
     widgets.addStyleName("flfont");
 
     List<String> tokens = new SearchTokenizer().getTokens(exercise.getForeignLanguage(), isChinese, new ArrayList<>());

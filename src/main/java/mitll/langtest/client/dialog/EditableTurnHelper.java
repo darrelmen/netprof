@@ -153,6 +153,9 @@ public class EditableTurnHelper {
     if (addTopMargin) {
       w.addStyleName("topFiveMargin");
     }
+    if (language == Language.URDU && !hasEnglishAttr) {
+      w.addStyleName("urduImportant");
+    }
 
     return w;
   }

@@ -46,6 +46,7 @@ import mitll.langtest.client.sound.AllHighlight;
 import mitll.langtest.client.sound.IHighlightSegment;
 import mitll.langtest.shared.exercise.AudioAttribute;
 import mitll.langtest.shared.exercise.ClientExercise;
+import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.ProjectStartupInfo;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.jetbrains.annotations.NotNull;
@@ -64,6 +65,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
   private final Logger logger = Logger.getLogger("TurnPanel");
 
   private TurnPanelDelegate turnPanelDelegate;
+  boolean isUrdu;
 
   /**
    * @param clientExercise
@@ -93,7 +95,20 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
         addStyleName("floatLeft");
       }
     }
-    turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify);
+
+    isUrdu = controller.getLanguageInfo() == Language.URDU;
+    turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify, controller.getLanguageInfo());
+  }
+
+
+  protected void addMarginStyle(Style style2) {
+    style2.setMarginLeft(15, Style.Unit.PX);
+
+    style2.setMarginRight(10, Style.Unit.PX);
+    boolean useLargeTop = this.isUrdu && !exercise.hasEnglishAttr();
+    style2.setMarginTop(useLargeTop ? 15 : 7, Style.Unit.PX);
+    style2.setMarginBottom(0, Style.Unit.PX);
+    if (useLargeTop) style2.setPaddingTop(10, Style.Unit.PX);
   }
 
   void makeClickableWords(ProjectStartupInfo projectStartupInfo, ListInterface listContainer) {
@@ -159,7 +174,7 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
   public void styleMe(DivWidget wrapper) {
     super.styleMe(wrapper);
     turnPanelDelegate.styleMe(wrapper);
-    flClickableRow.getElement().getStyle().setOverflow(Style.Overflow.HIDDEN);
+    flClickableRow.getElement().getStyle().setOverflow(Style.Overflow.VISIBLE);
   }
 
   @Override

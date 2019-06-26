@@ -408,7 +408,7 @@ public abstract class HistoryExerciseList<T extends CommonShell, U extends HasID
     //   logger.info("maybeSwitchProject project " + project + " vs " + currentProject);
     if (project != currentProject) {
       if (project > DEFAULT_PROJECT_ID) {
-        logger.info("maybeSwitchProject project from state " + project + " != " + currentProject);
+        logger.info("maybeSwitchProject project from selection state " + project + " to new project #" + currentProject);
         projectChangedTo(project);
       }
     }

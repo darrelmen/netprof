@@ -679,28 +679,18 @@ Where should this font live? under src?
     src: url('./langtest/Jameel Noori Nastaleeq.ttf') format('truetype')
 }
 
-.urdu {
-    font-family: 'MyUrduWebFont', sans-serif;
-    font-size: 14pt;
-    font-weight: normal;
-    line-height: 125%;
-    direction: rtl;
+.urduImportant {
+    font-family: 'MyUrduWebFont', sans-serif !important;
+    font-size: 18px !important;
+    font-weight: normal !important;
+    line-height: 125% !important;
+    direction: rtl !important;
+    padding-top: 8px;
 }
 
 .urdufont {
     font-family: 'MyUrduWebFont', sans-serif;
 }
-
-/*
-.urduflfont {
-    font-size: 24px;
-    word-wrap: normal; !* Internet Explorer 5.5+ *!
-    word-break: keep-all;
-    white-space: normal;
-    font-family: 'MyUrduWebFont', sans-serif;
-    line-height: 100%;
-}
-*/
 
 .urdubigflfont {
     font-size: 36px;

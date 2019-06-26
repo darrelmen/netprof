@@ -143,4 +143,6 @@ public interface ExerciseController<T extends CommonShell & HasUnitChapter> exte
   boolean isHasNetworkProblem();
 
   void setHasNetworkProblem(boolean hasNetworkProblem);
+
+  void startOver();
 }

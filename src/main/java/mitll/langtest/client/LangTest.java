@@ -87,10 +87,12 @@ import mitll.langtest.shared.user.User;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static com.google.gwt.user.client.Window.Navigator.getUserAgent;
 import static mitll.langtest.client.banner.NewContentChooser.MODE;
 
 public class LangTest implements
     EntryPoint, UserFeedback, ExerciseController<ClientExercise>, UserNotification, LifecycleSupport, UserState {
+  public static final String SHOWED_AVOID_IE = "showedAvoidIE";
   private final Logger logger = Logger.getLogger("LangTest");
 
   private static final boolean DEBUG = false;
@@ -585,7 +587,13 @@ public class LangTest implements
     populateRootPanel();
 
     setPageTitle();
-    browserCheck.checkForCompatibleBrowser();
+    String browserAndVersion = browserCheck.checkForCompatibleBrowser().getBrowserAndVersion();
+    logger.info("Detected " +browserAndVersion + " and agent " + getUserAgent());
+    if (browserCheck.isIE() && !storage.isTrue(SHOWED_AVOID_IE)) {
+      storage.setBoolean(SHOWED_AVOID_IE, true);
+
+      Window.alert("Your browser seems to be Internet Explorer. We recommend using any other browser: Edge, Chrome, Firefox or Safari.");
+    }
 
     String message = startupInfo.getMessage();
     if (message != null && !message.isEmpty()) {
@@ -664,7 +672,12 @@ public class LangTest implements
       }
     } else {
       if (DEBUG_MODE) logger.info("recordingModeSelect : no permission yet " + checkLogin);
-      BrowserRecording.getWebAudio().initWebaudio();
+      try {
+        BrowserRecording.getWebAudio().initWebaudio();
+      } catch (Exception e) {
+        logger.warning("got " +e);
+        WebAudioRecorder.webAudioMicNotAvailable();
+      }
       if (!WebAudioRecorder.isWebRTCAvailable()) {
         if (checkLogin) {
           if (DEBUG_MODE) logger.info("recordingModeSelect : checkLogin " + checkLogin);
@@ -973,8 +986,9 @@ public class LangTest implements
     ProjectStartupInfo projectStartupInfo = getProjectStartupInfo();
     if (projectStartupInfo == null) {
       logger.info("\ngetAudioService has no project yet... using default audio service...?");
-      if (userManager.getCurrent() != null) {
-        setProjectStartupInfo(userManager.getCurrent());
+      User current = userManager.getCurrent();
+      if (current != null) {
+        setProjectStartupInfo(current);
       }
       if (getProjectStartupInfo() == null) {
         logger.warning("\n after getting user ... getAudioService has no project yet... using default audio service...?");
@@ -1006,7 +1020,8 @@ public class LangTest implements
 
         @Override
         public void onSuccess(Void result) {
-          if (DEBUG) logger.info("updateProject did update on project #" + projID + " on hydra server (maybe h2 or s1).");
+          if (DEBUG)
+            logger.info("updateProject did update on project #" + projID + " on hydra server (maybe h2 or s1).");
         }
       });
     }
@@ -1243,6 +1258,7 @@ public class LangTest implements
     return initialUI.getNavigation();
   }
 
+  public void startOver() { initialUI.startOver(); }
   @Override
   public CommentAnnotator getCommentAnnotator() {
     return annotationHelper;

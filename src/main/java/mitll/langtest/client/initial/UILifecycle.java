@@ -48,11 +48,16 @@ public interface UILifecycle {
   int getHeightOfTopRows();
 
   /**
-   * @see LangTest#gotUser
    * @param user
+   * @see LangTest#gotUser
    */
   void gotUser(HasID user);
+
   boolean isShowingPleaseAllow();
+
+  /**
+   * @see ProjectChoices#showDeleteDialog
+   */
   void startOver();
 
   void getUserPermissions();
@@ -66,9 +71,9 @@ public interface UILifecycle {
   void addBreadcrumbs();
 
   /**
-   * @see mitll.langtest.client.project.ProjectChoices#gotClickOnFlag
    * @param name
    * @return
+   * @see mitll.langtest.client.project.ProjectChoices#gotClickOnFlag
    */
   @NotNull
   NavLink makeBreadcrumb(String name);
@@ -76,8 +81,8 @@ public interface UILifecycle {
   void clickOnParentCrumb(SlimProject parent, NavLink breadcrumb);
 
   /**
-   * @see LangTest#makeFlashContainer()
    * @param message
+   * @see LangTest#makeFlashContainer()
    */
   void setSplash(String message);
 

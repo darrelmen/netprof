@@ -1432,7 +1432,11 @@ public class AudioServiceImpl extends MyRemoteServiceServlet implements AudioSer
       logger.error("got " + e, e);
     }
 
-    logger.info("addToAudioTable : return " + audioAttribute.getUniqueID() + " : " + audioAttribute.getAudioRef() + " : " + audioAttribute.getTranscript());
+    if (audioAttribute == null) {
+      logger.warn("huh? no audio attribute?");
+    } else {
+      logger.info("addToAudioTable : return " + audioAttribute.getUniqueID() + " : " + audioAttribute.getAudioRef() + " : " + audioAttribute.getTranscript());
+    }
 
     return audioAttribute;
   }

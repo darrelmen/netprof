@@ -289,14 +289,11 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
   }
 
   private void updateText(String s, boolean moveToNextTurn) {
-    //int projectID = controller.getProjectID();
     if (projID != -1) {
       final int exID = getExID();
-
       if (DEBUG) logger.info("updateText : Checking " + s + " on " + projID + " for " + exID);
 
       // talk to the audio service first to determine the oov
-
       controller.getAudioService().isValid(projID, exID, getSanitized(s), new AsyncCallback<OOVWordsAndUpdate>() {
         @Override
         public void onFailure(Throwable caught) {

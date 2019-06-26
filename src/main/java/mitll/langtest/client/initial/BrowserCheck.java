@@ -34,18 +34,22 @@ import mitll.langtest.client.LangTest;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.google.gwt.user.client.Window.Navigator.getUserAgent;
 //import java.util.logging.Logger;
 
 public class BrowserCheck {
-//  private final Logger logger = Logger.getLogger("BrowserCheck");
+  //  private final Logger logger = Logger.getLogger("BrowserCheck");
 
   private static final String FIREFOX = "firefox";
   private static final String CHROME = "chrome";
   private static final String MSIE = "msie";
   private static final String SAFARI = "safari";
-  private static final String IE = "IE";
+  public static final String IE = "IE";
+  public static final String UNKNOWN = "Unknown";
+  // private static final String IE = IE1;
 
-  private String browser = "Unknown";
+  private String browser = UNKNOWN;
   private int ver = 0;
   private String version = "";
 
@@ -63,10 +67,10 @@ public class BrowserCheck {
    * @see LangTest#onModuleLoad2()
    */
   public BrowserCheck checkForCompatibleBrowser() {
-    if (browser.equals("Unknown")) getBrowserAndVersion();
+    if (browser.equals(UNKNOWN)) getBrowserAndVersion();
     Integer min = browserToVersion.get(browser);
-    if (browser.toLowerCase().contains("ie")) { // just skip IE
-      //Window.alert("Your browser is " + browser + ".<br></br>We recommend using either Firefox, Safari, or Chrome.");
+    if (browser.toLowerCase().contains(IE)) { // just skip IE
+      //Window.alert("Your browser is " + browser + ".<br></br>We recommend using any of Edge, Firefox, Safari, or Chrome.");
       return this;
     }
     int ieVersion = getIEVersion();
@@ -87,6 +91,9 @@ public class BrowserCheck {
     return this;
   }
 
+  public boolean isIE() {
+    return browser.equalsIgnoreCase(IE);
+  }
   public static boolean isIPad() {
     String userAgent = getUserAgent();
     boolean b = userAgent.contains("ipad") || userAgent.contains("iphone") || userAgent.contains("ipod");
@@ -112,7 +119,18 @@ public class BrowserCheck {
       browser = CHROME;
     } else if (agent.contains(MSIE)) {
       version = agent.substring(agent.indexOf(MSIE) + MSIE.length() + 1).split(";")[0];
-      browser = "IE";
+      browser = IE;
+    } else if (agent.contains("Trident/".toLowerCase())) {
+      if (agent.contains("Trident/7.0".toLowerCase()))
+        version = "11";
+      else if (agent.contains("Trident/6.0".toLowerCase()))
+        version = "10";
+      else if (agent.contains("Trident/5.0".toLowerCase()))
+        version = "9";
+      else
+        version = "0";  // not IE9, 10 or 11
+
+      browser = IE;
     } else if (agent.contains(SAFARI)) {
       version = agent.substring(agent.indexOf(SAFARI) + SAFARI.length() + 1).split("\\s+")[0];
       if (version.length() > 1) {
@@ -149,9 +167,9 @@ public class BrowserCheck {
       return $wnd.navigator.appName;
   }-*/;
 
-  private static native String getUserAgent() /*-{
-      return navigator.userAgent.toLowerCase();
-  }-*/;
+//  private static native String getUserAgent() /*-{
+//      return window.navigator.userAgent.toLowerCase();
+//  }-*/;
 
   public static native int getIEVersion() /*-{
       var ua = window.navigator.userAgent;
