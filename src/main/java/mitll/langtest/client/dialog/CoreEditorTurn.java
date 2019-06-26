@@ -105,7 +105,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     this.turnAddDelete = new TurnAddDelete(this, 21);
 
     this.editableTurnHelper = new EditableTurnHelper(language, vocab.hasEnglishAttr(), vocab.getForeignLanguage(),
-        this) {
+        this, false) {
       @Override
       protected int getTextBoxWidth() {
         return WIDTH_TO_USE;
@@ -115,7 +115,7 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     editableTurnHelper.setPlaceholder("Core Vocabulary");
 
     this.englishEditableTurnHelper = new EditableTurnHelper(language, true, vocab.getEnglish(),
-        this) {
+        this, false) {
       @Override
       protected int getTextBoxWidth() {
         return WIDTH_TO_USE;

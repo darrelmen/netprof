@@ -54,4 +54,6 @@ public interface ISimpleTurn extends IsWidget, ISimpleTurnMarking {
                        boolean showALTFL,
                        PhonesChoices phonesChoices,
                        EnglishDisplayChoices englishDisplayChoices);
+
+  boolean isEnglish();
 }

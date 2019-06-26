@@ -701,6 +701,8 @@ public class ListenViewHelper<T extends ITurnPanel>
           }
           currentTurn.markCurrent();
         }
+      } else if (isFirstPrompt(currentTurn) && currentTurn.isEnglish()) {
+        currentTurnPlayEnded();
       } else {
         currentTurn.showNoAudioToPlay();
         setPlayButtonToPlay();

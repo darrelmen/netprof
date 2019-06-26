@@ -514,12 +514,13 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
       allUnitChapterGroup = new ArrayList<>();
 
       boolean first = true;
-
-      int width = TYPE_AND_VALUE_WIDTH;
+     // int width = TYPE_AND_VALUE_WIDTH;
 
       for (String type : typeOrder) {
-        ListBox listBox = getListBox(width);
-        listBox.addChangeHandler(event -> gotChangeFor(type, listBox, all, addAll, () -> logger.info("OK, type->values done for " + type)));
+        ListBox listBox = getListBox(TYPE_AND_VALUE_WIDTH);
+        listBox.addChangeHandler(event -> gotChangeFor(type, listBox, all, addAll, () ->
+            {}// logger.info("OK, type->values done for " + type)
+        ));
         all.add(listBox);
 
         ControlGroup e = new ControlGroup();

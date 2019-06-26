@@ -29,7 +29,6 @@
 
 package mitll.langtest.client.custom.dialog;
 
-import com.github.gwtbootstrap.client.ui.ControlGroup;
 import com.github.gwtbootstrap.client.ui.FluidRow;
 import com.github.gwtbootstrap.client.ui.ListBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
@@ -55,6 +54,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
+  public static final boolean DEBUG = false;
   private final Logger logger = Logger.getLogger("CreateDialogDialog");
 
   private static final String PLEASE_CHOOSE = "Please choose.";
@@ -235,7 +235,8 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     );
     //  newDialog.setFilePath(filePath);
 
-    logger.info("doCreate new " + newDialog.getID() + " " + newDialog.isPrivate());// + " image: " + filePath);
+    if (DEBUG)
+      logger.info("doCreate new " + newDialog.getID() + " " + newDialog.isPrivate());// + " image: " + filePath);
 
     controller.getDialogService().addDialog(newDialog,
         new AsyncCallback<IDialog>() {

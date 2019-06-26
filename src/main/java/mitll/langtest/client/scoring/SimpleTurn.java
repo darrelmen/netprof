@@ -66,6 +66,11 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn, IObscurable {
   }
 
   @Override
+  public boolean isEnglish() {
+    return exercise.hasEnglishAttr();
+  }
+
+  @Override
   public void makeVisible() {
     turnPanelDelegate.makeVisible();
   }

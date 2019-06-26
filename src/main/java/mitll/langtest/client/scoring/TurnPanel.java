@@ -100,6 +100,10 @@ public class TurnPanel extends DialogExercisePanel<ClientExercise> implements IT
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify, controller.getLanguageInfo());
   }
 
+  @Override
+  public boolean isEnglish() {
+    return exercise.hasEnglishAttr();
+  }
 
   protected void addMarginStyle(Style style2) {
     style2.setMarginLeft(15, Style.Unit.PX);

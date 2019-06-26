@@ -31,20 +31,12 @@ package mitll.langtest.client.dialog;
 
 import com.github.gwtbootstrap.client.ui.TextBox;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
-import com.google.gwt.canvas.client.Canvas;
-import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.KeyUpEvent;
-import com.google.gwt.i18n.client.HasDirection;
-import com.google.gwt.i18n.shared.WordCountDirectionEstimator;
 import com.google.gwt.safehtml.shared.SimpleHtmlSanitizer;
 import com.google.gwt.user.client.ui.UIObject;
-import mitll.langtest.client.banner.SessionManager;
-import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.scoring.EnglishDisplayChoices;
 import mitll.langtest.client.scoring.PhonesChoices;
-import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
 import org.jetbrains.annotations.NotNull;
 
@@ -63,15 +55,25 @@ public class EditableTurnHelper {
   private boolean hasEnglishAttr;
   private String initialContent;
   private IFocusListener focusListener;
+  private boolean isFirstTurn;
 
+  /**
+   * @param language
+   * @param hasEnglishAttr
+   * @param initialContent
+   * @param focusListener
+   * @param isFirstTurn
+   */
   EditableTurnHelper(Language language,
                      boolean hasEnglishAttr,
                      String initialContent,
-                     IFocusListener focusListener) {
+                     IFocusListener focusListener,
+                     boolean isFirstTurn) {
     this.language = language;
     this.focusListener = focusListener;
     this.hasEnglishAttr = hasEnglishAttr;
     this.initialContent = initialContent;
+    this.isFirstTurn = isFirstTurn;
   }
 
   /**
@@ -88,6 +90,7 @@ public class EditableTurnHelper {
     String placeholder = (hasEnglishAttr ? "English" : language.toDisplay()) +
         (columns == ITurnContainer.COLUMNS.MIDDLE ? " translation" : "") //+        " (" + simpleTurn.getExID() + ")"
         ;
+    if (isFirstTurn && hasEnglishAttr) placeholder += " (Optional)";
     return
         (columns == ITurnContainer.COLUMNS.LEFT ? ENGLISH_SPEAKER :
             columns == ITurnContainer.COLUMNS.MIDDLE ? INTERPRETER_SPEAKER :
@@ -156,7 +159,6 @@ public class EditableTurnHelper {
     if (language == Language.URDU && !hasEnglishAttr) {
       w.addStyleName("urduImportant");
     }
-
     return w;
   }
 

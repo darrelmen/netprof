@@ -33,9 +33,6 @@ import com.github.gwtbootstrap.client.ui.Button;
 import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.github.gwtbootstrap.client.ui.constants.ButtonType;
 import com.github.gwtbootstrap.client.ui.constants.IconType;
-import com.google.gwt.canvas.client.Canvas;
-import com.google.gwt.canvas.dom.client.Context2d;
-import com.google.gwt.canvas.dom.client.TextMetrics;
 import com.google.gwt.dom.client.NativeEvent;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.event.dom.client.ClickHandler;
@@ -72,13 +69,20 @@ public class EditorTurn extends PlayAudioExercisePanel
     implements ITurnPanel, IRehearseView, IRecordingTurnPanel, IFocusListener, AddDeleteListener {
   private final Logger logger = Logger.getLogger("EditorTurn");
 
+  private static final int MAX_LENGTH = 14;// was 10
+  private static final int WARN_LENGTH = 7;
+
   private static final int CHUNK_STEP = 50;
   private static final int MAX_WIDTH = CHUNK_STEP * 12;
   private static final double CHEESY_SCALAR = 0.9;
 
   private static final String YELLOW = "yellow";
   private static final String WHITE = "white";
-  private static final String RED = "red";//"#ff000080";//"red";
+
+  /**
+   * 85% red
+   */
+  private static final String RED = "#f8b9c6";//"red";//"#ff000080";//"red";
 
 
   private static final String PREFIX = "This turn should be in ";
@@ -188,7 +192,7 @@ public class EditorTurn extends PlayAudioExercisePanel
 
     this.turnAddDelete = new TurnAddDelete(this, 26);
     this.editableTurnHelper = new EditableTurnHelper(controller.getLanguageInfo(), clientExercise.hasEnglishAttr(),
-        foreignLanguage, this);
+        foreignLanguage, this, isFirstTurn);
     editableTurnHelper.setPlaceholder(columns);
 
     turnPanelDelegate = new TurnPanelDelegate(clientExercise, this, columns, rightJustify, controller.getLanguageInfo()) {
@@ -245,6 +249,11 @@ public class EditorTurn extends PlayAudioExercisePanel
   @Override
   public int getExID() {
     return clientExercise == null ? -1 : clientExercise.getID();
+  }
+
+  @Override
+  public boolean isEnglish() {
+    return clientExercise.hasEnglishAttr();
   }
 
   @Override
@@ -536,14 +545,14 @@ public class EditorTurn extends PlayAudioExercisePanel
 
     boolean noCurrentLangFeedback = contentLanguageFeedback == ContentLanguageFeedback.NO_PROBLEM;
 
-    if (length > 10) {
+    if (length > MAX_LENGTH) {
       //  lengthFeedback = LengthFeedback.REALLY_LONG;
       markRed();
       // so don't step on any current message about content, if there is one
       if (noCurrentLangFeedback) {
         showFeedback(REALLY_AVOID_LONG_PHRASES);
       }
-    } else if (length > 7) {
+    } else if (length > WARN_LENGTH) {
       //  lengthFeedback = LengthFeedback.KINDA_LONG;
       markYellow();
 
