@@ -1,13 +1,13 @@
 // Build-time dependencies
 
 // ********************************* Plugins **************************************
-buildscript {
-    repositories {
-        maven {
-            url "${artifactory_contextUrl}/libs-release"
-        }
-    }
-}
+//buildscript {
+//    repositories {
+//        maven {
+//            url "${artifactory_contextUrl}/libs-release"
+//        }
+//    }
+//}
 
 plugins {
     id "com.jfrog.artifactory" //version "4.9.6"
@@ -17,6 +17,8 @@ plugins {
 //    id "com.sourcemuse.mongo" version "0.13.0"
     id "fr.putnami.gwt" //version "0.6.1"
 }
+
+description = "netprof - pronounce words and get your score"
 
 apply from: 'gradle-common/common.gradle'
 apply from: 'gradle-common/common-java.gradle'
@@ -41,11 +43,7 @@ artifactory {
     contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver
     publish {
         repository {
-            if (project.ext.status.equals("release")) {
-                repoKey = "ivy-libs-release-dli"// '${release_repo_key}'
-            } else {
-                repoKey = "ivy-libs-snapshot-dli"//'${snapshot_repo_key}'
-            }
+            repoKey = "ivy-libs-snapshot-dli"//'${snapshot_repo_key}'
             username = "${artifactory_user}"
             password = "${artifactory_password}"
             maven = false
