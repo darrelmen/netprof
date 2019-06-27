@@ -37,6 +37,34 @@ putnami {
     }
 }
 
+artifactory {
+    contextUrl = "${artifactory_contextUrl}"   //The base Artifactory URL if not overridden by the publisher/resolver
+    publish {
+        repository {
+            if (project.ext.status.equals("release")) {
+                repoKey = "ivy-libs-release-dli"// '${release_repo_key}'
+            } else {
+                repoKey = "ivy-libs-snapshot-dli"//'${snapshot_repo_key}'
+            }
+            username = "${artifactory_user}"
+            password = "${artifactory_password}"
+            maven = false
+            ivy {
+                ivyLayout = '[organization]/[module]/[revision]/[type]s/ivy-[revision].xml'
+                artifactLayout = '[organization]/[module]/[revision]/[type]s/[module](-[classifier])-[revision].[ext]'
+                mavenCompatible = false
+            }
+
+        }
+
+        defaults {
+            publishArtifacts = true
+            publishPom = true
+            publications ('ivyJava')
+        }
+    }
+}
+
 license {
     skipExistingHeaders true
     ignoreFailures true
