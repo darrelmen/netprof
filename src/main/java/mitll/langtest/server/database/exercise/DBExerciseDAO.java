@@ -751,8 +751,13 @@ public class DBExerciseDAO extends BaseExerciseDAO implements ExerciseDAO<Common
       logger.warn("setAttributes couldn't find " + exid);
     } else {
       if (exercise.getAttributes().size() != attributesFor.size()) {
-        logger.error("setAttributes refresh attributes after " + exercise.getAttributes());
-        logger.error("setAttributes refresh attributes after " + attributesFor);
+        logger.error("setAttributes refresh attributes for " +
+            "\n\tex " + exid + " after " +
+            "\n\texercise attributes " + exercise.getAttributes() +
+            "\n\tvs db attributes    " + attributesFor
+        );
+
+//        logger.error("setAttributes refresh attributes after " + attributesFor);
       }
     }
     return exercise;

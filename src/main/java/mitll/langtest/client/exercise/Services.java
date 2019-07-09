@@ -51,16 +51,9 @@ public interface Services<T extends CommonShell & HasUnitChapter> extends EventR
 
   ScoringServiceAsync getScoringServiceAsyncForHost(String host);
 
- // AudioServiceAsync getAudioService();
-
   Collection<AudioServiceAsync> getAllAudioServices();
 
   void tellOtherServerToRefreshProject(int projID);
-
-  /**
-   * @return
-   */
-//  ScoringServiceAsync getScoringService();
 
   ScoringServiceAsync getScoringServiceAsync(int projectid);
 
@@ -71,10 +64,6 @@ public interface Services<T extends CommonShell & HasUnitChapter> extends EventR
   UserServiceAsync getUserService();
 
   OpenUserServiceAsync getOpenUserService();
-
-//  ExerciseServiceAsync<T> getExerciseService();
-
- // DialogServiceAsync getDialogService();
 
   ListServiceAsync getListService();
 

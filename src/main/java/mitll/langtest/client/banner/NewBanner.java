@@ -128,6 +128,7 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
   private static final String IS_YOUR_MICROPHONE_ACTIVE = "Is your microphone active?";
 
   private static final String NETPROF_MANUAL = "langtest/NetProF_Manual.pdf";
+  private static final String NETPROF_DEV_MANUAL = "langtest/Netprof_Developer_Manual.pdf";
   /**
    * @see #getImage
    */
@@ -500,6 +501,9 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     rnav.add(info);
     info.add(userMenu.getAbout());
     info.add(getManual());
+  //  if (!controller.getUserManager().getCurrent().isStudent() || !controller.getPermissions().isEmpty()) {
+      info.add(getDevManual());
+  //  }
     info.add(getContactUs());
   }
 
@@ -960,6 +964,12 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
    */
   private NavLink getManual() {
     NavLink anchor = getAnchor(DOCUMENTATION, NETPROF_MANUAL);
+    anchor.getElement().getStyle().setColor("#5bb75b");
+    return anchor;
+  }
+
+  private NavLink getDevManual() {
+    NavLink anchor = getAnchor("Developer Manual", NETPROF_DEV_MANUAL);
     anchor.getElement().getStyle().setColor("#5bb75b");
     return anchor;
   }

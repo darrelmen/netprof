@@ -414,7 +414,7 @@ public class LangTest implements
   }
 
   private boolean isDefault(String host) {
-    return host.equals(LOCALHOST);
+    return host.startsWith(LOCALHOST);
   }
 
   /**
