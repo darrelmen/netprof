@@ -1419,9 +1419,14 @@ public class ProjectManagement implements IProjectManagement {
     return isRTL;
   }
 
-  private final DateFormat format = new SimpleDateFormat();
-
+  /**
+   * Note : SimpleDateFormat is not threadsafe!
+   * @see #getProjectInfo
+   * @param project
+   * @param info
+   */
   private void addDateProps(SlickProject project, Map<String, String> info) {
+    DateFormat format = new SimpleDateFormat();
     info.put(CREATED, format.format(project.created()));
     info.put(MODIFIED, format.format(project.modified()));
     info.put(SYNCED, format.format(project.lastimport()));

@@ -33,6 +33,7 @@ import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.dom.client.Style;
 import com.google.gwt.i18n.client.HasDirection;
 import com.google.gwt.user.client.ui.HTML;
+import mitll.langtest.client.dialog.CoreVocabEditor;
 import mitll.langtest.client.dialog.ITurnContainer;
 import mitll.langtest.client.sound.HighlightSegment;
 import mitll.langtest.client.sound.IHighlightSegment;
@@ -40,6 +41,7 @@ import mitll.langtest.shared.exercise.ClientExercise;
 import mitll.langtest.shared.project.Language;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -53,6 +55,13 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn, IObscurable {
   private boolean isChinese;
   private boolean deleting;
 
+  /**
+   * @see CoreVocabEditor#getLeftHelper()
+   * @param exercise
+   * @param columns
+   * @param rightJustify
+   * @param language
+   */
   public SimpleTurn(ClientExercise exercise, ITurnContainer.COLUMNS columns, boolean rightJustify, Language language) {
     this.exercise = exercise;
     turnPanelDelegate = new TurnPanelDelegate(exercise, this, columns, rightJustify, language);
@@ -160,6 +169,10 @@ public class SimpleTurn extends DivWidget implements ISimpleTurn, IObscurable {
 
     List<String> tokens = new SearchTokenizer().getTokens(exercise.getForeignLanguage(), isChinese, new ArrayList<>());
     HasDirection.Direction direction = language.isRTL() ? HasDirection.Direction.RTL : HasDirection.Direction.LTR;
+
+    if (language.isRTL()) {
+      Collections.reverse(tokens);
+    }
 
     tokens.forEach(token -> {
       HighlightSegment blue = new HighlightSegment(
