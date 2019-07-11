@@ -259,6 +259,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
 
   /**
    * Not sure if this is needed or redundant with other default image choice
+   *
    * @return
    */
   @NotNull
@@ -306,15 +307,18 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
 
   @Override
   public boolean addUnitToValue(String unit, String value) {
-    if (unit.equalsIgnoreCase(UNIT)) {
-      this.unit = value;
-      return true;
-    } else if (unit.equalsIgnoreCase(CHAPTER)) {
-      this.chapter = value;
-      return true;
-    } else {
-      return false;
-    }
+//    if (unit.equalsIgnoreCase(UNIT)) {
+//      this.unit = value;
+//      logger.info("addUnitToValue 1 " + unit + " " + value);
+//      return true;
+//    } else if (unit.equalsIgnoreCase(CHAPTER)) {
+//      this.chapter = value;
+//      logger.info("addUnitToValue 2 " + unit + " " + value);
+//      return true;
+//    } else {
+//      return false;
+//    }
+    return false;
   }
 
   @Override
@@ -322,9 +326,17 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     return unit;
   }
 
+  public void setUnit(String unit) {
+    this.unit = unit;
+  }
+
   @Override
   public String getChapter() {
     return chapter;
+  }
+
+  public void setChapter(String unit) {
+    this.chapter = unit;
   }
 
   @Override

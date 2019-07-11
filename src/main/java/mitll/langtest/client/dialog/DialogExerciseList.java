@@ -80,7 +80,6 @@ public class DialogExerciseList extends FacetExerciseList<IDialog, IDialog> {
 
   public static final String INTERP_COLOR = "aliceblue";
 
-  // private static final String ENGLISH = "english";
   public static final String LISTEN = "Listen";
   public static final String CORE_VOCAB = "Core Vocab";
 

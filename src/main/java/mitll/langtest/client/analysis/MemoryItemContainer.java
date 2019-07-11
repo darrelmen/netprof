@@ -64,7 +64,7 @@ import java.util.logging.Logger;
 public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagingContainer<T> {
   private final Logger logger = Logger.getLogger("MemoryItemContainer");
 
-  private static final boolean DEBUG = false;
+  private static final boolean DEBUG = true;
 
   private static final int TABLE_WIDTH = 420;
   private static final int MAX_LENGTH_ID = 13;
@@ -263,6 +263,7 @@ public abstract class MemoryItemContainer<T extends HasID> extends ClickablePagi
     }
 
     for (T user : users) {
+      if (DEBUG) logger.info("dialog " + user.getID() + " :  " +user);
       addItem(user);
 
       if (selectedUser != -1 && user.getID() == selectedUser) {

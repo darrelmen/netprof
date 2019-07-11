@@ -170,6 +170,7 @@ public class DialogDAO extends DAO implements IDialogDAO {
 
     byProjID.forEach(slickDialog -> {
       Dialog e = makeDialog(slickDialog);
+
       dialogs.add(e);
       idToDialog.put(slickDialog.id(), e);
     });

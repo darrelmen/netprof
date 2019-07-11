@@ -58,7 +58,6 @@ public interface DialogServiceAsync {
   void addDialog(IDialog dialog, AsyncCallback<IDialog> async);
 
   void update(IDialog dialog, AsyncCallback<Void> async);
- // void updateImage(int dialogID, int imageID, AsyncCallback<Boolean> async);
 
   void addEmptyExercises(int dialogID, int afterExid, boolean isLeftSpeaker, AsyncCallback<DialogExChangeResponse> async);
 

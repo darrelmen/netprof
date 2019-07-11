@@ -64,10 +64,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static mitll.langtest.client.custom.dialog.CreateDialogDialog.NO_SELECTION;
+
 public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends BasicDialog {
   private final Logger logger = Logger.getLogger("CreateDialog");
 
-  private static final int TYPE_AND_VALUE_WIDTH = 200;
+  private static final int TYPE_AND_VALUE_WIDTH = 220;
   private static final boolean DEBUG = false;
 
   static final String CREATE_NEW_LIST = "Create New List";
@@ -111,11 +113,20 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
 
   private ControlGroup publicPrivateGroup;
 
+  /**
+   *
+   * @param current
+   * @param names
+   * @param isEdit
+   * @param controller
+   * @param listView
+   */
   CreateDialog(T current, Set<String> names,
                boolean isEdit, ExerciseController controller,
                CreateComplete<T> listView
   ) {
     this.current = current;
+    logger.info("CreateDialog Current " +current);
     this.names = names;
     this.isEdit = isEdit;
     this.controller = controller;
@@ -326,7 +337,6 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
   }
 
   /**
-   *
    * @return
    */
   @NotNull
@@ -373,6 +383,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
         items.add(name);
       }
     });
+    logger.info("addSorted "+items);
     new ItemSorter().getSortedItems(items).forEach(listBox::addItem);
   }
 
@@ -426,11 +437,10 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
   protected abstract String getDescriptionOptional();
 
 
-
   private boolean getDefaultPrivacy() {
     boolean isPrivate = true;
     if (isEditing()) {
-  //    T current = getCurrent();
+      //    T current = getCurrent();
 //      logger.info("current " + current);
 //      logger.info("priv    " + current.isPrivate());
 
@@ -505,7 +515,9 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
         grid.setWidget(row, col++, getLabel(type));
       }
 
-      // logger.info("invoke unit " + unit + " chapter " + chapter);
+      logger.info("invoke " +
+          "\n\tunit    " + unit +
+          "\n\tchapter " + chapter);
 
       row++;
       col = 0;
@@ -514,12 +526,12 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
       allUnitChapterGroup = new ArrayList<>();
 
       boolean first = true;
-     // int width = TYPE_AND_VALUE_WIDTH;
 
       for (String type : typeOrder) {
         ListBox listBox = getListBox(TYPE_AND_VALUE_WIDTH);
         listBox.addChangeHandler(event -> gotChangeFor(type, listBox, all, addAll, () ->
-            {}// logger.info("OK, type->values done for " + type)
+            {
+            }// logger.info("OK, type->values done for " + type)
         ));
         all.add(listBox);
 
@@ -533,7 +545,7 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
         if (addAll) {
           listBox.addItem(ALL);
         } else {
-          listBox.addItem("-- Please Choose a " + type + " --");
+          listBox.addItem(NO_SELECTION + " Please Choose a " + type + " --");
         }
 
         if (first) {
@@ -541,9 +553,11 @@ public abstract class CreateDialog<T extends INameable & IPublicPrivate> extends
           first = false;
         }
         int i1 = typeOrder.indexOf(type);
-        // logger.info("For " + type + " : " + i1);
+        logger.info("invoke For " + type + " : " + i1);
 
         if (unit != null && i1 == 0) {
+          logger.info("invoke For " + type + " : " + i1 + " select unit " + unit );
+
           listBox.setSelectedValue(unit);
         }
       }

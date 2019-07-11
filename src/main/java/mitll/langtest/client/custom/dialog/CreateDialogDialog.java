@@ -54,8 +54,10 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
-  public static final boolean DEBUG = false;
   private final Logger logger = Logger.getLogger("CreateDialogDialog");
+
+  public static final boolean DEBUG = false;
+  static final String NO_SELECTION = "--";
 
   private static final String PLEASE_CHOOSE = "Please choose.";
   static final String HEIGHT = 100 + "px";
@@ -111,6 +113,7 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     String unit = isEdit ? getCurrent().getUnit() : null;
     String chapter = isEdit ? getCurrent().getChapter() : null;
 
+    logger.info("addFields " + unit + " : " + chapter);
     new RowAndCol(grid, col, row).invoke(false, unit, chapter);
 
     grid.addStyleName("leftFiveMargin");
@@ -181,7 +184,11 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
       boolean validUnit = true;
       for (int i = 0; i < allUnitChapter.size(); i++) {
         ListBox listBox = allUnitChapter.get(i);
-        if (listBox.getSelectedValue().startsWith("--")) {
+
+        if (listBox != null &&
+            listBox.getSelectedValue() != null &&
+            listBox.getSelectedValue().startsWith(NO_SELECTION)) {
+
           markError(allUnitChapterGroup.get(i), listBox, listBox, PLEASE_CHOOSE, "Please choose a " + typeOrder.get(i));
           validUnit = false;
           break;
@@ -281,6 +288,11 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     }
   }
 
+  /**
+   * @see ContentEditorView#doEdit
+   * @param currentSelection
+   * @param container
+   */
   @Override
   public void doEdit(T currentSelection, ButtonMemoryItemContainer<T> container) {
     IMutableDialog mutable = currentSelection.getMutable();
@@ -288,6 +300,16 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
     mutable.setEnglish(entitleBox.getSafeText());
     mutable.setOrientation(theDescription.getText());
 
+    List<String> typeOrder = controller.getProjectStartupInfo().getTypeOrder();
+
+    Map<String, String> unitAndChapterSelections = getUnitAndChapterSelections();
+
+    String unit = typeOrder.size() > 0 ? unitAndChapterSelections.get(typeOrder.get(0)) : "";
+    String chapter = typeOrder.size() > 1 ? unitAndChapterSelections.get(typeOrder.get(1)) : "";
+
+    mutable.setUnit(unit);
+    mutable.setChapter(chapter);
+    logger.info("doEdit");
     controller.getDialogService().update(currentSelection, new AsyncCallback<Void>() {
       @Override
       public void onFailure(Throwable caught) {

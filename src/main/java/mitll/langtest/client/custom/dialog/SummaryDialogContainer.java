@@ -41,6 +41,8 @@ import mitll.langtest.client.dialog.DialogExerciseList;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.shared.dialog.IDialog;
 
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -58,6 +60,7 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
   private static final String CHAPTER = "Chapter";
   private static final String ENGLISH = "English";
   private static final String ORIENTATION = "Orientation";
+  public static final String UNIT = "Unit";
 
   /**
    * @param controller
@@ -155,11 +158,16 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
   /**
    * @param list
    * @param maxLength
+   * @see
    */
   void addUnit(List<T> list, int maxLength) {
     Column<T, SafeHtml> userCol = getUnitColumn(maxLength);
     table.setColumnWidth(userCol, getIdWidth() + "px");
-    addColumn(userCol, new TextHeader("Unit"));
+
+    Collection<String> typeOrder = controller.getTypeOrder();
+    String unit = typeOrder != null && !typeOrder.isEmpty() ? typeOrder.iterator().next() : UNIT;
+    addColumn(userCol, new TextHeader(unit));
+
     table.addColumnSortHandler(getUnitSorter(userCol, list));
   }
 
@@ -190,7 +198,17 @@ public class SummaryDialogContainer<T extends IDialog> extends ButtonMemoryItemC
   void addChapter(List<T> list, int maxLength) {
     Column<T, SafeHtml> userCol = getChapterColumn(maxLength);
     table.setColumnWidth(userCol, getIdWidth() + "px");
-    addColumn(userCol, new TextHeader(CHAPTER));
+
+    Collection<String> typeOrder = controller.getTypeOrder();
+
+    String chapter = CHAPTER;
+    if (typeOrder != null && typeOrder.size() > 1) {
+      Iterator<String> iterator = typeOrder.iterator();
+      iterator.next();
+      chapter = iterator.next();
+    }
+
+    addColumn(userCol, new TextHeader(chapter));
     table.addColumnSortHandler(getChapterSorter(userCol, list));
   }
 

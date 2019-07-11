@@ -258,6 +258,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
             } else {
               {
                 List<T> exercises = result.getExercises();
+                exercises.forEach(d -> logger.info("onSuccess got " + d));
                 if (!fcanSeeAll) {
                   exercises = exercises.stream().filter(d -> d.getUserid() == user).collect(Collectors.toList());
                 }
@@ -305,6 +306,10 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
     left.add(getButtons(this.getMyLists()));
   }
 
+  /**
+   * @param result
+   * @see #addYours(DivWidget)
+   */
   @Override
   protected void populateUniqueListNames(Collection<T> result) {
     result.forEach(list -> names.add(list.getName()));

@@ -44,4 +44,7 @@ public interface IMutableDialog extends MutableShell {
 
   void setImageID(int imageID);
 
+  void setUnit(String unit);
+
+  void setChapter(String unit);
 }

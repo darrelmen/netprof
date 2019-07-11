@@ -886,6 +886,8 @@ public class Project implements IPronunciationLookup, IProject {
 
     dialogs.forEach(dialog -> idToDialog.put(dialog.getID(), dialog));
 
+    dialogs.forEach(dialog -> logger.info("dialog " +dialog));
+
     createDialogSectionHelper(idToDialog.values());
   }
 
