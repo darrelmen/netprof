@@ -353,15 +353,16 @@ public class NewBanner extends ResponsiveNavbar implements IBanner {
     return rnav;
   }
 
-  private NavLink rememberViewAndLink(ComplexWidget recnav, VIEWS record) {
+  private void rememberViewAndLink(ComplexWidget recnav, VIEWS record) {
     NavLink choice = getChoice(recnav, record);
     viewToLink.put(record, choice);
-    return choice;
+   // return choice;
   }
 
   @NotNull
   private Brand getBrand() {
-    Brand netprof = new Brand(NETPROF);
+    String appTitle = controller.getProps().getAppTitle();
+    Brand netprof = new Brand(appTitle);
     netprof.addStyleName("topFiveMargin");
     addHomeClick(netprof);
     netprof.addStyleName("handCursor");

@@ -258,7 +258,7 @@ public class DialogEditorView<T extends IDialog> extends ContentEditorView<T> {
             } else {
               {
                 List<T> exercises = result.getExercises();
-                exercises.forEach(d -> logger.info("onSuccess got " + d));
+             //   exercises.forEach(d -> logger.info("onSuccess got " + d));
                 if (!fcanSeeAll) {
                   exercises = exercises.stream().filter(d -> d.getUserid() == user).collect(Collectors.toList());
                 }

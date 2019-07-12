@@ -183,10 +183,10 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     User byID = db.getUserDAO().getByID(request.getUserID());
     if (isCanSeeAll(byID.isAdmin(), byID.getPermissions())) {
       dialogVisibleToMe = new ArrayList<>(getDialogs(request.getProjID()));
-      logger.info("dialogs 1 " + dialogVisibleToMe.stream().filter(d->d.getID() == 49).collect(Collectors.toList()));
+    //  logger.info("dialogs 1 " + dialogVisibleToMe.stream().filter(d->d.getID() == 49).collect(Collectors.toList()));
     } else {
       dialogVisibleToMe = getDialogVisibleToMe(request.getUserID(), getDialogs(request.getProjID()));
-      logger.info("dialogs 2  " + dialogVisibleToMe.stream().filter(d->d.getID() == 49).collect(Collectors.toList()));
+   //   logger.info("dialogs 2  " + dialogVisibleToMe.stream().filter(d->d.getID() == 49).collect(Collectors.toList()));
       sectionHelper = new SectionHelper<>();
       getProject(request.getProjID()).populateDialogSectionHelper(dialogVisibleToMe, sectionHelper);
     }
