@@ -141,4 +141,9 @@ public class RelatedCoreExerciseHelper implements IRelatedExercise {
   public boolean insertBefore(int after, int exid) {
     return false;
   }
+
+  @Override
+  public Collection<SlickRelatedExercise> getDialogIDToRelatedForDialogAndEx(int dialogID, int exid) {
+    return null;
+  }
 }

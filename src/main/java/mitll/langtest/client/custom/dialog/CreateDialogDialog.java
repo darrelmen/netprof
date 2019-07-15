@@ -237,7 +237,6 @@ public class CreateDialogDialog<T extends IDialog> extends CreateDialog<T> {
         new ArrayList<>(),
         new ArrayList<>(),
         DialogType.INTERPRETER, // always interpreter
-        "",
         isPrivate
     );
     //  newDialog.setFilePath(filePath);

@@ -545,7 +545,7 @@ public abstract class ContentEditorView<T extends INameable & IPublicPrivate>
    */
   @Override
   public void madeIt(T userList) {
-    logger.info("madeIt made it " + userList.getName());
+   // logger.info("madeIt made it " + userList.getName());
     try {
       dialogHelper.hide();
       myLists.addItemAfter(null, userList);

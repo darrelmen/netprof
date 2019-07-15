@@ -665,7 +665,7 @@ public class DialogTest extends BaseTest {
         new ArrayList<>(),
         new ArrayList<>(),
         dialog,
-        "us", true
+        true
     );
 
     andPopulate.getDialogDAO().add(toAdd, andPopulate.getProject(projectid).getLanguage());
@@ -686,7 +686,7 @@ public class DialogTest extends BaseTest {
         new ArrayList<>(),
         new ArrayList<>(),
         DialogType.DIALOG,
-        "us", true
+        true
     );
 
     andPopulate.waitForDefaultUser();

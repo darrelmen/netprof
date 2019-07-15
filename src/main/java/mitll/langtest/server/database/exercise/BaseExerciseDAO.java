@@ -47,6 +47,7 @@ import mitll.langtest.shared.exercise.CommonExercise;
 import mitll.langtest.shared.exercise.Exercise;
 import mitll.langtest.shared.project.ModelType;
 import mitll.langtest.shared.project.OOVWordsAndUpdate;
+import mitll.npdata.dao.SlickRelatedExercise;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -662,7 +663,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
    * @return
    * @see mitll.langtest.server.services.ExerciseServiceImpl#updateText(int, int, int, int, String, String)
    */
-  public OOVWordsAndUpdate updateText(Project project, int dialogID, int exid, int audioID, String content, String normalized, IRefResultDAO refResultDAO) {
+  public OOVWordsAndUpdate updateText(Project project, int dialogID, int exid, int audioID, String content,
+                                      String normalized, IRefResultDAO refResultDAO) {
     logger.info("updateText " +
         "\n\texid       " + exid +
         "\n\taudioID    " + audioID +
@@ -697,28 +699,8 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
         if (dialog == null) {
           logger.warn("updateText can't find dialog ID " + dialogID);
         } else {
-          ClientExercise exByID = dialog.getExByID(exid);
-          boolean isTurn = true;
-          if (exByID == null) {
-            isTurn = false;
-            exByID = dialog.getCoreByID(exid);
-          }
-
-          if (exByID == null) {
-            logger.warn("updateText can't find ex id  " + exid);
-          } else {
-            // not really sure this is needed
-
-            exByID.asCommon().getMutable().setForeignLanguage(content);
-            logger.info("updateText text on " + getExInfo(exByID));
-            logger.info("updateText after update : " + project.getExerciseByID(exid));
-
-            if (DEBUG) {
-              project.getDialog(dialogID).getCoreVocabulary().forEach(ex -> logger.info(getExInfo(ex)));
-            }
-          }
-
-          if (audioID != -1 && isTurn) {  // maybe we have text before the audio...
+          boolean theExerciseATurn = isTheExerciseATurn(dialogID, exid);
+          if (audioID != -1 && theExerciseATurn) {  // maybe we have text before the audio...
             if (!audioDAO.updateTranscript(audioID, content)) {
               logger.warn("updateText didn't update audio id# " + audioID + " with " + content);
             } else {
@@ -727,6 +709,11 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
             }
           } else {
             logger.info("updateText no audio id : " + audioID);
+          }
+
+          ClientExercise exByID = theExerciseATurn ? dialog.getExByID(exid) : dialog.getCoreByID(exid);
+          if (exByID != null) {
+            exByID.asCommon().getMutable().setForeignLanguage(content);
           }
         }
       } else {
@@ -737,10 +724,36 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
     }
   }
 
-  @NotNull
-  private String getExInfo(ClientExercise commonExercise) {
-    return commonExercise.getID() + " = '" + commonExercise.getForeignLanguage() + "' = '" + commonExercise.getEnglish() + "'";
+  private boolean isTheExerciseATurn(int dialogID, int exid) {
+    return !userExerciseDAO.getRelatedExercise().getDialogIDToRelatedForDialogAndEx(dialogID, exid).isEmpty();
+    //
+//    ClientExercise exByID = dialog.getExByID(exid);
+//    boolean isTurn = true;
+//    if (exByID == null) {
+//      isTurn = false;
+//      exByID = dialog.getCoreByID(exid);
+//    }
+//
+//    if (exByID == null) {
+//      logger.warn("updateText can't find ex id  " + exid);
+//    } else {
+//      // not really sure this is needed
+//
+////      exByID.asCommon().getMutable().setForeignLanguage(content);
+////      logger.info("updateText text on " + getExInfo(exByID));
+////      logger.info("updateText after update : " + project.getExerciseByID(exid));
+//
+////      if (DEBUG) {
+////        project.getDialog(dialogID).getCoreVocabulary().forEach(ex -> logger.info(getExInfo(ex)));
+////      }
+//    }
+//    return isTurn;
   }
+
+//  @NotNull
+//  private String getExInfo(ClientExercise commonExercise) {
+//    return commonExercise.getID() + " = '" + commonExercise.getForeignLanguage() + "' = '" + commonExercise.getEnglish() + "'";
+//  }
 
   public boolean updateEnglishText(Project project, int dialogID, int exid, String content) {
     CommonExercise exerciseByID = project.getExerciseByID(exid);
@@ -756,17 +769,18 @@ abstract class BaseExerciseDAO implements SimpleExerciseDAO<CommonExercise> {
       boolean update = project.getExerciseDAO().update(exerciseByID);
       if (update) {
         IDialog dialog = project.getDialog(dialogID);
-        List<ClientExercise> collect1 = dialog.getCoreVocabulary().stream().filter(exercise -> exercise.getID() == exid).collect(Collectors.toList());
-        if (collect1.isEmpty()) {
+        ClientExercise coreByID = dialog.getCoreByID(exid);
+//        List<ClientExercise> collect1 = dialog.getCoreVocabulary().stream().filter(exercise -> exercise.getID() == exid).collect(Collectors.toList());
+        if (coreByID == null) {
           logger.warn("updateEnglishText can't find ex id  " + exid);
           return false;
         } else {
           // not really sure this is needed
-          CommonExercise commonExercise = collect1.get(0).asCommon();
-          commonExercise.getMutable().setEnglish(content);
-          logger.info("updateEnglishText text on " + getExInfo(commonExercise));
+          //  CommonExercise commonExercise = collect1.get(0).asCommon();
+          coreByID.asCommon().getMutable().setEnglish(content);
+          //    logger.info("updateEnglishText text on " + getExInfo(commonExercise));
 
-          project.getDialog(dialogID).getCoreVocabulary().forEach(ex -> logger.info(getExInfo(ex)));
+          //    project.getDialog(dialogID).getCoreVocabulary().forEach(ex -> logger.info(getExInfo(ex)));
 
           return true;
         }

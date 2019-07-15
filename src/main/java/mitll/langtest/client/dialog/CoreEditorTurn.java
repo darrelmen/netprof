@@ -249,6 +249,13 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     }
   }
 
+  /**
+   * @param s
+   * @param moveToNextTurn
+   * @param isEnglish
+   * @see #gotBlur()
+   * @see #gotKey(KeyUpEvent)
+   */
   private void maybeCreateFirst(String s, boolean moveToNextTurn, boolean isEnglish) {
     if (getExID() == -1) {
       controller.getDialogService().addEmptyCoreExercise(dialogID, -1, new AsyncCallback<DialogExChangeResponse>() {
@@ -288,6 +295,11 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     }
   }
 
+  /**
+   * @param s
+   * @param moveToNextTurn
+   * @see #maybeCreateFirst(String, boolean, boolean)
+   */
   private void updateText(String s, boolean moveToNextTurn) {
     if (projID != -1) {
       final int exID = getExID();
@@ -333,12 +345,14 @@ class CoreEditorTurn extends SimpleTurn implements IFocusListener, AddDeleteList
     String sanitized = getSanitized(s);
     String sanitized2 = getSanitized(normalized);
 
-    logger.info("updateTextViaExerciseService " + exID +
-        "\n\tcontent    " + s +
-        "\n\tsanitized  " + sanitized +
-        "\n\tnormalized " + normalized +
-        "\n\tsanitized  " + sanitized2
-    );
+    if (DEBUG) {
+      logger.info("updateTextViaExerciseService " + exID +
+          "\n\tcontent    " + s +
+          "\n\tsanitized  " + sanitized +
+          "\n\tnormalized " + normalized +
+          "\n\tsanitized  " + sanitized2
+      );
+    }
 
     controller.getExerciseService().updateText(projectID, dialogID, exID, -1, sanitized, sanitized2, new AsyncCallback<OOVWordsAndUpdate>() {
       @Override

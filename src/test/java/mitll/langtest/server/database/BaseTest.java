@@ -55,6 +55,7 @@ public class BaseTest {
   protected static DatabaseImpl getH2Database(String config) {
     return getDatabase(config, true);
   }
+
   protected static DatabaseImpl getDatabase(String config, boolean useH2) {
     return getDatabase("war", config, useH2);
   }
@@ -112,10 +113,24 @@ public class BaseTest {
   private static DatabaseImpl getDatabase(ServerProperties serverProps) {
     DatabaseImpl database = new DatabaseImpl(serverProps,
         new PathHelper("war", serverProps), null, null);
+    theDatabase = database;
     return database;
   }
 
-  protected static DatabaseImpl getDatabase() {  return getDatabase(getProps());  }
+  private static DatabaseImpl theDatabase;
+
+  protected static void close() {
+    if (theDatabase == null) logger.error("no database?");
+    else theDatabase.close();
+  }
+
+  protected static DatabaseImpl getTheDatabase() {
+    return theDatabase;
+  }
+
+  protected static DatabaseImpl getDatabase() {
+    return getDatabase(getProps());
+  }
 
   protected static ServerProperties getProps() {
     File file = new File("/opt/netprof/config/netprof.properties");

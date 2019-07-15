@@ -344,6 +344,13 @@ public class DialogDAO extends DAO implements IDialogDAO {
       dialog.getCoreVocabulary().addAll(inOrder);
     }
   }*/
+
+  /**
+   * @see #configureDialog
+   * @param relatedExercises
+   * @param project
+   * @param dialog
+   */
   private void addCoreVocabNoSort(List<SlickRelatedExercise> relatedExercises, IProject project, Dialog dialog) {
     if (relatedExercises != null) {
       List<CommonExercise> inOrder = new ArrayList<>(relatedExercises.size());
@@ -380,7 +387,6 @@ public class DialogDAO extends DAO implements IDialogDAO {
         new ArrayList<>(),
         new ArrayList<>(),
         getDialogType(slickDialog),
-        database.getProject(slickDialog.projid()).getProject().countrycode(),
         slickDialog.isprivate());
 //    logger.info("makeDialog : " + dialog);
 //
@@ -762,8 +768,10 @@ public class DialogDAO extends DAO implements IDialogDAO {
     List<String> typeOrder = project.getTypeOrder();
 
     if (afterExid == -1) {
-      if (!toAdd.getCoreVocabulary().isEmpty()) {
-        logger.warn("\n\n\naddCoreVocab : after id is -1 but dialog has " + toAdd.getCoreVocabulary().size() + " exercises");
+      List<ClientExercise> coreVocabulary = toAdd.getCoreVocabulary();
+
+      if (!coreVocabulary.isEmpty()) {
+        logger.warn("\n\n\naddCoreVocab : after id is -1 but dialog has " + coreVocabulary.size() + " exercises");
       }
     }
 

@@ -665,7 +665,7 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     checkBox.getElement().getStyle().setFontSize(32, PX);
   }
 
-  protected AudioServiceAsync currentAudioService;
+  private AudioServiceAsync currentAudioService;
 
   /**
    * @param dialog
@@ -721,6 +721,9 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     addTurnForEachExercise(rowOne, left, right, dialog.getExercises());
   }
 
+  /**
+   * @see #getTurns
+   */
   void onUnload() {
   }
 
@@ -967,6 +970,9 @@ public abstract class TurnViewHelper<T extends ISimpleTurn>
     return i1 < 0 ? null : seq.get(i1);
   }
 
+  /**
+   * @see #onUnload
+   */
   void reloadDialog() {
     int projectID = getDialog().getProjid();
     if (projectID != -1) {

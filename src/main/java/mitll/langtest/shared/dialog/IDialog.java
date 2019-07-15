@@ -50,7 +50,7 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable,
   DialogType getKind();
 
   int getImageID();
-  String getCountryCode();
+  //String getCountryCode();
   String getImageRef();
 
   String getOrientation();
@@ -79,6 +79,8 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable,
   ClientExercise getLast();
 
   List<ClientExercise> getCoreVocabulary();
+  int getNumCoreVocab();
+  List<Integer> getCoreVocabularyIDs();
 
   List<ClientExercise> getBothExercisesAndCore();
   List<ClientExercise> getBothExercisesAndCoreNoEmpty();
@@ -95,5 +97,4 @@ public interface IDialog extends CommonShell, HasUnitChapter, Scored, INameable,
 
   ClientExercise getTurnByID(int id);
   ClientExercise getCoreByID(int id);
-
 }

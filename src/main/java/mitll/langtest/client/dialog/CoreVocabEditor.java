@@ -156,6 +156,9 @@ public class CoreVocabEditor extends TurnViewHelper<CoreEditorTurn>
     leftHelper.setDialog(dialog);
     this.leftHelper = leftHelper;
 
+//    logger.info("left side has " + dialog.getExercises().size() + " turns");
+//    dialog.getExercises().forEach(clientExercise -> logger.info("got " + clientExercise.getID() + " '" + clientExercise.getEnglish() + "' '" + clientExercise.getForeignLanguage() +"'"));
+
     DivWidget turns = leftHelper.getTurns(dialog);
     styleTurnContainer(turns);
     turns.setWidth(LEFT_WIDTH + "%");

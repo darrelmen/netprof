@@ -137,7 +137,7 @@ public class DialogPopulate {
    * @param appendOK
    * @see mitll.langtest.server.database.copy.CopyToPostgres#copyDialog
    */
-  public boolean populateDatabase(Project project, Project englishProject, boolean keepAudio, String excel, boolean appendOK) {
+/*  public boolean populateDatabase(Project project, Project englishProject, boolean keepAudio, String excel, boolean appendOK) {
     int projid = project.getID();
     IDialogDAO dialogDAO = db.getDialogDAO();
     if (!appendOK && !dialogDAO.getDialogs(projid).isEmpty()) {
@@ -148,7 +148,7 @@ public class DialogPopulate {
       maybeDoInterpreterImport(project, englishProject, dialogDAO, keepAudio, excel);
       return true;
     }
-  }
+  }*/
 
   /**
    * Loads data for any excel file we find under
@@ -161,7 +161,7 @@ public class DialogPopulate {
    * @param excel
    * @see #populateDatabase(Project, Project, boolean, String, boolean)
    */
-  private void maybeDoInterpreterImport(Project project, Project englishProject, IDialogDAO dialogDAO,
+/*  private void maybeDoInterpreterImport(Project project, Project englishProject, IDialogDAO dialogDAO,
                                         boolean keepAudio, String excel) {
     //logger.info("maybeDoInterpreterImport found interpreter candidate " + project);
     Project engProject = db.getProjectManagement().getProductionByLanguage(Language.ENGLISH);
@@ -183,7 +183,7 @@ public class DialogPopulate {
         addDialogs(project, englishProject, dialogDAO, Collections.emptyMap(), defaultUser, DialogType.INTERPRETER, dialogToSlick, keepAudio);
       }
     }
-  }
+  }*/
 
   @NotNull
   private String getDefaultChapter(String excel) {

@@ -83,4 +83,6 @@ public interface IRelatedExercise extends IDAO {
   Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(int projid);
 
   Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelatedForDialog(int dialogID);
+
+  Collection<SlickRelatedExercise> getDialogIDToRelatedForDialogAndEx(int dialogID, int exid);
 }

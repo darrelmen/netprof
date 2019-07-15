@@ -1732,14 +1732,14 @@ public class CopyToPostgres<T extends CommonShell> {
         copyToPostgres.dumpNorm(projID, propertiesFile);
         doExit(true);  // ?
         break;
-      case DIALOG:
-        copyDialog(to, cmd.getOptionValue(DIALOG.toLower()), propertiesFile, excelFile, true, false);
-        doExit(true);  // ?
-        break;
-      case DIALOGADD:
-        copyDialog(to, cmd.getOptionValue(DIALOGADD.toLower()), propertiesFile, excelFile, true, true);
-        doExit(true);  // ?
-        break;
+//      case DIALOG:
+//        copyDialog(to, cmd.getOptionValue(DIALOG.toLower()), propertiesFile, excelFile, true, false);
+//        doExit(true);  // ?
+//        break;
+//      case DIALOGADD:
+//        copyDialog(to, cmd.getOptionValue(DIALOGADD.toLower()), propertiesFile, excelFile, true, true);
+//        doExit(true);  // ?
+//        break;
       case DOMINOEXCELIMPORT:
         copyExcelIntoDomino(to, cmd.getOptionValue(DOMINOEXCELIMPORT.toLower()), propertiesFile, excelFile);
         doExit(true);  // ?
@@ -1785,7 +1785,7 @@ public class CopyToPostgres<T extends CommonShell> {
    * @see #main
    * @see DIALOG
    */
-  private static void copyDialog(int to, String lang, String propertiesFile, String excel, boolean keepAudio, boolean appendOK) {
+ /* private static void copyDialog(int to, String lang, String propertiesFile, String excel, boolean keepAudio, boolean appendOK) {
     database = getDatabase(propertiesFile);
 
     if (to == -1 && (lang == null || lang.isEmpty())) {
@@ -1833,7 +1833,7 @@ public class CopyToPostgres<T extends CommonShell> {
 
     closeDatabase();
   }
-
+*/
   /**
    * gotta load at least one project...
    *

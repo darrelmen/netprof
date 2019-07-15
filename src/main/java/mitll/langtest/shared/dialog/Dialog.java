@@ -68,7 +68,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
 
   private String unit;
   private String chapter;
-  private String countryCode;
+  // private String countryCode;
 
   /**
    *
@@ -100,12 +100,12 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
         copy.getForeignLanguage(),
         copy.getEnglish(),
 
-        new ArrayList<>(),//copy.getAttributes(),
-        new ArrayList<>(),// copy.getExercises(),
-        new ArrayList<>(),//copy.getCoreVocabulary(),
+        new ArrayList<>(),
+        new ArrayList<>(),
+        new ArrayList<>(),
 
         copy.getKind(),
-        copy.getCountryCode(),
+        //   copy.getCountryCode(),
         copy.isPrivate()
     );
 
@@ -130,7 +130,6 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
    * @param exercises
    * @param coreExercises
    * @param type
-   * @param countryCode
    * @param isPrivate
    * @see mitll.langtest.server.database.dialog.DialogDAO#makeDialog
    * @see BasicDialogReader#addDialogPair
@@ -150,7 +149,6 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
                 List<ClientExercise> exercises,
                 List<ClientExercise> coreExercises,
                 DialogType type,
-                String countryCode,
                 boolean isPrivate) {
     this.id = id;
     this.userid = userid;
@@ -168,7 +166,7 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     this.exercises = exercises;
     this.coreVocabulary = coreExercises;
     this.kind = type;
-    this.countryCode = countryCode;
+    // this.countryCode = countryCode;
     this.isPrivate = isPrivate;
   }
 
@@ -264,7 +262,6 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
    */
   @NotNull
   private String getDefaultImage() {
-    //return "langtest/cc/" + (getKind() == DialogType.INTERPRETER ? INTERPRETER_PNG : DIALOG_PNG);
     return "langtest/cc/" + INTERPRETER_PNG;
   }
 
@@ -472,10 +469,27 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     return imageid;
   }
 
+  /**
+   * Need to make sure provide thread safety!
+   *
+   * @return
+   */
   @Override
-  public List<ClientExercise> getCoreVocabulary() {
+  public synchronized List<ClientExercise> getCoreVocabulary() {
     return coreVocabulary;
   }
+
+  @Override
+  public int getNumCoreVocab() {
+    return getCoreVocabulary().size();
+  }
+
+  public List<Integer> getCoreVocabularyIDs() {
+    List<Integer> ids = new ArrayList<>();
+    getCoreVocabulary().forEach(clientExercise -> ids.add(clientExercise.getID()));
+    return ids;
+  }
+
 
   @Override
   public List<ClientExercise> getBothExercisesAndCore() {
@@ -492,16 +506,6 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     both.addAll(coreVocabulary);
     both = both.stream().filter(clientExercise -> !clientExercise.getForeignLanguage().isEmpty()).collect(Collectors.toList());
     return both;
-  }
-
-  /**
-   * TODO :remove?
-   *
-   * @return
-   */
-  // @Override
-  public String getCountryCode() {
-    return countryCode;
   }
 
   @Override
@@ -565,6 +569,14 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
     return collect1.isEmpty() ? null : collect1.get(0);
   }
 
+  public int getDominoID() {
+    return dominoID;
+  }
+
+  public void setDominoID(int dominoID) {
+    this.dominoID = dominoID;
+  }
+
   public String toString() {
     return "Dialog #" + id +
         "\n\tkind        " + kind +
@@ -579,13 +591,5 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
         "\n\t# ex        " + exercises.size() +
         "\n\t# core      " + coreVocabulary.size() +
         "\n\tattr        " + attributes;
-  }
-
-  public int getDominoID() {
-    return dominoID;
-  }
-
-  public void setDominoID(int dominoID) {
-    this.dominoID = dominoID;
   }
 }

@@ -163,6 +163,11 @@ public class RelatedExerciseHelper implements IRelatedExercise {
     return getDialogIDToRelated(daoWrapper.byProjectForOneDialog(dialogID));
   }
 
+  @Override
+  public Collection<SlickRelatedExercise> getDialogIDToRelatedForDialogAndEx(int dialogID, int exid) {
+    return daoWrapper.forDialogAndEx(dialogID,exid);
+  }
+
   @NotNull
   private Map<Integer, List<SlickRelatedExercise>> getDialogIDToRelated(Map<Integer, List<SlickRelatedExercise>> dialogToRelations) {
     return new SortedRelations().getDialogIDToRelated(dialogToRelations);

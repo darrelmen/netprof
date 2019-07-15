@@ -183,10 +183,10 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     User byID = db.getUserDAO().getByID(request.getUserID());
     if (isCanSeeAll(byID.isAdmin(), byID.getPermissions())) {
       dialogVisibleToMe = new ArrayList<>(getDialogs(request.getProjID()));
-    //  logger.info("dialogs 1 " + dialogVisibleToMe.stream().filter(d->d.getID() == 49).collect(Collectors.toList()));
+      //  logger.info("dialogs 1 " + dialogVisibleToMe.stream().filter(d->d.getID() == 49).collect(Collectors.toList()));
     } else {
       dialogVisibleToMe = getDialogVisibleToMe(request.getUserID(), getDialogs(request.getProjID()));
-   //   logger.info("dialogs 2  " + dialogVisibleToMe.stream().filter(d->d.getID() == 49).collect(Collectors.toList()));
+      //   logger.info("dialogs 2  " + dialogVisibleToMe.stream().filter(d->d.getID() == 49).collect(Collectors.toList()));
       sectionHelper = new SectionHelper<>();
       getProject(request.getProjID()).populateDialogSectionHelper(dialogVisibleToMe, sectionHelper);
     }
@@ -327,7 +327,6 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     IDialog dialog = getDialog(id);
 
     List<ClientExercise> exercises = dialog.getExercises();
-    List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
 
     boolean delete = dialogDAO.delete(projid, id);
     if (delete) {
@@ -367,8 +366,9 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       );
 */
 
-      coreVocabulary.forEach(clientExercise -> {
-            int exid = clientExercise.getID();
+      List<Integer> coreVocabulary = dialog.getCoreVocabularyIDs();
+      coreVocabulary.forEach(exid -> {
+            //int exid = clientExercise.getID();
             if (dialogDAO.deleteCoreExercise(id, exid, project)) {
               db.getExerciseDAO(projid).forget(exid);
             } else {
@@ -453,10 +453,10 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
 
     int projectForDialog = db.getDialogDAO().getProjectForDialog(dialogID);
     IDialog dialog = getProject(projectForDialog).getDialog(dialogID);
-    int before = dialog.getCoreVocabulary().size();
+    int before = dialog.getNumCoreVocab();
 
     dialog.getCoreVocabulary().forEach(exercise ->
-        logger.info("addEmptyCoreExercise before  (" + dialogID +
+        logger.info("addEmptyCoreExercise before project " + projectForDialog+ " (" + dialogID +
             ") vocab for " + exercise.getID() + " eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() + "'"));
 
     ClientExercise added = db.getDialogDAO().addCoreVocab(dialog, userIDFromSessionOrDB, afterExid, System.currentTimeMillis());
@@ -464,17 +464,21 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     logger.info("addEmptyCoreExercise Added exercise #" + added.getID());
 
     dialog = getProject(projectForDialog).getDialog(dialogID);
-    int after = dialog.getCoreVocabulary().size();
+    int after = dialog.getNumCoreVocab();
 
     if (after - before != 1) {
       logger.error("addEmptyCoreExercise before there were " + before + " but after add only " + after);
     }
 
-    dialog.getCoreVocabulary().forEach(exercise ->
-        logger.info("addEmptyCoreExercise (" + dialogID +
-            ") vocab for " + exercise.getID() + " eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() + "'"));
-
-
+ /*   List<ClientExercise> coreVocabulary = dialog.getCoreVocabulary();
+    if (coreVocabulary == null) {
+      logger.error("addEmptyCoreExercise : no core vocab for dialog #" + dialogID + " after ex " + afterExid);
+    } else {
+      coreVocabulary.forEach(exercise ->
+          logger.info("addEmptyCoreExercise (" + dialogID +
+              ") vocab for " + exercise.getID() + " eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() + "'"));
+    }
+*/
     List<ClientExercise> objects = new ArrayList<>();
     objects.add(added);
 

@@ -131,7 +131,7 @@ public class BaseDialogReader {
 
         dialogAttr,
         exercises,
-        new ArrayList<>(coreExercises), dialogType, countryCode, false);
+        new ArrayList<>(coreExercises), dialogType, false);
 
     outputDialogToSlick.put(dialog, slickDialog);
   }
