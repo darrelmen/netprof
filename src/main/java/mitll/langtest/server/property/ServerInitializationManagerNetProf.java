@@ -54,6 +54,7 @@ public class ServerInitializationManagerNetProf {
   private static final Logger log = LogManager.getLogger();
 
   private static final boolean DEBUG = false;
+  private static final boolean DEBUG_FILE = false;
 
   private static final String appName = "netprof";
 
@@ -156,38 +157,6 @@ public class ServerInitializationManagerNetProf {
     if (DEBUG) log.info("Using default properties file!");
     return in;
   }
-/*
-  public String getConfigLocation(ServletContext ctx) {
-    String fullCFN = System.getProperty(CONFIG_FILE_ATTR_NM);
-
-    if (fullCFN != null) {
-      log.info("Properties file provided with -D" + CONFIG_FILE_ATTR_NM +
-          ": '" + fullCFN + "'");
-   return  fullCFN;
-    }
-
-    // next try for -Dconfig.home and generate name
-    in = buildConfigNameAndOpenFile(ctx, System.getProperty(CONFIG_HOME_ATTR_NM));
-    if (in != null) {
-      log.info("Try to open properties file provided with -D" + CONFIG_HOME_ATTR_NM +
-          ": '" + System.getProperty(CONFIG_HOME_ATTR_NM) + "'");
-      return in;
-    }
-
-
-    // next try for web.xml config.home and generate name
-    if (ctx != null) {
-      in = buildConfigNameAndOpenFile(ctx, ctx.getInitParameter(CONFIG_HOME_ATTR_NM));
-      if (in != null) {
-        log.info("Try to open properties file provided with web.xml: '" +
-            System.getProperty(CONFIG_HOME_ATTR_NM) + "'");
-        return in;
-      }
-    }
-
-    // finally use default.
-    in = buildConfigNameAndOpenFile(ctx, DEFAULT_PROPERTY_HOME);
-  }*/
 
   private static boolean warned2 = false;
 
@@ -301,8 +270,10 @@ public class ServerInitializationManagerNetProf {
         File file = new File(configFileName);
         configDir = file.getParentFile();
         in = FileUtils.openInputStream(file);
-        if (DEBUG) log.info("Attempted to get input stream for " + configFileName +
-            " as file. Result: " + in);
+        if (DEBUG_FILE) {
+          log.info("openPropertiesFileStream : Attempted to get input stream for " + configFileName +
+              " as file. Result: " + in);
+        }
       } catch (Exception ex) {
         log.warn("Exception when opening file " + configFileName, ex);
         in = null;

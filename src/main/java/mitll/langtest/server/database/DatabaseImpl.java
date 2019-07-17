@@ -1655,6 +1655,13 @@ public class DatabaseImpl implements Database, DatabaseServices {
     return getFilterResponseHelper().getTypeToValues(request, projid, userid);
   }
 
+  /**
+   *
+   * @param request
+   * @param exercises
+   * @param projid
+   * @return
+   */
   public List<CommonExercise> filterExercises(ExerciseListRequest request,
                                               List<CommonExercise> exercises,
                                               int projid) {

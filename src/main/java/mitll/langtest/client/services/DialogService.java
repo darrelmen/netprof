@@ -29,8 +29,10 @@
 
 package mitll.langtest.client.services;
 
+import com.github.gwtbootstrap.client.ui.base.DivWidget;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
+import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.dialog.RehearseViewHelper;
 import mitll.langtest.shared.common.DominoSessionException;
 import mitll.langtest.shared.dialog.DialogExChangeResponse;
@@ -64,7 +66,8 @@ public interface DialogService extends RemoteService {
    * @param id
    * @return
    * @throws DominoSessionException
-   * @see mitll.langtest.client.dialog.ListenViewHelper#showContent
+   * @see mitll.langtest.client.banner.NewContentChooser#showScores(DivWidget)
+   * @see mitll.langtest.client.dialog.TurnViewHelper#showContentForDialogInURL
    */
   IDialog getDialog(int id) throws DominoSessionException;
 

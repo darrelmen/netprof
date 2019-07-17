@@ -35,10 +35,7 @@ import mitll.langtest.server.database.DatabaseImpl;
 import mitll.langtest.server.database.audio.IEnsureAudioHelper;
 import mitll.langtest.server.database.excel.ExcelExport;
 import mitll.langtest.server.database.excel.ResultDAOToExcel;
-import mitll.langtest.server.database.exercise.ExerciseServices;
-import mitll.langtest.server.database.exercise.ISection;
-import mitll.langtest.server.database.exercise.Search;
-import mitll.langtest.server.database.exercise.TripleExercises;
+import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.project.IProject;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.database.project.ProjectServices;
@@ -61,6 +58,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -82,6 +80,7 @@ public class AudioExport {
 
   private static final boolean DEBUG_COPY_AUDIO = false;
   public static final boolean DEBUG = false;
+
   /**
    * @param props
    * @see DatabaseImpl#writeZip(OutputStream, Map, int, AudioExportOptions, mitll.langtest.server.database.audio.IEnsureAudioHelper)
@@ -113,15 +112,12 @@ public class AudioExport {
       exercisesForSelectionState = exercisesForSearch.getByExercise();
     }
 
-    // Project project = getProject(projectid);
+    String language = project.getLanguage();
 
-    String language = project.getLanguage();// getLanguage(project);
-
-//    if (!typeToSection.isEmpty()) {
     logger.info("writeZip for project " + projectid +
         "\n\tensure audio for " + exercisesForSelectionState.size() +
-        "\n\texercises for " + language +
-        "\n\tselection " + typeToSection);
+        "\n\texercises for    " + language +
+        "\n\tselection        " + typeToSection);
 
     if (options.getIncludeAudio()) {
       Language languageEnum = project.getLanguageEnum();
@@ -129,7 +125,20 @@ public class AudioExport {
       ensureAudioHelper.ensureCompressedAudio(exercisesForSelectionState, languageEnum);
     }
 
-    //new AudioExport(getServerProps(), pathHelper.getContext())
+    // prune out dialog exercises.
+    {
+      Set<Integer> exidFromDialogs = new HashSet<>();
+      project.getDialogs().forEach(dialog -> dialog.getBothExercisesAndCore().forEach(clientExercise -> exidFromDialogs.add(clientExercise.getID())));
+
+      int before = exercisesForSelectionState.size();
+      // logger.info("writeZip : found " + toRemove.size() + " to remove");
+      exercisesForSelectionState = exercisesForSelectionState.stream().filter(commonExercise -> !exidFromDialogs.contains(commonExercise.getID())).collect(Collectors.toList());
+      int after = exercisesForSelectionState.size();
+      if (after != before) {
+        logger.info("writeZip removed " + (before - after) + " dialog exercises");
+      }
+    }
+
     writeZip(out,
         typeToSection,
         sectionHelper,
@@ -870,9 +879,9 @@ public class AudioExport {
   }
 
   private String getAbsFilePath(AudioConversion audioConversion, String audioRef, String language) {
-    String absPathForAudio = audioConversion.getAbsPathForAudio(audioRef, language, "", props.getAudioBaseDir());
+    return audioConversion.getAbsPathForAudio(audioRef, language, "", props.getAudioBaseDir());
 //    logger.info("getAbsFilePath audioBaseDir " + audioBaseDir + " " + absPathForAudio);
-    return absPathForAudio;
+   // return absPathForAudio;
   }
 
   /**

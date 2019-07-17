@@ -152,8 +152,9 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
       int userIDFromSessionOrDB = getUserIDFromSessionOrDB();
 
       if (userIDFromSessionOrDB != -1) {
-        List<IDialog> dialogList = getDialogsForRequest(request, sectionHelper);
+        List<IDialog> dialogList = getCopies(getDialogsForRequest(request, sectionHelper));
 
+//        getCopies(dialogList);
         Map<Integer, CorrectAndScore> scoreHistoryPerExercise = getScoreHistoryForDialogs(userIDFromSessionOrDB, dialogList);
 
         setDialogScores(dialogList, scoreHistoryPerExercise);
@@ -168,6 +169,12 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     }
   }
 
+  private  List<IDialog> getCopies(List<IDialog> dialogList) {
+    List<IDialog> copy= new ArrayList<>();
+    dialogList.forEach(dialog -> copy.add(new Dialog(dialog)));
+    return copy;
+  }
+
   /**
    * Worry about dialog visibility.
    *
@@ -178,24 +185,35 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
    */
   @NotNull
   private List<IDialog> getDialogsForRequest(ExerciseListRequest request, ISection<IDialog> sectionHelper) {
-    List<IDialog> dialogVisibleToMe;
 
     User byID = db.getUserDAO().getByID(request.getUserID());
-    if (isCanSeeAll(byID.isAdmin(), byID.getPermissions())) {
-      dialogVisibleToMe = new ArrayList<>(getDialogs(request.getProjID()));
-      //  logger.info("dialogs 1 " + dialogVisibleToMe.stream().filter(d->d.getID() == 49).collect(Collectors.toList()));
+    boolean admin = byID.isAdmin();
+    Collection<Permission> permissions = byID.getPermissions();
+
+    List<IDialog> dialogVisibleToMe;
+    Collection<IDialog> dialogsForProject = getDialogs(request.getProjID());
+
+
+
+    if (isCanSeeAll(admin, permissions)) {
+      dialogVisibleToMe = new ArrayList<>(dialogsForProject);
     } else {
-      dialogVisibleToMe = getDialogVisibleToMe(request.getUserID(), getDialogs(request.getProjID()));
-      //   logger.info("dialogs 2  " + dialogVisibleToMe.stream().filter(d->d.getID() == 49).collect(Collectors.toList()));
+      dialogVisibleToMe = getDialogVisibleToMe(request.getUserID(), dialogsForProject);
       sectionHelper = new SectionHelper<>();
-      getProject(request.getProjID()).populateDialogSectionHelper(dialogVisibleToMe, sectionHelper);
+
+      Project project = getProject(request.getProjID());
+      if (project == null) {
+        logger.error("getDialogsForRequest can't find the project #" + request.getProjID() + "\n\trequest " + request);
+      } else {
+        project.populateDialogSectionHelper(dialogVisibleToMe, sectionHelper);
+      }
     }
 
     List<IDialog> dialogList = (request.getTypeToSelection().isEmpty()) ?
         dialogVisibleToMe :
         new ArrayList<>(sectionHelper.getExercisesForSelectionState(request.getTypeToSelection()));
 
-    dialogList = getFilteredBySearchTerm(request, dialogList);
+    dialogList = getFilteredBySearchTerm(request.getPrefix(), dialogList);
 
     // sort... by date or unit, chapter, title
     if (request.isSortByDate()) {
@@ -244,8 +262,9 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     return scoreHistoryPerDialog;
   }
 
-  private List<IDialog> getFilteredBySearchTerm(ExerciseListRequest request, List<IDialog> dialogList) {
-    String prefix = request.getPrefix().trim();
+  private List<IDialog> getFilteredBySearchTerm(String prefix1, List<IDialog> dialogList) {
+   // String prefix1 = request.getPrefix();
+    String prefix = prefix1.trim();
     if (!prefix.isEmpty()) {
       String lowerCase = prefix.toLowerCase();
       dialogList = dialogList
@@ -456,7 +475,7 @@ public class DialogServiceImpl<T extends IDialog> extends MyRemoteServiceServlet
     int before = dialog.getNumCoreVocab();
 
     dialog.getCoreVocabulary().forEach(exercise ->
-        logger.info("addEmptyCoreExercise before project " + projectForDialog+ " (" + dialogID +
+        logger.info("addEmptyCoreExercise before project " + projectForDialog + " (" + dialogID +
             ") vocab for " + exercise.getID() + " eng '" + exercise.getEnglish() + "' '" + exercise.getForeignLanguage() + "'"));
 
     ClientExercise added = db.getDialogDAO().addCoreVocab(dialog, userIDFromSessionOrDB, afterExid, System.currentTimeMillis());

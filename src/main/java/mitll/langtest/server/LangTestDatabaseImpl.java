@@ -50,6 +50,7 @@ import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -276,15 +277,21 @@ public class LangTestDatabaseImpl extends MyRemoteServiceServlet implements Lang
     ServerInitializationManagerNetProf serverInitializationManagerNetProf = new ServerInitializationManagerNetProf();
     ServerProperties serverProps = serverInitializationManagerNetProf.getServerProps(servletContext);
 
-//    File configDir = serverInitializationManagerNetProf.getConfigDir();
-    //   logger.info("readProperties : configDir from props " + configDir);
+    {
+      File configDir = serverInitializationManagerNetProf.getConfigDir();
+      logger.info("readProperties : configDir from props dir " + configDir + " is dir? " + configDir.isDirectory());
 
-    /**
-     * @see
-     */
-    //  String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
-    //åString configDir1 = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
-    // logger.info("readProperties relativeConfigDir " + relativeConfigDir + " configDir         " + configDir);
+      /**
+       * @see
+       */
+  /*    String relativeConfigDir = "config" + File.separator + servletContext.getInitParameter("config");
+      String configDir1 = configDir.getAbsolutePath() + File.separator + relativeConfigDir;
+      logger.info("readProperties" +
+          "\n\trelativeConfigDir " + relativeConfigDir +
+          "\n\tconfigDir         " + configDir +
+          "\n\tconfigDir1        " + configDir1
+      );*/
+    }
 
     try {
       Object attribute = servletContext.getAttribute(USER_SVC);

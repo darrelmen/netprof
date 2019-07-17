@@ -901,9 +901,6 @@ public class ProjectManagement implements IProjectManagement {
    */
   @Override
   public List<CommonExercise> getExercises(int projectid, boolean onlyOne) {
-    if (isAmas()) {
-      return Collections.emptyList();
-    }
     Project project = getProjectOrFirst(projectid, onlyOne);
     if (project == null) {
       logger.error("getExercises no project for " + projectid + " so returning empty exercises.");

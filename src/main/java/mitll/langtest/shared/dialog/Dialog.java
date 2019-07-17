@@ -87,6 +87,10 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
   public Dialog() {
   }
 
+  /**
+   * @see mitll.langtest.server.services.MyRemoteServiceServlet#getDialog
+   * @param copy
+   */
   public Dialog(IDialog copy) {
     this(copy.getID(),
         copy.getUserid(),
@@ -105,7 +109,6 @@ public class Dialog implements IDialog, MutableShell, IMutableDialog {
         new ArrayList<>(),
 
         copy.getKind(),
-        //   copy.getCountryCode(),
         copy.isPrivate()
     );
 

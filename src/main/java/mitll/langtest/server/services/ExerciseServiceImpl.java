@@ -34,10 +34,7 @@ import mitll.langtest.client.dialog.EditorTurn;
 import mitll.langtest.client.services.ExerciseService;
 import mitll.langtest.server.database.audio.IAudioDAO;
 import mitll.langtest.server.database.custom.IUserListManager;
-import mitll.langtest.server.database.exercise.ExerciseDAO;
-import mitll.langtest.server.database.exercise.Search;
-import mitll.langtest.server.database.exercise.SectionHelper;
-import mitll.langtest.server.database.exercise.TripleExercises;
+import mitll.langtest.server.database.exercise.*;
 import mitll.langtest.server.database.project.Project;
 import mitll.langtest.server.domino.FileUpload;
 import mitll.langtest.server.scoring.SmallVocabDecoder;
@@ -51,6 +48,7 @@ import mitll.langtest.shared.exercise.*;
 import mitll.langtest.shared.flashcard.CorrectAndScore;
 import mitll.langtest.shared.project.Language;
 import mitll.langtest.shared.project.OOVWordsAndUpdate;
+import mitll.langtest.shared.project.ProjectMode;
 import mitll.langtest.shared.scoring.AlignmentAndScore;
 import mitll.langtest.shared.scoring.AlignmentOutput;
 import org.apache.commons.fileupload.servlet.ServletRequestContext;
@@ -274,6 +272,12 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
     exercises = predefExercises ? getExercises(projectID) : getCommonExercises(userListByID);
     // now if there's a prefix, filter by prefix match
 
+//    if (request.getMode() == ProjectMode.VOCABULARY) {
+//      logger.info("prune from " + exercises.size());
+//      exercises = new DialogPruner().getNoDialogExercises(exercises, getDatabase(), projectID);
+//      logger.info("prune tp   " + exercises.size());
+//    }
+
     TripleExercises<CommonExercise> exercisesForSearch = new TripleExercises<>().setByExercise(exercises);
 
     {
@@ -475,7 +479,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
    * Called from the client:
    *
    * @return
-   * @see #getExerciseWhenNoUnitChapter
    * @see #getExerciseWhenNoUnitChapter(ExerciseListRequest, int, UserList)
    */
   private List<CommonExercise> getExercises(int projectID) {
@@ -528,7 +531,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 
     String prefix = request.getPrefix().trim(); // leading or trailing spaces shouldn't do anything
     int userID = request.getUserID();
-    //boolean incorrectFirst = request.isIncorrectFirstOrder();
 
     boolean hasPrefix = !prefix.isEmpty();
     if (hasPrefix) {
@@ -537,9 +539,6 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
           "\n\tprefix   '" + prefix + "'" +
           (request.getActivityType() != ActivityType.UNSET ? "" : "\n\tactivity " + request.getActivityType()));
     }
-
-//    int i = markRecordedState(userID, request.getActivityType(), exercisesForState, request.isOnlyExamples());
-    //   logger.info("getExerciseListWrapperForPrefix marked " + i + " as recorded");
 
     if (hasPrefix) {
       logger.info("getExerciseListWrapperForPrefix check for prefix match over " + exercisesForState.size());
@@ -1063,20 +1062,9 @@ public class ExerciseServiceImpl<T extends CommonShell & ScoredExercise>
 //        }
 //      }
     //  }
+
     checkPerformance(projectID, exid, then2);
 
-    /*    if (byID != null) {
-     *//*
-      logger.debug("returning (" + language + ") exercise " + byID.getOldID() + " : " + byID);
-      for (AudioAttribute audioAttribute : byID.getAudioAttributes()) {
-        logger.info("\thas " + audioAttribute);
-      }
-*//*
-    } else {
-      logger.warn(language + " : couldn't find exercise with id '" + exid + "'");
-    }*/
-    // return byID;
-    // TODO : why doesn't this work?
     return byID;
   }
 

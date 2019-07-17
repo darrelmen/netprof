@@ -317,8 +317,10 @@ public class FilterResponseHelper implements IResponseFilter {
    * @see #getFilterResponseForRecording(FilterRequest, int, int)
    */
   private FilterResponse getFilterResponse(FilterRequest request, int projectID, ExerciseListRequest exerciseListRequest) {
-    logger.info("getFilterResponse FilterRequest " + request);
-    logger.info("getFilterResponse ExerciseListRequest " + exerciseListRequest);
+    logger.info("getFilterResponse " +
+        "\n\tFilterRequest       " + request +
+        "\n\tExerciseListRequest " + exerciseListRequest);
+
     SectionHelper<CommonExercise> unrecordedSectionHelper = getSectionHelperFromFiltered(projectID, exerciseListRequest);
 
     //  unrecordedSectionHelper.report();
@@ -366,6 +368,13 @@ public class FilterResponseHelper implements IResponseFilter {
     return unrecordedSectionHelper;
   }
 
+  /**
+   * @param projectID
+   * @param request
+   * @param dialog
+   * @return
+   * @see #getSectionHelperFromFiltered
+   */
   private List<CommonExercise> getInitialExercisesToFilter(int projectID, ExerciseListRequest request, boolean dialog) {
     List<CommonExercise> filtered;
     if (dialog) {
@@ -444,10 +453,16 @@ public class FilterResponseHelper implements IResponseFilter {
     return exercises;
   }
 
+  /**
+   * @param request
+   * @param exercises
+   * @param projid
+   * @return
+   * @see mitll.langtest.server.database.DatabaseImpl#filterExercises
+   */
   @Override
   public List<CommonExercise> filter(ExerciseListRequest request, List<CommonExercise> exercises, int projid) {
-    exercises = maybeFilterDownToJustDialog(request, projid, exercises);
-    return filterExercises(request, exercises, projid);
+    return filterExercises(request, maybeFilterDownToJustDialog(request, projid, exercises), projid);
   }
 
   /**
@@ -519,12 +534,17 @@ public class FilterResponseHelper implements IResponseFilter {
 
       exercises = getContextExercises(exercises);
     } else if (hasDialogs(projid)) {
-//        logger.info("filterExercises remove english - before " + exercises.size());
+      if (DEBUG) logger.info("filterExercises remove english - before " + exercises.size());
       exercises = getCommonExercisesWithoutEnglish(exercises);
-      //      logger.info("filterExercises remove english - after  " + exercises.size());
+      if (DEBUG) logger.info("filterExercises remove english - after  " + exercises.size());
     }
 
     exercises = getNonEmptyExercises(exercises);
+
+    // don't show dialog exercises in vocabulary.
+    if (request.getMode() == ProjectMode.VOCABULARY) {
+      exercises = new DialogPruner().getNoDialogExercises(exercises, databaseServices, projid);
+    }
 
     if (DEBUG) {
       logger.info("filterExercises" +
@@ -578,19 +598,6 @@ public class FilterResponseHelper implements IResponseFilter {
     }
     return exercises;
   }
-
-//  @NotNull
-//  private List<CommonExercise> getExactMatch(String prefix, Language language, List<CommonExercise> exercises) {
-//    SmallVocabDecoder smallVocabDecoder = new SmallVocabDecoder(language);
-//    exercises = exercises
-//        .stream()
-//        .filter(ex ->
-//            smallVocabDecoder.getTokens(ex.getForeignLanguage()).equals(prefix) ||
-//                smallVocabDecoder.getTokens(ex.getContext()).equals(prefix)
-//        )
-//        .collect(Collectors.toList());
-//    return exercises;
-//  }
 
   private List<CommonExercise> getParentChildPairs(List<CommonExercise> exercises, int projid) {
     List<CommonExercise> pairs = new ArrayList<>();
@@ -730,7 +737,8 @@ public class FilterResponseHelper implements IResponseFilter {
   }
 
   private List<CommonExercise> maybeDoInterpreterFilter(Collection<String> languageFilter,
-                                                        Collection<String> speakerFilter, List<CommonExercise> unrecordedExercises) {
+                                                        Collection<String> speakerFilter,
+                                                        List<CommonExercise> unrecordedExercises) {
     if (languageFilter != null && !languageFilter.isEmpty()) {
       logger.info("getRecordFilterExercisesMatchingGender before " + unrecordedExercises.size() + " = " + languageFilter);
       unrecordedExercises = filterByMatchingLanguage(languageFilter, unrecordedExercises, LANGUAGE_META_DATA);
@@ -845,10 +853,9 @@ public class FilterResponseHelper implements IResponseFilter {
    */
   @Override
   public List<CommonExercise> getExercisesForSelectionState(ExerciseListRequest request, int projid) {
-    Collection<CommonExercise> exercisesForState = getExercisesForSelection(projid, request.getTypeToSelection());
-    List<CommonExercise> copy = new ArrayList<>(exercisesForState);  // TODO : avoidable???
-    copy = maybeFilterDownToJustDialog(request, projid, copy);
-    return filterExercises(request, copy, projid);
+//    Collection<CommonExercise> exercisesForState = getExercisesForSelection(projid, request.getTypeToSelection());
+    List<CommonExercise> copy = new ArrayList<>(getExercisesForSelection(projid, request.getTypeToSelection()));  // TODO : avoidable???
+    return filterExercises(request, maybeFilterDownToJustDialog(request, projid, copy), projid);
   }
 
   private List<CommonExercise> maybeFilterDownToJustDialog(IRequest request, int projid, List<CommonExercise> copy) {
@@ -859,6 +866,8 @@ public class FilterResponseHelper implements IResponseFilter {
       if (after != before) {
         logger.info("getExercisesForSelectionState after " + after + " before " + before);
       }
+    } else {
+      copy = new DialogPruner().getNoDialogExercises(copy, databaseServices, projid);
     }
     return copy;
   }
