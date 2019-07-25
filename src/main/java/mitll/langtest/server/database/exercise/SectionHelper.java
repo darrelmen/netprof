@@ -93,6 +93,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   private static final boolean DEBUG_TYPE_ORDER = false;
   private static final boolean DEBUG_OR_MERGE = false;
   private static final boolean DEBUG_EMPTY = false;
+  private static final boolean DEBUG_BLANKS = false;
 
   public SectionHelper() {
     makeRoot();
@@ -175,7 +176,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
       for (SectionNode child : node.getChildren()) {
         if (!child.getType().equals(childType)) {
-          logger.warn("recurseAndCount child '" + child + "' doesn't match child type '" + childType +"'");
+          logger.warn("recurseAndCount child '" + child + "' doesn't match child type '" + childType + "'");
         }
         members.add(child.getName());
         recurseAndCount(child, typeToCount);
@@ -486,9 +487,9 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
   }
 
   /**
-   * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    * @param node
    * @param typeToCount
+   * @see #getTypeToMatchPairs(List, SectionNode, boolean)
    */
   private void recurseAndCountMatchInfo(SectionNode node, Map<String, Map<String, MatchInfo>> typeToCount) {
     String childType = node.getChildType();
@@ -1261,14 +1262,14 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
 
     typeToMatches.forEach((k, v) -> {
       if (k.equals(BLANK)) {
-        logger.info("filterOutBlanks drop " + k + "-" + v);
+        if (DEBUG_BLANKS) logger.info("filterOutBlanks drop " + k + "-" + v);
       } else {
         Set<MatchInfo> filtered = new LinkedHashSet<>();
         v.stream()
             .filter(matchInfo -> !matchInfo.getValue().equals(BLANK))
             .forEach(filtered::add);
         if (filtered.isEmpty()) {
-          logger.info("filterOutBlanks drop empty type " + k + "-" + v);
+          if (DEBUG_BLANKS) logger.info("filterOutBlanks drop empty type " + k + "-" + v);
         } else {
           typeToMatchesFiltered.put(k, filtered);
         }
@@ -1300,7 +1301,7 @@ public class SectionHelper<T extends HasID & HasUnitChapter> implements ISection
       Set<MatchInfo> matches = typeToMatches.get(type);
       if (matches == null || matches.isEmpty()) {
         typesToInclude1.remove(type);
-        logger.info("checkIfAnyTypesAreEmpty removing '" + type + "' matches = " + matches);
+        if (DEBUG_BLANKS) logger.info("checkIfAnyTypesAreEmpty removing '" + type + "' matches = " + matches);
         someEmpty = true;
       }
     }

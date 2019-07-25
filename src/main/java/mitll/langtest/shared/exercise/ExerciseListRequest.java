@@ -357,6 +357,11 @@ public class ExerciseListRequest implements IsSerializable, IRequest {
     return mode;
   }
 
+  /**
+   * @see mitll.langtest.client.custom.recording.RecordingFacetExerciseList#getExerciseListRequest(String)
+   * @param mode
+   * @return
+   */
   public ExerciseListRequest setMode(ProjectMode mode) {
     this.mode = mode;
     return this;

@@ -34,6 +34,7 @@ import com.github.gwtbootstrap.client.ui.base.ListItem;
 import com.github.gwtbootstrap.client.ui.base.UnorderedList;
 import com.google.gwt.user.client.ui.Panel;
 import mitll.langtest.client.custom.INavigation;
+import mitll.langtest.client.custom.SimpleChapterNPFHelper;
 import mitll.langtest.client.dialog.ModalInfoDialog;
 import mitll.langtest.client.exercise.ExerciseController;
 import mitll.langtest.client.list.SelectionState;
@@ -78,6 +79,7 @@ public class RecordingFacetExerciseList<T extends CommonShell & ScoredExercise> 
    * @param instanceName
    * @param listHeader
    * @param isContext
+   * @see RecorderNPFHelper#getMyListLayout(SimpleChapterNPFHelper)
    */
   public RecordingFacetExerciseList(ExerciseController controller,
                                     Panel topRow,

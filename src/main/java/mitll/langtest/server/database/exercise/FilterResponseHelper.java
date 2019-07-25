@@ -266,11 +266,11 @@ public class FilterResponseHelper implements IResponseFilter {
 
     long now = System.currentTimeMillis();
 
-    if (now - then > 0) {
+    if (now - then > 20) {
       logger.info("populate took " + (now - then) +
-          "\n\tto attach " + allAttributes.size() + //" : " + allAttributes +
+          "\n\tto attach     " + allAttributes.size() + //" : " + allAttributes +
           "\n\tattributes to " + all.size() + " exercises for " +
-          "\n\tfacets  " + allFacetTypes);
+          "\n\tfacets        " + allFacetTypes);
     }
 
     sectionHelper.rememberTypesInOrder(typeOrder, allAttributes);
@@ -594,7 +594,7 @@ public class FilterResponseHelper implements IResponseFilter {
     long now = System.currentTimeMillis();
 
     if (size != exercises.size()) {
-      logger.info("getNonEmptyExercises before  " + size + "after  " + exercises.size() + " took " + (now - then));
+      logger.info("getNonEmptyExercises before  " + size + " after  " + exercises.size() + " took " + (now - then));
     }
     return exercises;
   }

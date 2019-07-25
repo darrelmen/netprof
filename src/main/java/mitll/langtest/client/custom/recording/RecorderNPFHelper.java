@@ -50,6 +50,7 @@ import mitll.langtest.client.qc.QCNPFExercise;
 import mitll.langtest.client.scoring.CommentAnnotator;
 import mitll.langtest.client.scoring.GoodwaveExercisePanel;
 import mitll.langtest.shared.exercise.*;
+import mitll.langtest.shared.project.ProjectMode;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
@@ -123,18 +124,20 @@ public class RecorderNPFHelper<T extends CommonShell & ScoredExercise> extends S
    * @see RecordRefAudioPanel#onLoad
    */
   private void getProgressInfo() {
-    //    logger.info("getProgressInfo Get progress info for " + getClass());
-    controller.getService().getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
-      @Override
-      public void onFailure(Throwable caught) {
-        controller.handleNonFatalError("getting recording progress", caught);
-      }
+    if (controller.getMode() == ProjectMode.VOCABULARY) {
+      //    logger.info("getProgressInfo Get progress info for " + getClass());
+      controller.getService().getMaleFemaleProgress(new AsyncCallback<Map<String, Float>>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          controller.handleNonFatalError("getting recording progress", caught);
+        }
 
-      @Override
-      public void onSuccess(Map<String, Float> result) {
-        flex.populate(result);
-      }
-    });
+        @Override
+        public void onSuccess(Map<String, Float> result) {
+          flex.populate(result);
+        }
+      });
+    }
   }
 
   /**

@@ -42,11 +42,12 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 import java.util.stream.Collectors;
 
-class DialogPruner {
+public class DialogPruner {
   private static final Logger logger = LogManager.getLogger(DialogPruner.class);
+  private static final boolean DEBUG = false;
 
-  List<CommonExercise> getNoDialogExercises(List<CommonExercise> toFilter,
-                                            DatabaseServices databaseServices, int projectID) {
+  public List<CommonExercise> getNoDialogExercises(List<CommonExercise> toFilter,
+                                                   DatabaseServices databaseServices, int projectID) {
     return getNoDialogExercises(toFilter, getDialogExercises(databaseServices, projectID));
   }
 
@@ -54,29 +55,37 @@ class DialogPruner {
   private <T extends HasID> List<CommonExercise> getNoDialogExercises(List<CommonExercise> toFilter,
                                                                       List<T> dialogExercises) {
     long then = System.currentTimeMillis();
-    Set<Integer> exidFromDialogs = new HashSet<>();
+    Set<Integer> exidFromDialogs = getDialogExerciseIDs(dialogExercises);
 
-    dialogExercises.forEach(clientExercise -> exidFromDialogs.add(clientExercise.getID()));
+    if (DEBUG) {
+      Set<Integer> willRemove = new TreeSet<>();
+
+      toFilter.forEach(commonExercise -> {
+        if (exidFromDialogs.contains(commonExercise.getID())) {
+          willRemove.add(commonExercise.getID());
+        }
+      });
+
+      logger.info("getNoDialogExercises : remove " + willRemove.size() + " exids given " + exidFromDialogs.size());
+    }
 
     int before = toFilter.size();
-    Set<Integer> willRemove = new TreeSet<>();
-    // logger.info("writeZip : found " + toRemove.size() + " to remove");
-    toFilter.forEach(commonExercise -> {
-      if (exidFromDialogs.contains(commonExercise.getID())) {
-        willRemove.add(commonExercise.getID());
-      }
-    });
-
-    logger.info("getNoDialogExercises : remove exids : " + willRemove + " given " + exidFromDialogs.size());
-
     toFilter = toFilter.stream().filter(commonExercise -> !exidFromDialogs.contains(commonExercise.getID())).collect(Collectors.toList());
     int after = toFilter.size();
     // if (after != before) {
-    logger.info("getNoDialogExercises removed " + (before - after) + " dialog exercises from " + before);
+    if (DEBUG) logger.info("getNoDialogExercises removed " + (before - after) + " dialog exercises from " + before);
     // }
     long now = System.currentTimeMillis();
-    if (now - then > 50) logger.info("took " + (now - then));
+    if (now - then > 20) logger.info("getNoDialogExercises took " + (now - then) + " to filter out " + (before - after));
     return toFilter;
+  }
+
+  @NotNull
+  private <T extends HasID> Set<Integer> getDialogExerciseIDs(List<T> dialogExercises) {
+    Set<Integer> exidFromDialogs = new HashSet<>();
+
+    dialogExercises.forEach(clientExercise -> exidFromDialogs.add(clientExercise.getID()));
+    return exidFromDialogs;
   }
 
   @NotNull

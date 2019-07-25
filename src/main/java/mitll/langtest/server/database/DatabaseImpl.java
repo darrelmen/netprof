@@ -1656,7 +1656,6 @@ public class DatabaseImpl implements Database, DatabaseServices {
   }
 
   /**
-   *
    * @param request
    * @param exercises
    * @param projid
@@ -2069,7 +2068,9 @@ public class DatabaseImpl implements Database, DatabaseServices {
    */
   @Override
   public Map<String, Float> getMaleFemaleProgress(int projectid) {
-    return getAudioDAO().getMaleFemaleProgress(projectid, getExercises(projectid, false));
+//    List<CommonExercise> exercises = getExercises(projectid, false);
+    List<CommonExercise> exercises = new DialogPruner().getNoDialogExercises(getExercises(projectid, false), this, projectid);
+    return getAudioDAO().getMaleFemaleProgress(projectid, exercises);
   }
 
   @Override
